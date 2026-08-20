@@ -4,7 +4,7 @@
 
 **Blocked by:** 01 — Fallback convention and audit
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] Runs without `/grilling` — the design tree / round / frontier loop is inline
 - [x] Runs without `/domain-modeling` — CONTEXT.md / ADR side effects are inline

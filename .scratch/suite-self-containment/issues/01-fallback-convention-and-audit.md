@@ -4,7 +4,7 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [x] Convention documented (ADR-0003: `## Fallback` section, reference-first with inline fallback; two depths self-sufficient/crash-safe; applies to global refs only)
 - [x] Full inventory of `/grilling`, `/tdd`, `/code-review`, `/codebase-design`, `/domain-modeling` references across `skills/`
