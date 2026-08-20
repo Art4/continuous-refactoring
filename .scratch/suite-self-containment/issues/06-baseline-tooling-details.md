@@ -30,3 +30,11 @@
 **Overall tooling order (brainstorming):** composer audit → OWASP Dependency-Check → gitleaks/detect-secrets → composer-unused → composer-normalize → PHP-CS-Fixer → Rector → PHPUnit + PCOV → PHPStan/Psalm → Psalm Taint Analysis ⭐ → Semgrep → PHPCS Security Audit → PHPMD/Arkitect/Deptrac → Infection → OWASP ZAP/Nuclei (nightly)
 
 **Extended MR types:** G — Psalm taint findings · H — Semgrep OWASP violations · I — secret/credential cleanup · J — vulnerable dependency update
+
+**Tool dependency trees:** the baseline order must respect what each tool needs first — a tool's dependencies must exist before it (PHPStan, Rector, and PHPUnit all depend on Composer being introduced first):
+
+- **Tree 1 — PHP + Composer root:** PHP runtime → Composer → the Composer-based stack: PHP-CS-Fixer · Rector · PHPStan (+ security extension) · Psalm (+ taint plugin) · PHPUnit + PCOV · PHPCS Security Audit · PHPMD · Arkitect/Deptrac · Infection · composer audit · local-php-security-checker · composer-unused · composer-normalize.
+- **Tree 2 — Standalone binaries (no Composer):** gitleaks · truffleHog · detect-secrets (Python) · Semgrep (Python/Docker) · Trivy · Nuclei · OWASP Dependency-Check (Java runtime).
+- **Tree 3 — Runtime/instance-dependent:** OWASP ZAP (running app + Java) · DAST generally → deployed instance → nightly pipeline, never a per-MR gate.
+
+The tooling order emerges from these trees: Composer first, then the Composer stack, standalone binaries independent of it, DAST last (nightly).
