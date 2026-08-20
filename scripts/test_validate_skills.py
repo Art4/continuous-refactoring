@@ -29,8 +29,7 @@ class FrontmatterTests(unittest.TestCase):
 
     def test_unclosed_frontmatter(self):
         text = "---\nname: x\ndescription: y\n"
-        issues = vs.frontmatter_issues(text, "x")
-        self.assertTrue(any(i.level == "error" for i in issues))
+        self.assertTrue(vs.frontmatter_issues(text, "x"))
 
     def test_name_mismatch_with_directory(self):
         text = "---\nname: other-skill\ndescription: desc\n---\n"
@@ -44,11 +43,11 @@ class FrontmatterTests(unittest.TestCase):
 
     def test_double_hyphen_rejected(self):
         text = "---\nname: refactor--scan\ndescription: desc\n---\n"
-        self.assertTrue(any(i.level == "error" for i in vs.frontmatter_issues(text, "refactor-scan")))
+        self.assertTrue(vs.frontmatter_issues(text, "refactor-scan"))
 
     def test_leading_hyphen_rejected(self):
         text = "---\nname: -refactor-scan\ndescription: desc\n---\n"
-        self.assertTrue(any(i.level == "error" for i in vs.frontmatter_issues(text, "refactor-scan")))
+        self.assertTrue(vs.frontmatter_issues(text, "refactor-scan"))
 
     def test_missing_description(self):
         text = "---\nname: refactor-scan\n---\n"
@@ -141,6 +140,16 @@ class GlobalRefTests(unittest.TestCase):
         issues = vs.global_ref_issues(text, "refactor-scan", self.SUITE, {"refactor-scan": []})
         self.assertTrue(any("grilling" in i.message and "ledger" in i.message for i in issues))
 
+    def test_bare_ref_not_in_ledger(self):
+        text = "See /grilling for details."
+        issues = vs.global_ref_issues(text, "refactor-scan", self.SUITE, {"refactor-scan": []})
+        self.assertTrue(any("grilling" in i.message and "ledger" in i.message for i in issues))
+
+    def test_docs_path_slash_is_not_a_ref(self):
+        text = "Offer an ADR under `docs/adr/`."
+        issues = vs.global_ref_issues(text, "refactor-design", self.SUITE, {"refactor-design": []})
+        self.assertEqual(issues, [])
+
     def test_stale_ledger_row(self):
         text = "No global refs here."
         issues = vs.global_ref_issues(text, "refactor-scan", self.SUITE, {"refactor-scan": [("grilling", True)]})
@@ -201,7 +210,7 @@ class LocalRefTests(unittest.TestCase):
     def test_non_path_backticks_ignored(self):
         tmp, root = self._repo()
         try:
-            text = "Run `git log --oneline`, check `composer.json`, `Makefile`, `.php-cs-fixer.php`."
+            text = "Run `git log --oneline`, `git mv a.md b.md`, check `composer.json`, `Makefile`, `.php-cs-fixer.php`."
             self.assertEqual(vs.local_ref_issues(text, root), [])
         finally:
             tmp.cleanup()
@@ -266,6 +275,16 @@ class VocabTests(unittest.TestCase):
         issues = vs.vocab_issues(["Hot spot"], ["pain point"], skills, set())
         self.assertTrue(any("pain point" in i.message for i in issues))
 
+    def test_avoid_term_plural_flagged(self):
+        skills = {"refactor-scan": "Several pain points to check."}
+        issues = vs.vocab_issues(["Hot spot"], ["pain point"], skills, set())
+        self.assertTrue(any("pain point" in i.message for i in issues))
+
+    def test_term_inflection_matches_only_plural(self):
+        skills = {"refactor-scan": "Run the deletion testing on it."}
+        issues = vs.vocab_issues(["Deletion test"], [], skills, set())
+        self.assertTrue(any("Deletion test" in i.message for i in issues))
+
     def test_allowlisted_use_ok(self):
         skills = {"refactor-scan": "A **hot spot** with a classic pain point to check."}
         issues = vs.vocab_issues(["Hot spot"], ["pain point"], skills, {("refactor-scan", "pain point")})
@@ -280,7 +299,7 @@ class EndToEndTests(unittest.TestCase):
     def test_real_repo_passes(self):
         repo = pathlib.Path(__file__).resolve().parents[1]
         issues = vs.validate_repo(repo)
-        errors = [i for i in issues if i.level == "error"]
+        errors = [i for i in issues if True]
         self.assertEqual(errors, [], msg="\n".join(str(i) for i in errors))
 
 

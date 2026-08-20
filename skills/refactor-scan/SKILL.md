@@ -15,7 +15,7 @@ Read the project's domain glossary (`CONTEXT.md`) and ADRs in the areas you touc
 
 Decide *where* to look before you look:
 
-- If the user named a direction — a module, a subsystem, a hot spot — take it and skip the inference below.
+- If the user named a direction — a module, a subsystem, a pain point — take it and skip the inference below.
 - Otherwise walk back a good stretch of the commit history (`git log --oneline`) to find the **hot spots** — files and areas that keep coming up — and let those paths pull your attention first. If changes are scattered with no clear hot spot, widen the net.
 
 ### 2. Walk the codebase

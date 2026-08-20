@@ -17,13 +17,13 @@ Checks every ``skills/*/SKILL.md`` deterministically and without an LLM:
 - ADR references (``ADR-NNNN``) resolve to ``docs/adr/NNNN-*.md``
 - glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
-  prose uses, e.g. defining the seam)
+  prose uses, e.g. defining the seam or quoting a user's words)
 
 Usage:
     pip install pyyaml          # only non-stdlib dependency
-    python3 scripts/validate_skills.py [--strict] [REPO_ROOT]
+    python3 scripts/validate_skills.py [REPO_ROOT]
 
-Exit codes: 0 clean, 1 errors (or warnings with --strict), 2 warnings only.
+Exit codes: 0 clean, 1 any issue found.
 
 Run the tests with: python3 -m unittest discover -s scripts -p 'test_*.py'
 """
@@ -56,17 +56,17 @@ EXEMPT_LOCAL_REFS = {
 # so a new occurrence anywhere else is still flagged.
 VOCAB_ALLOW = {
     ("refactor-design", "boundary"): "defines the 'seam' term — 'public boundary' is the definition, not a synonym replacement",
+    ("refactor-scan", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
 }
 
 
 @dataclass(frozen=True)
 class Issue:
-    level: str  # "error" | "warning"
     skill: str
     message: str
 
     def __str__(self):
-        return f"{self.level}: {self.skill}: {self.message}"
+        return f"error: {self.skill}: {self.message}"
 
 
 # --------------------------------------------------------------------------
@@ -87,32 +87,32 @@ def frontmatter_issues(text, dirname):
     issues = []
     fm = parse_frontmatter(text)
     if fm is None:
-        return [Issue("error", dirname, "no valid YAML frontmatter block at the top of SKILL.md")]
+        return [Issue(dirname, "no valid YAML frontmatter block at the top of SKILL.md")]
     if not isinstance(fm, dict):
-        return [Issue("error", dirname, "frontmatter is not a YAML mapping")]
+        return [Issue(dirname, "frontmatter is not a YAML mapping")]
 
     name = fm.get("name")
     if not name:
-        issues.append(Issue("error", dirname, "frontmatter field 'name' is required"))
+        issues.append(Issue(dirname, "frontmatter field 'name' is required"))
     elif not isinstance(name, str):
-        issues.append(Issue("error", dirname, "frontmatter field 'name' must be a string"))
+        issues.append(Issue(dirname, "frontmatter field 'name' must be a string"))
     else:
         if len(name) > MAX_NAME:
-            issues.append(Issue("error", dirname, f"frontmatter 'name' is {len(name)} chars, max {MAX_NAME}"))
+            issues.append(Issue(dirname, f"frontmatter 'name' is {len(name)} chars, max {MAX_NAME}"))
         if not NAME_RE.fullmatch(name):
-            issues.append(Issue("error", dirname, f"frontmatter 'name' '{name}' is not kebab-case (lowercase letters, numbers, hyphens only)"))
+            issues.append(Issue(dirname, f"frontmatter 'name' '{name}' is not kebab-case (lowercase letters, numbers, hyphens only)"))
         if name != dirname:
-            issues.append(Issue("error", dirname, f"frontmatter 'name' '{name}' does not match the directory name '{dirname}'"))
+            issues.append(Issue(dirname, f"frontmatter 'name' '{name}' does not match the directory name '{dirname}'"))
 
     desc = fm.get("description")
     if not desc:
-        issues.append(Issue("error", dirname, "frontmatter field 'description' is required and must be non-empty"))
+        issues.append(Issue(dirname, "frontmatter field 'description' is required and must be non-empty"))
     elif len(desc) > MAX_DESC:
-        issues.append(Issue("error", dirname, f"frontmatter 'description' is {len(desc)} chars, max {MAX_DESC}"))
+        issues.append(Issue(dirname, f"frontmatter 'description' is {len(desc)} chars, max {MAX_DESC}"))
 
     unknown = sorted(set(fm) - ALLOWED_FRONTMATTER)
     for field in unknown:
-        issues.append(Issue("error", dirname, f"frontmatter field '{field}' is not recognized (allowed: {', '.join(sorted(ALLOWED_FRONTMATTER))})"))
+        issues.append(Issue(dirname, f"frontmatter field '{field}' is not recognized (allowed: {', '.join(sorted(ALLOWED_FRONTMATTER))})"))
     return issues
 
 
@@ -126,15 +126,15 @@ def section_issues(text, skill, requires_fallback):
 
     if skill == ORCHESTRATOR:
         if "The pass" not in headings:
-            issues.append(Issue("error", skill, "orchestrator skill must have a '## The pass' section"))
+            issues.append(Issue(skill, "orchestrator skill must have a '## The pass' section"))
     elif "Process" not in headings:
-        issues.append(Issue("error", skill, "missing required '## Process' section"))
+        issues.append(Issue(skill, "missing required '## Process' section"))
 
     if "Completion criterion" not in headings:
-        issues.append(Issue("error", skill, "missing required '## Completion criterion' section"))
+        issues.append(Issue(skill, "missing required '## Completion criterion' section"))
 
     if requires_fallback and "Fallback" not in headings:
-        issues.append(Issue("error", skill, "missing '## Fallback' section — required by ADR-0003 for a shipped global reference"))
+        issues.append(Issue(skill, "missing '## Fallback' section — required by ADR-0003 for a shipped global reference"))
     return issues
 
 
@@ -167,14 +167,14 @@ def parse_ledger(text):
 
 def global_ref_issues(text, skill, suite_names, ledger):
     issues = []
-    found = set(re.findall(r"`/([a-z0-9-]+)`", text))
-    global_found = found - set(suite_names)
+    found = set(re.findall(r"(?<![a-zA-Z0-9])(?:`?)/([a-z][a-z0-9-]+)`?", text))
+    external_refs = found - set(suite_names)
     ledger_refs = {ref for ref, _ in ledger.get(skill, [])}
 
-    for ref in sorted(global_found - ledger_refs):
-        issues.append(Issue("error", skill, f"global '/{ref}' reference is not recorded in the reference ledger ({LEDGER_PATH})"))
-    for ref in sorted(ledger_refs - global_found):
-        issues.append(Issue("error", skill, f"reference ledger records '/{ref}' but the skill no longer references it"))
+    for ref in sorted(external_refs - ledger_refs):
+        issues.append(Issue(skill, f"global '/{ref}' reference is not recorded in the reference ledger ({LEDGER_PATH})"))
+    for ref in sorted(ledger_refs - external_refs):
+        issues.append(Issue(skill, f"reference ledger records '/{ref}' but the skill no longer references it"))
     return issues
 
 
@@ -190,12 +190,12 @@ def local_ref_issues(text, repo_root, skill=""):
     repo_root = pathlib.Path(repo_root)
     for m in re.finditer(r"`([^`]+)`", text):
         ref = m.group(1)
-        if not _PATH_LIKE.match(ref):
+        if not _PATH_LIKE.match(ref) or re.search(r"\s", ref):
             continue
         if ref in EXEMPT_LOCAL_REFS:
             continue
         if not (repo_root / ref).exists():
-            issues.append(Issue("error", skill or ref, f"local reference '{ref}' does not exist in the suite repo"))
+            issues.append(Issue(skill or ref, f"local reference '{ref}' does not exist in the suite repo"))
     return issues
 
 
@@ -205,7 +205,7 @@ def adr_issues(text, repo_root, skill=""):
     for m in re.finditer(r"ADR-(\d{4})", text):
         num = m.group(1)
         if not list((repo_root / "docs/adr").glob(f"{num}-*.md")):
-            issues.append(Issue("error", skill or f"ADR-{num}", f"ADR reference ADR-{num} has no matching docs/adr/{num}-*.md"))
+            issues.append(Issue(skill or f"ADR-{num}", f"ADR reference ADR-{num} has no matching docs/adr/{num}-*.md"))
     return issues
 
 
@@ -234,15 +234,15 @@ def vocab_issues(terms, avoid, skills, allow):
     """skills: {skill_name: SKILL.md body}; allow: set of (skill, term) pairs."""
     issues = []
     for term in terms:
-        pattern = re.compile(r"\b" + re.escape(term) + r"\w*\b", re.I)
+        pattern = re.compile(r"\b" + re.escape(term) + r"s?\b", re.I)
         if not any(pattern.search(body) for body in skills.values()):
-            issues.append(Issue("error", "CONTEXT.md", f"glossary term '{term}' is defined but never used in the suite"))
+            issues.append(Issue("CONTEXT.md", f"glossary term '{term}' is defined but never used in the suite"))
     for skill, body in skills.items():
         for term in avoid:
             if (skill, term) in allow:
                 continue
-            if re.search(r"\b" + re.escape(term) + r"\b", body, re.I):
-                issues.append(Issue("error", skill, f"glossary avoid-term '{term}' used — CONTEXT.md says to use the preferred term instead"))
+            if re.search(r"\b" + re.escape(term) + r"s?\b", body, re.I):
+                issues.append(Issue(skill, f"glossary avoid-term '{term}' used — CONTEXT.md says to use the preferred term instead"))
     return issues
 
 
@@ -256,8 +256,20 @@ def validate_repo(repo_root):
     skills_dir = repo_root / "skills"
     suite_names = sorted(d.name for d in skills_dir.iterdir() if d.is_dir())
 
-    ledger = parse_ledger((repo_root / LEDGER_PATH).read_text())
-    glossary = parse_glossary((repo_root / CONTEXT_PATH).read_text())
+    ledger_text = (repo_root / LEDGER_PATH).read_text() if (repo_root / LEDGER_PATH).exists() else None
+    if ledger_text is None:
+        issues.append(Issue(LEDGER_PATH, f"missing reference ledger — required at {LEDGER_PATH}"))
+        ledger = {}
+    else:
+        ledger = parse_ledger(ledger_text)
+
+    context_text = (repo_root / CONTEXT_PATH).read_text() if (repo_root / CONTEXT_PATH).exists() else None
+    if context_text is None:
+        issues.append(Issue(CONTEXT_PATH, f"missing glossary — required at {CONTEXT_PATH}"))
+        glossary = Glossary(terms=[], avoid=[])
+    else:
+        glossary = parse_glossary(context_text)
+
     skills_text = {}
 
     for d in sorted(skills_dir.iterdir()):
@@ -265,7 +277,7 @@ def validate_repo(repo_root):
             continue
         md = d / "SKILL.md"
         if not md.exists():
-            issues.append(Issue("error", d.name, "missing SKILL.md"))
+            issues.append(Issue(d.name, "missing SKILL.md"))
             continue
         text = md.read_text()
         skills_text[d.name] = text
@@ -282,7 +294,6 @@ def validate_repo(repo_root):
 
 def main(argv=None):
     ap = argparse.ArgumentParser(description="Tier 1 static validation of the skill suite")
-    ap.add_argument("--strict", action="store_true", help="treat warnings as errors (exit 1)")
     ap.add_argument("root", nargs="?", default=".", help="suite repo root (default: current directory)")
     args = ap.parse_args(argv)
 
@@ -293,14 +304,7 @@ def main(argv=None):
             print(f"  {i}")
     else:
         print("All suite skills validated clean.")
-
-    errors = [i for i in issues if i.level == "error"]
-    warnings = [i for i in issues if i.level == "warning"]
-    if errors or (args.strict and warnings):
-        return 1
-    if warnings:
-        return 2
-    return 0
+    return 1 if issues else 0
 
 
 if __name__ == "__main__":

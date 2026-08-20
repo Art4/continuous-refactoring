@@ -14,6 +14,7 @@ on:
       - "docs/**"
       - "CONTEXT.md"
       - "scripts/**"
+      - ".github/workflows/skills-validation.yml"
 
 jobs:
   validate:
@@ -26,10 +27,10 @@ jobs:
           python-version: "3.11"
 
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml==6.0.1
 
       - name: Run validator tests
         run: python3 -m unittest discover -s scripts -p 'test_*.py'
 
-      - name: Validate the suite (Tier 1, strict)
-        run: python3 scripts/validate_skills.py --strict .
+      - name: Validate the suite (Tier 1)
+        run: python3 scripts/validate_skills.py .
