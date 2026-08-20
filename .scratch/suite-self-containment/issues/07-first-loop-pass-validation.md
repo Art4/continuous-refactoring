@@ -2,7 +2,7 @@
 
 **What to build:** The suite is symlinked into a real PHP target repo and a first loop pass runs end-to-end: `/refactor-baseline` establishes the tooling floor, then `/continuous-refactoring` runs scan → prioritise → design → implement → review against it — using the suite's own skills only, without global skill references.
 
-**Blocked by:** 05, 06
+**Blocked by:** 05, 06, 12
 
 **Status:** ready-for-agent
 
