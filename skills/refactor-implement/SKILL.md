@@ -7,7 +7,7 @@ description: Execute a designed refactor plan test-first, slice by slice, at the
 
 Execute a **plan** (from `refactor-design`) as a series of vertical slices, red → green, at the agreed **seam**. The tests written here are the ones the refactor is judged by later.
 
-Use `/tdd` as the reference for what a good test is and the rules of the red → green loop.
+Use `/tdd` if installed as the reference for what a good test is and the rules of the red → green loop; otherwise the loop rules and test-quality guidance in `## Fallback` below govern.
 
 ## Process
 
@@ -25,6 +25,10 @@ When the plan's slices are done:
 
 - Run the full test suite — the surviving tests from the plan plus the new seam tests must be green.
 - Run the baseline tooling (PHPStan, Rector, style) over the touched files — the refactor must not regress the **baseline**.
+
+## Fallback
+
+- **`/tdd`**: if installed, use its discipline as the reference for what a good test is and the rules of the loop. Otherwise run the loop by its inline rules. **Rules of the loop:** *red before green* — write the failing test first, then only enough code to pass it, without anticipating future slices or adding speculative features; *one slice at a time* — one seam, one test, one minimal implementation per cycle; *refactoring is not part of the loop* — it belongs to the review stage, so no refactoring inside the red → green cycle. **What makes a test worth keeping:** it verifies **behaviour through public interfaces**, not implementation details — the code can change entirely and the test still passes, so it survives the refactor. It must never be **tautological** (the assertion recomputes the expected value the way the code does, so it passes by construction and can never disagree with the code) nor **implementation-coupled** (mocks internal collaborators, tests private methods, or verifies through a side channel).
 
 ## Completion criterion
 
