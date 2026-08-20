@@ -12,7 +12,7 @@ Run this on demand whenever you're asked, or on the configured **cadence**.
 
 ## Loop state
 
-State lives in the target repo, not in the session:
+State lives in the target repo, not in the conversation:
 
 - **Config** — `docs/agents/refactoring.md`: cadence, last-run date, baseline marker, focus areas
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
