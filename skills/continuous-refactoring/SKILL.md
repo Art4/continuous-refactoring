@@ -42,6 +42,21 @@ Each step is one of the lifecycle skills. Stop between steps where the skill its
    - Update `CONTEXT.md` with any terms that crystallised
    - Stamp the last-run date in `docs/agents/refactoring.md`
 
+## Fallback
+
+The suite must keep working in a target repo with none of the global skills installed. Per ADR-0003, each lifecycle skill self-contains its own step: its `## Fallback` section means "use the global skill if installed, else the inline fallback". Two fallback depths apply: **crash-safe** means skip the global skill with a note — the step's core is already inline; **self-sufficient** means the fallback inlines the part of the global skill the step uses. The orchestrator itself engages one global reference:
+
+- **`/domain-modeling`** (learn step): if installed, use its discipline for the ADR and `CONTEXT.md` side effects. Otherwise skip with a note — the learn moves in step 7 (record the ADR, update `CONTEXT.md`, close the issue, stamp last-run) are inline and run regardless. Crash-safe.
+
+Where each lifecycle skill's inline fallback engages, so a pass runs on the suite's own skills alone:
+
+- **Scan** — `refactor-scan`: the candidate vocabulary is inline; a missing `codebase-design` is a crash-safe skip.
+- **Design** — `refactor-design`: a missing `grilling` engages the inline grilling loop (self-sufficient); a missing `domain-modeling` is a crash-safe skip — the `CONTEXT.md`/ADR side effects run inline regardless.
+- **Implement** — `refactor-implement`: a missing `tdd` engages the inline red → green rules and test-quality guidance (self-sufficient).
+- **Review** — `refactor-review`: a missing `code-review` engages the inline two-axis rules and Fowler smell baseline (self-sufficient).
+
+The authoritative inventory of every global reference and its fallback type lives in `docs/agents/skill-references.md` (ADR-0003) and is enforced by the Tier 1 validator (`scripts/validate_skills.py`).
+
 ## Completion criterion
 
 One full pass completed and the loop state updated — last-run stamped, the candidate issue closed, learnings recorded.
