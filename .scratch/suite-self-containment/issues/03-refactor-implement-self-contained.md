@@ -2,7 +2,7 @@
 
 **What to build:** `refactor-implement` works in a target repo that has no `/tdd` skill installed. The red → green loop rules (red before green, one slice at a time, no refactoring inside the loop) and what makes a test worth keeping (behaviour through public interfaces, no tautological or implementation-coupled tests) are inline in the skill's `## Fallback` section.
 
-**Blocked by:** 01 — Fallback convention and audit
+**Blocked by:** 01 ✓ done — Fallback convention and audit
 
 **Status:** done
 
