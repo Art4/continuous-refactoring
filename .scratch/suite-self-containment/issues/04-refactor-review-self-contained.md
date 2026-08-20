@@ -8,3 +8,4 @@
 
 - [ ] Runs without `/code-review` — the smell baseline and standards-axis rules are inline
 - [ ] Follows the convention (reference-first, inline fallback)
+- [ ] Tier 1 static validation passes (`python3 scripts/validate_skills.py .` exits 0)

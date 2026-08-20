@@ -8,3 +8,4 @@
 
 - [ ] A full pass is verified against the suite's own skills only (no global references required)
 - [ ] The fallback engagement points are documented in the orchestrator
+- [ ] Tier 1 static validation passes (`python3 scripts/validate_skills.py .` exits 0)
