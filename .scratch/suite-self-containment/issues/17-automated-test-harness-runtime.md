@@ -10,7 +10,7 @@
 - **Tier 4 — Trigger/discoverability tests:** explicit + implicit invocation per skill; negative controls — orchestrator without a baseline marker must not refactor, a scan on a clean repo reports clean and stops, a non-PHP project gets no PHP baseline.
 - **Tier 5 — CI gate + lift measurement:** harness wired into CI with regression baselines; LLM-judge rubric grading; with-skill vs without-skill lift measurement.
 
-**Blocked by:** 07 — Validate: first loop pass in a PHP target repo, 16 — Tier 1 static suite validation
+**Blocked by:** 07 — Validate: first loop pass in a PHP target repo, 16 ✓ done — Tier 1 static suite validation
 
 **Status:** ready-for-agent
 

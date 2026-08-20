@@ -12,7 +12,7 @@
 
 **Blocked by:** 01 ✓ done — Fallback convention and audit (provides the `/X` reference ledger)
 
-**Status:** ready-for-agent
+**Status:** done
 
 ## Comments
 
