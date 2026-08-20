@@ -32,6 +32,8 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 
 Capture the plan on the candidate issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`). This is the handoff that makes the refactor delegable.
 
+The plan follows the foundational refactoring rules (ADR-0004): behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
+
 ## Fallback
 
 - **`/grilling`**: if installed, use it. Otherwise run the grilling loop inline: map the design as a **design tree** — every decision branches into the decisions that hang off it — and work it in **rounds**. The **frontier** is every decision whose prerequisites are already settled. Ask the whole frontier in one round, numbering each question (`❓ **Q1** - **<title>**: <body>`, multiple choices allowed) with your recommended answer (`➡️ <recommendation>`), then wait for the user. Their answers reshape the tree and push the frontier outward — a question depending on one still open in this round belongs to a later round. Facts are your job (dispatch a sub-agent rather than asking the user), decisions are the user's. Done when the frontier is empty: every branch visited, nothing silently assumed. In this step the tree hangs off the five branches in section 2 — the deepened module, the seam, the interface, locality, and the tests that survive.

@@ -12,11 +12,15 @@ The ruleset is written where the suite's skills can reference it and is binding 
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Written ruleset exists and is referenced by `refactor-design` and `refactor-implement`
-- [ ] "No breaking changes" is binding — behavior-preserving is the definition of a refactor; behavior change routes to the normal feature/bug path
-- [ ] Strangler Fig is documented as the strategy for wide/legacy migrations
-- [ ] Kent Beck techniques are listed as the standard move vocabulary for plans
-- [ ] "Deterministic tools over agents" is binding — where a tool can do the move, the agent does not hand-apply it (style via php-cs-fixer, Rector-reported issues fixed by Rector)
-- [ ] "Own refactor branch" is binding — each refactor lives on its own branch unless the human or the plan says otherwise
+- [x] Written ruleset exists and is referenced by `refactor-design` and `refactor-implement`
+- [x] "No breaking changes" is binding — behavior-preserving is the definition of a refactor; behavior change routes to the normal feature/bug path
+- [x] Strangler Fig is documented as the strategy for wide/legacy migrations
+- [x] Kent Beck techniques are listed as the standard move vocabulary for plans
+- [x] "Deterministic tools over agents" is binding — where a tool can do the move, the agent does not hand-apply it (style via php-cs-fixer, Rector-reported issues fixed by Rector)
+- [x] "Own refactor branch" is binding — each refactor lives on its own branch unless the human or the plan says otherwise
+
+## Comments
+
+> **2026-08-20:** Implemented. Ruleset written as `docs/adr/0004-foundational-refactoring-rules.md` — five binding rules: no breaking changes, Strangler Fig for wide migrations, Kent Beck technique vocabulary, deterministic tools over agents, own refactor branch. `refactor-design` (plan step) and `refactor-implement` (slice step) both reference ADR-0004 and restate the rules binding to their step. Tier 1 static validation passes clean; validator test suite green.

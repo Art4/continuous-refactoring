@@ -9,6 +9,8 @@ Execute a **plan** (from `refactor-design`) as a series of vertical slices, red 
 
 Use `/tdd` if installed as the reference for what a good test is and the rules of the red → green loop; otherwise the loop rules and test-quality guidance in `## Fallback` below govern.
 
+Every slice honors the foundational refactoring rules (ADR-0004): behavior-preserving only, deterministic tools do the moves they can (code style through the formatter with the repo's ruleset, Rector-reported issues fixed by Rector — never hand-applied by the agent), and the work lives on the refactor's own branch unless the human or the plan says otherwise.
+
 ## Process
 
 ### 1. Confirm the seams
