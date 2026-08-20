@@ -44,6 +44,10 @@ Keep each candidate a single coherent refactoring — not a grab-bag. If a scan 
 
 Summarise: how many candidates filed, where, and the top 2-3 you'd look at first (and why). Then stop — prioritising is `refactor-prioritize`'s job.
 
+## Fallback
+
+- **`/codebase-design`**: if installed, use its vocabulary. Otherwise, the vocabulary is fully inline in section 2 above — module, interface, depth, seam, leverage, locality — use those terms and don't drift into "component", "service", or "API".
+
 ## Completion criterion
 
 Every genuine candidate found during the walk is filed as a `refactor:candidate` issue with Where / Problem / Signal, and the report lists the top candidates.

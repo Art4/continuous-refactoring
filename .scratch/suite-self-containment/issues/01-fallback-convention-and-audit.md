@@ -6,6 +6,10 @@
 
 **Status:** ready-for-agent
 
-- [ ] Convention documented (each skill: `## Fallback` section, reference-first with inline fallback)
-- [ ] Full inventory of `/grilling`, `/tdd`, `/code-review`, `/codebase-design`, `/domain-modeling` references across `skills/`
-- [ ] `refactor-scan` updated to the convention and self-contained
+- [x] Convention documented (each skill: `## Fallback` section, reference-first with inline fallback)
+- [x] Full inventory of `/grilling`, `/tdd`, `/code-review`, `/codebase-design`, `/domain-modeling` references across `skills/`
+- [x] `refactor-scan` updated to the convention and self-contained
+
+## Comments
+
+> **2026-08-20:** Grilled and implemented. Decisions: reference-first with inline fallback; two depths (self-sufficient for core procedures, crash-safe for enrichment); runtime check before invoking `/X`; fallbacks inline per-skill (no shared file); only global references, suite-internal exempt; only referencing skills carry fallbacks; skip-with-note for crash-safe. Delivered: ADR `docs/adr/0003-fallback-convention.md`, inventory `docs/agents/skill-references.md`, `refactor-scan` `## Fallback` section. Unblocks 02, 03, 04.
