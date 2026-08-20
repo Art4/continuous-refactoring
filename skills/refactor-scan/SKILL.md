@@ -22,8 +22,9 @@ Decide *where* to look before you look:
 
 Explore organically and note where you experience friction. Look for:
 
-- **Shallow modules** — interface nearly as complex as the implementation. Apply the **deletion test**: would deleting it concentrate complexity, or just move it? A "concentrates" is the signal you want.
+- **Shallow modules** — little **depth**: interface nearly as complex as the implementation. Apply the **deletion test**: would deleting it concentrate complexity, or just move it? A "concentrates" is the signal you want.
 - Missing **locality** — pure functions extracted for testability, but the real bugs hide in how they're called.
+- Low **leverage** — a lot of interface surface buying little behaviour behind it.
 - Tightly-coupled modules leaking across their **seams**.
 - Untested parts, or parts hard to test through their current interface.
 - **Tooling pressure** — places the baseline tools (PHPStan, Rector, style) keep flagging.
@@ -46,7 +47,7 @@ Summarise: how many candidates filed, where, and the top 2-3 you'd look at first
 
 ## Fallback
 
-- **`/codebase-design`**: if installed, use its vocabulary. Otherwise, the vocabulary is fully inline in section 2 above — module, interface, depth, seam, leverage, locality — use those terms and don't drift into "component", "service", or "API".
+- **`/codebase-design`**: if installed, use its vocabulary. Otherwise skip it — the full vocabulary (module, interface, depth, seam, leverage, locality) is already inline in section 2 above; use those terms and don't drift into "component", "service", or "API".
 
 ## Completion criterion
 
