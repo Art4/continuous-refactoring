@@ -32,6 +32,11 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 
 Capture the plan on the candidate issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`). This is the handoff that makes the refactor delegable.
 
+## Fallback
+
+- **`/grilling`**: if installed, use its session. Otherwise run the grilling loop inline: map the design as a **design tree** — every decision branches into the decisions that hang off it — and work it in **rounds**. The **frontier** is every decision whose prerequisites are already settled. Ask the whole frontier in one round, numbering each question (`❓ **Q1** - **<title>**: <body>`, multiple choices allowed) with your recommended answer (`➡️ <recommendation>`), then wait for the user. Their answers reshape the tree and push the frontier outward — a question depending on one still open in this round belongs to a later round. Facts are your job (dispatch a sub-agent rather than asking the user), decisions are the user's. Done when the frontier is empty: every branch visited, nothing silently assumed. In this step the tree hangs off the five branches in section 2 — the deepened module, the seam, the interface, locality, and the tests that survive.
+- **`/domain-modeling`**: if installed, use its discipline. Otherwise skip it with a note — the side effects this step performs are already inline in section 2 above and run regardless: add resolved terms to `CONTEXT.md` (a glossary and nothing else — no implementation details) as they crystallise, and offer an ADR under `docs/adr/` when the user rejects a design with a load-bearing reason a future scan should not re-suggest. The discipline's enrichment moves (challenging fuzzy terms, probing edge-case scenarios, cross-referencing the code) are not part of this step.
+
 ## Completion criterion
 
 The candidate has a written plan on its issue — module, seam, interface, surviving tests, slice order — and the design survives the grilling session (no open frontier).
