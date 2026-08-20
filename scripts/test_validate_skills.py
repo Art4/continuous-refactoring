@@ -118,13 +118,13 @@ class LedgerTests(unittest.TestCase):
             "| Skill | Global ref | Role | Fallback type | Self-contained in |\n"
             "|---|---|---|---|---|\n"
             "| `refactor-scan` | `/codebase-design` (Z.31) | enrichment | crash-safe | 01 \u2713 shipped |\n"
-            "| `refactor-review` | `/code-review` (Z.23) | core | self-sufficient | 04 (planned) |\n"
+            "| `refactor-review` | `/code-review` (Z.23) | core | self-sufficient | 04 \u2713 shipped |\n"
         )
         self.assertEqual(
             ledger["refactor-scan"], [("codebase-design", True)]
         )
         self.assertEqual(
-            ledger["refactor-review"], [("code-review", False)]
+            ledger["refactor-review"], [("code-review", True)]
         )
 
     def test_parse_ledger_ignores_header(self):
