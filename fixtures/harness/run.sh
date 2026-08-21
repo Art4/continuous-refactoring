@@ -70,8 +70,8 @@ setup_fixture() {
     cp -r "$FIXTURE_SRC" "$FIXTURE_DST"
     cd "$FIXTURE_DST"
     git init -q
-    git add -A
-    git commit -q -m "Initial fixture state"
+    git -c user.name="Test Runner" -c user.email="test@ci.local" add -A
+    git -c user.name="Test Runner" -c user.email="test@ci.local" commit -q -m "Initial fixture state"
     log_info "Fixture ready at: $FIXTURE_DST"
 }
 
