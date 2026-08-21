@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Tier 1 static suite validation for the continuous-refactoring skill suite.
+"""Static suite validation for the continuous-refactoring skill suite.
 
 Checks every ``skills/*/SKILL.md`` deterministically and without an LLM:
 
+Tier 1 — structural:
 - frontmatter: valid YAML, ``name`` matches the directory (kebab-case, <= 64
   chars), ``description`` present and <= 1024 chars, only known fields
 - required sections: ``## Completion criterion`` everywhere, ``## Process`` on
@@ -18,6 +19,17 @@ Checks every ``skills/*/SKILL.md`` deterministically and without an LLM:
 - glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
   prose uses, e.g. defining the seam or quoting a user's words)
+
+Tier 2 — semantic:
+- ADR-0004 rule propagation: every rule keyword from ADR-0004 appears in at
+  least one of ``refactor-design`` or ``refactor-implement``
+- Cross-skill contract consistency: the orchestrator's description of each
+  lifecycle step's output mentions that step's completion-criterion terms
+- Glossary reverse check: domain vocabulary used in 2+ skills but absent from
+  ``CONTEXT.md`` is flagged
+- ADR staleness: ADRs containing ``retired``/``supersedes``/``amends`` are
+  parsed into a dependency graph; skills referencing a superseded ADR without
+  noting the successor are flagged
 
 Usage:
     pip install pyyaml          # only non-stdlib dependency
@@ -254,6 +266,231 @@ def vocab_issues(terms, avoid, skills, allow):
 
 
 # --------------------------------------------------------------------------
+# Tier 2 — ADR-0004 rule propagation
+# --------------------------------------------------------------------------
+
+ADR0004_KEYWORDS = [
+    "behavior-preserving",
+    "Strangler Fig",
+    "Kent Beck",
+    "deterministic tools",
+    "own branch",
+]
+
+
+def adr0004_propagation_issues(skills_text):
+    """Check that every ADR-0004 rule keyword appears in at least one of
+    ``refactor-design`` or ``refactor-implement``."""
+    issues = []
+    targets = {"refactor-design", "refactor-implement"}
+    combined = "\n".join(
+        skills_text.get(s, "") for s in targets if s in skills_text
+    )
+    for kw in ADR0004_KEYWORDS:
+        if not re.search(re.escape(kw), combined, re.I):
+            issues.append(
+                Issue(
+                    "ADR-0004",
+                    f"rule keyword '{kw}' from ADR-0004 not found in "
+                    "refactor-design or refactor-implement",
+                )
+            )
+    return issues
+
+
+# --------------------------------------------------------------------------
+# Tier 2 — Cross-skill contract consistency
+# --------------------------------------------------------------------------
+
+# Maps orchestrator step labels to the lifecycle skill that owns them.
+# The orchestrator's text describes each step; the skill defines completion
+# criteria.  A mismatch means the orchestrator promises something the skill
+# doesn't deliver (or vice versa).
+ORCH_STEP_SKILL_MAP = {
+    "scan": "refactor-scan",
+    "prioritise": "refactor-prioritize",
+    "design": "refactor-design",
+    "implement": "refactor-implement",
+    "review": "refactor-review",
+}
+
+# Words too common to carry contract signal.
+_ORCH_STOP = {
+    "the", "a", "an", "of", "and", "or", "in", "on", "to", "for", "is",
+    "that", "this", "it", "as", "by", "with", "from", "at", "if", "so",
+    "its", "be", "do", "not", "but", "can", "will", "may", "shall",
+    "must", "are", "was", "were", "been", "has", "have", "had", "each",
+    "see", "run", "use", "via",
+}
+
+
+def _extract_keywords(text):
+    """Extract significant lowercase words from text."""
+    words = set(re.findall(r"[a-z]{3,}", text.lower()))
+    return words - _ORCH_STOP
+
+
+def _orchestrator_step_text(orch_text, step_label):
+    """Return the text block for one numbered step in the orchestrator."""
+    pattern = re.compile(
+        r"\d+\.\s+\*\*" + re.escape(step_label) + r"\*\*\.\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
+        re.S | re.I,
+    )
+    m = pattern.search(orch_text)
+    return m.group(1) if m else ""
+
+
+def _completion_keywords(skill_text):
+    """Extract keywords from a skill's ``## Completion criterion`` section."""
+    m = re.search(r"## Completion criterion\n(.*?)(?=\n## |\Z)", skill_text, re.S)
+    return _extract_keywords(m.group(1)) if m else set()
+
+
+def contract_consistency_issues(orch_text, skills_text):
+    """Flag mismatches between the orchestrator's step descriptions and each
+    skill's completion criterion keywords."""
+    issues = []
+    for step_label, skill_name in ORCH_STEP_SKILL_MAP.items():
+        step_text = _orchestrator_step_text(orch_text, step_label)
+        if not step_text:
+            continue
+        orch_kw = _extract_keywords(step_text)
+        skill_kw = _completion_keywords(skills_text.get(skill_name, ""))
+        missing_in_skill = orch_kw - skill_kw
+        missing_in_orch = skill_kw - orch_kw
+        if missing_in_skill and missing_in_orch:
+            issues.append(
+                Issue(
+                    skill_name,
+                    f"contract mismatch with orchestrator '{step_label}' step: "
+                    f"orchestrator uses terms not in completion criterion "
+                    f"({', '.join(sorted(missing_in_skill)[:5])}), "
+                    f"skill uses terms not in orchestrator description "
+                    f"({', '.join(sorted(missing_in_orch)[:5])})",
+                )
+            )
+        elif missing_in_skill:
+            issues.append(
+                Issue(
+                    skill_name,
+                    f"contract mismatch with orchestrator '{step_label}' step: "
+                    f"orchestrator uses terms not in completion criterion "
+                    f"({', '.join(sorted(missing_in_skill)[:5])})",
+                )
+            )
+        elif missing_in_orch:
+            issues.append(
+                Issue(
+                    skill_name,
+                    f"contract mismatch with orchestrator '{step_label}' step: "
+                    f"skill completion criterion uses terms not in orchestrator "
+                    f"({', '.join(sorted(missing_in_orch)[:5])})",
+                )
+            )
+    return issues
+
+
+# --------------------------------------------------------------------------
+# Tier 2 — Glossary reverse check
+# --------------------------------------------------------------------------
+
+
+def glossary_reverse_issues(skills_text, context_text):
+    """Flag domain vocabulary used in 2+ skills but absent from CONTEXT.md.
+
+    Only checks bold/emphasised terms (``**term**``) in skill files — these
+    are the terms authors explicitly mark as domain jargon.  Common English
+    words in bold are filtered out by the minimum-length and
+    multi-skill-usage thresholds.
+    """
+    issues = []
+    # Collect bold terms per skill
+    skill_bold = {}
+    for name, body in skills_text.items():
+        terms = set()
+        for m in re.finditer(r"\*\*([A-Za-z][A-Za-z -]{2,})\*\*", body):
+            terms.add(m.group(1).lower().strip())
+        skill_bold[name] = terms
+
+    # Find bold terms used in 2+ skills
+    term_usage = {}  # term -> set of skill names
+    for name, terms in skill_bold.items():
+        for t in terms:
+            term_usage.setdefault(t, set()).add(name)
+
+    glossary_terms = set()
+    if context_text:
+        for m in re.finditer(r"\*\*([A-Za-z][A-Za-z -]+)\*\*", context_text):
+            glossary_terms.add(m.group(1).lower().strip())
+
+    for term, users in sorted(term_usage.items()):
+        if len(users) >= 2 and term not in glossary_terms:
+            user_list = ", ".join(sorted(users))
+            issues.append(
+                Issue(
+                    "CONTEXT.md",
+                    f"domain term '{term}' used in {len(users)} skills "
+                    f"({user_list}) but missing from glossary",
+                )
+            )
+    return issues
+
+
+# --------------------------------------------------------------------------
+# Tier 2 — ADR staleness detection
+# --------------------------------------------------------------------------
+
+
+def parse_adr_graph(adr_dir):
+    """Parse ADRs for ``retired``/``supersedes``/``amends`` metadata.
+
+    Returns ``(graph, superseded_map)`` where:
+    - *graph* is ``{adr_num: [referenced_adr_nums]}``
+    - *superseded_map* is ``{superseded_num: successor_num}``
+    """
+    adr_dir = pathlib.Path(adr_dir)
+    graph = {}
+    superseded_map = {}
+    for p in sorted(adr_dir.glob("*.md")):
+        text = p.read_text()
+        num_m = re.match(r"(\d{4})", p.name)
+        if not num_m:
+            continue
+        num = num_m.group(1)
+        refs = [m.group(1) for m in re.finditer(r"ADR-(\d{4})", text)]
+        graph[num] = refs
+        # Detect "This supersedes ADR-NNNN" or "supersedes ADR-NNNN"
+        for m in re.finditer(r"supersedes\s+ADR-(\d{4})", text, re.I):
+            superseded_map[m.group(1)] = num
+        # Detect "This amends ADR-NNNN" (amends adds context but doesn't retire)
+        # Only flag actual supersession.
+    return graph, superseded_map
+
+
+def adr_staleness_issues(skills_text, adr_dir):
+    """Flag skills that reference a superseded ADR without noting the
+    successor."""
+    issues = []
+    _, superseded_map = parse_adr_graph(adr_dir)
+    if not superseded_map:
+        return issues
+
+    for skill_name, body in skills_text.items():
+        for old_num, successor_num in sorted(superseded_map.items()):
+            old_ref = f"ADR-{old_num}"
+            succ_ref = f"ADR-{successor_num}"
+            if re.search(r"ADR-" + old_num, body) and succ_ref not in body:
+                issues.append(
+                    Issue(
+                        skill_name,
+                        f"references {old_ref} which is superseded by "
+                        f"{succ_ref} — skill should note the successor",
+                    )
+                )
+    return issues
+
+
+# --------------------------------------------------------------------------
 # Whole-repo orchestration
 # --------------------------------------------------------------------------
 
@@ -296,11 +533,36 @@ def validate_repo(repo_root):
         issues += adr_issues(text, repo_root, skill=d.name)
 
     issues += vocab_issues(glossary.terms, glossary.avoid, skills_text, set(VOCAB_ALLOW))
+
+    # --- Tier 2: semantic checks ---
+    adr_dir = repo_root / "docs" / "adr"
+    if adr_dir.is_dir():
+        adr_text = (adr_dir / "0004-foundational-refactoring-rules.md").read_text() \
+            if (adr_dir / "0004-foundational-refactoring-rules.md").exists() else ""
+        if adr_text:
+            issues += adr0004_propagation_issues(skills_text)
+
+    orchestrator_text = skills_text.get(ORCHESTRATOR, "")
+    if orchestrator_text:
+        issues += contract_consistency_issues(orchestrator_text, skills_text)
+
+    if context_text:
+        issues += glossary_reverse_issues(skills_text, context_text)
+
+    if adr_dir.is_dir():
+        issues += adr_staleness_issues(skills_text, adr_dir)
+
     return sorted(issues, key=lambda i: (i.skill, i.message))
 
 
 def main(argv=None):
-    ap = argparse.ArgumentParser(description="Tier 1 static validation of the skill suite")
+    ap = argparse.ArgumentParser(
+        description="Static validation of the skill suite (Tier 1 + Tier 2)",
+        epilog=(
+            "Tier 2 checks: ADR-0004 rule propagation, cross-skill contract "
+            "consistency, glossary reverse check, ADR staleness detection"
+        ),
+    )
     ap.add_argument("root", nargs="?", default=".", help="suite repo root (default: current directory)")
     args = ap.parse_args(argv)
 
