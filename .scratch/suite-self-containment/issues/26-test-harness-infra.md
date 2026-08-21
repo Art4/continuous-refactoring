@@ -26,3 +26,5 @@
 ## Comments
 
 > **2026-08-21:** Abgespalten von Issue 17. Baut die Infrastruktur für Tiers 2+3.
+
+> **2026-08-21:** Implementiert und in PR #1 gemerget. CI Pipeline grün.

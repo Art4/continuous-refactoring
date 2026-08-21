@@ -26,7 +26,7 @@
 **Abhängigkeiten:**
 - 07 ✓ done — First loop pass validated
 - 16 ✓ done — Tier 1 static validation
-- 26 — Harness-Infrastruktur (Docker, Bash-Funktionen)
+- 26 ✓ done — Harness-Infrastruktur (Docker, Bash-Funktionen)
 
 **Commits:**
 1. Ticket 26: Harness-Infrastruktur
@@ -52,3 +52,5 @@
 > **2026-08-21:** ADR-0005 retires the baseline marker. Tier 4 negative control "orchestrator without a baseline marker must not refactor" is obsolete — replace with: without git, the suite must not run; missing tools are candidates, not a start-gate. `.out-of-scope/` assertions move to `docs/refactoring/`.
 
 > **2026-08-21:** Grilling-Session abgeschlossen. Entscheidungen: eigenes Harness (Docker + Bash), Tiers 2+3 zuerst, 3-5 Fixtures, Exit-Code + stdout, Baseline in `fixtures/baselines/`.
+
+> **2026-08-21:** Tiers 2+3 implementiert und in PR #1 gemerget. CI Pipeline grün. Tiers 4+5 als separates Ticket geplant.
