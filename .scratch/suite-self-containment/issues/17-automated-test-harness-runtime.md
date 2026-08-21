@@ -4,46 +4,46 @@
 
 **What to build:** The runtime tiers of the suite harness, on top of the static validation tier (16).
 
-## Grilling-Entscheidungen
+## Grilling Decisions
 
-| # | Entscheidung | Wahl |
-|---|--------------|------|
-| 1 | Infrastruktur | Eigenes Harness (opencode + Docker + Bash) |
-| 2 | Scope | Tiers 2+3 zuerst, 4+5 später |
-| 3 | Ground-Truth-Fixtures | 3-5 Fixtures |
-| 4 | Artifact Contracts | Issue-Struktur + Config + MR-Chain |
-| 5 | Script-Sprache | Bash |
-| 6 | Sandbox-Modus | Docker-Container mit opencode |
-| 7 | Assertion-Format | Exit-Code + stdout |
-| 8 | Precision/Recall | Einfach (precision = found/expected, recall = found/planted) |
-| 9 | Baseline-Speicherort | `fixtures/baselines/` |
-| 10 | Commit-Struktur | Feature-Branch, eigene Commits pro Tier |
+| # | Decision | Choice |
+|---|----------|--------|
+| 1 | Infrastructure | Custom harness (opencode + Docker + Bash) |
+| 2 | Scope | Tiers 2+3 first, 4+5 later |
+| 3 | Ground-truth fixtures | 3-5 fixtures |
+| 4 | Artifact contracts | Issue structure + config + MR chain |
+| 5 | Script language | Bash |
+| 6 | Sandbox mode | Docker container with opencode |
+| 7 | Assertion format | Exit-code + stdout |
+| 8 | Precision/recall | Simple (precision = found/expected, recall = found/planted) |
+| 9 | Baseline storage | `fixtures/baselines/` |
+| 10 | Commit structure | Feature branch, separate commits per tier |
 
 ## Plan
 
-**Feature-Branch:** `feature/test-harness-tiers-2-3`
+**Feature branch:** `feature/test-harness-tiers-2-3`
 
-**Abhängigkeiten:**
+**Dependencies:**
 - 07 ✓ done — First loop pass validated
 - 16 ✓ done — Tier 1 static validation
-- 26 ✓ done — Harness-Infrastruktur (Docker, Bash-Funktionen)
+- 26 ✓ done — Harness infrastructure (Docker, Bash functions)
 
 **Commits:**
-1. Ticket 26: Harness-Infrastruktur
-2. Tier 2: Artifact Contracts
-3. Tier 3: Ground Truth + Fixtures
+1. Ticket 26: Harness infrastructure
+2. Tier 2: Artifact contracts
+3. Tier 3: Ground truth + fixtures
 
-**Später (eigenes Ticket):**
-- Tiers 4+5 (Trigger Tests + CI Gate)
+**Later (separate ticket):**
+- Tiers 4+5 (trigger tests + CI gate)
 
-## Checkliste
+## Checklist
 
 - [x] Harness decision made (grilling) and recorded
-- [x] Ticket 26: Harness-Infrastruktur
+- [x] Ticket 26: Harness infrastructure
 - [x] Tier 2: artifact contract assertions over a sandboxed loop run
 - [x] Tier 3: ground-truth repos + precision/recall score + saved baseline
-- [ ] Tier 4: trigger tests incl. negative controls *(separates Ticket)*
-- [ ] Tier 5: CI gate + rubric grading + lift measurement *(separates Ticket)*
+- [ ] Tier 4: trigger tests incl. negative controls *(separate ticket)*
+- [ ] Tier 5: CI gate + rubric grading + lift measurement *(separate ticket)*
 
 ## Comments
 
@@ -51,6 +51,6 @@
 
 > **2026-08-21:** ADR-0005 retires the baseline marker. Tier 4 negative control "orchestrator without a baseline marker must not refactor" is obsolete — replace with: without git, the suite must not run; missing tools are candidates, not a start-gate. `.out-of-scope/` assertions move to `docs/refactoring/`.
 
-> **2026-08-21:** Grilling-Session abgeschlossen. Entscheidungen: eigenes Harness (Docker + Bash), Tiers 2+3 zuerst, 3-5 Fixtures, Exit-Code + stdout, Baseline in `fixtures/baselines/`.
+> **2026-08-21:** Grilling session complete. Decisions: custom harness (Docker + Bash), Tiers 2+3 first, 3-5 fixtures, exit-code + stdout, baseline in `fixtures/baselines/`.
 
-> **2026-08-21:** Tiers 2+3 implementiert und in PR #1 gemerget. CI Pipeline grün. Tiers 4+5 als separates Ticket geplant.
+> **2026-08-21:** Tiers 2+3 implemented and merged in PR #1. CI pipeline green. Tiers 4+5 planned as separate ticket.

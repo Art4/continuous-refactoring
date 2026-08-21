@@ -1,30 +1,30 @@
-# 26 — Test Harness Infrastruktur
+# 26 — Test Harness Infrastructure
 
 **Type:** build
 
-**What to build:** Gemeinsame Infrastruktur für das Test-Harness: Docker-Setup, Bash-Funktionen und Assertion-Helfer. Dies ist die Basis für Tiers 2+3.
+**What to build:** Shared infrastructure for the test harness: Docker setup, Bash functions, and assertion helpers. This is the foundation for Tiers 2+3.
 
 **Blocked by:** 07 ✓ done — First loop pass validated, 16 ✓ done — Tier 1 static validation
 
 **Status:** done
 
-- [x] Docker-Image für opencode + PHP erstellen
-- [x] Bash-Lib mit Assertion-Funktionen (`assert_issue_exists`, `assert_field_value`, etc.)
-- [x] Fixture-Setup-Script (Fixture → Docker mounten, opencode ausführen)
-- [x] CI-Skript für GitHub Actions
+- [x] Docker image for opencode + PHP
+- [x] Bash library with assertion functions (`assert_file_exists`, `assert_field_value`, etc.)
+- [x] Fixture setup script (copy fixture to Docker, run opencode)
+- [x] CI script for GitHub Actions
 
 ## Plan
 
-**Feature-Branch:** `feature/test-harness-tiers-2-3`
+**Feature branch:** `feature/test-harness-tiers-2-3`
 
-**Dateien:**
+**Files:**
 - `fixtures/harness/Dockerfile` — opencode + PHP 8.3 + Composer
-- `fixtures/harness/lib/assertions.sh` — Gemeinsame Bash-Funktionen
-- `fixtures/harness/run.sh` — Haupt-Skript (Fixture laden, opencode ausführen, Assertions)
-- `.github/workflows/test-harness.yml` — CI-Pipeline
+- `fixtures/harness/lib/assertions.sh` — shared Bash functions
+- `fixtures/harness/run.sh` — main script (load fixture, run opencode, assertions)
+- `.github/workflows/test-harness.yml` — CI pipeline
 
 ## Comments
 
-> **2026-08-21:** Abgespalten von Issue 17. Baut die Infrastruktur für Tiers 2+3.
+> **2026-08-21:** Split off from issue 17. Builds infrastructure for Tiers 2+3.
 
-> **2026-08-21:** Implementiert und in PR #1 gemerget. CI Pipeline grün.
+> **2026-08-21:** Implemented and merged in PR #1. CI pipeline green.
