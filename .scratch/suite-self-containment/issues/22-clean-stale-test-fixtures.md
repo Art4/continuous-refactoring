@@ -6,12 +6,14 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `refactor-baseline` replaced with `test-skill-fixture` (or similar neutral name) in all test fixtures
-- [ ] CI passes: `python3 -m unittest discover -s scripts -p 'test_*.py'`
-- [ ] No behavioral change — only fixture names change
+- [x] `refactor-baseline` replaced with `test-skill-fixture` (or similar neutral name) in all test fixtures
+- [x] CI passes: `python3 -m unittest discover -s scripts -p 'test_*.py'`
+- [x] No behavioral change — only fixture names change
 
 ## Comments
 
 > **2026-08-21:** Created from architecture review candidate 5 (Speculative). Minor hygiene — the validator dynamically discovers skills from `skills/*/`, so it never references `refactor-baseline` in production. Only the test fixtures are affected.
+
+> **2026-08-21:** Implemented in PR #2. Replaced `refactor-baseline` with `test-skill-fixture` in 3 test cases. All 47 tests pass. CI green.
