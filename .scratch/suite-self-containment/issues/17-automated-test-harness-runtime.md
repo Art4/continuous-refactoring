@@ -23,3 +23,5 @@
 ## Comments
 
 > **2026-08-20:** Split off from ticket 16 — the runtime tiers moved here; Tier 1 (static suite validation) stays in 16.
+
+> **2026-08-21:** ADR-0005 retires the baseline marker. Tier 4 negative control “orchestrator without a baseline marker must not refactor” is obsolete — replace with: without git, the suite must not run; missing tools are candidates, not a start-gate. `.out-of-scope/` assertions move to `docs/refactoring/`.

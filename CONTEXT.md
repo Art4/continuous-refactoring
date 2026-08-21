@@ -5,7 +5,7 @@ The vocabulary of a portable agent-skill suite that keeps a software project und
 ## Language
 
 **Candidate**:
-A refactoring opportunity filed as an issue on the project's issue tracker.
+A backlog item filed on the project's issue tracker — either a structural deepening or a missing node on the **tooling tree**.
 _Avoid_: task, ticket, todo
 
 **Backlog**:
@@ -16,9 +16,9 @@ _Avoid_: debt list, todo list
 One run of the orchestrator: discover → prioritise → design → implement → review → learn.
 _Avoid_: session, sprint
 
-**Baseline**:
-The one-time tooling foundation established before the loop starts — code style, Rector, PHPStan, and CI enforcement.
-_Avoid_: setup, bootstrap
+**Tooling tree**:
+The directed graph of tools in a language specialization. A child node is reachable only after its parent is fulfilled or rejected; a rejection closes that subtree.
+_Avoid_: baseline, floor, bootstrap, onboarding
 
 **Cadence**:
 The configured schedule that decides when the next periodic loop pass is due.
@@ -41,5 +41,5 @@ The public boundary at which a module is tested — where tests observe behaviou
 _Avoid_: boundary, internal hook
 
 **Tooling pressure**:
-A candidate that tools (PHPStan, Rector, CI) keep surfacing — things that will re-fail until fixed.
+A candidate that an already-fulfilled tooling-tree node keeps surfacing — things that will re-fail until fixed.
 _Avoid_: lint noise, tool complaints

@@ -6,12 +6,12 @@
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Grilling session held; each open tooling question decided
-- [ ] Coverage floor, mutation testing, dependency scan, OWASP static analysis, secret detection, and DAST each decided — in the basket or explicitly out, with concrete defaults
-- [ ] Outcome recorded as an ADR in `docs/adr/`
-- [ ] `refactor-baseline` updated to reference the concrete defaults where applicable
+- [x] Grilling session held; each open tooling question decided
+- [x] Coverage floor, mutation testing, dependency scan, OWASP static analysis, secret detection, and DAST each decided — in the basket or explicitly out, with concrete defaults
+- [x] Outcome recorded as an ADR in `docs/adr/`
+- [x] `refactor-baseline` updated to reference the concrete defaults where applicable — **superseded:** there is no baseline skill; ADR-0005 retires `/refactor-baseline`. Skill/playbook edits are follow-up, not this ticket.
 
 ## Comments
 
@@ -38,3 +38,5 @@
 - **Tree 3 — Runtime/instance-dependent:** OWASP ZAP (running app + Java) · DAST generally → deployed instance → nightly pipeline, never a per-MR gate.
 
 The tooling order emerges from these trees: Composer first, then the Composer stack, standalone binaries independent of it, DAST last (nightly).
+
+> **2026-08-21:** Grilled. The “baseline basket” framing was replaced: no `/refactor-baseline`, git-only hard requirement, PHP **tooling tree**, suite state under `docs/refactoring/`. Recorded as ADR-0005 (amends ADR-0002, path part of ADR-0001). PHPStan child sequence specified in ticket 18. First wave: CI-runner, Composer, cs-fixer, Rector, PHPStan, composer audit, test-runner-if-missing. Later: 08 coverage, 09 mutation, 11 SAST, 13 secrets, 14 DAST, normalize/unused. Ticket 10 (audit) stays first-wave but as a thin node, not a CI-fail default. Skills and playbooks are not updated in this ticket.
