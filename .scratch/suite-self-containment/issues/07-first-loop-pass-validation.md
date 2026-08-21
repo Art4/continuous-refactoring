@@ -4,11 +4,11 @@
 
 **Blocked by:** 05 ✓ done — Make the orchestrator degrade gracefully, 06 ✓ done — Tooling tree (ADR-0005), 12 ✓ done — Deliver each refactor as a merge request (skills updated to ADR-0005 as part of #12)
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Suite symlinked into a PHP target repo
-- [ ] Scan files at least one missing first-wave tooling-tree node as a `refactor:candidate` (or reports the tree already fulfilled)
-- [ ] At least one full loop pass completes with findings recorded (backlog issues, learnings)
+- [x] Suite symlinked into a PHP target repo
+- [x] Scan files at least one missing first-wave tooling-tree node as a `refactor:candidate` (or reports the tree already fulfilled)
+- [x] At least one full loop pass completes with findings recorded (backlog issues, learnings)
 
 ## Comments
 
@@ -23,3 +23,5 @@
 > **2026-08-21:** 25 done – Script aus tests-repo kopiert. 07 bleibt blocked auf 24.
 
 > **2026-08-21:** 24 done – README angepasst. 07 ist jetzt ready-for-agent.
+
+> **2026-08-21:** Loop-Pass durchgeführt. 5 Candidates gefiled, 002 (SQL Injection) als erstes behoben. Suite funktional.
