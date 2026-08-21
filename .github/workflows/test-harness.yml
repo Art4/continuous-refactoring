@@ -1,0 +1,53 @@
+name: Test Harness
+
+on:
+  push:
+    branches: [main, feature/*]
+  pull_request:
+    branches: [main]
+
+jobs:
+  tier1:
+    name: Tier 1 - Static Validation
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: pip install pyyaml
+      - name: Run validator
+        run: python scripts/validate_skills.py
+
+  tier2:
+    name: Tier 2 - Artifact Contracts
+    runs-on: ubuntu-latest
+    needs: tier1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t test-harness fixtures/harness/
+      - name: Run Tier 2 tests
+        run: |
+          chmod +x fixtures/harness/run.sh
+          ./fixtures/harness/run.sh tier2 php-project-with-candidates
+
+  tier3:
+    name: Tier 3 - Ground Truth
+    runs-on: ubuntu-latest
+    needs: tier1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build Docker image
+        run: docker build -t test-harness fixtures/harness/
+      - name: Run Tier 3 tests
+        run: |
+          chmod +x fixtures/harness/run.sh
+          ./fixtures/harness/run.sh tier3 php-project-with-candidates
+      - name: Upload baseline
+        uses: actions/upload-artifact@v4
+        with:
+          name: baseline
+          path: fixtures/baselines/
