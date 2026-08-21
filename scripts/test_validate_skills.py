@@ -109,7 +109,7 @@ class SectionTests(unittest.TestCase):
 
     def test_fallback_not_required_ok_without(self):
         text = "## Process\n## Completion criterion\n"
-        self.assertEqual(vs.section_issues(text, "refactor-baseline", requires_fallback=False), [])
+        self.assertEqual(vs.section_issues(text, "test-skill-fixture", requires_fallback=False), [])
 
 
 class LedgerTests(unittest.TestCase):
@@ -133,7 +133,7 @@ class LedgerTests(unittest.TestCase):
 
 
 class GlobalRefTests(unittest.TestCase):
-    SUITE = {"refactor-scan", "refactor-baseline", "refactor-prioritize"}
+    SUITE = {"refactor-scan", "test-skill-fixture", "refactor-prioritize"}
 
     def test_dangling_ref_not_in_ledger(self):
         text = "See `/grilling` for details."
@@ -157,7 +157,7 @@ class GlobalRefTests(unittest.TestCase):
 
     def test_suite_internal_refs_exempt(self):
         text = "Run `/refactor-scan` then `/refactor-prioritize`."
-        issues = vs.global_ref_issues(text, "refactor-baseline", self.SUITE, {"refactor-baseline": []})
+        issues = vs.global_ref_issues(text, "test-skill-fixture", self.SUITE, {"test-skill-fixture": []})
         self.assertEqual(issues, [])
 
     def test_matching_refs_ok(self):
