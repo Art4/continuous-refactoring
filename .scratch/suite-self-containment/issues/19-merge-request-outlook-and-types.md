@@ -4,7 +4,7 @@
 
 **What to build:** What a suite **merge request** says beyond the plain description in ticket 12 / ADR-0006 (candidate link, what changed, tests, CI). Ticket 12 explicitly does **not** include this. The 12 grilling deferred two questions together: whether the description **must end with an outlook** (what the candidate unlocks short/mid-term — next tooling-tree child or next deepening; ADR-0005 already talks as if it does), and whether a **closed type enum** names the quality dimension (brainstorming G–J plus first-wave kinds). Decide, then put the result where skills write the merge-request body.
 
-**Blocked by:** 12 — Deliver each candidate as a remembered merge request
+**Blocked by:** 12 ✓ done — Deliver each candidate as a remembered merge request
 
 **Status:** ready-for-agent
 

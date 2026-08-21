@@ -4,20 +4,22 @@
 
 **Blocked by:** 05 ✓ done — Make the orchestrator degrade gracefully
 
-**Status:** in-progress
+**Status:** done
 
-- [ ] Pass starts from remembered suite merge requests (only those count toward the cap)
-- [ ] Completed candidate → one branch, one merge request; URL stored under `docs/refactoring/`; issue `ready-for-human` (not `done`)
-- [ ] Open + comments → follow-up commits; that pass starts no new candidate
-- [ ] Merged → issue `done`; bookkeeping-only may still take one new candidate if a slot is free
-- [ ] Closed without merge → `wontfix` + out-of-scope from comments, or ask the human
-- [ ] Two open → point the human at them; no third; still respond to comments
-- [ ] Second merge request: stack only for a tooling-tree child or explicit design dependency; else parallel on the default branch; retarget/rebase after parent merge
-- [ ] Create-mode: read `AGENTS.md` / `CLAUDE.md`; else propose `autonomous`; remember `autonomous` | `ask-each-time` | `human-opens` in suite state — never write those agent docs
-- [ ] Description: candidate link, what changed, tests, CI — not outlook, not types
-- [ ] Atomic commits following the target repo’s convention; skills say merge request, chat uses the forge’s word
-- [ ] Works self-contained (no global-skill dependency)
+- [x] Pass starts from remembered suite merge requests (only those count toward the cap)
+- [x] Completed candidate → one branch, one merge request; URL stored under `docs/refactoring/`; issue `ready-for-human` (not `done`)
+- [x] Open + comments → follow-up commits; that pass starts no new candidate
+- [x] Merged → issue `done`; bookkeeping-only may still take one new candidate if a slot is free
+- [x] Closed without merge → `wontfix` + out-of-scope from comments, or ask the human
+- [x] Two open → point the human at them; no third; still respond to comments
+- [x] Second merge request: stack only for a tooling-tree child or explicit design dependency; else parallel on the default branch; retarget/rebase after parent merge
+- [x] Create-mode: read `AGENTS.md` / `CLAUDE.md`; else propose `autonomous`; remember `autonomous` | `ask-each-time` | `human-opens` in suite state — never write those agent docs
+- [x] Description: candidate link, what changed, tests, CI — not outlook, not types
+- [x] Atomic commits following the target repo's convention; skills say merge request, chat uses the forge's word
+- [x] Works self-contained (no global-skill dependency)
 
 ## Comments
 
-> **2026-08-21:** Grilled (grill-with-docs). Recorded as ADR-0006. Outlook and typed rationale split to ticket 19. Original “pass closes when the MR exists / issue done / chain ≤ 2 as a pass quota / letter types G–J” superseded.
+> **2026-08-21:** Grilled (grill-with-docs). Recorded as ADR-0006. Outlook and typed rationale split to ticket 19. Original "pass closes when the MR exists / issue done / chain ≤ 2 as a pass quota / letter types G–J" superseded.
+
+> **2026-08-21:** Implemented. Orchestrator rewrite (`continuous-refactoring/SKILL.md`), `refactor-baseline` retired, vocabulary migrated across all skills, validator updated with `EXEMPT_LOCAL_PREFIXES`, playbooks/docs/ledger consistent. Commit `f14a626`. 47/47 tests green, CI green.
