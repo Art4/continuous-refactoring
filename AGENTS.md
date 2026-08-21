@@ -1,5 +1,9 @@
 ## Agent skills
 
+### Git workflow
+
+All changes go through feature branches and pull requests — never direct commits to `main`. Create a branch, implement, ensure CI is green, then open a PR. Merge only after review and passing pipeline.
+
 ### Issue tracker
 
 Issues live as markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
