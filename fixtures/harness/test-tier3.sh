@@ -74,7 +74,7 @@ run_tier3_tests() {
     log_info "Precision: $precision"
     log_info "Recall: $recall"
 
-    # Assertions
+    # Assertions - check expected files exist
     assert_file_exists "$FIXTURE_SRC/expected/issues/001-shallow-user-service.md"
     assert_file_exists "$FIXTURE_SRC/expected/issues/002-sql-injection-user-repository.md"
     assert_file_exists "$FIXTURE_SRC/expected/issues/003-hardcoded-secret-user-repository.md"

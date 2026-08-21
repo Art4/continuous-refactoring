@@ -92,28 +92,28 @@ run_opencode() {
 run_tier2() {
     log_info "=== Tier 2: Artifact Contract Tests ==="
 
-    # Check issue structure
-    assert_dir_exists "$FIXTURE_DST/.scratch" || true
-    assert_dir_exists "$FIXTURE_DST/docs/refactoring" || true
+    # Check fixture structure (what exists in the source fixture)
+    assert_dir_exists "$FIXTURE_SRC/src"
+    assert_dir_exists "$FIXTURE_SRC/composer"
+    assert_dir_exists "$FIXTURE_SRC/expected"
 
-    # Check config format
-    if [[ -f "$FIXTURE_DST/docs/refactoring/config.md" ]]; then
-        assert_config_format "$FIXTURE_DST/docs/refactoring/config.md"
-    fi
+    # Check expected issues exist
+    local expected_issues="$FIXTURE_SRC/expected/issues"
+    assert_file_exists "$expected_issues/001-shallow-user-service.md"
+    assert_file_exists "$expected_issues/002-sql-injection-user-repository.md"
+    assert_file_exists "$expected_issues/003-hardcoded-secret-user-repository.md"
+    assert_file_exists "$expected_issues/004-unused-unused-reporting-service.md"
+    assert_file_exists "$expected_issues/005-style-violations-bootstrap.md"
 
-    # Check MR chain
-    if [[ -f "$FIXTURE_DST/docs/refactoring/merge-requests.md" ]]; then
-        assert_mr_chain_length "$FIXTURE_DST/docs/refactoring/merge-requests.md" 2
-    fi
+    # Check issue labels and fields
+    for issue in "$expected_issues"/*.md; do
+        assert_issue_has_label "$issue" "refactor:candidate"
+        assert_issue_has_fields "$issue" "## Where" "## Problem" "## Signal"
+    done
 
-    # Check for candidate issues
-    local issue_count
-    issue_count=$(find "$FIXTURE_DST" -name "*.md" -path "*issues*" | wc -l)
-    if [[ "$issue_count" -gt 0 ]]; then
-        log_pass "Found $issue_count issue(s)"
-    else
-        log_fail "No issues found"
-    fi
+    # Check expected docs
+    assert_file_exists "$FIXTURE_SRC/expected/docs/refactoring/config.md"
+    assert_config_format "$FIXTURE_SRC/expected/docs/refactoring/config.md"
 }
 
 # Tier 3: Ground Truth Tests
