@@ -19,15 +19,19 @@
 
 **Blocked by:** —
 
-**Status:** grilling
+**Status:** done
 
-- [ ] Grilling: Anzahl und Scope der Fixtures
-- [ ] Grilling: Reset-Strategie
-- [ ] Grilling: Struktur (eigene Git-Repos oder Unterverzeichnisse?)
-- [ ] Build: Repo erstellen
-- [ ] Build: Fixtures anlegen
+- [x] Grilling: Anzahl und Scope der Fixtures
+- [x] Grilling: Reset-Strategie
+- [x] Grilling: Struktur (eigene Git-Repos oder Unterverzeichnisse?)
+- [ ] 24 — README für Tests-Repo
+- [ ] 25 — Shell-Script für Fixture-Tests
+- [x] Build: Repo erstellen (erledigt – existiert bereits)
+- [x] Build: Fixtures anlegen (erledigt – php-project-with-candidates existiert)
 - [ ] Build: Reset-Scripte/Docs
 
 ## Comments
 
 > **2026-08-21:** Abgespalten von Issue 07 – Test-Fixtures werden eigenständig gepflegt. Issue 07 wird danach auf dieses Ticket verweisen.
+
+> **2026-08-21:** Grilling-Session abgeschlossen. Tickets 24 (README) und 25 (Shell-Script) erstellt.
