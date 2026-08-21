@@ -2,7 +2,7 @@
 # fixtures/harness/test-tier2.sh
 # Tier 2: Artifact Contract Tests
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"

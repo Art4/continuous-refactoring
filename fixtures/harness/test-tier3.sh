@@ -2,7 +2,7 @@
 # fixtures/harness/test-tier3.sh
 # Tier 3: Ground Truth Tests (Precision/Recall)
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"

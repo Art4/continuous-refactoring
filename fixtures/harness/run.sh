@@ -2,7 +2,7 @@
 # fixtures/harness/run.sh
 # Main harness script: loads fixture, runs opencode, checks artifacts
 
-set -euo pipefail
+set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_DIR="$(dirname "$(dirname "$SCRIPT_DIR")")"

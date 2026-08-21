@@ -2,7 +2,9 @@
 # fixtures/harness/lib/assertions.sh
 # Shared assertion functions for the test harness
 
-set -euo pipefail
+# NOTE: Do NOT use set -euo pipefail here.
+# Assertions return 1 on failure but should not abort the script.
+# The caller decides whether to use set -e.
 
 # Colors for output
 RED='\033[0;31m'
