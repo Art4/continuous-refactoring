@@ -35,3 +35,5 @@
 > **2026-08-21:** Abgespalten von Issue 07 – Test-Fixtures werden eigenständig gepflegt. Issue 07 wird danach auf dieses Ticket verweisen.
 
 > **2026-08-21:** Grilling-Session abgeschlossen. Tickets 24 (README) und 25 (Shell-Script) erstellt.
+
+> **2026-08-21:** Fixtures aus `continuous-refactoring-tests/` ins Hauptrepo unter `fixtures/` verschoben.
