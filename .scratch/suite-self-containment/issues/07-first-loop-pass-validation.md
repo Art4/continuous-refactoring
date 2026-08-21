@@ -2,7 +2,7 @@
 
 **What to build:** The suite is symlinked into a real PHP target repo and a first loop pass runs end-to-end: scan proposes missing first-wave **tooling tree** nodes as candidates (ADR-0005 — no `/refactor-baseline`), then `/continuous-refactoring` runs scan → prioritise → design → implement → review — using the suite's own skills only, without global skill references.
 
-**Blocked by:** 05 ✓ done — Make the orchestrator degrade gracefully, 06 ✓ done — Tooling tree (ADR-0005), 12 ✓ done — Deliver each refactor as a merge request (skills updated to ADR-0005 as part of #12), 23 — Test-Fixture-Repo-Infrastruktur (Grilling erledigt, Tickets 24 + 25 offen)
+**Blocked by:** 05 ✓ done — Make the orchestrator degrade gracefully, 06 ✓ done — Tooling tree (ADR-0005), 12 ✓ done — Deliver each refactor as a merge request (skills updated to ADR-0005 as part of #12), 23 — Test-Fixture-Repo-Infrastruktur (Grilling erledigt, 25 ✓ done, 24 offen)
 
 **Status:** blocked
 
@@ -19,3 +19,5 @@
 > **2026-08-21:** Blocked on 23 — Test-Fixture-Repo-Infrastruktur (eigenständiges Repo für PHP-Test-Fixtures).
 
 > **2026-08-21:** 23 grilling done. Tickets 24 (README) + 25 (Shell-Script) erstellt. 07 bleibt blocked, bis beide fertig sind.
+
+> **2026-08-21:** 25 done – Script aus tests-repo kopiert. 07 bleibt blocked auf 24.

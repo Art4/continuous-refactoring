@@ -2,7 +2,7 @@
 
 **Type:** grilling + build
 
-**What to build:** Separates Repo `continuous-refactoring-fixtures` mit PHP-Test-Repos für die Suite-Validierung. Jedes Fixture ist ein eigenständiges Git-Repo, das einen bestimmten Zustand der Tooling-Tree repräsentiert.
+**What to build:** Fixtures für die Suite-Validierung im Hauptrepo. Jedes Fixture ist ein Verzeichnis, das einen bestimmten Zustand der Tooling-Tree repräsentiert.
 
 **Grilling-Fokus:**
 - Wie viele Fixtures brauchen wir wirklich?
@@ -24,8 +24,8 @@
 - [x] Grilling: Anzahl und Scope der Fixtures
 - [x] Grilling: Reset-Strategie
 - [x] Grilling: Struktur (eigene Git-Repos oder Unterverzeichnisse?)
-- [ ] 24 — README für Tests-Repo
-- [ ] 25 — Shell-Script für Fixture-Tests
+- [ ] 24 — README für Fixtures
+- [x] 25 — Shell-Script für Fixture-Tests
 - [x] Build: Repo erstellen (erledigt – existiert bereits)
 - [x] Build: Fixtures anlegen (erledigt – php-project-with-candidates existiert)
 - [ ] Build: Reset-Scripte/Docs
