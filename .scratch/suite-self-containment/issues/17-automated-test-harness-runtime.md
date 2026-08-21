@@ -36,14 +36,16 @@
 **Later (separate ticket):**
 - Tiers 4+5 (trigger tests + CI gate)
 
+**Status:** done
+
 ## Checklist
 
 - [x] Harness decision made (grilling) and recorded
 - [x] Ticket 26: Harness infrastructure
 - [x] Tier 2: artifact contract assertions over a sandboxed loop run
 - [x] Tier 3: ground-truth repos + precision/recall score + saved baseline
-- [ ] Tier 4: trigger tests incl. negative controls *(separate ticket)*
-- [ ] Tier 5: CI gate + rubric grading + lift measurement *(separate ticket)*
+- [ ] Tier 4: trigger tests incl. negative controls *(see ticket 27)*
+- [ ] Tier 5: CI gate + rubric grading + lift measurement *(see ticket 27)*
 
 ## Comments
 

@@ -16,12 +16,12 @@
 
 > **2026-08-21:** Blockers resolved. #12 implemented with full ADR-0005/0006 skill migration (commit `f14a626`). Ready for end-to-end validation in a real PHP target repo.
 
-> **2026-08-21:** Blocked on 23 — Test-Fixture-Repo-Infrastruktur (eigenständiges Repo für PHP-Test-Fixtures).
+> **2026-08-21:** Blocked on 23 — test fixture repo infrastructure.
 
-> **2026-08-21:** 23 grilling done. Tickets 24 (README) + 25 (Shell-Script) erstellt. 07 bleibt blocked, bis beide fertig sind.
+> **2026-08-21:** 23 grilling done. Tickets 24 (README) + 25 (shell script) created. 07 stays blocked until both are done.
 
-> **2026-08-21:** 25 done – Script aus tests-repo kopiert. 07 bleibt blocked auf 24.
+> **2026-08-21:** 25 done — script copied from tests-repo. 07 stays blocked on 24.
 
-> **2026-08-21:** 24 done – README angepasst. 07 ist jetzt ready-for-agent.
+> **2026-08-21:** 24 done — README adapted. 07 is now ready-for-agent.
 
-> **2026-08-21:** Loop-Pass durchgeführt. 5 Candidates gefiled, 002 (SQL Injection) als erstes behoben. Suite funktional.
+> **2026-08-21:** Loop pass executed. 5 candidates filed, 002 (SQL injection) fixed first. Suite functional.
