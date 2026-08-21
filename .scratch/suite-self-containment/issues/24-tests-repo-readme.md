@@ -1,20 +1,20 @@
-# 24 — README für Fixtures
+# 24 — README for Fixtures
 
-**What to build:** Eine README.md im Ordner `fixtures/`, die die Struktur, verfügbaren Fixtures und deren Benutzung dokumentiert.
+**What to build:** A README.md in the `fixtures/` directory documenting the structure, available fixtures, and usage.
 
-**Blocked by:** None — kann sofort starten
+**Blocked by:** None — can start immediately
 
 **Status:** done
 
-- [x] `fixtures/README.md` mit Ordner-Struktur
-- [x] Beschreibung der Fixtures (php/php-project-with-candidates)
-- [x] Anleitung: Fixtures nutzen (Setup, Test, Reset)
-- [x] Erwartete Ergebnisse (expected/)
+- [x] `fixtures/README.md` with directory structure
+- [x] Description of fixtures (php/php-project-with-candidates)
+- [x] Usage guide: setup, test, reset
+- [x] Expected results (expected/)
 
 ## Comments
 
-> **2026-08-21:** Abgespalten von Issue 23 (Test-Fixture-Repo-Infrastruktur).
+> **2026-08-21:** Split off from issue 23 (test fixture repo infrastructure).
 
-> **2026-08-21:** Fixtures ins Hauptrepo verschoben (nicht mehr separates Repo).
+> **2026-08-21:** Fixtures moved to main repo (no longer separate repo).
 
-> **2026-08-21:** README aus tests-repo kopiert und Pfade angepasst.
+> **2026-08-21:** README copied from tests-repo and paths adapted.

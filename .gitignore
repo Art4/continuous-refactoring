@@ -1,2 +1,5 @@
 __pycache__/
 *.pyc
+
+# Test harness baselines (generated, not committed)
+fixtures/baselines/
