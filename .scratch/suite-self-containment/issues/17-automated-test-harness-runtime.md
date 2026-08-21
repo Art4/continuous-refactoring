@@ -39,7 +39,7 @@
 ## Checkliste
 
 - [x] Harness decision made (grilling) and recorded
-- [ ] Ticket 26: Harness-Infrastruktur
+- [x] Ticket 26: Harness-Infrastruktur
 - [ ] Tier 2: artifact contract assertions over a sandboxed loop run
 - [ ] Tier 3: ground-truth repos + precision/recall score + saved baseline
 - [ ] Tier 4: trigger tests incl. negative controls *(separates Ticket)*

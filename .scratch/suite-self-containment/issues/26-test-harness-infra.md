@@ -6,12 +6,12 @@
 
 **Blocked by:** 07 ✓ done — First loop pass validated, 16 ✓ done — Tier 1 static validation
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] Docker-Image für opencode + PHP erstellen
-- [ ] Bash-Lib mit Assertion-Funktionen (`assert_issue_exists`, `assert_field_value`, etc.)
-- [ ] Fixture-Setup-Script (Fixture → Docker mounten, opencode ausführen)
-- [ ] CI-Skript für GitHub Actions
+- [x] Docker-Image für opencode + PHP erstellen
+- [x] Bash-Lib mit Assertion-Funktionen (`assert_issue_exists`, `assert_field_value`, etc.)
+- [x] Fixture-Setup-Script (Fixture → Docker mounten, opencode ausführen)
+- [x] CI-Skript für GitHub Actions
 
 ## Plan
 
