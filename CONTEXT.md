@@ -13,8 +13,12 @@ The set of candidate issues on the tracker, awaiting prioritisation.
 _Avoid_: debt list, todo list
 
 **Loop pass**:
-One run of the orchestrator: discover → prioritise → design → implement → review → learn.
+One run of the orchestrator. It starts from remembered **merge request** state (respond to comments, record a merge, or learn a rejection). If fewer than two suite merge requests are open, it may then complete at most one **candidate** (discover → prioritise → design → implement → review → learn).
 _Avoid_: session, sprint
+
+**Merge request**:
+The forge reviewable that delivers a completed candidate. Skills always use this term; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
+_Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
 **Tooling tree**:
 The directed graph of tools in a language specialization. A child node is reachable only after its parent is fulfilled or rejected; a rejection closes that subtree.
