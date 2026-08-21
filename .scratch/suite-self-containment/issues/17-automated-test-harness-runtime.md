@@ -1,27 +1,54 @@
 # 17 — Automated test harness — Tiers 2–5: artifact contracts, ground truth, triggers, CI gate
 
-**Type:** grilling + build
+**Type:** build
 
-**What to build:** The runtime tiers of the suite harness, on top of the static validation tier (16). Based on the established skill-testing methods (deterministic sandbox/artifact assertions, ground-truth benchmarks, trigger/discoverability tests, LLM-judge grading with a CI gate), the ticket first decides the infrastructure and then builds the tiers on it:
+**What to build:** The runtime tiers of the suite harness, on top of the static validation tier (16).
 
-- **Decision first (grilling):** which infrastructure — a lightweight custom harness (`opencode run` + fixture repos + assertion scripts, fits the opencode runtime) vs an existing framework (skillkit / coder-eval / skillcheck; mostly Claude/Codex-oriented). Outcome recorded in the ticket or as an ADR.
-- **Tier 2 — Deterministic artifact contract tests:** a loop pass (or lifecycle skills) run via opencode in a sandboxed fixture repo; assertions on the produced artifacts — candidate issues with required fields + `refactor:candidate` label, config-file format, `.out-of-scope/` conventions, MR chain ≤ 2, learn effects (ADR/CONTEXT).
-- **Tier 3 — Ground-truth fixture repos:** golden PHP repos with planted candidates (shallow module, A03 injection, secret, unused dependency, style violation); `refactor-scan` scored against the planted set (precision/recall), with a saved baseline for regression tracking.
-- **Tier 4 — Trigger/discoverability tests:** explicit + implicit invocation per skill; negative controls — orchestrator without a baseline marker must not refactor, a scan on a clean repo reports clean and stops, a non-PHP project gets no PHP baseline.
-- **Tier 5 — CI gate + lift measurement:** harness wired into CI with regression baselines; LLM-judge rubric grading; with-skill vs without-skill lift measurement.
+## Grilling-Entscheidungen
 
-**Blocked by:** 07 — Validate: first loop pass in a PHP target repo, 16 ✓ done — Tier 1 static suite validation
+| # | Entscheidung | Wahl |
+|---|--------------|------|
+| 1 | Infrastruktur | Eigenes Harness (opencode + Docker + Bash) |
+| 2 | Scope | Tiers 2+3 zuerst, 4+5 später |
+| 3 | Ground-Truth-Fixtures | 3-5 Fixtures |
+| 4 | Artifact Contracts | Issue-Struktur + Config + MR-Chain |
+| 5 | Script-Sprache | Bash |
+| 6 | Sandbox-Modus | Docker-Container mit opencode |
+| 7 | Assertion-Format | Exit-Code + stdout |
+| 8 | Precision/Recall | Einfach (precision = found/expected, recall = found/planted) |
+| 9 | Baseline-Speicherort | `fixtures/baselines/` |
+| 10 | Commit-Struktur | Feature-Branch, eigene Commits pro Tier |
 
-**Status:** ready-for-agent
+## Plan
 
-- [ ] Harness decision made (grilling) and recorded; tiers built on it
+**Feature-Branch:** `feature/test-harness-tiers-2-3`
+
+**Abhängigkeiten:**
+- 07 ✓ done — First loop pass validated
+- 16 ✓ done — Tier 1 static validation
+- 26 — Harness-Infrastruktur (Docker, Bash-Funktionen)
+
+**Commits:**
+1. Ticket 26: Harness-Infrastruktur
+2. Tier 2: Artifact Contracts
+3. Tier 3: Ground Truth + Fixtures
+
+**Später (eigenes Ticket):**
+- Tiers 4+5 (Trigger Tests + CI Gate)
+
+## Checkliste
+
+- [x] Harness decision made (grilling) and recorded
+- [ ] Ticket 26: Harness-Infrastruktur
 - [ ] Tier 2: artifact contract assertions over a sandboxed loop run
 - [ ] Tier 3: ground-truth repos + precision/recall score + saved baseline
-- [ ] Tier 4: trigger tests incl. negative controls
-- [ ] Tier 5: CI gate + rubric grading + lift measurement
+- [ ] Tier 4: trigger tests incl. negative controls *(separates Ticket)*
+- [ ] Tier 5: CI gate + rubric grading + lift measurement *(separates Ticket)*
 
 ## Comments
 
 > **2026-08-20:** Split off from ticket 16 — the runtime tiers moved here; Tier 1 (static suite validation) stays in 16.
 
-> **2026-08-21:** ADR-0005 retires the baseline marker. Tier 4 negative control “orchestrator without a baseline marker must not refactor” is obsolete — replace with: without git, the suite must not run; missing tools are candidates, not a start-gate. `.out-of-scope/` assertions move to `docs/refactoring/`.
+> **2026-08-21:** ADR-0005 retires the baseline marker. Tier 4 negative control "orchestrator without a baseline marker must not refactor" is obsolete — replace with: without git, the suite must not run; missing tools are candidates, not a start-gate. `.out-of-scope/` assertions move to `docs/refactoring/`.
+
+> **2026-08-21:** Grilling-Session abgeschlossen. Entscheidungen: eigenes Harness (Docker + Bash), Tiers 2+3 zuerst, 3-5 Fixtures, Exit-Code + stdout, Baseline in `fixtures/baselines/`.
