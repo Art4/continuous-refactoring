@@ -4,15 +4,17 @@
 
 **Blocked by:** None — kann sofort starten
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `fixtures/README.md` mit Ordner-Struktur
-- [ ] Beschreibung der Fixtures (php/php-project-with-candidates)
-- [ ] Anleitung: Fixtures nutzen (Setup, Test, Reset)
-- [ ] Erwartete Ergebnisse (expected/)
+- [x] `fixtures/README.md` mit Ordner-Struktur
+- [x] Beschreibung der Fixtures (php/php-project-with-candidates)
+- [x] Anleitung: Fixtures nutzen (Setup, Test, Reset)
+- [x] Erwartete Ergebnisse (expected/)
 
 ## Comments
 
 > **2026-08-21:** Abgespalten von Issue 23 (Test-Fixture-Repo-Infrastruktur).
 
 > **2026-08-21:** Fixtures ins Hauptrepo verschoben (nicht mehr separates Repo).
+
+> **2026-08-21:** README aus tests-repo kopiert und Pfade angepasst.

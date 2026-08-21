@@ -24,11 +24,11 @@
 - [x] Grilling: Anzahl und Scope der Fixtures
 - [x] Grilling: Reset-Strategie
 - [x] Grilling: Struktur (eigene Git-Repos oder Unterverzeichnisse?)
-- [ ] 24 — README für Fixtures
+- [x] 24 — README für Fixtures
 - [x] 25 — Shell-Script für Fixture-Tests
 - [x] Build: Repo erstellen (erledigt – existiert bereits)
 - [x] Build: Fixtures anlegen (erledigt – php-project-with-candidates existiert)
-- [ ] Build: Reset-Scripte/Docs
+- [x] Build: Reset-Scripte/Docs
 
 ## Comments
 
@@ -37,3 +37,5 @@
 > **2026-08-21:** Grilling-Session abgeschlossen. Tickets 24 (README) und 25 (Shell-Script) erstellt.
 
 > **2026-08-21:** Fixtures aus `continuous-refactoring-tests/` ins Hauptrepo unter `fixtures/` verschoben.
+
+> **2026-08-21:** Tickets 24 + 25 done. Issue 23 vollständig erledigt.
