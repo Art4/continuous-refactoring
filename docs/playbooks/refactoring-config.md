@@ -1,4 +1,4 @@
-# Playbook: `docs/agents/refactoring.md` in the target repo
+# Playbook: `docs/refactoring/config.md` in the target repo
 
 The config file the orchestrator reads and writes. It's created lazily on the first pass (the orchestrator asks for the cadence; default: weekly).
 
@@ -8,8 +8,8 @@ The config file the orchestrator reads and writes. It's created lazily on the fi
 # Refactoring Loop Config
 
 **Cadence:** weekly
-**Last run:** 2026-08-20
-**Baseline:** done            <!-- or: pending -->
+**Last run:** 2026-08-21
+**Create-mode:** autonomous
 **Focus areas:** order intake, billing
 ```
 
@@ -19,11 +19,11 @@ The config file the orchestrator reads and writes. It's created lazily on the fi
 |---|---|---|
 | `Cadence` | Turnus for periodic passes (`weekly`, `biweekly`, `monthly`, …) | Orchestrator on first pass; you can edit |
 | `Last run` | Date of the last completed pass | Orchestrator after each pass |
-| `Baseline` | `pending` / `done` — the tooling floor is in place | `refactor-baseline` on completion |
+| `Create-mode` | How the orchestrator opens merge requests: `autonomous`, `ask-each-time`, or `human-opens` | Orchestrator (first learn step) |
 | `Focus areas` | Areas scans should target first | you, any time |
 
 ## Rules
 
-- **Only the orchestrator and the baseline skill write it.** You edit by hand when you change cadence or focus — that's what it's for.
-- The file travels with the repo. Loop state does not live in agent sessions but here (config, last-run), in the issue tracker (backlog), and in `.out-of-scope/` (learned rejections).
-- If the file is missing, the orchestrator creates it — that's the marker from which a pass can run.
+- **Only the orchestrator writes it.** You edit by hand when you change cadence, focus areas, or create-mode — that's what it's for.
+- The file travels with the repo. Loop state does not live in agent sessions but here (config, last-run), in the issue tracker (backlog), in `docs/refactoring/merge-requests.md` (open suite merge requests), and in `docs/refactoring/out-of-scope/` (learned rejections).
+- If the file is missing, the orchestrator scaffolds the `docs/refactoring/` directory — that's the marker from which a pass can run.

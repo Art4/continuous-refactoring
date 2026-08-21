@@ -4,7 +4,7 @@
 
 **Blocked by:** 05 ✓ done — Make the orchestrator degrade gracefully
 
-**Status:** ready-for-agent
+**Status:** in-progress
 
 - [ ] Pass starts from remembered suite merge requests (only those count toward the cap)
 - [ ] Completed candidate → one branch, one merge request; URL stored under `docs/refactoring/`; issue `ready-for-human` (not `done`)

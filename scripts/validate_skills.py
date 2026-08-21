@@ -12,8 +12,8 @@ Checks every ``skills/*/SKILL.md`` deterministically and without an LLM:
 - global ``/X`` references: the set found in each skill body must equal the set
   recorded for that skill in ``docs/agents/skill-references.md``
 - local file references (``docs/...``, ``CONTEXT.md``, ``*.md``) resolve to real
-  files; target-repo artifacts (``docs/agents/refactoring.md``,
-  ``CODING_STANDARDS.md``, ``CONTRIBUTING.md``) are exempt
+  files; target-repo artifacts (``CODING_STANDARDS.md``, ``CONTRIBUTING.md``)
+  and target-repo suite state (``docs/refactoring/**``, ADR-0005) are exempt
 - ADR references (``ADR-NNNN``) resolve to ``docs/adr/NNNN-*.md``
 - glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
@@ -47,9 +47,14 @@ LEDGER_PATH = "docs/agents/skill-references.md"
 CONTEXT_PATH = "CONTEXT.md"
 
 EXEMPT_LOCAL_REFS = {
-    "docs/agents/refactoring.md": "scaffolded into the target repo by the orchestrator",
     "CODING_STANDARDS.md": "target-repo artifact (optional)",
     "CONTRIBUTING.md": "target-repo artifact (optional)",
+}
+
+# Target-repo suite state lives under docs/refactoring/ in the target repo
+# (ADR-0005); the suite repo itself never contains these files.
+EXEMPT_LOCAL_PREFIXES = {
+    "docs/refactoring/": "target-repo suite state (ADR-0005)",
 }
 
 # Glossary avoid-terms whose use in prose is legitimate. Keyed by (skill, term)
@@ -193,6 +198,8 @@ def local_ref_issues(text, repo_root, skill=""):
         if not _PATH_LIKE.match(ref) or re.search(r"\s", ref):
             continue
         if ref in EXEMPT_LOCAL_REFS:
+            continue
+        if any(ref.startswith(p) for p in EXEMPT_LOCAL_PREFIXES):
             continue
         if not (repo_root / ref).exists():
             issues.append(Issue(skill or ref, f"local reference '{ref}' does not exist in the suite repo"))

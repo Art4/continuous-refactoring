@@ -19,7 +19,7 @@ For each candidate, assess four factors:
 
 - **Heat** — is it in a hot spot (frequently changing area)? A candidate in a hot spot pays off faster because it unblocks more upcoming change.
 - **Leverage** — how much future change does deepening this module unlock? A module many others call is high-leverage; a leaf nobody calls is not.
-- **Tooling pressure** — is the tooling floor (PHPStan, Rector, style) actively flagging it? If so, it's re-failing every CI run until fixed.
+- **Tooling pressure** — is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so, it's re-failing every CI run until fixed.
 - **Risk** — how hard to reverse / how wide the blast radius? Prefer reversible, low-risk refactors early in the loop while the habit is forming.
 
 Present the ranking as a short list, oldest-first within each tier, with a one-line rationale per candidate.

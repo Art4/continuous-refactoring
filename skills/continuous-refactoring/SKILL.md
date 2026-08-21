@@ -1,6 +1,6 @@
 ---
 name: continuous-refactoring
-description: Run one pass of the continuous refactoring loop — scan, prioritise, design, implement, review, learn. Use to keep a codebase under continuous refactoring, on a cadence or on demand.
+description: Run one pass of the continuous refactoring loop — pick up remembered merge requests, scan, prioritise, design, implement, review, learn. Use to keep a codebase under continuous refactoring, on a cadence or on demand.
 disable-model-invocation: true
 ---
 
@@ -8,39 +8,58 @@ disable-model-invocation: true
 
 The **loop pass** — the stateful, repeatable sequence that keeps a project under continuous refactoring. Each pass does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
+A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005).
+
 Run this on demand whenever you're asked, or on the configured **cadence**.
 
 ## Loop state
 
 State lives in the target repo, not in the conversation:
 
-- **Config** — `docs/agents/refactoring.md`: cadence, last-run date, baseline marker, focus areas
+- **Config** — `docs/refactoring/config.md`: cadence, last-run date, focus areas, merge-request create-mode
+- **Remembered merge requests** — `docs/refactoring/merge-requests.md`: every open suite merge request with its URL, candidate issue, and base branch
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
-- **Learned rejections** — `.out-of-scope/` entries from prior passes
+- **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
 
-Read all three at the start of every pass. If `docs/agents/refactoring.md` doesn't exist, scaffold it (ask the user for the cadence; default weekly) — this is the marker that a pass can run.
+Read all four at the start of every pass. If `docs/refactoring/config.md` doesn't exist, scaffold the suite state directory (ask the user for the cadence; default weekly) — this is the marker that a pass can run.
 
 ## The pass
 
-Each step is one of the lifecycle skills. Stop between steps where the skill itself stops for user input.
+Each numbered step runs the named lifecycle skill. Stop between steps where the skill itself stops for user input.
 
-1. **Baseline check.** If the **baseline** isn't marked done in `docs/agents/refactoring.md`, run `/refactor-baseline` first. No refactoring pass before the tooling floor exists.
+1. **Pick up remembered merge requests.** Work through `docs/refactoring/merge-requests.md`:
+   - Review comments arrived → follow-up commits on that branch (atomic, in the repo's convention). A pass that pushed follow-ups starts no new candidate.
+   - Merged → mark its candidate `done`, drop it from the remembered state.
+   - Closed without merge → if the comments support a structural rejection, mark `wontfix` and file a learned rejection under `docs/refactoring/out-of-scope/`; otherwise ask the human.
+   - Two merge requests still open → point the human at them; take no new candidate this pass beyond the responses above.
 
-2. **Scan.** Run `/refactor-scan`. If the last scan is recent and nothing changed, report that and stop early.
+2. **Scan.** Run `/refactor-scan`. It files structural candidates *and* missing tooling-tree nodes together. If the last scan is recent and nothing changed, report that and stop early.
 
-3. **Prioritise.** Run `/refactor-prioritize`. The user picks the next candidate.
+3. **Prioritise.** Run `/refactor-prioritize`. It recommends an unblocked tooling-tree node when one exists; the user picks the next candidate.
 
 4. **Design.** Run `/refactor-design` on the chosen candidate. If the candidate is tiny and the user wants to skip to implementation, that's their call — flag it, don't block.
 
-5. **Implement.** Run `/refactor-implement`.
+5. **Implement.** Run `/refactor-implement`. One candidate, one branch; slices stay on that branch.
 
 6. **Review.** Run `/refactor-review`. If findings come back, loop implement → review until clean.
 
 7. **Learn.** Close the loop:
-   - Mark the candidate issue done (or `wontfix` → `.out-of-scope/`)
+   - Deliver the completed candidate as a **merge request** — see `## Opening a merge request` below — remember its URL and candidate issue in `docs/refactoring/merge-requests.md`, and label the candidate `ready-for-human` (not done).
    - Record ADRs for decisions a future scan must not re-litigate (see `/domain-modeling`)
    - Update `CONTEXT.md` with any terms that crystallised
-   - Stamp the last-run date in `docs/agents/refactoring.md`
+   - Stamp the last-run date in `docs/refactoring/config.md`
+
+## Opening a merge request
+
+The create-mode decides who opens the forge reviewable:
+
+- Read the target repo's `AGENTS.md` / `CLAUDE.md` first. If either names a mode, follow it.
+- Neither does → propose `autonomous` and record the chosen mode — `autonomous`, `ask-each-time`, or `human-opens` — in `docs/refactoring/config.md`.
+- Skills always say **merge request**; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
+
+While fewer than two suite merge requests are open, a pass may deliver one more. Stack it (base = the open branch) only when the new candidate is a tooling-tree child of what is in flight or the design depends on it; otherwise branch parallel off the default branch. After the parent merges, the next pass retargets or rebases the child.
+
+The description is plain: link the candidate, what changed, which tests survive, what CI proves. No outlook, no type enum.
 
 ## Fallback
 
@@ -53,10 +72,10 @@ Where each lifecycle skill's inline fallback engages, so a pass runs on the suit
 - **Scan** — `refactor-scan`: the candidate vocabulary is inline; a missing `codebase-design` is a crash-safe skip.
 - **Design** — `refactor-design`: a missing `grilling` engages the inline grilling loop (self-sufficient); a missing `domain-modeling` is a crash-safe skip — the `CONTEXT.md`/ADR side effects run inline regardless.
 - **Implement** — `refactor-implement`: a missing `tdd` engages the inline red → green rules and test-quality guidance (self-sufficient).
-- **Review** — `refactor-review`: a missing `code-review` engages the inline two-axis rules and Fowler smell baseline (self-sufficient).
+- **Review** — `refactor-review`: a missing `code-review` engages the inline two-axis rules and Fowler smell set (self-sufficient).
 
 The authoritative inventory of every global reference and its fallback type lives in `docs/agents/skill-references.md` (ADR-0003) and is enforced by the Tier 1 validator (`scripts/validate_skills.py`).
 
 ## Completion criterion
 
-One full pass completed and the loop state updated — last-run stamped, the candidate issue closed, learnings recorded.
+One full pass completed and the loop state updated — remembered merge requests processed (comments answered, merges recorded or rejections learned), last-run stamped, and the pass's own outcome recorded: the delivered candidate sits `ready-for-human` with its merge request remembered, or the issue closed.

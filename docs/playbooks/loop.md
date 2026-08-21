@@ -13,9 +13,9 @@ scan → prioritise → design (grill) → implement (tdd) → review (2 axes)
 
 ## Cadence and triggers
 
-- **Cadence:** configured in `docs/agents/refactoring.md` (default: weekly). You kick the loop off whenever it's due.
+- **Cadence:** configured in `docs/refactoring/config.md` (default: weekly). You kick the loop off whenever it's due.
 - **On-demand:** `/continuous-refactoring` any time — after a feature, before a release, when an area hurts.
-- **Triggers that make an early scan worthwhile:** many commits in the same module (a hot spot), a bug that's been fixed three times, an area the baseline tools keep flagging.
+- **Triggers that make an early scan worthwhile:** many commits in the same module (a hot spot), a bug that's been fixed three times, an area the fulfilled tooling keeps flagging.
 
 ## What you decide each pass
 
@@ -23,7 +23,6 @@ The loop stops exactly where human judgement is needed:
 
 | Step | Skill | Your decision |
 |---|---|---|
-| Tooling floor | `refactor-baseline` | once: accept configs + CI enforcement |
 | Find candidates | `refactor-scan` | focus area, if you name one |
 | Prioritise | `refactor-prioritize` | which candidate is next |
 | Design | `refactor-design` | sign off the interface / seam |
@@ -40,6 +39,6 @@ The loop closes with the **learn step**:
 
 ## Common mistakes
 
-- **Starting the loop before the baseline.** No refactoring loop before code style, Rector, and PHPStan are enforced in CI — otherwise you measure structural quality without a mechanical minimum.
+- **Ignoring tooling-tree pressure.** When fulfilled tooling flags a candidate, the loop prioritises it — unfulfilled tooling is a missing tree node, not a baseline delay.
 - **Scanning everything at once.** Scope to hot spots or named areas; a scan that wants everything finds nothing well.
 - **Merging reviews into one score.** Standards and spec stay two separate axes — that's the only way you see a violation of one when the other is green.

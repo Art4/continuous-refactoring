@@ -26,7 +26,7 @@ Each slice: write the failing test first (red), then only enough code to pass it
 When the plan's slices are done:
 
 - Run the full test suite — the surviving tests from the plan plus the new seam tests must be green.
-- Run the baseline tooling (PHPStan, Rector, style) over the touched files — the refactor must not regress the **baseline**.
+- Run the fulfilled tooling (PHPStan, Rector, style) over the touched files — the refactor must not regress mechanical quality.
 
 ## Fallback
 
@@ -34,4 +34,4 @@ When the plan's slices are done:
 
 ## Completion criterion
 
-Every slice in the plan is implemented red → green, the full suite is green, and the baseline tools are clean on the touched files.
+Every slice in the plan is implemented red → green, the full suite is green, and the fulfilled tooling is clean on the touched files.

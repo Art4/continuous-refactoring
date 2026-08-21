@@ -11,6 +11,6 @@ Every reference from a suite skill to a **global** skill, and how its fallback b
 | `refactor-review` | `/code-review` (Z.23) | core (smell baseline) | self-sufficient | 04 ✓ shipped |
 | `continuous-refactoring` | `/domain-modeling` (Z.41) | enrichment (learn step) | crash-safe | 05 ✓ shipped |
 
-Exempt (no global refs): `refactor-baseline`, `refactor-prioritize`.
+Exempt (no global refs): `refactor-prioritize`.
 
 Keep this table in sync whenever a suite skill adds or drops a global reference — it is the audit ledger for the ADR-0003 convention.

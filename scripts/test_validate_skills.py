@@ -202,8 +202,28 @@ class LocalRefTests(unittest.TestCase):
     def test_target_repo_artifacts_exempt(self):
         tmp, root = self._repo()
         try:
-            text = "Scaffold `docs/agents/refactoring.md`; see `CODING_STANDARDS.md` or `CONTRIBUTING.md`."
+            text = "See `CODING_STANDARDS.md` or `CONTRIBUTING.md`."
             self.assertEqual(vs.local_ref_issues(text, root), [])
+        finally:
+            tmp.cleanup()
+
+    def test_target_repo_suite_state_exempt(self):
+        tmp, root = self._repo()
+        try:
+            text = (
+                "Config lives in `docs/refactoring/config.md`, remembered merge requests "
+                "in `docs/refactoring/merge-requests.md`, learned rejections under "
+                "`docs/refactoring/out-of-scope/`."
+            )
+            self.assertEqual(vs.local_ref_issues(text, root), [])
+        finally:
+            tmp.cleanup()
+
+    def test_superseded_config_location_flagged(self):
+        tmp, root = self._repo()
+        try:
+            issues = vs.local_ref_issues("Read `docs/agents/refactoring.md`.", root)
+            self.assertTrue(any("docs/agents/refactoring.md" in i.message for i in issues))
         finally:
             tmp.cleanup()
 

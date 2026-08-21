@@ -27,7 +27,7 @@ Explore organically and note where you experience friction. Look for:
 - Low **leverage** — a lot of interface surface buying little behaviour behind it.
 - Tightly-coupled modules leaking across their **seams**.
 - Untested parts, or parts hard to test through their current interface.
-- **Tooling pressure** — places the baseline tools (PHPStan, Rector, style) keep flagging.
+- **Tooling pressure** — places the fulfilled tooling (PHPStan, Rector, style) keeps flagging.
 
 Use the `/codebase-design` vocabulary (module, interface, depth, seam, leverage, locality) in every candidate description — don't drift into "component," "service," or "API."
 

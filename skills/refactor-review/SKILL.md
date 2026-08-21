@@ -1,26 +1,26 @@
 ---
 name: refactor-review
-description: Verify a completed refactor — tests green, baseline tools clean, and a two-axis review of the diff. Part of the continuous refactoring loop.
+description: Verify a completed refactor — tests green, fulfilled tooling clean, and a two-axis review of the diff. Part of the continuous refactoring loop.
 ---
 
 # Refactor Review
 
 Verify a completed refactor along two axes, reported separately so neither masks the other:
 
-- **Standards** — does the diff conform to this repo's documented standards *and* the baseline tooling?
+- **Standards** — does the diff conform to this repo's documented standards *and* the fulfilled tooling?
 - **Spec** — does it faithfully implement the plan on the candidate issue?
 
-The tooling floor (PHPStan, Rector, style) sets its own standards — those are *minimums*, enforced by CI; the review adds what tools can't see.
+The fulfilled tooling (PHPStan, Rector, style) sets its own standards — those are *minimums*, enforced by CI; the review adds what tools can't see.
 
 ## Process
 
-### 1. Verify the floor
+### 1. Verify the tooling
 
-Run the baseline tooling and the test suite over the diff. Confirm green. If the floor fails, the refactor is not done — send it back to `refactor-implement`.
+Run the fulfilled tooling and the test suite over the diff. Confirm green. If the tooling fails, the refactor is not done — send it back to `refactor-implement`.
 
 ### 2. Standards axis
 
-Review the diff against this repo's documented coding standards (see `docs/agents/domain.md`, any `CODING_STANDARDS.md`/`CONTRIBUTING.md`). On top of documented standards, carry the Fowler **smell baseline** and the standards-axis rules from `/code-review` — use it if installed, otherwise the inline baseline and rules in `## Fallback` below govern.
+Review the diff against this repo's documented coding standards (see `docs/agents/domain.md`, any `CODING_STANDARDS.md`/`CONTRIBUTING.md`). On top of documented standards, carry the Fowler **smell set** and the standards-axis rules from `/code-review` — use it if installed, otherwise the inline rules in `## Fallback` below govern.
 
 ### 3. Spec axis
 
@@ -34,8 +34,8 @@ Present the two axes as separate sections — do not merge or rerank findings ac
 
 - **`/code-review`**: if installed, use it as the reference for the two-axis review. Otherwise run the review by the inline rules below — this section carries the contract this step uses.
 
-  **Standards-axis rules.** Review the diff against the repo's documented coding standards (see `docs/agents/domain.md`, any `CODING_STANDARDS.md`/`CONTRIBUTING.md`). On top of documented standards, carry the Fowler **smell baseline** below — the fixed set of smells that applies even when the repo documents nothing. Two rules bind it:
-  - **The repo overrides.** A documented repo standard always wins; where it endorses something the baseline would flag, suppress the smell.
+  **Standards-axis rules.** Review the diff against the repo's documented coding standards (see `docs/agents/domain.md`, any `CODING_STANDARDS.md`/`CONTRIBUTING.md`). On top of documented standards, carry the Fowler **smell set** below — the fixed set of smells that applies even when the repo documents nothing. Two rules bind it:
+  - **The repo overrides.** A documented repo standard always wins; where it endorses something the tooling would flag, suppress the smell.
   - **Always a judgement call.** Each smell is a labelled heuristic ("possible Feature Envy"), never a hard violation — and, like any standard here, skip anything tooling already enforces.
 
   Each smell reads *what it is* → *how to fix*; match it against the diff:
@@ -55,4 +55,4 @@ Present the two axes as separate sections — do not merge or rerank findings ac
 
 ## Completion criterion
 
-Both axes reported separately, the floor is green, and the candidate issue is updated (done, or returned with concrete findings).
+Both axes reported separately, the tooling is green, and the candidate issue is updated (done, or returned with concrete findings).
