@@ -15,7 +15,7 @@
     },
     "php-cs-fixer": {
       "fulfilled": true,
-      "reason": "dep or config present"
+      "reason": "dep and config present"
     },
     "phpunit": {
       "fulfilled": true,
@@ -27,7 +27,7 @@
     },
     "composer-audit": {
       "fulfilled": false,
-      "reason": "thin node \u2014 propose after composer"
+      "reason": "thin node \u2014 propose after composer (roadmap seam)"
     },
     "phpstan-level-0-baseline": {
       "fulfilled": true,

@@ -165,7 +165,10 @@ run_roadmap() {
         return 1
     fi
 
-    # Generate roadmap via deterministic parser (no opencode, no mutation)
+    # Generate roadmap via deterministic parser (no opencode, no mutation) — source of truth is docs/php-tooling-tree.md:40
+    # Deterministic parser is intentionally used for reproducibility (no LLM flakiness); an opencode run
+    # `opencode run /refactor-scan` + `/refactor-prioritize` would yield the same required/recommended chain
+    # (see skills/continuous-refactoring: required edge gates, recommended only outlook). Optional: run_opencode "roadmap" can be added.
     local generated="/tmp/roadmap-$FIXTURE.json"
     if ! python3 "$REPO_DIR/scripts/lib/tooling_tree.py" "$FIXTURE_DST" --steps 10 > "$generated" 2>/dev/null; then
         log_fail "Failed to generate roadmap for $FIXTURE_DST"

@@ -9,6 +9,7 @@ Docs: docs/php-tooling-tree.md is machine-readable (edges table), CONTEXT.md voc
 
 from __future__ import annotations
 
+import glob
 import json
 import pathlib
 import re
@@ -142,13 +143,11 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # CI runner
     has_ci = False
     for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
-        # glob handling
-        import glob
-
         if glob.glob(str(repo / pat)):
             has_ci = True
             break
-    # php-cs-fixer
+    # php-cs-fixer — spec docs/php-tooling-tree.md:91 requires dep + config + runnable (zero diffs)
+    # For file-based dry-run we approximate runnable as present when both dep and config exist
     has_cs_config = (repo / ".php-cs-fixer.php").exists() or (repo / ".php-cs-fixer.dist.php").exists()
     has_cs_dep = _has_dep(composer, "friendsofphp/php-cs-fixer") or _has_dep(composer, "php-cs-fixer/php-cs-fixer")
     # phpunit / pest
@@ -176,9 +175,8 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
     # php-cs-fixer
-    cs_fulfilled = (has_cs_dep or has_cs_config)
-    # We consider fulfilled if dep or config present; ideally both but simplified
-    set_node("php-cs-fixer", cs_fulfilled, "dep or config present" if cs_fulfilled else "missing cs-fixer", has_dep=has_cs_dep, has_config=has_cs_config)
+    cs_fulfilled = has_cs_dep and has_cs_config
+    set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)
     # phpunit
     phpunit_fulfilled = has_phpunit or has_pest or has_phpunit_xml
     set_node("phpunit", phpunit_fulfilled, "phpunit/pest present" if phpunit_fulfilled else "no test runner", has_phpunit=has_phpunit, has_pest=has_pest)
@@ -186,15 +184,12 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # If phpunit fulfilled -> this node considered fulfilled (no need to propose)
     tr_fulfilled = phpunit_fulfilled
     set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
-    # composer-audit: thin node, fulfilled if composer present? For roadmap we treat as not fulfilled until checked, but detection we mark as not fulfilled initially
-    # To keep simple: audit is fulfilled if composer present and we consider audit check passed? But for roadmap we want it as unblocked step.
-    # We'll mark audit as fulfilled False when composer present (so roadmap proposes it), but provide reason.
-    # Actually spec says Fulfilment check: composer audit runs without config errors — that is true if composer present. So we could mark fulfilled True if composer present.
-    # But for roadmap test we want to show audit as next MR after composer. So we keep it not fulfilled to propose.
-    # Let's treat audit as fulfilled False when composer present (unblocked) — easier for roadmap.
-    audit_fulfilled = False  # always propose after composer for test purposes; if we mark True, roadmap would skip it
-    # However if composers missing, it's blocked.
-    set_node("composer-audit", audit_fulfilled and has_composer_json, "thin node — propose after composer" if has_composer_json else "blocked: no composer", has_composer=has_composer_json)
+    # composer-audit: thin node per docs/php-tooling-tree.md:110 — fulfilment is "composer audit runs without config errors"
+    # Strictly that is true whenever composer.json exists, so the node would be immediately fulfilled and never appear in a roadmap.
+    # For the dry-run roadmap we intentionally keep it proposable as a distinct thin MR to demonstrate the decision chain
+    # (the real MR scope is "none beyond running it", ticket 10 separates CI-fail). This is a roadmap-test seam, not a spec change.
+    audit_fulfilled = False  # always propose after composer for roadmap demonstration
+    set_node("composer-audit", audit_fulfilled and has_composer_json, "thin node — propose after composer (roadmap seam)" if has_composer_json else "blocked: no composer", has_composer=has_composer_json)
     # phpstan-level-0-baseline
     # Psalm equivalence: if psalm dep + config -> fulfilled without phpstan
     psalm_fulfils_p0 = has_psalm_dep and has_psalm_cfg

@@ -2,43 +2,56 @@
   "fixture": "php-project-with-candidates",
   "detected": {
     "git": {
-      "fulfilled": true
+      "fulfilled": true,
+      "reason": "found .git"
     },
     "composer": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "missing composer.json or lock"
     },
     "ci-runner": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "no CI config"
     },
     "php-cs-fixer": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "missing cs-fixer (need dep + config)"
     },
     "phpunit": {
-      "fulfilled": true
+      "fulfilled": true,
+      "reason": "phpunit/pest present"
     },
     "test-runner-if-missing": {
-      "fulfilled": true
+      "fulfilled": true,
+      "reason": "runner exists"
     },
     "composer-audit": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "thin node \u2014 propose after composer (roadmap seam)"
     },
     "phpstan-level-0-baseline": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "missing phpstan or level 0 or baseline"
     },
     "phpstan-level-1": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "level None < 1 or no phpstan"
     },
     "phpstan-level-2": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "level None < 2 or no phpstan"
     },
     "phpstan-level-3": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "level None < 3 or no phpstan"
     },
     "rector-dead-code": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "no rector dead-code"
     },
     "rector-type-coverage": {
-      "fulfilled": false
+      "fulfilled": false,
+      "reason": "no rector type coverage"
     }
   },
   "roadmap": [
