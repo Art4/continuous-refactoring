@@ -25,3 +25,5 @@
 ## Comments
 
 > **2026-08-21:** Split off from ticket 17. Tiers 2+3 done, 4+5 remaining.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `test-harness/issues/` — regrouped around the automated test harness.

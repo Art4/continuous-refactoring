@@ -56,3 +56,5 @@
 > **2026-08-21:** Grilling session complete. Decisions: custom harness (Docker + Bash), Tiers 2+3 first, 3-5 fixtures, exit-code + stdout, baseline in `fixtures/baselines/`.
 
 > **2026-08-21:** Tiers 2+3 implemented and merged in PR #1. CI pipeline green. Tiers 4+5 planned as separate ticket.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `test-harness/issues/` — regrouped around the automated test harness.

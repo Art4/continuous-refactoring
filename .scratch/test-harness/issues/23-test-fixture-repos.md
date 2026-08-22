@@ -39,3 +39,5 @@
 > **2026-08-21:** Fixtures moved from `continuous-refactoring-tests/` to main repo under `fixtures/`.
 
 > **2026-08-21:** Tickets 24 + 25 done. Issue 23 fully complete.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `test-harness/issues/` — regrouped around the automated test harness.
