@@ -6,7 +6,7 @@
 
 **Blocked by:** 06 ✓ done — Tooling tree (ADR-0005)
 
-**Status:** ready-for-agent
+**Status:** done
 
 Decided shape (2026-08-22 grilling, ADR-0007 — nodes on `docs/php-tooling-tree.md`):
 
@@ -17,10 +17,10 @@ Decided shape (2026-08-22 grilling, ADR-0007 — nodes on `docs/php-tooling-tree
 Remaining to specify:
 
 - [x] Each child named: parents, fulfilment check, MR scope — done on `docs/php-tooling-tree.md`
-- [ ] Level-0 + baseline on introduce made exact (what `phpstan.neon` contains, how the baseline is generated, paths)
+- [x] Level-0 + baseline on introduce made exact (what `phpstan.neon` contains, how the baseline is generated, paths) — specified in `docs/php-tooling-tree.md` `phpstan-level-0-baseline` Config + MR scope (2026-08-22)
 - [x] ~~CI-job child~~ — deferred to a later wave (ADR-0007); revisit when two-parent nodes arrive
-- [ ] Shrink vs raise-level details still open: stop conditions, what "empty baseline" means operationally (file absent vs empty ignore)
-- [ ] Equivalents: Psalm already present fulfils `phpstan-level-0-baseline` (ADR-0005); whether the level nodes still apply then
+- [x] Shrink vs raise-level details still open: stop conditions, what "empty baseline" means operationally (file absent vs empty ignore) — defined as absent OR empty `ignoreErrors`; stop conditions in `phpstan-level-1`..`3` section
+- [x] Equivalents: Psalm already present fulfils `phpstan-level-0-baseline` (ADR-0005); whether the level nodes still apply then — Psalm fulfils level-0, level chain is PHPStan-specific and not proposed under Psalm (`docs/php-tooling-tree.md` `phpstan` equivalents)
 - [x] Outcome recorded where the PHP tooling tree lives: `docs/php-tooling-tree.md`
 
 ## Comments
@@ -30,3 +30,5 @@ Remaining to specify:
 > **2026-08-22:** Moved from `suite-self-containment/issues/` to `php-tooling-tree/issues/` — regrouped around the PHP tooling tree.
 
 > **2026-08-22:** Grilled the tree shape end-to-end. Edges are now **required**/**recommended** (ADR-0007); Rector split into `rector-dead-code` / `rector-type-coverage`; CI-job children deferred. Shape lives on `docs/php-tooling-tree.md` — this ticket now only fills in operational details.
+
+> **2026-08-22:** Implemented — `docs/php-tooling-tree.md` now specifies: `phpstan.neon` minimal content and `paths` resolution, fixed baseline path `phpstan-baseline.neon`, generation command `--generate-baseline`, empty-baseline definition (absent or empty `ignoreErrors`), per-level MR scope (raise exactly one level + regenerated baseline + shrinking), stop conditions, and Psalm equivalence (fulfils level-0, level chain does not apply). Glossary edge terms wired into `skills/continuous-refactoring/SKILL.md` so Tier 1 passes. 68/68 tests green.
