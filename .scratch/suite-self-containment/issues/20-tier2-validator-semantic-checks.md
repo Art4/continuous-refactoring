@@ -13,16 +13,18 @@ The four checks:
 
 **Blocked by:** None — can start immediately.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] ADR-0004 rule-propagation check implemented and tested
-- [ ] Cross-skill contract-consistency check implemented and tested
-- [ ] Glossary reverse check implemented and tested
-- [ ] ADR staleness check implemented and tested
-- [ ] All new checks wired into `validate_repo()` and CI
-- [ ] Unit tests for each check (valid + invalid cases)
-- [ ] `validate_skills.py --help` updated to document Tier 2 checks
+- [x] ADR-0004 rule-propagation check implemented and tested
+- [x] Cross-skill contract-consistency check implemented and tested
+- [x] Glossary reverse check implemented and tested
+- [x] ADR staleness check implemented and tested
+- [x] All new checks wired into `validate_repo()` and CI
+- [x] Unit tests for each check (valid + invalid cases)
+- [x] `validate_skills.py --help` updated to document Tier 2 checks
 
 ## Comments
 
 > **2026-08-21:** Created from architecture review candidate 4 (Strong recommendation). Source: HTML report at `/tmp/architecture-review-20260821.html`. Related existing ticket: 17 (Tier 2–5 runtime harness — this ticket covers the static/deterministic Tier 2 checks; 17 covers sandbox/artifact-based Tier 2+).
+
+> **2026-08-22:** Implemented in PR #3 (branch `feat/tier2-semantic-checks`). Four checks added: ADR-0004 rule propagation, cross-skill contract consistency (advisory), glossary reverse (bold terms only), ADR staleness (supersedes + retired). 68 tests passing, all 5 CI checks green. Code-reviewed and refined: extracted constants, simplified regex, added `retired` detection. Glossary updated with leverage, locality, plan (caught by reverse check).
