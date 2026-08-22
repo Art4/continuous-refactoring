@@ -93,17 +93,29 @@ done
 FIXTURE_SRC="$FIXTURES_DIR/php/$FIXTURE"
 FIXTURE_DST="/tmp/continuous-refactoring-tests/$FIXTURE"
 
-# Setup fixture
+# Setup fixture — copies only project/ (expected stays outside container)
 setup_fixture() {
     log_info "Setting up fixture: $FIXTURE"
     rm -rf "$FIXTURE_DST"
     mkdir -p "$(dirname "$FIXTURE_DST")"
-    cp -r "$FIXTURE_SRC" "$FIXTURE_DST"
+    if [[ -d "$FIXTURE_SRC/project" ]]; then
+        cp -r "$FIXTURE_SRC/project/." "$FIXTURE_DST/"
+        # Ensure .github and dotfiles are copied (cp -r project/. may miss hidden on some shells, so explicit)
+        if [[ -d "$FIXTURE_SRC/project/.github" ]]; then
+            mkdir -p "$FIXTURE_DST/.github"
+            cp -r "$FIXTURE_SRC/project/.github/." "$FIXTURE_DST/.github/" 2>/dev/null || true
+        fi
+        for dot in "$FIXTURE_SRC/project"/.php-cs-fixer.php "$FIXTURE_SRC/project"/.php-cs-fixer.dist.php; do
+            [[ -f "$dot" ]] && cp "$dot" "$FIXTURE_DST/" 2>/dev/null || true
+        done
+    else
+        cp -r "$FIXTURE_SRC" "$FIXTURE_DST"
+    fi
     cd "$FIXTURE_DST"
     git init -q
     git -c user.name="Test Runner" -c user.email="test@ci.local" add -A
     git -c user.name="Test Runner" -c user.email="test@ci.local" commit -q -m "Initial fixture state"
-    log_info "Fixture ready at: $FIXTURE_DST"
+    log_info "Fixture ready at: $FIXTURE_DST (project only, expected not mounted)"
 }
 
 # Run opencode in Docker
@@ -123,9 +135,20 @@ run_opencode() {
 run_tier2() {
     log_info "=== Tier 2: Artifact Contract Tests ==="
 
-    # Check fixture structure (what exists in the source fixture)
-    assert_dir_exists "$FIXTURE_SRC/src"
-    assert_dir_exists "$FIXTURE_SRC/composer"
+    # Check fixture structure (what exists in the source fixture) — supports both old (src at root) and new (project/src)
+    local project_src="$FIXTURE_SRC/project"
+    if [[ -d "$project_src" ]]; then
+        assert_dir_exists "$project_src/src"
+        # composer may be at project/composer.json (new) or legacy composer/composer.json
+        if [[ -f "$project_src/composer.json" ]]; then
+            assert_file_exists "$project_src/composer.json"
+        elif [[ -d "$FIXTURE_SRC/composer" ]]; then
+            assert_dir_exists "$FIXTURE_SRC/composer"
+        fi
+    else
+        assert_dir_exists "$FIXTURE_SRC/src"
+        assert_dir_exists "$FIXTURE_SRC/composer"
+    fi
     assert_dir_exists "$FIXTURE_SRC/expected"
 
     # Check expected issues exist

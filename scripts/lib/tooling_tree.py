@@ -271,19 +271,21 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
 
     result: list[dict] = []
 
-    # Helper to get candidate structural issues for filling
+    # Helper to get candidate structural issues for filling — supports new layout project/ + expected (sibling)
     structural_candidates: list[dict] = []
-    expected_issues_dir = repo / "expected" / "issues"
-    alt_expected = repo / "fixtures" / "php" / repo.name / "expected" / "issues"
-    # Try both: repo may be fixture DST (/tmp/.../fixture) with src etc., expected under repo/expected or under original fixture src?
-    # For our generation we look for expected/issues under repo itself and under FIXTURES_DIR
-    # Simpler: look for any *.md under repo/expected/issues
-    for cand_dir in [repo / "expected" / "issues", repo / "composer" / "expected" / "issues"]:
+    # 1) Direct expected under repo (old layout: repo/expected, or DST with project copy but expected still at repo/expected for original fixture)
+    for cand_dir in [repo / "expected" / "issues", repo / "project" / "expected" / "issues", repo / "composer" / "expected" / "issues"]:
         if cand_dir.exists():
             for f in sorted(cand_dir.glob("*.md")):
                 structural_candidates.append({"file": f.name, "path": str(f)})
-    # Also check if repo is a fixture DST that was copied from FIXTURES_DIR/php/<name> — then expected is under repo/expected (because cp -r copies it)
-    # If still empty, search recursively for expected/issues
+    # 2) If repo is a DST (/tmp/.../php-empty), look at original fixture's expected (sibling to project, not mounted)
+    if not structural_candidates:
+        # REPO_ROOT is two levels above scripts/lib
+        fixtures_expected = REPO_ROOT / "fixtures" / "php" / repo.name / "expected" / "issues"
+        if fixtures_expected.exists():
+            for f in sorted(fixtures_expected.glob("*.md")):
+                structural_candidates.append({"file": f.name, "path": str(f)})
+    # 3) Fallback recursive
     if not structural_candidates:
         for p in repo.rglob("expected/issues/*.md"):
             structural_candidates.append({"file": p.name, "path": str(p)})
