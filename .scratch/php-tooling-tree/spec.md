@@ -4,6 +4,8 @@ Spec extracted from `suite-self-containment` (2026-08-22): all tickets that hang
 
 The tree has three roots: Composer-based stack (PHP-CS-Fixer · Rector · PHPStan · PHPUnit + PCOV · composer audit …), standalone binaries (gitleaks · Semgrep · Trivy …), and runtime-dependent DAST (nightly only). First wave: CI-runner, Composer, cs-fixer, Rector, PHPStan, composer audit (thin), test-runner-if-missing. Later waves: coverage floor, mutation testing, SAST, secret detection, DAST, composer-normalize/unused.
 
+> **2026-08-22:** Revised by ADR-0007 (`docs/adr/0007-required-recommended-edges.md`): edges are **required**/**recommended**; Rector leaves the first wave and becomes `rector-dead-code` / `rector-type-coverage` behind PHPStan levels. The canonical shape lives on **`docs/php-tooling-tree.md`**.
+
 ## Issues
 
 | # | Ticket | Wave |

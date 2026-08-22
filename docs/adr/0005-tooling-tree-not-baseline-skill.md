@@ -1,5 +1,7 @@
 # Tooling tree instead of a baseline skill
 
+> Amended by [ADR-0007](0007-required-recommended-edges.md): tree edges split into **required** and **recommended**; Rector leaves the first wave and becomes suite nodes adopted in levels behind PHPStan (`docs/php-tooling-tree.md`).
+
 The loop must work without a one-shot tooling onboarding. Language specialisation is a **tooling tree**: missing tools are small **candidates** (one reviewable MR each), not a `/refactor-baseline` pass that blocks the loop. Git is the only hard requirement — without it the suite does not run.
 
 A fat floor delayed the first deepening and duplicated “setup” beside the loop. Incremental nodes keep MRs small; the MR outlook names the child the step unlocks. Fill gaps, never downgrade; an equivalent (Psalm for PHPStan, Pest for PHPUnit) fulfils the node. Rejecting a node is recorded under the target repo’s suite root (`docs/refactoring/`, default `out-of-scope/` — path overridable in that config) and closes only that subtree.
