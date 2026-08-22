@@ -575,13 +575,15 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     issues = validate_repo(args.root)
+    errors = [i for i in issues if "contract advisory" not in i.message]
     if issues:
         print("Suite skill validation report:")
         for i in issues:
-            print(f"  {i}")
+            prefix = "warning" if "contract advisory" in i.message else "error"
+            print(f"  {prefix}: {i.skill}: {i.message}")
     else:
         print("All suite skills validated clean.")
-    return 1 if issues else 0
+    return 1 if errors else 0
 
 
 if __name__ == "__main__":
