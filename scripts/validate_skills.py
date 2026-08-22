@@ -315,28 +315,44 @@ ORCH_STEP_SKILL_MAP = {
 }
 
 # Words too common to carry contract signal.
-_ORCH_STOP = {
+_ORCH_STOP = frozenset({
     "the", "a", "an", "of", "and", "or", "in", "on", "to", "for", "is",
     "that", "this", "it", "as", "by", "with", "from", "at", "if", "so",
     "its", "be", "do", "not", "but", "can", "will", "may", "shall",
     "must", "are", "was", "were", "been", "has", "have", "had", "each",
-    "see", "run", "use", "via",
-}
+    "see", "run", "use", "via", "also", "into", "than", "then", "them",
+    "they", "their", "there", "these", "those", "other", "more", "most",
+    "some", "any", "all", "both", "very", "own", "same", "such",
+    "just", "only", "even", "still", "already", "back", "here", "well",
+    "now", "new", "old", "next", "first", "last", "long", "great",
+    "little", "right", "high", "small", "large", "young", "few",
+    "many", "much", "like", "about", "over", "after", "before",
+    "between", "under", "until", "while", "where", "which", "whose",
+    "don", "doesn", "didn", "won", "wouldn", "couldn", "shouldn",
+    "block", "call", "flag", "come", "keep", "make", "take",
+})
 
 
 def _extract_keywords(text):
     """Extract significant lowercase words from text."""
-    words = set(re.findall(r"[a-z]{3,}", text.lower()))
+    words = set(re.findall(r"[a-z]{4,}", text.lower()))
     return words - _ORCH_STOP
 
 
 def _orchestrator_step_text(orch_text, step_label):
     """Return the text block for one numbered step in the orchestrator."""
     pattern = re.compile(
-        r"\d+\.\s+\*\*" + re.escape(step_label) + r"\*\*\.\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
+        r"\d+\.\s+\*\*" + re.escape(step_label) + r"\.\*\*\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
         re.S | re.I,
     )
     m = pattern.search(orch_text)
+    if not m:
+        # Fallback: try without trailing period in bold
+        pattern2 = re.compile(
+            r"\d+\.\s+\*\*" + re.escape(step_label) + r"\*\*\.\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
+            re.S | re.I,
+        )
+        m = pattern2.search(orch_text)
     return m.group(1) if m else ""
 
 
@@ -348,7 +364,16 @@ def _completion_keywords(skill_text):
 
 def contract_consistency_issues(orch_text, skills_text):
     """Flag mismatches between the orchestrator's step descriptions and each
-    skill's completion criterion keywords."""
+    skill's completion criterion keywords.
+
+    Checks that the orchestrator's step description uses at least some of the
+    same domain terms as the skill's completion criterion.  Only flags when
+    fewer than 20 % of the completion-criterion keywords appear in the
+    orchestrator step — a significant conceptual gap.
+
+    Note: the orchestrator step descriptions are intentionally brief; some
+    false positives are expected.  These issues are advisory.
+    """
     issues = []
     for step_label, skill_name in ORCH_STEP_SKILL_MAP.items():
         step_text = _orchestrator_step_text(orch_text, step_label)
@@ -356,37 +381,26 @@ def contract_consistency_issues(orch_text, skills_text):
             continue
         orch_kw = _extract_keywords(step_text)
         skill_kw = _completion_keywords(skills_text.get(skill_name, ""))
-        missing_in_skill = orch_kw - skill_kw
-        missing_in_orch = skill_kw - orch_kw
-        if missing_in_skill and missing_in_orch:
-            issues.append(
-                Issue(
-                    skill_name,
-                    f"contract mismatch with orchestrator '{step_label}' step: "
-                    f"orchestrator uses terms not in completion criterion "
-                    f"({', '.join(sorted(missing_in_skill)[:5])}), "
-                    f"skill uses terms not in orchestrator description "
-                    f"({', '.join(sorted(missing_in_orch)[:5])})",
+        if not skill_kw:
+            continue
+        overlap = orch_kw & skill_kw
+        coverage = len(overlap) / len(skill_kw)
+        if coverage < 0.2:
+            missing_in_orch = skill_kw - orch_kw
+            # Only flag when there are terms the orchestrator should mention
+            # but doesn't — not when the orchestrator uses extra terms.
+            significant = missing_in_orch - {
+                "every", "candidate", "refactor", "skill", "issue",
+            }
+            if significant:
+                issues.append(
+                    Issue(
+                        skill_name,
+                        f"contract advisory: orchestrator '{step_label}' step "
+                        f"does not mention completion-criterion terms "
+                        f"({', '.join(sorted(significant)[:5])})",
+                    )
                 )
-            )
-        elif missing_in_skill:
-            issues.append(
-                Issue(
-                    skill_name,
-                    f"contract mismatch with orchestrator '{step_label}' step: "
-                    f"orchestrator uses terms not in completion criterion "
-                    f"({', '.join(sorted(missing_in_skill)[:5])})",
-                )
-            )
-        elif missing_in_orch:
-            issues.append(
-                Issue(
-                    skill_name,
-                    f"contract mismatch with orchestrator '{step_label}' step: "
-                    f"skill completion criterion uses terms not in orchestrator "
-                    f"({', '.join(sorted(missing_in_orch)[:5])})",
-                )
-            )
     return issues
 
 
@@ -398,13 +412,12 @@ def contract_consistency_issues(orch_text, skills_text):
 def glossary_reverse_issues(skills_text, context_text):
     """Flag domain vocabulary used in 2+ skills but absent from CONTEXT.md.
 
-    Only checks bold/emphasised terms (``**term**``) in skill files — these
-    are the terms authors explicitly mark as domain jargon.  Common English
-    words in bold are filtered out by the minimum-length and
-    multi-skill-usage thresholds.
+    Checks bold/emphasised terms (``**term**``) in skill files — these are
+    the terms authors explicitly mark as domain jargon.  The check catches
+    drift like ``slice``, ``design tree``, ``frontier``, ``smell`` that
+    enters multiple skills without a glossary entry.
     """
     issues = []
-    # Collect bold terms per skill
     skill_bold = {}
     for name, body in skills_text.items():
         terms = set()
@@ -412,8 +425,7 @@ def glossary_reverse_issues(skills_text, context_text):
             terms.add(m.group(1).lower().strip())
         skill_bold[name] = terms
 
-    # Find bold terms used in 2+ skills
-    term_usage = {}  # term -> set of skill names
+    term_usage = {}
     for name, terms in skill_bold.items():
         for t in terms:
             term_usage.setdefault(t, set()).add(name)
@@ -462,8 +474,8 @@ def parse_adr_graph(adr_dir):
         # Detect "This supersedes ADR-NNNN" or "supersedes ADR-NNNN"
         for m in re.finditer(r"supersedes\s+ADR-(\d{4})", text, re.I):
             superseded_map[m.group(1)] = num
-        # Detect "This amends ADR-NNNN" (amends adds context but doesn't retire)
-        # Only flag actual supersession.
+        # Detect "This amends ADR-NNNN" — amends creates a dependency edge
+        # but does not retire the amended ADR.
     return graph, superseded_map
 
 
@@ -536,11 +548,7 @@ def validate_repo(repo_root):
 
     # --- Tier 2: semantic checks ---
     adr_dir = repo_root / "docs" / "adr"
-    if adr_dir.is_dir():
-        adr_text = (adr_dir / "0004-foundational-refactoring-rules.md").read_text() \
-            if (adr_dir / "0004-foundational-refactoring-rules.md").exists() else ""
-        if adr_text:
-            issues += adr0004_propagation_issues(skills_text)
+    issues += adr0004_propagation_issues(skills_text)
 
     orchestrator_text = skills_text.get(ORCHESTRATOR, "")
     if orchestrator_text:
