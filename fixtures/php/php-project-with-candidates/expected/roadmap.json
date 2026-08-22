@@ -1,0 +1,151 @@
+{
+  "fixture": "php-project-with-candidates",
+  "detected": {
+    "git": {
+      "fulfilled": true
+    },
+    "composer": {
+      "fulfilled": false
+    },
+    "ci-runner": {
+      "fulfilled": false
+    },
+    "php-cs-fixer": {
+      "fulfilled": false
+    },
+    "phpunit": {
+      "fulfilled": true
+    },
+    "test-runner-if-missing": {
+      "fulfilled": true
+    },
+    "composer-audit": {
+      "fulfilled": false
+    },
+    "phpstan-level-0-baseline": {
+      "fulfilled": false
+    },
+    "phpstan-level-1": {
+      "fulfilled": false
+    },
+    "phpstan-level-2": {
+      "fulfilled": false
+    },
+    "phpstan-level-3": {
+      "fulfilled": false
+    },
+    "rector-dead-code": {
+      "fulfilled": false
+    },
+    "rector-type-coverage": {
+      "fulfilled": false
+    }
+  },
+  "roadmap": [
+    {
+      "n": 1,
+      "node": "composer",
+      "type": "tooling",
+      "required_parents": [
+        "git"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 2,
+      "node": "ci-runner",
+      "type": "tooling",
+      "required_parents": [
+        "git"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 3,
+      "node": "php-cs-fixer",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 4,
+      "node": "composer-audit",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 5,
+      "node": "phpstan-level-0-baseline",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 6,
+      "node": "phpstan-level-1",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 7,
+      "node": "phpstan-level-2",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-1"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 8,
+      "node": "phpstan-level-3",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-2"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 9,
+      "node": "rector-dead-code",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 10,
+      "node": "rector-type-coverage",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [
+        "php-cs-fixer",
+        "phpstan-level-3"
+      ],
+      "reason": "required parents fulfilled"
+    }
+  ]
+}

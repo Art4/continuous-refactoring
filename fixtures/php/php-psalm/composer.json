@@ -1,0 +1,11 @@
+{
+    "name": "example/php-psalm",
+    "description": "Psalm equivalent fulfils p0",
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "vimeo/psalm": "^5.0",
+        "phpunit/phpunit": "^10.2"
+    }
+}

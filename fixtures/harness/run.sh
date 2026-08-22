@@ -17,8 +17,9 @@ usage() {
 Usage: $(basename "$0") <tier> <fixture> [options]
 
 Tiers:
-    tier2   Run artifact contract tests
-    tier3   Run ground-truth precision/recall tests
+    tier2     Run artifact contract tests
+    tier3     Run ground-truth precision/recall tests
+    roadmap   Dry-run: detect tools, show decision chain and next 10 MRs (no MR created)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
@@ -27,6 +28,8 @@ Options:
 Examples:
     $(basename "$0") tier2 php-project-with-candidates
     $(basename "$0") tier3 php-project-with-candidates --php-version 8.2
+    $(basename "$0") roadmap php-empty
+    $(basename "$0") roadmap php-p0-empty --verbose
 EOF
     exit 1
 }
@@ -152,6 +155,54 @@ EOF
     log_info "Baseline saved to $baseline_dir/$FIXTURE.json"
 }
 
+# Roadmap: Dry-run — detect tools, decision chain, next 10 MRs (no mutation)
+run_roadmap() {
+    log_info "=== Roadmap (dry-run, no MR) — fixture: $FIXTURE ==="
+
+    local expected_roadmap="$FIXTURE_SRC/expected/roadmap.json"
+    if [[ ! -f "$expected_roadmap" ]]; then
+        log_fail "Missing expected roadmap: $expected_roadmap"
+        return 1
+    fi
+
+    # Generate roadmap via deterministic parser (no opencode, no mutation)
+    local generated="/tmp/roadmap-$FIXTURE.json"
+    if ! python3 "$REPO_DIR/scripts/lib/tooling_tree.py" "$FIXTURE_DST" --steps 10 > "$generated" 2>/dev/null; then
+        log_fail "Failed to generate roadmap for $FIXTURE_DST"
+        return 1
+    fi
+
+    # Pretty print for human observation
+    log_info "Detected tools (fulfilled):"
+    python3 -c "
+import json
+d=json.load(open('$generated'))
+for n,v in d['detected'].items():
+    if v['fulfilled']:
+        print(f\"  - {n}: {v['reason']}\")
+" 2>&1 | while IFS= read -r line; do log_info \"$line\"; done
+
+    log_info "Next 10 MRs (decision chain):"
+    python3 -c "
+import json
+d=json.load(open('$generated'))
+for r in d['roadmap']:
+    print(f\"  {r['n']:2}. {r['node']:30} [{r['type']}] — {r.get('reason','')}\")
+" 2>&1 | while IFS= read -r line; do log_info \"$line\"; done
+
+    # Ensure no MR/branch was created (dry-run)
+    assert_no_mr_created "$FIXTURE_DST"
+    assert_file_not_exists "$FIXTURE_DST/docs/refactoring/merge-requests.md"
+    assert_file_not_exists "$FIXTURE_DST/.scratch"
+
+    # Compare detected & roadmap against expected
+    assert_detected_contains "$generated" "$expected_roadmap"
+    assert_roadmap_matches "$generated" "$expected_roadmap"
+
+    # Also verify expected file itself is well-formed
+    assert_file_exists "$expected_roadmap"
+}
+
 # Main
 main() {
     reset_counters
@@ -163,6 +214,9 @@ main() {
             ;;
         tier3)
             run_tier3
+            ;;
+        roadmap)
+            run_roadmap
             ;;
         *)
             log_fail "Unknown tier: $TIER"

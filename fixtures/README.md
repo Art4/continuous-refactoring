@@ -24,6 +24,40 @@ continuous-refactoring/
 
 A PHP 8.1+ project with planted refactoring candidates. Represents a project where no tooling-tree nodes are fulfilled yet — everything is a structural candidate.
 
+### php-empty
+
+Git-only, no `composer.json`. First MR is `composer` + `ci-runner`. Tests the `git → composer` required edge.
+
+### php-partial
+
+`composer.json` + `composer.lock` with `phpunit` and `php-cs-fixer`, no PHPStan. Tests `composer → phpunit/coposer-audit/p0` unblocked; `p0` is next.
+
+### php-p0-empty
+
+`composer` + `php-cs-fixer` + `phpunit` + CI (` .github/workflows/ci.yml`) + `phpstan.neon` level 0 with empty baseline (`ignoreErrors: []`). Tests `p0` fulfilled empty → `p1` is next; also `rector-*` with `p0` required and `cs-fixer`/`p3` recommended outlook.
+
+### php-p0-nonempty
+
+Same as `php-p0-empty` but baseline has 3 `ignoreErrors` (non-empty). Tests **shrink vs raise** gate: `p1` blocked, loop proposes `rector-*` / structural shrink before next level; `phpstan-level-3` recommended outlook on `rector-type-coverage`.
+
+### php-psalm
+
+`composer` with `vimeo/psalm` + `psalm.xml`, no PHPStan. Tests **Psalm equivalence** — `vimeo/psalm` fulfils `phpstan-level-0-baseline`, level chain `p1..3` is not proposable, `rector-*` still via `p0`.
+
+### Roadmap (dry-run, no MR)
+
+Each fixture above has `expected/roadmap.json` — the next 10 MRs the deterministic parser `scripts/lib/tooling_tree.py` predicts (tool → fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). Verified by:
+
+```bash
+./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture
+./fixtures/harness/run.sh roadmap php-p0-nonempty
+# all fixtures (also in CI: roadmap matrix)
+for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-project-with-candidates; do
+  ./fixtures/harness/run.sh roadmap $f
+done
+```
+Checks: which tools are recognised (`detected` fulfilled), whether decisions follow `docs/php-tooling-tree.md`, correct 10-step order, recommended-edge outlook (`would benefit from …`), and **no MR/branch created** (still 1 commit, no `docs/refactoring/merge-requests.md` or `.scratch`).
+
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting
 - `src/UserRepository.php` — Contains SQL injection vulnerability and hardcoded secret

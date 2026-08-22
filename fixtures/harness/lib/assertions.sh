@@ -127,6 +127,93 @@ assert_mr_chain_length() {
     fi
 }
 
+# Assertion: No MR/branch was created (dry-run)
+assert_no_mr_created() {
+    local repo="$1"
+    local before_branches after_branches before_commits after_commits
+    # Count commits
+    local commits
+    commits=$(git -C "$repo" rev-list --count HEAD 2>/dev/null || echo "0")
+    if [[ "$commits" -eq 1 ]]; then
+        log_pass "No MR created — still 1 commit in $repo"
+        return 0
+    else
+        log_fail "Expected 1 commit (initial), found $commits in $repo — MR was created"
+        return 1
+    fi
+}
+
+# Assertion: file should not exist (e.g., no merge-requests.md created)
+assert_file_not_exists() {
+    local file="$1"
+    if [[ ! -e "$file" ]]; then
+        log_pass "File correctly absent: $file"
+        return 0
+    else
+        log_fail "File should not exist (dry-run): $file"
+        return 1
+    fi
+}
+
+# Assertion: roadmap order matches expected
+assert_roadmap_matches() {
+    local generated="$1"
+    local expected="$2"
+    # Compare node lists via python
+    if python3 -c "
+import json, sys
+g=json.load(open('$generated'))
+e=json.load(open('$expected'))
+gn=[r['node'] for r in g.get('roadmap', g if isinstance(g, list) else [])]
+en=[r['node'] for r in e.get('roadmap', [])]
+if gn==en:
+    sys.exit(0)
+else:
+    print(f'generated: {gn}', file=sys.stderr)
+    print(f'expected:  {en}', file=sys.stderr)
+    sys.exit(1)
+" 2>&1; then
+        log_pass "Roadmap order matches $expected"
+        return 0
+    else
+        log_fail "Roadmap order mismatch vs $expected"
+        python3 -c "
+import json
+g=json.load(open('$generated'))
+e=json.load(open('$expected'))
+print('--- generated nodes ---')
+for r in g.get('roadmap', []): print(r['n'], r['node'], '-', r.get('reason','')[:60])
+print('--- expected nodes ---')
+for r in e.get('roadmap', []): print(r['n'], r['node'])
+" 2>&1 | while read -r line; do log_info \"$line\"; done
+        return 1
+    fi
+}
+
+# Assertion: detected nodes contain expected fulfilled set (subset)
+assert_detected_contains() {
+    local generated="$1"
+    local expected="$2"
+    if python3 -c "
+import json, sys
+g=json.load(open('$generated'))
+e=json.load(open('$expected'))
+# e detected is {node: {fulfilled: bool}}
+for node, exp in e.get('detected', {}).items():
+    g_val = g.get('detected', {}).get(node, {}).get('fulfilled')
+    if g_val != exp.get('fulfilled'):
+        print(f\"detect mismatch {node}: expected {exp.get('fulfilled')} got {g_val}\", file=sys.stderr)
+        sys.exit(1)
+sys.exit(0)
+" 2>&1; then
+        log_pass "Detected nodes match $expected"
+        return 0
+    else
+        log_fail "Detected nodes mismatch vs $expected"
+        return 1
+    fi
+}
+
 # Print summary
 print_summary() {
     echo ""
