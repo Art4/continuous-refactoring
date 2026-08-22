@@ -21,8 +21,16 @@ The forge reviewable that delivers a completed candidate. Skills always use this
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
 **Tooling tree**:
-The directed graph of tools in a language specialization. A child node is reachable only after its parent is fulfilled or rejected; a rejection closes that subtree.
+The directed graph of adoption steps in a language specialization. A **node** adopts one tool up to a stated degree — a tool may own several nodes (each PHPStan level is its own node).
 _Avoid_: baseline, floor, bootstrap, onboarding
+
+**Required edge**:
+The gating edge between nodes: a node is proposed only once every parent linked by a required edge is fulfilled; rejecting a required parent closes every node beneath it.
+_Avoid_: hard edge, blocking edge
+
+**Recommended edge**:
+The advisory counterpart: the child stays proposable even when its recommended parent was rejected; the rejected parent is never re-proposed — at most the loop informs where it would have helped.
+_Avoid_: soft edge, nice-to-have edge
 
 **Cadence**:
 The configured schedule that decides when the next periodic loop pass is due.
