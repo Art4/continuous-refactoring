@@ -1,0 +1,150 @@
+{
+  "fixture": "php-p0-empty",
+  "detected": {
+    "git": {
+      "fulfilled": true,
+      "reason": "found .git"
+    },
+    "composer": {
+      "fulfilled": true,
+      "reason": "composer.json+lock present"
+    },
+    "ci-runner": {
+      "fulfilled": true,
+      "reason": "CI config present"
+    },
+    "php-cs-fixer": {
+      "fulfilled": true,
+      "reason": "dep and config present"
+    },
+    "phpunit": {
+      "fulfilled": true,
+      "reason": "phpunit/pest present"
+    },
+    "test-runner-if-missing": {
+      "fulfilled": true,
+      "reason": "runner exists"
+    },
+    "composer-audit": {
+      "fulfilled": false,
+      "reason": "thin node \u2014 propose after composer (roadmap seam)"
+    },
+    "phpstan-level-0-baseline": {
+      "fulfilled": true,
+      "reason": "phpstan level 0 + baseline present"
+    },
+    "phpstan-level-1": {
+      "fulfilled": false,
+      "reason": "level 0 < 1 or no phpstan"
+    },
+    "phpstan-level-2": {
+      "fulfilled": false,
+      "reason": "level 0 < 2 or no phpstan"
+    },
+    "phpstan-level-3": {
+      "fulfilled": false,
+      "reason": "level 0 < 3 or no phpstan"
+    },
+    "rector-dead-code": {
+      "fulfilled": false,
+      "reason": "no rector dead-code"
+    },
+    "rector-type-coverage": {
+      "fulfilled": false,
+      "reason": "no rector type coverage"
+    }
+  },
+  "roadmap": [
+    {
+      "n": 1,
+      "node": "composer-audit",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 2,
+      "node": "phpstan-level-1",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 3,
+      "node": "phpstan-level-2",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-1"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 4,
+      "node": "phpstan-level-3",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-2"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 5,
+      "node": "rector-dead-code",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 6,
+      "node": "rector-type-coverage",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [
+        "php-cs-fixer",
+        "phpstan-level-3"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 7,
+      "node": "structural:001-shallow-user-service.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 8,
+      "node": "structural:002-sql-injection-user-repository.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 9,
+      "node": "structural:003-hardcoded-secret-user-repository.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 10,
+      "node": "structural:004-unused-unused-reporting-service.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    }
+  ],
+  "no_mr_created": true,
+  "tooling_tree": "docs/php-tooling-tree.md"
+}

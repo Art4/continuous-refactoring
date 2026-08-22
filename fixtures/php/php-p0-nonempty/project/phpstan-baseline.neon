@@ -1,0 +1,14 @@
+parameters:
+    ignoreErrors:
+        -
+            message: '#Method Foo::bar\(\) has no return type#'
+            count: 1
+            path: src/UserService.php
+        -
+            message: '#Property App\Entity\User::$name has no type#'
+            count: 1
+            path: src/User.php
+        -
+            message: '#Missing return statement#'
+            count: 1
+            path: src/UserRepository.php

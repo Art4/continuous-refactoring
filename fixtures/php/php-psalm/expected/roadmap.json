@@ -1,0 +1,146 @@
+{
+  "fixture": "php-psalm",
+  "detected": {
+    "git": {
+      "fulfilled": true,
+      "reason": "found .git"
+    },
+    "composer": {
+      "fulfilled": true,
+      "reason": "composer.json+lock present"
+    },
+    "ci-runner": {
+      "fulfilled": false,
+      "reason": "no CI config"
+    },
+    "php-cs-fixer": {
+      "fulfilled": false,
+      "reason": "missing cs-fixer (need dep + config)"
+    },
+    "phpunit": {
+      "fulfilled": true,
+      "reason": "phpunit/pest present"
+    },
+    "test-runner-if-missing": {
+      "fulfilled": true,
+      "reason": "runner exists"
+    },
+    "composer-audit": {
+      "fulfilled": false,
+      "reason": "thin node \u2014 propose after composer (roadmap seam)"
+    },
+    "phpstan-level-0-baseline": {
+      "fulfilled": true,
+      "reason": "psalm fulfils p0 (vimeo/psalm + psalm.xml)"
+    },
+    "phpstan-level-1": {
+      "fulfilled": false,
+      "reason": "not applicable: psalm fulfils p0"
+    },
+    "phpstan-level-2": {
+      "fulfilled": false,
+      "reason": "not applicable: psalm fulfils p0"
+    },
+    "phpstan-level-3": {
+      "fulfilled": false,
+      "reason": "not applicable: psalm fulfils p0"
+    },
+    "rector-dead-code": {
+      "fulfilled": false,
+      "reason": "no rector dead-code"
+    },
+    "rector-type-coverage": {
+      "fulfilled": false,
+      "reason": "no rector type coverage"
+    }
+  },
+  "roadmap": [
+    {
+      "n": 1,
+      "node": "ci-runner",
+      "type": "tooling",
+      "required_parents": [
+        "git"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 2,
+      "node": "php-cs-fixer",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 3,
+      "node": "composer-audit",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 4,
+      "node": "rector-dead-code",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 5,
+      "node": "rector-type-coverage",
+      "type": "tooling",
+      "required_parents": [
+        "phpstan-level-0-baseline"
+      ],
+      "recommended_parents": [
+        "php-cs-fixer",
+        "phpstan-level-3"
+      ],
+      "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
+    },
+    {
+      "n": 6,
+      "node": "structural:001-shallow-user-service.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 7,
+      "node": "structural:002-sql-injection-user-repository.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 8,
+      "node": "structural:003-hardcoded-secret-user-repository.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 9,
+      "node": "structural:004-unused-unused-reporting-service.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    },
+    {
+      "n": 10,
+      "node": "structural:005-style-violations-bootstrap.md",
+      "type": "structural",
+      "reason": "planted candidate"
+    }
+  ],
+  "no_mr_created": true,
+  "tooling_tree": "docs/php-tooling-tree.md"
+}
