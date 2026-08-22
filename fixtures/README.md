@@ -49,14 +49,26 @@ Same as `php-p0-empty` but baseline has 3 `ignoreErrors` (non-empty). Tests **sh
 Each fixture above has `expected/roadmap.json` — the next 10 MRs the deterministic parser `scripts/lib/tooling_tree.py` predicts (tool → fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). Verified by:
 
 ```bash
-./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture
+./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture (deterministic, no LLM)
 ./fixtures/harness/run.sh roadmap php-p0-nonempty
 # all fixtures (also in CI: roadmap matrix)
 for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-project-with-candidates; do
   ./fixtures/harness/run.sh roadmap $f
 done
 ```
-Checks: which tools are recognised (`detected` fulfilled), whether decisions follow `docs/php-tooling-tree.md`, correct 10-step order, recommended-edge outlook (`would benefit from …`), and **no MR/branch created** (still 1 commit, no `docs/refactoring/merge-requests.md` or `.scratch`).
+Checks: which tools are recognized (`detected` fulfilled), whether decisions follow `docs/php-tooling-tree.md`, correct 10-step order, recommended-edge outlook (`would benefit from …`), and **no MR/branch created** (still 1 commit, no `docs/refactoring/merge-requests.md` or `.scratch`).
+
+**Local with opencode (isolated, advisory):**
+
+The roadmap tier runs in CI **without LLM** (only Python, `pip install pyyaml`). Locally you can additionally start `opencode` as an isolated subprocess — without global skills, only `skills/` from this repo, as a comparison (non-blocking):
+
+```bash
+# deterministic + opencode comparison (needs `opencode` binary via npm i -g opencode or npx)
+./fixtures/harness/run.sh roadmap php-empty --opencode --verbose
+./fixtures/harness/run.sh roadmap php-p0-nonempty --opencode
+```
+
+*What `--opencode` does:* `run.sh:roadmap` creates a `.agents/skills → skills/` symlink in the fixture, runs `timeout 60 opencode run "List the next 10 MRs without creating branches/MRs. Use docs/php-tooling-tree.md."` inside the fixture directory (subprocess, only `skills/` from this repo, no `~/.config/opencode/skills`), logs the first 80 lines to `/tmp/opencode-$FIXTURE.log` and advisory-checks whether the first expected node is mentioned. If the binary is missing, it only logs `opencode binary not found — skipping` (no fail). In CI `--opencode` stays **off** — deterministic is the gate, opencode is only local to observe whether the skill interprets the tree the same way.
 
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting

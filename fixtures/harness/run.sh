@@ -24,12 +24,14 @@ Tiers:
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
     --verbose               Enable verbose output
+    --opencode              Also run opencode isolated as subprocess (advisory, needs opencode binary)
 
 Examples:
     $(basename "$0") tier2 php-project-with-candidates
     $(basename "$0") tier3 php-project-with-candidates --php-version 8.2
     $(basename "$0") roadmap php-empty
     $(basename "$0") roadmap php-p0-empty --verbose
+    $(basename "$0") roadmap php-empty --opencode --verbose   # deterministic + opencode comparison
 EOF
     exit 1
 }
@@ -37,6 +39,7 @@ EOF
 # Parse options
 PHP_VERSION="${PHP_VERSION:-8.3}"
 VERBOSE=false
+WITH_OPENCODE=false
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -46,6 +49,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         --verbose)
             VERBOSE=true
+            shift
+            ;;
+        --opencode)
+            WITH_OPENCODE=true
             shift
             ;;
         *)
@@ -61,6 +68,27 @@ fi
 TIER="$1"
 FIXTURE="$2"
 shift 2
+
+# Parse trailing options (e.g., --opencode after fixture: roadmap php-empty --opencode)
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --opencode)
+            WITH_OPENCODE=true
+            shift
+            ;;
+        --verbose)
+            VERBOSE=true
+            shift
+            ;;
+        --php-version)
+            PHP_VERSION="$2"
+            shift 2
+            ;;
+        *)
+            break
+            ;;
+    esac
+done
 
 FIXTURE_SRC="$FIXTURES_DIR/php/$FIXTURE"
 FIXTURE_DST="/tmp/continuous-refactoring-tests/$FIXTURE"
@@ -204,6 +232,44 @@ for r in d['roadmap']:
 
     # Also verify expected file itself is well-formed
     assert_file_exists "$expected_roadmap"
+
+    # Optional: run opencode isolated as subprocess (advisory, no hard fail)
+    if [[ "$WITH_OPENCODE" == true ]]; then
+        log_info "=== Opencode isolated (advisory, no other skills) ==="
+        local opencode_bin=""
+        if command -v opencode >/dev/null 2>&1; then
+            opencode_bin="opencode"
+        elif command -v npx >/dev/null 2>&1 && npx --yes opencode --help >/dev/null 2>&1; then
+            opencode_bin="npx --yes opencode"
+        else
+            log_info "opencode binary not found (install via npm i -g opencode) — skipping advisory opencode run"
+            return 0
+        fi
+        # Isolated: only skills from this repo, no global ~/.config/opencode/skills
+        # Sub-process: working dir = fixture, skills mounted via --skills flag if supported, else via .agents/skills symlink
+        local opencode_out="/tmp/opencode-$FIXTURE.log"
+        log_info "Running: $opencode_bin run --skills $REPO_DIR/skills (subprocess, timeout 60s) in $FIXTURE_DST"
+        # Ensure .agents/skills symlink for opencode discovery (isolated)
+        mkdir -p "$FIXTURE_DST/.agents"
+        ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
+        if timeout 60 bash -c "cd \"$FIXTURE_DST\" && $opencode_bin run \"List the next 10 MRs for this repo without creating branches/MRs. Use docs/php-tooling-tree.md.\" 2>&1" > "$opencode_out" 2>&1; then
+            log_info "Opencode output (first 80 lines):"
+            head -n 80 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
+            # Advisory comparison: check if opencode mentions expected first node
+            local first_expected
+            first_expected=$(python3 -c "import json; print(json.load(open('$expected_roadmap'))['roadmap'][0]['node'])" 2>/dev/null || echo "")
+            if [[ -n "$first_expected" ]] && grep -qi "$first_expected" "$opencode_out" 2>/dev/null; then
+                log_pass "Opencode (advisory) mentions expected first node: $first_expected"
+            else
+                log_info "Opencode (advisory) does not mention expected first node $first_expected — check $opencode_out for details (non-blocking)"
+            fi
+        else
+            log_info "Opencode run failed or timed out — see $opencode_out (advisory, not failing test)"
+            head -n 40 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
+        fi
+        # Cleanup symlink (keep fixture clean)
+        rm -rf "$FIXTURE_DST/.agents"
+    fi
 }
 
 # Main
