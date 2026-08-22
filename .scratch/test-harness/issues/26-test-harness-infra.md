@@ -28,3 +28,5 @@
 > **2026-08-21:** Split off from issue 17. Builds infrastructure for Tiers 2+3.
 
 > **2026-08-21:** Implemented and merged in PR #1. CI pipeline green.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `test-harness/issues/` — regrouped around the automated test harness.

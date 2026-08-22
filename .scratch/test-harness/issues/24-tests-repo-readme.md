@@ -18,3 +18,5 @@
 > **2026-08-21:** Fixtures moved to main repo (no longer separate repo).
 
 > **2026-08-21:** README copied from tests-repo and paths adapted.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `test-harness/issues/` — regrouped around the automated test harness.

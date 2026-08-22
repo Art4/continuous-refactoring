@@ -40,3 +40,5 @@
 The tooling order emerges from these trees: Composer first, then the Composer stack, standalone binaries independent of it, DAST last (nightly).
 
 > **2026-08-21:** Grilled. The “baseline basket” framing was replaced: no `/refactor-baseline`, git-only hard requirement, PHP **tooling tree**, suite state under `docs/refactoring/`. Recorded as ADR-0005 (amends ADR-0002, path part of ADR-0001). PHPStan child sequence specified in ticket 18. First wave: CI-runner, Composer, cs-fixer, Rector, PHPStan, composer audit, test-runner-if-missing. Later: 08 coverage, 09 mutation, 11 SAST, 13 secrets, 14 DAST, normalize/unused. Ticket 10 (audit) stays first-wave but as a thin node, not a CI-fail default. Skills and playbooks are not updated in this ticket.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `php-tooling-tree/issues/` — regrouped around the PHP tooling tree.
