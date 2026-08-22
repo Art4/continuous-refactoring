@@ -25,3 +25,5 @@ Sketch to specify (do not treat as the spec until this ticket fills it in):
 ## Comments
 
 > **2026-08-21:** Split from the 06 grilling. ADR-0005 records the sketch and explicitly defers this specification here.
+
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `php-tooling-tree/issues/` — regrouped around the PHP tooling tree.

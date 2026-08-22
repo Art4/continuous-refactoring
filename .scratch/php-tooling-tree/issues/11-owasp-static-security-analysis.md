@@ -13,3 +13,4 @@
 ## Comments
 
 > **2026-08-21:** ADR-0005 — later wave; all security deferred.
+> **2026-08-22:** Moved from `suite-self-containment/issues/` to `php-tooling-tree/issues/` — regrouped around the PHP tooling tree.
