@@ -314,6 +314,10 @@ ORCH_STEP_SKILL_MAP = {
     "review": "refactor-review",
 }
 
+CONTRACT_COVERAGE_THRESHOLD = 0.2
+MAX_MISSING_TERMS = 5
+ADVISORY_PREFIX = "contract advisory"
+
 # Words too common to carry contract signal.
 _ORCH_STOP = frozenset({
     "the", "a", "an", "of", "and", "or", "in", "on", "to", "for", "is",
@@ -341,18 +345,13 @@ def _extract_keywords(text):
 
 def _orchestrator_step_text(orch_text, step_label):
     """Return the text block for one numbered step in the orchestrator."""
+    # Matches both "**Step.**" and "**Step**." (period inside or outside bold)
     pattern = re.compile(
-        r"\d+\.\s+\*\*" + re.escape(step_label) + r"\.\*\*\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
+        r"\d+\.\s+\*\*" + re.escape(step_label)
+        + r"(?:\.\*\*|\*\*\.?)\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
         re.S | re.I,
     )
     m = pattern.search(orch_text)
-    if not m:
-        # Fallback: try without trailing period in bold
-        pattern2 = re.compile(
-            r"\d+\.\s+\*\*" + re.escape(step_label) + r"\*\*\.\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
-            re.S | re.I,
-        )
-        m = pattern2.search(orch_text)
     return m.group(1) if m else ""
 
 
@@ -385,20 +384,20 @@ def contract_consistency_issues(orch_text, skills_text):
             continue
         overlap = orch_kw & skill_kw
         coverage = len(overlap) / len(skill_kw)
-        if coverage < 0.2:
+        if coverage < CONTRACT_COVERAGE_THRESHOLD:
             missing_in_orch = skill_kw - orch_kw
             # Only flag when there are terms the orchestrator should mention
             # but doesn't — not when the orchestrator uses extra terms.
-            significant = missing_in_orch - {
+            uncovered_terms = missing_in_orch - {
                 "every", "candidate", "refactor", "skill", "issue",
             }
-            if significant:
+            if uncovered_terms:
                 issues.append(
                     Issue(
                         skill_name,
-                        f"contract advisory: orchestrator '{step_label}' step "
+                        f"{ADVISORY_PREFIX}: orchestrator '{step_label}' step "
                         f"does not mention completion-criterion terms "
-                        f"({', '.join(sorted(significant)[:5])})",
+                        f"({', '.join(sorted(uncovered_terms)[:MAX_MISSING_TERMS])})",
                     )
                 )
     return issues
@@ -456,13 +455,15 @@ def glossary_reverse_issues(skills_text, context_text):
 def parse_adr_graph(adr_dir):
     """Parse ADRs for ``retired``/``supersedes``/``amends`` metadata.
 
-    Returns ``(graph, superseded_map)`` where:
+    Returns ``(graph, superseded_map, retired_set)`` where:
     - *graph* is ``{adr_num: [referenced_adr_nums]}``
     - *superseded_map* is ``{superseded_num: successor_num}``
+    - *retired_set* is ``{adr_num}`` for ADRs marked retired
     """
     adr_dir = pathlib.Path(adr_dir)
     graph = {}
     superseded_map = {}
+    retired_set = set()
     for p in sorted(adr_dir.glob("*.md")):
         text = p.read_text()
         num_m = re.match(r"(\d{4})", p.name)
@@ -474,17 +475,20 @@ def parse_adr_graph(adr_dir):
         # Detect "This supersedes ADR-NNNN" or "supersedes ADR-NNNN"
         for m in re.finditer(r"supersedes\s+ADR-(\d{4})", text, re.I):
             superseded_map[m.group(1)] = num
+        # Detect "retired" in the title (first heading)
+        title_m = re.match(r"#\s+.*", text)
+        if title_m and re.search(r"\bretired\b", title_m.group(), re.I):
+            retired_set.add(num)
         # Detect "This amends ADR-NNNN" — amends creates a dependency edge
         # but does not retire the amended ADR.
-    return graph, superseded_map
+    return graph, superseded_map, retired_set
 
 
 def adr_staleness_issues(skills_text, adr_dir):
-    """Flag skills that reference a superseded ADR without noting the
-    successor."""
+    """Flag skills that reference a superseded or retired ADR."""
     issues = []
-    _, superseded_map = parse_adr_graph(adr_dir)
-    if not superseded_map:
+    _, superseded_map, retired_set = parse_adr_graph(adr_dir)
+    if not superseded_map and not retired_set:
         return issues
 
     for skill_name, body in skills_text.items():
@@ -497,6 +501,16 @@ def adr_staleness_issues(skills_text, adr_dir):
                         skill_name,
                         f"references {old_ref} which is superseded by "
                         f"{succ_ref} — skill should note the successor",
+                    )
+                )
+        for num in sorted(retired_set):
+            ref = f"ADR-{num}"
+            if re.search(r"ADR-" + num, body):
+                issues.append(
+                    Issue(
+                        skill_name,
+                        f"references {ref} which is retired — "
+                        "skill should remove or update the reference",
                     )
                 )
     return issues
@@ -575,11 +589,11 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     issues = validate_repo(args.root)
-    errors = [i for i in issues if "contract advisory" not in i.message]
+    errors = [i for i in issues if ADVISORY_PREFIX not in i.message]
     if issues:
         print("Suite skill validation report:")
         for i in issues:
-            prefix = "warning" if "contract advisory" in i.message else "error"
+            prefix = "warning" if ADVISORY_PREFIX in i.message else "error"
             print(f"  {prefix}: {i.skill}: {i.message}")
     else:
         print("All suite skills validated clean.")

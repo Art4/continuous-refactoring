@@ -377,6 +377,7 @@ class ContractConsistencyTests(unittest.TestCase):
         issues = vs.contract_consistency_issues(self.ORCH, skills)
         # All five steps produce advisory issues (orchestrator is brief);
         # verify no hard errors.
+        self.assertTrue(len(issues) > 0, "expected advisory issues for brief orchestrator steps")
         for i in issues:
             self.assertIn("advisory", i.message)
 
@@ -524,7 +525,7 @@ class EndToEndTests(unittest.TestCase):
         issues = vs.validate_repo(repo)
         # Contract consistency issues are advisory (orchestrator steps are
         # intentionally brief); exclude them from the hard-fail check.
-        errors = [i for i in issues if "contract advisory" not in i.message]
+        errors = [i for i in issues if vs.ADVISORY_PREFIX not in i.message]
         self.assertEqual(errors, [], msg="\n".join(str(i) for i in errors))
 
 
