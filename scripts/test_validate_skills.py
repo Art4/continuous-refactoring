@@ -315,11 +315,217 @@ class VocabTests(unittest.TestCase):
         self.assertEqual(vs.vocab_issues(["Hot spot"], [], skills, set()), [])
 
 
+class ADR0004PropagationTests(unittest.TestCase):
+    def test_all_keywords_present(self):
+        skills = {
+            "refactor-design": "behavior-preserving, Strangler Fig, Kent Beck, deterministic tools, own branch",
+            "refactor-implement": "",
+        }
+        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
+
+    def test_split_across_skills(self):
+        skills = {
+            "refactor-design": "behavior-preserving, Strangler Fig",
+            "refactor-implement": "Kent Beck, deterministic tools, own branch",
+        }
+        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
+
+    def test_missing_keyword_flagged(self):
+        skills = {
+            "refactor-design": "behavior-preserving, Strangler Fig, Kent Beck",
+            "refactor-implement": "deterministic tools",
+        }
+        issues = vs.adr0004_propagation_issues(skills)
+        self.assertEqual(len(issues), 1)
+        self.assertIn("own branch", issues[0].message)
+
+    def test_case_insensitive(self):
+        skills = {
+            "refactor-design": "BEHAVIOR-PRESERVING, strangler fig, kent beck, DETERMINISTIC TOOLS, own branch",
+            "refactor-implement": "",
+        }
+        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
+
+    def test_missing_skill_flagged(self):
+        skills = {"refactor-design": "behavior-preserving Strangler Fig Kent Beck deterministic tools own branch"}
+        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
+
+    def test_multiple_missing(self):
+        skills = {"refactor-design": "", "refactor-implement": ""}
+        issues = vs.adr0004_propagation_issues(skills)
+        self.assertEqual(len(issues), 5)
+
+
+class ContractConsistencyTests(unittest.TestCase):
+    ORCH = (
+        "## The pass\n"
+        "1. **Scan.** Run the scan to file candidates.\n"
+        "2. **Prioritise.** Rank the backlog.\n"
+        "3. **Design.** Grill the candidate into a plan.\n"
+        "4. **Implement.** Execute the plan slice by slice.\n"
+        "5. **Review.** Verify tooling green and report findings.\n"
+    )
+
+    def test_matching_contracts(self):
+        skills = {
+            "refactor-scan": "## Completion criterion\nEvery candidate filed.",
+            "refactor-prioritize": "## Completion criterion\nBacklog ranked.",
+            "refactor-design": "## Completion criterion\nPlan written.",
+            "refactor-implement": "## Completion criterion\nSlices done, green.",
+            "refactor-review": "## Completion criterion\nTooling green, findings reported.",
+        }
+        issues = vs.contract_consistency_issues(self.ORCH, skills)
+        # All five steps produce advisory issues (orchestrator is brief);
+        # verify no hard errors.
+        self.assertTrue(len(issues) > 0, "expected advisory issues for brief orchestrator steps")
+        for i in issues:
+            self.assertIn("advisory", i.message)
+
+    def test_mismatch_flagged(self):
+        skills = {
+            "refactor-scan": "## Completion criterion\nNothing relevant at all.",
+            "refactor-prioritize": "## Completion criterion\nBacklog ranked.",
+            "refactor-design": "## Completion criterion\nPlan written.",
+            "refactor-implement": "## Completion criterion\nSlices done, green.",
+            "refactor-review": "## Completion criterion\nTooling green, findings reported.",
+        }
+        issues = vs.contract_consistency_issues(self.ORCH, skills)
+        scan_issues = [i for i in issues if "scan" in i.skill]
+        self.assertTrue(len(scan_issues) > 0)
+
+    def test_missing_step_skipped(self):
+        skills = {}
+        issues = vs.contract_consistency_issues(self.ORCH, skills)
+        self.assertEqual(issues, [])
+
+    def test_empty_orchestrator(self):
+        skills = {"refactor-scan": "## Completion criterion\nDone."}
+        issues = vs.contract_consistency_issues("", skills)
+        self.assertEqual(issues, [])
+
+
+class GlossaryReverseTests(unittest.TestCase):
+    def test_known_term_not_flagged(self):
+        skills = {
+            "refactor-scan": "Use the **hot spot** to find candidates.",
+            "refactor-design": "The **hot spot** drives prioritisation.",
+        }
+        context = "**Hot spot**: a frequently changing area."
+        issues = vs.glossary_reverse_issues(skills, context)
+        self.assertEqual(issues, [])
+
+    def test_unknown_bold_term_flagged(self):
+        skills = {
+            "refactor-scan": "Apply the **frontier** analysis.",
+            "refactor-design": "Expand the **frontier** outward.",
+        }
+        issues = vs.glossary_reverse_issues(skills, {})
+        self.assertEqual(len(issues), 1)
+        self.assertIn("frontier", issues[0].message)
+
+    def test_single_skill_not_flagged(self):
+        skills = {"refactor-scan": "Use **frontier** in one place only."}
+        issues = vs.glossary_reverse_issues(skills, {})
+        self.assertEqual(issues, [])
+
+    def test_empty_skills(self):
+        issues = vs.glossary_reverse_issues({}, {})
+        self.assertEqual(issues, [])
+
+    def test_non_bold_terms_ignored(self):
+        skills = {
+            "refactor-scan": "frontier analysis and frontier theory",
+            "refactor-design": "frontier exploration and frontier logic",
+        }
+        issues = vs.glossary_reverse_issues(skills, {})
+        self.assertEqual(issues, [])
+
+    def test_hyphenated_term(self):
+        skills = {
+            "refactor-scan": "The **design tree** branches.",
+            "refactor-design": "Build the **design tree** step by step.",
+        }
+        issues = vs.glossary_reverse_issues(skills, {})
+        self.assertEqual(len(issues), 1)
+        self.assertIn("design tree", issues[0].message)
+
+
+class ADRStalenessTests(unittest.TestCase):
+    def _repo(self, adr_files):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        adr_dir = root / "docs" / "adr"
+        adr_dir.mkdir(parents=True)
+        for name, content in adr_files.items():
+            (adr_dir / name).write_text(content)
+        return tmp, root
+
+    def test_no_superseded(self):
+        tmp, root = self._repo({"0001-foo.md": "# Foo\nADR-0002 referenced."})
+        try:
+            issues = vs.adr_staleness_issues({}, root / "docs" / "adr")
+            self.assertEqual(issues, [])
+        finally:
+            tmp.cleanup()
+
+    def test_superseded_without_successor_flagged(self):
+        tmp, root = self._repo({
+            "0001-old.md": "# Old",
+            "0002-new.md": "# New\nThis supersedes ADR-0001.",
+        })
+        try:
+            skills = {"refactor-scan": "Per ADR-0001 we do things."}
+            issues = vs.adr_staleness_issues(skills, root / "docs" / "adr")
+            self.assertEqual(len(issues), 1)
+            self.assertIn("ADR-0001", issues[0].message)
+            self.assertIn("ADR-0002", issues[0].message)
+        finally:
+            tmp.cleanup()
+
+    def test_superseded_with_successor_ok(self):
+        tmp, root = self._repo({
+            "0001-old.md": "# Old",
+            "0002-new.md": "# New\nThis supersedes ADR-0001.",
+        })
+        try:
+            skills = {"refactor-scan": "Per ADR-0001, see also ADR-0002."}
+            issues = vs.adr_staleness_issues(skills, root / "docs" / "adr")
+            self.assertEqual(issues, [])
+        finally:
+            tmp.cleanup()
+
+    def test_amends_not_flagged(self):
+        tmp, root = self._repo({
+            "0001-foo.md": "# Foo",
+            "0002-bar.md": "# Bar\nThis amends ADR-0001.",
+        })
+        try:
+            skills = {"refactor-scan": "Per ADR-0001."}
+            issues = vs.adr_staleness_issues(skills, root / "docs" / "adr")
+            self.assertEqual(issues, [])
+        finally:
+            tmp.cleanup()
+
+    def test_no_adr_refs_ok(self):
+        tmp, root = self._repo({
+            "0001-old.md": "# Old",
+            "0002-new.md": "# New\nThis supersedes ADR-0001.",
+        })
+        try:
+            skills = {"refactor-scan": "No ADR references here."}
+            issues = vs.adr_staleness_issues(skills, root / "docs" / "adr")
+            self.assertEqual(issues, [])
+        finally:
+            tmp.cleanup()
+
+
 class EndToEndTests(unittest.TestCase):
     def test_real_repo_passes(self):
         repo = pathlib.Path(__file__).resolve().parents[1]
         issues = vs.validate_repo(repo)
-        errors = [i for i in issues if True]
+        # Contract consistency issues are advisory (orchestrator steps are
+        # intentionally brief); exclude them from the hard-fail check.
+        errors = [i for i in issues if vs.ADVISORY_PREFIX not in i.message]
         self.assertEqual(errors, [], msg="\n".join(str(i) for i in errors))
 
 

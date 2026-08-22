@@ -47,3 +47,15 @@ _Avoid_: boundary, internal hook
 **Tooling pressure**:
 A candidate that an already-fulfilled tooling-tree node keeps surfacing — things that will re-fail until fixed.
 _Avoid_: lint noise, tool complaints
+
+**Leverage**:
+How much future change does deepening this module unlock? A module many others call is high-leverage; a leaf nobody calls is not.
+_Avoid_: (none — use the term as-is)
+
+**Locality**:
+What moves together, and what must not spread? The degree to which related code lives in one place rather than scattered across the codebase.
+_Avoid_: (none — use the term as-is)
+
+**Plan**:
+The concrete refactoring plan produced by `refactor-design`: the deepened module, its seam, the interface, and the surviving tests — written on the candidate issue so the refactor is delegable.
+_Avoid_: design doc
