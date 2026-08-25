@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 The **loop pass** — the stateful, repeatable sequence that keeps a project under continuous refactoring. Each pass does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
-A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005). A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
+A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005). A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected. `refactor-scan` checks git, the loop's own configuration, and backlog size itself before scanning anything else — the orchestrator does not duplicate those checks (ADR-0008).
 
 Run this on demand whenever you're asked, or on the configured **cadence**.
 
@@ -21,7 +21,7 @@ State lives in the target repo, not in the conversation:
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
 
-Read all four at the start of every pass. If `docs/refactoring/config.md` doesn't exist, scaffold the suite state directory (ask the user for the cadence; default weekly) — this is the marker that a pass can run.
+Read all four at the start of every pass. `docs/refactoring/config.md` is no longer scaffolded here directly: `refactor-scan` checks for it itself (the `loop-config` node, `docs/tooling-tree.md`) and files the single candidate that creates it when it's missing (ADR-0008) — that candidate, once implemented, is the marker that a pass has real configuration to work from.
 
 ## The pass
 
@@ -33,7 +33,7 @@ Each numbered step runs the named lifecycle skill. Stop between steps where the 
    - Closed without merge → if the comments support a structural rejection, mark `wontfix` and file a learned rejection under `docs/refactoring/out-of-scope/`; otherwise ask the human.
    - Two merge requests still open → point the human at them; take no new candidate this pass beyond the responses above.
 
-2. **Scan.** Run `/refactor-scan`. It files structural candidates *and* missing tooling-tree nodes together. If the last scan is recent and nothing changed, report that and stop early.
+2. **Scan.** Run `/refactor-scan`. It checks its own preconditions first — git, loop configuration, backlog size — then files exactly one tooling-tree candidate, or a batch of structural candidates once the tree is resolved, never both in the same pass (ADR-0008). If it stops at a precondition, or reports the last scan is recent and nothing changed, stop this pass early.
 
 3. **Prioritise.** Run `/refactor-prioritize`. It recommends an unblocked tooling-tree node when one exists; the user picks the next candidate.
 

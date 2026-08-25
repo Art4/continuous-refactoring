@@ -5,6 +5,10 @@
       "fulfilled": true,
       "reason": "found .git"
     },
+    "loop-config": {
+      "fulfilled": false,
+      "reason": "no docs/refactoring/config.md"
+    },
     "composer": {
       "fulfilled": true,
       "reason": "composer.json+lock present"
@@ -52,12 +56,16 @@
     "rector-type-coverage": {
       "fulfilled": false,
       "reason": "no rector type coverage"
+    },
+    "structural-scan": {
+      "fulfilled": false,
+      "reason": "waiting on: composer-audit, phpstan-level-3, rector-dead-code, rector-type-coverage"
     }
   },
   "roadmap": [
     {
       "n": 1,
-      "node": "ci-runner",
+      "node": "loop-config",
       "type": "tooling",
       "required_parents": [
         "git"
@@ -67,6 +75,16 @@
     },
     {
       "n": 2,
+      "node": "ci-runner",
+      "type": "tooling",
+      "required_parents": [
+        "loop-config"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 3,
       "node": "composer-audit",
       "type": "tooling",
       "required_parents": [
@@ -76,7 +94,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 3,
+      "n": 4,
       "node": "phpstan-level-0-baseline",
       "type": "tooling",
       "required_parents": [
@@ -86,7 +104,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 4,
+      "n": 5,
       "node": "phpstan-level-1",
       "type": "tooling",
       "required_parents": [
@@ -96,7 +114,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 5,
+      "n": 6,
       "node": "phpstan-level-2",
       "type": "tooling",
       "required_parents": [
@@ -106,7 +124,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 7,
       "node": "phpstan-level-3",
       "type": "tooling",
       "required_parents": [
@@ -116,7 +134,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
       "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
@@ -128,7 +146,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 8,
+      "n": 9,
       "node": "rector-type-coverage",
       "type": "tooling",
       "required_parents": [
@@ -141,16 +159,12 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 9,
-      "node": "structural:001-shallow-user-service.md",
-      "type": "structural",
-      "reason": "planted candidate"
-    },
-    {
       "n": 10,
-      "node": "structural:002-sql-injection-user-repository.md",
-      "type": "structural",
-      "reason": "planted candidate"
+      "node": "structural-scan",
+      "type": "tooling",
+      "required_parents": [],
+      "recommended_parents": [],
+      "reason": "all php-tree leaves resolved (fulfilled or rejected)"
     }
   ],
   "no_mr_created": true,

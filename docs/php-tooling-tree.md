@@ -1,12 +1,12 @@
 # PHP Tooling Tree
 
-The canonical shape of the PHP specialization's **tooling tree** (ADR-0005, amended by ADR-0007). This document records the form only — nodes and edges. Fulfilment and rejection state lives in each target repo under `docs/refactoring/`. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
+The canonical shape of the PHP specialization's **tooling tree** (ADR-0005, amended by ADR-0007 and ADR-0008). This document records the form only — nodes and edges below `loop-config` (see `docs/tooling-tree.md` for the generic root, and for `structural-scan`, this tree's downstream gate). Fulfilment and rejection state lives in each target repo under `docs/refactoring/`. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
 
 ## Diagram
 
 ```mermaid
 graph TD
-    git[git]
+    lc[loop-config]
     ci[ci-runner]
     comp[composer]
     cs[php-cs-fixer]
@@ -19,9 +19,10 @@ graph TD
     p3[phpstan-level-3]
     rdc[rector-dead-code]
     rtc[rector-type-coverage]
+    ss[structural-scan]
 
-    git -->|required| comp
-    git -->|required| ci
+    lc -->|required| comp
+    lc -->|required| ci
     comp -->|required| cs
     comp -->|required| unit
     comp -->|required| tr
@@ -35,14 +36,21 @@ graph TD
     cs -.->|recommended| rdc
     cs -.->|recommended| rtc
     p3 -.->|recommended| rtc
+    audit -.->|resolved| ss
+    unit -.->|resolved| ss
+    tr -.->|resolved| ss
+    cs -.->|resolved| ss
+    p3 -.->|resolved| ss
+    rdc -.->|resolved| ss
+    rtc -.->|resolved| ss
 ```
 
 ## Edges
 
 | from (parent) | to (child) | type |
 |---|---|---|
-| `git` | `composer` | required |
-| `git` | `ci-runner` | required |
+| `loop-config` | `composer` | required |
+| `loop-config` | `ci-runner` | required |
 | `composer` | `php-cs-fixer` | required |
 | `composer` | `phpunit` | required |
 | `composer` | `test-runner-if-missing` | required |
@@ -56,19 +64,21 @@ graph TD
 | `php-cs-fixer` | `rector-dead-code` | recommended |
 | `php-cs-fixer` | `rector-type-coverage` | recommended |
 | `phpstan-level-3` | `rector-type-coverage` | recommended |
+| `composer-audit` | `structural-scan` | resolved |
+| `phpunit` | `structural-scan` | resolved |
+| `test-runner-if-missing` | `structural-scan` | resolved |
+| `php-cs-fixer` | `structural-scan` | resolved |
+| `phpstan-level-3` | `structural-scan` | resolved |
+| `rector-dead-code` | `structural-scan` | resolved |
+| `rector-type-coverage` | `structural-scan` | resolved |
 
 The table is the machine-readable source; the diagram is its rendering. Extending the tree means adding a row here and the matching line in the diagram.
+
+The seven `resolved` rows above are not `required` or `recommended` — see `docs/tooling-tree.md`'s `structural-scan` node for what `resolved` means (a rejected leaf still unblocks `structural-scan`, unlike a rejected required parent) and why it exists.
 
 ## Nodes
 
 A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
-
-### `git`
-
-- **Tool:** git
-- **Purpose:** version control — the loop reads history from it and delivers through it.
-- **Fulfilment check:** target is a git repository.
-- **MR scope:** never an MR — the only hard requirement; without it the suite does not run (ADR-0005).
 
 ### `ci-runner`
 

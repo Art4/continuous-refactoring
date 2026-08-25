@@ -21,7 +21,7 @@ The forge reviewable that delivers a completed candidate. Skills always use this
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
 **Tooling tree**:
-The directed graph of adoption steps in a language specialization. A **node** adopts one tool up to a stated degree — a tool may own several nodes (each PHPStan level is its own node).
+The directed graph of adoption steps a target repo climbs — a generic root (`docs/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `docs/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node).
 _Avoid_: baseline, floor, bootstrap, onboarding
 
 **Required edge**:

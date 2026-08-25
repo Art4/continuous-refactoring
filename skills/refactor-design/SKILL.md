@@ -9,11 +9,17 @@ Turn one chosen **candidate** into a **plan** concrete enough to implement: the 
 
 ## Process
 
-### 1. Ground in the candidate
+### 1. Check whether it's already fully specified
+
+A **tooling tree** node candidate (`docs/tooling-tree.md`, `docs/php-tooling-tree.md`) is fully specified by definition — its Tool, Purpose, Fulfilment check, and MR scope are already written in the tree doc. Skip straight to step 4 and write the plan from that spec — no grilling needed, nothing to ground beyond the doc itself.
+
+A structural candidate is not pre-specified. Continue to step 2.
+
+### 2. Ground in the candidate
 
 Read the candidate issue and the code it names. Read `CONTEXT.md` and the ADRs in the area. Understand *why* it's a candidate (the friction) before proposing anything.
 
-### 2. Grill toward the seam
+### 3. Grill toward the seam
 
 Run `/grilling` on the candidate. The decision tree hangs off these branches:
 
@@ -28,9 +34,13 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 - Naming a module after a concept not in `CONTEXT.md`? Add the term.
 - User rejects a design with a load-bearing reason a future scan should not re-suggest? Offer an ADR.
 
-### 3. Write the plan
+### 4. Write the plan
 
-Capture the plan on the candidate issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`). This is the handoff that makes the refactor delegable.
+For a structural candidate: capture the plan on the candidate issue — the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`).
+
+For a tooling tree node (step 1): capture the tree doc's Tool / Purpose / Fulfilment check / MR scope on the candidate issue as the plan, verbatim — that scope *is* the slice ordering.
+
+Either way, this is the handoff that makes the refactor delegable.
 
 The plan follows the foundational refactoring rules (ADR-0004): behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
 
@@ -41,4 +51,4 @@ The plan follows the foundational refactoring rules (ADR-0004): behavior-preserv
 
 ## Completion criterion
 
-The candidate has a written plan on its issue — module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier).
+The candidate has a written plan on its issue. For a structural candidate: module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier). For a tooling tree node: the tree doc's Tool / Purpose / Fulfilment check / MR scope, copied onto the issue.
