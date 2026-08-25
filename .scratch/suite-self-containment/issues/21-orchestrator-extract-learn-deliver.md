@@ -9,7 +9,7 @@
 
 After extraction, the orchestrator reads as ~35 lines of pure delegation: step N = run skill X, step N+1 = run skill Y. Each extracted skill has its own `## Fallback`, `## Completion criterion`, and frontmatter.
 
-**Blocked by:** 12 — Deliver each candidate as a remembered merge request (ADR-0006 must land first; the deliver logic lives there currently).
+**Blocked by:** 12 ✓ done — Deliver each candidate as a remembered merge request (ADR-0006 must land first; the deliver logic lives there currently).
 
 **Status:** ready-for-agent
 
@@ -26,3 +26,4 @@ After extraction, the orchestrator reads as ~35 lines of pure delegation: step N
 > **2026-08-21:** Created from architecture review candidate 1 (Worth exploring). The orchestrator is the most-edited file in the repo (6 touches in 30 commits). Extracting learn + deliver reduces coupling and makes each step independently testable. Blocked by 12 because ADR-0006's MR-opening protocol must stabilize before extraction.
 
 > **2026-08-21:** Ticket hygiene — #12 is done (commit `2c4bb31`). This ticket is now unblocked.
+> **2026-08-23:** Ticket hygiene — normalized the `Blocked by` line to carry the `✓ done` marker (consistent with every other resolved-blocker reference in this tracker); it was left as plain prose after the 2026-08-21 unblock note above.
