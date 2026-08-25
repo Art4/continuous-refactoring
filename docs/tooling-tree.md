@@ -38,7 +38,7 @@ The table above is the only edge this document owns. A language tree's own edge 
 - **Tool:** none — this is the suite's own state, not a third-party tool.
 - **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write cadence, last-run date, and create-mode.
 - **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
-- **MR scope:** one MR — create `docs/refactoring/config.md` with a default `Cadence: weekly` (the user can edit it afterward; see `docs/playbooks/refactoring-config.md`). Ordinary node like any other: `refactor-scan` files it as a single `refactor:candidate` issue when missing, same as a PHP tree node, and it is the only candidate filed that pass.
+- **MR scope:** one MR — create `docs/refactoring/config.md` (see `docs/playbooks/refactoring-config.md` for its shape; there is deliberately no stored cadence — the loop never triggers itself). Ordinary node like any other: `refactor-scan` files it as a single `refactor:candidate` issue when missing, same as a PHP tree node, and it is the only candidate filed that pass.
 
 ### `structural-scan`
 

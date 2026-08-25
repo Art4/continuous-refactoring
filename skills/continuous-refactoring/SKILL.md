@@ -1,6 +1,6 @@
 ---
 name: continuous-refactoring
-description: Run one pass of the continuous refactoring loop — pick up remembered merge requests, scan, prioritise, design, implement, review, learn. Use to keep a codebase under continuous refactoring, on a cadence or on demand.
+description: Run one pass of the continuous refactoring loop — pick up remembered merge requests, scan, prioritise, design, implement, review, learn. Use to keep a codebase under continuous refactoring, on demand or via your own recurring trigger.
 disable-model-invocation: true
 ---
 
@@ -10,13 +10,13 @@ The **loop pass** — the stateful, repeatable sequence that keeps a project und
 
 A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005). A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected. `refactor-scan` checks git, the loop's own configuration, and backlog size itself before scanning anything else — the orchestrator does not duplicate those checks (ADR-0008).
 
-Run this on demand whenever you're asked, or on the configured **cadence**.
+Run this on demand whenever you're asked, or via whatever recurring trigger you've set up outside the suite — the loop has no stored schedule of its own; it does the same one pass regardless of how often it's invoked.
 
 ## Loop state
 
 State lives in the target repo, not in the conversation:
 
-- **Config** — `docs/refactoring/config.md`: cadence, last-run date, focus areas, merge-request create-mode
+- **Config** — `docs/refactoring/config.md`: last-run date, focus areas, merge-request create-mode
 - **Remembered merge requests** — `docs/refactoring/merge-requests.md`: every open suite merge request with its URL, candidate issue, and base branch
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes

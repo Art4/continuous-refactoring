@@ -32,10 +32,6 @@ _Avoid_: hard edge, blocking edge
 The advisory counterpart: the child stays proposable even when its recommended parent was rejected; the rejected parent is never re-proposed — at most the loop informs where it would have helped.
 _Avoid_: soft edge, nice-to-have edge
 
-**Cadence**:
-The configured schedule that decides when the next periodic loop pass is due.
-_Avoid_: frequency, interval
-
 **Hot spot**:
 A part of the codebase that keeps appearing in change history — the primary place to look for candidates.
 _Avoid_: problem area, pain point
