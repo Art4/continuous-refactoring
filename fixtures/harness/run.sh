@@ -218,12 +218,12 @@ run_roadmap() {
         return 1
     fi
 
-    # Generate roadmap via deterministic parser (no opencode, no mutation) — source of truth is docs/php-tooling-tree.md:40
+    # Generate roadmap via deterministic parser (no opencode, no mutation) — source of truth is skills/refactor-scan/references/php-tooling-tree.md
     # Deterministic parser is intentionally used for reproducibility (no LLM flakiness); an opencode run
     # `opencode run /refactor-scan` + `/refactor-prioritize` would yield the same required/recommended chain
     # (see skills/continuous-refactoring: required edge gates, recommended only outlook). Optional: run_opencode "roadmap" can be added.
     local generated="/tmp/roadmap-$FIXTURE.json"
-    if ! python3 "$REPO_DIR/scripts/lib/tooling_tree.py" "$FIXTURE_DST" --steps 10 > "$generated" 2>/dev/null; then
+    if ! python3 "$REPO_DIR/skills/refactor-scan/references/tooling_tree.py" "$FIXTURE_DST" --steps 10 > "$generated" 2>/dev/null; then
         log_fail "Failed to generate roadmap for $FIXTURE_DST"
         return 1
     fi
@@ -277,7 +277,7 @@ for r in d['roadmap']:
         # Ensure .agents/skills symlink for opencode discovery (isolated)
         mkdir -p "$FIXTURE_DST/.agents"
         ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
-        if timeout 60 bash -c "cd \"$FIXTURE_DST\" && $opencode_bin run \"List the next 10 MRs for this repo without creating branches/MRs. Use docs/php-tooling-tree.md.\" 2>&1" > "$opencode_out" 2>&1; then
+        if timeout 60 bash -c "cd \"$FIXTURE_DST\" && $opencode_bin run \"List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md.\" 2>&1" > "$opencode_out" 2>&1; then
             log_info "Opencode output (first 80 lines):"
             head -n 80 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
             # Advisory comparison: check if opencode mentions expected first node

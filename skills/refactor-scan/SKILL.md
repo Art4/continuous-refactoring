@@ -36,9 +36,9 @@ Hand every finding to `refactor-learn` — this skill only notices; it does not 
 
 Skipped if step 2 already proposed a pending issue.
 
-Run `python3 scripts/lib/tooling_tree.py <target-repo> --steps 5` and read the JSON's `next` field, **not** `roadmap` — `roadmap` simulates forward (it assumes each entry gets fulfilled to compute what would come after it, so entries past the first are a future lookahead, not real options today); `next` is already the real, currently-unblocked set — no further trimming needed, take it as-is (up to five entries):
+Run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 5` and read the JSON's `next` field, **not** `roadmap` — `roadmap` simulates forward (it assumes each entry gets fulfilled to compute what would come after it, so entries past the first are a future lookahead, not real options today); `next` is already the real, currently-unblocked set — no further trimming needed, take it as-is (up to five entries). If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=5`) instead — it walks the same tree docs by hand and returns the same set; with no sub-agent mechanism, run that prompt's steps yourself inline.
 
-- **Ordinary tooling nodes** (`loop-config`, and language-specialization nodes from e.g. `docs/php-tooling-tree.md`) — proposed by name; each is already fully specified in its tree doc.
+- **Ordinary tooling nodes** (`loop-config`, and language-specialization nodes from e.g. `skills/refactor-scan/references/php-tooling-tree.md`) — proposed by name; each is already fully specified in its tree doc.
 - **`structural-scan`** — proposed once every leaf of the active language tree is resolved (fulfilled, or explicitly rejected under `docs/refactoring/out-of-scope/`). Proposing it is just naming it — no codebase walk happens here (that's `refactor-design`'s job, only for the node actually chosen).
 - **No language tree recognized for this target**: `structural-scan`'s gate has no leaves to wait on, so it's immediately proposable on its own.
 

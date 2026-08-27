@@ -504,6 +504,56 @@ class ADRStalenessTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class ReferencesDirTests(unittest.TestCase):
+    """skills/*/references/*.md ships alongside its SKILL.md, so validate_repo
+    scans it the same way: ADR citations forbidden, local refs must resolve.
+    """
+
+    def _repo(self, ref_content):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, {
+            "CONTEXT.md": "# glossary",
+            "docs/agents/skill-references.md": "# ledger\n",
+            "skills/refactor-scan/SKILL.md": (
+                "---\nname: refactor-scan\ndescription: test\n---\n\n"
+                "## Process\n\n## Completion criterion\n"
+            ),
+            "skills/refactor-scan/references/tree.md": ref_content,
+        })
+        return tmp, root
+
+    def test_adr_ref_in_references_dir_flagged(self):
+        tmp, root = self._repo("Per ADR-0010, do the thing.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tree.md" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_missing_local_ref_in_references_dir_flagged(self):
+        tmp, root = self._repo("See `docs/agents/missing.md`.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tree.md" in i.skill and "missing.md" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_clean_references_dir_ok(self):
+        tmp, root = self._repo("No decisions or dangling paths here.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertFalse(any("references/tree.md" in i.skill for i in issues))
+        finally:
+            tmp.cleanup()
+
+
 class EndToEndTests(unittest.TestCase):
     def test_real_repo_passes(self):
         repo = pathlib.Path(__file__).resolve().parents[1]

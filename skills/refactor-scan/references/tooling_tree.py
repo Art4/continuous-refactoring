@@ -1,10 +1,12 @@
-"""Deterministic parser for PHP tooling tree (docs/php-tooling-tree.md).
+"""Deterministic parser for the PHP tooling tree (php-tooling-tree.md, alongside this file).
 
 Provides load_tree, detect_nodes, roadmap without invoking LLM or mutating repo.
 
-Seam: scripts/lib/tooling_tree.py — used by roadmap dry-run harness.
+Seam: skills/refactor-scan/references/tooling_tree.py — used by refactor-scan
+and the roadmap dry-run harness.
 
-Docs: docs/php-tooling-tree.md is machine-readable (edges table), CONTEXT.md vocabulary.
+Docs: php-tooling-tree.md (sibling to this file) is machine-readable (edges
+table), CONTEXT.md vocabulary.
 """
 
 from __future__ import annotations
@@ -14,11 +16,15 @@ import json
 import pathlib
 import re
 
-REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
-TREE_MD = REPO_ROOT / "docs" / "php-tooling-tree.md"
-# Generic root (ADR-0008): git -> loop-config, and the structural-scan node
-# that PHP's tree leaves point into via `resolved` edges.
-GENERIC_TREE_MD = REPO_ROOT / "docs" / "tooling-tree.md"
+_HERE = pathlib.Path(__file__).resolve().parent
+TREE_MD = _HERE / "php-tooling-tree.md"
+# Generic root: git -> loop-config, and the structural-scan node that PHP's
+# tree leaves point into via `resolved` edges.
+GENERIC_TREE_MD = _HERE / "tooling-tree.md"
+# Suite repo root — used only by roadmap()'s dev/test-only fixtures fallback
+# below. A shipped install has no fixtures/ directory, so this is never
+# reached outside the suite's own test harness.
+REPO_ROOT = _HERE.parents[2]  # references -> refactor-scan -> skills -> repo root
 
 _VALID_EDGE_TYPES = ("required", "recommended", "resolved")
 
@@ -51,9 +57,9 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
 
     With an explicit ``tree_md``, loads only that one file (single-file mode,
     useful for isolated parser tests). With none, loads the generic root
-    (``docs/tooling-tree.md``) plus the PHP specialization
-    (``docs/php-tooling-tree.md``) and merges their edges — the default,
-    real-world shape since ADR-0008.
+    (``tooling-tree.md``) plus the PHP specialization
+    (``php-tooling-tree.md``) and merges their edges — the default,
+    real-world shape.
     """
     if tree_md is not None:
         paths = [pathlib.Path(tree_md)]
@@ -68,9 +74,9 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
     # Build parent maps
     required_parents: dict[str, list[str]] = {n: [] for n in nodes}
     recommended_parents: dict[str, list[str]] = {n: [] for n in nodes}
-    # `resolved` parents (ADR-0008): unlike a required parent, a *rejected*
-    # resolved parent still counts as resolved — only structural-scan uses
-    # this edge type today. See docs/tooling-tree.md's structural-scan node.
+    # `resolved` parents: unlike a required parent, a *rejected* resolved
+    # parent still counts as resolved — only structural-scan uses this edge
+    # type today. See tooling-tree.md's structural-scan node.
     resolved_parents: dict[str, list[str]] = {n: [] for n in nodes}
     for e in edges:
         if e["type"] == "required":
@@ -162,18 +168,18 @@ def _baseline_exists(repo: pathlib.Path) -> bool:
 
 
 def _has_loop_config(repo: pathlib.Path) -> bool:
-    """loop-config's fulfilment check (ADR-0008): docs/refactoring/config.md exists."""
+    """loop-config's fulfilment check: docs/refactoring/config.md exists."""
     return (repo / "docs" / "refactoring" / "config.md").exists()
 
 
 def _rejected_nodes(repo: pathlib.Path) -> set[str]:
-    """Tooling-tree nodes recorded as out-of-scope for this target repo (ADR-0005).
+    """Tooling-tree nodes recorded as out-of-scope for this target repo.
 
     Convention: one file per rejected node at
     ``docs/refactoring/out-of-scope/<node>.md``. This is the minimal
-    convention needed for structural-scan's `resolved` gate (ADR-0008) — it
-    does not parse structural-candidate rejections, which are keyed by issue
-    number, not node name.
+    convention needed for structural-scan's `resolved` gate — it does not
+    parse structural-candidate rejections, which are keyed by issue number,
+    not node name.
     """
     d = repo / "docs" / "refactoring" / "out-of-scope"
     if not d.is_dir():
@@ -197,7 +203,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         if glob.glob(str(repo / pat)):
             has_ci = True
             break
-    # php-cs-fixer — spec docs/php-tooling-tree.md:91 requires dep + config + runnable (zero diffs)
+    # php-cs-fixer — spec (php-tooling-tree.md) requires dep + config + runnable (zero diffs)
     # For file-based dry-run we approximate runnable as present when both dep and config exist
     has_cs_config = (repo / ".php-cs-fixer.php").exists() or (repo / ".php-cs-fixer.dist.php").exists()
     has_cs_dep = _has_dep(composer, "friendsofphp/php-cs-fixer") or _has_dep(composer, "php-cs-fixer/php-cs-fixer")
@@ -221,7 +227,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
 
     # git
     set_node("git", has_git, "found .git" if has_git else "no .git")
-    # loop-config (ADR-0008)
+    # loop-config
     has_loop_config = _has_loop_config(repo)
     set_node("loop-config", has_loop_config, "docs/refactoring/config.md present" if has_loop_config else "no docs/refactoring/config.md")
     # composer
@@ -238,7 +244,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # If phpunit fulfilled -> this node considered fulfilled (no need to propose)
     tr_fulfilled = phpunit_fulfilled
     set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
-    # composer-audit: thin node per docs/php-tooling-tree.md:110 — fulfilment is "composer audit runs without config errors"
+    # composer-audit: thin node per php-tooling-tree.md — fulfilment is "composer audit runs without config errors"
     # Strictly that is true whenever composer.json exists, so the node would be immediately fulfilled and never appear in a roadmap.
     # For the dry-run roadmap we intentionally keep it proposable as a distinct thin MR to demonstrate the decision chain
     # (the real MR scope is "none beyond running it", ticket 10 separates CI-fail). This is a roadmap-test seam, not a spec change.
@@ -284,8 +290,8 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
 
-    # structural-scan (ADR-0008): fulfilled once every `resolved` parent —
-    # every PHP-tree leaf — is fulfilled OR recorded as rejected. Unlike a
+    # structural-scan: fulfilled once every `resolved` parent — every
+    # PHP-tree leaf — is fulfilled OR recorded as rejected. Unlike a
     # required parent, a rejected resolved parent still counts as resolved.
     rejected = _rejected_nodes(repo)
     leaves = tree["resolved_parents"].get("structural-scan", [])
@@ -319,16 +325,16 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5
     Unlike ``roadmap()``, this does not simulate — it does not assume a
     returned node is already fulfilled to compute what comes after it. Only
     ``git``'s real ``.git`` check and each node's real required/resolved
-    parents (ADR-0007, ADR-0008) decide what's in this list, so entries here
-    can be true siblings (e.g. ``composer`` and ``ci-runner`` once
-    ``loop-config`` is really fulfilled), not a serial lookahead (ADR-0010 —
-    ``refactor-scan`` needs "what's proposable now", not a forward roadmap).
+    parents decide what's in this list, so entries here can be true siblings
+    (e.g. ``composer`` and ``ci-runner`` once ``loop-config`` is really
+    fulfilled), not a serial lookahead — ``refactor-scan`` needs "what's
+    proposable now", not a forward roadmap.
     """
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
     detected = detect_nodes(repo, tree)
-    detected["git"]["fulfilled"] = True  # never proposed (ADR-0005)
+    detected["git"]["fulfilled"] = True  # never proposed
     rejected = _rejected_nodes(repo)
 
     result: list[dict] = []
@@ -343,9 +349,9 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5
             # other tooling node, where fulfilled really does mean "don't
             # propose again"). Gating on the generic skip here made this
             # branch permanently unreachable dead code — structural-scan
-            # must stay proposable every pass once open (ADR-0010: it's an
-            # ongoing candidate for refactor-design to keep drawing on, not
-            # a one-time node).
+            # must stay proposable every pass once open: it's an ongoing
+            # candidate for refactor-design to keep drawing on, not a
+            # one-time node.
             leaves = tree["resolved_parents"].get(node, [])
             unresolved = [leaf for leaf in leaves if not (detected.get(leaf, {}).get("fulfilled", False) or leaf in rejected)]
             if unresolved:
@@ -384,7 +390,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
     # git is never an MR; treat as implicitly fulfilled for roadmap (harness does git init)
     fulfilled["git"] = True
     detected["git"]["fulfilled"] = True
-    # out-of-scope rejections (ADR-0005), used by structural-scan's `resolved` gate
+    # out-of-scope rejections, used by structural-scan's `resolved` gate
     rejected = _rejected_nodes(repo)
 
     # For roadmap simulation, we need to handle that composer-audit is special: we marked fulfilled False always, so it will be proposed.
@@ -402,7 +408,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 structural_candidates.append({"file": f.name, "path": str(f)})
     # 2) If repo is a DST (/tmp/.../php-empty), look at original fixture's expected (sibling to project, not mounted)
     if not structural_candidates:
-        # REPO_ROOT is two levels above scripts/lib
+        # Dev/test-only: REPO_ROOT resolves to the suite checkout, which has
+        # a fixtures/ tree; never reached at skill runtime (see REPO_ROOT above).
         fixtures_expected = REPO_ROOT / "fixtures" / "php" / repo.name / "expected" / "issues"
         if fixtures_expected.exists():
             for f in sorted(fixtures_expected.glob("*.md")):
@@ -422,13 +429,13 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
         best_reason = ""
         for node in priority:
             if node == "git":
-                continue  # never an MR (ADR-0005)
+                continue  # never an MR
             if sim_fulfilled.get(node, False):
                 continue  # already fulfilled (real or simulated), skip
             if node == "structural-scan":
-                # `resolved` gate (ADR-0008): every leaf must be fulfilled OR
-                # rejected — not the standard required-parent check, which
-                # would instead close this node forever on any rejection.
+                # `resolved` gate: every leaf must be fulfilled OR rejected —
+                # not the standard required-parent check, which would
+                # instead close this node forever on any rejection.
                 leaves = tree["resolved_parents"].get(node, [])
                 unresolved = [leaf for leaf in leaves if not (sim_fulfilled.get(leaf, False) or leaf in rejected)]
                 if unresolved:
@@ -485,8 +492,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             # Do not actually mutate repo; just mark fulfilled for simulation
             continue
         # No tooling node unblocked -> fill with structural candidates, but
-        # only once the structural-scan gate has actually opened (ADR-0008):
-        # every PHP-tree leaf resolved. Otherwise structural work is exactly
+        # only once the structural-scan gate has actually opened: every
+        # PHP-tree leaf resolved. Otherwise structural work is exactly
         # what's still blocked — falling back to it here would silently
         # bypass the gate whenever the tooling chain stalls (e.g. a
         # non-empty PHPStan baseline blocking the next level).

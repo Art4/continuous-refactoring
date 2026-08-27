@@ -53,7 +53,7 @@ While fewer than two suite merge requests are open, a pass may deliver one more.
 
 The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
-For a tooling-tree candidate, close with an outlook: re-run `python3 scripts/lib/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and name whatever node it reports next, quoting that node's Purpose from the tree doc in one line. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
+For a tooling-tree candidate, close with an outlook: re-run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and name whatever node it reports next, quoting that node's Purpose from the tree doc in one line. If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; with no sub-agent mechanism, run that prompt's steps yourself inline. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
 
 ## Fallback
 

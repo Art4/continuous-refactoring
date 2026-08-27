@@ -11,7 +11,7 @@ Turn the **node** `refactor-prioritize` chose into a **plan** concrete enough to
 
 ### 1. Check whether it's already fully specified
 
-An ordinary **tooling tree** node (`docs/tooling-tree.md`, or a language specialization's tree) is fully specified by definition — its Tool, Purpose, Fulfilment check, and MR scope are already written in the tree doc. Skip straight to step 5 and file/write the plan from that spec — no codebase search, no grilling, nothing to ground beyond the doc itself.
+An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree.md`, or a language specialization's tree) is fully specified by definition — its Tool, Purpose, Fulfilment check, and MR scope are already written in the tree doc. Skip straight to step 5 and file/write the plan from that spec — no codebase search, no grilling, nothing to ground beyond the doc itself.
 
 The **`structural-scan`** node is not pre-specified — it names an open gate, not a candidate. Continue to step 2 to find one.
 

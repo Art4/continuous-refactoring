@@ -26,7 +26,7 @@ For each surviving proposal, assess four factors:
 - **Tooling pressure** — is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so, it's re-failing every CI run until fixed.
 - **Risk** — how hard to reverse / how wide the blast radius? Prefer reversible, low-risk refactors early in the loop while the habit is forming.
 
-For a tooling-tree node proposal, read its Purpose in the tree doc (`docs/tooling-tree.md` / the language specialization's tree) to reason about what it unlocks — node-detail data beyond that Purpose line (e.g. what reaching a specific tool level opens up next) is not yet a maintained source and is deliberately out of scope for now; reason from the tree doc and the ranking factors above.
+For a tooling-tree node proposal, read its Purpose in the tree doc (`skills/refactor-scan/references/tooling-tree.md` / the language specialization's tree) to reason about what it unlocks — node-detail data beyond that Purpose line (e.g. what reaching a specific tool level opens up next) is not yet a maintained source and is deliberately out of scope for now; reason from the tree doc and the ranking factors above.
 
 Present the ranking as a short ordered list of names only — save the rationale for the winning candidate for step 3, don't repeat it here.
 
