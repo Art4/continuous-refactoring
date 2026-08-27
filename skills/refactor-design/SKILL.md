@@ -1,6 +1,6 @@
 ---
 name: refactor-design
-description: Turn the chosen node into a concrete refactoring plan, filing it as an issue — search the codebase first when the node is structural-scan. Part of the continuous refactoring loop.
+description: Turn the chosen node into a concrete refactoring plan, filing it as an issue — search the codebase first when the node is structural-scan.
 ---
 
 # Refactor Design
@@ -75,8 +75,8 @@ The filed issue, carrying the plan → `refactor-implement`.
 ## Fallback
 
 - **`/codebase-design`**: if installed, use its vocabulary for step 2. Otherwise skip it — the full vocabulary (module, interface, depth, seam, leverage, locality) is already inline in step 2 above; use those terms and don't drift into "component", "service", or "API".
-- **`/grilling`**: if installed, use it. Otherwise run the grilling loop inline: map the design as a **design tree** — every decision branches into the decisions that hang off it — and work it in **rounds**. The **frontier** is every decision whose prerequisites are already settled. Ask the whole frontier in one round, numbering each question (`❓ **Q1** - **<title>**: <body>`, multiple choices allowed) with your recommended answer (`➡️ <recommendation>`), then wait for the user. Their answers reshape the tree and push the frontier outward — a question depending on one still open in this round belongs to a later round. Facts are your job (dispatch a sub-agent rather than asking the user), decisions are the user's. Done when the frontier is empty: every branch visited, nothing silently assumed. In this step the tree hangs off the five branches in section 4 — the deepened module, the seam, the interface, locality, and the tests that survive.
-- **`/domain-modeling`**: if installed, use its discipline. Otherwise skip it with a note — the side effects this step performs are already inline in section 4 above and run regardless: add resolved terms to `CONTEXT.md` (a glossary and nothing else — no implementation details) as they crystallise, and offer an ADR under `docs/adr/` when the user rejects a design with a load-bearing reason a future scan should not re-suggest. The discipline's enrichment moves (challenging fuzzy terms, probing edge-case scenarios, cross-referencing the code) are not part of this step.
+- **`/grilling`**: if installed, use it. Otherwise the grilling loop mechanics (design tree, frontier, rounds) are inlined at `skills/refactor-design/references/grilling-fallback.md`.
+- **`/domain-modeling`**: if installed, use its discipline. Otherwise the same reference file inlines the side effects this step performs — they're already inline in section 4 above too, and run regardless of whether this skill is installed.
 
 ## Completion criterion
 

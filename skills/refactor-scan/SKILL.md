@@ -1,6 +1,6 @@
 ---
 name: refactor-scan
-description: Propose up to five tooling-tree nodes from config.md/tree state, and detect (never act on) remembered issues or merge requests that have since closed or merged. Part of the continuous refactoring loop.
+description: Propose up to five tooling-tree nodes from config.md/tree state, and detect (never act on) remembered issues or merge requests that have since closed or merged.
 ---
 
 # Refactor Scan

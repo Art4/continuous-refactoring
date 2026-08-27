@@ -1,6 +1,6 @@
 ---
 name: refactor-prioritize
-description: Rank refactor-scan's proposals and recommend the next one to work on, or say why nothing should start this pass. Part of the continuous refactoring loop.
+description: Rank refactor-scan's proposals and recommend the next one to work on, or say why nothing should start this pass.
 ---
 
 # Refactor Prioritize
