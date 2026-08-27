@@ -1,42 +1,47 @@
 ---
 name: refactor-prioritize
-description: Rank the refactoring backlog and recommend the next candidate to work on. Part of the continuous refactoring loop.
+description: Rank refactor-scan's proposals and recommend the next one to work on, or say why nothing should start this pass. Part of the continuous refactoring loop.
 ---
 
 # Refactor Prioritize
 
-Rank the **backlog** — the open `refactor:candidate` issues — and recommend the next one to tackle. The loop's value comes from working the *right* candidate next, not from working any candidate.
+Rank the **proposals** `refactor-scan` handed the orchestrator this pass, and recommend the single one to work on next. The loop's value comes from working the *right* thing next, not from working any of them.
 
 ## Process
 
-### 1. Load the backlog
+### 1. Check whether anything should start at all
 
-Query the issue tracker for all open issues labeled `refactor:candidate` (see `docs/agents/issue-tracker.md`). Then read `docs/refactoring/merge-requests.md` — the loop's remembered-merge-request ledger — and drop any candidate already listed there from the backlog: it already has an open merge request delivering it, so it is not something to *start* work on, regardless of what label state the issue itself happens to carry.
+Read `docs/refactoring/merge-requests.md` directly (local state docs are fair game for any skill, ADR-0010 — only the external tracker/git reconciliation is `refactor-scan`'s alone). **Two or more suite merge requests already open?** Stop here: report which ones, and that the pass ends without starting new work while they await review/merge. This overrides everything below.
 
-Two distinct empty-ish outcomes can result. Report whichever applies and stop — they are not the same thing and need different messages:
+Otherwise, drop any proposal already listed in `merge-requests.md` from consideration — it already has an open merge request delivering it, so it isn't something to *start*.
 
-- **No open `refactor:candidate` issues at all.** Report the backlog is empty.
-- **One or more open `refactor:candidate` issues, but every one of them is already listed in `docs/refactoring/merge-requests.md`.** Report that the backlog is not empty but nothing is currently actionable — name each excluded candidate together with the merge request already delivering it (URL + branch from the ledger).
-
-Only candidates that survive this filter move on to ranking.
+If `refactor-scan` handed over a single resumed pending issue (not five fresh proposals), that *is* the recommendation — skip ranking and go straight to step 3 with it.
 
 ### 2. Rank
 
-For each surviving candidate, assess four factors:
+For each surviving proposal, assess four factors:
 
 - **Heat** — is it in a hot spot (frequently changing area)? A candidate in a hot spot pays off faster because it unblocks more upcoming change.
 - **Leverage** — how much future change does deepening this module unlock? A module many others call is high-leverage; a leaf nobody calls is not.
 - **Tooling pressure** — is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so, it's re-failing every CI run until fixed.
 - **Risk** — how hard to reverse / how wide the blast radius? Prefer reversible, low-risk refactors early in the loop while the habit is forming.
 
-Present the ranking as a short list, oldest-first within each tier, with a one-line rationale per candidate.
+For a tooling-tree node proposal, read its Purpose in the tree doc (`docs/tooling-tree.md` / the language specialization's tree) to reason about what it unlocks — node-detail data beyond that Purpose line (e.g. what reaching a specific tool level opens up next) is not yet a maintained source and is deliberately out of scope for now; reason from the tree doc and the ranking factors above.
+
+Present the ranking as a short list with a one-line rationale per proposal.
 
 ### 3. Recommend
 
-Name the single next candidate and say why it wins. If two are close, call the tie out and let the user decide.
+Name the single next candidate, say why it wins, and say what choosing it unlocks (the next node(s) it opens, per the tree doc, or the module/area it deepens for a `structural-scan` proposal). If two are close, call the tie out and let the user decide.
 
-If the (already-filtered) backlog contains a proposable **tooling tree** node (`loop-config`, or a node from `docs/php-tooling-tree.md`), treat it as a strong default recommendation — the loop's structural work compounds faster once the underlying tooling is in place, and `refactor-scan` only ever files one such candidate at a time. Still let the user pick a structural deepening instead; this is a recommendation, not a **required edge** (ADR-0005, ADR-0008).
+A proposable **tooling tree** node is a strong default recommendation — the loop's structural work compounds faster once the underlying tooling is in place. Still let the user pick something else instead; this is a recommendation, not a **required edge** (ADR-0005, ADR-0008).
+
+If nothing survived step 1's filtering (every proposal already in flight, or `refactor-scan` proposed nothing), report that explicitly instead of a recommendation — the orchestrator ends the pass here.
+
+## Output
+
+One chosen node/candidate with rationale → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass.
 
 ## Completion criterion
 
-The backlog is ranked with a one-line rationale per candidate, and a single next candidate is recommended with a reason — or, when every open candidate is already in flight per `docs/refactoring/merge-requests.md`, that is reported explicitly instead of a recommendation.
+Either a single next candidate is recommended with a reason and what it unlocks, or the pass is explicitly reported as having nothing to start (two MRs already open, or every proposal already in flight) — never both.

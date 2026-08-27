@@ -7,9 +7,11 @@ The playbook for humans. The skills do the work; this document explains how you 
 Continuous refactoring is **stateful and repeatable**: each pass does only the work due since the last one, and writes learned decisions back. So a weekly turnus and a spontaneous invocation both work — they run the same loop.
 
 ```
-scan → prioritise → design (grill) → implement (tdd) → review (2 axes)
-   └────────────────────────────── learn (ADR / CONTEXT.md / issue status) ←──────┘
+scan (propose nodes, detect closed MRs) → prioritise → design (grill, file the issue) → implement (tdd + review)
+   └────────────────────────────────── learn (ledger / ADR / CONTEXT.md / issue status) ←──────┘
 ```
+
+The orchestrator passes each skill's output to the next as its input (ADR-0010) — nobody re-derives context from shared state except `refactor-scan`'s own detection and whatever local state doc a skill reads directly.
 
 ## Triggers
 
@@ -25,11 +27,11 @@ The loop stops exactly where human judgement is needed:
 
 | Step | Skill | Your decision |
 |---|---|---|
-| Find candidates | `refactor-scan` | focus area, if you name one |
-| Prioritise | `refactor-prioritize` | which candidate is next |
+| Propose nodes | `refactor-scan` | focus area, if you name one |
+| Prioritise | `refactor-prioritize` | which node is next |
 | Design | `refactor-design` | sign off the interface / seam |
-| Implement | `refactor-implement` | the seams that get tested |
-| Review | `refactor-review` | accept or reject findings |
+| Implement (review included) | `refactor-implement` | the seams that get tested; accept or reject review findings |
+| Learn | `refactor-learn` | none — bookkeeping only |
 
 ## After the pass
 

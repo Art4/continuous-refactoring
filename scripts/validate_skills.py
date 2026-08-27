@@ -311,7 +311,7 @@ ORCH_STEP_SKILL_MAP = {
     "prioritise": "refactor-prioritize",
     "design": "refactor-design",
     "implement": "refactor-implement",
-    "review": "refactor-review",
+    "learn": "refactor-learn",
 }
 
 CONTRACT_COVERAGE_THRESHOLD = 0.2

@@ -313,6 +313,56 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     return True, "required parents fulfilled"
 
 
+def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5) -> list[dict]:
+    """Return up to `limit` nodes that are *really* unblocked and unfulfilled right now.
+
+    Unlike ``roadmap()``, this does not simulate — it does not assume a
+    returned node is already fulfilled to compute what comes after it. Only
+    ``git``'s real ``.git`` check and each node's real required/resolved
+    parents (ADR-0007, ADR-0008) decide what's in this list, so entries here
+    can be true siblings (e.g. ``composer`` and ``ci-runner`` once
+    ``loop-config`` is really fulfilled), not a serial lookahead (ADR-0010 —
+    ``refactor-scan`` needs "what's proposable now", not a forward roadmap).
+    """
+    repo = pathlib.Path(repo)
+    if tree is None:
+        tree = load_tree()
+    detected = detect_nodes(repo, tree)
+    detected["git"]["fulfilled"] = True  # never proposed (ADR-0005)
+    rejected = _rejected_nodes(repo)
+
+    result: list[dict] = []
+    for node in tree["order"]:
+        if node == "git":
+            continue
+        if node == "structural-scan":
+            # Checked on its own terms, *before* the generic fulfilled-skip
+            # below: detect_nodes() marks this node "fulfilled" the instant
+            # its resolved-parent leaves resolve, but that's the gate
+            # *opening*, not the node being delivered and done (unlike every
+            # other tooling node, where fulfilled really does mean "don't
+            # propose again"). Gating on the generic skip here made this
+            # branch permanently unreachable dead code — structural-scan
+            # must stay proposable every pass once open (ADR-0010: it's an
+            # ongoing candidate for refactor-design to keep drawing on, not
+            # a one-time node).
+            leaves = tree["resolved_parents"].get(node, [])
+            unresolved = [leaf for leaf in leaves if not (detected.get(leaf, {}).get("fulfilled", False) or leaf in rejected)]
+            if unresolved:
+                continue
+            result.append({"node": node, "reason": "all resolved-parent leaves fulfilled or rejected"})
+        else:
+            if detected.get(node, {}).get("fulfilled", False):
+                continue
+            ok, why = _is_unblocked(node, tree, detected)
+            if not ok:
+                continue
+            result.append({"node": node, "reason": why})
+        if len(result) >= limit:
+            break
+    return result
+
+
 def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> list[dict]:
     """Generate next `steps` MRs deterministically from current repo state.
 
@@ -458,11 +508,12 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
     return result[:steps]
 
 
-def detect_and_roadmap(repo: pathlib.Path, steps: int = 10) -> dict:
-    tree = load_tree()
+def detect_and_roadmap(repo: pathlib.Path, steps: int = 10, tree_md: pathlib.Path | None = None) -> dict:
+    tree = load_tree(tree_md=tree_md)
     detected = detect_nodes(repo, tree)
     road = roadmap(repo, steps=steps, tree=tree)
-    return {"detected": detected, "roadmap": road, "tree": {"edges": tree["edges"]}}
+    nxt = next_candidates(repo, tree=tree, limit=steps)
+    return {"detected": detected, "roadmap": road, "next": nxt, "tree": {"edges": tree["edges"]}}
 
 
 if __name__ == "__main__":
@@ -471,10 +522,12 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Detect tooling tree and propose next MRs (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to fixture/repo (default: .)")
     ap.add_argument("--steps", type=int, default=10, help="number of next MRs to propose")
+    ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree). Only scopes edges/gating (next, roadmap, tree.edges) -- detect_nodes' per-tool filesystem checks are hardcoded and always run regardless of --tree, so 'detected' in the JSON output may list nodes your override tree doesn't even define")
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
     args = ap.parse_args()
     repo = pathlib.Path(args.repo)
-    data = detect_and_roadmap(repo, steps=args.steps)
+    tree_md = pathlib.Path(args.tree) if args.tree else None
+    data = detect_and_roadmap(repo, steps=args.steps, tree_md=tree_md)
     # also add branch check: ensure no extra branches created
     # include git status
     print(json.dumps(data, indent=2))

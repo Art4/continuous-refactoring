@@ -3,9 +3,11 @@
 A portable agent-skill suite that keeps a software project under **continuous refactoring** — as a stateful, repeatable loop instead of a one-shot action.
 
 ```
-scan → prioritise → design (grill) → implement (tdd) → review (2 axes)
-   └────────────────────────────── learn (ADR / CONTEXT.md / issue status) ←──────┘
+scan (propose nodes, detect closed MRs) → prioritise → design (grill, file the issue) → implement (tdd + review)
+   └────────────────────────────────── learn (ledger / ADR / CONTEXT.md / issue status) ←──────┘
 ```
+
+The orchestrator carries each skill's output to the next skill's input (ADR-0010) — no skill re-derives its own context from shared state.
 
 The core is language-neutral; the first specialization is a **general PHP project** (code style, Rector, PHPStan via the tooling tree).
 
@@ -13,12 +15,12 @@ The core is language-neutral; the first specialization is a **general PHP projec
 
 | Skill | Purpose |
 |---|---|
-| `continuous-refactoring` | Orchestrator — runs a loop pass (cadence or on-demand) |
-| `refactor-scan` | Find candidates, file them as `refactor:candidate` issues |
-| `refactor-prioritize` | Rank the backlog, recommend the next candidate |
-| `refactor-design` | Grill a candidate → plan (module, seam, interface, surviving tests) |
-| `refactor-implement` | Execute the plan test-first, in slices |
-| `refactor-review` | Verify — two-axis review (standards / spec) |
+| `continuous-refactoring` | Orchestrator — runs a loop pass (cadence or on-demand), passes each skill's output to the next |
+| `refactor-scan` | Propose up to five tooling-tree nodes from `config.md`; detect (never file) closed/merged issues and MRs |
+| `refactor-prioritize` | Rank the proposals, recommend the next one |
+| `refactor-design` | Grill/search the chosen node → plan, files it as an issue |
+| `refactor-implement` | Execute the plan test-first, in slices, review included |
+| `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
 
 ## Installing in a target project
 
