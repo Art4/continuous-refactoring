@@ -237,33 +237,18 @@ class LocalRefTests(unittest.TestCase):
 
 
 class AdrTests(unittest.TestCase):
-    def _repo(self):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        write_tree(root, {"docs/adr/0002-generic-core-php-first.md": "# 0002"})
-        return tmp, root
+    def test_any_adr_ref_flagged(self):
+        issues = vs.adr_issues("Per ADR-0002.")
+        self.assertTrue(any("0002" in i.message for i in issues))
 
-    def test_resolvable_adr_ok(self):
-        tmp, root = self._repo()
-        try:
-            self.assertEqual(vs.adr_issues("Per ADR-0002.", root), [])
-        finally:
-            tmp.cleanup()
-
-    def test_missing_adr_flagged(self):
-        tmp, root = self._repo()
-        try:
-            issues = vs.adr_issues("Per ADR-9999.", root)
-            self.assertTrue(any("9999" in i.message for i in issues))
-        finally:
-            tmp.cleanup()
+    def test_resolvable_adr_still_flagged(self):
+        # Even a real, existing ADR is forbidden in skill prose — suite ADRs
+        # are internal maintainer docs that never ship with the skill.
+        issues = vs.adr_issues("Per ADR-0010.")
+        self.assertTrue(any("0010" in i.message for i in issues))
 
     def test_no_adr_refs_ok(self):
-        tmp, root = self._repo()
-        try:
-            self.assertEqual(vs.adr_issues("No decisions here.", root), [])
-        finally:
-            tmp.cleanup()
+        self.assertEqual(vs.adr_issues("No decisions here."), [])
 
 
 class VocabTests(unittest.TestCase):

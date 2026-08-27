@@ -5,11 +5,11 @@ description: Execute a designed refactor plan test-first, slice by slice, at the
 
 # Refactor Implement
 
-Execute a **plan** (from `refactor-design`) as a series of vertical slices, red → green, at the agreed **seam** — then review the diff and open the merge request. This skill carries what used to be `refactor-review`'s own pass step (ADR-0010): the review happens here, before the merge request goes up, not as a separate later step.
+Execute a **plan** (from `refactor-design`) as a series of vertical slices, red → green, at the agreed **seam** — then review the diff and open the merge request. This skill carries what used to be `refactor-review`'s own pass step: the review happens here, before the merge request goes up, not as a separate later step.
 
 Use `/tdd` if installed as the reference for what a good test is and the rules of the red → green loop; otherwise the loop rules and test-quality guidance in `## Fallback` below govern.
 
-Every slice honors the foundational refactoring rules (ADR-0004): behavior-preserving only, deterministic tools do the moves they can (code style through the formatter with the repo's ruleset, Rector-reported issues fixed by Rector — never hand-applied by the agent), and the work lives on the refactor's own branch unless the human or the plan says otherwise.
+Every slice honors the foundational refactoring rules: behavior-preserving only, deterministic tools do the moves they can (code style through the formatter with the repo's ruleset, Rector-reported issues fixed by Rector — never hand-applied by the agent), and the work lives on the refactor's own branch unless the human or the plan says otherwise.
 
 ## Process
 
@@ -43,11 +43,13 @@ Delegate to the `mattpocock/skills` implement skill (`setup-matt-pocock-skills`,
 - **Standards axis** — does the diff conform to this repo's documented standards and the fulfilled tooling?
 - **Spec axis** — does it faithfully implement the plan on the candidate issue: requirements missing or partial, behaviour that wasn't asked for (scope creep), requirements that look implemented but wrong?
 
-Findings on either axis send the work back to step 2 (structural) or step 1 (tooling-tree change) — implement, don't hand this off to a separate skill. Report the two axes separately; don't merge or rerank findings across them.
+Findings on either axis send the work back to step 2 (structural) or step 1 (tooling-tree change) — implement, don't hand this off to a separate skill. Report the two axes separately; don't merge or rerank findings across them — one line per finding (file, issue, fix), no prose explanation beyond that.
 
 ### 5. Open the merge request
 
 Once review is clean: push the branch and open the merge request (create-mode per `docs/refactoring/config.md`, per the orchestrator's `## Opening a merge request` section). Wait for CI if the target repo runs it; a red CI is a review finding like any other — back to step 2/1.
+
+The candidate branch stays checked out after this — nothing here switches back to the default branch. `refactor-learn`'s bookkeeping writes go out on their own separate bookkeeping branch/MR, never on this one (the `loop-config`-in-flight case is the one exception, which `refactor-learn` handles).
 
 ## Output
 

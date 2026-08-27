@@ -31,5 +31,5 @@ There is deliberately no `Cadence` field: the loop never triggers itself — "yo
 ## Rules
 
 - **`Last run` is `refactor-learn`-written; `Create-mode` and `Focus areas` you can edit by hand any time** — that's what they're for.
-- The file travels with the repo. Loop state does not live in agent sessions but here (last-run, create-mode, focus areas, pending issue), in the issue tracker (backlog), in `docs/refactoring/merge-requests.md` (open suite merge requests), and in `docs/refactoring/out-of-scope/` (learned rejections).
+- The file travels with the repo. Loop state does not live in agent sessions but here (last-run, create-mode, focus areas, pending issue), in the issue tracker (backlog), in `docs/refactoring/merge-requests.md` (open suite merge requests — only when the target's issue tracker has no native label mechanism; otherwise that state lives directly on the tracker as `refactor:delivered`-labeled issues, see ADR-0012), and in `docs/refactoring/out-of-scope/` (learned rejections).
 - If the file is missing, that's the `loop-config` tooling-tree node — see above. Ordinary in every way except who writes which field and which branch it lands on for that one candidate — see the `loop-config` exception above.

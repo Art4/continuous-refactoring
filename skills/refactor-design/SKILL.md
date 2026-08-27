@@ -5,7 +5,7 @@ description: Turn the chosen node into a concrete refactoring plan, filing it as
 
 # Refactor Design
 
-Turn the **node** `refactor-prioritize` chose into a **plan** concrete enough to implement, and file it as the issue that carries that plan (ADR-0010 — this skill is where a node first becomes an issue, not `refactor-scan`). The `/grilling` loop sharpens a structural design; `/domain-modeling` keeps the domain model current as decisions land.
+Turn the **node** `refactor-prioritize` chose into a **plan** concrete enough to implement, and file it as the issue that carries that plan — this skill is where a node first becomes an issue, not `refactor-scan`. The `/grilling` loop sharpens a structural design; `/domain-modeling` keeps the domain model current as decisions land.
 
 ## Process
 
@@ -17,7 +17,7 @@ The **`structural-scan`** node is not pre-specified — it names an open gate, n
 
 ### 2. Find a structural candidate
 
-This is the codebase walk that used to be `refactor-scan`'s (ADR-0010) — it only runs here, for the node actually chosen, not speculatively on every pass.
+This is the codebase walk that used to be `refactor-scan`'s — it only runs here, for the node actually chosen, not speculatively on every pass.
 
 Decide *where* to look before you look:
 
@@ -66,7 +66,7 @@ Either way: set `docs/refactoring/config.md`'s `Pending issue` field to this iss
 
 **`loop-config` exception:** if the chosen node *is* `loop-config` itself, `docs/refactoring/config.md` doesn't exist yet — there's nowhere to write `Pending issue` at this step. Skip the write here; `refactor-implement` records it directly when it creates the file (its own `## Fallback`-adjacent step, not a grilling or domain-modeling concern).
 
-The plan follows the foundational refactoring rules (ADR-0004): behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
+The plan follows the foundational refactoring rules: behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
 
 ## Output
 

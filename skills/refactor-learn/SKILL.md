@@ -5,21 +5,23 @@ description: The suite's only writer of bookkeeping — acts on refactor-scan's 
 
 # Refactor Learn
 
-The only skill in the suite that writes suite bookkeeping (ADR-0010): `docs/refactoring/merge-requests.md`, `docs/refactoring/out-of-scope/`, ADRs, `CONTEXT.md`, `docs/refactoring/config.md`, and issue labels. Every other lifecycle skill may read these directly; only this one writes them.
+The only skill in the suite that writes suite bookkeeping: `docs/refactoring/merge-requests.md` (only when the target's issue tracker has no native label mechanism — otherwise this data lives on the tracker instead, see `## Process`), `docs/refactoring/out-of-scope/`, ADRs, `CONTEXT.md`, `docs/refactoring/config.md`, and issue labels. Every other lifecycle skill may read these directly; only this one writes them.
 
 The orchestrator calls this skill up to **twice** in one pass, never more: an **early call**, right after `refactor-scan`, only when it produced findings; and a **closing call**, always, at the very end. The split exists because `refactor-prioritize` reads the ledger to decide whether two merge requests are already open — a finding this pass just resolved has to be written back before that check runs, not deferred to the end where it would be too late to matter this pass.
+
+**Land every write below by opening (or reusing) a dedicated bookkeeping branch/MR off the default branch — never a direct commit.** Before writing anything, in either call: confirm you aren't still on the candidate branch `refactor-implement` left checked out — these bookkeeping writes are not part of that review. Pull the default branch's latest, then create (or reuse, if one from an earlier interrupted pass is still open) a small dedicated bookkeeping branch off it, commit the writes below there, and open (or update) that merge request, using the same create-mode policy as the orchestrator's `## Opening a merge request` section. The one exception is the `loop-config`-in-flight case below, where the file being written doesn't exist anywhere except the `loop-config` candidate's own branch yet — that write rides the candidate's own already-open, already-reviewed merge request instead.
 
 ## Process
 
 ### Early call — findings only (from `refactor-scan`, if any)
 
-Runs only when scan produced findings; skip everything below when it didn't — the closing call still happens regardless, at the end.
+Runs only when scan produced findings; skip everything below when it didn't — the closing call still happens regardless, at the end. These are bookkeeping writes too — the rule above applies: land them via the dedicated bookkeeping branch/MR (open or reuse one), never a direct commit.
 
 For each finding:
 
-- Merged → mark the candidate `done` and close the issue, drop it from `docs/refactoring/merge-requests.md`.
+- Merged → mark the candidate `done` and close the issue.
 - Closed without merge → if the closing comments support a structural rejection (a maintainer gave a load-bearing reason), mark the candidate `wontfix`, close the issue, and file a learned rejection under `docs/refactoring/out-of-scope/`; otherwise ask the human what to do before deciding.
-- Drop the entry from `docs/refactoring/merge-requests.md` either way once resolved.
+- If merge requests are tracked in `docs/refactoring/merge-requests.md` (the target's issue tracker has no native label mechanism), drop the entry either way once resolved. When the tracker natively supports labels, closing/labeling the issue already removes it from the `refactor:delivered` set — nothing further to do.
 
 `done` and `wontfix` are the shared triage-role labels (`docs/agents/triage-labels.md`), not suite-specific ones — closing the issue is what actually takes it out of the backlog; which labels stay attached alongside `done`/`wontfix` doesn't matter for that.
 
@@ -29,18 +31,18 @@ A pass that only makes this call (no fresh candidate reached this run) is still 
 
 Given a freshly opened merge request (from `refactor-implement`, if the pass got that far):
 
-- Remember it in `docs/refactoring/merge-requests.md`: URL, candidate issue, the tooling-tree node name (blank for a structural candidate), and base branch. This ledger lives on the default branch regardless of what follows below.
+- When the target's issue tracker natively supports labels (GitHub, GitLab): nothing to remember here — the `refactor:delivered` label below, plus the merge request's own link back to this issue, already carries it. Otherwise, remember it in `docs/refactoring/merge-requests.md`: URL, candidate issue, the tooling-tree node name (blank for a structural candidate), and base branch — one of the writes the bookkeeping-branch/MR rule above governs.
 - Clear `docs/refactoring/config.md`'s `Pending issue` field — this candidate now has a merge request, so the marker that would let `refactor-scan` resume it as unfinished work no longer applies.
-- Label the candidate `refactor:delivered` (ADR-0009) — never `done` (the merge request isn't merged yet — that's the *next* pass's early call, once it merges) and never `ready-for-human` (that label means "nobody has implemented this yet," the opposite of what just happened).
+- Label the candidate `refactor:delivered` — never `done` (the merge request isn't merged yet — that's the *next* pass's early call, once it merges) and never `ready-for-human` (that label means "nobody has implemented this yet," the opposite of what just happened).
 - If `docs/refactoring/config.md`'s `Create-mode` wasn't set before this pass, record what `refactor-implement` used (`autonomous`, `ask-each-time`, or `human-opens` — per the orchestrator's `## Opening a merge request` guidance).
 
-**`loop-config`-in-flight exception — `config.md` doesn't exist on the default branch yet:** true only before the `loop-config` candidate itself has merged. There's nowhere on the default branch to clear `Pending issue` or record `Create-mode` yet. Write both as a follow-up commit on the candidate's own branch instead — the one exception to "bookkeeping goes to the default branch, not the candidate's branch" (ADR-0009), since `config.md` only exists there until this MR merges, and these fields will ride along in the same review. Once the merge request merges (a later pass's early call sees it), everything is on the default branch as usual from then on.
+**`loop-config`-in-flight exception — `config.md` doesn't exist on the default branch yet:** true only before the `loop-config` candidate itself has merged. There's nowhere on the default branch — or on a fresh bookkeeping branch off it — to clear `Pending issue` or record `Create-mode` yet, because `config.md` doesn't exist there. Write both as a follow-up commit on the `loop-config` candidate's own branch instead, riding along in that already-open, already-reviewed merge request — the one case where bookkeeping doesn't get its own separate branch/MR, per the rule above. Once the merge request merges (a later pass's early call sees it), every closing call after that opens its own dedicated bookkeeping branch/MR as usual.
 
-Then, regardless of whether a merge request was opened this pass:
+Then, regardless of whether a merge request was opened this pass — using the same dedicated bookkeeping branch/MR described above (open one even when no candidate MR happened this pass; never assume the current checkout is safe to write to):
 
 - Record an ADR (`docs/adr/`) for any decision a future scan must not re-litigate (see `/domain-modeling`).
 - Update `CONTEXT.md` with any terms that crystallised this pass.
-- Set `docs/refactoring/config.md`'s `Last run` to today — unconditionally, the last thing this skill does. Same `loop-config`-in-flight exception as above: before `loop-config` merges, this stamp lands on that candidate's own branch, not the default branch.
+- Set `docs/refactoring/config.md`'s `Last run` to today — unconditionally, the last thing this skill does. Same `loop-config`-in-flight exception as above: before `loop-config` merges, this stamp lands on that candidate's own branch, not a separate bookkeeping branch.
 
 ## Fallback
 
@@ -48,6 +50,6 @@ Then, regardless of whether a merge request was opened this pass:
 
 ## Completion criterion
 
-**Early call:** every finding this skill was given is resolved (`done`, `wontfix` + out-of-scope entry, or an explicit "asked the human, waiting"), and the ledger reflects it before `refactor-prioritize` runs.
+**Early call:** every finding this skill was given is resolved (`done`, `wontfix` + out-of-scope entry, or an explicit "asked the human, waiting"), the remembered set (tracker labels or the ledger, whichever applies) reflects it before `refactor-prioritize` runs, and any file writes went out through the dedicated bookkeeping merge request.
 
-**Closing call:** a freshly delivered candidate (if any) is remembered in the ledger with `Pending issue` cleared and `refactor:delivered` applied, and `Last run` is stamped.
+**Closing call:** a freshly delivered candidate (if any) is remembered — via the `refactor:delivered` label, or in the ledger, whichever the target's tracker calls for — with `Pending issue` cleared and `refactor:delivered` applied, `Last run` is stamped, and every file write went out through a merge request — the dedicated bookkeeping one, or the `loop-config` candidate's own — never a direct commit to the default branch.

@@ -15,7 +15,9 @@ Tier 1 — structural:
 - local file references (``docs/...``, ``CONTEXT.md``, ``*.md``) resolve to real
   files; target-repo artifacts (``CODING_STANDARDS.md``, ``CONTRIBUTING.md``)
   and target-repo suite state (``docs/refactoring/**``, ADR-0005) are exempt
-- ADR references (``ADR-NNNN``) resolve to ``docs/adr/NNNN-*.md``
+- ADR references (``ADR-NNNN``) are forbidden in skill prose — the suite's own
+  ADRs are internal maintainer docs that never ship with a skill; a skill
+  states the rule inline instead of citing the decision that produced it
 - glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
   prose uses, e.g. defining the seam or quoting a user's words)
@@ -218,13 +220,15 @@ def local_ref_issues(text, repo_root, skill=""):
     return issues
 
 
-def adr_issues(text, repo_root, skill=""):
+def adr_issues(text, skill=""):
     issues = []
-    repo_root = pathlib.Path(repo_root)
     for m in re.finditer(r"ADR-(\d{4})", text):
         num = m.group(1)
-        if not list((repo_root / "docs/adr").glob(f"{num}-*.md")):
-            issues.append(Issue(skill or f"ADR-{num}", f"ADR reference ADR-{num} has no matching docs/adr/{num}-*.md"))
+        issues.append(Issue(
+            skill or f"ADR-{num}",
+            f"skill prose references ADR-{num} — suite ADRs are internal maintainer docs, "
+            "never shipped with the skill; state the rule inline instead",
+        ))
     return issues
 
 
@@ -556,7 +560,7 @@ def validate_repo(repo_root):
         issues += section_issues(text, d.name, requires_fallback=shipped)
         issues += global_ref_issues(text, d.name, set(suite_names), ledger)
         issues += local_ref_issues(text, repo_root, skill=d.name)
-        issues += adr_issues(text, repo_root, skill=d.name)
+        issues += adr_issues(text, skill=d.name)
 
     issues += vocab_issues(glossary.terms, glossary.avoid, skills_text, set(VOCAB_ALLOW))
 

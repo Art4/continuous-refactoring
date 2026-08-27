@@ -8,18 +8,18 @@ disable-model-invocation: true
 
 The **loop pass** — the stateful, repeatable sequence that keeps a project under continuous refactoring. Each pass does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
-This skill is a thin data pipe (ADR-0010): it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It does not read shared state itself and does not decide anything a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize` and `refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes. If you're tracing a bug in the loop, look in the lifecycle skill responsible for that decision, not here.
+This skill is a thin data pipe: it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It does not read shared state itself and does not decide anything a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize` and `refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes. If you're tracing a bug in the loop, look in the lifecycle skill responsible for that decision, not here.
 
-A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005). A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
+A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state. Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop. A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
 
 Run this on demand whenever you're asked, or via whatever recurring trigger you've set up outside the suite — the loop has no stored schedule of its own; it does the same one pass regardless of how often it's invoked.
 
 ## Loop state
 
-State lives in the target repo, not in the conversation — every lifecycle skill may read these directly (ADR-0010); only `refactor-learn` writes them:
+State lives in the target repo, not in the conversation — every lifecycle skill may read these directly; only `refactor-learn` writes them:
 
 - **Config** — `docs/refactoring/config.md`: last-run date, focus areas, merge-request create-mode, and the `Pending issue` marker (`docs/playbooks/refactoring-config.md`)
-- **Remembered merge requests** — `docs/refactoring/merge-requests.md`: every open suite merge request with its URL, candidate issue, tooling-tree node (if any), and base branch
+- **Remembered merge requests** — which suite merge requests are open. When the target's issue tracker natively supports labels (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: `docs/refactoring/merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
 
@@ -35,7 +35,7 @@ Each numbered step runs the named lifecycle skill and carries its output to the 
 
 3. **Prioritise.** Run `/refactor-prioritize` on scan's proposals, against the now-current ledger. It stops the pass here (skip to step 5) if two suite merge requests are already open, or if every proposal is already in flight. Otherwise it hands one chosen node forward with its rationale.
 
-4. **Design.** Run `/refactor-design` on the chosen node. It files the node as an issue (the point at which a node first becomes one, ADR-0010) and writes the plan onto it. If the candidate is tiny and the user wants to skip ahead, that's their call — flag it, don't block. Carries the filed issue/plan into step 5.
+4. **Design.** Run `/refactor-design` on the chosen node. It files the node as an issue (the point at which a node first becomes one) and writes the plan onto it. If the candidate is tiny and the user wants to skip ahead, that's their call — flag it, don't block. Carries the filed issue/plan into step 5.
 
 5. **Implement.** Run `/refactor-implement`. One candidate, one branch; slices stay on that branch, and the branch only exists once this step creates it. It reviews its own diff along both axes (the check that used to be `refactor-review`'s own step) until clean — the change it describes matches what the plan asked for — before opening the merge request, looping back to its own earlier steps on findings rather than handing off to another skill. Carries the opened merge request into step 6.
 
@@ -46,20 +46,20 @@ Each numbered step runs the named lifecycle skill and carries its output to the 
 Followed by `refactor-implement` when it opens the reviewable; the create-mode decision itself is recorded into `docs/refactoring/config.md` by `refactor-learn`.
 
 - Read the target repo's `AGENTS.md` / `CLAUDE.md` first. If either names a mode, follow it.
-- Neither does → propose `autonomous` for this merge request; `refactor-learn` records the chosen mode — `autonomous`, `ask-each-time`, or `human-opens` — the first time it's decided.
+- Neither does → propose `autonomous` for this merge request; `refactor-learn` records the chosen mode — `autonomous`, `ask-each-time`, or `human-opens` — the first time it's decided. `refactor-learn` follows this same policy for its own bookkeeping merge request (see its `## Process`).
 - Skills always say **merge request**; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
 
 While fewer than two suite merge requests are open, a pass may deliver one more. Stack it (base = the open branch) only when the new candidate is a tooling-tree child of what is in flight or the design depends on it; otherwise branch parallel off the default branch. After the parent merges, the next pass retargets or rebases the child.
 
 The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
-For a tooling-tree candidate, close with an outlook: re-run `python3 scripts/lib/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and name whatever node it reports next, quoting that node's Purpose from the tree doc in one line. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled (ADR-0009), a type enum is a separate, still-undecided question.
+For a tooling-tree candidate, close with an outlook: re-run `python3 scripts/lib/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and name whatever node it reports next, quoting that node's Purpose from the tree doc in one line. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
 
 ## Fallback
 
-The suite must keep working in a target repo with none of the global skills installed. Per ADR-0003, each lifecycle skill self-contains its own step: its own `## Fallback` section means "use the global skill if installed, else the inline fallback". Two fallback depths apply: **crash-safe** means skip the global skill with a note — the step's core is already inline; **self-sufficient** means the fallback inlines the part of the global skill the step uses. The orchestrator engages no global skill itself (ADR-0010 moved its one reference into `refactor-learn`, which now owns the learn step) — every fallback lives in the lifecycle skill that uses it: `refactor-design`, `refactor-implement`, and `refactor-learn` each carry their own, per their `## Fallback` sections.
+The suite must keep working in a target repo with none of the global skills installed. Each lifecycle skill self-contains its own step: its own `## Fallback` section means "use the global skill if installed, else the inline fallback". Two fallback depths apply: **crash-safe** means skip the global skill with a note — the step's core is already inline; **self-sufficient** means the fallback inlines the part of the global skill the step uses. The orchestrator engages no global skill itself — that one reference now lives in `refactor-learn`, which owns the learn step — every fallback lives in the lifecycle skill that uses it: `refactor-design`, `refactor-implement`, and `refactor-learn` each carry their own, per their `## Fallback` sections.
 
-The authoritative inventory of every global reference and its fallback type lives in `docs/agents/skill-references.md` (ADR-0003) and is enforced by the Tier 1 validator (`scripts/validate_skills.py`) — that ledger, not this section, is the one place naming which global skill backs which step.
+The authoritative inventory of every global reference and its fallback type lives in `docs/agents/skill-references.md` and is enforced by the Tier 1 validator (`scripts/validate_skills.py`) — that ledger, not this section, is the one place naming which global skill backs which step.
 
 ## Completion criterion
 
