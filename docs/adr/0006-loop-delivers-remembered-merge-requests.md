@@ -1,6 +1,8 @@
 # Loop delivers via remembered merge requests
 
 > Amended by [ADR-0009](0009-merge-request-outlook-and-delivered-label.md): the description gains a plain-language opener and, for tooling-tree candidates, an outlook naming the next node (resolving half of ticket 19); the in-flight label is `refactor:delivered`, not `ready-for-human`.
+>
+> Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): the pass no longer starts from remembered merge-request state inline in the orchestrator — `refactor-scan` detects it, `refactor-learn` acts on it.
 
 A completed **candidate** is delivered as a **merge request**, remembered in the target repo’s suite state (`docs/refactoring/`). The **loop pass** does not wait for merge or a quiet review. Later passes react to that state. At most two suite merge requests are open; only those the loop remembered count. Outlook and typed rationales are not part of this decision (ticket 19).
 

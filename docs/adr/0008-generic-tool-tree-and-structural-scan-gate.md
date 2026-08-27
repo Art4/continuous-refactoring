@@ -1,6 +1,8 @@
 # Generic tool-tree root; structural scanning as a gated tree node
 
 > Amends [ADR-0005](0005-tooling-tree-not-baseline-skill.md): `git`'s tree entry moves to a new generic root (`docs/tooling-tree.md`); PHP's `composer`/`ci-runner` re-parent from `git` to a new `loop-config` node.
+>
+> Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): `structural-scan`'s "MR scope" changes — once the gate opens it is proposed like any other node, and the codebase walk that used to be `refactor-scan`'s own inline work moves to `refactor-design`, run only for the chosen candidate.
 
 Two gaps surfaced testing the suite end-to-end against a real target repo (a legacy PHP fixture with zero tooling). First, `refactor-scan` and `refactor-prioritize` never actually implemented the tree-walking ADR-0005 and ADR-0007 specify — the orchestrator's prose claimed it, `scripts/lib/tooling_tree.py` proved the design out against fixtures, but nothing wired either into the agent-facing skill text. A scan against the fixture found five genuine structural candidates and filed them without any awareness that the repo had no `composer.json`, no CI, no PHPStan — the tree was invisible to the skill that was supposed to walk it.
 

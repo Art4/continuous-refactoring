@@ -13,7 +13,7 @@ The set of candidate issues on the tracker, awaiting prioritisation.
 _Avoid_: debt list, todo list
 
 **Loop pass**:
-One run of the orchestrator. It starts from remembered **merge request** state (respond to comments, record a merge, or learn a rejection). If fewer than two suite merge requests are open, it may then complete at most one **candidate** (discover → prioritise → design → implement → review → learn).
+One run of the orchestrator. The orchestrator carries each lifecycle skill's output to the next skill's input (ADR-0010) rather than each skill re-deriving its own context: `refactor-scan` proposes up to five tooling-tree nodes and separately detects (never acts on) remembered merge requests that have since merged or closed; `refactor-learn` is the pass's only writer, acting on scan's findings and, once fewer than two suite merge requests are open, closing out at most one completed **candidate** (propose → prioritise → design → implement → learn).
 _Avoid_: session, sprint
 
 **Merge request**:
@@ -63,3 +63,11 @@ _Avoid_: (none — use the term as-is)
 **Plan**:
 The concrete refactoring plan produced by `refactor-design`: the deepened module, its seam, the interface, and the surviving tests — written on the candidate issue so the refactor is delegable.
 _Avoid_: design doc
+
+**Proposals**:
+The tooling-tree node names `refactor-scan` hands the orchestrator, up to five per pass — not yet candidates, since nothing is filed until `refactor-design` picks one and specs it.
+_Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
+
+**Findings**:
+Remembered issues or merge requests `refactor-scan` detects have since merged or closed on the external tracker — handed to `refactor-learn` to act on. Scan only notices; it never decides the outcome itself.
+_Avoid_: events, notifications

@@ -165,6 +165,31 @@ Troubleshooting:
 * `File not found: docs/php-tooling-tree.md` when `--dir /tmp/...` → run with `--dir` pointing to repo root and mention fixture path in prompt, or use the `.agents/skills` symlink method.
 * Long runtime → harness uses `timeout 60`; increase if model is slow.
 
+### Agent loop test (full pass, subagent-observed)
+
+Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010](../docs/adr/0010-orchestrator-explicit-data-flow.md) `## Validation`) so it can be repeated against this repo's own fixtures instead of an ad-hoc scratch copy of some other project. Where `roadmap --opencode` drives only `refactor-scan`'s proposal step via `opencode` in Docker, this drives the **full 6-step orchestrator pass** (`skills/continuous-refactoring/SKILL.md`: scan → learn → prioritise → design → implement → learn) via a Claude Code **Agent-tool subagent** — the tool a Claude Code session itself has, not a subprocess this script can launch. So `run.sh agent-loop` only prepares; running the subagent is a manual step, same as `--opencode` staying local-only and out of CI.
+
+```bash
+./fixtures/harness/run.sh agent-loop php-partial
+```
+
+What it does:
+
+1. Reuses `setup_fixture` — isolated copy at `/tmp/continuous-refactoring-tests/<fixture>`, fresh git repo, no remote (safe to commit/branch inside freely).
+2. Seeds a local-markdown issue-tracker override (`docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `.scratch/refactor/issues/`, a minimal `CONTEXT.md`, `docs/adr/`) — the same convention this repo uses for itself — so the skills never touch a real forge.
+3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one pass, note (don't silently fix) ambiguity, write friction notes to `agent-loop-friction-<fixture>.md`.
+4. Prints the sandbox and prompt paths and stops — spawn the subagent yourself (Agent tool, `run_in_background: false`, prompt = the file's contents) and let it run.
+
+Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `docs/refactoring/config.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):
+
+```bash
+source fixtures/harness/lib/assertions.sh
+assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/docs/refactoring/config.md"
+assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2 = after setup_fixture's init + tracker-seed commits
+```
+
+`php-partial` is a good default target — no `docs/refactoring/config.md` yet, so a pass exercises the `loop-config` bootstrap exception before reasoning about `composer`'s children. Any fixture name works; nothing here depends on `php-partial` specifically.
+
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting
 - `src/UserRepository.php` — Contains SQL injection vulnerability and hardcoded secret
