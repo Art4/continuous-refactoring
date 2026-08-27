@@ -17,9 +17,10 @@ usage() {
 Usage: $(basename "$0") <tier> <fixture> [options]
 
 Tiers:
-    tier2     Run artifact contract tests
-    tier3     Run ground-truth precision/recall tests
-    roadmap   Dry-run: detect tools, show decision chain and next 10 MRs (no MR created)
+    tier2       Run artifact contract tests
+    tier3       Run ground-truth precision/recall tests
+    roadmap     Dry-run: detect tools, show decision chain and next 10 MRs (no MR created)
+    agent-loop  Prepare an isolated sandbox + prompt for a full-pass, Agent-tool-subagent-observed run (local-only, see fixtures/README.md)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
@@ -32,6 +33,7 @@ Examples:
     $(basename "$0") roadmap php-empty
     $(basename "$0") roadmap php-p0-empty --verbose
     $(basename "$0") roadmap php-empty --opencode --verbose   # deterministic + opencode comparison
+    $(basename "$0") agent-loop php-partial                   # prepare sandbox + prompt, then spawn a subagent yourself
 EOF
     exit 1
 }
@@ -295,6 +297,94 @@ for r in d['roadmap']:
     fi
 }
 
+# Agent loop: prepare an isolated sandbox + prompt for a full-pass,
+# subagent-observed run. Formalizes the manual dry-run methodology from
+# ADR-0010's "## Validation" section against this repo's own fixtures.
+#
+# Unlike roadmap's --opencode (a Docker subprocess this script can launch
+# itself), a Claude Code Agent-tool subagent cannot be started from Bash —
+# this function only prepares the sandbox and a ready-to-use prompt; running
+# the subagent against that prompt is a separate, manual step (see
+# fixtures/README.md).
+run_agent_loop() {
+    log_info "=== Agent loop (full pass, subagent-observed) — fixture: $FIXTURE ==="
+
+    # Local issue-tracker override so the skills never touch a real forge —
+    # same convention this repo uses for itself (docs/agents/issue-tracker.md).
+    mkdir -p "$FIXTURE_DST/docs/agents" "$FIXTURE_DST/.scratch/refactor/issues"
+    cat > "$FIXTURE_DST/docs/agents/issue-tracker.md" <<'EOF'
+# Issue tracker: Local Markdown
+
+Issues live as markdown files in `.scratch/refactor/issues/`, one file per
+issue, numbered from `01`. A `Status:` / `Labels:` line near the top records
+triage state (see `docs/agents/triage-labels.md`). Comments append under a
+`## Comments` heading at the bottom of the file.
+
+## When a skill says "file an issue"
+
+Create a new file at `.scratch/refactor/issues/<NN>-<slug>.md`.
+
+## When a skill says "check the external tracker"
+
+Read the files under `.scratch/refactor/issues/` directly — there is no
+external forge in this sandbox.
+EOF
+    cat > "$FIXTURE_DST/docs/agents/triage-labels.md" <<'EOF'
+# Triage Labels
+
+| Label in mattpocock/skills | Label in our tracker | Meaning                                  |
+| --------------------------- | --------------------- | ----------------------------------------- |
+| `needs-triage`               | `needs-triage`          | Maintainer needs to evaluate this issue   |
+| `needs-info`                 | `needs-info`            | Waiting on reporter for more information  |
+| `ready-for-agent`            | `ready-for-agent`       | Fully specified, ready for an AFK agent   |
+| `ready-for-human`            | `ready-for-human`       | Requires human implementation             |
+| `wontfix`                    | `wontfix`               | Will not be actioned                      |
+| —                            | `done`                  | Work complete, delivered, no longer open  |
+EOF
+    if [[ ! -f "$FIXTURE_DST/CONTEXT.md" ]]; then
+        printf '# %s\n\n_Domain vocabulary for this sandbox project — the loop appends terms here as they crystallise._\n' "$FIXTURE" > "$FIXTURE_DST/CONTEXT.md"
+    fi
+    mkdir -p "$FIXTURE_DST/docs/adr"
+    git -C "$FIXTURE_DST" add -A
+    git -C "$FIXTURE_DST" -c user.name="Test Runner" -c user.email="test@ci.local" commit -q -m "Seed local issue-tracker override for agent-loop sandbox"
+
+    local prompt_file="/tmp/continuous-refactoring-tests/agent-loop-prompt-$FIXTURE.md"
+    local friction_file="$FIXTURE_DST/../agent-loop-friction-$FIXTURE.md"
+    cat > "$prompt_file" <<EOF
+You are dry-run testing the continuous-refactoring skill suite against an
+isolated sandbox — a copy of the fixture "$FIXTURE", not a real project.
+
+Sandbox (your working directory for everything below): $FIXTURE_DST
+It is a real, freshly-initialized git repo with no remote — commit, branch,
+and open merge requests (as local branches; there is no forge to push to)
+freely inside it. Never read or write anything outside this path.
+
+Read this file and follow it literally, as if you were the suite consuming
+its own instructions for the first time:
+    $REPO_DIR/skills/continuous-refactoring/SKILL.md
+It will point you to the lifecycle skills it orchestrates (refactor-scan,
+refactor-prioritize, refactor-design, refactor-implement, refactor-learn)
+under $REPO_DIR/skills/ — read each one when the orchestrator step tells you
+to run it.
+
+Run exactly one pass. Where the skill text is ambiguous or you have to guess
+at a behavior it doesn't spell out, do not silently improvise past it and do
+not edit the skill files — note the ambiguity instead. When the pass ends
+(or stops itself per its own completion criterion), append your findings to:
+    $friction_file
+covering: what you did each step, any ambiguity or guessed behavior, and
+whether each step's completion criterion was actually met.
+EOF
+
+    log_info "Sandbox ready: $FIXTURE_DST (git initialized, no remote, tracker/CONTEXT.md/docs/adr seeded)"
+    log_info "Prompt written: $prompt_file"
+    log_info "Next step (manual — this script cannot spawn a Claude Code subagent itself):"
+    log_info "  spawn an Agent-tool subagent with the contents of $prompt_file, let it run, then inspect"
+    log_info "  $FIXTURE_DST (git log, docs/refactoring/, .scratch/refactor/issues/) and $friction_file"
+    log_info "Optional post-run structural check once the pass has run:"
+    log_info "  assert_config_format \"$FIXTURE_DST/docs/refactoring/config.md\"  (source fixtures/harness/lib/assertions.sh first)"
+}
+
 # Main
 main() {
     reset_counters
@@ -309,6 +399,9 @@ main() {
             ;;
         roadmap)
             run_roadmap
+            ;;
+        agent-loop)
+            run_agent_loop
             ;;
         *)
             log_fail "Unknown tier: $TIER"

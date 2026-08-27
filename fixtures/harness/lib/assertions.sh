@@ -217,6 +217,23 @@ sys.exit(0)
     fi
 }
 
+# Assertion: repo has new commits past the initial fixture commit(s)
+# (advisory sanity check after an agent-loop run — not a hard content match,
+# since the subagent's output isn't deterministic)
+assert_git_has_new_commits() {
+    local repo="$1"
+    local baseline="$2" # commit count right after setup_fixture
+    local commits
+    commits=$(git -C "$repo" rev-list --count HEAD 2>/dev/null || echo "0")
+    if [[ "$commits" -gt "$baseline" ]]; then
+        log_pass "New commits in $repo since baseline ($baseline -> $commits)"
+        return 0
+    else
+        log_fail "No new commits in $repo since baseline ($baseline)"
+        return 1
+    fi
+}
+
 # Print summary
 print_summary() {
     echo ""
