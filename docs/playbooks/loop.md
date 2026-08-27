@@ -11,10 +11,12 @@ scan → prioritise → design (grill) → implement (tdd) → review (2 axes)
    └────────────────────────────── learn (ADR / CONTEXT.md / issue status) ←──────┘
 ```
 
-## Cadence and triggers
+## Triggers
 
-- **Cadence:** configured in `docs/refactoring/config.md` (default: weekly). You kick the loop off whenever it's due.
+The loop never triggers itself — it has no stored schedule (`docs/playbooks/refactoring-config.md`). You kick it off, however often that is: by hand, or via whatever recurring trigger you set up outside the suite.
+
 - **On-demand:** `/continuous-refactoring` any time — after a feature, before a release, when an area hurts.
+- **Recurring:** point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring` on whatever interval fits — the loop does the same one pass regardless of how often it's invoked.
 - **Triggers that make an early scan worthwhile:** many commits in the same module (a hot spot), a bug that's been fixed three times, an area the fulfilled tooling keeps flagging.
 
 ## What you decide each pass

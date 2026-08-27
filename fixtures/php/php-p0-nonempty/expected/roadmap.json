@@ -5,6 +5,10 @@
       "fulfilled": true,
       "reason": "found .git"
     },
+    "loop-config": {
+      "fulfilled": false,
+      "reason": "no docs/refactoring/config.md"
+    },
     "composer": {
       "fulfilled": true,
       "reason": "composer.json+lock present"
@@ -52,11 +56,25 @@
     "rector-type-coverage": {
       "fulfilled": false,
       "reason": "no rector type coverage"
+    },
+    "structural-scan": {
+      "fulfilled": false,
+      "reason": "waiting on: composer-audit, phpstan-level-3, rector-dead-code, rector-type-coverage"
     }
   },
   "roadmap": [
     {
       "n": 1,
+      "node": "loop-config",
+      "type": "tooling",
+      "required_parents": [
+        "git"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 2,
       "node": "composer-audit",
       "type": "tooling",
       "required_parents": [
@@ -66,7 +84,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 2,
+      "n": 3,
       "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
@@ -78,7 +96,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 3,
+      "n": 4,
       "node": "rector-type-coverage",
       "type": "tooling",
       "required_parents": [
@@ -91,44 +109,38 @@
       "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
     },
     {
-      "n": 4,
-      "node": "structural:001-shallow-user-service.md",
-      "type": "structural",
-      "reason": "planted candidate"
-    },
-    {
       "n": 5,
-      "node": "structural:002-sql-injection-user-repository.md",
-      "type": "structural",
-      "reason": "planted candidate"
-    },
-    {
-      "n": 6,
-      "node": "structural:003-hardcoded-secret-user-repository.md",
-      "type": "structural",
-      "reason": "planted candidate"
-    },
-    {
-      "n": 7,
-      "node": "structural:004-unused-unused-reporting-service.md",
-      "type": "structural",
-      "reason": "planted candidate"
-    },
-    {
-      "n": 8,
-      "node": "structural:005-style-violations-bootstrap.md",
-      "type": "structural",
-      "reason": "planted candidate"
-    },
-    {
-      "n": 9,
       "node": "phpstan-level-4",
       "type": "tooling (open chain)",
       "reason": "chain open above level 3 \u2014 appended node"
     },
     {
-      "n": 10,
+      "n": 6,
       "node": "phpstan-level-5",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 3 \u2014 appended node"
+    },
+    {
+      "n": 7,
+      "node": "phpstan-level-6",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 3 \u2014 appended node"
+    },
+    {
+      "n": 8,
+      "node": "phpstan-level-7",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 3 \u2014 appended node"
+    },
+    {
+      "n": 9,
+      "node": "phpstan-level-8",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 3 \u2014 appended node"
+    },
+    {
+      "n": 10,
+      "node": "phpstan-level-9",
       "type": "tooling (open chain)",
       "reason": "chain open above level 3 \u2014 appended node"
     }

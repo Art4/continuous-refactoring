@@ -5,6 +5,10 @@
       "fulfilled": true,
       "reason": "found .git"
     },
+    "loop-config": {
+      "fulfilled": false,
+      "reason": "no docs/refactoring/config.md"
+    },
     "composer": {
       "fulfilled": false,
       "reason": "missing composer.json or lock"
@@ -52,12 +56,16 @@
     "rector-type-coverage": {
       "fulfilled": false,
       "reason": "no rector type coverage"
+    },
+    "structural-scan": {
+      "fulfilled": false,
+      "reason": "waiting on: composer-audit, phpunit, test-runner-if-missing, php-cs-fixer, phpstan-level-3, rector-dead-code, rector-type-coverage"
     }
   },
   "roadmap": [
     {
       "n": 1,
-      "node": "composer",
+      "node": "loop-config",
       "type": "tooling",
       "required_parents": [
         "git"
@@ -67,16 +75,26 @@
     },
     {
       "n": 2,
-      "node": "ci-runner",
+      "node": "composer",
       "type": "tooling",
       "required_parents": [
-        "git"
+        "loop-config"
       ],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
     {
       "n": 3,
+      "node": "ci-runner",
+      "type": "tooling",
+      "required_parents": [
+        "loop-config"
+      ],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 4,
       "node": "php-cs-fixer",
       "type": "tooling",
       "required_parents": [
@@ -86,7 +104,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 4,
+      "n": 5,
       "node": "phpunit",
       "type": "tooling",
       "required_parents": [
@@ -96,7 +114,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 5,
+      "n": 6,
       "node": "composer-audit",
       "type": "tooling",
       "required_parents": [
@@ -106,7 +124,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 7,
       "node": "phpstan-level-0-baseline",
       "type": "tooling",
       "required_parents": [
@@ -116,7 +134,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
       "node": "phpstan-level-1",
       "type": "tooling",
       "required_parents": [
@@ -126,7 +144,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 8,
+      "n": 9,
       "node": "phpstan-level-2",
       "type": "tooling",
       "required_parents": [
@@ -136,25 +154,13 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 9,
+      "n": 10,
       "node": "phpstan-level-3",
       "type": "tooling",
       "required_parents": [
         "phpstan-level-2"
       ],
       "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 10,
-      "node": "rector-dead-code",
-      "type": "tooling",
-      "required_parents": [
-        "phpstan-level-0-baseline"
-      ],
-      "recommended_parents": [
-        "php-cs-fixer"
-      ],
       "reason": "required parents fulfilled"
     }
   ],

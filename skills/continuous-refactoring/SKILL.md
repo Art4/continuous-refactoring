@@ -1,6 +1,6 @@
 ---
 name: continuous-refactoring
-description: Run one pass of the continuous refactoring loop — pick up remembered merge requests, scan, prioritise, design, implement, review, learn. Use to keep a codebase under continuous refactoring, on a cadence or on demand.
+description: Run one pass of the continuous refactoring loop — pick up remembered merge requests, scan, prioritise, design, implement, review, learn. Use to keep a codebase under continuous refactoring, on demand or via your own recurring trigger.
 disable-model-invocation: true
 ---
 
@@ -8,20 +8,20 @@ disable-model-invocation: true
 
 The **loop pass** — the stateful, repeatable sequence that keeps a project under continuous refactoring. Each pass does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
-A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005). A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
+A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state (ADR-0006). Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop (ADR-0005). A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected. `refactor-scan` checks git, the loop's own configuration, and backlog size itself before scanning anything else — the orchestrator does not duplicate those checks (ADR-0008).
 
-Run this on demand whenever you're asked, or on the configured **cadence**.
+Run this on demand whenever you're asked, or via whatever recurring trigger you've set up outside the suite — the loop has no stored schedule of its own; it does the same one pass regardless of how often it's invoked.
 
 ## Loop state
 
 State lives in the target repo, not in the conversation:
 
-- **Config** — `docs/refactoring/config.md`: cadence, last-run date, focus areas, merge-request create-mode
-- **Remembered merge requests** — `docs/refactoring/merge-requests.md`: every open suite merge request with its URL, candidate issue, and base branch
+- **Config** — `docs/refactoring/config.md`: last-run date, focus areas, merge-request create-mode
+- **Remembered merge requests** — `docs/refactoring/merge-requests.md`: every open suite merge request with its URL, candidate issue, tooling-tree node (if any), and base branch
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
 
-Read all four at the start of every pass. If `docs/refactoring/config.md` doesn't exist, scaffold the suite state directory (ask the user for the cadence; default weekly) — this is the marker that a pass can run.
+Read all four at the start of every pass. `docs/refactoring/config.md` is no longer scaffolded here directly: `refactor-scan` checks for it itself (the `loop-config` node, `docs/tooling-tree.md`) and files the single candidate that creates it when it's missing (ADR-0008) — that candidate, once implemented, is the marker that a pass has real configuration to work from.
 
 ## The pass
 
@@ -33,7 +33,7 @@ Each numbered step runs the named lifecycle skill. Stop between steps where the 
    - Closed without merge → if the comments support a structural rejection, mark `wontfix` and file a learned rejection under `docs/refactoring/out-of-scope/`; otherwise ask the human.
    - Two merge requests still open → point the human at them; take no new candidate this pass beyond the responses above.
 
-2. **Scan.** Run `/refactor-scan`. It files structural candidates *and* missing tooling-tree nodes together. If the last scan is recent and nothing changed, report that and stop early.
+2. **Scan.** Run `/refactor-scan`. It checks its own preconditions first — git, loop configuration, backlog size. Two outcomes end the pass here, before anything else runs: no git repository, or the backlog is already full. Every other outcome continues to step 3 with whatever `/refactor-scan` reported — a tooling-tree candidate it just filed, a tooling-tree candidate that was already open and pending (nothing new filed, the existing one is what's next), or a batch of structural candidates once the tree is resolved (never a node together with structural candidates, ADR-0008). If it reports the last scan is recent and nothing changed, stop this pass early too.
 
 3. **Prioritise.** Run `/refactor-prioritize`. It recommends an unblocked tooling-tree node when one exists; the user picks the next candidate.
 
@@ -44,10 +44,11 @@ Each numbered step runs the named lifecycle skill. Stop between steps where the 
 6. **Review.** Run `/refactor-review`. If findings come back, loop implement → review until clean.
 
 7. **Learn.** Close the loop:
-   - Deliver the completed candidate as a **merge request** — see `## Opening a merge request` below — remember its URL and candidate issue in `docs/refactoring/merge-requests.md`, and label the candidate `ready-for-human` (not done).
+   - Deliver the completed candidate as a **merge request** — see `## Opening a merge request` below — remember its URL, candidate issue, and (for a tooling-tree candidate) the node name in `docs/refactoring/merge-requests.md`, and label the candidate `refactor:delivered` (not done — and not `ready-for-human`, ADR-0009: that label is `triage`'s, meaning "nobody has implemented this yet," the opposite of what just happened here).
    - Record ADRs for decisions a future scan must not re-litigate (see `/domain-modeling`)
    - Update `CONTEXT.md` with any terms that crystallised
    - Stamp the last-run date in `docs/refactoring/config.md`
+   - These four writes are suite bookkeeping: commit them straight to the target's default branch, not to the candidate's own branch — they aren't part of the diff a human reviews on the merge request (ADR-0009).
 
 ## Opening a merge request
 
@@ -59,7 +60,9 @@ The create-mode decides who opens the forge reviewable:
 
 While fewer than two suite merge requests are open, a pass may deliver one more. Stack it (base = the open branch) only when the new candidate is a tooling-tree child of what is in flight or the design depends on it; otherwise branch parallel off the default branch. After the parent merges, the next pass retargets or rebases the child.
 
-The description is plain: link the candidate, what changed, which tests survive, what CI proves. No outlook, no type enum.
+The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
+
+For a tooling-tree candidate, close with an outlook: re-run `python3 scripts/lib/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and name whatever node it reports next, quoting that node's Purpose from the tree doc in one line. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled (ADR-0009), a type enum is a separate, still-undecided question.
 
 ## Fallback
 
@@ -78,4 +81,4 @@ The authoritative inventory of every global reference and its fallback type live
 
 ## Completion criterion
 
-One full pass completed and the loop state updated — remembered merge requests processed (comments answered, merges recorded or rejections learned), last-run stamped, and the pass's own outcome recorded: the delivered candidate sits `ready-for-human` with its merge request remembered, or the issue closed.
+One full pass completed and the loop state updated — remembered merge requests processed (comments answered, merges recorded or rejections learned), last-run stamped, and the pass's own outcome recorded: the delivered candidate sits `refactor:delivered` with its merge request remembered, or the issue closed.

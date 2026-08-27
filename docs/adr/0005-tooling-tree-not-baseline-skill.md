@@ -1,6 +1,8 @@
 # Tooling tree instead of a baseline skill
 
 > Amended by [ADR-0007](0007-required-recommended-edges.md): tree edges split into **required** and **recommended**; Rector leaves the first wave and becomes suite nodes adopted in levels behind PHPStan (`docs/php-tooling-tree.md`).
+>
+> Amended by [ADR-0008](0008-generic-tool-tree-and-structural-scan-gate.md): `git` moves to a new generic root (`docs/tooling-tree.md`) alongside a new `loop-config` node; PHP's tree attaches beneath `loop-config` instead of `git` directly.
 
 The loop must work without a one-shot tooling onboarding. Language specialisation is a **tooling tree**: missing tools are small **candidates** (one reviewable MR each), not a `/refactor-baseline` pass that blocks the loop. Git is the only hard requirement — without it the suite does not run.
 

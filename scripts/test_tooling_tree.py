@@ -15,16 +15,36 @@ class LoadTreeTests(unittest.TestCase):
     def test_edges_parsed(self):
         tree = load_tree()
         self.assertGreaterEqual(len(tree["edges"]), 15)
+        # generic root (ADR-0008): git -> loop-config, loop-config -> PHP tree roots
+        self.assertIn({"from": "git", "to": "loop-config", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "loop-config", "to": "composer", "type": "required"}, tree["edges"])
         # check required edge
-        self.assertIn({"from": "git", "to": "composer", "type": "required"}, tree["edges"])
         self.assertIn({"from": "phpstan-level-0-baseline", "to": "phpstan-level-1", "type": "required"}, tree["edges"])
         # recommended
         self.assertIn({"from": "php-cs-fixer", "to": "rector-dead-code", "type": "recommended"}, tree["edges"])
+        # resolved (ADR-0008): PHP-tree leaves gate structural-scan
+        self.assertIn({"from": "composer-audit", "to": "structural-scan", "type": "resolved"}, tree["edges"])
 
     def test_order_contains_nodes(self):
         tree = load_tree()
-        for n in ["git", "composer", "phpstan-level-0-baseline", "phpstan-level-1", "rector-dead-code"]:
+        for n in ["git", "loop-config", "composer", "phpstan-level-0-baseline", "phpstan-level-1", "rector-dead-code", "structural-scan"]:
             self.assertIn(n, tree["order"])
+
+    def test_resolved_parents_of_structural_scan(self):
+        tree = load_tree()
+        leaves = set(tree["resolved_parents"]["structural-scan"])
+        self.assertEqual(
+            leaves,
+            {
+                "composer-audit",
+                "phpunit",
+                "test-runner-if-missing",
+                "php-cs-fixer",
+                "phpstan-level-3",
+                "rector-dead-code",
+                "rector-type-coverage",
+            },
+        )
 
 
 class BaselineEmptyTests(unittest.TestCase):
@@ -74,8 +94,20 @@ class DetectNodesTests(unittest.TestCase):
         try:
             d = detect_nodes(root)
             self.assertTrue(d["git"]["fulfilled"])
+            self.assertFalse(d["loop-config"]["fulfilled"])
             self.assertFalse(d["composer"]["fulfilled"])
             self.assertFalse(d["phpstan-level-0-baseline"]["fulfilled"])
+            self.assertFalse(d["structural-scan"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_loop_config_fulfilled_when_config_md_present(self):
+        tmp, root = self._make_repo({
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["loop-config"]["fulfilled"])
         finally:
             tmp.cleanup()
 
@@ -137,6 +169,78 @@ class DetectNodesTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class StructuralScanGateTests(unittest.TestCase):
+    """ADR-0008: structural-scan's `resolved` edges — a rejected leaf still
+    unblocks the node, unlike a standard required edge."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _fully_tooled_files(self):
+        return {
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "phpunit/phpunit": "^10.0",
+                    "friendsofphp/php-cs-fixer": "^3.0",
+                },
+            }),
+            "composer.lock": "{}",
+            ".php-cs-fixer.php": "<?php return [];",
+            "phpstan.neon": "parameters:\n    level: 3\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "rector.php": "<?php // DeadCode Type",
+        }
+
+    def test_unfulfilled_when_leaves_missing(self):
+        tmp, root = self._make_repo({})
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["structural-scan"]["fulfilled"])
+            self.assertIn("composer-audit", d["structural-scan"]["details"]["unresolved"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_when_every_leaf_fulfilled(self):
+        tmp, root = self._make_repo(self._fully_tooled_files())
+        try:
+            d = detect_nodes(root)
+            # composer-audit is a deliberate roadmap-demo seam (always proposable
+            # once composer exists — see detect_nodes) so it never reads as
+            # fulfilled by file inspection; reject it explicitly here instead,
+            # exercising the rejected-still-resolves path for at least one leaf.
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "composer-audit.md").write_text("rejected: not worth it here\n")
+            d = detect_nodes(root)
+            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
+        finally:
+            tmp.cleanup()
+
+    def test_rejected_leaf_still_resolves_unlike_required_edge(self):
+        # Every leaf fulfilled except rector-type-coverage, which is rejected
+        # (not fulfilled) — structural-scan must still open, unlike a normal
+        # required edge which would close permanently on a rejection.
+        files = self._fully_tooled_files()
+        files["rector.php"] = "<?php // DeadCode rules only"
+        tmp, root = self._make_repo(files)
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "composer-audit.md").write_text("rejected\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
+            d = detect_nodes(root)
+            self.assertFalse(d["rector-type-coverage"]["fulfilled"])
+            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
+        finally:
+            tmp.cleanup()
+
+
 class RoadmapTests(unittest.TestCase):
     def _make_repo(self, files: dict):
         tmp = tempfile.TemporaryDirectory()
@@ -148,13 +252,27 @@ class RoadmapTests(unittest.TestCase):
         (root / ".git").mkdir()
         return tmp, root
 
-    def test_empty_roadmap_starts_with_composer(self):
+    def test_empty_roadmap_starts_with_loop_config(self):
+        # ADR-0008: with no docs/refactoring/config.md, loop-config is the
+        # first proposable node — required parent of composer/ci-runner.
         tmp, root = self._make_repo({})
+        try:
+            r = roadmap(root, steps=4)
+            self.assertEqual(r[0]["node"], "loop-config")
+            # composer has priority over ci-runner in the order table, and is
+            # unblocked once loop-config is simulated fulfilled.
+            self.assertEqual(r[1]["node"], "composer")
+            self.assertIn(r[2]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
+        finally:
+            tmp.cleanup()
+
+    def test_roadmap_with_loop_config_starts_with_composer(self):
+        # With docs/refactoring/config.md already present, loop-config is
+        # fulfilled and the roadmap picks up where it used to before ADR-0008.
+        tmp, root = self._make_repo({"docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"})
         try:
             r = roadmap(root, steps=3)
             self.assertEqual(r[0]["node"], "composer")
-            # ci-runner and composer are both children of git; composer has priority in order table
-            # second step should be ci-runner or cs-fixer depending on fulfilled simulation
             self.assertIn(r[1]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
         finally:
             tmp.cleanup()

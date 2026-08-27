@@ -21,7 +21,7 @@ The forge reviewable that delivers a completed candidate. Skills always use this
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
 **Tooling tree**:
-The directed graph of adoption steps in a language specialization. A **node** adopts one tool up to a stated degree — a tool may own several nodes (each PHPStan level is its own node).
+The directed graph of adoption steps a target repo climbs — a generic root (`docs/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `docs/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node).
 _Avoid_: baseline, floor, bootstrap, onboarding
 
 **Required edge**:
@@ -31,10 +31,6 @@ _Avoid_: hard edge, blocking edge
 **Recommended edge**:
 The advisory counterpart: the child stays proposable even when its recommended parent was rejected; the rejected parent is never re-proposed — at most the loop informs where it would have helped.
 _Avoid_: soft edge, nice-to-have edge
-
-**Cadence**:
-The configured schedule that decides when the next periodic loop pass is due.
-_Avoid_: frequency, interval
 
 **Hot spot**:
 A part of the codebase that keeps appearing in change history — the primary place to look for candidates.

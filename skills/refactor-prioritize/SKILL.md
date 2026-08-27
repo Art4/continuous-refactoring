@@ -28,6 +28,8 @@ Present the ranking as a short list, oldest-first within each tier, with a one-l
 
 Name the single next candidate and say why it wins. If two are close, call the tie out and let the user decide.
 
+If the backlog contains a proposable **tooling tree** node (`loop-config`, or a node from `docs/php-tooling-tree.md`), treat it as a strong default recommendation — the loop's structural work compounds faster once the underlying tooling is in place, and `refactor-scan` only ever files one such candidate at a time. Still let the user pick a structural deepening instead; this is a recommendation, not a **required edge** (ADR-0005, ADR-0008).
+
 ## Completion criterion
 
 The backlog is ranked with a one-line rationale per candidate, and a single next candidate is recommended with a reason.

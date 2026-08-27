@@ -101,11 +101,14 @@ assert_issue_has_label() {
 # Assertion: Check config file format
 assert_config_format() {
     local config_file="$1"
-    if grep -q "Cadence:" "$config_file" 2>/dev/null; then
-        log_pass "Config has Cadence field"
+    # No Cadence field by design (ADR-0008): the loop never triggers itself,
+    # so nothing stores a schedule. Last run is the orchestrator-written
+    # anchor field instead.
+    if grep -q "Last run:" "$config_file" 2>/dev/null; then
+        log_pass "Config has Last run field"
         return 0
     else
-        log_fail "Config missing Cadence field"
+        log_fail "Config missing Last run field"
         return 1
     fi
 }
