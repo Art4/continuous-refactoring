@@ -62,7 +62,7 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 
 **A structural candidate:** create an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), and Signal (which friction signal from step 2 it came from). Then capture the plan on that issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`).
 
-Either way: set `docs/refactoring/config.md`'s `Pending issue` field to this issue (`docs/playbooks/refactoring-config.md`) — the marker that lets a future `refactor-scan` resume this exact work instead of proposing something fresh if the pass stops here. `refactor-learn` clears it once a merge request exists.
+Either way: set `docs/refactoring/config.md`'s `Pending issue` field to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — the marker that lets a future `refactor-scan` resume this exact work instead of proposing something fresh if the pass stops here. `refactor-learn` clears it once a merge request exists.
 
 **`loop-config` exception:** if the chosen node *is* `loop-config` itself, `docs/refactoring/config.md` doesn't exist yet — there's nowhere to write `Pending issue` at this step. Skip the write here; `refactor-implement` records it directly when it creates the file (its own `## Fallback`-adjacent step, not a grilling or domain-modeling concern).
 

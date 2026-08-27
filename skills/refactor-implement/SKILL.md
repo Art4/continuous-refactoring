@@ -21,7 +21,7 @@ Then, for a structural candidate: list the seams the plan names and confirm them
 
 A tooling-tree node's plan has no seam to confirm — its scope is a config/dependency change (see the tree doc's MR scope), not code. Skip straight to making that change; there's no red → green cycle for it, only its Fulfilment check (step 3).
 
-**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending issue` (`docs/refactoring/config.md` didn't exist yet). When you create the file here, set `Pending issue` to this candidate's issue yourself. Leave `Last run` and `Create-mode` out (or clearly unset) — don't invent placeholder values for them; per `docs/playbooks/refactoring-config.md` those are `refactor-learn`'s fields, and `refactor-learn` fills them in its own follow-up commit (see its `## Process`).
+**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending issue` (`docs/refactoring/config.md` didn't exist yet). When you create the file here, set `Pending issue` to this candidate's issue yourself. Leave `Last run` and `Create-mode` out (or clearly unset) — don't invent placeholder values for them; per `skills/continuous-refactoring/references/refactoring-config.md` those are `refactor-learn`'s fields, and `refactor-learn` fills them in its own follow-up commit (see its `## Process`).
 
 ### 2. One slice at a time
 

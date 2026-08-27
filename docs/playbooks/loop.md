@@ -15,7 +15,7 @@ The orchestrator passes each skill's output to the next as its input (ADR-0010) 
 
 ## Triggers
 
-The loop never triggers itself — it has no stored schedule (`docs/playbooks/refactoring-config.md`). You kick it off, however often that is: by hand, or via whatever recurring trigger you set up outside the suite.
+The loop never triggers itself — it has no stored schedule (`skills/continuous-refactoring/references/refactoring-config.md`). You kick it off, however often that is: by hand, or via whatever recurring trigger you set up outside the suite.
 
 - **On-demand:** `/continuous-refactoring` any time — after a feature, before a release, when an area hurts.
 - **Recurring:** point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring` on whatever interval fits — the loop does the same one pass regardless of how often it's invoked.

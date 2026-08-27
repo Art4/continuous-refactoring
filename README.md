@@ -46,4 +46,4 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 - **Learned rejections:** `docs/refactoring/out-of-scope/`
 - **Domain language:** `CONTEXT.md` · decisions: `docs/adr/`
 
-See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human and [docs/playbooks/refactoring-config.md](docs/playbooks/refactoring-config.md) for the config file.
+See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human and [skills/continuous-refactoring/references/refactoring-config.md](skills/continuous-refactoring/references/refactoring-config.md) for the config file.

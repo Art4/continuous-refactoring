@@ -18,7 +18,7 @@ Run this on demand whenever you're asked, or via whatever recurring trigger you'
 
 State lives in the target repo, not in the conversation — every lifecycle skill may read these directly; only `refactor-learn` writes them:
 
-- **Config** — `docs/refactoring/config.md`: last-run date, focus areas, merge-request create-mode, and the `Pending issue` marker (`docs/playbooks/refactoring-config.md`)
+- **Config** — `docs/refactoring/config.md`: last-run date, focus areas, merge-request create-mode, and the `Pending issue` marker (`skills/continuous-refactoring/references/refactoring-config.md`)
 - **Remembered merge requests** — which suite merge requests are open. When the target's issue tracker natively supports labels (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: `docs/refactoring/merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes

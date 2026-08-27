@@ -27,4 +27,4 @@ This repo IS the skill suite. The skills live under `skills/` and are consumed b
 - `refactor-implement` — execute the plan test-first, review included
 - `refactor-learn` — the suite's only writer: ledger, ADR/CONTEXT.md, issue status
 
-Loop vocabulary lives in `CONTEXT.md` (candidate, backlog, tooling tree, merge request, cadence, hot spot, deepening, seam, deletion test, proposals, findings). Human-facing docs live in `docs/playbooks/`.
+Loop vocabulary lives in `CONTEXT.md` (candidate, backlog, tooling tree, merge request, cadence, hot spot, deepening, seam, deletion test, proposals, findings). Human-facing docs live in `docs/playbooks/`. A reference doc a skill actually needs at runtime lives under `skills/<owning-skill>/references/` instead — `docs/playbooks/`, like `docs/adr/` and `docs/agents/`, never ships with the skills (ADR-0013).
