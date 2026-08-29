@@ -62,9 +62,9 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 
 **A structural candidate:** create an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), and Signal (which friction signal from step 2 it came from). Then capture the plan on that issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`).
 
-Either way: set `docs/refactoring/config.md`'s `Pending tasks` field to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — the marker that lets a future `refactor-scan` resume this exact work instead of proposing something fresh if the pass stops here. `refactor-learn` clears it once a merge request exists.
+Either way: set `docs/refactoring/config.md`'s `Pending candidates` field to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — the marker that lets a future `refactor-scan` resume this exact work instead of proposing something fresh if the pass stops here. `refactor-learn` clears it once a merge request exists.
 
-**`loop-config` exception:** if the chosen node *is* `loop-config` itself, `docs/refactoring/config.md` doesn't exist yet — there's nowhere to write `Pending tasks` at this step. Skip the write here; `refactor-implement` records it directly when it creates the file (its own `## Fallback`-adjacent step, not a grilling or domain-modeling concern).
+**`loop-config` exception:** if the chosen node *is* `loop-config` itself, `docs/refactoring/config.md` doesn't exist yet — there's nowhere to write `Pending candidates` at this step. Skip the write here; `refactor-implement` records it directly when it creates the file (its own `## Fallback`-adjacent step, not a grilling or domain-modeling concern).
 
 The plan follows the foundational refactoring rules: behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
 
@@ -80,4 +80,4 @@ The filed issue, carrying the plan → `refactor-implement`.
 
 ## Completion criterion
 
-The candidate has an issue (newly filed, or a resumed one) with a written plan on it, and `config.md`'s `Pending tasks` names it. For a structural candidate: module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier). For a tooling tree node: the tree doc's Purpose / Fulfilment check / MR scope, carried onto the issue as its own plan — not introduced as a quotation from the tree doc.
+The candidate has an issue (newly filed, or a resumed one) with a written plan on it, and `config.md`'s `Pending candidates` names it. For a structural candidate: module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier). For a tooling tree node: the tree doc's Purpose / Fulfilment check / MR scope, carried onto the issue as its own plan — not introduced as a quotation from the tree doc.
