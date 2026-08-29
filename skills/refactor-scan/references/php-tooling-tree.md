@@ -80,10 +80,11 @@ The seven `resolved` rows above are not `required` or `recommended` — see `ski
 
 A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
 
-A node's full definition may live in its own file under `php-tooling-tree/` (sibling to this document) once extracted — see `composer` below for the first example. The stub left behind here keeps Tool and Purpose inline so merge requests can be described by the tool's human-readable name rather than the node's slug (e.g. `phpstan-level-0-baseline` reads as "PHPStan Level 0"); Fulfilment check and MR scope move to the extracted file. Nodes not yet extracted stay inline in full.
+A node's full definition may live in its own file under `php-tooling-tree/` (sibling to this document) once extracted — see `composer` below for the first example. Every node also carries a **Name** — the human-readable label issue titles, merge requests, and chat status use instead of the node's slug (e.g. `phpstan-level-0-baseline` → "PHPStan Level 0"). The stub left behind here keeps Name, Tool, and Purpose inline so that label is available without opening the extracted file; Fulfilment check and MR scope move to the extracted file. Nodes not yet extracted stay inline in full.
 
 ### `ci-runner`
 
+- **Name:** CI Runner
 - **Tool:** GitHub Actions / GitLab CI
 - **Purpose:** an existing pipeline that later hosts quality jobs.
 - **Fulfilment check:** CI config file present; forge determined from `git remote`; unknown CI → ask, do not record a rejection.
@@ -91,6 +92,7 @@ A node's full definition may live in its own file under `php-tooling-tree/` (sib
 
 ### `composer`
 
+- **Name:** Composer
 - **Tool:** Composer
 - **Purpose:** dependency management for the Composer-stack track.
 
@@ -98,6 +100,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `php-cs-fixer`
 
+- **Name:** PHP CS Fixer
 - **Tool:** php-cs-fixer
 - **Purpose:** automated code style so later Rector output lands styled.
 - **Fulfilment check:** dev dependency installed, config committed, runnable locally with zero reported diffs.
@@ -105,6 +108,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `phpunit`
 
+- **Name:** PHPUnit
 - **Tool:** PHPUnit
 - **Purpose:** the project's test runner.
 - **Fulfilment check:** dev dependency installed and runnable (`phpunit` exits green on existing tests); an equivalent already present (Pest) fulfils the node.
@@ -112,6 +116,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `test-runner-if-missing`
 
+- **Name:** Test Runner (fallback)
 - **Tool:** any test runner
 - **Purpose:** guarantees *some* runner exists before deepening work relies on tests.
 - **Fulfilment check:** proposed only when no runner exists; fulfilled by adopting one (default PHPUnit).
@@ -119,6 +124,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `composer-audit`
 
+- **Name:** Composer Audit
 - **Tool:** composer audit
 - **Purpose:** dependency vulnerability visibility (thin node).
 - **Fulfilment check:** `composer audit` runs locally without configuration errors.
@@ -126,6 +132,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `phpstan-level-0-baseline`
 
+- **Name:** PHPStan Level 0
 - **Tool:** PHPStan (`vimeo/psalm` fulfils as an equivalent — see *Equivalents* below).
 - **Purpose:** static analysis introduced green at level 0.
 - **Fulfilment check:** one of:
@@ -151,6 +158,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `phpstan-level-1`, `phpstan-level-2`, `phpstan-level-3`
 
+- **Names:** `phpstan-level-1` → PHPStan Level 1, `phpstan-level-2` → PHPStan Level 2, `phpstan-level-3` → PHPStan Level 3
 - **Tool:** PHPStan
 - **Purpose:** raise the analysis level one step at a time.
 - **Fulfilment check:** the immediate predecessor level node is fulfilled **and** its baseline is **empty** (see *Empty baseline*). Then: bump `level` in `phpstan.neon` by exactly one (e.g., `0 → 1`, `1 → 2`), regenerate `phpstan-baseline.neon` via `vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon`, and `vendor/bin/phpstan analyse` is green. Levels are never skipped; one MR raises exactly one level.
@@ -172,6 +180,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `rector-dead-code`
 
+- **Name:** Rector: Dead Code Set
 - **Tool:** Rector (dead-code suite)
 - **Purpose:** remove dead code with rules whose changes are safe to review early.
 - **Fulfilment check:** dead-code suite enabled and fully applied — no remaining rule findings.
@@ -179,6 +188,7 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 ### `rector-type-coverage`
 
+- **Name:** Rector: Type Coverage Set
 - **Tool:** Rector (typing suites)
 - **Purpose:** raise declared type coverage progressively.
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.

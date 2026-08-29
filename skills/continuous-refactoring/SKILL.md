@@ -29,7 +29,7 @@ State lives in the target repo, not in the conversation — every lifecycle skil
 
 Each numbered step runs the named lifecycle skill and carries its output to the next step. Stop between steps where the skill itself stops for user input.
 
-1. **Scan.** Run `/refactor-scan`. It checks its own preconditions first — git, backlog size — and resumes any `Pending issue` before proposing anything fresh. Two outcomes end the pass here, before anything else runs: no git repository (nothing else runs, not even step 5), or the backlog is already full (skip to step 5 with whatever findings scan reported, no new candidate this pass). Every other outcome carries scan's **findings** (closed/merged issues or MRs, possibly empty) into step 2 and **proposals** (the resumed pending issue, or up to five node names) into step 3.
+1. **Scan.** Run `/refactor-scan`. It checks its own preconditions first — git, backlog size — and resumes any `Pending issue` before proposing anything fresh. Two outcomes end the pass here, before anything else runs: no git repository (nothing else runs, not even step 5), or the backlog is already full (skip to step 5 with whatever findings scan reported, no new candidate this pass). Every other outcome carries scan's **findings** (closed/merged issues or MRs, possibly empty) into step 2 and **proposals** (the resumed pending issue, or up to five node Names, never slugs) into step 3.
 
 2. **Learn, early call — findings only.** If step 1 produced any findings, run `/refactor-learn` on them now, before prioritising — it resolves each one (`done` / `wontfix` + out-of-scope entry) and updates the ledger immediately. This can't wait until step 5: step 3 reads the ledger to decide whether two merge requests are already open, and a finding scan just made (a remembered one merged or closed) has to be reflected there first, or step 3 would count a slot as occupied that this pass itself just freed. Skip this call entirely when step 1 had no findings — it is not a bookkeeping-only pass by itself, just an early half of one.
 
@@ -53,13 +53,28 @@ While fewer than two suite merge requests are open, a pass may deliver one more.
 
 The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
-For a tooling-tree candidate, close with an outlook: re-run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and name whatever node it reports next, quoting that node's Purpose from the tree doc in one line. If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; with no sub-agent mechanism, run that prompt's steps yourself inline. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
+For a tooling-tree candidate, close with an outlook: re-run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree, look up whatever node slug it reports next in the tree doc, and name it by its **Name** (never the slug the script returned), quoting that node's Purpose from the tree doc in one line. If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; with no sub-agent mechanism, run that prompt's steps yourself inline. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
 
 ## Fallback
 
 The suite must keep working in a target repo with none of the global skills installed. Each lifecycle skill self-contains its own step: its own `## Fallback` section means "use the global skill if installed, else the inline fallback". Two fallback depths apply: **crash-safe** means skip the global skill with a note — the step's core is already inline; **self-sufficient** means the fallback inlines the part of the global skill the step uses. The orchestrator engages no global skill itself — that one reference now lives in `refactor-learn`, which owns the learn step — every fallback lives in the lifecycle skill that uses it: `refactor-design`, `refactor-implement`, and `refactor-learn` each carry their own, per their `## Fallback` sections.
 
 The authoritative inventory of every global reference and its fallback type lives in `docs/agents/skill-references.md` and is enforced by the Tier 1 validator (`scripts/validate_skills.py`) — that ledger, not this section, is the one place naming which global skill backs which step.
+
+## Closing report
+
+Wherever the pass ends — completed, stopped early by a precondition, or nothing survived prioritising — close with exactly two lines to the human, nothing more. Each lifecycle skill's own `## Output` is handoff data carried to the *next skill*, not a report; don't restate it here. Name any tooling-tree node by its **Name** (never its slug).
+
+- **Status:** one line, what happened this pass.
+- **Next:** one line, what the human can or should do now.
+
+One example pair per stopping point already named above and in `## Completion criterion`:
+
+- No git repository: "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun."
+- Backlog full, or two merge requests already open: "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then."
+- Nothing survived prioritising: "Status: nothing to work on this pass — every proposal already in flight. Next: nothing needed, rerun later."
+- A candidate delivered: "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands."
+- Bookkeeping-only pass (only step 2's early call ran): "Status: reconciled 1 merged candidate, nothing new started. Next: nothing needed, rerun later."
 
 ## Completion criterion
 

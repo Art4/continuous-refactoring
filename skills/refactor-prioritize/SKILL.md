@@ -28,11 +28,11 @@ For each surviving proposal, assess four factors:
 
 For a tooling-tree node proposal, read its Purpose in the tree doc (`skills/refactor-scan/references/tooling-tree.md` / the language specialization's tree) to reason about what it unlocks — node-detail data beyond that Purpose line (e.g. what reaching a specific tool level opens up next) is not yet a maintained source and is deliberately out of scope for now; reason from the tree doc and the ranking factors above.
 
-Present the ranking as a short ordered list of names only — save the rationale for the winning candidate for step 3, don't repeat it here.
+Present the ranking as a short ordered list of Names only (the tree doc's `**Name:**` field for a tooling-tree node, never its slug) — save the rationale for the winning candidate for step 3, don't repeat it here.
 
 ### 3. Recommend
 
-Name the single next candidate; in one line say why it wins, and in one line say what choosing it unlocks (the next node(s) it opens, per the tree doc, or the module/area it deepens for a `structural-scan` proposal) — two lines total, this **is** the `## Output` payload below, not a separate report. If two are close, call the tie out and let the user decide.
+Name the single next candidate — by its Name, never its slug, for a tooling-tree node; in one line say why it wins, and in one line say what choosing it unlocks (the next node(s) it opens, per the tree doc, or the module/area it deepens for a `structural-scan` proposal) — two lines total, this **is** the `## Output` payload below, not a separate report. If two are close, call the tie out and let the user decide.
 
 A proposable **tooling tree** node is a strong default recommendation — the loop's structural work compounds faster once the underlying tooling is in place. Still let the user pick something else instead; this is a recommendation, not a **required edge**.
 
