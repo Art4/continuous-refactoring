@@ -570,9 +570,19 @@ def validate_repo(repo_root):
         issues += local_ref_issues(text, repo_root, skill=d.name)
         issues += adr_issues(text, skill=d.name)
 
-        for ref_md in sorted((d / "references").glob("*.md")):
-            ref_text = ref_md.read_text()
-            ref_skill = f"{d.name}/references/{ref_md.name}"
+        # Every file a skill ships under references/ — not just its top-level
+        # *.md — is in scope for the same two checks: a reference doc or
+        # script can live nested (e.g. php-tooling-tree/composer.md), and a
+        # non-.md file (e.g. tooling_tree.py) can carry an ADR citation in
+        # its own docstrings/comments just as easily as prose can. Skip
+        # compiled bytecode and its cache directory — never source, never
+        # shipped intentionally.
+        references_dir = d / "references"
+        for ref_file in sorted(references_dir.rglob("*")):
+            if ref_file.is_dir() or ref_file.suffix == ".pyc" or "__pycache__" in ref_file.parts:
+                continue
+            ref_text = ref_file.read_text()
+            ref_skill = f"{d.name}/references/{ref_file.relative_to(references_dir)}"
             issues += local_ref_issues(ref_text, repo_root, skill=ref_skill)
             issues += adr_issues(ref_text, skill=ref_skill)
 

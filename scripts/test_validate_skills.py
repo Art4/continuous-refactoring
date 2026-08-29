@@ -545,6 +545,54 @@ class ReferencesDirTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_adr_ref_in_non_md_reference_file_flagged(self):
+        # A reference doc doesn't have to be Markdown to ship with the skill
+        # — a .py helper under references/ carries the same ban on ADR
+        # citations in its own docstrings/comments as prose does.
+        tmp, root = self._repo("# glossary")
+        try:
+            (root / "skills" / "refactor-scan" / "references" / "tooling_tree.py").write_text(
+                '"""Per ADR-0010, do the thing."""\n'
+            )
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tooling_tree.py" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_adr_ref_in_nested_reference_dir_flagged(self):
+        # references/ can nest a subdirectory of its own (e.g.
+        # php-tooling-tree/composer.md) — scanning must recurse, not just
+        # glob the top level.
+        tmp, root = self._repo("# glossary")
+        try:
+            (root / "skills" / "refactor-scan" / "references" / "nested").mkdir(parents=True)
+            (root / "skills" / "refactor-scan" / "references" / "nested" / "node.md").write_text(
+                "Per ADR-0010, do the thing.\n"
+            )
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/nested/node.md" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_pycache_in_references_dir_ignored(self):
+        # Compiled bytecode is never source and never shipped intentionally
+        # — scanning it would only risk a decode error on binary content.
+        tmp, root = self._repo("# glossary")
+        try:
+            pycache = root / "skills" / "refactor-scan" / "references" / "__pycache__"
+            pycache.mkdir(parents=True)
+            (pycache / "tooling_tree.cpython-311.pyc").write_bytes(b"\x00\x01\x02not text")
+            issues = vs.validate_repo(root)  # must not raise
+            self.assertFalse(any("__pycache__" in i.skill for i in issues))
+        finally:
+            tmp.cleanup()
+
     def test_clean_references_dir_ok(self):
         tmp, root = self._repo("No decisions or dangling paths here.")
         try:

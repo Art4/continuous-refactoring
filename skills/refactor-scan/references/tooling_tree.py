@@ -279,7 +279,7 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     closure a `required` edge already causes for proposability, made
     explicit here because `recommended`-edge gating (unlike `required`-edge
     gating) must tell "permanently rejected" apart from "not reached yet":
-    only the former releases a `recommended`-gated child (ADR-0016)."""
+    only the former releases a `recommended`-gated child."""
     if _seen is None:
         _seen = set()
     if node in _seen:
@@ -295,14 +295,14 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
 
 def _is_decided(node: str, tree: dict, detected: dict, rejected: set[str]) -> bool:
     """True once `node` has reached a final state for `recommended`-edge
-    gating purposes (ADR-0016, CONTEXT.md's Recommended edge): fulfilled, or
+    gating purposes (CONTEXT.md's Recommended edge): fulfilled, or
     effectively rejected (see above) — not merely "not yet reached"."""
     return detected.get(node, {}).get("fulfilled", False) or _is_effectively_rejected(node, tree, rejected)
 
 
 def _undecided_recommended_parents(node: str, tree: dict, detected: dict, rejected: set[str]) -> list[str]:
     """`node`'s `recommended` parents that haven't reached a decided state
-    yet — a non-empty result means `node` stays withheld (ADR-0016): a
+    yet — a non-empty result means `node` stays withheld: a
     `recommended` edge now gates until every parent is decided, releasing
     the child either way once decided (fulfilled, or rejected — unlike a
     `required` edge, which closes the child on rejection instead)."""
@@ -482,9 +482,8 @@ def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: d
 def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | None = None) -> list[dict]:
     """Return every node that is *really* unblocked and unfulfilled right now
     (or, with an explicit `limit`, at most that many — `refactor-scan` itself
-    never passes one: ADR-0016 lifted the old five-node cap, since more than
-    five nodes can be genuinely unblocked at once even without this ticket's
-    other change).
+    never passes one: more than five nodes can be genuinely unblocked at
+    once, so this is never capped by default).
 
     Unlike ``roadmap()``, this does not simulate — it does not assume a
     returned node is already fulfilled to compute what comes after it. Only
@@ -495,9 +494,9 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
     proposable now", not a forward roadmap.
 
     A node with an undecided `recommended` parent is withheld from this list
-    entirely (ADR-0016) rather than merely ranked lower — see
-    ``withheld_candidates()`` for the matching "waiting on" list
-    ``refactor-scan`` surfaces alongside this one.
+    entirely rather than merely ranked lower — see ``withheld_candidates()``
+    for the matching "waiting on" list ``refactor-scan`` surfaces alongside
+    this one.
     """
     repo = pathlib.Path(repo)
     if tree is None:
@@ -552,9 +551,9 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
     """Nodes that would otherwise be in ``next_candidates()`` (required
     parents fulfilled, not rejected, not yet fulfilled) but stay withheld
     because one or more ``recommended`` parents haven't reached a decided
-    state yet (ADR-0016) — surfaced separately so ``refactor-scan`` can name
-    them and say what they're waiting on, instead of them silently vanishing
-    from the proposal set."""
+    state yet — surfaced separately so ``refactor-scan`` can name them and
+    say what they're waiting on, instead of them silently vanishing from the
+    proposal set."""
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
@@ -734,8 +733,8 @@ def detect_and_roadmap(repo: pathlib.Path, steps: int = 10, tree_md: pathlib.Pat
     tree = load_tree(tree_md=tree_md)
     detected = detect_nodes(repo, tree)
     road = roadmap(repo, steps=steps, tree=tree)
-    # `next` is uncapped (ADR-0016) — `--steps` only bounds `roadmap`'s
-    # forward simulation depth, a separate concept.
+    # `next` is uncapped — `--steps` only bounds `roadmap`'s forward
+    # simulation depth, a separate concept.
     nxt = next_candidates(repo, tree=tree)
     withheld = withheld_candidates(repo, tree=tree)
     reversals = php_version_reversal_findings(repo)
@@ -754,7 +753,7 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(description="Detect tooling tree and propose next MRs (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to fixture/repo (default: .)")
-    ap.add_argument("--steps", type=int, default=10, help="depth of the simulated `roadmap` lookahead — does not bound `next`, which is always every currently-unblocked node (ADR-0016)")
+    ap.add_argument("--steps", type=int, default=10, help="depth of the simulated `roadmap` lookahead — does not bound `next`, which is always every currently-unblocked node")
     ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree). Only scopes edges/gating (next, roadmap, tree.edges) -- detect_nodes' per-tool filesystem checks are hardcoded and always run regardless of --tree, so 'detected' in the JSON output may list nodes your override tree doesn't even define")
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
     args = ap.parse_args()
