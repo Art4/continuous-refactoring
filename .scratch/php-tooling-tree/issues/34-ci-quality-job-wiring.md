@@ -39,9 +39,9 @@ counts as CI-gated*, adapted here to live inside an existing node's own check ra
 - [x] `phpstan-level-0-baseline`'s formerly-unconditional MR scope note gains one line: once `ci-runner`
   is already fulfilled, this MR also wires the tool into CI — mirrors `phpunit`'s own new MR-scope line.
 
-**Out of scope:** a dedicated `static-code-analyzer`/`psalm` node redesign, and a recurring
-"housekeeping" node — both vetted during the same grilling session and filed as separate follow-up
-tickets, not part of this one.
+**Out of scope:** a dedicated `static-code-analyzer`/`psalm` node redesign (ticket 37), and a recurring
+"housekeeping" node (ticket 38) — both vetted during the same grilling session and filed as separate
+follow-up tickets, not part of this one.
 
 ## Comments
 
