@@ -19,10 +19,12 @@ Decided shape (2026-08-29):
 Remaining to specify:
 
 - [x] `Learnings` added to the node schema — `CONTEXT.md`'s **Tooling tree** term
-- [x] `composer` node's Learnings filled in — `skills/refactor-scan/references/php-tooling-tree.md`
+- [x] `composer` node's Learnings filled in — `skills/refactor-scan/references/php-tooling-tree.md` (now `skills/refactor-scan/references/php-tooling-tree/composer.md`, see ticket 30)
 - [x] This ticket recorded in the feature's issue table — `.scratch/php-tooling-tree/spec.md`
 - [ ] Generalize `Learnings` to the remaining PHP-tree nodes (`ci-runner`, `php-cs-fixer`, `phpunit`, …) — deferred to future tickets, one node at a time
 
 ## Comments
 
 > **2026-08-29:** Created at the user's request — they wanted the individual tool nodes improved, with a concrete first step of recording learnings on the `composer` node specifically (lockfile-vs-type handling, description derivation, vendor/ gitignore). Schema decision and composer content landed together in the same pass. If the pattern proves useful across more nodes, a dedicated ADR formalizing it is worth considering then — not done here.
+
+> **2026-08-29:** Composer's entry (including this Learnings section) moved out of `php-tooling-tree.md` into its own reference file — see ticket 30.

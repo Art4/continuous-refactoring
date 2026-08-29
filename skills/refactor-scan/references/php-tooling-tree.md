@@ -80,6 +80,8 @@ The seven `resolved` rows above are not `required` or `recommended` — see `ski
 
 A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
 
+A node's full definition may live in its own file under `php-tooling-tree/` (sibling to this document) once extracted — see `composer` below for the first example. Nodes not yet extracted stay inline.
+
 ### `ci-runner`
 
 - **Tool:** GitHub Actions / GitLab CI
@@ -89,14 +91,7 @@ A node may span several merge requests; a rejection of a required parent closes 
 
 ### `composer`
 
-- **Tool:** Composer
-- **Purpose:** dependency management for the Composer-stack track.
-- **Fulfilment check:** `composer.json` plus committed lockfile; install runs locally and once CI can run it.
-- **MR scope:** composer files and lockfile; no tool adoption inside this MR.
-- **Learnings:**
-  - `composer.json`'s `type` decides `composer.lock`'s git treatment: `library` → `composer.lock` goes in `.gitignore`, not committed; `project` (or any other non-library type) → `composer.lock` is committed.
-  - A missing or generic `description` in `composer.json` is derived from the target repo's README or existing code where possible; if it can't be derived, it's left empty rather than filled with a placeholder.
-  - `vendor/` always belongs in `.gitignore`, regardless of type.
+Full definition: `skills/refactor-scan/references/php-tooling-tree/composer.md`.
 
 ### `php-cs-fixer`
 
