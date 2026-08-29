@@ -125,10 +125,8 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 - **Name:** PHPUnit
 - **Tool:** PHPUnit
 - **Purpose:** the project's test runner.
-- **Fulfilment check:** dev dependency installed and runnable (`phpunit` exits green on existing tests); an equivalent already present (Pest) fulfils the node.
-- **MR scope:** dependency + minimal config; no test rewrites.
-- **Security advisories:** a known CVE in the only PHP-version-compatible PHPUnit line does not block
-  adoption — see `require-dev` security advisories above.
+
+Full definition (Fulfilment check, security advisories, MR scope, test-directory layout convention): `skills/refactor-scan/references/php-tooling-tree/phpunit.md`.
 
 ### `test-runner-if-missing`
 

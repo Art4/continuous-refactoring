@@ -25,7 +25,9 @@ A tooling-tree node's plan has no seam to confirm — its scope is a config/depe
 
 ### 2. One slice at a time
 
-Skipped for a tooling-tree node (step 1 already made its one change directly). For a structural candidate: each slice: write the failing test first (red), then only enough code to pass it (green). One seam, one test, one minimal implementation per cycle. Don't anticipate future slices or add speculative features.
+Skipped for a tooling-tree node (step 1 already made its one change directly). For a structural candidate: before this pass's first test, ensure the target has a test-layout convention on record — `tests/README.md`, if the active language specialization defines one (PHP: `skills/refactor-scan/references/php-tooling-tree/phpunit.md`'s *Test layout*). Missing entirely (even on a target where the test runner was adopted before this convention existed)? Create it with that default. Already there? Read it fresh — never assume the default still matches, a human may have adapted it — and follow it to decide which folder each new test belongs in, creating a documented-but-not-yet-existing folder (and its config entry) only once a test actually needs it, one at a time. No language convention applies? Place tests by your own judgment as before.
+
+Then, each slice: write the failing test first (red), then only enough code to pass it (green). One seam, one test, one minimal implementation per cycle. Don't anticipate future slices or add speculative features.
 
 ### 3. Verify the loop on completion
 
