@@ -13,6 +13,8 @@ The tree has three roots: Composer-based stack (PHP-CS-Fixer · Rector · PHPSta
 | 06 | Tooling tree decision (ADR-0005) — done | root |
 | 10 | Dependency vulnerability scan (composer audit child; CI-fail is a separate child node) | first |
 | 18 | Specify the PHPStan adoption chain (introduce → CI job → shrink baseline → raise level) | first |
+| 29 | Per-node Learnings entry, starting with `composer` (type-dependent lockfile, description derivation, vendor/ gitignore) | first |
+| 30 | Extract node prose into per-node reference files, starting with `composer` | first |
 | 08 | Test-coverage floor (PHPUnit child) | later |
 | 09 | Mutation testing via Infection (PHPUnit child) | later |
 | 11 | OWASP-aware static security analysis (SAST) | later |

@@ -21,7 +21,7 @@ The forge reviewable that delivers a completed candidate. Skills always use this
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
 **Tooling tree**:
-The directed graph of adoption steps a target repo climbs — a generic root (`skills/refactor-scan/references/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node).
+The directed graph of adoption steps a target repo climbs — a generic root (`skills/refactor-scan/references/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry.
 _Avoid_: baseline, floor, bootstrap, onboarding
 
 **Required edge**:

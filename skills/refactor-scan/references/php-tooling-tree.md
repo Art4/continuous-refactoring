@@ -80,6 +80,8 @@ The seven `resolved` rows above are not `required` or `recommended` — see `ski
 
 A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
 
+A node's full definition may live in its own file under `php-tooling-tree/` (sibling to this document) once extracted — see `composer` below for the first example. The stub left behind here keeps Tool and Purpose inline so merge requests can be described by the tool's human-readable name rather than the node's slug (e.g. `phpstan-level-0-baseline` reads as "PHPStan Level 0"); Fulfilment check and MR scope move to the extracted file. Nodes not yet extracted stay inline in full.
+
 ### `ci-runner`
 
 - **Tool:** GitHub Actions / GitLab CI
@@ -91,8 +93,8 @@ A node may span several merge requests; a rejection of a required parent closes 
 
 - **Tool:** Composer
 - **Purpose:** dependency management for the Composer-stack track.
-- **Fulfilment check:** `composer.json` plus committed lockfile; install runs locally and once CI can run it.
-- **MR scope:** composer files and lockfile; no tool adoption inside this MR.
+
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/composer.md`.
 
 ### `php-cs-fixer`
 
