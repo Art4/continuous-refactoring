@@ -1,150 +1,198 @@
 {
-  "fixture": "php-p0-nonempty",
-  "detected": {
-    "git": {
-      "fulfilled": true,
-      "reason": "found .git"
+    "fixture": "php-p0-nonempty",
+    "detected": {
+        "git": {
+            "fulfilled": true,
+            "reason": "found .git",
+            "details": {}
+        },
+        "loop-config": {
+            "fulfilled": false,
+            "reason": "no docs/refactoring/config.md",
+            "details": {}
+        },
+        "composer": {
+            "fulfilled": true,
+            "reason": "composer.json+lock present",
+            "details": {
+                "has_json": true,
+                "has_lock": true
+            }
+        },
+        "ci-runner": {
+            "fulfilled": true,
+            "reason": "CI config present",
+            "details": {}
+        },
+        "php-cs-fixer": {
+            "fulfilled": true,
+            "reason": "dep and config present",
+            "details": {
+                "has_dep": true,
+                "has_config": true
+            }
+        },
+        "phpunit": {
+            "fulfilled": true,
+            "reason": "phpunit/pest present",
+            "details": {
+                "has_phpunit": true,
+                "has_pest": false
+            }
+        },
+        "test-runner-if-missing": {
+            "fulfilled": true,
+            "reason": "runner exists",
+            "details": {
+                "depends_composer": true
+            }
+        },
+        "composer-audit": {
+            "fulfilled": false,
+            "reason": "no CI job runs composer audit yet",
+            "details": {
+                "has_real_dep": false
+            }
+        },
+        "phpstan-level-0-baseline": {
+            "fulfilled": true,
+            "reason": "phpstan level 0 + baseline present",
+            "details": {
+                "level": 0,
+                "baseline_empty": false
+            }
+        },
+        "phpstan-level-1": {
+            "fulfilled": false,
+            "reason": "level 0 < 1 or no phpstan",
+            "details": {
+                "level": 0,
+                "baseline_empty": false
+            }
+        },
+        "phpstan-level-2": {
+            "fulfilled": false,
+            "reason": "level 0 < 2 or no phpstan",
+            "details": {
+                "level": 0,
+                "baseline_empty": false
+            }
+        },
+        "phpstan-level-3": {
+            "fulfilled": false,
+            "reason": "level 0 < 3 or no phpstan",
+            "details": {
+                "level": 0,
+                "baseline_empty": false
+            }
+        },
+        "rector-dead-code": {
+            "fulfilled": false,
+            "reason": "no rector dead-code",
+            "details": {
+                "has_rector": false
+            }
+        },
+        "rector-type-coverage": {
+            "fulfilled": false,
+            "reason": "no rector type coverage",
+            "details": {
+                "has_rector": false
+            }
+        },
+        "structural-scan": {
+            "fulfilled": false,
+            "reason": "waiting on: composer-audit, phpstan-level-3, rector-dead-code, rector-type-coverage",
+            "details": {
+                "unresolved": [
+                    "composer-audit",
+                    "phpstan-level-3",
+                    "rector-dead-code",
+                    "rector-type-coverage"
+                ],
+                "rejected": []
+            }
+        }
     },
-    "loop-config": {
-      "fulfilled": false,
-      "reason": "no docs/refactoring/config.md"
-    },
-    "composer": {
-      "fulfilled": true,
-      "reason": "composer.json+lock present"
-    },
-    "ci-runner": {
-      "fulfilled": true,
-      "reason": "CI config present"
-    },
-    "php-cs-fixer": {
-      "fulfilled": true,
-      "reason": "dep and config present"
-    },
-    "phpunit": {
-      "fulfilled": true,
-      "reason": "phpunit/pest present"
-    },
-    "test-runner-if-missing": {
-      "fulfilled": true,
-      "reason": "runner exists"
-    },
-    "composer-audit": {
-      "fulfilled": false,
-      "reason": "thin node \u2014 propose after composer (roadmap seam)"
-    },
-    "phpstan-level-0-baseline": {
-      "fulfilled": true,
-      "reason": "phpstan level 0 + baseline present"
-    },
-    "phpstan-level-1": {
-      "fulfilled": false,
-      "reason": "level 0 < 1 or no phpstan"
-    },
-    "phpstan-level-2": {
-      "fulfilled": false,
-      "reason": "level 0 < 2 or no phpstan"
-    },
-    "phpstan-level-3": {
-      "fulfilled": false,
-      "reason": "level 0 < 3 or no phpstan"
-    },
-    "rector-dead-code": {
-      "fulfilled": false,
-      "reason": "no rector dead-code"
-    },
-    "rector-type-coverage": {
-      "fulfilled": false,
-      "reason": "no rector type coverage"
-    },
-    "structural-scan": {
-      "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpstan-level-3, rector-dead-code, rector-type-coverage"
-    }
-  },
-  "roadmap": [
-    {
-      "n": 1,
-      "node": "loop-config",
-      "type": "tooling",
-      "required_parents": [
-        "git"
-      ],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 2,
-      "node": "composer-audit",
-      "type": "tooling",
-      "required_parents": [
-        "composer"
-      ],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 3,
-      "node": "rector-dead-code",
-      "type": "tooling",
-      "required_parents": [
-        "phpstan-level-0-baseline"
-      ],
-      "recommended_parents": [
-        "php-cs-fixer"
-      ],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 4,
-      "node": "rector-type-coverage",
-      "type": "tooling",
-      "required_parents": [
-        "phpstan-level-0-baseline"
-      ],
-      "recommended_parents": [
-        "php-cs-fixer",
-        "phpstan-level-3"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
-    },
-    {
-      "n": 5,
-      "node": "phpstan-level-4",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 3 \u2014 appended node"
-    },
-    {
-      "n": 6,
-      "node": "phpstan-level-5",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 3 \u2014 appended node"
-    },
-    {
-      "n": 7,
-      "node": "phpstan-level-6",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 3 \u2014 appended node"
-    },
-    {
-      "n": 8,
-      "node": "phpstan-level-7",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 3 \u2014 appended node"
-    },
-    {
-      "n": 9,
-      "node": "phpstan-level-8",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 3 \u2014 appended node"
-    },
-    {
-      "n": 10,
-      "node": "phpstan-level-9",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 3 \u2014 appended node"
-    }
-  ],
-  "no_mr_created": true,
-  "tooling_tree": "docs/php-tooling-tree.md"
+    "roadmap": [
+        {
+            "n": 1,
+            "node": "loop-config",
+            "type": "tooling",
+            "required_parents": [
+                "git"
+            ],
+            "recommended_parents": [],
+            "reason": "required parents fulfilled"
+        },
+        {
+            "n": 2,
+            "node": "rector-dead-code",
+            "type": "tooling",
+            "required_parents": [
+                "phpstan-level-0-baseline"
+            ],
+            "recommended_parents": [
+                "php-cs-fixer"
+            ],
+            "reason": "required parents fulfilled"
+        },
+        {
+            "n": 3,
+            "node": "rector-type-coverage",
+            "type": "tooling",
+            "required_parents": [
+                "phpstan-level-0-baseline"
+            ],
+            "recommended_parents": [
+                "php-cs-fixer",
+                "phpstan-level-3"
+            ],
+            "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) — still proposable"
+        },
+        {
+            "n": 4,
+            "node": "phpstan-level-4",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        },
+        {
+            "n": 5,
+            "node": "phpstan-level-5",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        },
+        {
+            "n": 6,
+            "node": "phpstan-level-6",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        },
+        {
+            "n": 7,
+            "node": "phpstan-level-7",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        },
+        {
+            "n": 8,
+            "node": "phpstan-level-8",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        },
+        {
+            "n": 9,
+            "node": "phpstan-level-9",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        },
+        {
+            "n": 10,
+            "node": "phpstan-level-10",
+            "type": "tooling (open chain)",
+            "reason": "chain open above level 3 — appended node"
+        }
+    ],
+    "no_mr_created": true,
+    "tooling_tree": "docs/php-tooling-tree.md"
 }
