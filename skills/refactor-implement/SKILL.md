@@ -21,11 +21,13 @@ Then, for a structural candidate: list the seams the plan names and confirm them
 
 A tooling-tree node's plan has no seam to confirm — its scope is a config/dependency change (see the tree doc's MR scope), not code. Skip straight to making that change; there's no red → green cycle for it, only its Fulfilment check (step 3).
 
-**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending issue` (`docs/refactoring/config.md` didn't exist yet). When you create the file here, set `Pending issue` to this candidate's issue yourself. Leave `Last run` and `Create-mode` out (or clearly unset) — don't invent placeholder values for them; per `skills/continuous-refactoring/references/refactoring-config.md` those are `refactor-learn`'s fields, and `refactor-learn` fills them in its own follow-up commit (see its `## Process`).
+**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending issue` (`docs/refactoring/config.md` didn't exist yet). When you create the file here, set `Pending issue` to this candidate's issue yourself. Leave `Create-mode` and `Fulfilled nodes` out (or clearly unset) — don't invent placeholder values for them; per `skills/continuous-refactoring/references/refactoring-config.md` those are `refactor-learn`'s fields, and `refactor-learn` fills them in its own follow-up commit (see its `## Process`).
 
 ### 2. One slice at a time
 
-Skipped for a tooling-tree node (step 1 already made its one change directly). For a structural candidate: each slice: write the failing test first (red), then only enough code to pass it (green). One seam, one test, one minimal implementation per cycle. Don't anticipate future slices or add speculative features.
+Skipped for a tooling-tree node (step 1 already made its one change directly). For a structural candidate: before this pass's first test, ensure the target has a test-layout convention on record — `tests/README.md`, if the active language specialization defines one (PHP: `skills/refactor-scan/references/php-tooling-tree/phpunit.md`'s *Test layout*). Missing entirely (even on a target where the test runner was adopted before this convention existed)? Create it with that default. Already there? Read it fresh — never assume the default still matches, a human may have adapted it — and follow it to decide which folder each new test belongs in, creating a documented-but-not-yet-existing folder (and its config entry) only once a test actually needs it, one at a time. No language convention applies? Place tests by your own judgment as before.
+
+Then, each slice: write the failing test first (red), then only enough code to pass it (green). One seam, one test, one minimal implementation per cycle. Don't anticipate future slices or add speculative features.
 
 ### 3. Verify the loop on completion
 

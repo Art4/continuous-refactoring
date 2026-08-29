@@ -127,6 +127,40 @@ def _has_dep(composer: dict | None, name: str) -> bool:
     return False
 
 
+# Composer platform pseudo-packages: never real dependencies `composer audit`
+# could report anything about (php-tooling-tree.md's composer-audit stop
+# conditions).
+_PLATFORM_PACKAGE_NAMES = {"php", "hhvm", "composer-plugin-api", "composer-runtime-api"}
+
+
+def _has_real_require_dep(composer: dict | None) -> bool:
+    """True if composer.json's `require` names at least one real package —
+    excludes platform pseudo-packages (php, hhvm, ext-*, lib-*,
+    composer-plugin-api, composer-runtime-api)."""
+    if not composer:
+        return False
+    for name in composer.get("require", {}):
+        if name in _PLATFORM_PACKAGE_NAMES:
+            continue
+        if name.startswith("ext-") or name.startswith("lib-"):
+            continue
+        return True
+    return False
+
+
+def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
+    """composer-audit's real fulfilment (php-tooling-tree.md): a CI job that
+    runs `composer audit`, gating the pipeline on known advisories."""
+    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
+        for f in glob.glob(str(repo / pat)):
+            try:
+                if "composer audit" in pathlib.Path(f).read_text(encoding="utf-8"):
+                    return True
+            except OSError:
+                continue
+    return False
+
+
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
     p = repo / "phpstan.neon"
     if not p.exists():
@@ -170,6 +204,73 @@ def _baseline_exists(repo: pathlib.Path) -> bool:
 def _has_loop_config(repo: pathlib.Path) -> bool:
     """loop-config's fulfilment check: docs/refactoring/config.md exists."""
     return (repo / "docs" / "refactoring" / "config.md").exists()
+
+
+def _parse_min_version(constraint: str) -> tuple[int, ...] | None:
+    """Best-effort minimum-version extraction from a composer-style version
+    constraint (e.g. '>=7.2', '^8.1', '7.2.0'). Not a full composer
+    constraint parser — handles the single-lower-bound shapes this suite's
+    `Blocked by:` fields and `require.php`/`config.platform.php` actually
+    use. Returns None if no version-like substring is found."""
+    if not constraint:
+        return None
+    m = re.search(r"(\d+(?:\.\d+){0,2})", constraint)
+    if not m:
+        return None
+    return tuple(int(p) for p in m.group(1).split("."))
+
+
+def _current_php_floor(composer: dict | None) -> tuple[int, ...] | None:
+    """The target's current minimum PHP version: `config.platform.php`
+    (an exact pin) if present, else `require.php`'s constraint
+    (best-effort lower bound)."""
+    if not composer:
+        return None
+    platform_php = composer.get("config", {}).get("platform", {}).get("php")
+    v = _parse_min_version(platform_php) if platform_php else None
+    if v:
+        return v
+    return _parse_min_version(composer.get("require", {}).get("php"))
+
+
+def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ...] | None:
+    """Parse `**Blocked by:** PHP >= X.Y` from a node's out-of-scope entry,
+    if the entry has one (php-tooling-tree.md's mechanical-reversal design;
+    only PHP-version rejections are ever auto-detected this way)."""
+    p = repo / "docs" / "refactoring" / "out-of-scope" / f"{node}.md"
+    if not p.exists():
+        return None
+    try:
+        txt = p.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r"\*\*Blocked by:\*\*\s*PHP\s*>=\s*([\d.]+)", txt)
+    if not m:
+        return None
+    return _parse_min_version(m.group(1))
+
+
+def php_version_reversal_findings(repo: pathlib.Path) -> list[dict]:
+    """Rejected nodes whose recorded `Blocked by: PHP >= X.Y` condition the
+    target now satisfies — findings for `refactor-learn` to act on
+    (removing the out-of-scope entry); this function only detects, per the
+    suite's detect-never-write split (`refactor-scan`/`refactor-learn`)."""
+    repo = pathlib.Path(repo)
+    current = _current_php_floor(_read_composer(repo))
+    if current is None:
+        return []
+    findings = []
+    for node in sorted(_rejected_nodes(repo)):
+        blocked_by = _out_of_scope_blocked_by_php(repo, node)
+        if blocked_by is not None and current >= blocked_by:
+            findings.append({
+                "node": node,
+                "reason": (
+                    f"PHP floor now {'.'.join(map(str, current))}, satisfies "
+                    f"Blocked by PHP >= {'.'.join(map(str, blocked_by))}"
+                ),
+            })
+    return findings
 
 
 def _rejected_nodes(repo: pathlib.Path) -> set[str]:
@@ -244,12 +345,19 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # If phpunit fulfilled -> this node considered fulfilled (no need to propose)
     tr_fulfilled = phpunit_fulfilled
     set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
-    # composer-audit: thin node per php-tooling-tree.md — fulfilment is "composer audit runs without config errors"
-    # Strictly that is true whenever composer.json exists, so the node would be immediately fulfilled and never appear in a roadmap.
-    # For the dry-run roadmap we intentionally keep it proposable as a distinct thin MR to demonstrate the decision chain
-    # (the real MR scope is "none beyond running it", ticket 10 separates CI-fail). This is a roadmap-test seam, not a spec change.
-    audit_fulfilled = False  # always propose after composer for roadmap demonstration
-    set_node("composer-audit", audit_fulfilled and has_composer_json, "thin node — propose after composer (roadmap seam)" if has_composer_json else "blocked: no composer", has_composer=has_composer_json)
+    # composer-audit: fulfilled once CI actually gates on `composer audit` (php-tooling-tree.md).
+    # Eligibility (whether it's *proposable* at all, beyond its required edges) is a separate,
+    # extra gate handled in next_candidates()/roadmap() — a real dependency exists, or every
+    # other structural-scan leaf is already resolved — mirroring the phpstan-level-N
+    # stop-conditions pattern rather than living in this fulfilment check.
+    has_real_dep = _has_real_require_dep(composer)
+    audit_fulfilled = _has_composer_audit_ci_job(repo)
+    set_node(
+        "composer-audit",
+        audit_fulfilled,
+        "CI job runs composer audit" if audit_fulfilled else "no CI job runs composer audit yet",
+        has_real_dep=has_real_dep,
+    )
     # phpstan-level-0-baseline
     # Psalm equivalence: if psalm dep + config -> fulfilled without phpstan
     psalm_fulfils_p0 = has_psalm_dep and has_psalm_cfg
@@ -319,6 +427,22 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     return True, "required parents fulfilled"
 
 
+def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: dict, rejected: set[str]) -> tuple[bool, str]:
+    """composer-audit's stop condition beyond required-edge fulfilment
+    (php-tooling-tree.md): proposable once a real `require` dependency
+    exists, or every *other* structural-scan leaf is already resolved —
+    independent alternatives, not ordered. `resolved_check` maps node name
+    to a bool: already fulfilled (real or simulated)."""
+    if has_real_dep:
+        return True, "real require dependency present"
+    leaves = tree["resolved_parents"].get("structural-scan", [])
+    other_leaves = [leaf for leaf in leaves if leaf != "composer-audit"]
+    unresolved = [leaf for leaf in other_leaves if not (resolved_check.get(leaf, False) or leaf in rejected)]
+    if not unresolved:
+        return True, "no real dependency yet, but every other structural-scan leaf is resolved"
+    return False, f"no real dependency yet, waiting on: {', '.join(unresolved)}"
+
+
 def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5) -> list[dict]:
     """Return up to `limit` nodes that are *really* unblocked and unfulfilled right now.
 
@@ -360,9 +484,17 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5
         else:
             if detected.get(node, {}).get("fulfilled", False):
                 continue
+            if node in rejected:
+                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
+            if node == "composer-audit":
+                has_real_dep = detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False)
+                resolved_check = {n: d.get("fulfilled", False) for n, d in detected.items()}
+                ok, why = _composer_audit_extra_gate(has_real_dep, tree, resolved_check, rejected)
+                if not ok:
+                    continue
             result.append({"node": node, "reason": why})
         if len(result) >= limit:
             break
@@ -432,6 +564,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 continue  # never an MR
             if sim_fulfilled.get(node, False):
                 continue  # already fulfilled (real or simulated), skip
+            if node in rejected:
+                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             if node == "structural-scan":
                 # `resolved` gate: every leaf must be fulfilled OR rejected —
                 # not the standard required-parent check, which would
@@ -451,6 +585,11 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             sim_ok, sim_why = _is_unblocked(node, tree, {k: {"fulfilled": v} for k, v in sim_fulfilled.items()})
             if not sim_ok:
                 continue
+            if node == "composer-audit":
+                has_real_dep = detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False)
+                sim_ok, sim_why = _composer_audit_extra_gate(has_real_dep, tree, sim_fulfilled, rejected)
+                if not sim_ok:
+                    continue
             # For phpstan levels, additional empty-baseline gate
             if node in ("phpstan-level-1", "phpstan-level-2", "phpstan-level-3"):
                 # Need predecessor fulfilled with empty baseline
@@ -520,7 +659,8 @@ def detect_and_roadmap(repo: pathlib.Path, steps: int = 10, tree_md: pathlib.Pat
     detected = detect_nodes(repo, tree)
     road = roadmap(repo, steps=steps, tree=tree)
     nxt = next_candidates(repo, tree=tree, limit=steps)
-    return {"detected": detected, "roadmap": road, "next": nxt, "tree": {"edges": tree["edges"]}}
+    reversals = php_version_reversal_findings(repo)
+    return {"detected": detected, "roadmap": road, "next": nxt, "reversals": reversals, "tree": {"edges": tree["edges"]}}
 
 
 if __name__ == "__main__":

@@ -20,8 +20,9 @@ Runs only when scan produced findings; skip everything below when it didn't — 
 For each finding:
 
 - Merged → mark the candidate `done` and close the issue.
-- Closed without merge → if the closing comments support a structural rejection (a maintainer gave a load-bearing reason), mark the candidate `wontfix`, close the issue, and file a learned rejection under `docs/refactoring/out-of-scope/`; otherwise ask the human what to do before deciding.
+- Closed without merge → if the closing comments support a structural rejection (a maintainer gave a load-bearing reason), mark the candidate `wontfix`, close the issue, and file a learned rejection under `docs/refactoring/out-of-scope/`; otherwise ask the human what to do before deciding. If the load-bearing reason is a minimum PHP version the target doesn't meet, also record it machine-parseably — a `**Blocked by:** PHP >= X.Y` line — so a later pass can detect the reversal automatically (`tooling_tree.py`'s `detect_nodes()`) instead of needing a human to notice.
 - If merge requests are tracked in `docs/refactoring/merge-requests.md` (the target's issue tracker has no native label mechanism), drop the entry either way once resolved. When the tracker natively supports labels, closing/labeling the issue already removes it from the `refactor:delivered` set — nothing further to do.
+- **PHP-version reversal** (`refactor-scan` step 3 also reports these) → an existing `docs/refactoring/out-of-scope/<node>.md` names a `**Blocked by:** PHP >= X.Y` condition the target now satisfies. Remove that file — the rejection is reversed, the node is proposable again on its own merits, starting from scratch (it is *not* thereby fulfilled). Never do this for a rejection with no `Blocked by:` field, or one that scan didn't report as satisfied — those stay rejected until a human (or an agent with a stated reason) removes them by hand; `refactor-scan` only ever detects and reports this, never removes the file itself.
 
 `done` and `wontfix` are the shared triage-role labels (`docs/agents/triage-labels.md`), not suite-specific ones — closing the issue is what actually takes it out of the backlog; which labels stay attached alongside `done`/`wontfix` doesn't matter for that.
 
@@ -42,7 +43,7 @@ Then, regardless of whether a merge request was opened this pass — using the s
 
 - Record an ADR (`docs/adr/`) for any decision a future scan must not re-litigate (see `/domain-modeling`).
 - Update `CONTEXT.md` with any terms that crystallised this pass.
-- Set `docs/refactoring/config.md`'s `Last run` to today — unconditionally, the last thing this skill does. Same `loop-config`-in-flight exception as above: before `loop-config` merges, this stamp lands on that candidate's own branch, not a separate bookkeeping branch.
+- Write `docs/refactoring/config.md`'s `Fulfilled nodes` — unconditionally, the last thing this skill does (`skills/continuous-refactoring/references/refactoring-config.md`'s own field). If this pass ran `tooling_tree.py` (the deterministic parser, `python3` available), **overwrite the whole field** with its complete current fulfilled-set — cheap, and this is what keeps the cache correct across out-of-band changes (a revert, a manual edit) whenever parser access comes back. If this pass instead ran the manual/LLM tree-walk fallback, only *add* whatever slugs that walk itself freshly confirmed fulfilled (the freshly delivered candidate's own node, plus any others the walk happened to evaluate) — never remove or "clean up" entries on a fallback pass, and never guess at nodes the walk didn't actually check this pass. Same `loop-config`-in-flight exception as above: before `loop-config` merges, this write lands on that candidate's own branch, not a separate bookkeeping branch — its first entry is `loop-config` itself.
 
 ## Fallback
 
@@ -50,6 +51,6 @@ Then, regardless of whether a merge request was opened this pass — using the s
 
 ## Completion criterion
 
-**Early call:** every finding this skill was given is resolved (`done`, `wontfix` + out-of-scope entry, or an explicit "asked the human, waiting"), the remembered set (tracker labels or the ledger, whichever applies) reflects it before `refactor-prioritize` runs, and any file writes went out through the dedicated bookkeeping merge request.
+**Early call:** every finding this skill was given is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's `out-of-scope` file removed, or an explicit "asked the human, waiting"), the remembered set (tracker labels or the ledger, whichever applies) reflects it before `refactor-prioritize` runs, and any file writes went out through the dedicated bookkeeping merge request.
 
-**Closing call:** a freshly delivered candidate (if any) is remembered — via the `refactor:delivered` label, or in the ledger, whichever the target's tracker calls for — with `Pending issue` cleared and `refactor:delivered` applied, `Last run` is stamped, and every file write went out through a merge request — the dedicated bookkeeping one, or the `loop-config` candidate's own — never a direct commit to the default branch.
+**Closing call:** a freshly delivered candidate (if any) is remembered — via the `refactor:delivered` label, or in the ledger, whichever the target's tracker calls for — with `Pending issue` cleared and `refactor:delivered` applied, `Fulfilled nodes` is written (full overwrite when the parser ran this pass, additive otherwise), and every file write went out through a merge request — the dedicated bookkeeping one, or the `loop-config` candidate's own — never a direct commit to the default branch.

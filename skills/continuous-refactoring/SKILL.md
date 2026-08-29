@@ -18,7 +18,7 @@ Run this on demand whenever you're asked, or via whatever recurring trigger you'
 
 State lives in the target repo, not in the conversation — every lifecycle skill may read these directly; only `refactor-learn` writes them:
 
-- **Config** — `docs/refactoring/config.md`: last-run date, focus areas, merge-request create-mode, and the `Pending issue` marker (`skills/continuous-refactoring/references/refactoring-config.md`)
+- **Config** — `docs/refactoring/config.md`: focus areas, merge-request create-mode, the `Pending issue` marker, and the `Fulfilled nodes` cache (`skills/continuous-refactoring/references/refactoring-config.md`)
 - **Remembered merge requests** — which suite merge requests are open. When the target's issue tracker natively supports labels (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: `docs/refactoring/merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
@@ -39,7 +39,7 @@ Each numbered step runs the named lifecycle skill and carries its output to the 
 
 5. **Implement.** Run `/refactor-implement`. One candidate, one branch; slices stay on that branch, and the branch only exists once this step creates it. It reviews its own diff along both axes (the check that used to be `refactor-review`'s own step) until clean — the change it describes matches what the plan asked for — before opening the merge request, looping back to its own earlier steps on findings rather than handing off to another skill. Carries the opened merge request into step 6.
 
-6. **Learn, closing call.** Run `/refactor-learn` with the freshly opened merge request (if step 5 ran) — this call always happens, even when nothing past step 3 did (a pass that only did step 2's early reconciliation is still a complete pass). It records the merge request in the ledger with the `refactor:delivered` label, clears `Pending issue`, captures ADRs/`CONTEXT.md` updates, and stamps `Last run`, unconditionally, last. `refactor-learn` is the only skill that writes any of the state listed above — across both calls in a pass, never more than twice.
+6. **Learn, closing call.** Run `/refactor-learn` with the freshly opened merge request (if step 5 ran) — this call always happens, even when nothing past step 3 did (a pass that only did step 2's early reconciliation is still a complete pass). It records the merge request in the ledger with the `refactor:delivered` label, clears `Pending issue`, captures ADRs/`CONTEXT.md` updates, and writes `Fulfilled nodes`, unconditionally, last (full overwrite if this pass had parser access, additive otherwise). `refactor-learn` is the only skill that writes any of the state listed above — across both calls in a pass, never more than twice.
 
 ## Opening a merge request
 
@@ -82,4 +82,4 @@ One example pair per stopping point already named above and in `## Completion cr
 
 ## Completion criterion
 
-One full pass completed and the loop state updated — `refactor-learn` ran at least once (even a bookkeeping-only pass), `Last run` is stamped, and the pass's own outcome is recorded: the delivered candidate sits `refactor:delivered` with its merge request remembered, or the issue closed, or nothing was actionable this pass and that's reported.
+One full pass completed and the loop state updated — `refactor-learn` ran at least once (even a bookkeeping-only pass), `Fulfilled nodes` is written, and the pass's own outcome is recorded: the delivered candidate sits `refactor:delivered` with its merge request remembered, or the issue closed, or nothing was actionable this pass and that's reported.

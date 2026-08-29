@@ -6,12 +6,15 @@ When `python3` can't run — not installed, or executing it isn't permitted in t
 
 Read `skills/refactor-scan/references/tooling-tree.md` in full, plus the active language specialization's tree doc if one applies to `{TARGET_REPO}` (PHP: `skills/refactor-scan/references/php-tooling-tree.md`). Build the combined edge table from both, keeping the order rows appear in the docs (generic root first, then the specialization).
 
+Before walking, read `{TARGET_REPO}/docs/refactoring/config.md`'s `Fulfilled nodes` field, if the file exists — a listed slug is already fulfilled; skip step 1 below for it entirely, don't re-derive it. Nodes not listed there still get evaluated fresh as usual.
+
 For each node, in that order:
 
-1. Evaluate its Fulfilment check — written under the node's own heading — against `{TARGET_REPO}` directly. Read the files it names; don't guess.
+1. Already in `Fulfilled nodes`? Treat as fulfilled, skip to the next node — no file reads needed. Otherwise evaluate its Fulfilment check — written under the node's own heading — against `{TARGET_REPO}` directly. Read the files it names; don't guess.
 2. A node is unblocked once every one of its **required** edges points to an already-fulfilled parent. **Recommended** edges never block. `structural-scan`'s **resolved** edges are different: each one clears once its node is fulfilled *or* a file exists at `{TARGET_REPO}/docs/refactoring/out-of-scope/<node>.md` — once every resolved-edge parent clears one way or the other, `structural-scan` is proposable. Check this before the ordinary already-fulfilled skip below: `structural-scan` stays proposable every pass once open, it's not a one-time node.
 3. Skip a node that's already fulfilled — except `structural-scan`, which the point above already covers.
+4. Skip a node (other than `structural-scan`) that has a file at `{TARGET_REPO}/docs/refactoring/out-of-scope/<node>.md` — it was explicitly rejected and stays out until that entry is reversed (removed); don't re-propose it on the strength of newly-fulfilled required parents alone.
 
-Collect nodes in table order until you have `{N}` that are unblocked and not yet fulfilled, or the table runs out. `git` is never a candidate. This set is the fallback for `tooling_tree.py`'s `next` field.
+Collect nodes in table order until you have `{N}` that are unblocked, not yet fulfilled, and not rejected, or the table runs out. `git` is never a candidate. This set is the fallback for `tooling_tree.py`'s `next` field.
 
 Return only this: for each node in the set, its **Name** (the `**Name:**` field under its heading — never the node's slug) and one line — either why it's unblocked, or its Purpose, whichever the caller asked for. Nothing else: no restated edge table, no exploration narrative.
