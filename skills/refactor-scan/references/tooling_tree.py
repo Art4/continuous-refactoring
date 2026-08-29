@@ -127,6 +127,40 @@ def _has_dep(composer: dict | None, name: str) -> bool:
     return False
 
 
+# Composer platform pseudo-packages: never real dependencies `composer audit`
+# could report anything about (php-tooling-tree.md's composer-audit stop
+# conditions).
+_PLATFORM_PACKAGE_NAMES = {"php", "hhvm", "composer-plugin-api", "composer-runtime-api"}
+
+
+def _has_real_require_dep(composer: dict | None) -> bool:
+    """True if composer.json's `require` names at least one real package —
+    excludes platform pseudo-packages (php, hhvm, ext-*, lib-*,
+    composer-plugin-api, composer-runtime-api)."""
+    if not composer:
+        return False
+    for name in composer.get("require", {}):
+        if name in _PLATFORM_PACKAGE_NAMES:
+            continue
+        if name.startswith("ext-") or name.startswith("lib-"):
+            continue
+        return True
+    return False
+
+
+def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
+    """composer-audit's real fulfilment (php-tooling-tree.md): a CI job that
+    runs `composer audit`, gating the pipeline on known advisories."""
+    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
+        for f in glob.glob(str(repo / pat)):
+            try:
+                if "composer audit" in pathlib.Path(f).read_text(encoding="utf-8"):
+                    return True
+            except OSError:
+                continue
+    return False
+
+
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
     p = repo / "phpstan.neon"
     if not p.exists():
@@ -244,12 +278,19 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # If phpunit fulfilled -> this node considered fulfilled (no need to propose)
     tr_fulfilled = phpunit_fulfilled
     set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
-    # composer-audit: thin node per php-tooling-tree.md — fulfilment is "composer audit runs without config errors"
-    # Strictly that is true whenever composer.json exists, so the node would be immediately fulfilled and never appear in a roadmap.
-    # For the dry-run roadmap we intentionally keep it proposable as a distinct thin MR to demonstrate the decision chain
-    # (the real MR scope is "none beyond running it", ticket 10 separates CI-fail). This is a roadmap-test seam, not a spec change.
-    audit_fulfilled = False  # always propose after composer for roadmap demonstration
-    set_node("composer-audit", audit_fulfilled and has_composer_json, "thin node — propose after composer (roadmap seam)" if has_composer_json else "blocked: no composer", has_composer=has_composer_json)
+    # composer-audit: fulfilled once CI actually gates on `composer audit` (php-tooling-tree.md).
+    # Eligibility (whether it's *proposable* at all, beyond its required edges) is a separate,
+    # extra gate handled in next_candidates()/roadmap() — a real dependency exists, or every
+    # other structural-scan leaf is already resolved — mirroring the phpstan-level-N
+    # stop-conditions pattern rather than living in this fulfilment check.
+    has_real_dep = _has_real_require_dep(composer)
+    audit_fulfilled = _has_composer_audit_ci_job(repo)
+    set_node(
+        "composer-audit",
+        audit_fulfilled,
+        "CI job runs composer audit" if audit_fulfilled else "no CI job runs composer audit yet",
+        has_real_dep=has_real_dep,
+    )
     # phpstan-level-0-baseline
     # Psalm equivalence: if psalm dep + config -> fulfilled without phpstan
     psalm_fulfils_p0 = has_psalm_dep and has_psalm_cfg
@@ -319,6 +360,22 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     return True, "required parents fulfilled"
 
 
+def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: dict, rejected: set[str]) -> tuple[bool, str]:
+    """composer-audit's stop condition beyond required-edge fulfilment
+    (php-tooling-tree.md): proposable once a real `require` dependency
+    exists, or every *other* structural-scan leaf is already resolved —
+    independent alternatives, not ordered. `resolved_check` maps node name
+    to a bool: already fulfilled (real or simulated)."""
+    if has_real_dep:
+        return True, "real require dependency present"
+    leaves = tree["resolved_parents"].get("structural-scan", [])
+    other_leaves = [leaf for leaf in leaves if leaf != "composer-audit"]
+    unresolved = [leaf for leaf in other_leaves if not (resolved_check.get(leaf, False) or leaf in rejected)]
+    if not unresolved:
+        return True, "no real dependency yet, but every other structural-scan leaf is resolved"
+    return False, f"no real dependency yet, waiting on: {', '.join(unresolved)}"
+
+
 def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5) -> list[dict]:
     """Return up to `limit` nodes that are *really* unblocked and unfulfilled right now.
 
@@ -363,6 +420,12 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
+            if node == "composer-audit":
+                has_real_dep = detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False)
+                resolved_check = {n: d.get("fulfilled", False) for n, d in detected.items()}
+                ok, why = _composer_audit_extra_gate(has_real_dep, tree, resolved_check, rejected)
+                if not ok:
+                    continue
             result.append({"node": node, "reason": why})
         if len(result) >= limit:
             break
@@ -451,6 +514,11 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             sim_ok, sim_why = _is_unblocked(node, tree, {k: {"fulfilled": v} for k, v in sim_fulfilled.items()})
             if not sim_ok:
                 continue
+            if node == "composer-audit":
+                has_real_dep = detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False)
+                sim_ok, sim_why = _composer_audit_extra_gate(has_real_dep, tree, sim_fulfilled, rejected)
+                if not sim_ok:
+                    continue
             # For phpstan levels, additional empty-baseline gate
             if node in ("phpstan-level-1", "phpstan-level-2", "phpstan-level-3"):
                 # Need predecessor fulfilled with empty baseline

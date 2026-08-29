@@ -20,6 +20,7 @@ _spec.loader.exec_module(tooling_tree)
 load_tree = tooling_tree.load_tree
 detect_nodes = tooling_tree.detect_nodes
 roadmap = tooling_tree.roadmap
+next_candidates = tooling_tree.next_candidates
 _is_baseline_empty = tooling_tree._is_baseline_empty
 
 
@@ -36,6 +37,9 @@ class LoadTreeTests(unittest.TestCase):
         self.assertIn({"from": "php-cs-fixer", "to": "rector-dead-code", "type": "recommended"}, tree["edges"])
         # resolved (ADR-0008): PHP-tree leaves gate structural-scan
         self.assertIn({"from": "composer-audit", "to": "structural-scan", "type": "resolved"}, tree["edges"])
+        # composer-audit's MR scope now includes wiring into CI (absorbs
+        # former ticket 10), so it needs ci-runner too, not just composer.
+        self.assertIn({"from": "ci-runner", "to": "composer-audit", "type": "required"}, tree["edges"])
 
     def test_order_contains_nodes(self):
         tree = load_tree()
@@ -209,6 +213,10 @@ class StructuralScanGateTests(unittest.TestCase):
             "phpstan.neon": "parameters:\n    level: 3\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type",
+            # ci-runner + composer-audit's own CI-gate fulfilment (no `require`
+            # dep here, so composer-audit only resolves via the "every other
+            # leaf resolved" fallback — see ComposerAuditGateTests).
+            ".github/workflows/ci.yml": "jobs:\n  audit:\n    steps:\n      - run: composer audit\n",
         }
 
     def test_unfulfilled_when_leaves_missing(self):
@@ -223,14 +231,11 @@ class StructuralScanGateTests(unittest.TestCase):
     def test_fulfilled_when_every_leaf_fulfilled(self):
         tmp, root = self._make_repo(self._fully_tooled_files())
         try:
+            # composer-audit is genuinely fulfilled here (the fixture's CI job
+            # runs `composer audit`) — every leaf fulfilled by file inspection,
+            # no rejection needed.
             d = detect_nodes(root)
-            # composer-audit is a deliberate roadmap-demo seam (always proposable
-            # once composer exists — see detect_nodes) so it never reads as
-            # fulfilled by file inspection; reject it explicitly here instead,
-            # exercising the rejected-still-resolves path for at least one leaf.
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "composer-audit.md").write_text("rejected: not worth it here\n")
-            d = detect_nodes(root)
+            self.assertTrue(d["composer-audit"]["fulfilled"], d["composer-audit"])
             self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
         finally:
             tmp.cleanup()
@@ -244,11 +249,117 @@ class StructuralScanGateTests(unittest.TestCase):
         tmp, root = self._make_repo(files)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "composer-audit.md").write_text("rejected\n")
             (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
             d = detect_nodes(root)
+            self.assertTrue(d["composer-audit"]["fulfilled"], d["composer-audit"])  # genuinely fulfilled, not rejected
             self.assertFalse(d["rector-type-coverage"]["fulfilled"])
             self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
+        finally:
+            tmp.cleanup()
+
+
+class ComposerAuditGateTests(unittest.TestCase):
+    """php-tooling-tree.md's composer-audit stop conditions: proposable once
+    ci-runner + composer are fulfilled, and (a real `require` dependency
+    exists, or every other structural-scan leaf is already resolved)."""
+
+    # CI exists (fulfils ci-runner) but doesn't run `composer audit` yet —
+    # for eligibility tests, which must stay independent of composer-audit's
+    # own fulfilment check (otherwise it'd be skipped as already-done, not
+    # exercised as blocked/eligible for the right reason).
+    _CI_YML_NO_AUDIT = "jobs:\n  lint:\n    steps:\n      - run: php -l\n"
+    _CI_YML_WITH_AUDIT = "jobs:\n  audit:\n    steps:\n      - run: composer audit\n"
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_blocked_without_ci_runner_even_with_real_dep(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertNotIn("composer-audit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_blocked_with_ci_but_only_platform_dependency(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1", "ext-json": "*"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_NO_AUDIT,
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertNotIn("composer-audit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_eligible_with_real_dependency_and_ci(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1", "acme/widgets": "^1.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_NO_AUDIT,
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertIn("composer-audit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_eligible_via_fallback_when_every_other_leaf_resolved(self):
+        # No real dependency at all, but every other structural-scan leaf is
+        # fulfilled — composer-audit must still eventually become proposable,
+        # or structural-scan would never open on a dependency-free target.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "phpunit/phpunit": "^10.0",
+                    "friendsofphp/php-cs-fixer": "^3.0",
+                },
+            }),
+            "composer.lock": "{}",
+            ".php-cs-fixer.php": "<?php return [];",
+            "phpstan.neon": "parameters:\n    level: 3\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "rector.php": "<?php // DeadCode Type",
+            ".github/workflows/ci.yml": self._CI_YML_NO_AUDIT,
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertIn("composer-audit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_once_ci_job_present(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_WITH_AUDIT,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["composer-audit"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_not_fulfilled_without_ci_job(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["composer-audit"]["fulfilled"])
         finally:
             tmp.cleanup()
 
@@ -300,8 +411,11 @@ class RoadmapTests(unittest.TestCase):
             # after composer fulfilled, unblocked should include these
             self.assertIn("php-cs-fixer", nodes)
             self.assertIn("phpunit", nodes)
-            self.assertIn("composer-audit", nodes)
             self.assertIn("phpstan-level-0-baseline", nodes)
+            # composer-audit stays blocked here: no ci-runner (required parent)
+            # and no real `require` dependency (only the `php` platform
+            # pseudo-package) — see ComposerAuditGateTests for its own gating.
+            self.assertNotIn("composer-audit", nodes)
             # p0 within 10 (needs composer)
             self.assertIn("phpstan-level-0-baseline", nodes)
         finally:

@@ -27,6 +27,7 @@ graph TD
     comp -->|required| unit
     comp -->|required| tr
     comp -->|required| audit
+    ci -->|required| audit
     comp -->|required| p0
     p0 -->|required| p1
     p1 -->|required| p2
@@ -55,6 +56,7 @@ graph TD
 | `composer` | `phpunit` | required |
 | `composer` | `test-runner-if-missing` | required |
 | `composer` | `composer-audit` | required |
+| `ci-runner` | `composer-audit` | required |
 | `composer` | `phpstan-level-0-baseline` | required |
 | `phpstan-level-0-baseline` | `phpstan-level-1` | required |
 | `phpstan-level-1` | `phpstan-level-2` | required |
@@ -81,6 +83,18 @@ The seven `resolved` rows above are not `required` or `recommended` — see `ski
 A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
 
 A node's full definition may live in its own file under `php-tooling-tree/` (sibling to this document) once extracted — see `composer` below for the first example. Every node also carries a **Name** — the human-readable label issue titles, merge requests, and chat status use instead of the node's slug (e.g. `phpstan-level-0-baseline` → "PHPStan Level 0"). The stub left behind here keeps Name, Tool, and Purpose inline so that label is available without opening the extracted file; Fulfilment check and MR scope move to the extracted file. Nodes not yet extracted stay inline in full.
+
+### `require-dev` security advisories
+
+A known security advisory in a `require-dev` package never blocks that package's adoption. Dev-only
+tooling (test runners, static analysers, style fixers, …) is excluded from production installs
+(`composer install --no-dev`) and never ships or runs there — the blast radius stays inside CI/dev
+machines. More importantly, the tooling a vulnerable dev-dependency provides — most of all a test suite —
+is frequently the prerequisite for the very refactoring/PHP-upgrade path that would let a newer,
+non-vulnerable version of that same tool be adopted later; refusing it here would block the fix instead
+of enabling it. Applies tree-wide to every `require-dev` node (`phpunit` below is the concrete case that
+surfaced this rule). Does not apply to `require` (production) dependencies — that's exactly what
+`composer-audit` (below) exists to police.
 
 ### `ci-runner`
 
@@ -113,6 +127,8 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 - **Purpose:** the project's test runner.
 - **Fulfilment check:** dev dependency installed and runnable (`phpunit` exits green on existing tests); an equivalent already present (Pest) fulfils the node.
 - **MR scope:** dependency + minimal config; no test rewrites.
+- **Security advisories:** a known CVE in the only PHP-version-compatible PHPUnit line does not block
+  adoption — see `require-dev` security advisories above.
 
 ### `test-runner-if-missing`
 
@@ -126,9 +142,19 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 
 - **Name:** Composer Audit
 - **Tool:** composer audit
-- **Purpose:** dependency vulnerability visibility (thin node).
-- **Fulfilment check:** `composer audit` runs locally without configuration errors.
-- **MR scope:** none beyond running it — making it fail CI is a separate child in a later wave (ticket 10).
+- **Purpose:** dependency vulnerability visibility, enforced as a CI gate (absorbs the former "ticket 10" —
+  see `.scratch/php-tooling-tree/issues/10-dependency-vulnerability-scan.md`, recorded done there).
+- **Fulfilment check:** a CI job exists that runs `composer audit` (the pipeline fails when it reports a
+  known advisory).
+- **MR scope:** wire `composer audit` into CI as a gate — no production-code change.
+- **Stop conditions / when not to propose:** both required parents (`composer`, `ci-runner`) fulfilled is
+  necessary but not sufficient — this node also stays blocked until either (a) `composer.json`'s
+  `require` block names at least one real package (platform pseudo-packages — `php`, `hhvm`, `ext-*`,
+  `lib-*`, `composer-plugin-api`, `composer-runtime-api` — don't count; `composer audit` has nothing to
+  check without a real dependency), **or** (b) every other leaf feeding `structural-scan` (`phpunit`,
+  `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`)
+  is already resolved — so a dependency-free target still eventually resolves this leaf instead of
+  leaving `structural-scan` permanently blocked. (a) and (b) are independent alternatives, not ordered.
 
 ### `phpstan-level-0-baseline`
 
