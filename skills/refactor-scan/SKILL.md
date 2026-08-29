@@ -52,7 +52,7 @@ Two things, handed onward by the orchestrator — state them plainly, no separat
 - Which precondition stopped the pass, if one did (step 1) — then nothing below applies this pass.
 - **Findings** (possibly empty) → `refactor-learn`.
 - **A resume-candidate** (step 3's new case), if one was detected → straight to `refactor-implement`, same as a resumed `Pending candidates` — bypasses `refactor-prioritize`/`refactor-design` this pass.
-- **Proposals**: the pending candidate alone, or up to five node Names (never slugs), or none → `refactor-prioritize`.
+- **Proposals**: the pending candidate alone, or up to five node Names (never slugs), or none → `refactor-prioritize`. The proposal set names **every** node currently unblocked (required parents fulfilled, not rejected) — never a priority-truncated subset past the five-node limit silently standing in for "the rest weren't ready yet." If more than five are unblocked at once, that's still every one up to the limit, in tree order; it never means fewer than five were actually proposable.
 
 ## Completion criterion
 

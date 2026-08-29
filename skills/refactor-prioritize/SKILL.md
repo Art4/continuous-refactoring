@@ -19,12 +19,13 @@ If `refactor-scan` handed over a single resumed pending issue (not five fresh pr
 
 ### 2. Rank
 
-For each surviving proposal, assess four factors:
+For each surviving proposal, assess five factors:
 
 - **Heat** — is it in a hot spot (frequently changing area)? A candidate in a hot spot pays off faster because it unblocks more upcoming change.
 - **Leverage** — how much future change does deepening this module unlock? A module many others call is high-leverage; a leaf nobody calls is not.
 - **Tooling pressure** — is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so, it's re-failing every CI run until fixed.
 - **Risk** — how hard to reverse / how wide the blast radius? Prefer reversible, low-risk refactors early in the loop while the habit is forming.
+- **Skip streak** — how many consecutive prior passes proposed this candidate without choosing it (`docs/refactoring/config.md`'s `Skip streak` field, `skills/continuous-refactoring/references/refactoring-config.md`; read-only here — `refactor-learn` is the one that writes it). A longer streak weighs increasingly toward choosing it this pass, so a `required` tooling-tree sibling that never wins on the other four factors alone doesn't starve indefinitely — but it's still one factor among five, not a forced pick: a genuinely more urgent candidate can still win over a long-streak one.
 
 For a tooling-tree node proposal, read its Purpose in the tree doc (`skills/refactor-scan/references/tooling-tree.md` / the language specialization's tree) to reason about what it unlocks — node-detail data beyond that Purpose line (e.g. what reaching a specific tool level opens up next) is not yet a maintained source and is deliberately out of scope for now; reason from the tree doc and the ranking factors above.
 

@@ -18,7 +18,7 @@ Run this on demand whenever you're asked, or via whatever recurring trigger you'
 
 State lives in the target repo, not in the conversation — every lifecycle skill may read these directly; only `refactor-learn` writes them:
 
-- **Config** — `docs/refactoring/config.md`: focus areas, merge-request create-mode, the `Pending candidates` marker, and the `Fulfilled nodes` cache (`skills/continuous-refactoring/references/refactoring-config.md`)
+- **Config** — `docs/refactoring/config.md`: focus areas, merge-request create-mode, the `Pending candidates` marker, the `Fulfilled nodes` cache, and the `Skip streak` counter `refactor-prioritize` reads as a ranking factor (`skills/continuous-refactoring/references/refactoring-config.md`)
 - **Remembered merge requests** — which suite merge requests are open. When the target's issue tracker natively supports labels (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: `docs/refactoring/merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
 - **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
 - **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
@@ -51,7 +51,7 @@ Followed by `refactor-implement` when it opens the reviewable; the create-mode d
 - Neither does → propose `autonomous` for this merge request; `refactor-learn` records the chosen mode — `autonomous`, `ask-each-time`, or `human-opens` — the first time it's decided. `refactor-learn` follows this same policy for its own bookkeeping merge request (see its `## Process`).
 - Skills always say **merge request**; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
 
-While fewer than two suite merge requests are open, a pass may deliver one more. Stack it (base = the open branch) only when the new candidate is a tooling-tree child of what is in flight or the design depends on it; otherwise branch parallel off the default branch. After the parent merges, the next pass retargets or rebases the child.
+While fewer than two suite merge requests are open, a pass may deliver one more. Always stack it (base = whatever suite branch is currently open) rather than branching parallel off the default branch — never both open against the default branch at once, regardless of whether the new candidate is a tooling-tree child of what's in flight. This trades a little throughput (a pass can't parallelize two truly unrelated candidates) for a stronger guarantee: no two suite branches ever touch `docs/refactoring/config.md` concurrently, which is what previously let a bookkeeping-style field accumulate repeated merge conflicts across overlapping branches. After the base merges, the next pass retargets or rebases the child.
 
 The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
