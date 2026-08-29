@@ -240,6 +240,26 @@ def adr_issues(text, skill=""):
     return issues
 
 
+def scratch_ref_issues(text, skill=""):
+    """`.scratch/` is this suite's own internal issue tracker (tickets,
+    specs) — ephemeral maintainer working state, same category as an
+    ADR-NNNN citation (adr_issues above): a real file today, but never
+    shipped with the skill and not guaranteed to exist or mean the same
+    thing to a target repo reading it. Backtick-quoted only, same as
+    local_ref_issues — a plain-prose mention of "scratch work" isn't a link."""
+    issues = []
+    text = _FENCE_RE.sub("", text)
+    for m in re.finditer(r"`([^`]+)`", text):
+        ref = m.group(1)
+        if ref.startswith(".scratch/"):
+            issues.append(Issue(
+                skill or ref,
+                f"skill prose references '{ref}' — .scratch/ is the suite's internal issue "
+                "tracker, never shipped with the skill; state the fact inline instead",
+            ))
+    return issues
+
+
 # --------------------------------------------------------------------------
 # Glossary vocabulary
 # --------------------------------------------------------------------------
@@ -569,14 +589,15 @@ def validate_repo(repo_root):
         issues += global_ref_issues(text, d.name, set(suite_names), ledger)
         issues += local_ref_issues(text, repo_root, skill=d.name)
         issues += adr_issues(text, skill=d.name)
+        issues += scratch_ref_issues(text, skill=d.name)
 
         # Every file a skill ships under references/ — not just its top-level
-        # *.md — is in scope for the same two checks: a reference doc or
+        # *.md — is in scope for the same three checks: a reference doc or
         # script can live nested (e.g. php-tooling-tree/composer.md), and a
-        # non-.md file (e.g. tooling_tree.py) can carry an ADR citation in
-        # its own docstrings/comments just as easily as prose can. Skip
-        # compiled bytecode and its cache directory — never source, never
-        # shipped intentionally.
+        # non-.md file (e.g. tooling_tree.py) can carry an ADR or .scratch/
+        # citation in its own docstrings/comments just as easily as prose
+        # can. Skip compiled bytecode and its cache directory — never
+        # source, never shipped intentionally.
         references_dir = d / "references"
         for ref_file in sorted(references_dir.rglob("*")):
             if ref_file.is_dir() or ref_file.suffix == ".pyc" or "__pycache__" in ref_file.parts:
@@ -585,6 +606,7 @@ def validate_repo(repo_root):
             ref_skill = f"{d.name}/references/{ref_file.relative_to(references_dir)}"
             issues += local_ref_issues(ref_text, repo_root, skill=ref_skill)
             issues += adr_issues(ref_text, skill=ref_skill)
+            issues += scratch_ref_issues(ref_text, skill=ref_skill)
 
     issues += vocab_issues(glossary.terms, glossary.avoid, skills_text, set(VOCAB_ALLOW))
 

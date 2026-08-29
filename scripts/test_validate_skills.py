@@ -251,6 +251,26 @@ class AdrTests(unittest.TestCase):
         self.assertEqual(vs.adr_issues("No decisions here."), [])
 
 
+class ScratchRefTests(unittest.TestCase):
+    def test_scratch_ref_flagged(self):
+        issues = vs.scratch_ref_issues("See `.scratch/php-tooling-tree/issues/10-foo.md`.")
+        self.assertTrue(any(".scratch/php-tooling-tree/issues/10-foo.md" in i.message for i in issues))
+
+    def test_scratch_ref_flagged_even_if_file_exists(self):
+        # Existence doesn't matter here — unlike local_ref_issues, this is a
+        # category ban (internal issue tracker), not a broken-link check.
+        issues = vs.scratch_ref_issues("See `.scratch/php-tooling-tree/spec.md`.")
+        self.assertTrue(any("spec.md" in i.message for i in issues))
+
+    def test_no_scratch_refs_ok(self):
+        self.assertEqual(vs.scratch_ref_issues("No scratch references here."), [])
+
+    def test_plain_prose_scratch_mention_not_flagged(self):
+        # Backtick-quoted only, same restraint as local_ref_issues — a
+        # non-code mention isn't a link.
+        self.assertEqual(vs.scratch_ref_issues("Some scratch work happened here."), [])
+
+
 class VocabTests(unittest.TestCase):
     def test_glossary_parsed(self):
         glossary = vs.parse_glossary(
@@ -529,6 +549,17 @@ class ReferencesDirTests(unittest.TestCase):
             issues = vs.validate_repo(root)
             self.assertTrue(any(
                 "references/tree.md" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_scratch_ref_in_references_dir_flagged(self):
+        tmp, root = self._repo("See `.scratch/php-tooling-tree/issues/10-foo.md` for background.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tree.md" in i.skill and ".scratch/" in i.message
                 for i in issues
             ))
         finally:

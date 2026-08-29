@@ -140,8 +140,8 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 
 - **Name:** Composer Audit
 - **Tool:** composer audit
-- **Purpose:** dependency vulnerability visibility, enforced as a CI gate (absorbs the former "ticket 10" —
-  see `.scratch/php-tooling-tree/issues/10-dependency-vulnerability-scan.md`, recorded done there).
+- **Purpose:** dependency vulnerability visibility, enforced as a CI gate (absorbs what was originally
+  tracked as a separate dependency-vulnerability-scan concern, now folded into this node).
 - **Fulfilment check:** a CI job exists that runs `composer audit` (the pipeline fails when it reports a
   known advisory).
 - **MR scope:** wire `composer audit` into CI as a gate — no production-code change.
