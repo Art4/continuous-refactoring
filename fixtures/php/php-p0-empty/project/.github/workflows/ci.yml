@@ -4,4 +4,5 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: echo ci
+      - run: vendor/bin/phpunit
+      - run: vendor/bin/phpstan analyse

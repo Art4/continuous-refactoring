@@ -148,17 +148,27 @@ def _has_real_require_dep(composer: dict | None) -> bool:
     return False
 
 
-def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
-    """composer-audit's real fulfilment (php-tooling-tree.md): a CI job that
-    runs `composer audit`, gating the pipeline on known advisories."""
+def _has_ci_job_invoking(repo: pathlib.Path, needle: str) -> bool:
+    """True if any CI workflow file (GitHub Actions or GitLab CI) contains
+    `needle` as a literal substring. The conservative approximation shared by
+    every self-wired CI-gate check in this module (`composer-audit`, and
+    since ticket 34, `phpunit`/`phpstan-level-0-baseline`): presence of the
+    invocation, not proof the job actually fails the pipeline on a red
+    result."""
     for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
         for f in glob.glob(str(repo / pat)):
             try:
-                if "composer audit" in pathlib.Path(f).read_text(encoding="utf-8"):
+                if needle in pathlib.Path(f).read_text(encoding="utf-8"):
                     return True
             except OSError:
                 continue
     return False
+
+
+def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
+    """composer-audit's real fulfilment (php-tooling-tree.md): a CI job that
+    runs `composer audit`, gating the pipeline on known advisories."""
+    return _has_ci_job_invoking(repo, "composer audit")
 
 
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
@@ -374,12 +384,26 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # php-cs-fixer
     cs_fulfilled = has_cs_dep and has_cs_config
     set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)
-    # phpunit
-    phpunit_fulfilled = has_phpunit or has_pest or has_phpunit_xml
-    set_node("phpunit", phpunit_fulfilled, "phpunit/pest present" if phpunit_fulfilled else "no test runner", has_phpunit=has_phpunit, has_pest=has_pest)
-    # test-runner-if-missing: fulfilled if some runner exists, else blocked by composer etc.
-    # If phpunit fulfilled -> this node considered fulfilled (no need to propose)
-    tr_fulfilled = phpunit_fulfilled
+    # phpunit — adopted AND, once ci-runner is fulfilled, actually gated in
+    # CI (ticket 34's self-wiring: folded into this node's own fulfilment
+    # check instead of a separate CI-job node). No CI yet still fulfils the
+    # node on adoption alone — nothing to wire in until CI exists.
+    phpunit_adopted = has_phpunit or has_pest or has_phpunit_xml
+    phpunit_ci_needle = "vendor/bin/pest" if has_pest else "vendor/bin/phpunit"
+    phpunit_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, phpunit_ci_needle)
+    phpunit_fulfilled = phpunit_adopted and phpunit_ci_ok
+    if phpunit_fulfilled:
+        phpunit_reason = "phpunit/pest present"
+    elif phpunit_adopted:
+        phpunit_reason = "adopted locally but not gated in CI"
+    else:
+        phpunit_reason = "no test runner"
+    set_node("phpunit", phpunit_fulfilled, phpunit_reason, has_phpunit=has_phpunit, has_pest=has_pest)
+    # test-runner-if-missing: fulfilled once *any* runner is adopted, full
+    # stop — independent of phpunit's CI-gating above. This node only
+    # answers "does a runner exist at all", not "is it enforced in CI"
+    # (php-tooling-tree.md).
+    tr_fulfilled = phpunit_adopted
     set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
     # composer-audit: fulfilled once CI actually gates on `composer audit` (php-tooling-tree.md).
     # Eligibility (whether it's *proposable* at all, beyond its required edges) is a separate,
@@ -395,12 +419,26 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         has_real_dep=has_real_dep,
     )
     # phpstan-level-0-baseline
-    # Psalm equivalence: if psalm dep + config -> fulfilled without phpstan
+    # Psalm equivalence: if psalm dep + config -> fulfilled without phpstan.
+    # Deliberately no CI-gating on this branch yet (ticket 34) — Psalm is
+    # getting its own node in a follow-up ticket, which is the right place
+    # to add its own CI-gating check rather than growing this equivalence
+    # branch further ahead of that redesign.
     psalm_fulfils_p0 = has_psalm_dep and has_psalm_cfg
+    # ticket 34 self-wiring: once ci-runner is fulfilled, this node also
+    # requires a CI job that actually invokes phpstan. The invocation is
+    # level-independent (`vendor/bin/phpstan analyse` regardless of the
+    # configured level), so gating it once here covers the whole
+    # phpstan-level-1..3 chain — those nodes stay CI-agnostic on purpose.
+    phpstan_p0_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "vendor/bin/phpstan analyse")
     if psalm_fulfils_p0:
         set_node("phpstan-level-0-baseline", True, "psalm fulfils p0 (vimeo/psalm + psalm.xml)", has_psalm=True)
-    elif has_phpstan_dep and phpstan_level == 0 and baseline_exists:
+    elif has_phpstan_dep and phpstan_level == 0 and baseline_exists and phpstan_p0_ci_ok:
         set_node("phpstan-level-0-baseline", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty)
+    elif has_phpstan_dep and phpstan_level == 0 and baseline_exists and not phpstan_p0_ci_ok:
+        # locally green, but CI exists and doesn't gate on it yet — the
+        # baseline this level sets is only durable once CI enforces it.
+        set_node("phpstan-level-0-baseline", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty)
     elif has_phpstan_dep and phpstan_level == 0 and not baseline_exists:
         # level 0 but no baseline yet -> not green, not fulfilled
         set_node("phpstan-level-0-baseline", False, "phpstan level 0 but baseline missing", level=phpstan_level)
@@ -652,11 +690,14 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 best = node
                 best_reason = "all php-tree leaves resolved (fulfilled or rejected)"
                 break
-            # test-runner-if-missing is fulfilled if phpunit/pest already fulfilled (simulated)
+            # test-runner-if-missing is fulfilled if phpunit/pest already fulfilled (simulated) —
+            # phpunit fulfilled implies a runner is adopted, so proposing this one too is redundant.
             if node == "test-runner-if-missing" and sim_fulfilled.get("phpunit"):
                 continue
-            if node == "phpunit" and sim_fulfilled.get("test-runner-if-missing"):
-                continue
+            # No symmetric skip the other way (ticket 34): test-runner-if-missing fulfilled no
+            # longer implies phpunit fulfilled — a runner can be adopted (satisfying
+            # test-runner-if-missing) while phpunit's own CI-gating requirement is still open, and
+            # that's a genuinely different, still-proposable candidate (wire it into CI).
             sim_ok, sim_why = _is_unblocked(node, tree, {k: {"fulfilled": v} for k, v in sim_fulfilled.items()})
             if not sim_ok:
                 continue
