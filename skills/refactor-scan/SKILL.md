@@ -20,7 +20,7 @@ Only past both does a pass propose anything.
 
 ### 2. Resume pending work first
 
-Read `docs/refactoring/config.md`'s `Pending issue` field (`skills/continuous-refactoring/references/refactoring-config.md`). If it names an issue, a previous pass's `refactor-design` filed it but the pass was interrupted before `refactor-implement` produced a merge request for it. Propose exactly that issue and stop here — don't also walk the tree this pass. Finishing pending work comes before proposing fresh work.
+Read `docs/refactoring/config.md`'s `Pending issue` field (`skills/continuous-refactoring/references/refactoring-config.md`). If it names an issue, a previous pass's `refactor-design` filed it but the pass was interrupted before `refactor-implement` produced a merge request for it. Propose exactly that issue and stop here — finishing pending work comes before proposing fresh work.
 
 ### 3. Detect closed/merged remembered state
 

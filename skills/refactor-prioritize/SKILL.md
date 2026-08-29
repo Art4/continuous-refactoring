@@ -40,7 +40,7 @@ If nothing survived step 1's filtering (every proposal already in flight, or `re
 
 ## Output
 
-Step 3's two lines (the candidate, plus why it wins and what it unlocks), verbatim, → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass. Nothing more.
+Step 3's two lines (the candidate, plus why it wins and what it unlocks), verbatim, → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass.
 
 ## Completion criterion
 
