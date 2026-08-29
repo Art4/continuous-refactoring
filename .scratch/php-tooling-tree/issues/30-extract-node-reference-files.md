@@ -20,7 +20,7 @@ Remaining to specify:
 - [x] New file created — `skills/refactor-scan/references/php-tooling-tree/composer.md`
 - [x] `php-tooling-tree.md`'s `composer` entry replaced with a stub pointing to it
 - [x] `## Nodes` intro note added documenting the per-node-file pattern for future extractions
-- [ ] Extract the remaining PHP-tree nodes (`ci-runner`, `php-cs-fixer`, `phpunit`, `test-runner-if-missing`, `composer-audit`, `phpstan-level-0-baseline`..`phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`) — deferred to future tickets, one node at a time
+- [x] ~~Extract the remaining PHP-tree nodes (`ci-runner`, `php-cs-fixer`, `phpunit`, `test-runner-if-missing`, `composer-audit`, `phpstan-level-0-baseline`..`phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`)~~ — deferred to future tickets, one node at a time
 
 ## Comments
 

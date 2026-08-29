@@ -21,7 +21,7 @@ Remaining to specify:
 - [x] ~~`Learnings` added to the node schema — `CONTEXT.md`'s **Tooling tree** term~~ — reverted, see 2026-08-29 (later) comment below
 - [x] `composer`'s learnings worked into its own definition — `skills/refactor-scan/references/php-tooling-tree/composer.md`'s Fulfilment check + MR scope (see ticket 30)
 - [x] This ticket recorded in the feature's issue table — `.scratch/php-tooling-tree/spec.md`
-- [ ] Fold learnings into the remaining PHP-tree nodes' prose (`ci-runner`, `php-cs-fixer`, `phpunit`, …) as they're extracted — deferred to future tickets, one node at a time
+- [x] ~~Fold learnings into the remaining PHP-tree nodes' prose (`ci-runner`, `php-cs-fixer`, `phpunit`, …)~~ — deferred to future tickets, one node at a time, as each is extracted
 
 ## Comments
 
