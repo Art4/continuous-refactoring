@@ -4,6 +4,8 @@
 
 All changes go through feature branches and pull requests — never direct commits to `main`. Create a branch, implement, ensure CI is green, then open a PR. Merge only after review and passing pipeline.
 
+**Run the relevant tests locally before pushing, every time — not just for code changes.** A change to `skills/**` or `docs/**` still needs `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py .` green locally first (see `.github/workflows/skills-validation.yml`); a change touching the tooling-tree parser or fixtures additionally needs the relevant `scripts/run-test.sh`/`fixtures/harness/run.sh` tier. Pushing untested and then iterating on red CI is not an acceptable substitute for running it yourself first.
+
 ### Issue tracker
 
 Issues live as markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.
