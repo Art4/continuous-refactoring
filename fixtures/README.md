@@ -21,7 +21,7 @@ continuous-refactoring/
     └── run-test.sh                     # Test automation script
 ```
 
-> **Isolation:** `fixtures/harness/run.sh: setup_fixture` copies only `project/` to `/tmp/continuous-refactoring-tests/<fixture>` (`cp -r project/. DST/`). `expected/` is **not** mounted into Docker / not copied — it lives at `fixtures/php/<fixture>/expected/` and is compared on the host via `python3 scripts/lib/tooling_tree.py`. This prevents the code under test from reading the expected results.
+> **Isolation:** `fixtures/harness/run.sh: setup_fixture` copies only `project/` to `/tmp/continuous-refactoring-tests/<fixture>` (`cp -r project/. DST/`). `expected/` is **not** mounted into Docker / not copied — it lives at `fixtures/php/<fixture>/expected/` and is compared on the host via `python3 skills/refactor-scan/references/tooling_tree.py`. This prevents the code under test from reading the expected results.
 
 ## Available Fixtures
 
@@ -51,7 +51,7 @@ Same as `php-p0-empty` but baseline has 3 `ignoreErrors` (non-empty). Tests **sh
 
 ### Roadmap (dry-run, no MR)
 
-Each fixture above has `expected/roadmap.json` — the next 10 MRs the deterministic parser `scripts/lib/tooling_tree.py` predicts (tool → fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). Verified by:
+Each fixture above has `expected/roadmap.json` — the next 10 MRs the deterministic parser `skills/refactor-scan/references/tooling_tree.py` predicts (tool → fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). Verified by:
 
 ```bash
 ./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture (deterministic, no LLM)
@@ -61,7 +61,7 @@ for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-projec
   ./fixtures/harness/run.sh roadmap $f
 done
 ```
-Checks: which tools are recognized (`detected` fulfilled), whether decisions follow `docs/php-tooling-tree.md`, correct 10-step order, recommended-edge outlook (`would benefit from …`), and **no MR/branch created** (still 1 commit, no `docs/refactoring/merge-requests.md` or `.scratch`).
+Checks: which tools are recognized (`detected` fulfilled), whether decisions follow `skills/refactor-scan/references/php-tooling-tree.md`, correct 10-step order, recommended-edge outlook (`would benefit from …`), and **no MR/branch created** (still 1 commit, no `docs/refactoring/merge-requests.md` or `.scratch`).
 
 **Local with opencode (isolated, advisory):**
 
@@ -73,7 +73,7 @@ The roadmap tier runs in CI **without LLM** (only Python, `pip install pyyaml`).
 ./fixtures/harness/run.sh roadmap php-p0-nonempty --opencode
 ```
 
-*What `--opencode` does:* `run.sh:roadmap` creates a `.agents/skills → skills/` symlink in the fixture, runs `timeout 60 opencode run "List the next 10 MRs without creating branches/MRs. Use docs/php-tooling-tree.md."` inside the fixture directory (subprocess, only `skills/` from this repo, no `~/.config/opencode/skills`), logs the first 80 lines to `/tmp/opencode-$FIXTURE.log` and advisory-checks whether the first expected node is mentioned. If the binary is missing, it only logs `opencode binary not found — skipping` (no fail). In CI `--opencode` stays **off** — deterministic is the gate, opencode is only local to observe whether the skill interprets the tree the same way.
+*What `--opencode` does:* `run.sh:roadmap` creates a `.agents/skills → skills/` symlink in the fixture, runs `timeout 60 opencode run "List the next 10 MRs without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md."` inside the fixture directory (subprocess, only `skills/` from this repo, no `~/.config/opencode/skills`), logs the first 80 lines to `/tmp/opencode-$FIXTURE.log` and advisory-checks whether the first expected node is mentioned. If the binary is missing, it only logs `opencode binary not found — skipping` (no fail). In CI `--opencode` stays **off** — deterministic is the gate, opencode is only local to observe whether the skill interprets the tree the same way.
 
 ### Reproducible local opencode test (for humans and agents)
 
@@ -128,15 +128,15 @@ DST=/tmp/continuous-refactoring-tests/$FIXTURE
 rm -rf $DST && mkdir -p $(dirname $DST) && cp -r $SRC $DST
 (cd $DST && git init -q && git -c user.name="Test" -c user.email="test@test" add -A && git commit -q -m "init")
 
-# 2a. Run from repo root so opencode finds docs/php-tooling-tree.md (needs --auto to allow reading /tmp fixture)
+# 2a. Run from repo root so opencode finds skills/refactor-scan/references/php-tooling-tree.md (needs --auto to allow reading /tmp fixture)
 opencode run -m opencode/muse-spark-1.2-contributor-free --auto \
   --dir /home/artur/projects/continuous-refactoring \
-  "For fixture at /tmp/continuous-refactoring-tests/$FIXTURE (copied from fixtures/php/$FIXTURE), show which tools are recognized per docs/php-tooling-tree.md, whether decisions are correct, and list the next 10 MRs in order without creating branches/MRs. Use deterministic tree: required edge gates, recommended only outlook, empty-baseline absent OR empty ignoreErrors, psalm fulfils p0."
+  "For fixture at /tmp/continuous-refactoring-tests/$FIXTURE (copied from fixtures/php/$FIXTURE), show which tools are recognized per skills/refactor-scan/references/php-tooling-tree.md, whether decisions are correct, and list the next 10 MRs in order without creating branches/MRs. Use deterministic tree: required edge gates, recommended only outlook, empty-baseline absent OR empty ignoreErrors, psalm fulfils p0."
 
 # 2b. Alternative: run inside fixture with skills symlink (exactly what run.sh does)
 mkdir -p $DST/.agents && ln -sfn /home/artur/projects/continuous-refactoring/skills $DST/.agents/skills
 timeout 60 opencode run -m opencode/muse-spark-1.2-contributor-free --auto --dir $DST \
-  "List the next 10 MRs for this repo without creating branches/MRs. Use docs/php-tooling-tree.md." 2>&1 | head -n 80
+  "List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md." 2>&1 | head -n 80
 # log: /tmp/opencode-$FIXTURE.log
 ```
 
@@ -152,9 +152,13 @@ For agents (subprocess):
 import subprocess, pathlib
 fixture = "php-p0-nonempty"
 subprocess.run(["./fixtures/harness/run.sh", "roadmap", fixture, "--opencode", "--verbose"], check=False)
-# or direct deterministic check:
-import json; from scripts.lib.tooling_tree import detect_and_roadmap
-data = detect_and_roadmap(pathlib.Path(f"fixtures/php/{fixture}"), steps=10)
+# or direct deterministic check — importlib, not a dotted import: "refactor-scan"'s
+# hyphen makes `skills.refactor_scan...` an invalid package path
+import importlib.util, json, pathlib
+spec = importlib.util.spec_from_file_location("tooling_tree", "skills/refactor-scan/references/tooling_tree.py")
+tooling_tree = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tooling_tree)
+data = tooling_tree.detect_and_roadmap(pathlib.Path(f"fixtures/php/{fixture}"), steps=10)
 assert data["roadmap"][0]["node"] == "composer-audit"  # etc.
 ```
 
@@ -162,7 +166,7 @@ Troubleshooting:
 
 * `opencode binary not found` → `npm i -g opencode` or use `npx --yes opencode`.
 * `permission requested: external_directory … auto-rejecting` → add `--auto` (the harness does this).
-* `File not found: docs/php-tooling-tree.md` when `--dir /tmp/...` → run with `--dir` pointing to repo root and mention fixture path in prompt, or use the `.agents/skills` symlink method.
+* `File not found: skills/refactor-scan/references/php-tooling-tree.md` when `--dir /tmp/...` → run with `--dir` pointing to repo root and mention fixture path in prompt, or use the `.agents/skills` symlink method.
 * Long runtime → harness uses `timeout 60`; increase if model is slow.
 
 ### Agent loop test (full pass, subagent-observed)

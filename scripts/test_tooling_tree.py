@@ -1,14 +1,26 @@
-"""Tests for deterministic tooling tree parser (scripts/lib/tooling_tree.py)
+"""Tests for deterministic tooling tree parser (skills/refactor-scan/references/tooling_tree.py)
 
 TDD: verify tree parsing, detection, and 10-step roadmap generation against fixtures.
 """
 
+import importlib.util
 import json
+import os
 import pathlib
 import tempfile
 import unittest
 
-from lib.tooling_tree import load_tree, detect_nodes, roadmap, _is_baseline_empty
+# importlib, not a dotted import: "refactor-scan"'s hyphen makes
+# `skills.refactor_scan...` an invalid package path.
+_MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "skills" / "refactor-scan" / "references" / "tooling_tree.py"
+_spec = importlib.util.spec_from_file_location("tooling_tree", _MODULE_PATH)
+tooling_tree = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(tooling_tree)
+
+load_tree = tooling_tree.load_tree
+detect_nodes = tooling_tree.detect_nodes
+roadmap = tooling_tree.roadmap
+_is_baseline_empty = tooling_tree._is_baseline_empty
 
 
 class LoadTreeTests(unittest.TestCase):
@@ -341,6 +353,30 @@ class RoadmapTests(unittest.TestCase):
             self.assertEqual(r[-1]["n"], 10)
         finally:
             tmp.cleanup()
+
+
+class PortabilityTests(unittest.TestCase):
+    """Guards the property the skills/refactor-scan/references/ move exists for:
+    the module finds its own tree docs as siblings, never via the suite
+    checkout's layout — so a shipped copy (skills/refactor-scan/ alone, no
+    scripts/ or docs/ around it) still works, under symlink or copy install.
+    """
+
+    def test_load_tree_ignores_cwd(self):
+        old_cwd = pathlib.Path.cwd()
+        with tempfile.TemporaryDirectory() as unrelated:
+            os.chdir(unrelated)
+            try:
+                tree = load_tree()
+            finally:
+                os.chdir(old_cwd)
+        self.assertGreaterEqual(len(tree["edges"]), 15)
+        self.assertIn({"from": "git", "to": "loop-config", "type": "required"}, tree["edges"])
+
+    def test_tree_docs_are_siblings_of_the_module(self):
+        module_dir = pathlib.Path(tooling_tree.__file__).resolve().parent
+        self.assertTrue((module_dir / "tooling-tree.md").exists())
+        self.assertTrue((module_dir / "php-tooling-tree.md").exists())
 
 
 if __name__ == "__main__":

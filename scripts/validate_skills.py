@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Static suite validation for the continuous-refactoring skill suite.
 
-Checks every ``skills/*/SKILL.md`` deterministically and without an LLM:
+Checks every ``skills/*/SKILL.md`` — plus every ``skills/*/references/*.md``,
+which ships alongside it — deterministically and without an LLM:
 
 Tier 1 — structural:
 - frontmatter: valid YAML, ``name`` matches the directory (kebab-case, <= 64
@@ -15,7 +16,10 @@ Tier 1 — structural:
 - local file references (``docs/...``, ``CONTEXT.md``, ``*.md``) resolve to real
   files; target-repo artifacts (``CODING_STANDARDS.md``, ``CONTRIBUTING.md``)
   and target-repo suite state (``docs/refactoring/**``, ADR-0005) are exempt
-- ADR references (``ADR-NNNN``) resolve to ``docs/adr/NNNN-*.md``
+- ADR references (``ADR-NNNN``) are forbidden in skill prose and in
+  ``references/*.md`` — the suite's own ADRs are internal maintainer docs that
+  never ship with a skill; a skill states the rule inline instead of citing
+  the decision that produced it
 - glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
   prose uses, e.g. defining the seam or quoting a user's words)
@@ -200,11 +204,17 @@ def global_ref_issues(text, skill, suite_names, ledger):
 # --------------------------------------------------------------------------
 
 _PATH_LIKE = re.compile(r"(?:^docs/|^CONTEXT(?:-MAP)?\.md$|\.md$|^skills/)")
+# A fenced code block's ``` pair is itself two backticks short of the naive
+# `x` scanner's expectations — without stripping fences first, the scanner
+# desyncs on the first fence in the file and misreads every inline `ref`
+# after it for the rest of the text. Strip fences before scanning.
+_FENCE_RE = re.compile(r"```.*?```", re.S)
 
 
 def local_ref_issues(text, repo_root, skill=""):
     issues = []
     repo_root = pathlib.Path(repo_root)
+    text = _FENCE_RE.sub("", text)
     for m in re.finditer(r"`([^`]+)`", text):
         ref = m.group(1)
         if not _PATH_LIKE.match(ref) or re.search(r"\s", ref):
@@ -218,13 +228,15 @@ def local_ref_issues(text, repo_root, skill=""):
     return issues
 
 
-def adr_issues(text, repo_root, skill=""):
+def adr_issues(text, skill=""):
     issues = []
-    repo_root = pathlib.Path(repo_root)
     for m in re.finditer(r"ADR-(\d{4})", text):
         num = m.group(1)
-        if not list((repo_root / "docs/adr").glob(f"{num}-*.md")):
-            issues.append(Issue(skill or f"ADR-{num}", f"ADR reference ADR-{num} has no matching docs/adr/{num}-*.md"))
+        issues.append(Issue(
+            skill or f"ADR-{num}",
+            f"skill prose references ADR-{num} — suite ADRs are internal maintainer docs, "
+            "never shipped with the skill; state the rule inline instead",
+        ))
     return issues
 
 
@@ -556,7 +568,13 @@ def validate_repo(repo_root):
         issues += section_issues(text, d.name, requires_fallback=shipped)
         issues += global_ref_issues(text, d.name, set(suite_names), ledger)
         issues += local_ref_issues(text, repo_root, skill=d.name)
-        issues += adr_issues(text, repo_root, skill=d.name)
+        issues += adr_issues(text, skill=d.name)
+
+        for ref_md in sorted((d / "references").glob("*.md")):
+            ref_text = ref_md.read_text()
+            ref_skill = f"{d.name}/references/{ref_md.name}"
+            issues += local_ref_issues(ref_text, repo_root, skill=ref_skill)
+            issues += adr_issues(ref_text, skill=ref_skill)
 
     issues += vocab_issues(glossary.terms, glossary.avoid, skills_text, set(VOCAB_ALLOW))
 

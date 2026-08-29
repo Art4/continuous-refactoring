@@ -237,33 +237,18 @@ class LocalRefTests(unittest.TestCase):
 
 
 class AdrTests(unittest.TestCase):
-    def _repo(self):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        write_tree(root, {"docs/adr/0002-generic-core-php-first.md": "# 0002"})
-        return tmp, root
+    def test_any_adr_ref_flagged(self):
+        issues = vs.adr_issues("Per ADR-0002.")
+        self.assertTrue(any("0002" in i.message for i in issues))
 
-    def test_resolvable_adr_ok(self):
-        tmp, root = self._repo()
-        try:
-            self.assertEqual(vs.adr_issues("Per ADR-0002.", root), [])
-        finally:
-            tmp.cleanup()
-
-    def test_missing_adr_flagged(self):
-        tmp, root = self._repo()
-        try:
-            issues = vs.adr_issues("Per ADR-9999.", root)
-            self.assertTrue(any("9999" in i.message for i in issues))
-        finally:
-            tmp.cleanup()
+    def test_resolvable_adr_still_flagged(self):
+        # Even a real, existing ADR is forbidden in skill prose — suite ADRs
+        # are internal maintainer docs that never ship with the skill.
+        issues = vs.adr_issues("Per ADR-0010.")
+        self.assertTrue(any("0010" in i.message for i in issues))
 
     def test_no_adr_refs_ok(self):
-        tmp, root = self._repo()
-        try:
-            self.assertEqual(vs.adr_issues("No decisions here.", root), [])
-        finally:
-            tmp.cleanup()
+        self.assertEqual(vs.adr_issues("No decisions here."), [])
 
 
 class VocabTests(unittest.TestCase):
@@ -515,6 +500,56 @@ class ADRStalenessTests(unittest.TestCase):
             skills = {"refactor-scan": "No ADR references here."}
             issues = vs.adr_staleness_issues(skills, root / "docs" / "adr")
             self.assertEqual(issues, [])
+        finally:
+            tmp.cleanup()
+
+
+class ReferencesDirTests(unittest.TestCase):
+    """skills/*/references/*.md ships alongside its SKILL.md, so validate_repo
+    scans it the same way: ADR citations forbidden, local refs must resolve.
+    """
+
+    def _repo(self, ref_content):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, {
+            "CONTEXT.md": "# glossary",
+            "docs/agents/skill-references.md": "# ledger\n",
+            "skills/refactor-scan/SKILL.md": (
+                "---\nname: refactor-scan\ndescription: test\n---\n\n"
+                "## Process\n\n## Completion criterion\n"
+            ),
+            "skills/refactor-scan/references/tree.md": ref_content,
+        })
+        return tmp, root
+
+    def test_adr_ref_in_references_dir_flagged(self):
+        tmp, root = self._repo("Per ADR-0010, do the thing.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tree.md" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_missing_local_ref_in_references_dir_flagged(self):
+        tmp, root = self._repo("See `docs/agents/missing.md`.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tree.md" in i.skill and "missing.md" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_clean_references_dir_ok(self):
+        tmp, root = self._repo("No decisions or dangling paths here.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertFalse(any("references/tree.md" in i.skill for i in issues))
         finally:
             tmp.cleanup()
 
