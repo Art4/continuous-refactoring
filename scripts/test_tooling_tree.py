@@ -21,6 +21,7 @@ load_tree = tooling_tree.load_tree
 detect_nodes = tooling_tree.detect_nodes
 roadmap = tooling_tree.roadmap
 next_candidates = tooling_tree.next_candidates
+php_version_reversal_findings = tooling_tree.php_version_reversal_findings
 _is_baseline_empty = tooling_tree._is_baseline_empty
 
 
@@ -360,6 +361,125 @@ class ComposerAuditGateTests(unittest.TestCase):
         try:
             d = detect_nodes(root)
             self.assertFalse(d["composer-audit"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+
+class RejectionRespectedTests(unittest.TestCase):
+    """A node with an out-of-scope entry stays out of next_candidates()/
+    roadmap() even once its required parents are fulfilled -- until the
+    entry is removed (the composer-audit/phpunit reversal gap: rejected
+    ordinary nodes were never checked, only structural-scan's own gate)."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_rejected_ordinary_node_not_in_next_candidates(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertNotIn("php-cs-fixer", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_rejected_ordinary_node_not_in_roadmap(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
+        })
+        try:
+            nodes = [x["node"] for x in roadmap(root, steps=10)]
+            self.assertNotIn("phpunit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_unrejected_sibling_still_proposed(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertIn("phpunit", nodes)
+        finally:
+            tmp.cleanup()
+
+
+class PhpVersionReversalTests(unittest.TestCase):
+    """php-tooling-tree.md's mechanical reversal: a rejected node's
+    `Blocked by: PHP >= X.Y` condition satisfied by the target's current
+    floor surfaces as a finding (refactor-scan detects, refactor-learn
+    removes the out-of-scope entry -- never the other way round)."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_reversal_found_when_php_floor_satisfies_blocked_by(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
+        })
+        try:
+            nodes = [f["node"] for f in php_version_reversal_findings(root)]
+            self.assertIn("phpunit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_no_reversal_when_php_floor_still_below_blocked_by(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
+        })
+        try:
+            self.assertEqual(php_version_reversal_findings(root), [])
+        finally:
+            tmp.cleanup()
+
+    def test_no_reversal_without_blocked_by_field(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/some-stylistic-rejection.md": "Not worth it here.\n",
+        })
+        try:
+            self.assertEqual(php_version_reversal_findings(root), [])
+        finally:
+            tmp.cleanup()
+
+    def test_uses_platform_pin_over_require_when_present(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({
+                "require": {"php": ">=7.2"},
+                "config": {"platform": {"php": "7.2.34"}},
+            }),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
+        })
+        try:
+            nodes = [f["node"] for f in php_version_reversal_findings(root)]
+            self.assertEqual(nodes, ["phpunit"])
         finally:
             tmp.cleanup()
 

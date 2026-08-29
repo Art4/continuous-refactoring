@@ -206,6 +206,73 @@ def _has_loop_config(repo: pathlib.Path) -> bool:
     return (repo / "docs" / "refactoring" / "config.md").exists()
 
 
+def _parse_min_version(constraint: str) -> tuple[int, ...] | None:
+    """Best-effort minimum-version extraction from a composer-style version
+    constraint (e.g. '>=7.2', '^8.1', '7.2.0'). Not a full composer
+    constraint parser — handles the single-lower-bound shapes this suite's
+    `Blocked by:` fields and `require.php`/`config.platform.php` actually
+    use. Returns None if no version-like substring is found."""
+    if not constraint:
+        return None
+    m = re.search(r"(\d+(?:\.\d+){0,2})", constraint)
+    if not m:
+        return None
+    return tuple(int(p) for p in m.group(1).split("."))
+
+
+def _current_php_floor(composer: dict | None) -> tuple[int, ...] | None:
+    """The target's current minimum PHP version: `config.platform.php`
+    (an exact pin) if present, else `require.php`'s constraint
+    (best-effort lower bound)."""
+    if not composer:
+        return None
+    platform_php = composer.get("config", {}).get("platform", {}).get("php")
+    v = _parse_min_version(platform_php) if platform_php else None
+    if v:
+        return v
+    return _parse_min_version(composer.get("require", {}).get("php"))
+
+
+def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ...] | None:
+    """Parse `**Blocked by:** PHP >= X.Y` from a node's out-of-scope entry,
+    if the entry has one (php-tooling-tree.md's mechanical-reversal design;
+    only PHP-version rejections are ever auto-detected this way)."""
+    p = repo / "docs" / "refactoring" / "out-of-scope" / f"{node}.md"
+    if not p.exists():
+        return None
+    try:
+        txt = p.read_text(encoding="utf-8")
+    except OSError:
+        return None
+    m = re.search(r"\*\*Blocked by:\*\*\s*PHP\s*>=\s*([\d.]+)", txt)
+    if not m:
+        return None
+    return _parse_min_version(m.group(1))
+
+
+def php_version_reversal_findings(repo: pathlib.Path) -> list[dict]:
+    """Rejected nodes whose recorded `Blocked by: PHP >= X.Y` condition the
+    target now satisfies — findings for `refactor-learn` to act on
+    (removing the out-of-scope entry); this function only detects, per the
+    suite's detect-never-write split (`refactor-scan`/`refactor-learn`)."""
+    repo = pathlib.Path(repo)
+    current = _current_php_floor(_read_composer(repo))
+    if current is None:
+        return []
+    findings = []
+    for node in sorted(_rejected_nodes(repo)):
+        blocked_by = _out_of_scope_blocked_by_php(repo, node)
+        if blocked_by is not None and current >= blocked_by:
+            findings.append({
+                "node": node,
+                "reason": (
+                    f"PHP floor now {'.'.join(map(str, current))}, satisfies "
+                    f"Blocked by PHP >= {'.'.join(map(str, blocked_by))}"
+                ),
+            })
+    return findings
+
+
 def _rejected_nodes(repo: pathlib.Path) -> set[str]:
     """Tooling-tree nodes recorded as out-of-scope for this target repo.
 
@@ -417,6 +484,8 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int = 5
         else:
             if detected.get(node, {}).get("fulfilled", False):
                 continue
+            if node in rejected:
+                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
@@ -495,6 +564,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 continue  # never an MR
             if sim_fulfilled.get(node, False):
                 continue  # already fulfilled (real or simulated), skip
+            if node in rejected:
+                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             if node == "structural-scan":
                 # `resolved` gate: every leaf must be fulfilled OR rejected —
                 # not the standard required-parent check, which would
@@ -588,7 +659,8 @@ def detect_and_roadmap(repo: pathlib.Path, steps: int = 10, tree_md: pathlib.Pat
     detected = detect_nodes(repo, tree)
     road = roadmap(repo, steps=steps, tree=tree)
     nxt = next_candidates(repo, tree=tree, limit=steps)
-    return {"detected": detected, "roadmap": road, "next": nxt, "tree": {"edges": tree["edges"]}}
+    reversals = php_version_reversal_findings(repo)
+    return {"detected": detected, "roadmap": road, "next": nxt, "reversals": reversals, "tree": {"edges": tree["edges"]}}
 
 
 if __name__ == "__main__":
