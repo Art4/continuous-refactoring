@@ -12,9 +12,9 @@ frontier in one round, numbering each question (`❓ **Q1** - **<title>**:
 <body>`, multiple choices allowed) with your recommended answer (`➡️
 <recommendation>`), then wait for the user. Their answers reshape the tree
 and push the frontier outward — a question depending on one still open in
-this round belongs to a later round. Facts are your job (dispatch a
-sub-agent rather than asking the user), decisions are the user's. Done when
-the frontier is empty: every branch visited, nothing silently assumed.
+this round belongs to a later round. Facts are your job — dispatch a
+sub-agent for them; decisions are the user's. Done when the frontier is
+empty: every branch visited, nothing silently assumed.
 
 In this step the tree hangs off the five branches in step 4 of `## Process` —
 the deepened module, the seam, the interface, locality, and the tests that

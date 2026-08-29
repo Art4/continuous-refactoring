@@ -35,7 +35,7 @@ Each numbered step runs the named lifecycle skill and carries its output to the 
 
 3. **Prioritise.** Run `/refactor-prioritize` on scan's proposals, against the now-current ledger. It stops the pass here (skip to step 5) if two suite merge requests are already open, or if every proposal is already in flight. Otherwise it hands one chosen node forward with its rationale.
 
-4. **Design.** Run `/refactor-design` on the chosen node. It files the node as an issue (the point at which a node first becomes one) and writes the plan onto it. If the candidate is tiny and the user wants to skip ahead, that's their call — flag it, don't block. Carries the filed issue/plan into step 5.
+4. **Design.** Run `/refactor-design` on the chosen node. It files the node as an issue (the point at which a node first becomes one) and writes the plan onto it. If the candidate is tiny and the user wants to skip ahead, that's their call — flag it and go. Carries the filed issue/plan into step 5.
 
 5. **Implement.** Run `/refactor-implement`. One candidate, one branch; slices stay on that branch, and the branch only exists once this step creates it. It reviews its own diff along both axes (the check that used to be `refactor-review`'s own step) until clean — the change it describes matches what the plan asked for — before opening the merge request, looping back to its own earlier steps on findings rather than handing off to another skill. Carries the opened merge request into step 6.
 
@@ -53,7 +53,11 @@ While fewer than two suite merge requests are open, a pass may deliver one more.
 
 The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
-For a tooling-tree candidate, close with an outlook: re-run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree, look up whatever node slug it reports next in the tree doc, and name it by its **Name** (never the slug the script returned), quoting that node's Purpose from the tree doc in one line. If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; with no sub-agent mechanism, run that prompt's steps yourself inline. A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
+For a tooling-tree candidate, close with an outlook: one plain sentence a human can read, naming the next node by its **Name** and working its Purpose into that same sentence (e.g. "next up: Composer — dependency management for the Composer-stack track"). Nothing about how that was determined belongs in it — no shell command, no file path, no `Purpose:`-labelled field.
+
+To determine what's next: re-run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and look up whatever node slug it reports in the tree doc, using its Name (never the slug the script returned). If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; with no sub-agent mechanism, run that prompt's steps yourself inline.
+
+A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
 
 ## Fallback
 
@@ -63,7 +67,7 @@ The authoritative inventory of every global reference and its fallback type live
 
 ## Closing report
 
-Wherever the pass ends — completed, stopped early by a precondition, or nothing survived prioritising — close with exactly two lines to the human, nothing more. Each lifecycle skill's own `## Output` is handoff data carried to the *next skill*, not a report; don't restate it here. Name any tooling-tree node by its **Name** (never its slug).
+Wherever the pass ends — completed, stopped early by a precondition, or nothing survived prioritising — close with exactly two lines to the human. Each lifecycle skill's own `## Output` is handoff data carried to the *next skill* — separate from this closing report. Name any tooling-tree node by its **Name** (never its slug).
 
 - **Status:** one line, what happened this pass.
 - **Next:** one line, what the human can or should do now.
