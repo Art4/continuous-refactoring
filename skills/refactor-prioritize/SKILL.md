@@ -15,7 +15,7 @@ Get the remembered set of in-flight suite merge requests: every issue labeled `r
 
 Otherwise, drop any proposal already in that set from consideration — it already has an open merge request delivering it, so it isn't something to *start*.
 
-If `refactor-scan` handed over a single resumed pending issue (not five fresh proposals), that *is* the recommendation — skip ranking and go straight to step 3 with it.
+If `refactor-scan` handed over a single resumed pending issue (not a fresh batch of proposals), that *is* the recommendation — skip ranking and go straight to step 3 with it.
 
 ### 2. Rank
 

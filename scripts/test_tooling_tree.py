@@ -21,6 +21,7 @@ load_tree = tooling_tree.load_tree
 detect_nodes = tooling_tree.detect_nodes
 roadmap = tooling_tree.roadmap
 next_candidates = tooling_tree.next_candidates
+withheld_candidates = tooling_tree.withheld_candidates
 php_version_reversal_findings = tooling_tree.php_version_reversal_findings
 _is_baseline_empty = tooling_tree._is_baseline_empty
 
@@ -414,6 +415,135 @@ class RejectionRespectedTests(unittest.TestCase):
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
             self.assertIn("phpunit", nodes)
+        finally:
+            tmp.cleanup()
+
+
+class RecommendedGateTests(unittest.TestCase):
+    """ADR-0016: a `recommended` edge now withholds its child from
+    next_candidates() until every recommended parent is decided — fulfilled
+    or rejected, released either way. Unlike a `required` edge, which only
+    ever releases the child on fulfilment and instead cascades a rejection,
+    a decided-rejected recommended parent still releases the child."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _p0_fulfilled_files(self):
+        # phpstan-level-0-baseline fulfilled (rector-dead-code's/
+        # rector-type-coverage's required parent); php-cs-fixer and
+        # phpstan-level-3 both stay undecided (neither fulfilled nor
+        # rejected).
+        return {
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        }
+
+    def test_child_withheld_while_recommended_parent_undecided(self):
+        tmp, root = self._make_repo(self._p0_fulfilled_files())
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("php-cs-fixer", nodes)  # the undecided parent itself is still proposable
+            self.assertNotIn("rector-dead-code", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_child_released_once_recommended_parent_rejected(self):
+        tmp, root = self._make_repo(self._p0_fulfilled_files())
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "php-cs-fixer.md").write_text("rejected\n")
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("rector-dead-code", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_child_released_once_recommended_parent_fulfilled(self):
+        files = self._p0_fulfilled_files()
+        files["composer.json"] = json.dumps({"require-dev": {
+            "phpstan/phpstan": "^1.0",
+            "friendsofphp/php-cs-fixer": "^3.0",
+        }})
+        files[".php-cs-fixer.php"] = "<?php return [];"
+        tmp, root = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("rector-dead-code", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_gate_waits_on_every_recommended_parent_not_just_one(self):
+        # php-cs-fixer decided (fulfilled) but phpstan-level-3 not even
+        # reached yet (level still 0) -> rector-type-coverage stays
+        # withheld: it has two recommended parents, both must be decided.
+        files = self._p0_fulfilled_files()
+        files["composer.json"] = json.dumps({"require-dev": {
+            "phpstan/phpstan": "^1.0",
+            "friendsofphp/php-cs-fixer": "^3.0",
+        }})
+        files[".php-cs-fixer.php"] = "<?php return [];"
+        tmp, root = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertNotIn("rector-type-coverage", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_cascade_rejection_of_required_ancestor_decides_recommended_parent(self):
+        # phpstan-level-1 rejected -> phpstan-level-2/-3 permanently closed
+        # via the required chain -> counts as phpstan-level-3 "decided" for
+        # rector-type-coverage's recommended edge (php-cs-fixer is decided
+        # here too, via fulfilment, so it isn't the thing under test).
+        files = self._p0_fulfilled_files()
+        files["composer.json"] = json.dumps({"require-dev": {
+            "phpstan/phpstan": "^1.0",
+            "friendsofphp/php-cs-fixer": "^3.0",
+        }})
+        files[".php-cs-fixer.php"] = "<?php return [];"
+        tmp, root = self._make_repo(files)
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("rector-type-coverage", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_withheld_candidates_names_the_waiting_on_parents(self):
+        tmp, root = self._make_repo(self._p0_fulfilled_files())
+        try:
+            withheld = {w["node"]: set(w["waiting_on"]) for w in withheld_candidates(root)}
+            self.assertEqual(withheld["rector-dead-code"], {"php-cs-fixer"})
+            self.assertEqual(withheld["rector-type-coverage"], {"php-cs-fixer", "phpstan-level-3"})
+        finally:
+            tmp.cleanup()
+
+    def test_next_candidates_uncapped_by_default(self):
+        # Six nodes genuinely unblocked at once — past the old five-node cap
+        # ADR-0016 lifts (real even without this ticket's recommended-gate
+        # change: loop-config, php-cs-fixer, phpunit, test-runner-if-missing,
+        # composer-audit, phpstan-level-1).
+        files = self._p0_fulfilled_files()
+        files["composer.json"] = json.dumps({
+            "require": {"vendor/pkg": "^1.0"},
+            "require-dev": {"phpstan/phpstan": "^1.0"},
+        })
+        files[".github/workflows/ci.yml"] = "jobs:\n  build:\n    steps:\n      - run: echo hi\n"
+        tmp, root = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertGreater(len(nodes), 5)
+            # limit is still honored when a caller explicitly wants one
+            self.assertLessEqual(len(next_candidates(root, limit=3)), 3)
         finally:
             tmp.cleanup()
 

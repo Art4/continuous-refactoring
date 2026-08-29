@@ -13,7 +13,7 @@ The set of candidate issues on the tracker, awaiting prioritisation.
 _Avoid_: debt list, todo list
 
 **Loop pass**:
-One run of the orchestrator. The orchestrator carries each lifecycle skill's output to the next skill's input (ADR-0010) rather than each skill re-deriving its own context: `refactor-scan` proposes up to five tooling-tree nodes and separately detects (never acts on) remembered merge requests that have since merged or closed; `refactor-learn` is the pass's only writer, acting on scan's findings and, once fewer than two suite merge requests are open, closing out at most one completed **candidate** (propose → prioritise → design → implement → learn).
+One run of the orchestrator. The orchestrator carries each lifecycle skill's output to the next skill's input (ADR-0010) rather than each skill re-deriving its own context: `refactor-scan` proposes every currently-unblocked tooling-tree node and separately detects (never acts on) remembered merge requests that have since merged or closed; `refactor-learn` is the pass's only writer, acting on scan's findings and, once fewer than two suite merge requests are open, closing out at most one completed **candidate** (propose → prioritise → design → implement → learn).
 _Avoid_: session, sprint
 
 **Merge request**:
@@ -29,8 +29,8 @@ The gating edge between nodes: a node is proposed only once every parent linked 
 _Avoid_: hard edge, blocking edge
 
 **Recommended edge**:
-The advisory counterpart: the child stays proposable even when its recommended parent was rejected; the rejected parent is never re-proposed — at most the loop informs where it would have helped.
-_Avoid_: soft edge, nice-to-have edge
+The counterpart that gates on a decision rather than on fulfilment (ADR-0016): a node is proposed only once every parent linked by a recommended edge is _decided_ — fulfilled, or rejected. A rejected recommended parent still releases the child instead of closing it, unlike a required parent; the rejected parent is never re-proposed. A recommended parent that hasn't been reached yet at all counts as undecided too, withholding the child just the same as one that's merely sitting proposed-but-unactioned.
+_Avoid_: soft edge, nice-to-have edge, non-blocking edge
 
 **Hot spot**:
 A part of the codebase that keeps appearing in change history — the primary place to look for candidates.
@@ -65,7 +65,7 @@ The concrete refactoring plan produced by `refactor-design`: the deepened module
 _Avoid_: design doc
 
 **Proposals**:
-The tooling-tree node names `refactor-scan` hands the orchestrator, up to five per pass — not yet candidates, since nothing is filed until `refactor-design` picks one and specs it.
+The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-design` picks one and specs it.
 _Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
 
 **Findings**:
