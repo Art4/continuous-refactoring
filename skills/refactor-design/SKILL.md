@@ -58,7 +58,7 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 
 ### 5. File the issue and write the plan
 
-**A tooling-tree node:** before filing, check whether an issue titled exactly `Tooling tree: <node>` is already open — if so, that's the issue; don't file a second one (it means a prior pass got this far and was interrupted before `refactor-implement` finished). Otherwise create one, label **`refactor:candidate`**, naming the node and quoting its Tool / Purpose / Fulfilment check / MR scope from the tree doc verbatim — that scope *is* the slice ordering, and *is* the plan.
+**A tooling-tree node:** before filing, check whether an issue titled exactly `Tooling tree: <Name>` (the node's **Name** from the tree doc, e.g. `Tooling tree: PHPStan Level 0` — never its slug) is already open — if so, that's the issue; don't file a second one (it means a prior pass got this far and was interrupted before `refactor-implement` finished). Otherwise create one titled that way, label **`refactor:candidate`**, and quote its Tool / Purpose / Fulfilment check / MR scope from the tree doc verbatim — that scope *is* the slice ordering, and *is* the plan.
 
 **A structural candidate:** create an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), and Signal (which friction signal from step 2 it came from). Then capture the plan on that issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`).
 

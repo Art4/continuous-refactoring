@@ -28,6 +28,7 @@ The table above is the only edge this document owns. A language tree's own edge 
 
 ### `git`
 
+- **Name:** Git
 - **Tool:** git
 - **Purpose:** version control — the loop reads history from it and delivers through it.
 - **Fulfilment check:** target is a git repository.
@@ -35,6 +36,7 @@ The table above is the only edge this document owns. A language tree's own edge 
 
 ### `loop-config`
 
+- **Name:** Refactoring Config
 - **Tool:** none — this is the suite's own state, not a third-party tool.
 - **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write cadence, last-run date, and create-mode.
 - **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
@@ -42,6 +44,7 @@ The table above is the only edge this document owns. A language tree's own edge 
 
 ### `structural-scan`
 
+- **Name:** Structural Scan
 - **Tool:** none — this node represents the loop's own structural-deepening work (the `refactor-scan`/`refactor-design`/`refactor-implement`/`refactor-review` cycle applied to the target's own code), not a third-party tool.
 - **Purpose:** hold structural refactoring back until deterministic tooling has had its say — static analysis and a test suite catch regressions that an agent-driven structural change could otherwise introduce silently. Deterministic tools settle first, agent-driven scanning follows.
 - **Fulfilment check:** every leaf node of the active language specialization's tree is **resolved** — fulfilled, or explicitly rejected and recorded under `docs/refactoring/out-of-scope/`. For PHP, the leaf set and the edges into this node are declared in `skills/refactor-scan/references/php-tooling-tree.md`.

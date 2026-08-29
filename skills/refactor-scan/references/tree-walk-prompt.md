@@ -14,4 +14,4 @@ For each node, in that order:
 
 Collect nodes in table order until you have `{N}` that are unblocked and not yet fulfilled, or the table runs out. `git` is never a candidate. This set is the fallback for `tooling_tree.py`'s `next` field.
 
-Return only this: for each node in the set, its name and one line — either why it's unblocked, or its Purpose, whichever the caller asked for. Nothing else: no restated edge table, no exploration narrative.
+Return only this: for each node in the set, its **Name** (the `**Name:**` field under its heading — never the node's slug) and one line — either why it's unblocked, or its Purpose, whichever the caller asked for. Nothing else: no restated edge table, no exploration narrative.
