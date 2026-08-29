@@ -116,13 +116,18 @@ Siehe [findings.md](findings.md) für das volle Log (Runden 1–24). Herausragen
 Erkenntnisse — betreffen das Design der continuous-refactoring-Skill-Suite selbst, noch nicht in der
 Suite umgesetzt:
 
-- `refactor-scan` erzeugt bei jedem Pass eine neue Issue-/MR-Nummer für denselben Tooling-Kandidaten,
-  statt offene/unbeantwortete frühere Versuche zu erkennen/referenzieren — auf Dauer unübersichtlich.
+- ~~`refactor-scan` erzeugt bei jedem Pass eine neue Issue-/MR-Nummer für denselben Tooling-
+  Kandidaten...~~ — **zurückgezogen** (siehe findings.md, Korrektur-Eintrag): die Belege dafür (#15/#19/
+  #23) waren alle vom Menschen geschlossene Reste manueller Testläufe *vor* Beobachtungsbeginn, nicht
+  live beobachtetes Bot-Verhalten. In 24 live beobachteten Runden kam jeder Knoten genau einmal.
+  Unbestätigte Restfrage: `config.md`s `Pending issue`-Feld deckt laut Spec nur "Issue gefilt, noch
+  keine MR" ab, nicht "MR offen, aber unreviewt" — nie beobachtet, reine Theorie.
 - Der PHP-Tooling-Zweig (CS Fixer, PHPUnit, PHPStan, Composer Audit, Test-Runner-Fallback) scheitert
   komplett und vorhersagbar an einer bewusst alten PHP-5.6-Baseline — ein Vorab-Check der PHP-Version
   könnte das Einzeln-Durchprobieren jedes Knotens ersparen.
-- `composer-audit` wurde ausgeliefert, obwohl `composer.json` noch keine einzige `require`- (nur
-  `require-dev`-) Abhängigkeit hatte → faktisch ein No-Op. Sollte im Tooling-Tree später kommen:
+- ~~`composer-audit` wurde ausgeliefert, obwohl `composer.json` noch keine einzige `require`- (nur
+  `require-dev`-) Abhängigkeit hatte...~~ — **behoben**, siehe `skills/refactor-scan/references/
+  php-tooling-tree.md`s composer-audit-Knoten und `refactor/composer-audit-eligibility`-Branch.
   Kriterium z. B. "mindestens eine `require`-Abhängigkeit existiert" **oder** "kein anderer Zweig mehr
   offen" (Lückenfüller).
 

@@ -406,3 +406,28 @@ Nutzers echte Funktionstests gegen den PR-Branch durchgeführt (nicht nur Diff g
   hatte (Test-Net vor strukturellem Umbau). → **Gemergt** (`gh pr merge 51 --merge`, 11:43Z,
   `mergedBy: Art4`).
 - Ruhig-Zähler: 0 (fremde + eigene Aktivität).
+
+### Korrektur (2026-08-29, im Findings-Review) — Runde 2s "doppelte Issue-Nummern"-Finding zurückgezogen
+
+- **Ursprüngliche Behauptung (Runde 2):** `refactor-scan` erzeuge bei jedem Pass eine neue Issue-/MR-
+  Nummer für denselben Tooling-Kandidaten, statt offene/unbeantwortete frühere Versuche zu erkennen —
+  als "Verbesserungsvorschlag (nicht dringend)" notiert, basierend auf den vier `loop-config`-Anläufen
+  #15/#19/#23/#25.
+- **Nutzer-Einwand:** Die geschlossenen MRs könnten aus früheren, manuellen Testläufen stammen (Repo
+  vorher aufgeräumt, alte Issues gelöscht — MRs ließen sich auf GitHub nicht löschen).
+- **Nachgeprüft mit echten Zeitstempeln** (`gh api .../issues/<n>/timeline`): Alle sieben betroffenen
+  PRs (#9, #12, #15, #17, #19, #21, #23 — sowohl `loop-config`- als auch `composer`-Anläufe) wurden von
+  **`Art4` (dem Menschen)** geschlossen, nicht vom Bot — und jede Schließung liegt zeitlich klar *vor*
+  dem Entstehen des jeweils nächsten Versuchs (z. B. #15 um 07:04Z geschlossen, #19 erst um 07:23Z
+  erstellt). Exaktes Muster manueller Neustarts mit Aufräumen dazwischen, alles *vor* Beobachtungsbeginn
+  (09:30Z). In den tatsächlich live beobachteten 24 Runden (09:30–11:43Z) ist **kein einziges Mal**
+  passiert, dass derselbe Knoten erneut vorgeschlagen wurde, während eine MR dafür noch offen war —
+  jeder Knoten kam genau einmal.
+- **Ergebnis: Finding zurückgezogen.** Nicht durch Live-Beobachtung belegt — Restmüll aus vorherigen
+  manuellen Testläufen des Nutzers, kein beobachtetes Bot-Verhalten.
+- **Verbleibende, unbestätigte Randnotiz (reine Theorie, keine Auffälligkeit):** `refactor-scan`s eigener
+  Mechanismus gegen genau dieses Szenario (`Pending issue` in `config.md`) deckt laut Spec nur "Issue
+  gefilt, aber noch keine MR" ab — nicht "MR existiert, hängt aber unreviewt herum" (Schritt 4s
+  Tree-Walk/`next_candidates()` ist rein dateibasiert, ohne Abgleich gegen offene Issues/PRs für
+  denselben Knoten). Ob das in echtem Dauerbetrieb (Reviewer lässt eine MR tagelang liegen) zum Problem
+  würde, ist nie beobachtet worden — hier nur als offene Frage vermerkt, kein bestätigter Fund.
