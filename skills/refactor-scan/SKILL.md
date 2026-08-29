@@ -20,7 +20,7 @@ Only past both does a pass propose anything.
 
 ### 2. Resume pending work first
 
-Read `docs/refactoring/config.md`'s `Pending issue` field (`skills/continuous-refactoring/references/refactoring-config.md`). If it names an issue, a previous pass's `refactor-design` filed it but the pass was interrupted before `refactor-implement` produced a merge request for it. Propose exactly that issue and stop here — finishing pending work comes before proposing fresh work.
+Read `docs/refactoring/config.md`'s `Pending candidates` field (`skills/continuous-refactoring/references/refactoring-config.md`). If it names an issue, a previous pass's `refactor-design` filed it but the pass was interrupted before `refactor-implement` produced a merge request for it. Propose exactly that issue and stop here — finishing pending work comes before proposing fresh work.
 
 ### 3. Detect closed/merged remembered state
 
@@ -28,6 +28,7 @@ Get the remembered set: every issue labeled `refactor:delivered` when the target
 
 - Merged → a finding: this candidate is delivered.
 - Closed without merge → a finding: this candidate was declined: note whether the closing comments give a maintainer's structural reason (out-of-scope material) or not.
+- **Still open, with reviewer activity (a review requesting changes, or a comment) newer than the candidate branch's last commit** → a resume-candidate, not a finding for `refactor-learn` (it doesn't fit any of `refactor-learn`'s existing outcomes — done, wontfix, or a reversed rejection — nobody has decided anything yet, the candidate just needs another look). Hand it forward the same way step 2 hands forward a `Pending candidates` entry: straight to `refactor-implement`, skipping `refactor-prioritize`/`refactor-design` — the candidate already has a design and an open merge request, only the fix loop applies. (`refactor-implement` step 1 already supports resuming an existing branch — "a returning pass, e.g. after a review finding sent this back" — this is the same shape, just discovered by a fresh pass instead of the same one.)
 - **Still open, nothing changed** → no finding for this entry.
 
 Also check every `docs/refactoring/out-of-scope/<node>.md` that names a `**Blocked by:** PHP >= X.Y` condition (`tooling_tree.py`'s `detect_nodes()` reports this directly when run; walking by hand, compare it against the target's current `composer.json` `require.php`/`config.platform.php`) — if the target's current PHP version now satisfies it, a finding: this rejection is reversed. A rejection with no `Blocked by:` field, or one whose condition still isn't met, is never a finding here.
@@ -36,7 +37,7 @@ Hand every finding to `refactor-learn` — this skill only notices; it does not 
 
 ### 4. Propose tooling-tree nodes
 
-Skipped if step 2 already proposed a pending issue.
+Skipped if step 2 already proposed a pending candidate.
 
 Run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 5` and read the JSON's `next` field, **not** `roadmap` — `roadmap` simulates forward (it assumes each entry gets fulfilled to compute what would come after it, so entries past the first are a future lookahead, not real options today); `next` is already the real, currently-unblocked set, with rejected nodes (an existing `docs/refactoring/out-of-scope/<node>.md`) already excluded — no further trimming needed, take it as-is (up to five entries). If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=5`) instead — it walks the same tree docs by hand (reading `docs/refactoring/config.md`'s `Fulfilled nodes` first to skip re-deriving what's already cached, and skipping any node with an `out-of-scope` entry the same way the parser does) and returns the same set; with no sub-agent mechanism, run that prompt's steps yourself inline.
 
@@ -50,8 +51,9 @@ Two things, handed onward by the orchestrator — state them plainly, no separat
 
 - Which precondition stopped the pass, if one did (step 1) — then nothing below applies this pass.
 - **Findings** (possibly empty) → `refactor-learn`.
-- **Proposals**: the pending issue alone, or up to five node Names (never slugs), or none → `refactor-prioritize`.
+- **A resume-candidate** (step 3's new case), if one was detected → straight to `refactor-implement`, same as a resumed `Pending candidates` — bypasses `refactor-prioritize`/`refactor-design` this pass.
+- **Proposals**: the pending candidate alone, or up to five node Names (never slugs), or none → `refactor-prioritize`.
 
 ## Completion criterion
 
-Findings (if any) are handed to `refactor-learn` and proposals (if any) are handed to `refactor-prioritize` — or a precondition stopped the pass and the report says which. Never a node together with entries past `structural-scan` in the same list.
+Findings (if any) are handed to `refactor-learn`, a resume-candidate (if any) is handed straight to `refactor-implement`, and proposals (if any) are handed to `refactor-prioritize` — or a precondition stopped the pass and the report says which. Never a node together with entries past `structural-scan` in the same list.

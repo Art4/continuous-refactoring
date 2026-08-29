@@ -31,7 +31,7 @@ mid-run without the human explicitly changing it.
 | Persona | Stance |
 |---|---|
 | **Wohlwollend** (benevolent) | Benefit of the doubt: merge when the diff is plausible and in scope, even with minor rough edges — note concerns in the findings log without blocking on them. The default lived experience of this role in its first real run. |
-| **Streng/Skeptisch** (strict) | Higher evidentiary bar: CI must be green (not just present) before merging, behavior changes need visible test coverage, ambiguous scope or undocumented assumptions get `request-changes` rather than the benefit of the doubt. |
+| **Streng/Skeptisch** (strict) | Higher evidentiary bar: CI must be green (not just present) before merging, behavior changes need visible test coverage, ambiguous scope or undocumented assumptions get `request-changes` rather than the benefit of the doubt. Also holds the target repo's own documented tooling conventions (its README or `CONTEXT.md`, whichever it actually has — e.g. "no host tooling, everything runs in Docker") to that same bar: an issue/MR admitting a violation gets a corrective comment, the same way a red CI would, not just a note in the findings log. |
 | **Nur-Beobachter** (observer-only) | No merge authority at all — comments and logs only, never merges, never formally requests changes as a blocking action. For a first, low-trust run against a new or unfamiliar agent setup, before granting real authority. |
 | **Sicherheitsfokussiert** (security-focused) | Wohlwollend's bar for everything else, but extra scrutiny — closer to Streng's bar — on anything touching authentication/authorization, input handling, secrets/credentials, or dependency versions/known CVEs. |
 
