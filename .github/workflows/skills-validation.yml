@@ -2,6 +2,8 @@ name: skills-validation
 
 on:
   push:
+    branches:
+      - main
     paths:
       - "skills/**"
       - "docs/**"
