@@ -30,7 +30,7 @@ Get the remembered set: every issue labeled `refactor:delivered` when the target
 - Closed without merge → a finding: this candidate was declined: note whether the closing comments give a maintainer's structural reason (out-of-scope material) or not.
 - **Still open, nothing changed** → no finding for this entry.
 
-Also check every `docs/refactoring/out-of-scope/<node>.md` that names a `**Blocked by:** PHP >= X.Y` condition (`tooling_tree.py`'s `detect_nodes()` reports this directly when run; walking by hand, compare it against the target's current `composer.json` `require.php`/`config.platform.php`) — if the target's current floor now satisfies it, a finding: this rejection is reversed. A rejection with no `Blocked by:` field, or one whose condition still isn't met, is never a finding here.
+Also check every `docs/refactoring/out-of-scope/<node>.md` that names a `**Blocked by:** PHP >= X.Y` condition (`tooling_tree.py`'s `detect_nodes()` reports this directly when run; walking by hand, compare it against the target's current `composer.json` `require.php`/`config.platform.php`) — if the target's current PHP version now satisfies it, a finding: this rejection is reversed. A rejection with no `Blocked by:` field, or one whose condition still isn't met, is never a finding here.
 
 Hand every finding to `refactor-learn` — this skill only notices; it does not mark anything `done`, `wontfix`, or write to `docs/refactoring/out-of-scope/` itself (removing a reversed entry is `refactor-learn`'s write, not this step's).
 
