@@ -16,7 +16,7 @@ The core is language-neutral; the first specialization is a **general PHP projec
 | Skill | Purpose |
 |---|---|
 | `continuous-refactoring` | Orchestrator — runs a loop pass (cadence or on-demand), passes each skill's output to the next |
-| `refactor-scan` | Propose up to five tooling-tree nodes from `config.md`; detect (never file) closed/merged issues and MRs |
+| `refactor-scan` | Propose every currently-unblocked tooling-tree node from `config.md`; detect (never file) closed/merged issues and MRs |
 | `refactor-prioritize` | Rank the proposals, recommend the next one |
 | `refactor-design` | Grill/search the chosen node → plan, files it as an issue |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |

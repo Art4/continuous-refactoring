@@ -140,8 +140,8 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 
 - **Name:** Composer Audit
 - **Tool:** composer audit
-- **Purpose:** dependency vulnerability visibility, enforced as a CI gate (absorbs the former "ticket 10" —
-  see `.scratch/php-tooling-tree/issues/10-dependency-vulnerability-scan.md`, recorded done there).
+- **Purpose:** dependency vulnerability visibility, enforced as a CI gate (absorbs what was originally
+  tracked as a separate dependency-vulnerability-scan concern, now folded into this node).
 - **Fulfilment check:** a CI job exists that runs `composer audit` (the pipeline fails when it reports a
   known advisory).
 - **MR scope:** wire `composer audit` into CI as a gate — no production-code change.
@@ -208,7 +208,7 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Tool:** Rector (dead-code suite)
 - **Purpose:** remove dead code with rules whose changes are safe to review early.
 - **Fulfilment check:** dead-code suite enabled and fully applied — no remaining rule findings.
-- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green by shrinking the baseline within the same MRs.
+- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green by shrinking the baseline within the same MRs. Proposed once `phpstan-level-0-baseline` is fulfilled **and** `php-cs-fixer` has been decided (fulfilled or rejected) — a still-undecided `php-cs-fixer` withholds this node so its dead-code rewrites don't land unstyled; a rejected `php-cs-fixer` still releases it, it just never gets styled output.
 
 ### `rector-type-coverage`
 
@@ -216,4 +216,4 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Tool:** Rector (typing suites)
 - **Purpose:** raise declared type coverage progressively.
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.
-- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `phpstan-level-0-baseline` is fulfilled; most valuable after `phpstan-level-3` — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled (stated in the outlook when those are unfulfilled or rejected).
+- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `phpstan-level-0-baseline` is fulfilled **and** both `php-cs-fixer` and `phpstan-level-3` have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, so this node waits on both. Either one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit.

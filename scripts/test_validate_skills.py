@@ -251,6 +251,26 @@ class AdrTests(unittest.TestCase):
         self.assertEqual(vs.adr_issues("No decisions here."), [])
 
 
+class ScratchRefTests(unittest.TestCase):
+    def test_scratch_ref_flagged(self):
+        issues = vs.scratch_ref_issues("See `.scratch/php-tooling-tree/issues/10-foo.md`.")
+        self.assertTrue(any(".scratch/php-tooling-tree/issues/10-foo.md" in i.message for i in issues))
+
+    def test_scratch_ref_flagged_even_if_file_exists(self):
+        # Existence doesn't matter here — unlike local_ref_issues, this is a
+        # category ban (internal issue tracker), not a broken-link check.
+        issues = vs.scratch_ref_issues("See `.scratch/php-tooling-tree/spec.md`.")
+        self.assertTrue(any("spec.md" in i.message for i in issues))
+
+    def test_no_scratch_refs_ok(self):
+        self.assertEqual(vs.scratch_ref_issues("No scratch references here."), [])
+
+    def test_plain_prose_scratch_mention_not_flagged(self):
+        # Backtick-quoted only, same restraint as local_ref_issues — a
+        # non-code mention isn't a link.
+        self.assertEqual(vs.scratch_ref_issues("Some scratch work happened here."), [])
+
+
 class VocabTests(unittest.TestCase):
     def test_glossary_parsed(self):
         glossary = vs.parse_glossary(
@@ -534,6 +554,17 @@ class ReferencesDirTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_scratch_ref_in_references_dir_flagged(self):
+        tmp, root = self._repo("See `.scratch/php-tooling-tree/issues/10-foo.md` for background.")
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tree.md" in i.skill and ".scratch/" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
     def test_missing_local_ref_in_references_dir_flagged(self):
         tmp, root = self._repo("See `docs/agents/missing.md`.")
         try:
@@ -542,6 +573,54 @@ class ReferencesDirTests(unittest.TestCase):
                 "references/tree.md" in i.skill and "missing.md" in i.message
                 for i in issues
             ))
+        finally:
+            tmp.cleanup()
+
+    def test_adr_ref_in_non_md_reference_file_flagged(self):
+        # A reference doc doesn't have to be Markdown to ship with the skill
+        # — a .py helper under references/ carries the same ban on ADR
+        # citations in its own docstrings/comments as prose does.
+        tmp, root = self._repo("# glossary")
+        try:
+            (root / "skills" / "refactor-scan" / "references" / "tooling_tree.py").write_text(
+                '"""Per ADR-0010, do the thing."""\n'
+            )
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/tooling_tree.py" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_adr_ref_in_nested_reference_dir_flagged(self):
+        # references/ can nest a subdirectory of its own (e.g.
+        # php-tooling-tree/composer.md) — scanning must recurse, not just
+        # glob the top level.
+        tmp, root = self._repo("# glossary")
+        try:
+            (root / "skills" / "refactor-scan" / "references" / "nested").mkdir(parents=True)
+            (root / "skills" / "refactor-scan" / "references" / "nested" / "node.md").write_text(
+                "Per ADR-0010, do the thing.\n"
+            )
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "references/nested/node.md" in i.skill and "ADR-0010" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_pycache_in_references_dir_ignored(self):
+        # Compiled bytecode is never source and never shipped intentionally
+        # — scanning it would only risk a decode error on binary content.
+        tmp, root = self._repo("# glossary")
+        try:
+            pycache = root / "skills" / "refactor-scan" / "references" / "__pycache__"
+            pycache.mkdir(parents=True)
+            (pycache / "tooling_tree.cpython-311.pyc").write_bytes(b"\x00\x01\x02not text")
+            issues = vs.validate_repo(root)  # must not raise
+            self.assertFalse(any("__pycache__" in i.skill for i in issues))
         finally:
             tmp.cleanup()
 

@@ -23,7 +23,7 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/ag
 This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking them into a target repo's `.agents/skills/` (see `README.md`):
 
 - `continuous-refactoring` — the loop pass orchestrator (scan → prioritise → design → implement → learn), a thin data pipe between the lifecycle skills (ADR-0010)
-- `refactor-scan` — propose up to five tooling-tree nodes, detect (never act on) closed/merged issues and MRs
+- `refactor-scan` — propose every currently-unblocked tooling-tree node, detect (never act on) closed/merged issues and MRs
 - `refactor-prioritize` — rank the proposals, recommend next
 - `refactor-design` — grill/search the chosen node into a plan, files it as an issue
 - `refactor-implement` — execute the plan test-first, review included
