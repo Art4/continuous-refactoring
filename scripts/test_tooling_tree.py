@@ -217,8 +217,18 @@ class StructuralScanGateTests(unittest.TestCase):
             "rector.php": "<?php // DeadCode Type",
             # ci-runner + composer-audit's own CI-gate fulfilment (no `require`
             # dep here, so composer-audit only resolves via the "every other
-            # leaf resolved" fallback — see ComposerAuditGateTests).
-            ".github/workflows/ci.yml": "jobs:\n  audit:\n    steps:\n      - run: composer audit\n",
+            # leaf resolved" fallback — see ComposerAuditGateTests). Also
+            # gates phpunit's/phpstan-level-0-baseline's own CI-gating check
+            # (ticket 34) — omitting either invocation here would make this
+            # "fully tooled" fixture stop being fully tooled.
+            ".github/workflows/ci.yml": (
+                "jobs:\n"
+                "  audit:\n"
+                "    steps:\n"
+                "      - run: composer audit\n"
+                "      - run: vendor/bin/phpunit\n"
+                "      - run: vendor/bin/phpstan analyse\n"
+            ),
         }
 
     def test_unfulfilled_when_leaves_missing(self):
@@ -334,7 +344,17 @@ class ComposerAuditGateTests(unittest.TestCase):
             "phpstan.neon": "parameters:\n    level: 3\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type",
-            ".github/workflows/ci.yml": self._CI_YML_NO_AUDIT,
+            # No `composer audit` here — deliberate (see docstring). Does
+            # invoke phpunit/phpstan though, so phpunit/phpstan-level-3
+            # genuinely resolve too (ticket 34's self-wiring); otherwise this
+            # fixture would no longer have "every other leaf resolved".
+            ".github/workflows/ci.yml": (
+                "jobs:\n"
+                "  build:\n"
+                "    steps:\n"
+                "      - run: vendor/bin/phpunit\n"
+                "      - run: vendor/bin/phpstan analyse\n"
+            ),
         })
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
@@ -362,6 +382,165 @@ class ComposerAuditGateTests(unittest.TestCase):
         try:
             d = detect_nodes(root)
             self.assertFalse(d["composer-audit"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+
+class CiSelfWiringTests(unittest.TestCase):
+    """Ticket 34: phpunit's and phpstan-level-0-baseline's own fulfilment
+    checks self-wire a CI-gating requirement once ci-runner is fulfilled,
+    instead of a separate phpunit-ci-job/phpstan-ci-job node."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    _CI_YML_NO_TOOLS = "jobs:\n  lint:\n    steps:\n      - run: php -l\n"
+    _CI_YML_PHPUNIT = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit\n"
+    _CI_YML_PEST = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/pest\n"
+    _CI_YML_PHPSTAN = "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/phpstan analyse\n"
+
+    def test_phpunit_fulfilled_on_adoption_alone_without_ci(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpunit"]["fulfilled"], d["phpunit"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpunit_not_fulfilled_when_ci_exists_but_doesnt_gate(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpunit"]["fulfilled"], d["phpunit"])
+            self.assertIn("not gated in CI", d["phpunit"]["reason"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpunit_fulfilled_when_ci_gates_on_it(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_PHPUNIT,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpunit"]["fulfilled"], d["phpunit"])
+        finally:
+            tmp.cleanup()
+
+    def test_pest_requires_pest_invocation_not_phpunit(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"pestphp/pest": "^2.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_PHPUNIT,  # gates phpunit, not pest
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpunit"]["fulfilled"], d["phpunit"])
+        finally:
+            tmp.cleanup()
+
+    def test_test_runner_if_missing_independent_of_ci_gating(self):
+        # A runner is adopted (satisfies test-runner-if-missing) but not yet
+        # CI-gated (phpunit stays unfulfilled) — the two nodes must diverge,
+        # not track each other as they did before ticket 34.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpunit"]["fulfilled"], d["phpunit"])
+            self.assertTrue(d["test-runner-if-missing"]["fulfilled"], d["test-runner-if-missing"])
+        finally:
+            tmp.cleanup()
+
+    def test_roadmap_still_proposes_phpunit_for_ci_wiring(self):
+        # Regression guard for the stale roadmap() skip this ticket removes:
+        # test-runner-if-missing already fulfilled must not hide phpunit's
+        # own still-open CI-gating candidate.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertIn("phpunit", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_p0_fulfilled_on_adoption_alone_without_ci(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_p0_not_fulfilled_when_ci_exists_but_doesnt_gate(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
+            self.assertIn("not gated in CI", d["phpstan-level-0-baseline"]["reason"])
+            # the level chain stays blocked too, via the normal required-edge check
+            self.assertFalse(d["phpstan-level-1"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_p0_fulfilled_when_ci_gates_on_it(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
+        finally:
+            tmp.cleanup()
+
+    def test_psalm_equivalence_not_ci_gated(self):
+        # Deliberately out of scope for this ticket (see php-tooling-tree.md)
+        # — Psalm gets its own node, and its own CI check, in a follow-up.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
         finally:
             tmp.cleanup()
 

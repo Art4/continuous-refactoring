@@ -1,0 +1,60 @@
+# 38 — Recurring `housekeeping` node (periodic maintenance sweep)
+
+**What to build:** A new tooling-tree node with a fundamentally different lifecycle from every existing
+node: it re-proposes itself periodically instead of staying fulfilled forever once done.
+
+- `housekeeping` — required parent: `composer`.
+- Re-proposed whenever the last housekeeping pass is more than 7 days ago. The date of the last pass is
+  recorded in `docs/refactoring/config.md`.
+- Bundles several periodic maintenance concerns into one recurring MR: the `composer audit` call,
+  `test-runner-if-missing`, a `composer update` run, and (per ticket 34's own grilling) a check that
+  adopted dev tools are actually wired into CI.
+
+**Why:** Came up while grilling ticket 34 as a considered alternative to that ticket's CI-gating
+self-wiring fix — a broader, recurring mechanism that would keep catching "adopted but not enforced/not
+current" gaps on an ongoing basis, rather than a one-time fulfilment-check tightening. Deliberately parked
+as its own ticket rather than decided or designed there: it introduces a genuinely new pattern the tree
+has never had before (see *Open design questions* below), and conflating it with ticket 34's narrower,
+already-well-understood fix would have blocked that ticket on a much bigger, unresolved design.
+
+`composer update` in particular is not modeled anywhere in the tree today — there is no existing node for
+"dependencies are kept reasonably current" (only `composer-audit`'s narrower "no *known* vulnerable
+dependency" check).
+
+**Blocked by:** none, but this is the least-designed of the three ideas that came out of ticket 34's
+grilling and needs its own dedicated `/grill-me` session from a much earlier stage than usual — likely
+starting from "should this be a tree node at all, or a different mechanism entirely" rather than assuming
+the shape sketched above.
+
+**Priority:** low — no discovered bug motivates urgency (contrast with ticket 37's structural-scan gap);
+this is a proposed enhancement, not a fix.
+
+**Status:** needs-triage
+
+Open design questions (none of these were resolved during ticket 34's grilling — this ticket only records
+that the idea was raised, not a design):
+
+- [ ] **Breaks the tree's monotonic assumption.** Every other node's `fulfilled` flag only ever needs to
+  flip false→true in practice (`detect_nodes()` is stateless/recomputed each scan, but nothing currently
+  *depends* on a previously-fulfilled node becoming unfulfilled again). A node whose fulfilment is
+  time-based would flip true→false on a schedule. Does this interact badly with anything downstream —
+  most importantly `structural-scan`'s resolved-gate, which assumes leaves settle and stay settled?
+  Should `housekeeping` feed `structural-scan` at all, or stay a deliberately separate, parallel track
+  that never gates structural work?
+- [ ] Is "required parent: `composer`" right, or does re-proposing every 7 days need a different kind of
+  edge entirely (none of `required`/`recommended`/`resolved` currently express "gate, but also re-trigger
+  on a timer")?
+- [ ] Does bundling composer-audit/test-runner-if-missing/composer-update/CI-wiring into *one* recurring
+  MR make sense, or should each remain (or become) its own independently-recurring check?
+- [ ] How does `docs/refactoring/config.md` record the last-housekeeping date — new field, format,
+  who/what writes it (presumably `refactor-learn`, matching its "only writer" role)?
+- [ ] Is this PHP-tree-specific, or does it belong in the generic root (`tooling-tree.md`) since none of
+  its bundled concerns (well, `composer audit` aside) are inherently PHP-specific? If generic, this likely
+  needs its own ADR, not just a `php-tooling-tree.md` node entry — recurring nodes would be a rule change
+  to the tree model itself, the same weight as ADR-0016's recommended-edge change.
+
+## Comments
+
+> **2026-08-30:** Filed as a follow-up from ticket 34's `/grill-me` session (in German), parked
+> deliberately rather than designed — see `.scratch/php-tooling-tree/issues/34-ci-quality-job-wiring.md`'s
+> comments for the grilling transcript context this idea was raised in.
