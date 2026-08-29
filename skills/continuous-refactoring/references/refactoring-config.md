@@ -15,6 +15,8 @@ The config file the suite reads and writes. It doesn't exist on a fresh target r
 - loop-config
 - composer
 - ci-runner
+**Skip streak:**
+- php-cs-fixer: 3
 ```
 
 ## Fields
@@ -25,6 +27,7 @@ The config file the suite reads and writes. It doesn't exist on a fresh target r
 | `Focus areas` | Areas scans should target first | you, any time |
 | `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue `refactor-design` just filed, not yet delivered as a merge request. Written as a list purely for formatting consistency with `Fulfilled nodes` and easier diffing — it still holds at most one entry; the suite tracks exactly one thing in flight at a time (`refactor-scan`/`refactor-prioritize`), this is not a multi-pending queue. | `refactor-design` sets it when it files; `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the candidate is resolved another way |
 | `Fulfilled nodes` | Tooling-tree node **slugs** (never Names — internal bookkeeping stays keyed by the slug) already confirmed fulfilled, one per bulleted line | `refactor-learn`, every closing call — see *Fulfilled nodes* below |
+| `Skip streak` | Tooling-tree node slugs paired with a consecutive-skip count (`- <slug>: <N>`), omitted entirely when empty (no bullet at all, not even `- none` — an empty field and a field that's never had an entry look the same, and that's fine: both mean "nothing has ever been skipped"). One of `refactor-prioritize`'s five ranking factors — see *Skip streak* below | `refactor-learn`, every closing call — see *Skip streak* below |
 
 `Pending candidates` exists so a pass interrupted between design and implement doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass.
 
@@ -58,10 +61,20 @@ is already cheap and always correct there, so there's nothing to gain and a stal
 
 **`loop-config` exception:** for the `loop-config` candidate itself, this file doesn't exist yet when `refactor-design` would normally write `Pending candidates` — `refactor-implement` sets it directly when it creates the file instead, leaving `Create-mode` and the first `Fulfilled nodes` entry (`loop-config` itself, at minimum) for `refactor-learn`'s own follow-up commit. Because the file only exists on that candidate's own (not yet merged) branch, `refactor-learn`'s writes land there too, the one time bookkeeping doesn't go straight to the default branch. Every pass after that, once the file is on the default branch, all of this is as described in the table above.
 
+## `Skip streak`
+
+A per-node counter — how many consecutive passes proposed this node without choosing it — that exists purely to feed `refactor-prioritize`'s fifth ranking factor of the same name: a `required` tooling-tree sibling that never wins on Heat/Leverage/Tooling pressure/Risk alone can otherwise be proposed and passed over indefinitely, one round at a time, forever.
+
+- **Read:** only by `refactor-prioritize`, as one input among five — never a forcing rule, never read by anything else.
+- **Write:** `refactor-learn`, every closing call, alongside `Fulfilled nodes`. Re-derive the set of `required` tooling nodes that were proposable this pass but not chosen the same way `Fulfilled nodes` is re-derived — via the deterministic parser's current unblocked set when `python3` is available — rather than threading a new value through `refactor-design`/`refactor-implement`'s handoff chain. Increment each of those by 1; reset the node that was chosen (or newly fulfilled) to 0, which in practice means dropping its entry — a node at 0 isn't written at all (see below).
+- **Omit zero entries.** A node with no skip streak (never proposed-and-passed-over, or just reset to 0) gets no bullet — don't write `- <slug>: 0`. This keeps the field's size proportional to how many nodes are actually starving, not to the tree's total size.
+- **No cross-pass ordering metadata** (no timestamp, no "as of which pass") — same reasoning as `Fulfilled nodes`: a versioned, repeatedly-rewritten field gains nothing operationally from it and only adds merge-conflict surface.
+- **Depends on suite MRs always stacking, never branching parallel off the default branch, while one is open** (`skills/continuous-refactoring/SKILL.md`'s merge-request-opening guidance). A per-node counter rewritten by every closing call is exactly the shape that caused repeated bookkeeping-merge-request conflicts before, back when a single `Pending candidates`-style field could be touched by two concurrently open branches at once. With every suite branch serialized behind whatever's currently open, only one write to this field is ever in flight at a time.
+
 There is deliberately no `Cadence` field: the loop never triggers itself — you kick it off whenever it's due, whether that's you running `/continuous-refactoring` by hand or a scheduler you set up outside the suite. Nothing here would read a stored cadence, so nothing stores one.
 
 ## Rules
 
-- **`Pending candidates` and `Fulfilled nodes` are `refactor-learn`-written — never by hand.** `Create-mode` and `Focus areas` you can edit by hand any time — that's what they're for. Nobody is expected to hand-edit `Fulfilled nodes`; if it drifts wrong, the next pass with parser access overwrites it.
+- **`Pending candidates`, `Fulfilled nodes`, and `Skip streak` are `refactor-learn`-written — never by hand.** `Create-mode` and `Focus areas` you can edit by hand any time — that's what they're for. Nobody is expected to hand-edit `Fulfilled nodes` or `Skip streak`; if either drifts wrong, the next pass with parser access re-derives it.
 - The file travels with the repo. Loop state does not live in agent sessions but here (create-mode, focus areas, pending candidates, fulfilled nodes), in the issue tracker (backlog), in `docs/refactoring/merge-requests.md` (open suite merge requests — only when the target's issue tracker has no native label mechanism; otherwise that state lives directly on the tracker as `refactor:delivered`-labeled issues), and in `docs/refactoring/out-of-scope/` (learned rejections).
 - If the file is missing, that's the `loop-config` tooling-tree node — see above. Ordinary in every way except who writes which field and which branch it lands on for that one candidate — see the `loop-config` exception above.
