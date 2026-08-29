@@ -21,7 +21,7 @@ Then, for a structural candidate: list the seams the plan names and confirm them
 
 A tooling-tree node's plan has no seam to confirm — its scope is a config/dependency change (see the tree doc's MR scope), not code. Skip straight to making that change; there's no red → green cycle for it, only its Fulfilment check (step 3).
 
-**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending issue` (`docs/refactoring/config.md` didn't exist yet). When you create the file here, set `Pending issue` to this candidate's issue yourself. Leave `Create-mode` and `Fulfilled nodes` out (or clearly unset) — don't invent placeholder values for them; per `skills/continuous-refactoring/references/refactoring-config.md` those are `refactor-learn`'s fields, and `refactor-learn` fills them in its own follow-up commit (see its `## Process`).
+**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending tasks` (`docs/refactoring/config.md` didn't exist yet). When you create the file here, set `Pending tasks` to this candidate's issue yourself. Leave `Create-mode` and `Fulfilled nodes` out (or clearly unset) — don't invent placeholder values for them; per `skills/continuous-refactoring/references/refactoring-config.md` those are `refactor-learn`'s fields, and `refactor-learn` fills them in its own follow-up commit (see its `## Process`).
 
 ### 2. One slice at a time
 
@@ -49,7 +49,9 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 ### 5. Open the merge request
 
-Once review is clean: push the branch and open the merge request (create-mode per `docs/refactoring/config.md`, per the orchestrator's `## Opening a merge request` section). Wait for CI if the target repo runs it; a red CI is a review finding like any other — back to step 2/1.
+Once review is clean: push the branch and open the merge request (create-mode per `docs/refactoring/config.md`, per the orchestrator's `## Opening a merge request` section). Include `Closes #<candidate-issue-number>` in the merge request body **only when this merge request is understood to satisfy the candidate issue's Fulfilment check on its own** — the common case, one node/one issue/one merge request. When a node's delivery is understood to span several merge requests (ADR-0007: "a node may span several merge requests" — e.g. PHPStan baseline-shrinking work before a level can advance), don't add `Closes` to an intermediate merge request; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback for that case, not a gap to work around here.
+
+Wait for CI if the target repo runs it — confirm via the forge's actual CI status (e.g. `gh pr checks` or equivalent), not a local dry-run of the same verification commands from step 3: the CI environment (container image, PHP version, network) can disagree with a local run in ways only the real CI surfaces. A red CI is a review finding like any other — back to step 2/1.
 
 The candidate branch stays checked out after this — nothing here switches back to the default branch. `refactor-learn`'s bookkeeping writes go out on their own separate bookkeeping branch/MR, never on this one (the `loop-config`-in-flight case is the one exception, which `refactor-learn` handles).
 
