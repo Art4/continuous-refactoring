@@ -106,7 +106,7 @@
         "has_rector": false
       }
     },
-    "structural-scan": {
+    "php-structural-scan": {
       "fulfilled": false,
       "reason": "waiting on: composer-audit, phpunit, test-runner-if-missing, php-cs-fixer, phpstan-level-3, rector-dead-code, rector-type-coverage",
       "details": {
@@ -118,6 +118,17 @@
           "phpstan-level-3",
           "rector-dead-code",
           "rector-type-coverage"
+        ],
+        "rejected": []
+      }
+    },
+    "structural-scan": {
+      "fulfilled": false,
+      "reason": "waiting on: editorconfig, php-structural-scan",
+      "details": {
+        "unresolved": [
+          "editorconfig",
+          "php-structural-scan"
         ],
         "rejected": []
       }
