@@ -8,9 +8,11 @@ The generic root of every language specialization's **tooling tree**. Two ordina
 graph TD
     git[git]
     lc[loop-config]
+    edc[editorconfig]
     ss[structural-scan]
 
     git -->|required| lc
+    lc -->|required| edc
     lc -.->|"(language tree attaches here)"| ss
 ```
 
@@ -21,8 +23,9 @@ The dotted edge above is illustrative only — the real edges into `structural-s
 | from (parent) | to (child) | type |
 |---|---|---|
 | `git` | `loop-config` | required |
+| `loop-config` | `editorconfig` | required |
 
-The table above is the only edge this document owns. A language tree's own edge table is the source for edges into its nodes and into `structural-scan`.
+The table above is the only edge this document owns — both rows are generic-to-generic (both endpoints live in this document). A language tree's own edge table is the source for edges into *its own* nodes and into `structural-scan`; an edge whose child lives here instead (e.g. `editorconfig → php-cs-fixer`, declared in `php-tooling-tree.md`'s table since `php-cs-fixer` is a PHP-tree node) is the one case that crosses the other way.
 
 ## Nodes
 
@@ -41,6 +44,34 @@ The table above is the only edge this document owns. A language tree's own edge 
 - **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write cadence, last-run date, and create-mode.
 - **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
 - **MR scope:** one MR — create `docs/refactoring/config.md` (see `skills/continuous-refactoring/references/refactoring-config.md` for its shape; there is deliberately no stored cadence — the loop never triggers itself). Ordinary node like any other: `refactor-scan` files it as a single `refactor:candidate` issue when missing, same as a PHP tree node, and it is the only candidate filed that pass.
+
+### `editorconfig`
+
+- **Name:** `.editorconfig`
+- **Tool:** none — plain-text convention file, read by any EditorConfig-aware editor, not a runnable tool.
+- **Purpose:** settle the most basic formatting conventions (indentation, charset, line endings) before a
+  language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
+  exists so "later Rector output lands styled." Language-independent, so it lives at the generic root and
+  its `required` parent (`loop-config`, above) is declared in this document's own edge table — only its
+  *outgoing* edge crosses into a language tree today (`skills/refactor-scan/references/php-tooling-tree.md`'s
+  edge table: `editorconfig → php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
+- **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
+  equivalent-detection nuance.
+- **MR scope:** create a default `.editorconfig` when missing — one language-neutral `[*]` section, no
+  per-language stanza:
+  ```
+  root = true
+
+  [*]
+  charset = utf-8
+  end_of_line = lf
+  insert_final_newline = true
+  trim_trailing_whitespace = true
+  indent_style = space
+  indent_size = 4
+  ```
+  Ordinary node like any other — rejectable as `wontfix` (`docs/refactoring/out-of-scope/editorconfig.md`)
+  like any other node, no special carve-out.
 
 ### `structural-scan`
 

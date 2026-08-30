@@ -9,6 +9,7 @@ graph TD
     lc[loop-config]
     ci[ci-runner]
     comp[composer]
+    edc[editorconfig]
     cs[php-cs-fixer]
     unit[phpunit]
     audit[composer-audit]
@@ -23,6 +24,7 @@ graph TD
 
     lc -->|required| comp
     lc -->|required| ci
+    edc -.->|recommended| cs
     comp -->|required| cs
     comp -->|required| unit
     comp -->|required| tr
@@ -52,6 +54,7 @@ graph TD
 |---|---|---|
 | `loop-config` | `composer` | required |
 | `loop-config` | `ci-runner` | required |
+| `editorconfig` | `php-cs-fixer` | recommended |
 | `composer` | `php-cs-fixer` | required |
 | `composer` | `phpunit` | required |
 | `composer` | `test-runner-if-missing` | required |
@@ -125,6 +128,10 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 - **Purpose:** automated code style so later Rector output lands styled.
 - **Fulfilment check:** dev dependency installed, config committed, runnable locally with zero reported diffs.
 - **MR scope:** dependency + config + one formatting pass.
+- **Recommended parent:** `editorconfig` — settle the target's most basic formatting conventions
+  (indentation, charset, line endings) before this node introduces language-specific style rules. This
+  node stays withheld from proposal until `editorconfig` is decided (fulfilled or rejected); a rejected
+  `editorconfig` still releases this node, it just goes in without that baseline.
 
 ### `phpunit`
 
