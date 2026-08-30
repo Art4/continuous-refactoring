@@ -175,7 +175,11 @@ run_opencode_advisory() {
         ln -sfn "$REPO_DIR/skills" "$workdir/.agents/skills"
     fi
     log_info "Running: $opencode_bin run -m $OPENCODE_MODEL (subprocess, timeout ${timeout_s}s) in $workdir$([[ "$mount_skills" == true ]] || echo ", no skills mounted")"
-    if timeout "$timeout_s" bash -c "cd \"$workdir\" && $opencode_bin run -m $OPENCODE_MODEL \"$prompt\" 2>&1" > "$out_file" 2>&1; then
+    # $prompt is passed as a positional parameter ($2 below), not
+    # interpolated into the script text — a prompt containing shell
+    # metacharacters (backticks, $, quotes — e.g. `judge`'s rubric text)
+    # would otherwise be re-parsed as shell syntax by this inner bash -c.
+    if timeout "$timeout_s" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' "$2"' _ "$workdir" "$prompt" > "$out_file" 2>&1; then
         [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
         return 0
     else
@@ -582,7 +586,20 @@ run_judge() {
         return 1
     fi
     local out="/tmp/judge-$FIXTURE.log"
-    local prompt="Grade this repo's refactoring-loop artifacts (docs/refactoring/, any filed issues, git log) against the rubric at fixtures/harness/rubric.md. Give one score 1-5 per rubric dimension plus a one-line justification each."
+    # Embed the rubric's content directly rather than pointing the model at
+    # `fixtures/harness/rubric.md` — that path only resolves from this
+    # repo's root, not $FIXTURE_DST (the isolated /tmp copy the subprocess
+    # actually runs in, which has no fixtures/ at all). Read on this
+    # process's own host filesystem (no permission wall here) and pass the
+    # content straight through — safe now that run_opencode_advisory passes
+    # $prompt as a positional parameter instead of interpolating it.
+    local rubric_text
+    rubric_text="$(cat "$rubric")"
+    local prompt="Grade this repo's refactoring-loop artifacts (docs/refactoring/, any filed issues, git log) against the rubric below. Give one score 1-5 per dimension plus a one-line justification each.
+
+---
+$rubric_text
+---"
     if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$out" "$OPENCODE_TIMEOUT"; then
         log_info "Judge output:"
         while IFS= read -r line; do log_info "  $line"; done < "$out"
