@@ -23,6 +23,7 @@ roadmap = tooling_tree.roadmap
 next_candidates = tooling_tree.next_candidates
 withheld_candidates = tooling_tree.withheld_candidates
 php_version_reversal_findings = tooling_tree.php_version_reversal_findings
+php_floor_precheck = tooling_tree.php_floor_precheck
 _is_baseline_empty = tooling_tree._is_baseline_empty
 
 
@@ -789,6 +790,152 @@ class PhpVersionReversalTests(unittest.TestCase):
         try:
             nodes = [f["node"] for f in php_version_reversal_findings(root)]
             self.assertEqual(nodes, ["phpunit"])
+        finally:
+            tmp.cleanup()
+
+
+class PhpFloorPrecheckTests(unittest.TestCase):
+    """Ticket 31: the target's current PHP floor is checked once against each
+    of the five deterministic PHP tooling leaves' known minimum-ever PHP
+    version, instead of proposing/rejecting each one individually. Design
+    decision (see `php_floor_precheck`'s docstring): skip silently, no
+    `docs/refactoring/out-of-scope/` entry written."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_no_composer_json_blocks_nothing(self):
+        tmp, root = self._make_repo({})
+        try:
+            self.assertEqual(php_floor_precheck(root), [])
+        finally:
+            tmp.cleanup()
+
+    def test_modern_floor_blocks_nothing(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": "^8.1"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            self.assertEqual(php_floor_precheck(root), [])
+        finally:
+            tmp.cleanup()
+
+    def test_php_56_floor_blocks_only_the_two_leaves_that_never_ran_that_low(self):
+        # composer-audit (needs Composer >=2.4, itself PHP >=7.2.5) and
+        # phpstan-level-0-baseline (phpstan/phpstan has required PHP >=7.1
+        # since its first release) never had a version installable on PHP
+        # 5.6. php-cs-fixer, phpunit, and test-runner-if-missing all have
+        # PHP-5.6-compatible lines (their absolute floor is PHP 5.3), so PHP
+        # 5.6 alone doesn't block them.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            blocked = {b["node"] for b in php_floor_precheck(root)}
+            self.assertEqual(blocked, {"composer-audit", "phpstan-level-0-baseline"})
+        finally:
+            tmp.cleanup()
+
+    def test_php_70_unblocks_phpstan_but_not_composer_audit(self):
+        # phpstan/phpstan's first published release (0.1) required PHP ~7.0
+        # -- its true floor, below PHPStan's own documented "PHP 7.1+"
+        # marketing baseline for later versions. composer-audit still needs
+        # PHP >=7.2.5 (Composer 2.4's own floor), so it stays blocked here.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.0"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            blocked = {b["node"] for b in php_floor_precheck(root)}
+            self.assertEqual(blocked, {"composer-audit"})
+        finally:
+            tmp.cleanup()
+
+    def test_very_old_floor_blocks_all_five_leaves(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.2"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            blocked = {b["node"] for b in php_floor_precheck(root)}
+            self.assertEqual(
+                blocked,
+                {
+                    "php-cs-fixer",
+                    "phpunit",
+                    "test-runner-if-missing",
+                    "composer-audit",
+                    "phpstan-level-0-baseline",
+                },
+            )
+        finally:
+            tmp.cleanup()
+
+    def test_uses_platform_pin_over_require_when_present(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({
+                "require": {"php": ">=8.1"},
+                "config": {"platform": {"php": "5.6.40"}},
+            }),
+            "composer.lock": "{}",
+        })
+        try:
+            blocked = {b["node"] for b in php_floor_precheck(root)}
+            self.assertIn("composer-audit", blocked)
+        finally:
+            tmp.cleanup()
+
+    def test_next_candidates_excludes_blocked_leaves(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertNotIn("composer-audit", nodes)
+            self.assertNotIn("phpstan-level-0-baseline", nodes)
+            # php-cs-fixer and test-runner-if-missing are PHP-5.6-compatible
+            # and unblocked (required parents fulfilled) — still proposed.
+            self.assertIn("php-cs-fixer", nodes)
+            self.assertIn("test-runner-if-missing", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_roadmap_never_proposes_blocked_leaves(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
+        })
+        try:
+            r = roadmap(root, steps=10)
+            nodes = [x["node"] for x in r]
+            self.assertNotIn("composer-audit", nodes)
+            self.assertNotIn("phpstan-level-0-baseline", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_detect_and_roadmap_reports_php_floor_blocked(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            data = tooling_tree.detect_and_roadmap(root)
+            blocked = {b["node"] for b in data["php_floor_blocked"]}
+            self.assertEqual(blocked, {"composer-audit", "phpstan-level-0-baseline"})
         finally:
             tmp.cleanup()
 

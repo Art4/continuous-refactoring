@@ -260,6 +260,80 @@ def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ..
     return _parse_min_version(m.group(1))
 
 
+# Ticket 31: the oldest PHP version each of the five deterministic PHP
+# tooling leaves has ever run on, across every published major line of the
+# tool — below this floor, no version of the tool (however old or
+# unmaintained) can be installed at all, so a propose → design → implement
+# → reject cycle can never land it. Checked once per pass instead of once
+# per leaf (see `php_floor_precheck`). Source facts:
+#   - php-cs-fixer: friendsofphp/php-cs-fixer 1.0 (2012) required PHP >=5.3.6.
+#   - phpunit: phpunit/phpunit's earliest Composer-installable line (3.7)
+#     required PHP >=5.3.3.
+#   - test-runner-if-missing: defaults to adopting phpunit — same floor.
+#   - composer-audit: the `composer audit` subcommand shipped in Composer
+#     2.4.0 (2022); no earlier Composer release (1.x or 2.0-2.3) ever had it,
+#     and Composer 2.4 itself requires PHP >=7.2.5.
+#   - phpstan-level-0-baseline: phpstan/phpstan's first published release
+#     (0.1) required PHP ~7.0 — it has never run on PHP 5.x; vimeo/psalm
+#     (this node's equivalent fulfiller) has likewise required PHP 7+ since
+#     its earliest releases.
+_LEAF_MIN_PHP_VERSION = {
+    "php-cs-fixer": "5.3",
+    "phpunit": "5.3",
+    "test-runner-if-missing": "5.3",
+    "composer-audit": "7.2",
+    "phpstan-level-0-baseline": "7.0",
+}
+
+
+def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
+    """Check the target's current PHP floor once against each of
+    `_LEAF_MIN_PHP_VERSION`'s five leaves, instead of proposing (and
+    eventually rejecting) each one individually five separate times
+    (ticket 31). Returns the leaves whose minimum isn't met yet, each with a
+    human-readable reason — `next_candidates()` and `roadmap()` skip these,
+    and `detect_and_roadmap()` surfaces the list so a caller can report the
+    fact in one pass instead of it silently vanishing.
+
+    Design decision: skip silently, no `docs/refactoring/out-of-scope/`
+    entry written for a blocked leaf. The check is cheap and re-derived
+    fully from `composer.json` every pass, so nothing is lost by not
+    persisting it — and that directory otherwise records a genuine human/
+    agent rejection decision (ticket 10's mechanical-reversal design), not a
+    mechanical fact already on disk. Once the target's PHP floor rises, a
+    previously-blocked leaf is simply unblocked next pass; there is nothing
+    to reverse. The one consequence worth naming: four of these five leaves
+    (`php-cs-fixer`, `phpunit`, `test-runner-if-missing`, `composer-audit`)
+    are themselves `structural-scan` leaves (php-tooling-tree.md's `resolved`
+    edges) — while blocked here, they count as neither fulfilled nor
+    rejected, so `structural-scan` stays genuinely closed until the floor
+    rises (matching how a target that truly cannot run these tools yet
+    shouldn't be treated as tooling-ready). A human who wants
+    `structural-scan` to open anyway despite the floor can still file the
+    out-of-scope entries by hand — this precheck doesn't do it for them.
+
+    Returns `[]` when the target's PHP floor can't be determined (no
+    `composer.json`, or neither `require.php` nor `config.platform.php`
+    parses) — consistent with `php_version_reversal_findings()`, unknown
+    floor never blocks anything here either."""
+    repo = pathlib.Path(repo)
+    current = _current_php_floor(_read_composer(repo))
+    if current is None:
+        return []
+    blocked = []
+    for node, min_constraint in _LEAF_MIN_PHP_VERSION.items():
+        minimum = _parse_min_version(min_constraint)
+        if minimum is not None and current < minimum:
+            blocked.append({
+                "node": node,
+                "reason": (
+                    f"PHP floor {'.'.join(map(str, current))} below {node}'s minimum "
+                    f"PHP >= {'.'.join(map(str, minimum))}"
+                ),
+            })
+    return blocked
+
+
 def php_version_reversal_findings(repo: pathlib.Path) -> list[dict]:
     """Rejected nodes whose recorded `Blocked by: PHP >= X.Y` condition the
     target now satisfies — findings for `refactor-learn` to act on
@@ -542,6 +616,7 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
     detected = detect_nodes(repo, tree)
     detected["git"]["fulfilled"] = True  # never proposed
     rejected = _rejected_nodes(repo)
+    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
 
     result: list[dict] = []
     for node in tree["order"]:
@@ -568,6 +643,8 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
                 continue
             if node in rejected:
                 continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
+            if node in php_floor_blocked:
+                continue  # ticket 31 — target's PHP floor doesn't meet this leaf's known minimum yet
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
@@ -598,6 +675,7 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
     detected = detect_nodes(repo, tree)
     detected["git"]["fulfilled"] = True
     rejected = _rejected_nodes(repo)
+    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
 
     result: list[dict] = []
     for node in tree["order"]:
@@ -605,6 +683,8 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
             continue
         if detected.get(node, {}).get("fulfilled", False) or node in rejected:
             continue
+        if node in php_floor_blocked:
+            continue  # ticket 31 — no recommended edge targets these leaves today, but stays consistent if one ever does
         ok, _why = _is_unblocked(node, tree, detected)
         if not ok:
             continue
@@ -637,6 +717,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
     detected["git"]["fulfilled"] = True
     # out-of-scope rejections, used by structural-scan's `resolved` gate
     rejected = _rejected_nodes(repo)
+    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
 
     # For roadmap simulation, we need to handle that composer-audit is special: we marked fulfilled False always, so it will be proposed.
     # But test-runner-if-missing is fulfilled if phpunit present — skip proposing it separately.
@@ -679,6 +760,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 continue  # already fulfilled (real or simulated), skip
             if node in rejected:
                 continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
+            if node in php_floor_blocked:
+                continue  # ticket 31 — target's PHP floor doesn't meet this leaf's known minimum yet
             if node == "structural-scan":
                 # `resolved` gate: every leaf must be fulfilled OR rejected —
                 # not the standard required-parent check, which would
@@ -779,12 +862,14 @@ def detect_and_roadmap(repo: pathlib.Path, steps: int = 10, tree_md: pathlib.Pat
     nxt = next_candidates(repo, tree=tree)
     withheld = withheld_candidates(repo, tree=tree)
     reversals = php_version_reversal_findings(repo)
+    php_floor_blocked = php_floor_precheck(repo)
     return {
         "detected": detected,
         "roadmap": road,
         "next": nxt,
         "withheld": withheld,
         "reversals": reversals,
+        "php_floor_blocked": php_floor_blocked,
         "tree": {"edges": tree["edges"]},
     }
 
