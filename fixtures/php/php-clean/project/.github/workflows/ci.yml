@@ -1,0 +1,9 @@
+name: ci
+on: [push]
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - run: vendor/bin/phpunit
+      - run: vendor/bin/phpstan analyse
+      - run: composer audit

@@ -18,22 +18,30 @@ Usage: $(basename "$0") <tier> <fixture> [options]
 
 Tiers:
     tier2       Run artifact contract tests
-    tier3       Run ground-truth precision/recall tests
+    tier3       Run ground-truth precision/recall tests (also checks recall against the committed baseline — ticket 27)
+    tier4       Trigger/discoverability tests: explicit+implicit invocation per skill, negative controls (fixture: php-clean; local-only, see fixtures/README.md)
     roadmap     Dry-run: detect tools, show decision chain and next 10 MRs (no MR created)
     agent-loop  Prepare an isolated sandbox + prompt for a full-pass, Agent-tool-subagent-observed run (local-only, see fixtures/README.md)
+    judge       LLM-judge rubric grading against fixtures/harness/rubric.md (local-only, advisory — ticket 27)
+    lift        With-skill vs without-skill lift measurement (local-only, advisory — ticket 27)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
     --verbose               Enable verbose output
     --opencode              Also run opencode isolated as subprocess (advisory, needs opencode binary)
+                            Model is pinned via \$OPENCODE_MODEL (default: opencode/muse-spark-1.2-contributor-free)
+                            Per-call timeout via \$OPENCODE_TIMEOUT (default: 60s — raise for a slower model)
 
 Examples:
     $(basename "$0") tier2 php-project-with-candidates
     $(basename "$0") tier3 php-project-with-candidates --php-version 8.2
+    $(basename "$0") tier4 php-clean --opencode --verbose
     $(basename "$0") roadmap php-empty
     $(basename "$0") roadmap php-p0-empty --verbose
     $(basename "$0") roadmap php-empty --opencode --verbose   # deterministic + opencode comparison
     $(basename "$0") agent-loop php-partial                   # prepare sandbox + prompt, then spawn a subagent yourself
+    $(basename "$0") judge php-project-with-candidates --opencode
+    $(basename "$0") lift php-partial --opencode
 EOF
     exit 1
 }
@@ -42,6 +50,19 @@ EOF
 PHP_VERSION="${PHP_VERSION:-8.3}"
 VERBOSE=false
 WITH_OPENCODE=false
+# Pinned explicitly — `opencode run` with no -m falls back to whatever
+# local/ambient default model is configured (observed: a local ollama model
+# that just hangs to timeout with zero output). fixtures/README.md's manual
+# instructions already assume this exact model; override via env var if a
+# different one is set up locally.
+OPENCODE_MODEL="${OPENCODE_MODEL:-opencode/muse-spark-1.2-contributor-free}"
+# Per-call default for run_opencode_advisory's internal `timeout` — callers
+# can still pass their own timeout_s explicitly (e.g. tier4's shorter
+# per-skill checks); this only changes the *default* a caller gets when it
+# doesn't. 60s is tight for a model that actually reads several fixture
+# files before answering (observed: some models need 2-4x that on a busier
+# fixture) — override per run without editing the script.
+OPENCODE_TIMEOUT="${OPENCODE_TIMEOUT:-60}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -120,6 +141,54 @@ setup_fixture() {
     log_info "Fixture ready at: $FIXTURE_DST (project only, expected not mounted)"
 }
 
+# Resolve the opencode binary invocation (empty string if unavailable) —
+# shared by every local-only advisory check (roadmap --opencode, tier4,
+# judge, lift). Echoes the command prefix on stdout; logs and returns
+# nonzero if no binary is found so callers can skip cleanly.
+resolve_opencode_bin() {
+    if command -v opencode >/dev/null 2>&1; then
+        echo "opencode"
+        return 0
+    elif command -v npx >/dev/null 2>&1 && npx --yes opencode --help >/dev/null 2>&1; then
+        echo "npx --yes opencode"
+        return 0
+    fi
+    log_info "opencode binary not found (install via npm i -g opencode) — skipping advisory opencode run"
+    return 1
+}
+
+# Run one opencode prompt, isolated (only skills/ from this repo, via a
+# .agents/skills symlink — no global ~/.config/opencode/skills), as a
+# subprocess against $1's working directory. $2 is the prompt, $3 the log
+# file to write, $4 an optional timeout (default 60s), $5 an optional
+# "false" to skip the skills symlink entirely (used by `lift`'s
+# without-skill baseline — everything else about the invocation stays
+# identical, so that run is a fair comparison against the with-skill one).
+# Never fails the caller — advisory only; check the log file / grep it
+# yourself.
+run_opencode_advisory() {
+    local workdir="$1" prompt="$2" out_file="$3" timeout_s="${4:-$OPENCODE_TIMEOUT}" mount_skills="${5:-true}"
+    local opencode_bin
+    opencode_bin="$(resolve_opencode_bin)" || return 1
+    if [[ "$mount_skills" == true ]]; then
+        mkdir -p "$workdir/.agents"
+        ln -sfn "$REPO_DIR/skills" "$workdir/.agents/skills"
+    fi
+    log_info "Running: $opencode_bin run -m $OPENCODE_MODEL (subprocess, timeout ${timeout_s}s) in $workdir$([[ "$mount_skills" == true ]] || echo ", no skills mounted")"
+    # $prompt is passed as a positional parameter ($2 below), not
+    # interpolated into the script text — a prompt containing shell
+    # metacharacters (backticks, $, quotes — e.g. `judge`'s rubric text)
+    # would otherwise be re-parsed as shell syntax by this inner bash -c.
+    if timeout "$timeout_s" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' "$2"' _ "$workdir" "$prompt" > "$out_file" 2>&1; then
+        [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
+        return 0
+    else
+        log_info "Opencode run failed or timed out — see $out_file (advisory, not failing test)"
+        [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
+        return 1
+    fi
+}
+
 # Run opencode in Docker
 run_opencode() {
     local command="$1"
@@ -193,8 +262,15 @@ run_tier3() {
         log_info "Recall: $recall ($found_count/$planted_count)"
     fi
 
-    # Save baseline
+    # Regression gate (ticket 27, Tier 5): compare against the committed
+    # baseline *before* overwriting it. In CI this stays a same-number
+    # comparison (found is always 0 — no LLM runs in CI, see
+    # fixtures/README.md), but the mechanism is real: it fails the moment a
+    # baseline committed from a local `--opencode`/`agent-loop` run regresses.
     local baseline_dir="$FIXTURES_DIR/baselines"
+    assert_baseline_not_regressed "$baseline_dir/$FIXTURE.json" "$found_count" "$planted_count"
+
+    # Save baseline
     mkdir -p "$baseline_dir"
     cat > "$baseline_dir/$FIXTURE.json" <<EOF
 {
@@ -261,23 +337,8 @@ for r in d['roadmap']:
     # Optional: run opencode isolated as subprocess (advisory, no hard fail)
     if [[ "$WITH_OPENCODE" == true ]]; then
         log_info "=== Opencode isolated (advisory, no other skills) ==="
-        local opencode_bin=""
-        if command -v opencode >/dev/null 2>&1; then
-            opencode_bin="opencode"
-        elif command -v npx >/dev/null 2>&1 && npx --yes opencode --help >/dev/null 2>&1; then
-            opencode_bin="npx --yes opencode"
-        else
-            log_info "opencode binary not found (install via npm i -g opencode) — skipping advisory opencode run"
-            return 0
-        fi
-        # Isolated: only skills from this repo, no global ~/.config/opencode/skills
-        # Sub-process: working dir = fixture, skills mounted via --skills flag if supported, else via .agents/skills symlink
         local opencode_out="/tmp/opencode-$FIXTURE.log"
-        log_info "Running: $opencode_bin run --skills $REPO_DIR/skills (subprocess, timeout 60s) in $FIXTURE_DST"
-        # Ensure .agents/skills symlink for opencode discovery (isolated)
-        mkdir -p "$FIXTURE_DST/.agents"
-        ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
-        if timeout 60 bash -c "cd \"$FIXTURE_DST\" && $opencode_bin run \"List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md.\" 2>&1" > "$opencode_out" 2>&1; then
+        if run_opencode_advisory "$FIXTURE_DST" "List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md." "$opencode_out"; then
             log_info "Opencode output (first 80 lines):"
             head -n 80 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
             # Advisory comparison: check if opencode mentions expected first node
@@ -289,11 +350,8 @@ for r in d['roadmap']:
                 log_info "Opencode (advisory) does not mention expected first node $first_expected — check $opencode_out for details (non-blocking)"
             fi
         else
-            log_info "Opencode run failed or timed out — see $opencode_out (advisory, not failing test)"
-            head -n 40 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
+            [[ -f "$opencode_out" ]] && head -n 40 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
         fi
-        # Cleanup symlink (keep fixture clean)
-        rm -rf "$FIXTURE_DST/.agents"
     fi
 }
 
@@ -385,6 +443,198 @@ EOF
     log_info "  assert_config_format \"$FIXTURE_DST/docs/refactoring/config.md\"  (source fixtures/harness/lib/assertions.sh first)"
 }
 
+# Tier 4: Trigger/discoverability tests (ticket 27) — explicit + implicit
+# invocation per skill, and the two negative controls that are prose-level
+# judgment calls a skill makes rather than something the deterministic
+# parser decides: "no git" (refactor-scan's own step-1 precondition —
+# whether the check the parser's detect_nodes() already reports accurately
+# is actually *followed* is a model-behavior question, not a parser one)
+# and "not a PHP project" (ADR-0008 keeps language recognition an informal
+# heuristic on purpose, "premature before a second language specialization
+# exists"). The third negative control, "scan on clean repo reports clean",
+# is fully deterministic and lives in `scripts/test_trigger_controls.py`
+# (CI-gated) — the check here only confirms the skill's own wording matches
+# that deterministic result.
+#
+# Local-only advisory, same posture as `roadmap --opencode` and
+# `agent-loop`: this repo's CI has no model credentials, so nothing here
+# ever gates CI — see fixtures/README.md's "Tier 4" section. Run fixture
+# php-clean (its already-fully-resolved tree doubles as the clean-repo
+# scenario); the no-git and non-PHP scenarios are synthesized fresh here,
+# independent of $FIXTURE.
+run_tier4() {
+    log_info "=== Tier 4: Trigger & Discoverability (advisory) — fixture: $FIXTURE ==="
+
+    if [[ "$WITH_OPENCODE" != true ]]; then
+        log_info "Deterministic negative control (clean repo) already covered by: python3 -m unittest scripts.test_trigger_controls"
+        log_info "The behavioral checks below need --opencode (local-only, non-CI, needs the opencode binary):"
+        log_info "  $(basename "$0") tier4 $FIXTURE --opencode --verbose"
+        return 0
+    fi
+    if ! resolve_opencode_bin >/dev/null; then
+        return 0
+    fi
+
+    # --- Negative control 1: no git ---
+    local no_git_dir="/tmp/continuous-refactoring-tests/tier4-no-git"
+    rm -rf "$no_git_dir" && mkdir -p "$no_git_dir"
+    cp -r "$FIXTURE_DST/." "$no_git_dir/" 2>/dev/null || true
+    rm -rf "$no_git_dir/.git"
+    local out="/tmp/tier4-no-git.log"
+    if run_opencode_advisory "$no_git_dir" "Run one pass of the continuous refactoring loop (skills/continuous-refactoring/SKILL.md)." "$out" 60; then
+        if grep -qi "no git\|not a git\|git repository" "$out"; then
+            log_pass "No-git negative control: output names the missing git repository"
+        else
+            log_info "No-git negative control: expected wording not found in $out (advisory, non-blocking)"
+        fi
+        if [[ -f "$no_git_dir/docs/refactoring/config.md" ]]; then
+            log_fail "No-git negative control: docs/refactoring/config.md was written despite no git repository"
+        else
+            log_pass "No-git negative control: no loop state written"
+        fi
+    fi
+
+    # --- Negative control 2: non-PHP project ---
+    local non_php_dir="/tmp/continuous-refactoring-tests/tier4-non-php"
+    rm -rf "$non_php_dir" && mkdir -p "$non_php_dir/src"
+    printf '{"name": "not-a-php-project", "version": "1.0.0"}\n' > "$non_php_dir/package.json"
+    printf "console.log('hi');\n" > "$non_php_dir/src/index.js"
+    (cd "$non_php_dir" && git init -q && git -c user.name="Test Runner" -c user.email="test@ci.local" add -A && git -c user.name="Test Runner" -c user.email="test@ci.local" commit -q -m "Initial fixture state")
+    out="/tmp/tier4-non-php.log"
+    if run_opencode_advisory "$non_php_dir" "Run /refactor-scan against this repo." "$out" 60; then
+        if grep -qi "composer\|php-cs-fixer\|phpstan" "$out"; then
+            log_info "Non-PHP negative control: output mentions PHP tooling — check $out (advisory, non-blocking)"
+        else
+            log_pass "Non-PHP negative control: no PHP-specific tooling proposed"
+        fi
+    fi
+
+    # --- Negative control 3: clean repo (deterministic half already green
+    # via scripts/test_trigger_controls.py against this same fixture) ---
+    out="/tmp/tier4-clean.log"
+    if run_opencode_advisory "$FIXTURE_DST" "Run /refactor-scan against this repo." "$out" 60; then
+        if grep -qi "structural-scan\|nothing to propose\|nothing new" "$out"; then
+            log_pass "Clean-repo negative control: report matches the deterministic result (only structural-scan open)"
+        else
+            log_info "Clean-repo negative control: expected wording not found in $out (advisory, non-blocking)"
+        fi
+    fi
+
+    # --- Discoverability: explicit + implicit invocation per skill ---
+    log_info "--- Discoverability: explicit + implicit invocation per skill ---"
+    _tier4_discoverability "refactor-scan" "propose the next tooling-tree candidate for this repo" "tooling-tree"
+    _tier4_discoverability "refactor-prioritize" "rank the current refactoring proposals and recommend the next one" "recommend"
+    _tier4_discoverability "refactor-design" "turn the chosen refactor candidate into a concrete plan and file it as an issue" "issue"
+    _tier4_discoverability "refactor-implement" "implement the designed refactor plan test-first and open the merge request" "merge request"
+    _tier4_discoverability "refactor-learn" "record what this refactoring pass learned in the ledger" "ledger"
+    _tier4_orchestrator_explicit_only
+}
+
+# One skill, both invocation modes — advisory grep against a marker word the
+# skill's own SKILL.md process section uses. Not run for continuous-refactoring
+# (see _tier4_orchestrator_explicit_only): it ships disable-model-invocation:
+# true, so its implicit case has the opposite expected outcome.
+_tier4_discoverability() {
+    local skill="$1" implicit_prompt="$2" marker="$3"
+    local explicit_out="/tmp/tier4-$skill-explicit.log"
+    local implicit_out="/tmp/tier4-$skill-implicit.log"
+    if run_opencode_advisory "$FIXTURE_DST" "/$skill" "$explicit_out" 45; then
+        if grep -qi "$marker" "$explicit_out"; then
+            log_pass "$skill: explicit invocation (/$skill) triggers — mentions '$marker'"
+        else
+            log_info "$skill: explicit invocation ran but didn't mention '$marker' — check $explicit_out (non-blocking)"
+        fi
+    fi
+    if run_opencode_advisory "$FIXTURE_DST" "$implicit_prompt" "$implicit_out" 45; then
+        if grep -qi "$marker" "$implicit_out"; then
+            log_pass "$skill: implicit invocation (natural language) triggers — mentions '$marker'"
+        else
+            log_info "$skill: implicit invocation ran but didn't mention '$marker' — check $implicit_out (non-blocking)"
+        fi
+    fi
+}
+
+# continuous-refactoring ships disable-model-invocation: true in its own
+# SKILL.md frontmatter — natural language alone must NOT trigger the full
+# 6-step pass; only the explicit /continuous-refactoring form should.
+_tier4_orchestrator_explicit_only() {
+    local implicit_out="/tmp/tier4-continuous-refactoring-implicit.log"
+    if run_opencode_advisory "$FIXTURE_DST" "Keep this codebase under continuous refactoring." "$implicit_out" 45; then
+        if grep -qi "refactor-scan\|refactor-implement\|merge request" "$implicit_out"; then
+            log_info "continuous-refactoring: implicit prompt appears to have run the full pass — check $implicit_out (disable-model-invocation should block this; advisory, non-blocking)"
+        else
+            log_pass "continuous-refactoring: implicit natural-language prompt did not trigger the full pass (disable-model-invocation: true honored)"
+        fi
+    fi
+    local explicit_out="/tmp/tier4-continuous-refactoring-explicit.log"
+    if run_opencode_advisory "$FIXTURE_DST" "/continuous-refactoring" "$explicit_out" 90; then
+        log_pass "continuous-refactoring: explicit invocation ran — see $explicit_out"
+    fi
+}
+
+# Tier 5 — LLM-judge rubric grading (ticket 27). Local-only, advisory,
+# non-CI (needs model credentials this repo's CI does not have). Grades one
+# fixture's loop-state artifacts against fixtures/harness/rubric.md.
+run_judge() {
+    log_info "=== LLM-judge rubric grading — fixture: $FIXTURE ==="
+    if ! resolve_opencode_bin >/dev/null; then
+        return 0
+    fi
+    local rubric="$FIXTURES_DIR/harness/rubric.md"
+    if [[ ! -f "$rubric" ]]; then
+        log_fail "Missing rubric: $rubric"
+        return 1
+    fi
+    local out="/tmp/judge-$FIXTURE.log"
+    # Embed the rubric's content directly rather than pointing the model at
+    # `fixtures/harness/rubric.md` — that path only resolves from this
+    # repo's root, not $FIXTURE_DST (the isolated /tmp copy the subprocess
+    # actually runs in, which has no fixtures/ at all). Read on this
+    # process's own host filesystem (no permission wall here) and pass the
+    # content straight through — safe now that run_opencode_advisory passes
+    # $prompt as a positional parameter instead of interpolating it.
+    local rubric_text
+    rubric_text="$(cat "$rubric")"
+    local prompt="Grade this repo's refactoring-loop artifacts (docs/refactoring/, any filed issues, git log) against the rubric below. Give one score 1-5 per dimension plus a one-line justification each.
+
+---
+$rubric_text
+---"
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$out" "$OPENCODE_TIMEOUT"; then
+        log_info "Judge output:"
+        while IFS= read -r line; do log_info "  $line"; done < "$out"
+        log_pass "Judge run complete — read $out for the per-dimension scores (advisory, not a hard gate)"
+    fi
+}
+
+# Tier 5 — with-skill vs. without-skill lift measurement (ticket 27).
+# Local-only, advisory, non-CI. Runs the same prompt twice against the same
+# fixture state: once with skills/ mounted (run_opencode_advisory's isolated
+# .agents/skills symlink), once with no skill guidance at all — prints both
+# transcript paths so a human (or `judge`'s rubric) can compare them.
+run_lift() {
+    log_info "=== Lift measurement (with-skill vs. without-skill) — fixture: $FIXTURE ==="
+    if ! resolve_opencode_bin >/dev/null; then
+        return 0
+    fi
+
+    local prompt="Improve this codebase's refactoring hygiene: find the single most valuable next step and take it."
+    local with_out="/tmp/lift-$FIXTURE-with-skill.log"
+    local without_out="/tmp/lift-$FIXTURE-without-skill.log"
+
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$with_out" "$OPENCODE_TIMEOUT"; then
+        log_pass "With-skill run complete — $with_out"
+    fi
+
+    log_info "Running without-skill baseline (no .agents/skills symlink)..."
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$without_out" "$OPENCODE_TIMEOUT" false; then
+        log_pass "Without-skill run complete — $without_out"
+    fi
+
+    log_info "Compare $with_out vs $without_out by hand, or grade both against the rubric with:"
+    log_info "  $(basename "$0") judge $FIXTURE --opencode"
+}
+
 # Main
 main() {
     reset_counters
@@ -397,11 +647,20 @@ main() {
         tier3)
             run_tier3
             ;;
+        tier4)
+            run_tier4
+            ;;
         roadmap)
             run_roadmap
             ;;
         agent-loop)
             run_agent_loop
+            ;;
+        judge)
+            run_judge
+            ;;
+        lift)
+            run_lift
             ;;
         *)
             log_fail "Unknown tier: $TIER"

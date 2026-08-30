@@ -10,3 +10,4 @@ concern the shape shared across every future language tree, not PHP-specific nod
 | # | Ticket | Wave |
 |---|--------|------|
 | 01 | `.editorconfig` as its own generic-tree node, before `php-cs-fixer` | first |
+| 39 | `roadmap()`'s simulation never proposes `structural-scan` once its gate is already open | first |
