@@ -583,7 +583,7 @@ run_judge() {
     fi
     local out="/tmp/judge-$FIXTURE.log"
     local prompt="Grade this repo's refactoring-loop artifacts (docs/refactoring/, any filed issues, git log) against the rubric at fixtures/harness/rubric.md. Give one score 1-5 per rubric dimension plus a one-line justification each."
-    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$out" 90; then
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$out" "$OPENCODE_TIMEOUT"; then
         log_info "Judge output:"
         while IFS= read -r line; do log_info "  $line"; done < "$out"
         log_pass "Judge run complete — read $out for the per-dimension scores (advisory, not a hard gate)"
@@ -605,12 +605,12 @@ run_lift() {
     local with_out="/tmp/lift-$FIXTURE-with-skill.log"
     local without_out="/tmp/lift-$FIXTURE-without-skill.log"
 
-    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$with_out" 90; then
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$with_out" "$OPENCODE_TIMEOUT"; then
         log_pass "With-skill run complete — $with_out"
     fi
 
     log_info "Running without-skill baseline (no .agents/skills symlink)..."
-    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$without_out" 90 false; then
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$without_out" "$OPENCODE_TIMEOUT" false; then
         log_pass "Without-skill run complete — $without_out"
     fi
 
