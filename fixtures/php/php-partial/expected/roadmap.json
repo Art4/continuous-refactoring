@@ -3,63 +3,121 @@
   "detected": {
     "git": {
       "fulfilled": true,
-      "reason": "found .git"
+      "reason": "found .git",
+      "details": {}
     },
     "loop-config": {
       "fulfilled": false,
-      "reason": "no docs/refactoring/config.md"
+      "reason": "no docs/refactoring/config.md",
+      "details": {}
     },
     "composer": {
       "fulfilled": true,
-      "reason": "composer.json+lock present"
+      "reason": "composer.json+lock present",
+      "details": {
+        "has_json": true,
+        "has_lock": true
+      }
     },
     "ci-runner": {
       "fulfilled": false,
-      "reason": "no CI config"
+      "reason": "no CI config",
+      "details": {}
+    },
+    "editorconfig": {
+      "fulfilled": false,
+      "reason": "no .editorconfig",
+      "details": {}
     },
     "php-cs-fixer": {
       "fulfilled": true,
-      "reason": "dep and config present"
+      "reason": "dep and config present",
+      "details": {
+        "has_dep": true,
+        "has_config": true
+      }
     },
     "phpunit": {
       "fulfilled": true,
-      "reason": "phpunit/pest present"
+      "reason": "phpunit/pest present",
+      "details": {
+        "has_phpunit": true,
+        "has_pest": false
+      }
     },
     "test-runner-if-missing": {
       "fulfilled": true,
-      "reason": "runner exists"
+      "reason": "runner exists",
+      "details": {
+        "depends_composer": true
+      }
     },
     "composer-audit": {
       "fulfilled": false,
-      "reason": "thin node \u2014 propose after composer (roadmap seam)"
+      "reason": "no CI job runs composer audit yet",
+      "details": {
+        "has_real_dep": true
+      }
     },
     "phpstan-level-0-baseline": {
       "fulfilled": false,
-      "reason": "missing phpstan or level 0 or baseline"
+      "reason": "missing phpstan or level 0 or baseline",
+      "details": {
+        "has_phpstan": false,
+        "level": null,
+        "baseline_exists": false
+      }
     },
     "phpstan-level-1": {
       "fulfilled": false,
-      "reason": "level None < 1 or no phpstan"
+      "reason": "level None < 1 or no phpstan",
+      "details": {
+        "level": null,
+        "baseline_empty": true
+      }
     },
     "phpstan-level-2": {
       "fulfilled": false,
-      "reason": "level None < 2 or no phpstan"
+      "reason": "level None < 2 or no phpstan",
+      "details": {
+        "level": null,
+        "baseline_empty": true
+      }
     },
     "phpstan-level-3": {
       "fulfilled": false,
-      "reason": "level None < 3 or no phpstan"
+      "reason": "level None < 3 or no phpstan",
+      "details": {
+        "level": null,
+        "baseline_empty": true
+      }
     },
     "rector-dead-code": {
       "fulfilled": false,
-      "reason": "no rector dead-code"
+      "reason": "no rector dead-code",
+      "details": {
+        "has_rector": false
+      }
     },
     "rector-type-coverage": {
       "fulfilled": false,
-      "reason": "no rector type coverage"
+      "reason": "no rector type coverage",
+      "details": {
+        "has_rector": false
+      }
     },
     "structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpstan-level-3, rector-dead-code, rector-type-coverage"
+      "reason": "waiting on: composer-audit, phpstan-level-3, rector-dead-code, rector-type-coverage",
+      "details": {
+        "unresolved": [
+          "composer-audit",
+          "phpstan-level-3",
+          "rector-dead-code",
+          "rector-type-coverage"
+        ],
+        "rejected": []
+      }
     }
   },
   "roadmap": [
@@ -75,7 +133,7 @@
     },
     {
       "n": 2,
-      "node": "ci-runner",
+      "node": "editorconfig",
       "type": "tooling",
       "required_parents": [
         "loop-config"
@@ -85,16 +143,27 @@
     },
     {
       "n": 3,
-      "node": "composer-audit",
+      "node": "ci-runner",
       "type": "tooling",
       "required_parents": [
-        "composer"
+        "loop-config"
       ],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
     {
       "n": 4,
+      "node": "composer-audit",
+      "type": "tooling",
+      "required_parents": [
+        "composer",
+        "ci-runner"
+      ],
+      "recommended_parents": [],
+      "reason": "real require dependency present"
+    },
+    {
+      "n": 5,
       "node": "phpstan-level-0-baseline",
       "type": "tooling",
       "required_parents": [
@@ -104,7 +173,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 5,
+      "n": 6,
       "node": "phpstan-level-1",
       "type": "tooling",
       "required_parents": [
@@ -114,7 +183,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 7,
       "node": "phpstan-level-2",
       "type": "tooling",
       "required_parents": [
@@ -124,7 +193,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
       "node": "phpstan-level-3",
       "type": "tooling",
       "required_parents": [
@@ -134,7 +203,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 8,
+      "n": 9,
       "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
@@ -146,7 +215,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 9,
+      "n": 10,
       "node": "rector-type-coverage",
       "type": "tooling",
       "required_parents": [
@@ -157,14 +226,6 @@
         "phpstan-level-3"
       ],
       "reason": "required parents fulfilled"
-    },
-    {
-      "n": 10,
-      "node": "structural-scan",
-      "type": "tooling",
-      "required_parents": [],
-      "recommended_parents": [],
-      "reason": "all php-tree leaves resolved (fulfilled or rejected)"
     }
   ],
   "no_mr_created": true,
