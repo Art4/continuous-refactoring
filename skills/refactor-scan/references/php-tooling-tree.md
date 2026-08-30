@@ -20,6 +20,7 @@ graph TD
     p3[phpstan-level-3]
     rdc[rector-dead-code]
     rtc[rector-type-coverage]
+    phpss[php-structural-scan]
     ss[structural-scan]
 
     lc -->|required| comp
@@ -39,13 +40,14 @@ graph TD
     cs -.->|recommended| rdc
     cs -.->|recommended| rtc
     p3 -.->|recommended| rtc
-    audit -.->|resolved| ss
-    unit -.->|resolved| ss
-    tr -.->|resolved| ss
-    cs -.->|resolved| ss
-    p3 -.->|resolved| ss
-    rdc -.->|resolved| ss
-    rtc -.->|resolved| ss
+    audit -.->|resolved| phpss
+    unit -.->|resolved| phpss
+    tr -.->|resolved| phpss
+    cs -.->|resolved| phpss
+    p3 -.->|resolved| phpss
+    rdc -.->|resolved| phpss
+    rtc -.->|resolved| phpss
+    phpss -.->|resolved| ss
 ```
 
 ## Edges
@@ -69,17 +71,18 @@ graph TD
 | `php-cs-fixer` | `rector-dead-code` | recommended |
 | `php-cs-fixer` | `rector-type-coverage` | recommended |
 | `phpstan-level-3` | `rector-type-coverage` | recommended |
-| `composer-audit` | `structural-scan` | resolved |
-| `phpunit` | `structural-scan` | resolved |
-| `test-runner-if-missing` | `structural-scan` | resolved |
-| `php-cs-fixer` | `structural-scan` | resolved |
-| `phpstan-level-3` | `structural-scan` | resolved |
-| `rector-dead-code` | `structural-scan` | resolved |
-| `rector-type-coverage` | `structural-scan` | resolved |
+| `composer-audit` | `php-structural-scan` | resolved |
+| `phpunit` | `php-structural-scan` | resolved |
+| `test-runner-if-missing` | `php-structural-scan` | resolved |
+| `php-cs-fixer` | `php-structural-scan` | resolved |
+| `phpstan-level-3` | `php-structural-scan` | resolved |
+| `rector-dead-code` | `php-structural-scan` | resolved |
+| `rector-type-coverage` | `php-structural-scan` | resolved |
+| `php-structural-scan` | `structural-scan` | resolved |
 
 The table is the machine-readable source; the diagram is its rendering. Extending the tree means adding a row here and the matching line in the diagram.
 
-The seven `resolved` rows above are not `required` or `recommended` — see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means (a rejected leaf still unblocks `structural-scan`, unlike a rejected required parent) and why it exists. `structural-scan` has one further `resolved` parent beyond these seven — `editorconfig` — declared in `tooling-tree.md`'s own edge table instead, since both its endpoints are generic-root nodes; see that document's `structural-scan` node for the full eight-leaf picture.
+The seven `resolved` rows above feed `php-structural-scan`, this tree's own aggregation node — not `structural-scan` directly. `php-structural-scan` is resolved once every one of those seven is itself resolved (fulfilled, or rejected under `docs/refactoring/out-of-scope/`), the same `resolved` semantics as `structural-scan`'s own gate (see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means and why it exists), just one hop down. The eighth row above, `php-structural-scan → structural-scan`, is this tree's sole direct contribution to `structural-scan`'s own gate — `structural-scan` has one further direct `resolved` parent, `editorconfig`, declared in `tooling-tree.md`'s own edge table instead (both its endpoints are generic-root nodes); see that document's `structural-scan` node for the two-parent picture.
 
 ## Nodes
 
@@ -162,10 +165,9 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   necessary but not sufficient — this node also stays blocked until either (a) `composer.json`'s
   `require` block names at least one real package (platform pseudo-packages — `php`, `hhvm`, `ext-*`,
   `lib-*`, `composer-plugin-api`, `composer-runtime-api` — don't count; `composer audit` has nothing to
-  check without a real dependency), **or** (b) every other leaf feeding `structural-scan` (`phpunit`,
-  `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`,
-  and `editorconfig` — the last declared in `skills/refactor-scan/references/tooling-tree.md`'s own edge
-  table, not this file's) is already resolved — so a dependency-free target still eventually resolves this leaf instead of
+  check without a real dependency), **or** (b) every other leaf feeding `php-structural-scan` (`phpunit`,
+  `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`)
+  is already resolved — so a dependency-free target still eventually resolves this leaf instead of
   leaving `structural-scan` permanently blocked. (a) and (b) are independent alternatives, not ordered.
 
 ### `phpstan-level-0-baseline`
@@ -231,3 +233,11 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Purpose:** raise declared type coverage progressively.
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.
 - **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `phpstan-level-0-baseline` is fulfilled **and** both `php-cs-fixer` and `phpstan-level-3` have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, so this node waits on both. Either one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit.
+
+### `php-structural-scan`
+
+- **Name:** PHP Structural Scan (internal — never proposed; see below)
+- **Tool:** none — pure aggregation node, no fulfilment check or MR scope of its own.
+- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of seven direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way).
+- **Fulfilment check:** every one of its seven `resolved` parents above (`composer-audit`, `phpunit`, `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`) is itself resolved — fulfilled, or rejected under `docs/refactoring/out-of-scope/`. Identical `resolved`-edge semantics to `structural-scan`'s own gate, one hop down: a rejected leaf here still counts as resolved.
+- **MR scope:** none — never proposed, never an MR. There is no real-world action to take *as* `php-structural-scan`; the seven leaves above are where the real work happens. `refactor-scan`/`next_candidates()`/`roadmap()` must never surface this node as a candidate — it exists only so `structural-scan`'s own gate can read one edge instead of seven.

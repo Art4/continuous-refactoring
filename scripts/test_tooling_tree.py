@@ -38,8 +38,11 @@ class LoadTreeTests(unittest.TestCase):
         self.assertIn({"from": "phpstan-level-0-baseline", "to": "phpstan-level-1", "type": "required"}, tree["edges"])
         # recommended
         self.assertIn({"from": "php-cs-fixer", "to": "rector-dead-code", "type": "recommended"}, tree["edges"])
-        # resolved (ADR-0008): PHP-tree leaves gate structural-scan
-        self.assertIn({"from": "composer-audit", "to": "structural-scan", "type": "resolved"}, tree["edges"])
+        # resolved (ADR-0008, ticket 42): PHP-tree leaves gate their own
+        # aggregation node, php-structural-scan, which itself gates
+        # structural-scan via one resolved edge.
+        self.assertIn({"from": "composer-audit", "to": "php-structural-scan", "type": "resolved"}, tree["edges"])
+        self.assertIn({"from": "php-structural-scan", "to": "structural-scan", "type": "resolved"}, tree["edges"])
         # composer-audit's MR scope now includes wiring into CI (absorbs
         # former ticket 10), so it needs ci-runner too, not just composer.
         self.assertIn({"from": "ci-runner", "to": "composer-audit", "type": "required"}, tree["edges"])
@@ -59,10 +62,19 @@ class LoadTreeTests(unittest.TestCase):
             self.assertIn(n, tree["order"])
 
     def test_resolved_parents_of_structural_scan(self):
+        # ticket 42: structural-scan's direct resolved parents are now just
+        # editorconfig (generic-root leaf) and php-structural-scan (the PHP
+        # tree's own aggregation node) — not the seven PHP leaves directly.
         tree = load_tree()
-        leaves = set(tree["resolved_parents"]["structural-scan"])
         self.assertEqual(
-            leaves,
+            set(tree["resolved_parents"]["structural-scan"]),
+            {"editorconfig", "php-structural-scan"},
+        )
+
+    def test_resolved_parents_of_php_structural_scan(self):
+        tree = load_tree()
+        self.assertEqual(
+            set(tree["resolved_parents"]["php-structural-scan"]),
             {
                 "composer-audit",
                 "phpunit",
@@ -71,11 +83,15 @@ class LoadTreeTests(unittest.TestCase):
                 "phpstan-level-3",
                 "rector-dead-code",
                 "rector-type-coverage",
-                # ticket 41: editorconfig, an 8th resolved leaf, declared in
-                # tooling-tree.md's own edge table (generic-to-generic).
-                "editorconfig",
             },
         )
+
+    def test_php_structural_scan_aggregated_away_not_exposed(self):
+        # ticket 42: php-structural-scan feeds structural-scan's own
+        # resolved gate, so it must never be exposed as a proposable
+        # candidate itself — only structural-scan is.
+        tree = load_tree()
+        self.assertEqual(tree["exposed_resolved_gate_nodes"], {"structural-scan"})
 
 
 class BaselineEmptyTests(unittest.TestCase):
@@ -275,11 +291,17 @@ class StructuralScanGateTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_unfulfilled_when_leaves_missing(self):
+        # ticket 42: structural-scan's own `unresolved` now names its two
+        # direct resolved-parents (editorconfig, php-structural-scan), not
+        # the individual PHP leaves — those live one hop down, on
+        # php-structural-scan's own `unresolved` (see
+        # PhpStructuralScanAggregationTests).
         tmp, root = self._make_repo({})
         try:
             d = detect_nodes(root)
             self.assertFalse(d["structural-scan"]["fulfilled"])
-            self.assertIn("composer-audit", d["structural-scan"]["details"]["unresolved"])
+            self.assertEqual(set(d["structural-scan"]["details"]["unresolved"]), {"editorconfig", "php-structural-scan"})
+            self.assertIn("composer-audit", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()
 
@@ -313,10 +335,149 @@ class StructuralScanGateTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class PhpStructuralScanAggregationTests(unittest.TestCase):
+    """Ticket 42: `php-structural-scan` aggregates the PHP tree's seven
+    `resolved` leaves behind one node, itself resolving into
+    `structural-scan` via a single `resolved` edge. Same `resolved`-edge
+    semantics as `structural-scan`'s own gate, one hop down — and, unlike
+    `structural-scan`, never itself a proposable candidate."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _fully_tooled_php_leaves(self):
+        # Every one of php-structural-scan's seven leaves fulfilled —
+        # deliberately omits .editorconfig, which is no longer one of its
+        # siblings (it gates structural-scan directly instead).
+        return {
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "phpunit/phpunit": "^10.0",
+                    "friendsofphp/php-cs-fixer": "^3.0",
+                },
+            }),
+            "composer.lock": "{}",
+            ".php-cs-fixer.php": "<?php return [];",
+            "phpstan.neon": "parameters:\n    level: 3\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "rector.php": "<?php // DeadCode Type",
+            ".github/workflows/ci.yml": (
+                "jobs:\n"
+                "  audit:\n"
+                "    steps:\n"
+                "      - run: composer audit\n"
+                "      - run: vendor/bin/phpunit\n"
+                "      - run: vendor/bin/phpstan analyse\n"
+            ),
+        }
+
+    def test_unresolved_when_leaves_missing(self):
+        tmp, root = self._make_repo({})
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["php-structural-scan"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_resolved_when_every_leaf_fulfilled(self):
+        tmp, root = self._make_repo(self._fully_tooled_php_leaves())
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["php-structural-scan"]["fulfilled"], d["php-structural-scan"])
+        finally:
+            tmp.cleanup()
+
+    def test_rejected_leaf_still_resolves_php_structural_scan(self):
+        # Mirrors StructuralScanGateTests' equivalent case, one hop down: a
+        # rejected leaf still counts as resolved, unlike a required parent.
+        files = self._fully_tooled_php_leaves()
+        files["rector.php"] = "<?php // DeadCode rules only"
+        tmp, root = self._make_repo(files)
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
+            d = detect_nodes(root)
+            self.assertFalse(d["rector-type-coverage"]["fulfilled"])
+            self.assertTrue(d["php-structural-scan"]["fulfilled"], d["php-structural-scan"])
+        finally:
+            tmp.cleanup()
+
+    def test_structural_scan_resolves_only_once_php_structural_scan_resolves(self):
+        # Two-hop regression: structural-scan must read php-structural-scan's
+        # already-computed status regardless of tree["order"] position.
+        files = self._fully_tooled_php_leaves()
+        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["php-structural-scan"]["fulfilled"], d["php-structural-scan"])
+            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
+        finally:
+            tmp.cleanup()
+        # Now drop one leaf: php-structural-scan (and so structural-scan)
+        # must close again.
+        files2 = dict(files)
+        del files2["rector.php"]
+        tmp2, root2 = self._make_repo(files2)
+        try:
+            d2 = detect_nodes(root2)
+            self.assertFalse(d2["php-structural-scan"]["fulfilled"])
+            self.assertFalse(d2["structural-scan"]["fulfilled"])
+        finally:
+            tmp2.cleanup()
+
+    def test_never_in_next_candidates(self):
+        files = self._fully_tooled_php_leaves()
+        tmp, root = self._make_repo(files)
+        try:
+            # php-structural-scan resolved, but editorconfig undecided —
+            # structural-scan itself stays closed either way.
+            nodes = [c["node"] for c in next_candidates(root, limit=20)]
+            self.assertNotIn("php-structural-scan", nodes)
+            self.assertNotIn("structural-scan", nodes)
+        finally:
+            tmp.cleanup()
+        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
+        tmp2, root2 = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root2, limit=20)]
+            self.assertNotIn("php-structural-scan", nodes)
+            self.assertIn("structural-scan", nodes)
+        finally:
+            tmp2.cleanup()
+
+    def test_never_in_roadmap(self):
+        files = self._fully_tooled_php_leaves()
+        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
+        tmp, root = self._make_repo(files)
+        try:
+            r = roadmap(root, steps=10)
+            self.assertNotIn("php-structural-scan", [x["node"] for x in r])
+        finally:
+            tmp.cleanup()
+
+    def test_never_in_withheld_candidates(self):
+        tmp, root = self._make_repo({})
+        try:
+            w = withheld_candidates(root)
+            self.assertNotIn("php-structural-scan", [x["node"] for x in w])
+        finally:
+            tmp.cleanup()
+
+
 class ComposerAuditGateTests(unittest.TestCase):
     """php-tooling-tree.md's composer-audit stop conditions: proposable once
     ci-runner + composer are fulfilled, and (a real `require` dependency
-    exists, or every other structural-scan leaf is already resolved)."""
+    exists, or every other leaf feeding php-structural-scan is already
+    resolved)."""
 
     # CI exists (fulfils ci-runner) but doesn't run `composer audit` yet —
     # for eligibility tests, which must stay independent of composer-audit's
@@ -371,9 +532,10 @@ class ComposerAuditGateTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_eligible_via_fallback_when_every_other_leaf_resolved(self):
-        # No real dependency at all, but every other structural-scan leaf is
-        # fulfilled — composer-audit must still eventually become proposable,
-        # or structural-scan would never open on a dependency-free target.
+        # No real dependency at all, but every other leaf feeding
+        # php-structural-scan is fulfilled — composer-audit must still
+        # eventually become proposable, or php-structural-scan (and so
+        # structural-scan) would never open on a dependency-free target.
         tmp, root = self._make_repo({
             "composer.json": json.dumps({
                 "require-dev": {
@@ -387,7 +549,10 @@ class ComposerAuditGateTests(unittest.TestCase):
             "phpstan.neon": "parameters:\n    level: 3\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type",
-            # ticket 41: editorconfig is now among "every other leaf" too.
+            # ticket 42: editorconfig is no longer one of composer-audit's
+            # siblings (it gates structural-scan directly, not
+            # php-structural-scan) — kept here anyway, harmless, so this
+            # fixture also happens to be "fully tooled" overall.
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
             # No `composer audit` here — deliberate (see docstring). Does
             # invoke phpunit/phpstan though, so phpunit/phpstan-level-3

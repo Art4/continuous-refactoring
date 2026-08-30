@@ -75,8 +75,9 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
     required_parents: dict[str, list[str]] = {n: [] for n in nodes}
     recommended_parents: dict[str, list[str]] = {n: [] for n in nodes}
     # `resolved` parents: unlike a required parent, a *rejected* resolved
-    # parent still counts as resolved — only structural-scan uses this edge
-    # type today. See tooling-tree.md's structural-scan node.
+    # parent still counts as resolved. Used by structural-scan and, one hop
+    # down, by php-structural-scan (the PHP tree's own aggregation node
+    # feeding it) — see tooling-tree.md's structural-scan node.
     resolved_parents: dict[str, list[str]] = {n: [] for n in nodes}
     for e in edges:
         if e["type"] == "required":
@@ -85,6 +86,17 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
             recommended_parents[e["to"]].append(e["from"])
         else:
             resolved_parents[e["to"]].append(e["from"])
+    # A resolved-gated node whose own resolved-ness only feeds *another*
+    # resolved-gated node's resolved_parents (an aggregation node — today:
+    # php-structural-scan, feeding structural-scan) is never itself
+    # proposed. Derived from the edge table rather than a hardcoded name, so
+    # a future second aggregation node (e.g. js-structural-scan) needs no
+    # code change here.
+    _resolved_targets = {n for n, parents in resolved_parents.items() if parents}
+    _aggregated_away = {
+        p for n in _resolved_targets for p in resolved_parents[n] if p in _resolved_targets
+    }
+    exposed_resolved_gate_nodes = _resolved_targets - _aggregated_away
     # Preserve order as appear in file
     order = []
     seen = set()
@@ -100,6 +112,7 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
         "required_parents": required_parents,
         "recommended_parents": recommended_parents,
         "resolved_parents": resolved_parents,
+        "exposed_resolved_gate_nodes": exposed_resolved_gate_nodes,
     }
 
 
@@ -414,6 +427,48 @@ def _rejected_nodes(repo: pathlib.Path) -> set[str]:
     return {p.stem for p in d.glob("*.md")}
 
 
+def _resolved_gate_status(
+    tree: dict, fulfilled_lookup, rejected: set[str]
+) -> dict[str, tuple[bool, list[str]]]:
+    """Compute ``{node: (resolved, unresolved_leaves)}`` for every node with
+    one or more `resolved` parents — generic over any such node (today:
+    ``structural-scan``, and PHP's own aggregation node ``php-structural-
+    scan`` feeding it), not hardcoded to one node name. A node is resolved
+    once every one of its resolved-parent leaves is itself fulfilled or
+    recorded as rejected — unlike a required parent, a rejected
+    resolved parent still counts as resolved.
+
+    Computed in dependency order so an aggregation node (whose own
+    resolved-parents are ordinary leaves) is resolved *before* a node that
+    reads its resolved-ness as one of its own resolved-parents (e.g.
+    structural-scan reading php-structural-scan) — independent of where
+    either node happens to sit in ``tree["order"]``.
+
+    ``fulfilled_lookup(name) -> bool`` supplies each ordinary leaf's
+    fulfilled state — either the real ``detect_nodes()`` output, or
+    ``roadmap()``'s per-iteration simulated snapshot.
+    """
+    resolved_gated = [n for n in tree["resolved_parents"] if tree["resolved_parents"][n]]
+    computed: dict[str, tuple[bool, list[str]]] = {}
+    pending = set(resolved_gated)
+    while pending:
+        progressed = False
+        for node in list(pending):
+            leaves = tree["resolved_parents"][node]
+            if any(leaf in pending for leaf in leaves):
+                continue  # a resolved-gated leaf not yet computed this pass -- defer
+            unresolved = [
+                leaf for leaf in leaves
+                if not ((computed[leaf][0] if leaf in computed else fulfilled_lookup(leaf)) or leaf in rejected)
+            ]
+            computed[node] = (not unresolved, unresolved)
+            pending.discard(node)
+            progressed = True
+        if not progressed:
+            break  # cycle among resolved-gated nodes -- a well-formed tree never has one
+    return computed
+
+
 def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     """Return {node: {fulfilled: bool, reason: str, details: dict}} for each node."""
     repo = pathlib.Path(repo)
@@ -555,18 +610,20 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
 
-    # structural-scan: fulfilled once every `resolved` parent — every
-    # PHP-tree leaf — is fulfilled OR recorded as rejected. Unlike a
+    # Resolved-gated nodes: structural-scan, and PHP's own aggregation node
+    # php-structural-scan feeding it — fulfilled once every one of a node's
+    # `resolved` parents is fulfilled OR recorded as rejected. Unlike a
     # required parent, a rejected resolved parent still counts as resolved.
+    # Generic over every such node (see _resolved_gate_status), computed in
+    # dependency order so php-structural-scan's status is already known by
+    # the time structural-scan's own check reads it.
     rejected = _rejected_nodes(repo)
-    leaves = tree["resolved_parents"].get("structural-scan", [])
-    if leaves:
-        unresolved = [leaf for leaf in leaves if not (out.get(leaf, {}).get("fulfilled") or leaf in rejected)]
-        ss_fulfilled = not unresolved
+    gate = _resolved_gate_status(tree, lambda n: out.get(n, {}).get("fulfilled", False), rejected)
+    for node, (resolved, unresolved) in gate.items():
         set_node(
-            "structural-scan",
-            ss_fulfilled,
-            "all php-tree leaves resolved (fulfilled or rejected)" if ss_fulfilled else f"waiting on: {', '.join(unresolved)}",
+            node,
+            resolved,
+            "all resolved-parent leaves resolved (fulfilled or rejected)" if resolved else f"waiting on: {', '.join(unresolved)}",
             unresolved=unresolved,
             rejected=sorted(rejected),
         )
@@ -587,16 +644,19 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
 def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: dict, rejected: set[str]) -> tuple[bool, str]:
     """composer-audit's stop condition beyond required-edge fulfilment
     (php-tooling-tree.md): proposable once a real `require` dependency
-    exists, or every *other* structural-scan leaf is already resolved —
-    independent alternatives, not ordered. `resolved_check` maps node name
-    to a bool: already fulfilled (real or simulated)."""
+    exists, or every *other* leaf feeding php-structural-scan (its true
+    siblings under the aggregation node, not structural-scan's own
+    resolved-parents, which is just {editorconfig, php-structural-scan}) is
+    already resolved — independent alternatives, not ordered.
+    `resolved_check` maps node name to a bool: already fulfilled (real or
+    simulated)."""
     if has_real_dep:
         return True, "real require dependency present"
-    leaves = tree["resolved_parents"].get("structural-scan", [])
+    leaves = tree["resolved_parents"].get("php-structural-scan", [])
     other_leaves = [leaf for leaf in leaves if leaf != "composer-audit"]
     unresolved = [leaf for leaf in other_leaves if not (resolved_check.get(leaf, False) or leaf in rejected)]
     if not unresolved:
-        return True, "no real dependency yet, but every other structural-scan leaf is resolved"
+        return True, "no real dependency yet, but every other leaf feeding php-structural-scan is resolved"
     return False, f"no real dependency yet, waiting on: {', '.join(unresolved)}"
 
 
@@ -631,22 +691,26 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
     for node in tree["order"]:
         if node == "git":
             continue
-        if node == "structural-scan":
-            # Checked on its own terms, *before* the generic fulfilled-skip
-            # below: detect_nodes() marks this node "fulfilled" the instant
-            # its resolved-parent leaves resolve, but that's the gate
+        if tree["resolved_parents"].get(node):
+            # Resolved-gated node (structural-scan, and any aggregation node
+            # feeding it, e.g. php-structural-scan). Checked on its own
+            # terms, *before* the generic fulfilled-skip below: detect_nodes()
+            # marks such a node "fulfilled" the instant its resolved-parent
+            # leaves resolve, but for an *exposed* one that's the gate
             # *opening*, not the node being delivered and done (unlike every
             # other tooling node, where fulfilled really does mean "don't
             # propose again"). Gating on the generic skip here made this
-            # branch permanently unreachable dead code — structural-scan
-            # must stay proposable every pass once open: it's an ongoing
-            # candidate for refactor-design to keep drawing on, not a
-            # one-time node.
-            leaves = tree["resolved_parents"].get(node, [])
-            unresolved = [leaf for leaf in leaves if not (detected.get(leaf, {}).get("fulfilled", False) or leaf in rejected)]
-            if unresolved:
+            # branch permanently unreachable dead code — an exposed
+            # resolved-gated node must stay proposable every pass once open:
+            # it's an ongoing candidate for refactor-design to keep drawing
+            # on, not a one-time node. An aggregation node that isn't itself
+            # exposed (its resolved-ness only feeds another resolved-gated
+            # node) is never proposed at all, whatever its resolved state.
+            if node not in tree["exposed_resolved_gate_nodes"]:
                 continue
-            result.append({"node": node, "reason": "all resolved-parent leaves fulfilled or rejected"})
+            if not detected.get(node, {}).get("fulfilled", False):
+                continue
+            result.append({"node": node, "reason": detected[node]["reason"]})
         else:
             if detected.get(node, {}).get("fulfilled", False):
                 continue
@@ -688,7 +752,11 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
 
     result: list[dict] = []
     for node in tree["order"]:
-        if node in ("git", "structural-scan"):
+        if node == "git" or tree["resolved_parents"].get(node):
+            # Resolved-gated nodes (structural-scan, and any aggregation
+            # node feeding it, e.g. php-structural-scan) are never withheld
+            # by recommended-edge gating — they're gated by `resolved`
+            # edges entirely, handled in next_candidates() instead.
             continue
         if detected.get(node, {}).get("fulfilled", False) or node in rejected:
             continue
@@ -759,6 +827,15 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
     # Simulate
     for _ in range(steps):
         sim_fulfilled = {**fulfilled, **{r["node"]: True for r in result}}
+        # Fresh per-iteration resolved-gate status for every resolved-gated
+        # node (structural-scan, and PHP's own aggregation node
+        # php-structural-scan feeding it), computed from this iteration's
+        # sim_fulfilled snapshot — independent of tree["order"] position, so
+        # structural-scan's own check below reads php-structural-scan's
+        # already-resolved status correctly even though the generic root's
+        # structural-scan node sorts earlier in tree["order"] than the PHP
+        # tree's aggregation node.
+        gate = _resolved_gate_status(tree, lambda n: sim_fulfilled.get(n, False), rejected)
         # Find best unblocked candidate among tooling nodes
         best = None
         best_reason = ""
@@ -771,16 +848,25 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             if node in php_floor_blocked:
                 continue  # ticket 31 — target's PHP floor doesn't meet this leaf's known minimum yet
-            if node == "structural-scan":
-                # `resolved` gate: every leaf must be fulfilled OR rejected —
-                # not the standard required-parent check, which would
-                # instead close this node forever on any rejection.
-                leaves = tree["resolved_parents"].get(node, [])
-                unresolved = [leaf for leaf in leaves if not (sim_fulfilled.get(leaf, False) or leaf in rejected)]
-                if unresolved:
+            if tree["resolved_parents"].get(node):
+                # `resolved` gate: every resolved-parent leaf must be
+                # fulfilled OR rejected — not the standard required-parent
+                # check, which would instead close this node forever on any
+                # rejection. Applies to any resolved-gated node
+                # (structural-scan, and any aggregation node feeding it,
+                # e.g. php-structural-scan) — `gate` (computed fresh this
+                # iteration, above) already resolves an aggregation node's
+                # own status first, so structural-scan's check reads it
+                # correctly regardless of tree["order"] position. An
+                # aggregation node that isn't itself exposed is never a
+                # candidate, whatever its resolved state.
+                if node not in tree["exposed_resolved_gate_nodes"]:
+                    continue
+                resolved, _unresolved = gate[node]
+                if not resolved:
                     continue
                 best = node
-                best_reason = "all php-tree leaves resolved (fulfilled or rejected)"
+                best_reason = "all resolved-parent leaves resolved (fulfilled or rejected)"
                 break
             # test-runner-if-missing is fulfilled if phpunit/pest already fulfilled (simulated) —
             # phpunit fulfilled implies a runner is adopted, so proposing this one too is redundant.
