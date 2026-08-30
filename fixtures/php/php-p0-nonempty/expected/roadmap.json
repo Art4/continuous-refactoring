@@ -165,6 +165,14 @@
       "reason": "no phpstan-deprecation-rules dep",
       "details": {}
     },
+    "psalm-taint-analysis": {
+      "fulfilled": false,
+      "reason": "no psalm dep/config",
+      "details": {
+        "has_psalm_dep": false,
+        "has_psalm_cfg": false
+      }
+    },
     "rector-dead-code": {
       "fulfilled": false,
       "reason": "no rector dead-code",
@@ -209,7 +217,7 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return",
+      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return, psalm-taint-analysis",
       "details": {
         "unresolved": [
           "composer-audit",
@@ -220,7 +228,8 @@
           "rector-php-set",
           "rector-code-quality",
           "rector-phpunit-set",
-          "rector-early-return"
+          "rector-early-return",
+          "psalm-taint-analysis"
         ],
         "rejected": []
       }
@@ -245,6 +254,7 @@
       "required_parents": [
         "git"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -255,6 +265,7 @@
       "required_parents": [
         "loop-config"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -262,8 +273,10 @@
       "n": 3,
       "node": "rector-php-set",
       "type": "tooling",
-      "required_parents": [
-        "phpstan-level-0-baseline"
+      "required_parents": [],
+      "required_any_parents": [
+        "phpstan-level-0-baseline",
+        "psalm"
       ],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
@@ -273,9 +286,9 @@
       "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
-        "phpstan-level-0-baseline",
         "rector-php-set"
       ],
+      "required_any_parents": [],
       "recommended_parents": [
         "php-cs-fixer"
       ],
@@ -283,25 +296,25 @@
     },
     {
       "n": 5,
-      "node": "rector-type-coverage",
-      "type": "tooling",
-      "required_parents": [
-        "phpstan-level-0-baseline",
-        "rector-php-set"
-      ],
-      "recommended_parents": [
-        "php-cs-fixer",
-        "phpstan-level-3"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
-    },
-    {
-      "n": 6,
       "node": "rector-code-quality",
       "type": "tooling",
       "required_parents": [
         "rector-php-set"
       ],
+      "required_any_parents": [],
+      "recommended_parents": [
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 6,
+      "node": "rector-early-return",
+      "type": "tooling",
+      "required_parents": [
+        "rector-php-set"
+      ],
+      "required_any_parents": [],
       "recommended_parents": [
         "php-cs-fixer"
       ],
@@ -312,24 +325,28 @@
       "node": "rector-phpunit-set",
       "type": "tooling",
       "required_parents": [
-        "rector-php-set"
+        "phpunit"
       ],
+      "required_any_parents": [],
       "recommended_parents": [
+        "rector-code-quality",
         "php-cs-fixer"
       ],
       "reason": "required parents fulfilled"
     },
     {
       "n": 8,
-      "node": "rector-early-return",
+      "node": "rector-type-coverage",
       "type": "tooling",
-      "required_parents": [
-        "rector-php-set"
-      ],
+      "required_parents": [],
+      "required_any_parents": [],
       "recommended_parents": [
-        "php-cs-fixer"
+        "rector-dead-code",
+        "rector-early-return",
+        "php-cs-fixer",
+        "phpstan-level-3"
       ],
-      "reason": "required parents fulfilled"
+      "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
     },
     {
       "n": 9,

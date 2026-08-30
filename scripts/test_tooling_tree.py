@@ -75,7 +75,15 @@ class LoadTreeTests(unittest.TestCase):
         # ticket 43: phpstan-level-10 replaced phpstan-level-3 as the level
         # chain's leaf, and 5 new leaves joined (phpstan-deprecation-rules,
         # rector-php-set, rector-code-quality, rector-phpunit-set,
-        # rector-early-return) — twelve total, up from seven.
+        # rector-early-return) — twelve total, up from seven. Ticket 44's
+        # follow-up adds `psalm-taint-analysis` as a thirteenth leaf — a
+        # deterministic security-scan tool exactly like `composer-audit`
+        # (also one of these thirteen), so it gates the same way. `psalm`
+        # itself is deliberately NOT one of these — ticket 37 originally gave
+        # it its own leaf, found redundant on review and dropped: the actual
+        # bug (a Psalm-only target never resolving `phpstan-level-10`) is
+        # already fixed by that node's own mutual-exclusion rejection
+        # housekeeping, without needing `psalm` to be a leaf too.
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["php-structural-scan"]),
@@ -92,7 +100,62 @@ class LoadTreeTests(unittest.TestCase):
                 "rector-code-quality",
                 "rector-phpunit-set",
                 "rector-early-return",
+                "psalm-taint-analysis",
             },
+        )
+        self.assertNotIn("psalm", tree["resolved_parents"]["php-structural-scan"])
+
+    def test_required_any_parents_of_psalm_taint_analysis(self):
+        # ticket 37: a new OR-required-parent edge type — psalm-taint-analysis
+        # is unblocked once *either* phpstan-level-4 or psalm is fulfilled,
+        # not both.
+        tree = load_tree()
+        self.assertEqual(
+            set(tree["required_any_parents"]["psalm-taint-analysis"]),
+            {"phpstan-level-4", "psalm"},
+        )
+
+    def test_required_any_parents_of_rector_php_set(self):
+        # ticket 37/44 follow-up: rector-php-set reads the static-analyzer
+        # gate directly via required-any(phpstan-level-0-baseline, psalm)
+        # instead of relying on it being implicit inside
+        # phpstan-level-0-baseline's own Psalm-equivalence fulfilment check.
+        # rector-dead-code/rector-code-quality/rector-early-return no longer
+        # carry their own direct required edge on phpstan-level-0-baseline —
+        # they read this transitively via their existing required parent on
+        # rector-php-set. rector-type-coverage/rector-phpunit-set are no
+        # longer tied to this gate at all (later restructuring moved them
+        # onto sibling Rector nodes instead, via recommended edges — see
+        # test_rector_type_coverage_and_phpunit_set_gate_via_siblings_now).
+        tree = load_tree()
+        self.assertEqual(
+            set(tree["required_any_parents"]["rector-php-set"]),
+            {"phpstan-level-0-baseline", "psalm"},
+        )
+        self.assertEqual(tree["required_parents"]["rector-dead-code"], ["rector-php-set"])
+        self.assertEqual(tree["required_parents"]["rector-code-quality"], ["rector-php-set"])
+        self.assertEqual(tree["required_parents"]["rector-early-return"], ["rector-php-set"])
+        self.assertEqual(tree["required_parents"]["rector-type-coverage"], [])
+        self.assertEqual(tree["required_parents"]["rector-phpunit-set"], ["phpunit"])
+        # Exactly these two nodes use required-any today.
+        self.assertEqual(
+            {n for n, parents in tree["required_any_parents"].items() if parents},
+            {"psalm-taint-analysis", "rector-php-set"},
+        )
+
+    def test_rector_type_coverage_and_phpunit_set_gate_via_siblings_now(self):
+        # Follow-up restructuring: rector-type-coverage/rector-phpunit-set
+        # lost their direct required: rector-php-set edge, gated instead via
+        # recommended edges from sibling Rector nodes (dead-code/
+        # early-return for type-coverage; code-quality for phpunit-set).
+        tree = load_tree()
+        self.assertEqual(
+            set(tree["recommended_parents"]["rector-type-coverage"]),
+            {"rector-dead-code", "rector-early-return", "php-cs-fixer", "phpstan-level-3"},
+        )
+        self.assertEqual(
+            set(tree["recommended_parents"]["rector-phpunit-set"]),
+            {"rector-code-quality", "php-cs-fixer"},
         )
 
     def test_php_structural_scan_aggregated_away_not_exposed(self):
@@ -193,6 +256,48 @@ class DetectNodesTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_p0_psalm_equivalence_still_unblocks_rector_family(self):
+        # Ticket 37 regression guard: mutual exclusion must NOT touch
+        # phpstan-level-0-baseline's own fulfilled state. If the
+        # Psalm-equivalence branch were ever replaced by rejecting
+        # phpstan-level-0-baseline itself (ticket 37's literal wording,
+        # deliberately not implemented that way — see php-tooling-tree.md's
+        # `phpstan` equivalents section), the Rector family would become
+        # permanently unreachable for every Psalm-only target on that path
+        # alone (a required-parent rejection closes every node beneath it).
+        # Ticket 37/44's follow-up made this doubly robust: rector-php-set's
+        # gate is now required-any(phpstan-level-0-baseline, psalm) — psalm
+        # unblocks it directly, independent of phpstan-level-0-baseline's own
+        # fulfilled state entirely. rector-dead-code/rector-type-coverage are
+        # not checked directly here — they only require rector-php-set
+        # fulfilled (an ordinary, unrelated adoption fact), so this one check
+        # on rector-php-set's own unblocked-ness is the meaningful regression
+        # guard for the whole family.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"])
+            self.assertTrue(d["psalm"]["fulfilled"])
+            ok, why = tooling_tree._is_unblocked("rector-php-set", load_tree(), d)
+            self.assertTrue(ok, why)
+        finally:
+            tmp.cleanup()
+
+    def test_rector_php_set_reachable_via_psalm_alone_even_if_p0_were_false(self):
+        # Direct proof of the "doubly robust" claim above: rector-php-set's
+        # required-any(phpstan-level-0-baseline, psalm) unblocks it via psalm
+        # alone, with no dependency on phpstan-level-0-baseline's own
+        # fulfilled state — unlike before ticket 37/44's follow-up, where the
+        # only path was through phpstan-level-0-baseline's fulfilled flag
+        # (itself driven by the equivalence).
+        fulfilled = {"phpstan-level-0-baseline": {"fulfilled": False}, "psalm": {"fulfilled": True}}
+        ok, why = tooling_tree._is_unblocked("rector-php-set", load_tree(), fulfilled)
+        self.assertTrue(ok, why)
+
     def test_p0_phpstan_level0_empty(self):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
@@ -276,6 +381,14 @@ class StructuralScanGateTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
+            # ticket 44: `psalm-taint-analysis` is a 13th php-structural-scan
+            # leaf. This fixture never adopted vimeo/psalm at all (PHPStan
+            # path, no taint scanning either), so a "fully tooled" scenario
+            # needs its own rejection written too — otherwise it sits neither
+            # fulfilled nor rejected and this helper stops being "fully
+            # resolved". `psalm` itself is not a leaf (ticket 37, dropped as
+            # redundant) so it needs no rejection here.
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
 
     def test_unresolved_when_only_editorconfig_missing(self):
@@ -298,7 +411,7 @@ class StructuralScanGateTests(unittest.TestCase):
         del files[".editorconfig"]
         tmp, root = self._make_repo(files)
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "editorconfig.md").write_text("rejected\n")
             d = detect_nodes(root)
             self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
@@ -343,7 +456,7 @@ class StructuralScanGateTests(unittest.TestCase):
         files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList EarlyReturn"
         tmp, root = self._make_repo(files)
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
             d = detect_nodes(root)
             self.assertTrue(d["composer-audit"]["fulfilled"], d["composer-audit"])  # genuinely fulfilled, not rejected
@@ -397,6 +510,13 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
+            # ticket 44: `psalm-taint-analysis` is the thirteenth leaf — this
+            # fixture never adopted vimeo/psalm at all (PHPStan path, no
+            # taint scanning either), so it needs its own rejection written
+            # too (same reasoning as StructuralScanGateTests'
+            # `_fully_tooled_files` above). `psalm` itself is not a leaf
+            # (ticket 37, dropped as redundant) so it needs no rejection.
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
 
     def test_unresolved_when_leaves_missing(self):
@@ -423,7 +543,7 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList EarlyReturn"
         tmp, root = self._make_repo(files)
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
             d = detect_nodes(root)
             self.assertFalse(d["rector-type-coverage"]["fulfilled"])
@@ -490,6 +610,195 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         try:
             w = withheld_candidates(root)
             self.assertNotIn("php-structural-scan", [x["node"] for x in w])
+        finally:
+            tmp.cleanup()
+
+
+class PsalmMutualExclusionTests(unittest.TestCase):
+    """Ticket 37: phpstan-level-10 is the php-structural-scan leaf a target's
+    static-analyzer choice must resolve — the actual bug this ticket fixes (a
+    Psalm-only target previously left phpstan-level-10 neither fulfilled nor
+    rejected, permanently blocking php-structural-scan). `psalm` itself is
+    deliberately not a leaf (found redundant on review, see
+    test_resolved_parents_of_php_structural_scan) — only phpstan-level-10's
+    own resolution matters here."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _psalm_only_files(self):
+        return {
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        }
+
+    def test_psalm_leaf_fulfilled_but_phpstan_level_10_leaf_unresolved_without_housekeeping(self):
+        # Reproduces the bug this ticket fixes: without the mutual-exclusion
+        # out-of-scope write, phpstan-level-10 sits neither fulfilled (Psalm
+        # path) nor rejected (nobody wrote the file) — php-structural-scan
+        # stays blocked on it forever.
+        tmp, root = self._make_repo(self._psalm_only_files())
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psalm"]["fulfilled"])
+            self.assertFalse(d["phpstan-level-10"]["fulfilled"])
+            self.assertIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_level_10_rejection_closes_the_gap(self):
+        # The fix: the recognition-pass housekeeping described on the `psalm`
+        # node's own entry (php-tooling-tree.md) writes
+        # out-of-scope/phpstan-level-10.md — phpstan-level-10 then resolves
+        # (rejected), and it's no longer in php-structural-scan's unresolved
+        # list, exactly mirroring the real php-psalm fixture (ticket 37).
+        files = self._psalm_only_files()
+        files["docs/refactoring/out-of-scope/phpstan-level-10.md"] = "rejected: mutual exclusion (ticket 37) — psalm path chosen\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertNotIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_path_needs_no_psalm_rejection(self):
+        # On the PHPStan path, php-structural-scan resolves without any
+        # psalm-related out-of-scope entry at all — psalm isn't a leaf, so
+        # there's nothing to reject (unlike the earlier design this ticket
+        # tried and dropped, which needed docs/refactoring/out-of-scope/
+        # psalm.md just to satisfy a leaf that didn't need to exist).
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 10\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psalm"]["fulfilled"])
+            self.assertTrue(d["phpstan-level-10"]["fulfilled"])
+            self.assertNotIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
+        finally:
+            tmp.cleanup()
+
+
+class PsalmTaintAnalysisTests(unittest.TestCase):
+    """Ticket 37: psalm-taint-analysis is unlocked via a required-any edge
+    (phpstan-level-4 OR psalm), independent of the mutual exclusion above."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_fulfilled_via_psalm_dep_and_config(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psalm-taint-analysis"]["fulfilled"], d["psalm-taint-analysis"])
+        finally:
+            tmp.cleanup()
+
+    def test_is_a_php_structural_scan_resolved_leaf(self):
+        # Follow-up correction: psalm-taint-analysis is a deterministic
+        # security-scan tool exactly like composer-audit (also a
+        # php-structural-scan leaf) — fulfilling it resolves its own leaf,
+        # same as any other leaf in the set.
+        tree = load_tree()
+        self.assertIn("psalm-taint-analysis", tree["resolved_parents"]["php-structural-scan"])
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psalm-taint-analysis"]["fulfilled"])
+            self.assertNotIn("psalm-taint-analysis", d["php-structural-scan"]["details"]["unresolved"])
+        finally:
+            tmp.cleanup()
+
+    def test_unfulfilled_without_psalm(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psalm-taint-analysis"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_ci_present_but_not_gated_on_taint_flag_stays_unfulfilled(self):
+        # Same ticket-34 CI-self-wiring shape as phpstan-level-0-baseline: once
+        # ci-runner exists, a plain `vendor/bin/psalm` invocation (no
+        # --taint-analysis) is not enough.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+            ".github/workflows/ci.yml": "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/psalm\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psalm-taint-analysis"]["fulfilled"], d["psalm-taint-analysis"])
+        finally:
+            tmp.cleanup()
+
+    def test_ci_gated_on_taint_flag_fulfils(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+            ".github/workflows/ci.yml": "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/psalm --taint-analysis\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psalm-taint-analysis"]["fulfilled"], d["psalm-taint-analysis"])
+        finally:
+            tmp.cleanup()
+
+    def test_not_proposable_when_neither_required_any_parent_fulfilled(self):
+        # phpstan at level 0 only (not level 4), no psalm at all.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=20)]
+            self.assertNotIn("psalm-taint-analysis", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_proposable_once_phpstan_level_4_fulfilled(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 4\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root, limit=20)]
+            self.assertIn("psalm-taint-analysis", nodes)
         finally:
             tmp.cleanup()
 
@@ -588,6 +897,11 @@ class ComposerAuditGateTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
+            # ticket 44: `psalm-taint-analysis` is one of the "every other
+            # leaf" — written rejected here, same PHPStan-path reasoning as
+            # the other "fully tooled" fixtures above. `psalm` itself is not
+            # a leaf (ticket 37, dropped as redundant) so it needs none.
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         })
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
@@ -849,16 +1163,19 @@ class RecommendedGateTests(unittest.TestCase):
         return tmp, root
 
     def _p0_fulfilled_files(self):
-        # phpstan-level-0-baseline fulfilled (rector-dead-code's/
-        # rector-type-coverage's required parent); php-cs-fixer and
-        # phpstan-level-3 both stay undecided (neither fulfilled nor
-        # rejected). `.editorconfig` present (ticket 01: php-cs-fixer's own
-        # recommended parent) so php-cs-fixer itself stays proposable here —
-        # its undecided status under test is about rector-dead-code's gate,
-        # not php-cs-fixer's own. `rector.php` fulfils rector-php-set only
-        # (ticket 43: rector-dead-code's/rector-type-coverage's other new
-        # required parent) — no DeadCode/Type markers, so those two stay
-        # unfulfilled, exactly what each test below is probing.
+        # phpstan-level-0-baseline fulfilled (unblocks rector-php-set via its
+        # required-any gate); php-cs-fixer and phpstan-level-3 both stay
+        # undecided (neither fulfilled nor rejected). `.editorconfig` present
+        # (ticket 01: php-cs-fixer's own recommended parent) so php-cs-fixer
+        # itself stays proposable here — its undecided status under test is
+        # about rector-dead-code's gate, not php-cs-fixer's own. `rector.php`
+        # fulfils rector-php-set only (ticket 43) — no DeadCode/Type/
+        # EarlyReturn markers, so rector-dead-code/rector-type-coverage/
+        # rector-early-return all stay unfulfilled, exactly what each test
+        # below is probing. rector-type-coverage no longer has rector-php-set
+        # as a required parent at all (follow-up restructuring) — it's gated
+        # by rector-dead-code/rector-early-return as recommended parents
+        # instead, alongside php-cs-fixer/phpstan-level-3.
         return {
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
@@ -880,7 +1197,7 @@ class RecommendedGateTests(unittest.TestCase):
     def test_child_released_once_recommended_parent_rejected(self):
         tmp, root = self._make_repo(self._p0_fulfilled_files())
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "php-cs-fixer.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-dead-code", nodes)
@@ -923,6 +1240,9 @@ class RecommendedGateTests(unittest.TestCase):
         # via the required chain -> counts as phpstan-level-3 "decided" for
         # rector-type-coverage's recommended edge (php-cs-fixer is decided
         # here too, via fulfilment, so it isn't the thing under test).
+        # rector-type-coverage also gained rector-dead-code/rector-early-return
+        # as recommended parents (follow-up restructuring) — decided here via
+        # rejection, since this fixture's rector.php doesn't fulfil either.
         files = self._p0_fulfilled_files()
         files["composer.json"] = json.dumps({"require-dev": {
             "phpstan/phpstan": "^1.0",
@@ -931,8 +1251,10 @@ class RecommendedGateTests(unittest.TestCase):
         files[".php-cs-fixer.php"] = "<?php return [];"
         tmp, root = self._make_repo(files)
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-dead-code.md").write_text("rejected\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-early-return.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-type-coverage", nodes)
         finally:
@@ -943,7 +1265,10 @@ class RecommendedGateTests(unittest.TestCase):
         try:
             withheld = {w["node"]: set(w["waiting_on"]) for w in withheld_candidates(root)}
             self.assertEqual(withheld["rector-dead-code"], {"php-cs-fixer"})
-            self.assertEqual(withheld["rector-type-coverage"], {"php-cs-fixer", "phpstan-level-3"})
+            self.assertEqual(
+                withheld["rector-type-coverage"],
+                {"rector-dead-code", "rector-early-return", "php-cs-fixer", "phpstan-level-3"},
+            )
         finally:
             tmp.cleanup()
 
@@ -1049,7 +1374,7 @@ class EditorconfigNodeTests(unittest.TestCase):
     def test_php_cs_fixer_released_once_editorconfig_rejected(self):
         tmp, root = self._make_repo(self._loop_config_and_composer_files())
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "editorconfig.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("php-cs-fixer", nodes)
