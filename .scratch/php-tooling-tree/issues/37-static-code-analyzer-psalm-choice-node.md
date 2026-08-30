@@ -105,3 +105,16 @@ Resolved during this session's dedicated grilling (2026-08-30):
 > ticket's own "What to build" text (the equivalence-removal wording — see the resolved checklist above)
 > before implementing, rather than after. Implemented via direct edits in the same session
 > (`php-tooling-tree.md`, `tooling_tree.py`, fixtures, tests) — not via `/implement`.
+
+> **2026-08-30 (follow-up correction, before merge):** Discussing PR #28's result surfaced a second
+> refinement, this time to how the Rector family reads the mutual exclusion's static-analyzer gate.
+> Previously `rector-dead-code`/`rector-type-coverage`/`rector-php-set` each carried a direct
+> `required: phpstan-level-0-baseline` edge, relying on that node's own Psalm-equivalence fulfilment check
+> to implicitly cover the Psalm path too. Reworked so `rector-php-set` reads
+> `required-any(phpstan-level-0-baseline, psalm)` directly instead — the OR relationship explicit at the
+> edge level, not hidden inside another node's fulfilment check — and `rector-dead-code`/
+> `rector-type-coverage`'s own direct edges to `phpstan-level-0-baseline` were dropped outright (not
+> replaced) as redundant, since both already require `rector-php-set`, which now carries the gate
+> transitively. See [ticket 44](../../tooling-tree/issues/44-psalm-taint-analysis-node.md)'s own comment for
+> the paired correction (`psalm-taint-analysis` becoming a `php-structural-scan` resolved-leaf) found in the
+> same conversation. Both recorded together in ADR-0019's new Part C.

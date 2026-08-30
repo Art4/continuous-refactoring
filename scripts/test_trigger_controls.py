@@ -75,7 +75,8 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
         # under this target's level-0 ceiling). Ticket 37: `psalm` is also
         # rejected here — the mutual-exclusion counterpart of this target's
         # chosen PHPStan path, since `psalm` is now a php-structural-scan leaf
-        # too.
+        # too. Ticket 44 follow-up: `psalm-taint-analysis` is rejected too —
+        # this target never adopted taint analysis either.
         self.assertEqual(
             sorted(detected["structural-scan"]["details"]["rejected"]),
             [
@@ -91,6 +92,7 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
                 "phpstan-level-8",
                 "phpstan-level-9",
                 "psalm",
+                "psalm-taint-analysis",
             ],
         )
 

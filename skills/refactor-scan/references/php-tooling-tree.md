@@ -60,9 +60,8 @@ graph TD
     p8 -->|required| p9
     p9 -->|required| p10
     p5 -->|required| dep
-    p0 -->|required| rdc
-    p0 -->|required| rtc
-    p0 -->|required| rps
+    p0 -.->|required-any| rps
+    psalm -.->|required-any| rps
     rps -->|required| rdc
     rps -->|required| rtc
     rps -->|required| rcq
@@ -89,6 +88,7 @@ graph TD
     rpu -.->|resolved| phpss
     rer -.->|resolved| phpss
     psalm -.->|resolved| phpss
+    pta -.->|resolved| phpss
     phpss -.->|resolved| ss
 ```
 
@@ -118,9 +118,8 @@ graph TD
 | `phpstan-level-8` | `phpstan-level-9` | required |
 | `phpstan-level-9` | `phpstan-level-10` | required |
 | `phpstan-level-5` | `phpstan-deprecation-rules` | required |
-| `phpstan-level-0-baseline` | `rector-dead-code` | required |
-| `phpstan-level-0-baseline` | `rector-type-coverage` | required |
-| `phpstan-level-0-baseline` | `rector-php-set` | required |
+| `phpstan-level-0-baseline` | `rector-php-set` | required-any |
+| `psalm` | `rector-php-set` | required-any |
 | `rector-php-set` | `rector-dead-code` | required |
 | `rector-php-set` | `rector-type-coverage` | required |
 | `rector-php-set` | `rector-code-quality` | required |
@@ -147,13 +146,14 @@ graph TD
 | `rector-phpunit-set` | `php-structural-scan` | resolved |
 | `rector-early-return` | `php-structural-scan` | resolved |
 | `psalm` | `php-structural-scan` | resolved |
+| `psalm-taint-analysis` | `php-structural-scan` | resolved |
 | `php-structural-scan` | `structural-scan` | resolved |
 
 The table is the machine-readable source; the diagram is its rendering. Extending the tree means adding a row here and the matching line in the diagram.
 
-The thirteen `resolved` rows above feed `php-structural-scan`, this tree's own aggregation node — not `structural-scan` directly. `php-structural-scan` is resolved once every one of those thirteen is itself resolved (fulfilled, or rejected under `docs/refactoring/out-of-scope/`), the same `resolved` semantics as `structural-scan`'s own gate (see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means and why it exists), just one hop down. `phpstan-level-3` (ticket 43) is no longer one of these thirteen — `phpstan-level-10` took over as the level chain's leaf once the chain grew past level 3. `psalm` (ticket 37) was added as the thirteenth leaf so a Psalm-only target — which never fulfils `phpstan-level-10` and, absent this row, was never auto-rejected there either — has its own leaf to resolve instead of leaving `php-structural-scan` permanently blocked; see `psalm`'s and `phpstan-level-0-baseline`'s node entries below for the mutual-exclusion housekeeping that keeps exactly one of `psalm`/`phpstan-level-10` fulfilled and the other rejected. The final row above, `php-structural-scan → structural-scan`, is this tree's sole direct contribution to `structural-scan`'s own gate — `structural-scan` has one further direct `resolved` parent, `editorconfig`, declared in `tooling-tree.md`'s own edge table instead (both its endpoints are generic-root nodes); see that document's `structural-scan` node for the two-parent picture.
+The fourteen `resolved` rows above feed `php-structural-scan`, this tree's own aggregation node — not `structural-scan` directly. `php-structural-scan` is resolved once every one of those fourteen is itself resolved (fulfilled, or rejected under `docs/refactoring/out-of-scope/`), the same `resolved` semantics as `structural-scan`'s own gate (see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means and why it exists), just one hop down. `phpstan-level-3` (ticket 43) is no longer one of these fourteen — `phpstan-level-10` took over as the level chain's leaf once the chain grew past level 3. `psalm` (ticket 37) was added as a thirteenth leaf so a Psalm-only target — which never fulfils `phpstan-level-10` and, absent this row, was never auto-rejected there either — has its own leaf to resolve instead of leaving `php-structural-scan` permanently blocked; see `psalm`'s and `phpstan-level-0-baseline`'s node entries below for the mutual-exclusion housekeeping that keeps exactly one of `psalm`/`phpstan-level-10` fulfilled and the other rejected. `psalm-taint-analysis` (ticket 44) is the fourteenth leaf — a deterministic security-scan tool exactly like `composer-audit` (also one of these fourteen), so it gates `structural-scan` the same way every other deterministic-tooling leaf here does; not "structural vs. security", but "does this tool produce findings that could collide with agent-driven structural work" (`tooling-tree.md`'s `structural-scan` node states the actual criterion). The final row above, `php-structural-scan → structural-scan`, is this tree's sole direct contribution to `structural-scan`'s own gate — `structural-scan` has one further direct `resolved` parent, `editorconfig`, declared in `tooling-tree.md`'s own edge table instead (both its endpoints are generic-root nodes); see that document's `structural-scan` node for the two-parent picture.
 
-`psalm-taint-analysis`'s two `required-any` rows above are this tree's only use of that edge type (`CONTEXT.md`): unlike a `required` edge (every parent must be fulfilled) this node is proposed once **at least one** of `phpstan-level-4`/`psalm` is fulfilled — it doesn't matter which general-analysis path a target took, taint analysis is available once that path is mature enough. See `psalm-taint-analysis`'s own node entry below.
+Two edge types beyond `required`/`recommended`/`resolved` appear above, both new in ticket 37/44's session: `psalm-taint-analysis`'s two `required-any` rows from `phpstan-level-4`/`psalm`, and `rector-php-set`'s two `required-any` rows from `phpstan-level-0-baseline`/`psalm`. Unlike a `required` edge (every parent must be fulfilled), a `required-any` group only needs **at least one** parent fulfilled. `rector-php-set` reading this directly (rather than relying on it being implicit inside `phpstan-level-0-baseline`'s own Psalm-equivalence fulfilment check — see the *Equivalents* section below) makes it the Rector family's sole direct gate on which static-analysis path was chosen; `rector-dead-code`/`rector-type-coverage` no longer carry their own direct edge to `phpstan-level-0-baseline` (removed, not replaced) — both already have `rector-php-set` as a required parent, which now carries the same gate transitively. See `rector-php-set`'s and `psalm-taint-analysis`'s own node entries below.
 
 ## Nodes
 
@@ -239,7 +239,7 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   check without a real dependency), **or** (b) every other leaf feeding `php-structural-scan` (`phpunit`,
   `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-10`, `phpstan-deprecation-rules`,
   `rector-dead-code`, `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`,
-  `rector-early-return`, `psalm`) is already resolved — so a dependency-free target still eventually resolves this leaf instead of
+  `rector-early-return`, `psalm`, `psalm-taint-analysis`) is already resolved — so a dependency-free target still eventually resolves this leaf instead of
   leaving `structural-scan` permanently blocked. (a) and (b) are independent alternatives, not ordered.
 
 ### `static-code-analyzer`
@@ -321,7 +321,7 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
     `paths` is resolved from `composer.json` `autoload` / `autoload-dev` (`psr-4` + `psr-0` directories; `files` ignored). If no autoload directories are declared, the fallback is `src`. Additional source roots (e.g., `tests/` when not already covered) may be appended when present. `excludePaths` always contains `vendor`. `includes` references the baseline at the fixed path `phpstan-baseline.neon` (repo root); the line is present in `phpstan.neon` from the introduce MR onward.
   - `phpstan-baseline.neon` — committed at repo root. Auto-generated, never hand-edited. Generated by `vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon` (overwrites if present). Contains `parameters.ignoreErrors` entries for all violations at the current level; when no violations remain the file is still committed but contains an empty ignore list (see *Empty baseline*).
   - Dependency versioning follows the target's pinning policy; if none is declared, use a `^` caret range with a committed `composer.lock`.
-- **MR scope:** dependency addition (`composer require --dev phpstan/phpstan`) + `phpstan.neon` with `level: 0` + initial baseline generation (`--generate-baseline`) committed together, leaving `vendor/bin/phpstan analyse` green (exit 0). Shrinking the baseline belongs to the level nodes' scope, not this introduce MR. No level above 0 and no additional rulesets are introduced here. If `ci-runner` is already fulfilled when this MR lands, it also wires `vendor/bin/phpstan analyse` into CI as a gate (ticket 34) — mirrors `phpunit`'s own MR-scope line. **Mutual exclusion (ticket 37):** when this MR lands via the PHPStan path (not the Psalm-equivalence branch) and `psalm` is not already fulfilled, it also commits `docs/refactoring/out-of-scope/psalm.md` — the same worked-example template as `psalm`'s own entry above, reason inverted ("this target adopted PHPStan; the `psalm` path does not apply"). This resolves `psalm` (the thirteenth `php-structural-scan` leaf) as rejected instead of leaving it permanently unresolved. This write targets `psalm` only — it never rejects `phpstan-level-0-baseline` itself (that would be this node rejecting itself) nor any `phpstan-level-N` node.
+- **MR scope:** dependency addition (`composer require --dev phpstan/phpstan`) + `phpstan.neon` with `level: 0` + initial baseline generation (`--generate-baseline`) committed together, leaving `vendor/bin/phpstan analyse` green (exit 0). Shrinking the baseline belongs to the level nodes' scope, not this introduce MR. No level above 0 and no additional rulesets are introduced here. If `ci-runner` is already fulfilled when this MR lands, it also wires `vendor/bin/phpstan analyse` into CI as a gate (ticket 34) — mirrors `phpunit`'s own MR-scope line. **Mutual exclusion (ticket 37):** when this MR lands via the PHPStan path (not the Psalm-equivalence branch) and `psalm` is not already fulfilled, it also commits `docs/refactoring/out-of-scope/psalm.md` — the same worked-example template as `psalm`'s own entry above, reason inverted ("this target adopted PHPStan; the `psalm` path does not apply"). This resolves `psalm` (one of the fourteen `php-structural-scan` leaves) as rejected instead of leaving it permanently unresolved. This write targets `psalm` only — it never rejects `phpstan-level-0-baseline` itself (that would be this node rejecting itself) nor any `phpstan-level-N` node.
 - **Verification:** `composer install` succeeds locally; `vendor/bin/phpstan analyse --error-format=table` (or plain `vendor/bin/phpstan analyse`) exits 0 with the committed baseline included.
 
 ### `phpstan-level-1` through `phpstan-level-10`
@@ -367,14 +367,19 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **No other analyser fulfils the node:** only `vimeo/psalm` is recognised as an equivalent for the PHPStan nodes. Other tools (e.g., Phan, Psalm plugins) are not treated as fulfilling this chain.
 - **Mutual exclusion (ticket 37) does not touch this equivalence.** It would be tempting to read "PHPStan
   and Psalm are mutually exclusive" as `phpstan-level-0-baseline` itself getting rejected on the Psalm
-  path — it does not. `rector-dead-code`, `rector-type-coverage`, and `rector-php-set` all have
-  `phpstan-level-0-baseline` as a **required** parent, and rejecting a required parent permanently closes
-  every node beneath it (*Nodes* preamble above); rejecting this node on the Psalm path would silently
-  make the entire Rector family unreachable for every Psalm-only target — a real behavior change nothing
-  asked for. Mutual exclusion instead targets the two `php-structural-scan` leaves — `psalm` and
-  `phpstan-level-10` — via the MR-scope/housekeeping writes on `psalm`'s and this node's own entries above.
-  This node's fulfilment check keeps reading "PHPStan path OR `psalm` fulfilled" exactly as it already
-  does above, unchanged.
+  path — it does not. Before the ticket 37/44 follow-up, `rector-dead-code`, `rector-type-coverage`, and
+  `rector-php-set` all had `phpstan-level-0-baseline` as a **required** parent, and rejecting a required
+  parent permanently closes every node beneath it (*Nodes* preamble above); rejecting this node on the
+  Psalm path would have silently made the entire Rector family unreachable for every Psalm-only target — a
+  real behavior change nothing asked for. `rector-dead-code`/`rector-type-coverage` no longer carry that
+  direct edge at all (their gate is now read transitively via `rector-php-set`'s own `required-any`
+  parent), but the underlying reasoning still applies to `rector-php-set` itself: its `required-any`
+  parents are `phpstan-level-0-baseline` **and** `psalm` (either fulfilled unlocks it) precisely so a
+  Psalm-only target keeps reaching it without depending on `phpstan-level-0-baseline` ever being rejected.
+  Mutual exclusion instead targets the two `php-structural-scan` leaves — `psalm` and `phpstan-level-10` —
+  via the MR-scope/housekeeping writes on `psalm`'s and this node's own entries above. This node's
+  fulfilment check keeps reading "PHPStan path OR `psalm` fulfilled" exactly as it already does above,
+  unchanged.
 
 ### `psalm-taint-analysis`
 
@@ -403,8 +408,12 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   incidentally read `true` once `psalm.xml` exists (harmless: `_rejected_nodes()`/rejection checks read the
   out-of-scope file directly, independent of the detected-fulfilled flag — see `psalm`'s own *Co-presence*
   bullet above).
-- **Not** a `php-structural-scan` resolved-leaf — a security-scan addition, orthogonal to that
-  aggregation's structural-quality scope.
+- **`php-structural-scan` resolved-leaf:** yes — the fourteenth (alongside `psalm`). The gate's purpose is
+  "deterministic tooling has had its say before agent-driven structural work begins"
+  (`tooling-tree.md`'s `structural-scan` node), not "structural-quality tools only" — `composer-audit` is
+  already one of these fourteen leaves and is itself a pure security scan (dependency vulnerabilities), so
+  excluding this node on a "security vs. structural" distinction wouldn't have been consistent with that
+  precedent.
 
 ### `rector-dead-code`
 
@@ -412,7 +421,7 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Tool:** Rector (dead-code suite)
 - **Purpose:** remove dead code with rules whose changes are safe to review early.
 - **Fulfilment check:** dead-code suite enabled and fully applied — no remaining rule findings.
-- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green by shrinking the baseline within the same MRs. Proposed once `phpstan-level-0-baseline` **and** `rector-php-set` (ticket 43) are fulfilled **and** `php-cs-fixer` has been decided (fulfilled or rejected) — a still-undecided `php-cs-fixer` withholds this node so its dead-code rewrites don't land unstyled; a rejected `php-cs-fixer` still releases it, it just never gets styled output.
+- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green by shrinking the baseline within the same MRs. Proposed once `rector-php-set` (ticket 43) is fulfilled **and** `php-cs-fixer` has been decided (fulfilled or rejected) — a still-undecided `php-cs-fixer` withholds this node so its dead-code rewrites don't land unstyled; a rejected `php-cs-fixer` still releases it, it just never gets styled output. No longer carries its own direct required parent on `phpstan-level-0-baseline` (ticket 37/44 follow-up) — `rector-php-set`'s own `required-any` gate (see that node's entry below) already covers which static-analysis path was chosen; duplicating it here was redundant.
 
 ### `rector-type-coverage`
 
@@ -420,22 +429,27 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Tool:** Rector (typing suites)
 - **Purpose:** raise declared type coverage progressively.
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.
-- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `phpstan-level-0-baseline` **and** `rector-php-set` (ticket 43) are fulfilled **and** both `php-cs-fixer` and `phpstan-level-3` have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, so this node waits on both. Either one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit. The `phpstan-level-3` threshold stays put here (ticket 43 decision) even though the level chain itself now reaches `phpstan-level-10` — level 3 was already judged "strict enough" for reviewable Rector rewrites.
+- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `rector-php-set` (ticket 43) is fulfilled **and** both `php-cs-fixer` and `phpstan-level-3` have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, so this node waits on both. Either one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit. The `phpstan-level-3` threshold stays put here (ticket 43 decision) even though the level chain itself now reaches `phpstan-level-10` — level 3 was already judged "strict enough" for reviewable Rector rewrites. Same follow-up as `rector-dead-code` above: no longer carries its own direct required parent on `phpstan-level-0-baseline` — covered transitively via `rector-php-set`'s `required-any` gate.
 
 ### `rector-php-set`
 
 - **Name:** Rector: PHP Set
 - **Tool:** Rector (versioned PHP-upgrade rule set, e.g. `LevelSetList::up_to_php_8x`)
 - **Purpose:** adopt Rector's own PHP-version-targeted rule set — the common gate the other Rector
-  rule-set nodes below wait on, mirroring how `phpstan-level-0-baseline` gates `rector-dead-code`/
-  `rector-type-coverage` today.
+  rule-set nodes below wait on, mirroring how `phpstan-level-0-baseline`/`psalm` gate the family today.
 - **Fulfilment check:** the PHP-version rule set enabled in `rector.php`/`rector.neon` and fully applied —
   no remaining rule findings.
 - **MR scope:** adopted in levels, one MR per target PHP version bump; keeps PHPStan green by shrinking
   the baseline within the same MRs (same shape as `rector-dead-code`).
-- **Required parent:** `phpstan-level-0-baseline` (same as `rector-dead-code`/`rector-type-coverage`). No
-  `php-cs-fixer` recommended parent (unlike the four sibling Rector nodes below) — decided directly with
-  the user; this node is the styling-order exception in the family.
+- **Required-any parents:** `phpstan-level-0-baseline`, `psalm` (ticket 37/44 follow-up) — either fulfilled
+  unlocks this node. Previously this was a single `required` parent on `phpstan-level-0-baseline` alone
+  (relying on that node's own Psalm-equivalence branch to also cover the Psalm path implicitly); reading
+  the `required-any` group directly instead makes the OR explicit at the edge level and is now the Rector
+  family's sole direct gate on which static-analysis path was chosen — `rector-dead-code`/
+  `rector-type-coverage` no longer carry their own copy of it (see those nodes' entries above), they read
+  it transitively via their existing required parent on this node. No `php-cs-fixer` recommended parent
+  (unlike the four sibling Rector nodes below) — decided directly with the user; this node is the
+  styling-order exception in the family.
 
 ### `rector-code-quality`
 
@@ -474,6 +488,6 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 
 - **Name:** PHP Structural Scan (internal — never proposed; see below)
 - **Tool:** none — pure aggregation node, no fulfilment check or MR scope of its own.
-- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of twelve direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way).
-- **Fulfilment check:** every one of its thirteen `resolved` parents above (`composer-audit`, `phpunit`, `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-10`, `phpstan-deprecation-rules`, `rector-dead-code`, `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`, `rector-early-return`, `psalm`) is itself resolved — fulfilled, or rejected under `docs/refactoring/out-of-scope/`. Identical `resolved`-edge semantics to `structural-scan`'s own gate, one hop down: a rejected leaf here still counts as resolved. `psalm` (ticket 37) and `phpstan-level-10` are mutually resolving in practice — exactly one is fulfilled (whichever path the target chose) and the mutual-exclusion housekeeping on `psalm`'s/`phpstan-level-0-baseline`'s own entries above rejects the other, so both are always resolved together.
-- **MR scope:** none — never proposed, never an MR. There is no real-world action to take *as* `php-structural-scan`; the thirteen leaves above are where the real work happens. `refactor-scan`/`next_candidates()`/`roadmap()` must never surface this node as a candidate — it exists only so `structural-scan`'s own gate can read one edge instead of thirteen.
+- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of fourteen direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way).
+- **Fulfilment check:** every one of its fourteen `resolved` parents above (`composer-audit`, `phpunit`, `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-10`, `phpstan-deprecation-rules`, `rector-dead-code`, `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`, `rector-early-return`, `psalm`, `psalm-taint-analysis`) is itself resolved — fulfilled, or rejected under `docs/refactoring/out-of-scope/`. Identical `resolved`-edge semantics to `structural-scan`'s own gate, one hop down: a rejected leaf here still counts as resolved. `psalm` (ticket 37) and `phpstan-level-10` are mutually resolving in practice — exactly one is fulfilled (whichever path the target chose) and the mutual-exclusion housekeeping on `psalm`'s/`phpstan-level-0-baseline`'s own entries above rejects the other, so both are always resolved together. `psalm-taint-analysis` (ticket 44) is an ordinary fourteenth leaf — no such pairing, just fulfilled or rejected like any other deterministic-tooling leaf.
+- **MR scope:** none — never proposed, never an MR. There is no real-world action to take *as* `php-structural-scan`; the fourteen leaves above are where the real work happens. `refactor-scan`/`next_candidates()`/`roadmap()` must never surface this node as a candidate — it exists only so `structural-scan`'s own gate can read one edge instead of fourteen.

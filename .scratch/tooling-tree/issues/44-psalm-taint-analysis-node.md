@@ -13,8 +13,9 @@
   the PHPStan level chain reaches 4, or the target chose Psalm as its general analyzer, regardless of which.
   Fulfilment check: `vimeo/psalm` present + committed `psalm.xml`/`psalm.xml.dist` + (once `ci-runner` is
   fulfilled) a CI job invoking `vendor/bin/psalm --taint-analysis` (same ticket-34 CI-self-wiring shape as
-  `phpstan-level-0-baseline`). Not a `php-structural-scan` resolved-leaf — a security-scan addition,
-  orthogonal to that aggregation's structural-quality scope.
+  `phpstan-level-0-baseline`). ~~Not a `php-structural-scan` resolved-leaf — a security-scan addition,
+  orthogonal to that aggregation's structural-quality scope.~~ **Corrected (follow-up, before merge): it is
+  the fourteenth `php-structural-scan` resolved-leaf — see the Comments section below.**
 
 **Why:** Psalm ships two distinct capabilities under one binary — general static analysis (what the
 `psalm` node, ticket 43, already recognizes) and taint analysis for security bugs (SQL injection, XSS,
@@ -41,7 +42,8 @@ Already settled (this session's grilling, user-confirmed):
 - [x] Taint-analysis is its own node, independent of the `psalm` node's mutual-exclusion rejection status —
   adopting it on the PHPStan path does not reopen that rejection (see `psalm`'s own *Co-presence* bullet in
   `php-tooling-tree.md`).
-- [x] Not a `php-structural-scan` resolved-leaf.
+- [x] ~~Not a `php-structural-scan` resolved-leaf.~~ **Corrected below (follow-up, before merge): it is
+  one.**
 
 ## Comments
 
@@ -51,3 +53,14 @@ Already settled (this session's grilling, user-confirmed):
 > taint analysis alongside whichever general analyzer was chosen" — a third, previously undiscussed
 > capability, not a relaxation of the mutual exclusion. Implemented together with ticket 37 in the same
 > session/PR.
+
+> **2026-08-30 (follow-up correction, before merge):** Discussing PR #28's result, the user asked directly
+> whether it was right for this node to have no `resolved` edge into `php-structural-scan`, and what that
+> edge actually means. On review, this ticket's original "not a resolved-leaf — security-scan addition,
+> orthogonal to structural-quality scope" reasoning didn't hold up: `composer-audit` is already one of
+> those leaves and is itself a pure security tool. The real criterion (`tooling-tree.md`'s `structural-scan`
+> node) is "does this tool produce deterministic findings that could collide with agent-driven structural
+> work" — taint analysis qualifies exactly like PHPStan levels or Rector sets do. Corrected: `psalm-taint-
+> analysis` is now the fourteenth `php-structural-scan` resolved-leaf. Recorded in ADR-0019's new Part C,
+> alongside a paired correction to ticket 37 (`rector-php-set`'s `required-any` gate) found in the same
+> conversation.
