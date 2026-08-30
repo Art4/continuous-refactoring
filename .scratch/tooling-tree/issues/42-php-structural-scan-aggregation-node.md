@@ -43,47 +43,45 @@ type, not `recommended` — keeps the existing mechanism and fixes a real scalin
 specialization exists, since retrofitting this shape after two specializations both have direct leaf
 edges into `structural-scan` is strictly more edits than doing it now with one.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `skills/refactor-scan/references/tooling-tree.md`: reword the ownership-rule paragraph and
+- [x] `skills/refactor-scan/references/tooling-tree.md`: reworded the ownership-rule paragraph and
       `structural-scan`'s Fulfilment-check/Edge-type bullets — 2 direct resolved parents
-      (`editorconfig`, `php-structural-scan`), not 8; reword the illustrative dotted-diagram line's label.
-- [ ] `skills/refactor-scan/references/php-tooling-tree.md`: repoint the 7 leaf `resolved` edges (table +
-      diagram) from `structural-scan` to `php-structural-scan`; add the new `php-structural-scan ->
-      structural-scan` row; add the `php-structural-scan` node entry (inline, not extracted); reword the
-      "seven resolved rows" prose paragraph after the table; reword `composer-audit`'s Stop-conditions
-      bullet ("every other leaf feeding `php-structural-scan`", drop `editorconfig` from that named list —
+      (`editorconfig`, `php-structural-scan`), not 8; reworded the illustrative dotted-diagram line's label.
+- [x] `skills/refactor-scan/references/php-tooling-tree.md`: repointed the 7 leaf `resolved` edges (table +
+      diagram) from `structural-scan` to `php-structural-scan`; added the new `php-structural-scan ->
+      structural-scan` row; added the `php-structural-scan` node entry (inline, not extracted); reworded the
+      "seven resolved rows" prose paragraph after the table; reworded `composer-audit`'s Stop-conditions
+      bullet ("every other leaf feeding `php-structural-scan`", dropped `editorconfig` from that named list —
       it's no longer a sibling under the new shape).
-- [ ] `skills/refactor-scan/SKILL.md`: reword the `structural-scan` bullet for the two-hop aggregation
-      shape; state explicitly `php-structural-scan` is never itself proposed.
-- [ ] `skills/refactor-scan/references/tree-walk-prompt.md`: generalize the resolved-edge-clears rule
-      (currently `structural-scan`-specific) to any node with resolved edges; add an explicit rule that an
+- [x] `skills/refactor-scan/SKILL.md`: reworded the `structural-scan` bullet for the two-hop aggregation
+      shape; states explicitly `php-structural-scan` is never itself proposed.
+- [x] `skills/refactor-scan/references/tree-walk-prompt.md`: generalized the resolved-edge-clears rule
+      (previously `structural-scan`-specific) to any node with resolved edges; added an explicit rule that an
       aggregation node (one whose only outgoing edge is itself a `resolved` edge into another node) is
       never collected into the proposable/withheld sets even once resolved.
-- [ ] `skills/refactor-scan/references/tooling_tree.py`: generalize `detect_nodes()`'s
-      structural-scan-only resolved-gate block to compute every resolved-gated node (ordered so
-      `php-structural-scan` is computed before `structural-scan` reads it); rename
+- [x] `skills/refactor-scan/references/tooling_tree.py`: added a generic `_resolved_gate_status()` helper
+      (replacing `detect_nodes()`'s structural-scan-only block), computed in dependency order so
+      `php-structural-scan` is resolved before `structural-scan` reads it; renamed
       `_composer_audit_extra_gate()`'s hardcoded `"structural-scan"` lookup to `"php-structural-scan"`
-      (composer-audit's true sibling set under the new shape); add a derived
-      `exposed_resolved_gate_nodes` concept to `load_tree()` (a resolved-gated node that is itself another
-      resolved-gated node's resolved-parent is never exposed) and use it in `next_candidates()`,
+      (composer-audit's true sibling set under the new shape); added a derived
+      `exposed_resolved_gate_nodes` set to `load_tree()` (a resolved-gated node that is itself another
+      resolved-gated node's resolved-parent is never exposed) and used it in `next_candidates()`,
       `roadmap()`, `withheld_candidates()` to keep `php-structural-scan` out of all three outputs.
-- [ ] `scripts/test_tooling_tree.py`: update `LoadTreeTests` (repointed edges, new
-      `resolved_parents["php-structural-scan"]`/`["structural-scan"]` assertions); new
-      `PhpStructuralScanAggregationTests` class (resolves-only-when-all-7-resolved,
-      rejected-leaf-still-resolves, never-in-next/roadmap/withheld); update
-      `StructuralScanGateTests.test_unfulfilled_when_leaves_missing`'s `unresolved` assertion (now
-      reports `php-structural-scan`, not the flat leaf name, once leaves are missing);
-      `ComposerAuditGateTests.test_eligible_via_fallback_when_every_other_leaf_resolved`'s fixture no
-      longer strictly needs `.editorconfig` (optional cleanup).
-- [ ] `fixtures/php/*/expected/roadmap.json` (all 7): regenerate via
-      `python3 skills/refactor-scan/references/tooling_tree.py fixtures/php/<name>/project --steps 10`;
-      verify each with `fixtures/harness/run.sh roadmap <name>`. Flag any fixture whose 10-step roadmap
-      sequence shifts (expected: none, since `php-structural-scan` is never a proposable roadmap step —
-      confirm this per fixture rather than assume it).
-- [ ] New ADR (`docs/adr/0017-php-structural-scan-aggregation-node.md`) amending ADR-0008.
-- [ ] `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py .`
-      both green.
+- [x] `scripts/test_tooling_tree.py`: updated `LoadTreeTests` (repointed edges, new
+      `resolved_parents["php-structural-scan"]`/`["structural-scan"]` and `exposed_resolved_gate_nodes`
+      assertions); added `PhpStructuralScanAggregationTests` class (resolves-only-when-all-7-resolved,
+      rejected-leaf-still-resolves, two-hop structural-scan regression, never-in-next/roadmap/withheld);
+      fixed `StructuralScanGateTests.test_unfulfilled_when_leaves_missing`'s `unresolved` assertion (now
+      reports `php-structural-scan`, not the flat leaf name); reworded
+      `ComposerAuditGateTests.test_eligible_via_fallback_when_every_other_leaf_resolved`'s comments
+      (fixture itself left unchanged, harmless either way).
+- [x] `fixtures/php/*/expected/roadmap.json` (all 7): regenerated against `fixtures/harness/run.sh`'s own
+      sandboxes; verified each with `fixtures/harness/run.sh roadmap <name>` — 7/7 green, no roadmap
+      step-count or order shift in any of them (confirmed per fixture, not assumed).
+- [x] New ADR: `docs/adr/0017-php-structural-scan-aggregation-node.md`, amending ADR-0008.
+- [x] `python3 -m unittest discover -s scripts -p 'test_*.py'` — 167/167 pass. `python3
+      scripts/validate_skills.py .` — clean.
 
 ## Comments
 
