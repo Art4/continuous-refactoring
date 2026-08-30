@@ -28,6 +28,20 @@ REPO_ROOT = _HERE.parents[2]  # references -> refactor-scan -> skills -> repo ro
 
 _VALID_EDGE_TYPES = ("required", "recommended", "resolved")
 
+# Ordinary required-gated nodes that must never be surfaced as a proposable
+# candidate, regardless of their own fulfilled state: `git` (never an MR),
+# `static-code-analyzer` (pure plumbing, ticket 43), `psalm` (recognition-only,
+# ticket 43 — same fait-accompli shape Pest already gets for `phpunit`, just
+# now its own node instead of embedded logic). Resolved-gated aggregation
+# nodes (`php-structural-scan`) are excluded separately via
+# `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
+# required-gated nodes instead.
+_NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm"}
+
+# The PHPStan level chain (ticket 43: extended from 1..3 to 1..10) — used by
+# roadmap()'s per-level empty-baseline gate and its open-chain filler.
+_PHPSTAN_LEVEL_NODES = [f"phpstan-level-{i}" for i in range(1, 11)]
+
 
 def _parse_edges(path: pathlib.Path) -> list[dict]:
     text = path.read_text(encoding="utf-8")
@@ -556,13 +570,31 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         "CI job runs composer audit" if audit_fulfilled else "no CI job runs composer audit yet",
         has_real_dep=has_real_dep,
     )
+    # static-code-analyzer (ticket 43): pure organizational/plumbing node,
+    # always fulfilled once composer is — no independent state of its own.
+    set_node(
+        "static-code-analyzer",
+        out["composer"]["fulfilled"],
+        "composer fulfilled" if out["composer"]["fulfilled"] else "waiting on composer",
+    )
+    # psalm (ticket 43): the raw detection formerly inlined into
+    # phpstan-level-0-baseline's own equivalents branch, now its own node —
+    # recognition-only, never proposed (see _NEVER_PROPOSED below). No
+    # CI-gating requirement yet, same as before the split.
+    psalm_fulfilled = has_psalm_dep and has_psalm_cfg
+    set_node(
+        "psalm",
+        psalm_fulfilled,
+        "vimeo/psalm + psalm.xml present" if psalm_fulfilled else "no psalm dep/config",
+        has_psalm_dep=has_psalm_dep,
+        has_psalm_cfg=has_psalm_cfg,
+    )
+
     # phpstan-level-0-baseline
-    # Psalm equivalence: if psalm dep + config -> fulfilled without phpstan.
-    # Deliberately no CI-gating on this branch yet (ticket 34) — Psalm is
-    # getting its own node in a follow-up ticket, which is the right place
-    # to add its own CI-gating check rather than growing this equivalence
-    # branch further ahead of that redesign.
-    psalm_fulfils_p0 = has_psalm_dep and has_psalm_cfg
+    # Psalm equivalence: fulfilled without phpstan whenever the `psalm` node
+    # (above) is fulfilled — reads that node's computed state instead of
+    # re-deriving the raw detection here (ticket 43).
+    psalm_fulfils_p0 = psalm_fulfilled
     # ticket 34 self-wiring: once ci-runner is fulfilled, this node also
     # requires a CI job that actually invokes phpstan. The invocation is
     # level-independent (`vendor/bin/phpstan analyse` regardless of the
@@ -583,9 +615,12 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     else:
         set_node("phpstan-level-0-baseline", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists)
 
-    # phpstan-level-1..3
+    # phpstan-level-1..10 (ticket 43 extended the chain from 1..3 to 1..10;
+    # phpstan-level-10 is now the chain's resolved-leaf into
+    # php-structural-scan, see that node)
     # For fulfilled check: level >= N
-    for lvl, node in [(1, "phpstan-level-1"), (2, "phpstan-level-2"), (3, "phpstan-level-3")]:
+    for lvl in range(1, 11):
+        node = f"phpstan-level-{lvl}"
         if psalm_fulfils_p0:
             # Psalm path: level nodes not applicable -> treat as not unblocked (blocked by equivalence)
             set_node(node, False, "not applicable: psalm fulfils p0", psalm_equivalent=True)
@@ -595,11 +630,25 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         # We expose details
         set_node(node, fulfilled, f"level {phpstan_level} >= {lvl}" if fulfilled else f"level {phpstan_level} < {lvl} or no phpstan", level=phpstan_level, baseline_empty=baseline_empty)
 
+    # phpstan-deprecation-rules (ticket 43): dependency-presence approximation,
+    # same simplification style as php-cs-fixer's dep+config check — no real
+    # `vendor/bin/phpstan analyse` invocation in this dry-run parser.
+    has_deprecation_rules_dep = _has_dep(composer, "phpstan/phpstan-deprecation-rules")
+    set_node(
+        "phpstan-deprecation-rules",
+        has_deprecation_rules_dep,
+        "phpstan-deprecation-rules present" if has_deprecation_rules_dep else "no phpstan-deprecation-rules dep",
+    )
+
     # rector
     # Fulfilment: dead-code suite enabled and fully applied — we approximate as False unless rector.php contains dead-code set
     has_rector = (repo / "rector.php").exists() or (repo / "rector.neon").exists()
     has_rector_dead = False
     has_rector_types = False
+    has_rector_php_set = False
+    has_rector_code_quality = False
+    has_rector_phpunit_set = False
+    has_rector_early_return = False
     if has_rector:
         txt = ""
         for p in [repo / "rector.php", repo / "rector.neon"]:
@@ -607,8 +656,18 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
                 txt += p.read_text(encoding="utf-8")
         has_rector_dead = "DeadCode" in txt or "dead-code" in txt.lower()
         has_rector_types = "Type" in txt or "type" in txt.lower()
+        has_rector_php_set = "LevelSetList" in txt or "php-set" in txt.lower()
+        has_rector_code_quality = "CodeQuality" in txt or "code-quality" in txt.lower()
+        has_rector_phpunit_set = "PHPUnitSetList" in txt or "phpunit-set" in txt.lower()
+        has_rector_early_return = "EarlyReturn" in txt or "early-return" in txt.lower()
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
+    # rector-php-set and its 3 children (ticket 43): same has_rector-gated
+    # substring-detection style as dead-code/type-coverage above.
+    set_node("rector-php-set", has_rector_php_set, "rector php-version set present" if has_rector_php_set else "no rector php-version set", has_rector=has_rector)
+    set_node("rector-code-quality", has_rector_code_quality, "rector code-quality set present" if has_rector_code_quality else "no rector code-quality set", has_rector=has_rector)
+    set_node("rector-phpunit-set", has_rector_phpunit_set, "rector phpunit set present" if has_rector_phpunit_set else "no rector phpunit set", has_rector=has_rector)
+    set_node("rector-early-return", has_rector_early_return, "rector early-return set present" if has_rector_early_return else "no rector early-return set", has_rector=has_rector)
 
     # Resolved-gated nodes: structural-scan, and PHP's own aggregation node
     # php-structural-scan feeding it — fulfilled once every one of a node's
@@ -689,7 +748,7 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
 
     result: list[dict] = []
     for node in tree["order"]:
-        if node == "git":
+        if node in _NEVER_PROPOSED:
             continue
         if tree["resolved_parents"].get(node):
             # Resolved-gated node (structural-scan, and any aggregation node
@@ -752,7 +811,7 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
 
     result: list[dict] = []
     for node in tree["order"]:
-        if node == "git" or tree["resolved_parents"].get(node):
+        if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
             # Resolved-gated nodes (structural-scan, and any aggregation
             # node feeding it, e.g. php-structural-scan) are never withheld
             # by recommended-edge gating — they're gated by `resolved`
@@ -840,8 +899,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
         best = None
         best_reason = ""
         for node in priority:
-            if node == "git":
-                continue  # never an MR
+            if node in _NEVER_PROPOSED:
+                continue  # never an MR / never a candidate
             if sim_fulfilled.get(node, False):
                 continue  # already fulfilled (real or simulated), skip
             if node in rejected:
@@ -884,11 +943,13 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 sim_ok, sim_why = _composer_audit_extra_gate(has_real_dep, tree, sim_fulfilled, rejected)
                 if not sim_ok:
                     continue
-            # For phpstan levels, additional empty-baseline gate
-            if node in ("phpstan-level-1", "phpstan-level-2", "phpstan-level-3"):
+            # For phpstan levels, additional empty-baseline gate (ticket 43:
+            # chain extended from 1..3 to 1..10, same rule throughout)
+            if node in _PHPSTAN_LEVEL_NODES:
                 # Need predecessor fulfilled with empty baseline
                 # Predecessor mapping: p1 needs p0 empty, p2 needs p1 empty, etc.
-                pred = {"phpstan-level-1": "phpstan-level-0-baseline", "phpstan-level-2": "phpstan-level-1", "phpstan-level-3": "phpstan-level-2"}[node]
+                lvl = int(node.rsplit("-", 1)[1])
+                pred = "phpstan-level-0-baseline" if lvl == 1 else f"phpstan-level-{lvl - 1}"
                 # For simulation, check predecessor fulfilled
                 if not sim_fulfilled.get(pred, False):
                     continue
@@ -939,8 +1000,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 continue
         # Fill remaining with open chain note
         if len(result) < steps:
-            nxt = 4 + len([r for r in result if "phpstan-level" in r["node"]])
-            result.append({"n": len(result) + 1, "node": f"phpstan-level-{nxt}", "type": "tooling (open chain)", "reason": "chain open above level 3 — appended node"})
+            nxt = 11 + len([r for r in result if "phpstan-level" in r["node"]])
+            result.append({"n": len(result) + 1, "node": f"phpstan-level-{nxt}", "type": "tooling (open chain)", "reason": "chain open above level 10 — appended node"})
             continue
         break
 

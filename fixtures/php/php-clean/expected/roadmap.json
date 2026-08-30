@@ -1,197 +1,315 @@
 {
-    "fixture": "php-clean",
-    "detected": {
-        "git": {
-            "fulfilled": true,
-            "reason": "found .git",
-            "details": {}
-        },
-        "loop-config": {
-            "fulfilled": true,
-            "reason": "docs/refactoring/config.md present",
-            "details": {}
-        },
-        "composer": {
-            "fulfilled": true,
-            "reason": "composer.json+lock present",
-            "details": {
-                "has_json": true,
-                "has_lock": true
-            }
-        },
-        "ci-runner": {
-            "fulfilled": true,
-            "reason": "CI config present",
-            "details": {}
-        },
-        "editorconfig": {
-            "fulfilled": true,
-            "reason": ".editorconfig present",
-            "details": {}
-        },
-        "php-cs-fixer": {
-            "fulfilled": true,
-            "reason": "dep and config present",
-            "details": {
-                "has_dep": true,
-                "has_config": true
-            }
-        },
-        "phpunit": {
-            "fulfilled": true,
-            "reason": "phpunit/pest present",
-            "details": {
-                "has_phpunit": true,
-                "has_pest": false
-            }
-        },
-        "test-runner-if-missing": {
-            "fulfilled": true,
-            "reason": "runner exists",
-            "details": {
-                "depends_composer": true
-            }
-        },
-        "composer-audit": {
-            "fulfilled": true,
-            "reason": "CI job runs composer audit",
-            "details": {
-                "has_real_dep": true
-            }
-        },
-        "phpstan-level-0-baseline": {
-            "fulfilled": true,
-            "reason": "phpstan level 0 + baseline present",
-            "details": {
-                "level": 0,
-                "baseline_empty": true
-            }
-        },
-        "phpstan-level-1": {
-            "fulfilled": false,
-            "reason": "level 0 < 1 or no phpstan",
-            "details": {
-                "level": 0,
-                "baseline_empty": true
-            }
-        },
-        "phpstan-level-2": {
-            "fulfilled": false,
-            "reason": "level 0 < 2 or no phpstan",
-            "details": {
-                "level": 0,
-                "baseline_empty": true
-            }
-        },
-        "phpstan-level-3": {
-            "fulfilled": false,
-            "reason": "level 0 < 3 or no phpstan",
-            "details": {
-                "level": 0,
-                "baseline_empty": true
-            }
-        },
-        "rector-dead-code": {
-            "fulfilled": true,
-            "reason": "rector dead-code set present",
-            "details": {
-                "has_rector": true
-            }
-        },
-        "rector-type-coverage": {
-            "fulfilled": true,
-            "reason": "rector type coverage present",
-            "details": {
-                "has_rector": true
-            }
-        },
-        "php-structural-scan": {
-            "fulfilled": true,
-            "reason": "all resolved-parent leaves resolved (fulfilled or rejected)",
-            "details": {
-                "unresolved": [],
-                "rejected": [
-                    "phpstan-level-1",
-                    "phpstan-level-2",
-                    "phpstan-level-3"
-                ]
-            }
-        },
-        "structural-scan": {
-            "fulfilled": true,
-            "reason": "all resolved-parent leaves resolved (fulfilled or rejected)",
-            "details": {
-                "unresolved": [],
-                "rejected": [
-                    "phpstan-level-1",
-                    "phpstan-level-2",
-                    "phpstan-level-3"
-                ]
-            }
-        }
+  "fixture": "php-clean",
+  "detected": {
+    "git": {
+      "fulfilled": true,
+      "reason": "found .git",
+      "details": {}
     },
-    "roadmap": [
-        {
-            "n": 1,
-            "node": "phpstan-level-4",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 2,
-            "node": "phpstan-level-5",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 3,
-            "node": "phpstan-level-6",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 4,
-            "node": "phpstan-level-7",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 5,
-            "node": "phpstan-level-8",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 6,
-            "node": "phpstan-level-9",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 7,
-            "node": "phpstan-level-10",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 8,
-            "node": "phpstan-level-11",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 9,
-            "node": "phpstan-level-12",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        },
-        {
-            "n": 10,
-            "node": "phpstan-level-13",
-            "type": "tooling (open chain)",
-            "reason": "chain open above level 3 \u2014 appended node"
-        }
-    ],
-    "no_mr_created": true,
-    "tooling_tree": "docs/php-tooling-tree.md"
+    "loop-config": {
+      "fulfilled": true,
+      "reason": "docs/refactoring/config.md present",
+      "details": {}
+    },
+    "composer": {
+      "fulfilled": true,
+      "reason": "composer.json+lock present",
+      "details": {
+        "has_json": true,
+        "has_lock": true
+      }
+    },
+    "ci-runner": {
+      "fulfilled": true,
+      "reason": "CI config present",
+      "details": {}
+    },
+    "editorconfig": {
+      "fulfilled": true,
+      "reason": ".editorconfig present",
+      "details": {}
+    },
+    "php-cs-fixer": {
+      "fulfilled": true,
+      "reason": "dep and config present",
+      "details": {
+        "has_dep": true,
+        "has_config": true
+      }
+    },
+    "phpunit": {
+      "fulfilled": true,
+      "reason": "phpunit/pest present",
+      "details": {
+        "has_phpunit": true,
+        "has_pest": false
+      }
+    },
+    "test-runner-if-missing": {
+      "fulfilled": true,
+      "reason": "runner exists",
+      "details": {
+        "depends_composer": true
+      }
+    },
+    "composer-audit": {
+      "fulfilled": true,
+      "reason": "CI job runs composer audit",
+      "details": {
+        "has_real_dep": true
+      }
+    },
+    "static-code-analyzer": {
+      "fulfilled": true,
+      "reason": "composer fulfilled",
+      "details": {}
+    },
+    "psalm": {
+      "fulfilled": false,
+      "reason": "no psalm dep/config",
+      "details": {
+        "has_psalm_dep": false,
+        "has_psalm_cfg": false
+      }
+    },
+    "phpstan-level-0-baseline": {
+      "fulfilled": true,
+      "reason": "phpstan level 0 + baseline present",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-1": {
+      "fulfilled": false,
+      "reason": "level 0 < 1 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-2": {
+      "fulfilled": false,
+      "reason": "level 0 < 2 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-3": {
+      "fulfilled": false,
+      "reason": "level 0 < 3 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-4": {
+      "fulfilled": false,
+      "reason": "level 0 < 4 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-5": {
+      "fulfilled": false,
+      "reason": "level 0 < 5 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-6": {
+      "fulfilled": false,
+      "reason": "level 0 < 6 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-7": {
+      "fulfilled": false,
+      "reason": "level 0 < 7 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-8": {
+      "fulfilled": false,
+      "reason": "level 0 < 8 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-9": {
+      "fulfilled": false,
+      "reason": "level 0 < 9 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-level-10": {
+      "fulfilled": false,
+      "reason": "level 0 < 10 or no phpstan",
+      "details": {
+        "level": 0,
+        "baseline_empty": true
+      }
+    },
+    "phpstan-deprecation-rules": {
+      "fulfilled": false,
+      "reason": "no phpstan-deprecation-rules dep",
+      "details": {}
+    },
+    "rector-dead-code": {
+      "fulfilled": true,
+      "reason": "rector dead-code set present",
+      "details": {
+        "has_rector": true
+      }
+    },
+    "rector-type-coverage": {
+      "fulfilled": true,
+      "reason": "rector type coverage present",
+      "details": {
+        "has_rector": true
+      }
+    },
+    "rector-php-set": {
+      "fulfilled": true,
+      "reason": "rector php-version set present",
+      "details": {
+        "has_rector": true
+      }
+    },
+    "rector-code-quality": {
+      "fulfilled": true,
+      "reason": "rector code-quality set present",
+      "details": {
+        "has_rector": true
+      }
+    },
+    "rector-phpunit-set": {
+      "fulfilled": true,
+      "reason": "rector phpunit set present",
+      "details": {
+        "has_rector": true
+      }
+    },
+    "rector-early-return": {
+      "fulfilled": true,
+      "reason": "rector early-return set present",
+      "details": {
+        "has_rector": true
+      }
+    },
+    "php-structural-scan": {
+      "fulfilled": true,
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)",
+      "details": {
+        "unresolved": [],
+        "rejected": [
+          "phpstan-deprecation-rules",
+          "phpstan-level-1",
+          "phpstan-level-10",
+          "phpstan-level-2",
+          "phpstan-level-3",
+          "phpstan-level-4",
+          "phpstan-level-5",
+          "phpstan-level-6",
+          "phpstan-level-7",
+          "phpstan-level-8",
+          "phpstan-level-9"
+        ]
+      }
+    },
+    "structural-scan": {
+      "fulfilled": true,
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)",
+      "details": {
+        "unresolved": [],
+        "rejected": [
+          "phpstan-deprecation-rules",
+          "phpstan-level-1",
+          "phpstan-level-10",
+          "phpstan-level-2",
+          "phpstan-level-3",
+          "phpstan-level-4",
+          "phpstan-level-5",
+          "phpstan-level-6",
+          "phpstan-level-7",
+          "phpstan-level-8",
+          "phpstan-level-9"
+        ]
+      }
+    }
+  },
+  "roadmap": [
+    {
+      "n": 1,
+      "node": "phpstan-level-11",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 2,
+      "node": "phpstan-level-12",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 3,
+      "node": "phpstan-level-13",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 4,
+      "node": "phpstan-level-14",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 5,
+      "node": "phpstan-level-15",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 6,
+      "node": "phpstan-level-16",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 7,
+      "node": "phpstan-level-17",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 8,
+      "node": "phpstan-level-18",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 9,
+      "node": "phpstan-level-19",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 10,
+      "node": "phpstan-level-20",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    }
+  ],
+  "no_mr_created": true,
+  "tooling_tree": "docs/php-tooling-tree.md"
 }

@@ -72,6 +72,10 @@ class LoadTreeTests(unittest.TestCase):
         )
 
     def test_resolved_parents_of_php_structural_scan(self):
+        # ticket 43: phpstan-level-10 replaced phpstan-level-3 as the level
+        # chain's leaf, and 5 new leaves joined (phpstan-deprecation-rules,
+        # rector-php-set, rector-code-quality, rector-phpunit-set,
+        # rector-early-return) — twelve total, up from seven.
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["php-structural-scan"]),
@@ -80,9 +84,14 @@ class LoadTreeTests(unittest.TestCase):
                 "phpunit",
                 "test-runner-if-missing",
                 "php-cs-fixer",
-                "phpstan-level-3",
+                "phpstan-level-10",
+                "phpstan-deprecation-rules",
                 "rector-dead-code",
                 "rector-type-coverage",
+                "rector-php-set",
+                "rector-code-quality",
+                "rector-phpunit-set",
+                "rector-early-return",
             },
         )
 
@@ -235,15 +244,21 @@ class StructuralScanGateTests(unittest.TestCase):
             "composer.json": json.dumps({
                 "require-dev": {
                     "phpstan/phpstan": "^1.0",
+                    "phpstan/phpstan-deprecation-rules": "^1.0",
                     "phpunit/phpunit": "^10.0",
                     "friendsofphp/php-cs-fixer": "^3.0",
                 },
             }),
             "composer.lock": "{}",
             ".php-cs-fixer.php": "<?php return [];",
-            "phpstan.neon": "parameters:\n    level: 3\n",
+            # ticket 43: level chain now reaches phpstan-level-10 (was 3) —
+            # a "fully tooled" fixture must reach the new top to resolve
+            # php-structural-scan by fulfilment alone.
+            "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type",
+            # ticket 43: also fulfils rector-php-set/-code-quality/-phpunit-set/
+            # -early-return (substring-detected, same style as DeadCode/Type).
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
             # ticket 41: editorconfig is now an 8th structural-scan leaf —
             # this "fully tooled" fixture needs it decided (fulfilled) too.
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
@@ -322,7 +337,10 @@ class StructuralScanGateTests(unittest.TestCase):
         # (not fulfilled) — structural-scan must still open, unlike a normal
         # required edge which would close permanently on a rejection.
         files = self._fully_tooled_files()
-        files["rector.php"] = "<?php // DeadCode rules only"
+        # Drop only the "Type"/"type" markers (rector-type-coverage) — keep
+        # every other ticket-43 rector marker so only this one leaf is
+        # unfulfilled-and-rejected, not incidentally several more.
+        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList EarlyReturn"
         tmp, root = self._make_repo(files)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
@@ -353,22 +371,24 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         return tmp, root
 
     def _fully_tooled_php_leaves(self):
-        # Every one of php-structural-scan's seven leaves fulfilled —
-        # deliberately omits .editorconfig, which is no longer one of its
-        # siblings (it gates structural-scan directly instead).
+        # Every one of php-structural-scan's twelve leaves (ticket 43: was
+        # seven) fulfilled — deliberately omits .editorconfig, which is not
+        # one of its siblings (it gates structural-scan directly instead).
         return {
             "composer.json": json.dumps({
                 "require-dev": {
                     "phpstan/phpstan": "^1.0",
+                    "phpstan/phpstan-deprecation-rules": "^1.0",
                     "phpunit/phpunit": "^10.0",
                     "friendsofphp/php-cs-fixer": "^3.0",
                 },
             }),
             "composer.lock": "{}",
             ".php-cs-fixer.php": "<?php return [];",
-            "phpstan.neon": "parameters:\n    level: 3\n",
+            # ticket 43: level chain now reaches phpstan-level-10 (was 3).
+            "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
             ".github/workflows/ci.yml": (
                 "jobs:\n"
                 "  audit:\n"
@@ -399,7 +419,8 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         # Mirrors StructuralScanGateTests' equivalent case, one hop down: a
         # rejected leaf still counts as resolved, unlike a required parent.
         files = self._fully_tooled_php_leaves()
-        files["rector.php"] = "<?php // DeadCode rules only"
+        # Drop only the "Type"/"type" markers (rector-type-coverage).
+        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList EarlyReturn"
         tmp, root = self._make_repo(files)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
@@ -540,22 +561,24 @@ class ComposerAuditGateTests(unittest.TestCase):
             "composer.json": json.dumps({
                 "require-dev": {
                     "phpstan/phpstan": "^1.0",
+                    "phpstan/phpstan-deprecation-rules": "^1.0",
                     "phpunit/phpunit": "^10.0",
                     "friendsofphp/php-cs-fixer": "^3.0",
                 },
             }),
             "composer.lock": "{}",
             ".php-cs-fixer.php": "<?php return [];",
-            "phpstan.neon": "parameters:\n    level: 3\n",
+            # ticket 43: level chain now reaches phpstan-level-10 (was 3).
+            "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
             # ticket 42: editorconfig is no longer one of composer-audit's
             # siblings (it gates structural-scan directly, not
             # php-structural-scan) — kept here anyway, harmless, so this
             # fixture also happens to be "fully tooled" overall.
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
             # No `composer audit` here — deliberate (see docstring). Does
-            # invoke phpunit/phpstan though, so phpunit/phpstan-level-3
+            # invoke phpunit/phpstan though, so phpunit/phpstan-level-10
             # genuinely resolve too (ticket 34's self-wiring); otherwise this
             # fixture would no longer have "every other leaf resolved".
             ".github/workflows/ci.yml": (
@@ -832,13 +855,17 @@ class RecommendedGateTests(unittest.TestCase):
         # rejected). `.editorconfig` present (ticket 01: php-cs-fixer's own
         # recommended parent) so php-cs-fixer itself stays proposable here —
         # its undecided status under test is about rector-dead-code's gate,
-        # not php-cs-fixer's own.
+        # not php-cs-fixer's own. `rector.php` fulfils rector-php-set only
+        # (ticket 43: rector-dead-code's/rector-type-coverage's other new
+        # required parent) — no DeadCode/Type markers, so those two stay
+        # unfulfilled, exactly what each test below is probing.
         return {
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 0\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
+            "rector.php": "<?php // LevelSetList",
         }
 
     def test_child_withheld_while_recommended_parent_undecided(self):
@@ -1343,7 +1370,10 @@ class RoadmapTests(unittest.TestCase):
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
         })
         try:
-            r = roadmap(root, steps=10)
+            # ticket 43: the level chain alone (1..10) now spans 10 nodes, so
+            # a 10-step lookahead no longer reaches rector-dead-code at all —
+            # widen the lookahead rather than shrink what's under test.
+            r = roadmap(root, steps=25)
             rector = [x for x in r if x["node"] == "rector-dead-code"]
             self.assertTrue(rector)
             # rector should be present; outlook may be absent if cs-fixer already picked earlier — accept either
