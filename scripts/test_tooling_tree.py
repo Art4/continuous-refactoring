@@ -165,6 +165,22 @@ class LoadTreeTests(unittest.TestCase):
         tree = load_tree()
         self.assertEqual(tree["exposed_resolved_gate_nodes"], {"structural-scan"})
 
+    def test_php_minimal_version_edges(self):
+        # ticket 35: php-minimal-version — two required parents (same shape
+        # as composer-audit's ci-runner + composer), and a recommended
+        # parent of rector-php-set (its PHP-version-targeted rule set
+        # otherwise has no dependency on the runtime floor it rewrites to).
+        tree = load_tree()
+        self.assertEqual(
+            set(tree["required_parents"]["php-minimal-version"]),
+            {"loop-config", "ci-runner"},
+        )
+        self.assertIn("php-minimal-version", tree["recommended_parents"]["rector-php-set"])
+        # Deliberately NOT one of php-structural-scan's resolved-parent
+        # leaves — not decided during ticket 35's grilling session, so not
+        # added here.
+        self.assertNotIn("php-minimal-version", tree["resolved_parents"]["php-structural-scan"])
+
 
 class BaselineEmptyTests(unittest.TestCase):
     def _repo_with(self, content: str | None):
@@ -1601,6 +1617,189 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             data = tooling_tree.detect_and_roadmap(root)
             blocked = {b["node"] for b in data["php_floor_blocked"]}
             self.assertEqual(blocked, {"composer-audit", "phpstan-level-0-baseline"})
+        finally:
+            tmp.cleanup()
+
+
+class PhpMinimalVersionTests(unittest.TestCase):
+    """Ticket 35: `php-minimal-version` recommends raising composer.json's
+    declared PHP floor once it no longer covers what the tree actually
+    needs — the minimum of any leaf `php_floor_precheck()` currently blocks,
+    or the highest PHP version a quality-tooling CI job (phpstan/psalm/
+    rector/php-cs-fixer) tests. Two required parents (loop-config,
+    ci-runner); a recommended parent of rector-php-set."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    _CI_YML_PHPSTAN_83 = (
+        "jobs:\n"
+        "  quality:\n"
+        "    strategy:\n"
+        "      matrix:\n"
+        "        php-version: ['8.3']\n"
+        "    steps:\n"
+        "      - run: vendor/bin/phpstan analyse\n"
+    )
+    # A job testing multiple PHP versions, but only running phpunit — a
+    # legitimate compatibility matrix, not evidence the runtime floor itself
+    # needs to move (signal (b) must not fire on this).
+    _CI_YML_COMPAT_MATRIX_PHPUNIT = (
+        "jobs:\n"
+        "  compat:\n"
+        "    strategy:\n"
+        "      matrix:\n"
+        "        php-version: ['7.4', '8.0', '8.3']\n"
+        "    steps:\n"
+        "      - run: vendor/bin/phpunit\n"
+    )
+
+    def test_fulfilled_when_no_composer_json(self):
+        # Undeterminable floor -- same convention php_floor_precheck() uses:
+        # unknown floor never blocks/recommends anything.
+        tmp, root = self._make_repo({})
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_when_floor_already_covers_every_signal(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
+        finally:
+            tmp.cleanup()
+
+    def test_not_fulfilled_when_floor_blocks_a_leaf(self):
+        # Signal (a): php_floor_precheck() blocks composer-audit (PHP >=7.2)
+        # and phpstan-level-0-baseline (PHP >=7.0) at this floor -- gap is
+        # the higher of the two, 7.2.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
+            self.assertEqual(d["php-minimal-version"]["details"]["gap"], [7, 2])
+        finally:
+            tmp.cleanup()
+
+    def test_quality_tooling_ci_job_php_version_creates_gap(self):
+        # Signal (b): a quality-tooling job (phpstan) tests PHP 8.3, above
+        # the declared floor -- gap fires even though no leaf is
+        # floor-blocked at 7.4.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.4"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_83,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
+            self.assertEqual(d["php-minimal-version"]["details"]["gap"], [8, 3])
+        finally:
+            tmp.cleanup()
+
+    def test_compat_matrix_job_without_quality_tool_does_not_create_gap(self):
+        # A job testing multiple PHP versions but only running phpunit (not
+        # a quality tool) must not trigger the recommendation -- exactly the
+        # distinction the grilling session drew.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=7.4"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": self._CI_YML_COMPAT_MATRIX_PHPUNIT,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
+        finally:
+            tmp.cleanup()
+
+    def test_not_proposable_without_ci_runner_even_with_a_gap(self):
+        # ci-runner is a required parent -- a real gap alone isn't enough.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertNotIn("php-minimal-version", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_proposable_once_loop_config_and_ci_runner_fulfilled(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
+        })
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("php-minimal-version", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_rector_php_set_withheld_while_undecided_then_released_on_rejection(self):
+        # Same decided-gate shape as every other recommended edge
+        # (RecommendedGateTests) -- php-minimal-version undecided (a real
+        # gap, not yet rejected) withholds rector-php-set; rejecting
+        # php-minimal-version releases it.
+        files = {
+            "composer.json": json.dumps({"require": {"php": ">=5.6"}, "require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            # Invokes phpstan too, so phpstan-level-0-baseline is genuinely
+            # fulfilled (ticket 34's CI self-wiring) despite CI existing —
+            # rector-php-set's required-any parent needs this, independent
+            # of php-minimal-version's own gate under test here.
+            ".github/workflows/ci.yml": "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/phpstan analyse\n",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            # No rector.php -- rector-php-set itself stays unfulfilled, so it
+            # can actually appear as a candidate once its gates release.
+        }
+        tmp, root = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertNotIn("rector-php-set", nodes)
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "php-minimal-version.md").write_text("rejected\n")
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("rector-php-set", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_can_flip_back_to_unfulfilled_as_the_moving_target_changes(self):
+        # Re-triggering property: no persisted state, no special mechanism —
+        # detect_nodes() is re-derived fresh each call. A floor that
+        # satisfied yesterday's requirement stops satisfying it once a new
+        # quality-tooling CI job tests a higher version.
+        base_files = {
+            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
+            "composer.lock": "{}",
+        }
+        tmp, root = self._make_repo(base_files)
+        try:
+            self.assertTrue(detect_nodes(root)["php-minimal-version"]["fulfilled"])
+            (root / ".github" / "workflows").mkdir(parents=True, exist_ok=True)
+            (root / ".github" / "workflows" / "ci.yml").write_text(self._CI_YML_PHPSTAN_83)
+            # 8.1 still >= 8.3? No -- now stale: a later tool raised the bar.
+            self.assertFalse(detect_nodes(root)["php-minimal-version"]["fulfilled"])
         finally:
             tmp.cleanup()
 
