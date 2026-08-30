@@ -14,11 +14,6 @@ Harness decisions were grilled in ticket 17: custom harness (opencode + Docker +
 | 25 | Shell script for fixture tests (`scripts/run-test.sh`) | infra | done |
 | 26 | Harness infrastructure (Docker image, assertion lib, CI workflow) | infra | done |
 | 17 | Artifact contracts + ground truth (Tiers 2+3) | 2–3 | done |
-| 27 | Trigger tests incl. negative controls; CI gate + rubric grading + lift measurement | 4–5 | open |
-
-## Remaining work (ticket 27)
-
-- **Tier 4** — trigger/discoverability tests: explicit + implicit invocation per skill; negative controls: without git the suite must not run, scan on a clean repo reports clean, non-PHP project gets no PHP tooling proposals.
-- **Tier 5** — wire the harness into CI with regression baselines; LLM-judge rubric grading; with-skill vs without-skill lift measurement.
+| 27 | Trigger tests incl. negative controls; CI gate + rubric grading + lift measurement | 4–5 | done |
 
 Numbering was kept from the original feature so cross-references in done tickets stay valid.
