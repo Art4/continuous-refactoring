@@ -145,21 +145,27 @@ resolve_opencode_bin() {
 # Run one opencode prompt, isolated (only skills/ from this repo, via a
 # .agents/skills symlink — no global ~/.config/opencode/skills), as a
 # subprocess against $1's working directory. $2 is the prompt, $3 the log
-# file to write, $4 an optional timeout (default 60s). Never fails the
-# caller — advisory only; check the log file / grep it yourself.
+# file to write, $4 an optional timeout (default 60s), $5 an optional
+# "false" to skip the skills symlink entirely (used by `lift`'s
+# without-skill baseline — everything else about the invocation stays
+# identical, so that run is a fair comparison against the with-skill one).
+# Never fails the caller — advisory only; check the log file / grep it
+# yourself.
 run_opencode_advisory() {
-    local workdir="$1" prompt="$2" out_file="$3" timeout_s="${4:-60}"
+    local workdir="$1" prompt="$2" out_file="$3" timeout_s="${4:-60}" mount_skills="${5:-true}"
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 1
-    mkdir -p "$workdir/.agents"
-    ln -sfn "$REPO_DIR/skills" "$workdir/.agents/skills"
-    log_info "Running: $opencode_bin run (subprocess, timeout ${timeout_s}s) in $workdir"
+    if [[ "$mount_skills" == true ]]; then
+        mkdir -p "$workdir/.agents"
+        ln -sfn "$REPO_DIR/skills" "$workdir/.agents/skills"
+    fi
+    log_info "Running: $opencode_bin run (subprocess, timeout ${timeout_s}s) in $workdir$([[ "$mount_skills" == true ]] || echo ", no skills mounted")"
     if timeout "$timeout_s" bash -c "cd \"$workdir\" && $opencode_bin run \"$prompt\" 2>&1" > "$out_file" 2>&1; then
-        rm -rf "$workdir/.agents"
+        [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
         return 0
     else
         log_info "Opencode run failed or timed out — see $out_file (advisory, not failing test)"
-        rm -rf "$workdir/.agents"
+        [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
         return 1
     fi
 }
@@ -421,11 +427,15 @@ EOF
 # Tier 4: Trigger/discoverability tests (ticket 27) — explicit + implicit
 # invocation per skill, and the two negative controls that are prose-level
 # judgment calls a skill makes rather than something the deterministic
-# parser decides ("no git", "not a PHP project" — ADR-0008 keeps language
-# recognition an informal heuristic on purpose). The third negative control,
-# "scan on clean repo reports clean", is fully deterministic and lives in
-# `scripts/test_trigger_controls.py` (CI-gated) — the check here only
-# confirms the skill's own wording matches that deterministic result.
+# parser decides: "no git" (refactor-scan's own step-1 precondition —
+# whether the check the parser's detect_nodes() already reports accurately
+# is actually *followed* is a model-behavior question, not a parser one)
+# and "not a PHP project" (ADR-0008 keeps language recognition an informal
+# heuristic on purpose, "premature before a second language specialization
+# exists"). The third negative control, "scan on clean repo reports clean",
+# is fully deterministic and lives in `scripts/test_trigger_controls.py`
+# (CI-gated) — the check here only confirms the skill's own wording matches
+# that deterministic result.
 #
 # Local-only advisory, same posture as `roadmap --opencode` and
 # `agent-loop`: this repo's CI has no model credentials, so nothing here
@@ -572,8 +582,9 @@ run_judge() {
 # transcript paths so a human (or `judge`'s rubric) can compare them.
 run_lift() {
     log_info "=== Lift measurement (with-skill vs. without-skill) — fixture: $FIXTURE ==="
-    local opencode_bin
-    opencode_bin="$(resolve_opencode_bin)" || return 0
+    if ! resolve_opencode_bin >/dev/null; then
+        return 0
+    fi
 
     local prompt="Improve this codebase's refactoring hygiene: find the single most valuable next step and take it."
     local with_out="/tmp/lift-$FIXTURE-with-skill.log"
@@ -584,10 +595,8 @@ run_lift() {
     fi
 
     log_info "Running without-skill baseline (no .agents/skills symlink)..."
-    if timeout 90 bash -c "cd \"$FIXTURE_DST\" && $opencode_bin run \"$prompt\" 2>&1" > "$without_out" 2>&1; then
+    if run_opencode_advisory "$FIXTURE_DST" "$prompt" "$without_out" 90 false; then
         log_pass "Without-skill run complete — $without_out"
-    else
-        log_info "Without-skill run failed or timed out — see $without_out (advisory, not failing test)"
     fi
 
     log_info "Compare $with_out vs $without_out by hand, or grade both against the rubric with:"
