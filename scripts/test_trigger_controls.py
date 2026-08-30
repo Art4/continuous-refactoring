@@ -67,12 +67,27 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
         detected = detect_nodes(PHP_CLEAN_FIXTURE)
         self.assertTrue(detected["structural-scan"]["fulfilled"])
         self.assertEqual(detected["structural-scan"]["details"]["unresolved"], [])
-        # The three phpstan levels above this target's declared ceiling are
-        # rejected (docs/refactoring/out-of-scope/), not fulfilled — a
-        # `resolved` parent counts either way (ADR-0008).
+        # ticket 43: the phpstan levels above this target's declared ceiling
+        # are rejected (docs/refactoring/out-of-scope/), not fulfilled — a
+        # `resolved` parent counts either way (ADR-0008). The chain now
+        # extends to level 10 (was 3), and phpstan-deprecation-rules is
+        # rejected too (its required parent, phpstan-level-5, never fulfils
+        # under this target's level-0 ceiling).
         self.assertEqual(
             sorted(detected["structural-scan"]["details"]["rejected"]),
-            ["phpstan-level-1", "phpstan-level-2", "phpstan-level-3"],
+            [
+                "phpstan-deprecation-rules",
+                "phpstan-level-1",
+                "phpstan-level-10",
+                "phpstan-level-2",
+                "phpstan-level-3",
+                "phpstan-level-4",
+                "phpstan-level-5",
+                "phpstan-level-6",
+                "phpstan-level-7",
+                "phpstan-level-8",
+                "phpstan-level-9",
+            ],
         )
 
 

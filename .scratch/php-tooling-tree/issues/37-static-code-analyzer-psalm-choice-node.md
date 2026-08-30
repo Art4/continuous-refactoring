@@ -1,5 +1,17 @@
 # 37 — `static-code-analyzer` choice node: PHPStan vs. Psalm as mutually-exclusive required children
 
+> **2026-08-30 update (ticket 43):** `static-code-analyzer` and `psalm` now exist in
+> `php-tooling-tree.md` — but as a narrower, non-conflicting restructuring than this ticket proposes:
+> `psalm` is recognition-only (never proposed, `MR scope: none`), *not* a `structural-scan` resolved-leaf,
+> and there is no mutual-exclusion auto-rejection. `phpstan-level-0-baseline`'s equivalence branch still
+> exists, just reads the `psalm` node's state instead of re-deriving it inline (see
+> [ADR-0018](../../../docs/adr/0018-psalm-becomes-a-tree-node.md)). The latent bug in *Why* point 2 below
+> is confirmed **still open** — unchanged, just relocated from `phpstan-level-3` to `phpstan-level-10`
+> (ticket 43 extended the level chain). This ticket's remaining scope going forward is narrower than
+> originally filed: making `psalm` an additional resolved-leaf plus the mutual-exclusion auto-rejection —
+> the `static-code-analyzer`/`psalm` nodes themselves no longer need building, only this restructuring on
+> top of them.
+
 **What to build:** Replace today's Psalm-as-equivalence-inside-`phpstan-level-0-baseline` approach with an
 explicit choice node:
 
@@ -10,8 +22,9 @@ explicit choice node:
   `static-code-analyzer`. They are mutually exclusive: choosing one tool automatically writes a
   `docs/refactoring/out-of-scope/<node>.md` entry for the other, reusing the existing rejection convention
   (`_rejected_nodes()`) rather than inventing new rejection machinery.
-- `psalm` is added as an additional `structural-scan` resolved-leaf alongside the existing
-  `phpstan-level-3` — see *Why* below for the bug this fixes.
+- `psalm` is added as an additional `structural-scan` resolved-leaf alongside `phpstan-level-10` (ticket
+  43 renumbered this from `phpstan-level-3` once the level chain was extended) — see *Why* below for the
+  bug this fixes.
 - `phpstan-level-0-baseline`'s current Psalm-equivalence branch (`psalm_fulfils_p0` in `detect_nodes()`,
   and the *Equivalents* section in `php-tooling-tree.md`) is removed/superseded by this restructuring.
 
@@ -23,15 +36,16 @@ explicit choice node:
    (`CONTEXT.md`'s vocabulary has no "choice"/XOR primitive). Modeling PHPStan and Psalm as siblings under
    a shared `static-code-analyzer` parent makes the choice a first-class, humanly-inspectable decision
    instead of an implicit branch inside another node's fulfilment logic.
-2. **A latent bug this fixes.** `phpstan-level-1..3`'s own doc already says level nodes "do not apply when
-   Psalm is the fulfiller" (`php-tooling-tree.md`'s *Equivalents* section) — a Psalm-choosing target never
-   fulfils `phpstan-level-1/2/3` and is never auto-rejected there either. But `structural-scan`'s
-   resolved-leaf set only includes `phpstan-level-3`, not any Psalm-path node (`detect_nodes()`,
-   `php-tooling-tree.md`'s edges table). Confirmed by reading the code during ticket 34's grilling: for a
-   Psalm-only target, `structural-scan` stays permanently blocked unless a human manually writes an
-   out-of-scope entry for `phpstan-level-3` — a leaf the target was never going to fulfil in the first
-   place. Adding `psalm` as its own resolved-leaf, with the mutual-exclusion auto-rejection above making
-   the *un*chosen sibling count as resolved automatically, closes this for free.
+2. **A latent bug this fixes.** `phpstan-level-1..10`'s own doc already says level nodes "do not apply
+   when Psalm is the fulfiller" (`php-tooling-tree.md`'s *Equivalents* section) — a Psalm-choosing target
+   never fulfils any `phpstan-level-N` and is never auto-rejected there either. But `php-structural-scan`'s
+   resolved-leaf set only includes `phpstan-level-10` (renumbered by ticket 43; was `phpstan-level-3`),
+   not any Psalm-path node (`detect_nodes()`, `php-tooling-tree.md`'s edges table). Reconfirmed directly
+   against ticket 43's `php-psalm` fixture: for a Psalm-only target, `php-structural-scan` (and so
+   `structural-scan`) stays permanently blocked unless a human manually writes an out-of-scope entry for
+   `phpstan-level-10` — a leaf the target was never going to fulfil in the first place. Adding `psalm` as
+   its own resolved-leaf, with the mutual-exclusion auto-rejection above making the *un*chosen sibling
+   count as resolved automatically, closes this for free.
 
 **Blocked by:** none technically, but this needs its own dedicated `/grill-me` session before
 implementation — the points below are already settled from ticket 34's grilling (carried over, not
@@ -45,8 +59,9 @@ re-open), but the node's exact Fulfilment-check/MR-scope prose (mirroring the de
 Already settled (confirmed during ticket 34's grilling — treat as decided, not open):
 
 - [x] Mutual exclusion via auto-written `out-of-scope/` entries, no new rejection mechanism.
-- [x] `psalm` becomes an additional `structural-scan` resolved-leaf alongside `phpstan-level-3`.
-- [x] A Psalm strictness ratchet (mirroring `phpstan-level-1..3`, via Psalm's `errorLevel`) is explicitly
+- [x] `psalm` becomes an additional resolved-leaf (feeding `php-structural-scan`, per ticket 43's
+  aggregation-node shape) alongside `phpstan-level-10` (was `phpstan-level-3`).
+- [x] A Psalm strictness ratchet (mirroring `phpstan-level-1..10`, via Psalm's `errorLevel`) is explicitly
   **out of scope** for this ticket — noted as a possible third follow-up ticket, not committed to.
 
 Still open (needs the dedicated grilling session):
