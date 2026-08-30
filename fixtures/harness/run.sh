@@ -30,6 +30,7 @@ Options:
     --verbose               Enable verbose output
     --opencode              Also run opencode isolated as subprocess (advisory, needs opencode binary)
                             Model is pinned via \$OPENCODE_MODEL (default: opencode/muse-spark-1.2-contributor-free)
+                            Per-call timeout via \$OPENCODE_TIMEOUT (default: 60s — raise for a slower model)
 
 Examples:
     $(basename "$0") tier2 php-project-with-candidates
@@ -55,6 +56,13 @@ WITH_OPENCODE=false
 # instructions already assume this exact model; override via env var if a
 # different one is set up locally.
 OPENCODE_MODEL="${OPENCODE_MODEL:-opencode/muse-spark-1.2-contributor-free}"
+# Per-call default for run_opencode_advisory's internal `timeout` — callers
+# can still pass their own timeout_s explicitly (e.g. tier4's shorter
+# per-skill checks); this only changes the *default* a caller gets when it
+# doesn't. 60s is tight for a model that actually reads several fixture
+# files before answering (observed: some models need 2-4x that on a busier
+# fixture) — override per run without editing the script.
+OPENCODE_TIMEOUT="${OPENCODE_TIMEOUT:-60}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -159,7 +167,7 @@ resolve_opencode_bin() {
 # Never fails the caller — advisory only; check the log file / grep it
 # yourself.
 run_opencode_advisory() {
-    local workdir="$1" prompt="$2" out_file="$3" timeout_s="${4:-60}" mount_skills="${5:-true}"
+    local workdir="$1" prompt="$2" out_file="$3" timeout_s="${4:-$OPENCODE_TIMEOUT}" mount_skills="${5:-true}"
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 1
     if [[ "$mount_skills" == true ]]; then
