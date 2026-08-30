@@ -49,6 +49,23 @@ Same as `php-p0-empty` but baseline has 3 `ignoreErrors` (non-empty). Tests **sh
 
 `composer` with `vimeo/psalm` + `psalm.xml`, no PHPStan. Tests **Psalm equivalence** — `vimeo/psalm` fulfils `phpstan-level-0-baseline`, level chain `p1..3` is not proposable, `rector-*` still via `p0`.
 
+### php-clean
+
+Every deterministic PHP-tooling-tree leaf resolved: `composer`, `ci-runner`, `php-cs-fixer`, `phpunit` (CI-gated), `composer-audit` (CI-gated, real dependency), `phpstan-level-0-baseline` (level 0, empty baseline — this target's declared ceiling), `rector-dead-code`/`rector-type-coverage` fully adopted. Levels 1–3 are explicitly rejected under `docs/refactoring/out-of-scope/` rather than climbed — climbing them would flip `phpstan-level-0-baseline` back to unfulfilled (it only recognizes level *exactly* 0) while `structural-scan`'s `resolved` gate only cares about `phpstan-level-3`, so an honest "nothing tooling-side left to propose" state needs the reject path, not the climb (see `docs/refactoring/out-of-scope/phpstan-level-{1,2,3}.md` for the reasoning). Tests **"scan on clean repo reports clean"** (ticket 27's deterministic Tier 4 negative control) — `next()` holds nothing but the perpetual `structural-scan` invitation, `withheld()` is empty. `expected/roadmap.json`'s 10-step *simulation* still falls back to the open `phpstan-level-4..13` chain rather than proposing `structural-scan` — a real gap in `roadmap()`'s simulation loop (it doesn't special-case an already-open `structural-scan` gate the way `next_candidates()` does), tracked separately; **use `next`, not `roadmap`, for this fixture's real signal**, exactly as `refactor-scan`'s own `SKILL.md` already warns.
+
+### Tier 4 — Trigger & Discoverability tests (ticket 27)
+
+Ticket 27's three negative controls split across two layers:
+
+- **Deterministic** (`scripts/test_trigger_controls.py`, CI-gated via the `tier4` job): "scan on clean repo reports clean" is a real, fully-testable property of the deterministic parser — see `php-clean` above. The other two controls ("no git", "not a PHP project") are prose-level judgment calls a skill makes (`refactor-scan`'s own step-1 precondition; ADR-0008 deliberately keeps language recognition an informal heuristic, "premature before a second language specialization exists") — this module only checks the ground-truth *signal* each judgment reads (`detect_nodes()` reports `git`/`composer` accurately), not the judgment itself.
+- **Behavioral** (`fixtures/harness/run.sh tier4 <fixture> --opencode`, local-only advisory, same non-CI posture as `roadmap --opencode` and `agent-loop`): runs all three negative controls end-to-end via opencode, plus **explicit + implicit invocation per skill** — for each of the five lifecycle skills, both `/skill-name` and a natural-language paraphrase of its `description` should trigger it; for the orchestrator (`continuous-refactoring`, which ships `disable-model-invocation: true`), only the explicit form should.
+
+```bash
+./fixtures/harness/run.sh tier4 php-clean --opencode --verbose
+```
+
+Without `--opencode` it just points at the deterministic test module and exits — same degrade-gracefully shape as `roadmap --opencode` when the binary is missing.
+
 ### Roadmap (dry-run, no MR)
 
 Each fixture above has `expected/roadmap.json` — the next 10 MRs the deterministic parser `skills/refactor-scan/references/tooling_tree.py` predicts (tool → fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). Verified by:
@@ -57,7 +74,7 @@ Each fixture above has `expected/roadmap.json` — the next 10 MRs the determini
 ./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture (deterministic, no LLM)
 ./fixtures/harness/run.sh roadmap php-p0-nonempty
 # all fixtures (also in CI: roadmap matrix)
-for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-project-with-candidates; do
+for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean php-project-with-candidates; do
   ./fixtures/harness/run.sh roadmap $f
 done
 ```
@@ -101,7 +118,7 @@ Run deterministic gate (always, no LLM, fast):
 # single fixture
 ./fixtures/harness/run.sh roadmap php-empty --verbose
 # all 6 fixtures (same as CI roadmap matrix)
-for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-project-with-candidates; do
+for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean php-project-with-candidates; do
   ./fixtures/harness/run.sh roadmap $f
 done
 # expected: 6× PASS — Detected nodes match, Roadmap order matches, No MR created
@@ -113,7 +130,7 @@ Run with opencode (isolated, advisory — requires model, ~60s per fixture):
 # single fixture with opencode comparison (deterministic + LLM)
 ./fixtures/harness/run.sh roadmap php-empty --opencode --verbose
 # all 5 new fixtures (opencode advisory)
-for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm; do
+for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean; do
   ./fixtures/harness/run.sh roadmap $f --opencode
 done
 ```
@@ -207,6 +224,24 @@ assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2
 - guzzlehttp/guzzle ^7.8
 - monolog/monolog ^3.4
 - phpunit/phpunit ^10.2 (dev)
+
+### Tier 5 — CI gate, rubric grading, lift measurement (ticket 27)
+
+**Regression-baseline CI gate:** Tier 3's precision/recall baselines live at `fixtures/baselines/` — gitignored ("generated, not committed"), so the CI `tier3` job restores/saves them via `actions/cache` (`.github/workflows/test-harness.yml`) instead. `run_tier3` now compares the freshly-computed recall against whatever baseline the cache restored (`assert_baseline_not_regressed`, `fixtures/harness/lib/assertions.sh`) *before* overwriting it, and fails the job if recall regressed. Caveat worth knowing before you touch this: CI never runs an LLM (see "Roadmap" above), so `found` is always `0` there — the gate is real and will catch a genuine regression the moment a baseline records an actual recall from a local `agent-loop`/`--opencode` run, but inside CI itself today it's comparing `0` against `0` every time. The already-existing `roadmap` matrix (`expected/roadmap.json`, exact match, hard fail on drift) is this harness's other, already-meaningful regression gate — extended to 7 fixtures by `php-clean`.
+
+**LLM-judge rubric grading** (local-only, advisory, non-CI): grades one fixture's post-pass artifacts against `fixtures/harness/rubric.md`'s five dimensions (process fidelity, candidate selection, artifact quality, state hygiene, honesty about ambiguity).
+
+```bash
+./fixtures/harness/run.sh judge php-project-with-candidates --opencode
+```
+
+**With-skill vs. without-skill lift measurement** (local-only, advisory, non-CI): runs the same prompt twice against the same fixture state — once with `skills/` mounted the way every other `--opencode` check does, once with no skill guidance at all — so the two transcripts can be compared by hand or graded against the rubric above.
+
+```bash
+./fixtures/harness/run.sh lift php-partial --opencode
+```
+
+Both commands share the same degrade-gracefully behavior as `roadmap --opencode`: no `opencode` binary found → one info line, exit clean, nothing fails.
 
 ## Expected Issues
 

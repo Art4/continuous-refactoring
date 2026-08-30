@@ -234,6 +234,38 @@ assert_git_has_new_commits() {
     fi
 }
 
+# Assertion: current tier-3 recall has not regressed against the committed
+# baseline (ticket 27, Tier 5 — "wire harness into CI with regression
+# baselines"). Compares found/planted ratios; a missing baseline file is not
+# a regression (first run for this fixture) — it passes and lets the caller
+# save the new baseline.
+assert_baseline_not_regressed() {
+    local baseline_file="$1"
+    local current_found="$2"
+    local current_planted="$3"
+
+    if [[ ! -f "$baseline_file" ]]; then
+        log_pass "No prior baseline at $baseline_file — nothing to regress against"
+        return 0
+    fi
+
+    if python3 -c "
+import json, sys
+b = json.load(open('$baseline_file'))
+b_found, b_planted = b.get('found', 0), b.get('planted', 0)
+c_found, c_planted = $current_found, $current_planted
+b_recall = (b_found / b_planted) if b_planted else 0
+c_recall = (c_found / c_planted) if c_planted else 0
+sys.exit(0 if c_recall >= b_recall else 1)
+" 2>&1; then
+        log_pass "Recall did not regress vs. baseline ($baseline_file)"
+        return 0
+    else
+        log_fail "Recall regressed vs. baseline ($baseline_file): now $current_found/$current_planted, was better before"
+        return 1
+    fi
+}
+
 # Print summary
 print_summary() {
     echo ""
