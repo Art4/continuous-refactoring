@@ -29,6 +29,7 @@ Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
     --verbose               Enable verbose output
     --opencode              Also run opencode isolated as subprocess (advisory, needs opencode binary)
+                            Model is pinned via \$OPENCODE_MODEL (default: opencode/muse-spark-1.2-contributor-free)
 
 Examples:
     $(basename "$0") tier2 php-project-with-candidates
@@ -48,6 +49,12 @@ EOF
 PHP_VERSION="${PHP_VERSION:-8.3}"
 VERBOSE=false
 WITH_OPENCODE=false
+# Pinned explicitly — `opencode run` with no -m falls back to whatever
+# local/ambient default model is configured (observed: a local ollama model
+# that just hangs to timeout with zero output). fixtures/README.md's manual
+# instructions already assume this exact model; override via env var if a
+# different one is set up locally.
+OPENCODE_MODEL="${OPENCODE_MODEL:-opencode/muse-spark-1.2-contributor-free}"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -159,8 +166,8 @@ run_opencode_advisory() {
         mkdir -p "$workdir/.agents"
         ln -sfn "$REPO_DIR/skills" "$workdir/.agents/skills"
     fi
-    log_info "Running: $opencode_bin run (subprocess, timeout ${timeout_s}s) in $workdir$([[ "$mount_skills" == true ]] || echo ", no skills mounted")"
-    if timeout "$timeout_s" bash -c "cd \"$workdir\" && $opencode_bin run \"$prompt\" 2>&1" > "$out_file" 2>&1; then
+    log_info "Running: $opencode_bin run -m $OPENCODE_MODEL (subprocess, timeout ${timeout_s}s) in $workdir$([[ "$mount_skills" == true ]] || echo ", no skills mounted")"
+    if timeout "$timeout_s" bash -c "cd \"$workdir\" && $opencode_bin run -m $OPENCODE_MODEL \"$prompt\" 2>&1" > "$out_file" 2>&1; then
         [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
         return 0
     else
