@@ -79,7 +79,7 @@ graph TD
 
 The table is the machine-readable source; the diagram is its rendering. Extending the tree means adding a row here and the matching line in the diagram.
 
-The seven `resolved` rows above are not `required` or `recommended` — see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means (a rejected leaf still unblocks `structural-scan`, unlike a rejected required parent) and why it exists.
+The seven `resolved` rows above are not `required` or `recommended` — see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means (a rejected leaf still unblocks `structural-scan`, unlike a rejected required parent) and why it exists. `structural-scan` has one further `resolved` parent beyond these seven — `editorconfig` — declared in `tooling-tree.md`'s own edge table instead, since both its endpoints are generic-root nodes; see that document's `structural-scan` node for the full eight-leaf picture.
 
 ## Nodes
 
@@ -163,8 +163,9 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   `require` block names at least one real package (platform pseudo-packages — `php`, `hhvm`, `ext-*`,
   `lib-*`, `composer-plugin-api`, `composer-runtime-api` — don't count; `composer audit` has nothing to
   check without a real dependency), **or** (b) every other leaf feeding `structural-scan` (`phpunit`,
-  `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`)
-  is already resolved — so a dependency-free target still eventually resolves this leaf instead of
+  `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-3`, `rector-dead-code`, `rector-type-coverage`,
+  and `editorconfig` — the last declared in `skills/refactor-scan/references/tooling-tree.md`'s own edge
+  table, not this file's) is already resolved — so a dependency-free target still eventually resolves this leaf instead of
   leaving `structural-scan` permanently blocked. (a) and (b) are independent alternatives, not ordered.
 
 ### `phpstan-level-0-baseline`
