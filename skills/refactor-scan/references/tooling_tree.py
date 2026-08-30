@@ -216,6 +216,12 @@ def _has_loop_config(repo: pathlib.Path) -> bool:
     return (repo / "docs" / "refactoring" / "config.md").exists()
 
 
+def _has_editorconfig(repo: pathlib.Path) -> bool:
+    """editorconfig's fulfilment check (ticket 01): .editorconfig exists at
+    the repo root. Pure presence check, no equivalent-detection nuance."""
+    return (repo / ".editorconfig").exists()
+
+
 def _parse_min_version(constraint: str) -> tuple[int, ...] | None:
     """Best-effort minimum-version extraction from a composer-style version
     constraint (e.g. '>=7.2', '^8.1', '7.2.0'). Not a full composer
@@ -455,6 +461,9 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
+    # editorconfig (ticket 01)
+    has_editorconfig = _has_editorconfig(repo)
+    set_node("editorconfig", has_editorconfig, ".editorconfig present" if has_editorconfig else "no .editorconfig")
     # php-cs-fixer
     cs_fulfilled = has_cs_dep and has_cs_config
     set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)

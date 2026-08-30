@@ -42,6 +42,33 @@ The table above is the only edge this document owns. A language tree's own edge 
 - **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
 - **MR scope:** one MR — create `docs/refactoring/config.md` (see `skills/continuous-refactoring/references/refactoring-config.md` for its shape; there is deliberately no stored cadence — the loop never triggers itself). Ordinary node like any other: `refactor-scan` files it as a single `refactor:candidate` issue when missing, same as a PHP tree node, and it is the only candidate filed that pass.
 
+### `editorconfig`
+
+- **Name:** `.editorconfig`
+- **Tool:** none — plain-text convention file, read by any EditorConfig-aware editor, not a runnable tool.
+- **Purpose:** settle the most basic formatting conventions (indentation, charset, line endings) before a
+  language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
+  exists so "later Rector output lands styled." Language-independent, so it lives at the generic root even
+  though today only the PHP tree declares an edge into it (`skills/refactor-scan/references/php-tooling-tree.md`'s
+  edge table: `loop-config → editorconfig` required, `editorconfig → php-cs-fixer` recommended).
+- **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
+  equivalent-detection nuance.
+- **MR scope:** create a default `.editorconfig` when missing — one language-neutral `[*]` section, no
+  per-language stanza:
+  ```
+  root = true
+
+  [*]
+  charset = utf-8
+  end_of_line = lf
+  insert_final_newline = true
+  trim_trailing_whitespace = true
+  indent_style = space
+  indent_size = 4
+  ```
+  Ordinary node like any other — rejectable as `wontfix` (`docs/refactoring/out-of-scope/editorconfig.md`)
+  like any other node, no special carve-out.
+
 ### `structural-scan`
 
 - **Name:** Structural Scan

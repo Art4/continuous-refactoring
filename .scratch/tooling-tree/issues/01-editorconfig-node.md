@@ -33,12 +33,13 @@ formatting conventions first, the same way `php-cs-fixer` exists so "later Recto
 
 **Priority:** low — quality-of-life node, no urgency.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `skills/refactor-scan/references/tooling-tree.md`: add the `.editorconfig` node under `## Nodes` (Name, Tool, Purpose, Fulfilment check, MR scope — see above). Diagram stays untouched (illustrative-only, per its existing note; `composer`/`ci-runner` aren't drawn there either).
-- [ ] `skills/refactor-scan/references/php-tooling-tree.md`: add `loop-config → editorconfig` (required) and `editorconfig → php-cs-fixer` (recommended) to the Edges table and the mermaid diagram; note in `php-cs-fixer`'s own node prose that it now has a recommended parent, mirroring `rector-dead-code`'s prose style.
-- [ ] `skills/refactor-scan/references/tooling_tree.py`: add a `.editorconfig`-presence check and wire it into `detect_nodes()` (mirrors `_has_loop_config`). No other function needs changing — the required/recommended gating in `next_candidates()`/`withheld_candidates()`/`roadmap()` is already generic over the edge table.
-- [ ] `scripts/test_tooling_tree.py`: `LoadTreeTests` assertion for the two new edges; a `detect_nodes()` present/absent case; a recommended-gate case that `php-cs-fixer` is withheld from `next_candidates()` until `editorconfig` is decided (mirrors `RecommendedGateTests`'s existing pattern).
+- [x] `skills/refactor-scan/references/tooling-tree.md`: add the `.editorconfig` node under `## Nodes` (Name, Tool, Purpose, Fulfilment check, MR scope — see above). Diagram stays untouched (illustrative-only, per its existing note; `composer`/`ci-runner` aren't drawn there either).
+- [x] `skills/refactor-scan/references/php-tooling-tree.md`: added `loop-config → editorconfig` (required) and `editorconfig → php-cs-fixer` (recommended) to the Edges table and the mermaid diagram; noted in `php-cs-fixer`'s own node prose that it now has a recommended parent, mirroring `rector-dead-code`'s prose style (worded inline, no ADR citation — skill prose ships with the suite, per `scripts/validate_skills.py`'s `adr_issues()` check, the same trap ticket 33 hit and fixed).
+- [x] `skills/refactor-scan/references/tooling_tree.py`: added `_has_editorconfig()` and wired it into `detect_nodes()` (mirrors `_has_loop_config`). No other function needed changing — the required/recommended gating in `next_candidates()`/`withheld_candidates()`/`roadmap()` is already generic over the edge table.
+- [x] `scripts/test_tooling_tree.py`: `LoadTreeTests` assertion for the two new edges; new `EditorconfigNodeTests` class (8 tests: presence/absence, blocked-until-`loop-config`, and the recommended-gate withhold/release-by-fulfilment/release-by-rejection/withheld-naming cases, mirroring `RecommendedGateTests`'s pattern). Three pre-existing tests whose fixtures never decided `editorconfig` needed a `.editorconfig` file added to stay green under the new gate (`RecommendedGateTests._p0_fulfilled_files`, `PhpFloorPrecheckTests.test_next_candidates_excludes_blocked_leaves`) — not a behavior change, just an undecided-parent side effect the fixtures hadn't accounted for.
+- [x] `fixtures/php/php-clean/project/.editorconfig`: added (this fixture's whole premise is "every tooling leaf already resolved" — needed the new node fulfilled too, caught by `scripts/test_trigger_controls.py`'s `CleanRepoReportsCleanTests`).
 
 ## Comments
 

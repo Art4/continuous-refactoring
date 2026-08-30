@@ -43,6 +43,11 @@ class LoadTreeTests(unittest.TestCase):
         # composer-audit's MR scope now includes wiring into CI (absorbs
         # former ticket 10), so it needs ci-runner too, not just composer.
         self.assertIn({"from": "ci-runner", "to": "composer-audit", "type": "required"}, tree["edges"])
+        # ticket 01: `.editorconfig` node — required from loop-config (its own
+        # prerequisite, mirroring composer/ci-runner), recommended into
+        # php-cs-fixer (settle basic formatting before style-tool adoption).
+        self.assertIn({"from": "loop-config", "to": "editorconfig", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "editorconfig", "to": "php-cs-fixer", "type": "recommended"}, tree["edges"])
 
     def test_order_contains_nodes(self):
         tree = load_tree()
@@ -620,12 +625,16 @@ class RecommendedGateTests(unittest.TestCase):
         # phpstan-level-0-baseline fulfilled (rector-dead-code's/
         # rector-type-coverage's required parent); php-cs-fixer and
         # phpstan-level-3 both stay undecided (neither fulfilled nor
-        # rejected).
+        # rejected). `.editorconfig` present (ticket 01: php-cs-fixer's own
+        # recommended parent) so php-cs-fixer itself stays proposable here —
+        # its undecided status under test is about rector-dead-code's gate,
+        # not php-cs-fixer's own.
         return {
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 0\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
         }
 
     def test_child_withheld_while_recommended_parent_undecided(self):
@@ -724,6 +733,103 @@ class RecommendedGateTests(unittest.TestCase):
             self.assertGreater(len(nodes), 5)
             # limit is still honored when a caller explicitly wants one
             self.assertLessEqual(len(next_candidates(root, limit=3)), 3)
+        finally:
+            tmp.cleanup()
+
+
+class EditorconfigNodeTests(unittest.TestCase):
+    """Ticket 01: `.editorconfig` as its own generic-tree node. Two edges
+    exercised here: `loop-config -> editorconfig` (required — its own
+    prerequisite) and `editorconfig -> php-cs-fixer` (recommended — settle
+    basic formatting before php-cs-fixer's style rules, ADR-0016's
+    decided-gate)."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _loop_config_and_composer_files(self):
+        return {
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
+            "composer.lock": "{}",
+        }
+
+    def test_absent_not_fulfilled(self):
+        tmp, root = self._make_repo(self._loop_config_and_composer_files())
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["editorconfig"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_present_fulfilled(self):
+        files = self._loop_config_and_composer_files()
+        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["editorconfig"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_blocked_until_loop_config_fulfilled(self):
+        tmp, root = self._make_repo({})  # no docs/refactoring/config.md
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertNotIn("editorconfig", nodes)
+            self.assertIn("loop-config", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_proposable_once_loop_config_fulfilled(self):
+        tmp, root = self._make_repo({"docs/refactoring/config.md": "# Refactoring Loop Config\n"})
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("editorconfig", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_php_cs_fixer_withheld_while_editorconfig_undecided(self):
+        tmp, root = self._make_repo(self._loop_config_and_composer_files())
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("editorconfig", nodes)  # the undecided parent itself is still proposable
+            self.assertNotIn("php-cs-fixer", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_php_cs_fixer_released_once_editorconfig_fulfilled(self):
+        files = self._loop_config_and_composer_files()
+        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
+        tmp, root = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("php-cs-fixer", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_php_cs_fixer_released_once_editorconfig_rejected(self):
+        tmp, root = self._make_repo(self._loop_config_and_composer_files())
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "editorconfig.md").write_text("rejected\n")
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("php-cs-fixer", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_withheld_candidates_names_editorconfig(self):
+        tmp, root = self._make_repo(self._loop_config_and_composer_files())
+        try:
+            withheld = {w["node"]: set(w["waiting_on"]) for w in withheld_candidates(root)}
+            self.assertEqual(withheld["php-cs-fixer"], {"editorconfig"})
         finally:
             tmp.cleanup()
 
@@ -900,6 +1006,9 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             "composer.lock": "{}",
             "docs/refactoring/config.md": "# Refactoring Loop Config\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
+            # ticket 01: decided (fulfilled), so php-cs-fixer's own recommended
+            # gate doesn't interfere with what this test actually exercises.
+            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
         })
         try:
             nodes = [c["node"] for c in next_candidates(root)]
