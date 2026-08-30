@@ -1062,26 +1062,33 @@ class RoadmapTests(unittest.TestCase):
 
     def test_empty_roadmap_starts_with_loop_config(self):
         # ADR-0008: with no docs/refactoring/config.md, loop-config is the
-        # first proposable node — required parent of composer/ci-runner.
+        # first proposable node — required parent of composer/ci-runner
+        # (and, since ticket 01, editorconfig).
         tmp, root = self._make_repo({})
         try:
-            r = roadmap(root, steps=4)
+            r = roadmap(root, steps=5)
             self.assertEqual(r[0]["node"], "loop-config")
-            # composer has priority over ci-runner in the order table, and is
-            # unblocked once loop-config is simulated fulfilled.
-            self.assertEqual(r[1]["node"], "composer")
-            self.assertIn(r[2]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
+            # ticket 01: editorconfig lives in tooling-tree.md, parsed before
+            # php-tooling-tree.md, so it sorts ahead of composer/ci-runner in
+            # tree["order"] — a trivial generic-root node, same footing as
+            # loop-config itself.
+            self.assertEqual(r[1]["node"], "editorconfig")
+            self.assertEqual(r[2]["node"], "composer")
+            self.assertIn(r[3]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
         finally:
             tmp.cleanup()
 
     def test_roadmap_with_loop_config_starts_with_composer(self):
         # With docs/refactoring/config.md already present, loop-config is
-        # fulfilled and the roadmap picks up where it used to before ADR-0008.
+        # fulfilled and the roadmap picks up where it used to before ADR-0008
+        # — plus editorconfig (ticket 01), ordered ahead of composer for the
+        # same reason as above.
         tmp, root = self._make_repo({"docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"})
         try:
-            r = roadmap(root, steps=3)
-            self.assertEqual(r[0]["node"], "composer")
-            self.assertIn(r[1]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
+            r = roadmap(root, steps=4)
+            self.assertEqual(r[0]["node"], "editorconfig")
+            self.assertEqual(r[1]["node"], "composer")
+            self.assertIn(r[2]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
         finally:
             tmp.cleanup()
 

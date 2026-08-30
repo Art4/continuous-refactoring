@@ -41,6 +41,21 @@ formatting conventions first, the same way `php-cs-fixer` exists so "later Recto
 - [x] `scripts/test_tooling_tree.py`: `LoadTreeTests` assertion for the two new edges; new `EditorconfigNodeTests` class (8 tests: presence/absence, blocked-until-`loop-config`, and the recommended-gate withhold/release-by-fulfilment/release-by-rejection/withheld-naming cases, mirroring `RecommendedGateTests`'s pattern). Three pre-existing tests whose fixtures never decided `editorconfig` needed a `.editorconfig` file added to stay green under the new gate (`RecommendedGateTests._p0_fulfilled_files`, `PhpFloorPrecheckTests.test_next_candidates_excludes_blocked_leaves`) — not a behavior change, just an undecided-parent side effect the fixtures hadn't accounted for.
 - [x] `fixtures/php/php-clean/project/.editorconfig`: added (this fixture's whole premise is "every tooling leaf already resolved" — needed the new node fulfilled too, caught by `scripts/test_trigger_controls.py`'s `CleanRepoReportsCleanTests`).
 
+**Correction (caught by `/code-review`'s Standards axis before the PR was opened):** the initial implementation
+put `loop-config → editorconfig` in `php-tooling-tree.md`'s edge table, following the `loop-config →
+composer`/`ci-runner` precedent too broadly — that precedent only covers edges *into PHP-tree nodes*.
+`editorconfig` is a generic-root node, so a `loop-config → editorconfig` edge is generic-to-generic and
+belongs in `tooling-tree.md`'s own table (`git → loop-config`'s sibling), per that document's own stated
+ownership rule. Moved the row; `editorconfig → php-cs-fixer` correctly stays in `php-tooling-tree.md`
+(that one really does cross into a PHP-tree node). Side effect worth naming: `load_tree()` parses
+`tooling-tree.md` fully before `php-tooling-tree.md`, so `editorconfig` now sorts in `tree["order"]`
+right after `loop-config` — ahead of `composer`/`ci-runner` — meaning `roadmap()` proposes it earlier
+than before the fix. Accepted as correct: `.editorconfig` is a trivial, near-zero-cost generic-root step,
+same footing as `loop-config` itself; nothing in the ticket specified its priority relative to
+`composer`/`ci-runner`. Updated `RoadmapTests.test_empty_roadmap_starts_with_loop_config` and
+`test_roadmap_with_loop_config_starts_with_composer` accordingly. 156/156 tests pass, `validate_skills.py`
+clean.
+
 ## Comments
 
 > **2026-08-29:** Filed from the legacy-todo reviewer-loop findings log

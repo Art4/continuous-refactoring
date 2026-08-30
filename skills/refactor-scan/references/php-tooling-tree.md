@@ -24,7 +24,6 @@ graph TD
 
     lc -->|required| comp
     lc -->|required| ci
-    lc -->|required| edc
     edc -.->|recommended| cs
     comp -->|required| cs
     comp -->|required| unit
@@ -55,7 +54,6 @@ graph TD
 |---|---|---|
 | `loop-config` | `composer` | required |
 | `loop-config` | `ci-runner` | required |
-| `loop-config` | `editorconfig` | required |
 | `editorconfig` | `php-cs-fixer` | recommended |
 | `composer` | `php-cs-fixer` | required |
 | `composer` | `phpunit` | required |

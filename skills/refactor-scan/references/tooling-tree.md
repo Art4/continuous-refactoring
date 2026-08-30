@@ -8,9 +8,11 @@ The generic root of every language specialization's **tooling tree**. Two ordina
 graph TD
     git[git]
     lc[loop-config]
+    edc[editorconfig]
     ss[structural-scan]
 
     git -->|required| lc
+    lc -->|required| edc
     lc -.->|"(language tree attaches here)"| ss
 ```
 
@@ -21,8 +23,9 @@ The dotted edge above is illustrative only — the real edges into `structural-s
 | from (parent) | to (child) | type |
 |---|---|---|
 | `git` | `loop-config` | required |
+| `loop-config` | `editorconfig` | required |
 
-The table above is the only edge this document owns. A language tree's own edge table is the source for edges into its nodes and into `structural-scan`.
+The table above is the only edge this document owns — both rows are generic-to-generic (both endpoints live in this document). A language tree's own edge table is the source for edges into *its own* nodes and into `structural-scan`; an edge whose child lives here instead (e.g. `editorconfig → php-cs-fixer`, declared in `php-tooling-tree.md`'s table since `php-cs-fixer` is a PHP-tree node) is the one case that crosses the other way.
 
 ## Nodes
 
@@ -48,9 +51,10 @@ The table above is the only edge this document owns. A language tree's own edge 
 - **Tool:** none — plain-text convention file, read by any EditorConfig-aware editor, not a runnable tool.
 - **Purpose:** settle the most basic formatting conventions (indentation, charset, line endings) before a
   language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
-  exists so "later Rector output lands styled." Language-independent, so it lives at the generic root even
-  though today only the PHP tree declares an edge into it (`skills/refactor-scan/references/php-tooling-tree.md`'s
-  edge table: `loop-config → editorconfig` required, `editorconfig → php-cs-fixer` recommended).
+  exists so "later Rector output lands styled." Language-independent, so it lives at the generic root and
+  its `required` parent (`loop-config`, above) is declared in this document's own edge table — only its
+  *outgoing* edge crosses into a language tree today (`skills/refactor-scan/references/php-tooling-tree.md`'s
+  edge table: `editorconfig → php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
 - **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
   equivalent-detection nuance.
 - **MR scope:** create a default `.editorconfig` when missing — one language-neutral `[*]` section, no
