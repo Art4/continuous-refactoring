@@ -24,6 +24,11 @@
             "reason": "CI config present",
             "details": {}
         },
+        "editorconfig": {
+            "fulfilled": true,
+            "reason": ".editorconfig present",
+            "details": {}
+        },
         "php-cs-fixer": {
             "fulfilled": true,
             "reason": "dep and config present",
@@ -100,9 +105,21 @@
                 "has_rector": true
             }
         },
+        "php-structural-scan": {
+            "fulfilled": true,
+            "reason": "all resolved-parent leaves resolved (fulfilled or rejected)",
+            "details": {
+                "unresolved": [],
+                "rejected": [
+                    "phpstan-level-1",
+                    "phpstan-level-2",
+                    "phpstan-level-3"
+                ]
+            }
+        },
         "structural-scan": {
             "fulfilled": true,
-            "reason": "all php-tree leaves resolved (fulfilled or rejected)",
+            "reason": "all resolved-parent leaves resolved (fulfilled or rejected)",
             "details": {
                 "unresolved": [],
                 "rejected": [
