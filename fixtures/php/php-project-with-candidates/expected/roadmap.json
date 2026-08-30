@@ -166,6 +166,14 @@
       "reason": "no phpstan-deprecation-rules dep",
       "details": {}
     },
+    "psalm-taint-analysis": {
+      "fulfilled": false,
+      "reason": "no psalm dep/config",
+      "details": {
+        "has_psalm_dep": false,
+        "has_psalm_cfg": false
+      }
+    },
     "rector-dead-code": {
       "fulfilled": false,
       "reason": "no rector dead-code",
@@ -210,7 +218,7 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return",
+      "reason": "waiting on: composer-audit, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return, psalm-taint-analysis",
       "details": {
         "unresolved": [
           "composer-audit",
@@ -222,7 +230,8 @@
           "rector-php-set",
           "rector-code-quality",
           "rector-phpunit-set",
-          "rector-early-return"
+          "rector-early-return",
+          "psalm-taint-analysis"
         ],
         "rejected": []
       }
@@ -247,6 +256,7 @@
       "required_parents": [
         "git"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -257,6 +267,7 @@
       "required_parents": [
         "loop-config"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -267,6 +278,7 @@
       "required_parents": [
         "loop-config"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -277,6 +289,7 @@
       "required_parents": [
         "loop-config"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -287,6 +300,7 @@
       "required_parents": [
         "composer"
       ],
+      "required_any_parents": [],
       "recommended_parents": [
         "editorconfig"
       ],
@@ -300,30 +314,47 @@
         "composer",
         "ci-runner"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "real require dependency present"
     },
     {
       "n": 7,
+      "node": "rector-phpunit-set",
+      "type": "tooling",
+      "required_parents": [
+        "phpunit"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [
+        "rector-code-quality",
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled | outlook: would benefit from rector-code-quality (recommended) \u2014 still proposable"
+    },
+    {
+      "n": 8,
+      "node": "rector-type-coverage",
+      "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [
+        "rector-dead-code",
+        "rector-early-return",
+        "php-cs-fixer",
+        "phpstan-level-3"
+      ],
+      "reason": "required parents fulfilled | outlook: would benefit from rector-dead-code (recommended) \u2014 still proposable"
+    },
+    {
+      "n": 9,
       "node": "phpstan-level-11",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 8,
-      "node": "phpstan-level-12",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
-    },
-    {
-      "n": 9,
-      "node": "phpstan-level-13",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
-    },
-    {
       "n": 10,
-      "node": "phpstan-level-14",
+      "node": "phpstan-level-12",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     }

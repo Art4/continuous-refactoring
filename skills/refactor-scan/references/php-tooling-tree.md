@@ -63,11 +63,12 @@ graph TD
     p0 -.->|required-any| rps
     psalm -.->|required-any| rps
     rps -->|required| rdc
-    rps -->|required| rtc
     rps -->|required| rcq
-    rps -->|required| rpu
     rps -->|required| rer
     unit -->|required| rpu
+    rdc -.->|recommended| rtc
+    rer -.->|recommended| rtc
+    rcq -.->|recommended| rpu
     cs -.->|recommended| rdc
     cs -.->|recommended| rtc
     cs -.->|recommended| rcq
@@ -121,11 +122,12 @@ graph TD
 | `phpstan-level-0-baseline` | `rector-php-set` | required-any |
 | `psalm` | `rector-php-set` | required-any |
 | `rector-php-set` | `rector-dead-code` | required |
-| `rector-php-set` | `rector-type-coverage` | required |
 | `rector-php-set` | `rector-code-quality` | required |
-| `rector-php-set` | `rector-phpunit-set` | required |
 | `rector-php-set` | `rector-early-return` | required |
 | `phpunit` | `rector-phpunit-set` | required |
+| `rector-dead-code` | `rector-type-coverage` | recommended |
+| `rector-early-return` | `rector-type-coverage` | recommended |
+| `rector-code-quality` | `rector-phpunit-set` | recommended |
 | `php-cs-fixer` | `rector-dead-code` | recommended |
 | `php-cs-fixer` | `rector-type-coverage` | recommended |
 | `php-cs-fixer` | `rector-code-quality` | recommended |
@@ -153,7 +155,7 @@ The table is the machine-readable source; the diagram is its rendering. Extendin
 
 The thirteen `resolved` rows above feed `php-structural-scan`, this tree's own aggregation node — not `structural-scan` directly. `php-structural-scan` is resolved once every one of those thirteen is itself resolved (fulfilled, or rejected under `docs/refactoring/out-of-scope/`), the same `resolved` semantics as `structural-scan`'s own gate (see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means and why it exists), just one hop down. `phpstan-level-3` (ticket 43) is no longer one of these thirteen — `phpstan-level-10` took over as the level chain's leaf once the chain grew past level 3. A Psalm-only target never fulfils `phpstan-level-10` — see `psalm`'s own node entry below for the mutual-exclusion housekeeping that resolves it as rejected instead (ticket 37); `psalm` itself is deliberately **not** its own leaf here — a dedicated resolved-leaf for it was tried and dropped as redundant ceremony: the `phpstan-level-10` rejection above is sufficient on its own, and giving `psalm` its own leaf only ever added an extra rejection write on the PHPStan path that resolved nothing not already resolved. `psalm-taint-analysis` (ticket 44) is the thirteenth leaf — a deterministic security-scan tool exactly like `composer-audit` (also one of these thirteen), so it gates `structural-scan` the same way every other deterministic-tooling leaf here does; not "structural vs. security", but "does this tool produce findings that could collide with agent-driven structural work" (`tooling-tree.md`'s `structural-scan` node states the actual criterion). The final row above, `php-structural-scan → structural-scan`, is this tree's sole direct contribution to `structural-scan`'s own gate — `structural-scan` has one further direct `resolved` parent, `editorconfig`, declared in `tooling-tree.md`'s own edge table instead (both its endpoints are generic-root nodes); see that document's `structural-scan` node for the two-parent picture.
 
-Two edge types beyond `required`/`recommended`/`resolved` appear above, both new in ticket 37/44's session: `psalm-taint-analysis`'s two `required-any` rows from `phpstan-level-4`/`psalm`, and `rector-php-set`'s two `required-any` rows from `phpstan-level-0-baseline`/`psalm`. Unlike a `required` edge (every parent must be fulfilled), a `required-any` group only needs **at least one** parent fulfilled. `rector-php-set` reading this directly (rather than relying on it being implicit inside `phpstan-level-0-baseline`'s own Psalm-equivalence fulfilment check — see the *Equivalents* section below) makes it the Rector family's sole direct gate on which static-analysis path was chosen; `rector-dead-code`/`rector-type-coverage` no longer carry their own direct edge to `phpstan-level-0-baseline` (removed, not replaced) — both already have `rector-php-set` as a required parent, which now carries the same gate transitively. See `rector-php-set`'s and `psalm-taint-analysis`'s own node entries below.
+Two edge types beyond `required`/`recommended`/`resolved` appear above, both new in ticket 37/44's session: `psalm-taint-analysis`'s two `required-any` rows from `phpstan-level-4`/`psalm`, and `rector-php-set`'s two `required-any` rows from `phpstan-level-0-baseline`/`psalm`. Unlike a `required` edge (every parent must be fulfilled), a `required-any` group only needs **at least one** parent fulfilled. `rector-php-set` reading this directly (rather than relying on it being implicit inside `phpstan-level-0-baseline`'s own Psalm-equivalence fulfilment check — see the *Equivalents* section below) makes it the gate on which static-analysis path was chosen for `rector-dead-code`/`rector-code-quality`/`rector-early-return`, which no longer carry their own direct edge to `phpstan-level-0-baseline` (removed, not replaced) — all three already have `rector-php-set` as a required parent, which now carries the same gate transitively. `rector-type-coverage`/`rector-phpunit-set` are gated by their sibling Rector nodes instead (`recommended` edges — see their own node entries below), not by this gate at all any more. See `rector-php-set`'s and `psalm-taint-analysis`'s own node entries below.
 
 ## Nodes
 
@@ -371,8 +373,10 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   parent permanently closes every node beneath it (*Nodes* preamble above); rejecting this node on the
   Psalm path would have silently made the entire Rector family unreachable for every Psalm-only target — a
   real behavior change nothing asked for. `rector-dead-code`/`rector-type-coverage` no longer carry that
-  direct edge at all (their gate is now read transitively via `rector-php-set`'s own `required-any`
-  parent), but the underlying reasoning still applies to `rector-php-set` itself: its `required-any`
+  direct edge at all (`rector-dead-code`'s gate is now read transitively via `rector-php-set`'s own
+  `required-any` parent; `rector-type-coverage` no longer carries any tie to this gate at all — a later
+  restructuring moved it onto sibling Rector nodes instead, see that node's own entry), but the underlying
+  reasoning still applies to `rector-php-set` itself: its `required-any`
   parents are `phpstan-level-0-baseline` **and** `psalm` (either fulfilled unlocks it) precisely so a
   Psalm-only target keeps reaching it without depending on `phpstan-level-0-baseline` ever being rejected.
   Mutual exclusion instead targets `phpstan-level-10`, the level chain's own `php-structural-scan` leaf —
@@ -429,7 +433,16 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Tool:** Rector (typing suites)
 - **Purpose:** raise declared type coverage progressively.
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.
-- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `rector-php-set` (ticket 43) is fulfilled **and** both `php-cs-fixer` and `phpstan-level-3` have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, so this node waits on both. Either one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit. The `phpstan-level-3` threshold stays put here (ticket 43 decision) even though the level chain itself now reaches `phpstan-level-10` — level 3 was already judged "strict enough" for reviewable Rector rewrites. Same follow-up as `rector-dead-code` above: no longer carries its own direct required parent on `phpstan-level-0-baseline` — covered transitively via `rector-php-set`'s `required-any` gate.
+- **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `rector-dead-code` **and** `rector-early-return` have both been decided **and** both `php-cs-fixer` and `phpstan-level-3` have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, without dead code removed or control flow flattened first its type-coverage rewrites touch messier code, so this node waits on all three pairs. Any one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit. The `phpstan-level-3` threshold stays put here (ticket 43 decision) even though the level chain itself now reaches `phpstan-level-10` — level 3 was already judged "strict enough" for reviewable Rector rewrites.
+- **No required parent** (as of the `rector-dead-code`/`rector-early-return` restructuring above) — unlike
+  every other node in this family, nothing here directly or transitively requires `rector-php-set` (or,
+  through it, that a static analyzer was chosen) to be *fulfilled*; only decided recommended parents gate
+  it, and a rejected recommended parent still releases its child same as any other recommended edge in
+  this tree (*Nodes* preamble above). In
+  principle this node could become proposable with `rector-dead-code`/`rector-early-return` both rejected
+  and `rector-php-set` never touched at all — an edge case, not a new category of gap (nothing in this tree
+  validates that a rejected node was ever reachable first), but worth naming plainly rather than implying a
+  guarantee that no longer holds.
 
 ### `rector-php-set`
 
@@ -444,12 +457,14 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 - **Required-any parents:** `phpstan-level-0-baseline`, `psalm` (ticket 37/44 follow-up) — either fulfilled
   unlocks this node. Previously this was a single `required` parent on `phpstan-level-0-baseline` alone
   (relying on that node's own Psalm-equivalence branch to also cover the Psalm path implicitly); reading
-  the `required-any` group directly instead makes the OR explicit at the edge level and is now the Rector
-  family's sole direct gate on which static-analysis path was chosen — `rector-dead-code`/
-  `rector-type-coverage` no longer carry their own copy of it (see those nodes' entries above), they read
-  it transitively via their existing required parent on this node. No `php-cs-fixer` recommended parent
-  (unlike the four sibling Rector nodes below) — decided directly with the user; this node is the
-  styling-order exception in the family.
+  the `required-any` group directly instead makes the OR explicit at the edge level and is now the gate on
+  which static-analysis path was chosen for this node's own three direct children —
+  `rector-dead-code`/`rector-code-quality`/`rector-early-return` (see those nodes' own **Required parent**
+  lines) — read it transitively via their required parent on this node. `rector-type-coverage`/
+  `rector-phpunit-set` are *not* among them any more (a later restructuring made them wait on sibling Rector
+  nodes instead — see those nodes' own entries for why they no longer transitively depend on this gate at
+  all). No `php-cs-fixer` recommended parent (unlike the sibling Rector nodes below) — decided directly with
+  the user; this node is the styling-order exception in the family.
 
 ### `rector-code-quality`
 
@@ -471,12 +486,13 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   PHPUnit rule set.
 - **Fulfilment check:** PHPUnit suite enabled and fully applied — no remaining rule findings.
 - **MR scope:** adopted in levels, one MR per level.
-- **Required parents:** `rector-php-set`, `phpunit` — this node rewrites PHPUnit-specific code, so it needs
-  PHPUnit (or its fait-accompli equivalent, Pest, which the `phpunit` node already recognizes) actually
-  adopted first, not just the general PHP-version rule set. The other Rector nodes gate on
-  `rector-php-set` alone since their rewrites aren't tied to one specific tool's presence the way this
-  one's are.
-- **Recommended parent:** `php-cs-fixer`.
+- **Required parent:** `phpunit` — this node rewrites PHPUnit-specific code, so it needs PHPUnit (or its
+  fait-accompli equivalent, Pest, which the `phpunit` node already recognizes) actually adopted first. No
+  longer requires `rector-php-set` directly either (a later restructuring moved that gate to
+  `rector-code-quality`'s recommended parent below) — same "no required tie to the static-analyzer choice
+  any more" situation as `rector-type-coverage`, see that node's entry for the caveat.
+- **Recommended parents:** `rector-code-quality`, `php-cs-fixer` — settle code-quality rewrites first, same
+  non-blocking ordering rationale as `rector-type-coverage`'s new recommended parents above.
 
 ### `rector-early-return`
 

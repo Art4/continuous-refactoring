@@ -120,20 +120,42 @@ class LoadTreeTests(unittest.TestCase):
         # gate directly via required-any(phpstan-level-0-baseline, psalm)
         # instead of relying on it being implicit inside
         # phpstan-level-0-baseline's own Psalm-equivalence fulfilment check.
-        # rector-dead-code/rector-type-coverage no longer carry their own
-        # direct required edge on phpstan-level-0-baseline — they read this
-        # transitively via their existing required parent on rector-php-set.
+        # rector-dead-code/rector-code-quality/rector-early-return no longer
+        # carry their own direct required edge on phpstan-level-0-baseline —
+        # they read this transitively via their existing required parent on
+        # rector-php-set. rector-type-coverage/rector-phpunit-set are no
+        # longer tied to this gate at all (later restructuring moved them
+        # onto sibling Rector nodes instead, via recommended edges — see
+        # test_rector_type_coverage_and_phpunit_set_gate_via_siblings_now).
         tree = load_tree()
         self.assertEqual(
             set(tree["required_any_parents"]["rector-php-set"]),
             {"phpstan-level-0-baseline", "psalm"},
         )
         self.assertEqual(tree["required_parents"]["rector-dead-code"], ["rector-php-set"])
-        self.assertEqual(tree["required_parents"]["rector-type-coverage"], ["rector-php-set"])
+        self.assertEqual(tree["required_parents"]["rector-code-quality"], ["rector-php-set"])
+        self.assertEqual(tree["required_parents"]["rector-early-return"], ["rector-php-set"])
+        self.assertEqual(tree["required_parents"]["rector-type-coverage"], [])
+        self.assertEqual(tree["required_parents"]["rector-phpunit-set"], ["phpunit"])
         # Exactly these two nodes use required-any today.
         self.assertEqual(
             {n for n, parents in tree["required_any_parents"].items() if parents},
             {"psalm-taint-analysis", "rector-php-set"},
+        )
+
+    def test_rector_type_coverage_and_phpunit_set_gate_via_siblings_now(self):
+        # Follow-up restructuring: rector-type-coverage/rector-phpunit-set
+        # lost their direct required: rector-php-set edge, gated instead via
+        # recommended edges from sibling Rector nodes (dead-code/
+        # early-return for type-coverage; code-quality for phpunit-set).
+        tree = load_tree()
+        self.assertEqual(
+            set(tree["recommended_parents"]["rector-type-coverage"]),
+            {"rector-dead-code", "rector-early-return", "php-cs-fixer", "phpstan-level-3"},
+        )
+        self.assertEqual(
+            set(tree["recommended_parents"]["rector-phpunit-set"]),
+            {"rector-code-quality", "php-cs-fixer"},
         )
 
     def test_php_structural_scan_aggregated_away_not_exposed(self):
@@ -1141,16 +1163,19 @@ class RecommendedGateTests(unittest.TestCase):
         return tmp, root
 
     def _p0_fulfilled_files(self):
-        # phpstan-level-0-baseline fulfilled (rector-dead-code's/
-        # rector-type-coverage's required parent); php-cs-fixer and
-        # phpstan-level-3 both stay undecided (neither fulfilled nor
-        # rejected). `.editorconfig` present (ticket 01: php-cs-fixer's own
-        # recommended parent) so php-cs-fixer itself stays proposable here —
-        # its undecided status under test is about rector-dead-code's gate,
-        # not php-cs-fixer's own. `rector.php` fulfils rector-php-set only
-        # (ticket 43: rector-dead-code's/rector-type-coverage's other new
-        # required parent) — no DeadCode/Type markers, so those two stay
-        # unfulfilled, exactly what each test below is probing.
+        # phpstan-level-0-baseline fulfilled (unblocks rector-php-set via its
+        # required-any gate); php-cs-fixer and phpstan-level-3 both stay
+        # undecided (neither fulfilled nor rejected). `.editorconfig` present
+        # (ticket 01: php-cs-fixer's own recommended parent) so php-cs-fixer
+        # itself stays proposable here — its undecided status under test is
+        # about rector-dead-code's gate, not php-cs-fixer's own. `rector.php`
+        # fulfils rector-php-set only (ticket 43) — no DeadCode/Type/
+        # EarlyReturn markers, so rector-dead-code/rector-type-coverage/
+        # rector-early-return all stay unfulfilled, exactly what each test
+        # below is probing. rector-type-coverage no longer has rector-php-set
+        # as a required parent at all (follow-up restructuring) — it's gated
+        # by rector-dead-code/rector-early-return as recommended parents
+        # instead, alongside php-cs-fixer/phpstan-level-3.
         return {
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
@@ -1215,6 +1240,9 @@ class RecommendedGateTests(unittest.TestCase):
         # via the required chain -> counts as phpstan-level-3 "decided" for
         # rector-type-coverage's recommended edge (php-cs-fixer is decided
         # here too, via fulfilment, so it isn't the thing under test).
+        # rector-type-coverage also gained rector-dead-code/rector-early-return
+        # as recommended parents (follow-up restructuring) — decided here via
+        # rejection, since this fixture's rector.php doesn't fulfil either.
         files = self._p0_fulfilled_files()
         files["composer.json"] = json.dumps({"require-dev": {
             "phpstan/phpstan": "^1.0",
@@ -1225,6 +1253,8 @@ class RecommendedGateTests(unittest.TestCase):
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-dead-code.md").write_text("rejected\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-early-return.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-type-coverage", nodes)
         finally:
@@ -1235,7 +1265,10 @@ class RecommendedGateTests(unittest.TestCase):
         try:
             withheld = {w["node"]: set(w["waiting_on"]) for w in withheld_candidates(root)}
             self.assertEqual(withheld["rector-dead-code"], {"php-cs-fixer"})
-            self.assertEqual(withheld["rector-type-coverage"], {"php-cs-fixer", "phpstan-level-3"})
+            self.assertEqual(
+                withheld["rector-type-coverage"],
+                {"rector-dead-code", "rector-early-return", "php-cs-fixer", "phpstan-level-3"},
+            )
         finally:
             tmp.cleanup()
 

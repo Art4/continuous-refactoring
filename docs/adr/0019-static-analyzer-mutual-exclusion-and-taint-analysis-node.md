@@ -143,8 +143,58 @@ tool-specific Rector node's pattern of requiring the tool it rewrites. Added `ph
 parent (plain `required`, not `required-any` — no OR semantics needed here). No `tooling_tree.py` changes
 needed; a plain `required` edge is parsed generically like every other one.
 
+## Decision — Part F: Rector family restructured into two entry points + sibling ordering (next review pass)
+
+Requested directly: `rector-type-coverage` and `rector-phpunit-set` lose their direct `required:
+rector-php-set` edge; `rector-dead-code`, `rector-early-return`, `rector-code-quality` keep it, remaining
+the family's three entry points. Three new `recommended` edges take over instead: `rector-dead-code` →
+`rector-type-coverage`, `rector-early-return` → `rector-type-coverage` (two recommended parents — same
+"gate waits on every recommended parent, not just one" shape `rector-type-coverage` already had for
+`php-cs-fixer`/`phpstan-level-3`), and `rector-code-quality` → `rector-phpunit-set`.
+
+**Real consequence, not glossed over:** `rector-type-coverage` now has **no required parent at all** tying
+it to "a static analyzer was chosen" — only recommended parents, which need only be *decided*, and a
+rejected recommended parent still releases its child (standing behavior throughout this tree). In
+principle a human could pre-reject `rector-dead-code`/`rector-early-return` on a bare project and have
+`rector-type-coverage` become proposable with `rector-php-set` never fulfilled at all. This isn't a new
+category of gap — nothing in this tree validates that a rejected node was ever reachable first — but it is
+a real, deliberate loosening for these two specific nodes, confirmed with the user before implementing
+(unlike the parallel "drop `php-cs-fixer`/`phpunit`'s `php-structural-scan` leaves" request raised in the
+same conversation, which was withdrawn once the equivalent analysis showed it wasn't a safe no-op).
+
+Also required correcting two paragraphs elsewhere in `php-tooling-tree.md` that had (accurately, at the
+time) described `rector-type-coverage` as reading `rector-php-set`'s `required-any` gate transitively — no
+longer true after this restructuring; both were reworded to name the three remaining transitive readers
+(`rector-dead-code`/`rector-code-quality`/`rector-early-return`) and state plainly that
+`rector-type-coverage`/`rector-phpunit-set` are not among them.
+
+No `tooling_tree.py` changes needed — plain `recommended` edges, parsed generically; `_undecided_recommended_parents()`
+already handled multiple recommended parents on one node before this change (`rector-type-coverage`'s
+existing `php-cs-fixer`/`phpstan-level-3` pair). Fixture fallout was real, not cosmetic: four
+`expected/roadmap.json` snapshots (`php-empty`, `php-p0-nonempty`, `php-psalm`,
+`php-project-with-candidates`) needed regenerating — `rector-phpunit-set` (now gated by `phpunit` alone)
+and `rector-type-coverage` reach the 10-step roadmap simulation earlier/differently than before, a genuine
+ordering change, not drift. `scripts/test_tooling_tree.py`'s `RecommendedGateTests` fixture
+(`_p0_fulfilled_files()`) needed two of its dependent tests extended (decide `rector-dead-code`/
+`rector-early-return` where a test needs `rector-type-coverage` reachable) rather than loosened.
+
 ## Considered Options
 
+- **Also drop `php-cs-fixer`/`phpunit`'s direct `php-structural-scan` resolved edges** (Part F, requested
+  alongside the Rector restructuring). Rejected once analyzed and reported back: unlike the redundant edges
+  dropped in Part D, nothing else in the tree guarantees these two get *decided* before `structural-scan`
+  opens if their direct leaf status is removed — a real gate relaxation, not a no-op. Withdrawn once this
+  was surfaced.
+- **Keep the three new Rector edges (`rector-dead-code`/`rector-early-return` → `rector-type-coverage`,
+  `rector-code-quality` → `rector-phpunit-set`) additive, alongside the existing `required: rector-php-set`
+  edges** (Reading A, considered before Part F). Rejected in favor of Reading B (replacement) — confirmed
+  directly: the intent was to change what unblocks `rector-type-coverage`/`rector-phpunit-set`, not just add
+  an ordering hint on top of unchanged gating.
+- **Make the three new Rector edges `required-any` instead of `recommended`** (`rector-type-coverage` has
+  two sources, a natural `required-any` fit). Considered, but `recommended` was chosen to match this
+  family's existing ordering-edge precedent (`php-cs-fixer`'s recommended edges into the same five nodes)
+  rather than introduce a second distinct gating shape for what reads as the same kind of "settle this
+  first" relationship.
 - **Implement the mutual exclusion by literally rejecting `phpstan-level-0-baseline` on the Psalm path**
   (the ticket's original wording). Rejected — see the Rector-family regression above.
 - **A general "choice"/XOR edge type**, for mutual exclusion generally. Rejected: mutual exclusion is
@@ -173,7 +223,10 @@ needed; a plain `required` edge is parsed generically like every other one.
   `out-of-scope/psalm.md` write on the PHPStan path; `phpstan-level-10`'s own resolution (already required
   to fix the underlying bug) was sufficient on its own.
 
-## Consequences (final state, after Parts A–E)
+## Consequences (final state, after Parts A–F)
+
+Part F's own consequences (Rector-family restructuring, fixture/test fallout) are detailed in that section
+above rather than repeated here.
 
 `php-tooling-tree.md`'s `php-structural-scan` gains one new resolved-leaf, net: `psalm-taint-analysis`
 (thirteen leaves total, up from the original twelve — `psalm` was added in Part A and removed again in

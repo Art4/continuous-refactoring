@@ -134,3 +134,17 @@ Resolved during this session's dedicated grilling (2026-08-30):
 > `rector-phpunit-set` now requires `phpunit` directly (a real gap — it previously only required
 > `rector-php-set`, so nothing stopped PHPUnit-specific Rector rewrites being proposed before PHPUnit
 > itself was adopted). Recorded in ADR-0019 Parts D and E.
+
+> **2026-08-30 (third follow-up correction, before merge):** Two more requests in the same review pass.
+> (1) Drop `php-cs-fixer`/`phpunit`'s direct `php-structural-scan` resolved edges too — analyzed and
+> reported back that, unlike the edges dropped above, this one is **not** a safe no-op (nothing else in the
+> tree guarantees either gets *decided* before `structural-scan` opens); withdrawn by the user once this was
+> surfaced, no change made. (2) Restructure the Rector family: `rector-type-coverage`/`rector-phpunit-set`
+> lose their direct `required: rector-php-set` edge, gated instead via new `recommended` edges from sibling
+> Rector nodes (`rector-dead-code`/`rector-early-return` → `rector-type-coverage`, `rector-code-quality` →
+> `rector-phpunit-set`) — confirmed as a deliberate replacement (not additive) after the shorthand request
+> turned out genuinely ambiguous between two readings. Real, named consequence: `rector-type-coverage` now
+> has no required tie to the static-analyzer choice at all, only decided-not-fulfilled recommended parents
+> — confirmed as intended. Required regenerating four `expected/roadmap.json` fixture snapshots (a genuine
+> roadmap-order change, not drift) and extending two `RecommendedGateTests` cases. Recorded in ADR-0019's
+> new Part F.
