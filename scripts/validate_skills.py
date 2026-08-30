@@ -20,6 +20,9 @@ Tier 1 — structural:
   ``references/*.md`` — the suite's own ADRs are internal maintainer docs that
   never ship with a skill; a skill states the rule inline instead of citing
   the decision that produced it
+- ``.scratch/`` file references and ``ticket N`` / ``PR #N`` citations are
+  forbidden the same way — this suite's own internal issue tracker and forge
+  history, never shipped with a skill; state the fact inline instead
 - glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
   prose uses, e.g. defining the seam or quoting a user's words)
@@ -236,6 +239,24 @@ def adr_issues(text, skill=""):
             skill or f"ADR-{num}",
             f"skill prose references ADR-{num} — suite ADRs are internal maintainer docs, "
             "never shipped with the skill; state the rule inline instead",
+        ))
+    return issues
+
+
+def ticket_ref_issues(text, skill=""):
+    """'ticket N' / 'PR #N' / 'pull request #N' — this suite's own internal
+    issue-tracker and forge-PR numbers, same category as an ADR-NNNN citation
+    (adr_issues above): meaningful to a maintainer working in this repo's
+    history, not to a target repo reading the shipped skill. Plain prose, not
+    backtick-restricted (unlike scratch_ref_issues) — these aren't file
+    paths, they're inline citations."""
+    issues = []
+    for m in re.finditer(r"\b[Tt]icket\s+\d+\b|\bPR\s*#\d+\b|\bpull request\s*#\d+\b", text):
+        ref = m.group(0)
+        issues.append(Issue(
+            skill or ref,
+            f"skill prose references '{ref}' — ticket/PR numbers are internal maintainer "
+            "tracking, never shipped with the skill; state the fact inline instead",
         ))
     return issues
 
@@ -590,13 +611,14 @@ def validate_repo(repo_root):
         issues += local_ref_issues(text, repo_root, skill=d.name)
         issues += adr_issues(text, skill=d.name)
         issues += scratch_ref_issues(text, skill=d.name)
+        issues += ticket_ref_issues(text, skill=d.name)
 
         # Every file a skill ships under references/ — not just its top-level
-        # *.md — is in scope for the same three checks: a reference doc or
+        # *.md — is in scope for the same four checks: a reference doc or
         # script can live nested (e.g. php-tooling-tree/composer.md), and a
-        # non-.md file (e.g. tooling_tree.py) can carry an ADR or .scratch/
-        # citation in its own docstrings/comments just as easily as prose
-        # can. Skip compiled bytecode and its cache directory — never
+        # non-.md file (e.g. tooling_tree.py) can carry an ADR, .scratch/, or
+        # ticket/PR citation in its own docstrings/comments just as easily as
+        # prose can. Skip compiled bytecode and its cache directory — never
         # source, never shipped intentionally.
         references_dir = d / "references"
         for ref_file in sorted(references_dir.rglob("*")):
@@ -607,6 +629,7 @@ def validate_repo(repo_root):
             issues += local_ref_issues(ref_text, repo_root, skill=ref_skill)
             issues += adr_issues(ref_text, skill=ref_skill)
             issues += scratch_ref_issues(ref_text, skill=ref_skill)
+            issues += ticket_ref_issues(ref_text, skill=ref_skill)
 
     issues += vocab_issues(glossary.terms, glossary.avoid, skills_text, set(VOCAB_ALLOW))
 

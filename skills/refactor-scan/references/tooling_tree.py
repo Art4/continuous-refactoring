@@ -30,16 +30,15 @@ _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 
 # Ordinary required-gated nodes that must never be surfaced as a proposable
 # candidate, regardless of their own fulfilled state: `git` (never an MR),
-# `static-code-analyzer` (pure plumbing, ticket 43), `psalm` (recognition-only,
-# ticket 43 — same fait-accompli shape Pest already gets for `phpunit`, just
-# now its own node instead of embedded logic). Resolved-gated aggregation
-# nodes (`php-structural-scan`) are excluded separately via
+# `static-code-analyzer` (pure plumbing), `psalm` (recognition-only — same
+# fait-accompli shape Pest already gets for `phpunit`). Resolved-gated
+# aggregation nodes (`php-structural-scan`) are excluded separately via
 # `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
 # required-gated nodes instead.
 _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm"}
 
-# The PHPStan level chain (ticket 43: extended from 1..3 to 1..10) — used by
-# roadmap()'s per-level empty-baseline gate and its open-chain filler.
+# The PHPStan level chain (1..10) — used by roadmap()'s per-level
+# empty-baseline gate and its open-chain filler.
 _PHPSTAN_LEVEL_NODES = [f"phpstan-level-{i}" for i in range(1, 11)]
 
 
@@ -93,7 +92,7 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
     # down, by php-structural-scan (the PHP tree's own aggregation node
     # feeding it) — see tooling-tree.md's structural-scan node.
     resolved_parents: dict[str, list[str]] = {n: [] for n in nodes}
-    # `required-any` parents (ticket 37): unlike `required` (every parent
+    # `required-any` parents: unlike `required` (every parent
     # must be fulfilled), a node with required-any parents is unblocked once
     # *at least one* of them is fulfilled — e.g. psalm-taint-analysis is
     # proposed once either phpstan-level-4 or psalm is fulfilled, whichever
@@ -189,8 +188,8 @@ def _has_real_require_dep(composer: dict | None) -> bool:
 def _has_ci_job_invoking(repo: pathlib.Path, needle: str) -> bool:
     """True if any CI workflow file (GitHub Actions or GitLab CI) contains
     `needle` as a literal substring. The conservative approximation shared by
-    every self-wired CI-gate check in this module (`composer-audit`, and
-    since ticket 34, `phpunit`/`phpstan-level-0-baseline`): presence of the
+    every self-wired CI-gate check in this module (`composer-audit`,
+    `phpunit`/`phpstan-level-0-baseline`): presence of the
     invocation, not proof the job actually fails the pipeline on a red
     result."""
     for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
@@ -255,7 +254,7 @@ def _has_loop_config(repo: pathlib.Path) -> bool:
 
 
 def _has_editorconfig(repo: pathlib.Path) -> bool:
-    """editorconfig's fulfilment check (ticket 01): .editorconfig exists at
+    """editorconfig's fulfilment check: .editorconfig exists at
     the repo root. Pure presence check, no equivalent-detection nuance."""
     return (repo / ".editorconfig").exists()
 
@@ -304,8 +303,8 @@ def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ..
     return _parse_min_version(m.group(1))
 
 
-# Ticket 31: the oldest PHP version each of the five deterministic PHP
-# tooling leaves has ever run on, across every published major line of the
+# The oldest PHP version each of the five deterministic PHP tooling leaves
+# has ever run on, across every published major line of the
 # tool — below this floor, no version of the tool (however old or
 # unmaintained) can be installed at all, so a propose → design → implement
 # → reject cycle can never land it. Checked once per pass instead of once
@@ -333,8 +332,8 @@ _LEAF_MIN_PHP_VERSION = {
 def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     """Check the target's current PHP floor once against each of
     `_LEAF_MIN_PHP_VERSION`'s five leaves, instead of proposing (and
-    eventually rejecting) each one individually five separate times
-    (ticket 31). Returns the leaves whose minimum isn't met yet, each with a
+    eventually rejecting) each one individually five separate times.
+    Returns the leaves whose minimum isn't met yet, each with a
     human-readable reason — `next_candidates()` and `roadmap()` skip these,
     and `detect_and_roadmap()` surfaces the list so a caller can report the
     fact in one pass instead of it silently vanishing.
@@ -343,7 +342,7 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     entry written for a blocked leaf. The check is cheap and re-derived
     fully from `composer.json` every pass, so nothing is lost by not
     persisting it — and that directory otherwise records a genuine human/
-    agent rejection decision (ticket 10's mechanical-reversal design), not a
+    agent rejection decision (a mechanical-reversal design), not a
     mechanical fact already on disk. Once the target's PHP floor rises, a
     previously-blocked leaf is simply unblocked next pass; there is nothing
     to reverse. The one consequence worth naming: four of these five leaves
@@ -541,14 +540,14 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
-    # editorconfig (ticket 01)
+    # editorconfig
     has_editorconfig = _has_editorconfig(repo)
     set_node("editorconfig", has_editorconfig, ".editorconfig present" if has_editorconfig else "no .editorconfig")
     # php-cs-fixer
     cs_fulfilled = has_cs_dep and has_cs_config
     set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)
     # phpunit — adopted AND, once ci-runner is fulfilled, actually gated in
-    # CI (ticket 34's self-wiring: folded into this node's own fulfilment
+    # CI (self-wiring: folded into this node's own fulfilment
     # check instead of a separate CI-job node). No CI yet still fulfils the
     # node on adoption alone — nothing to wire in until CI exists.
     phpunit_adopted = has_phpunit or has_pest or has_phpunit_xml
@@ -581,17 +580,15 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         "CI job runs composer audit" if audit_fulfilled else "no CI job runs composer audit yet",
         has_real_dep=has_real_dep,
     )
-    # static-code-analyzer (ticket 43): pure organizational/plumbing node,
+    # static-code-analyzer: pure organizational/plumbing node,
     # always fulfilled once composer is — no independent state of its own.
     set_node(
         "static-code-analyzer",
         out["composer"]["fulfilled"],
         "composer fulfilled" if out["composer"]["fulfilled"] else "waiting on composer",
     )
-    # psalm (ticket 43): the raw detection formerly inlined into
-    # phpstan-level-0-baseline's own equivalents branch, now its own node —
-    # recognition-only, never proposed (see _NEVER_PROPOSED below). No
-    # CI-gating requirement yet, same as before the split.
+    # psalm: recognition-only, never proposed (see _NEVER_PROPOSED below). No
+    # CI-gating requirement.
     psalm_fulfilled = has_psalm_dep and has_psalm_cfg
     set_node(
         "psalm",
@@ -604,9 +601,9 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # phpstan-level-0-baseline
     # Psalm equivalence: fulfilled without phpstan whenever the `psalm` node
     # (above) is fulfilled — reads that node's computed state instead of
-    # re-deriving the raw detection here (ticket 43).
+    # re-deriving the raw detection here.
     psalm_fulfils_p0 = psalm_fulfilled
-    # ticket 34 self-wiring: once ci-runner is fulfilled, this node also
+    # Self-wiring: once ci-runner is fulfilled, this node also
     # requires a CI job that actually invokes phpstan. The invocation is
     # level-independent (`vendor/bin/phpstan analyse` regardless of the
     # configured level), so gating it once here covers the whole
@@ -626,9 +623,8 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     else:
         set_node("phpstan-level-0-baseline", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists)
 
-    # phpstan-level-1..10 (ticket 43 extended the chain from 1..3 to 1..10;
-    # phpstan-level-10 is now the chain's resolved-leaf into
-    # php-structural-scan, see that node)
+    # phpstan-level-1..10 — phpstan-level-10 is the chain's resolved-leaf
+    # into php-structural-scan, see that node
     # For fulfilled check: level >= N
     for lvl in range(1, 11):
         node = f"phpstan-level-{lvl}"
@@ -641,7 +637,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         # We expose details
         set_node(node, fulfilled, f"level {phpstan_level} >= {lvl}" if fulfilled else f"level {phpstan_level} < {lvl} or no phpstan", level=phpstan_level, baseline_empty=baseline_empty)
 
-    # phpstan-deprecation-rules (ticket 43): dependency-presence approximation,
+    # phpstan-deprecation-rules: dependency-presence approximation,
     # same simplification style as php-cs-fixer's dep+config check — no real
     # `vendor/bin/phpstan analyse` invocation in this dry-run parser.
     has_deprecation_rules_dep = _has_dep(composer, "phpstan/phpstan-deprecation-rules")
@@ -651,7 +647,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         "phpstan-deprecation-rules present" if has_deprecation_rules_dep else "no phpstan-deprecation-rules dep",
     )
 
-    # psalm-taint-analysis (ticket 37): security-focused taint analysis,
+    # psalm-taint-analysis: security-focused taint analysis,
     # orthogonal to which general analyzer was chosen — required-any parent
     # (phpstan-level-4 OR psalm) is checked separately by _is_unblocked(),
     # this only computes the node's own fulfilment. Deliberately reuses
@@ -698,7 +694,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         has_rector_early_return = "EarlyReturn" in txt or "early-return" in txt.lower()
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
-    # rector-php-set and its 3 children (ticket 43): same has_rector-gated
+    # rector-php-set and its 3 children: same has_rector-gated
     # substring-detection style as dead-code/type-coverage above.
     set_node("rector-php-set", has_rector_php_set, "rector php-version set present" if has_rector_php_set else "no rector php-version set", has_rector=has_rector)
     set_node("rector-code-quality", has_rector_code_quality, "rector code-quality set present" if has_rector_code_quality else "no rector code-quality set", has_rector=has_rector)
@@ -733,7 +729,7 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     for p in req:
         if not fulfilled.get(p, {}).get("fulfilled", False):
             return False, f"blocked by required parent {p}"
-    # required-any (ticket 37): at least one, not all, must be fulfilled.
+    # required-any: at least one, not all, must be fulfilled.
     # Combines with the ordinary required parents above via AND (both checks
     # must pass); within this group the parents combine via OR.
     req_any = tree["required_any_parents"].get(node, [])
@@ -818,7 +814,7 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
             if node in rejected:
                 continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             if node in php_floor_blocked:
-                continue  # ticket 31 — target's PHP floor doesn't meet this leaf's known minimum yet
+                continue  # target's PHP floor doesn't meet this leaf's known minimum yet
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
@@ -862,7 +858,7 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
         if detected.get(node, {}).get("fulfilled", False) or node in rejected:
             continue
         if node in php_floor_blocked:
-            continue  # ticket 31 — no recommended edge targets these leaves today, but stays consistent if one ever does
+            continue  # no recommended edge targets these leaves today, but stays consistent if one ever does
         ok, _why = _is_unblocked(node, tree, detected)
         if not ok:
             continue
@@ -948,7 +944,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             if node in rejected:
                 continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             if node in php_floor_blocked:
-                continue  # ticket 31 — target's PHP floor doesn't meet this leaf's known minimum yet
+                continue  # target's PHP floor doesn't meet this leaf's known minimum yet
             if tree["resolved_parents"].get(node):
                 # `resolved` gate: every resolved-parent leaf must be
                 # fulfilled OR rejected — not the standard required-parent
@@ -973,7 +969,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             # phpunit fulfilled implies a runner is adopted, so proposing this one too is redundant.
             if node == "test-runner-if-missing" and sim_fulfilled.get("phpunit"):
                 continue
-            # No symmetric skip the other way (ticket 34): test-runner-if-missing fulfilled no
+            # No symmetric skip the other way: test-runner-if-missing fulfilled no
             # longer implies phpunit fulfilled — a runner can be adopted (satisfying
             # test-runner-if-missing) while phpunit's own CI-gating requirement is still open, and
             # that's a genuinely different, still-proposable candidate (wire it into CI).
@@ -985,8 +981,8 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 sim_ok, sim_why = _composer_audit_extra_gate(has_real_dep, tree, sim_fulfilled, rejected)
                 if not sim_ok:
                     continue
-            # For phpstan levels, additional empty-baseline gate (ticket 43:
-            # chain extended from 1..3 to 1..10, same rule throughout)
+            # For phpstan levels, additional empty-baseline gate (same rule
+            # throughout the 1..10 chain)
             if node in _PHPSTAN_LEVEL_NODES:
                 # Need predecessor fulfilled with empty baseline
                 # Predecessor mapping: p1 needs p0 empty, p2 needs p1 empty, etc.

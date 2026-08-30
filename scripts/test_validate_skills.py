@@ -271,6 +271,32 @@ class ScratchRefTests(unittest.TestCase):
         self.assertEqual(vs.scratch_ref_issues("Some scratch work happened here."), [])
 
 
+class TicketRefTests(unittest.TestCase):
+    def test_ticket_ref_flagged(self):
+        issues = vs.ticket_ref_issues("Fixed in ticket 37.")
+        self.assertTrue(any("ticket 37" in i.message for i in issues))
+
+    def test_capitalized_ticket_ref_flagged(self):
+        issues = vs.ticket_ref_issues("Ticket 43 extended the chain.")
+        self.assertTrue(any("Ticket 43" in i.message for i in issues))
+
+    def test_pr_ref_flagged(self):
+        issues = vs.ticket_ref_issues("See PR #28 for details.")
+        self.assertTrue(any("PR #28" in i.message for i in issues))
+
+    def test_pull_request_ref_flagged(self):
+        issues = vs.ticket_ref_issues("Discussed in pull request #28.")
+        self.assertTrue(any("pull request #28" in i.message for i in issues))
+
+    def test_no_ticket_refs_ok(self):
+        self.assertEqual(vs.ticket_ref_issues("No internal tracking references here."), [])
+
+    def test_plain_ticket_word_without_number_not_flagged(self):
+        # "ticket" as a bare noun (e.g. glossary avoid-synonym lists) isn't
+        # a citation — only a number after it makes this a reference.
+        self.assertEqual(vs.ticket_ref_issues("_Avoid_: task, ticket, todo"), [])
+
+
 class VocabTests(unittest.TestCase):
     def test_glossary_parsed(self):
         glossary = vs.parse_glossary(
