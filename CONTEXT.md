@@ -32,6 +32,14 @@ _Avoid_: hard edge, blocking edge
 The counterpart that gates on a decision rather than on fulfilment (ADR-0016): a node is proposed only once every parent linked by a recommended edge is _decided_ — fulfilled, or rejected. A rejected recommended parent still releases the child instead of closing it, unlike a required parent; the rejected parent is never re-proposed. A recommended parent that hasn't been reached yet at all counts as undecided too, withholding the child just the same as one that's merely sitting proposed-but-unactioned.
 _Avoid_: soft edge, nice-to-have edge, non-blocking edge
 
+**Required-any edge**:
+An OR variant of the required edge (ADR-0019): a node with required-any parents is proposed once _at least one_ of them is fulfilled, not all — distinct from a **choice** (below), which is about mutual exclusion between siblings, not about unlocking a downstream child from either side. Combines with a node's ordinary required parents (if any) via AND between the two edge types, OR within the required-any group itself.
+_Avoid_: optional required edge, either-or edge
+
+**Choice**:
+Two or more sibling nodes under a shared required parent where adopting one makes the others out-of-scope by design — recorded the same way any other rejection is, via a `docs/refactoring/out-of-scope/<node>.md` entry for the unchosen sibling(s), not a separate mechanism. The tree has no dedicated XOR primitive; a choice is just an ordinary sibling pair plus the convention that picking one means rejecting the rest.
+_Avoid_: XOR, either-or
+
 **Hot spot**:
 A part of the codebase that keeps appearing in change history — the primary place to look for candidates.
 _Avoid_: problem area, pain point

@@ -26,7 +26,7 @@ GENERIC_TREE_MD = _HERE / "tooling-tree.md"
 # reached outside the suite's own test harness.
 REPO_ROOT = _HERE.parents[2]  # references -> refactor-scan -> skills -> repo root
 
-_VALID_EDGE_TYPES = ("required", "recommended", "resolved")
+_VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 
 # Ordinary required-gated nodes that must never be surfaced as a proposable
 # candidate, regardless of their own fulfilled state: `git` (never an MR),
@@ -93,11 +93,21 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
     # down, by php-structural-scan (the PHP tree's own aggregation node
     # feeding it) — see tooling-tree.md's structural-scan node.
     resolved_parents: dict[str, list[str]] = {n: [] for n in nodes}
+    # `required-any` parents (ticket 37): unlike `required` (every parent
+    # must be fulfilled), a node with required-any parents is unblocked once
+    # *at least one* of them is fulfilled — e.g. psalm-taint-analysis is
+    # proposed once either phpstan-level-4 or psalm is fulfilled, whichever
+    # general-analysis path the target took. Ordinary required parents (if
+    # any) on the same node must still all be fulfilled too — the two lists
+    # combine with AND between them, OR within this one.
+    required_any_parents: dict[str, list[str]] = {n: [] for n in nodes}
     for e in edges:
         if e["type"] == "required":
             required_parents[e["to"]].append(e["from"])
         elif e["type"] == "recommended":
             recommended_parents[e["to"]].append(e["from"])
+        elif e["type"] == "required-any":
+            required_any_parents[e["to"]].append(e["from"])
         else:
             resolved_parents[e["to"]].append(e["from"])
     # A resolved-gated node whose own resolved-ness only feeds *another*
@@ -124,6 +134,7 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
         "nodes": nodes,
         "order": order,
         "required_parents": required_parents,
+        "required_any_parents": required_any_parents,
         "recommended_parents": recommended_parents,
         "resolved_parents": resolved_parents,
         "exposed_resolved_gate_nodes": exposed_resolved_gate_nodes,
@@ -640,6 +651,31 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         "phpstan-deprecation-rules present" if has_deprecation_rules_dep else "no phpstan-deprecation-rules dep",
     )
 
+    # psalm-taint-analysis (ticket 37): security-focused taint analysis,
+    # orthogonal to which general analyzer was chosen — required-any parent
+    # (phpstan-level-4 OR psalm) is checked separately by _is_unblocked(),
+    # this only computes the node's own fulfilment. Deliberately reuses
+    # has_psalm_dep/has_psalm_cfg (already computed above for the `psalm`
+    # node) rather than re-deriving them — same dep+config signal, disjoint
+    # concern (taint mode is a CI-invocation flag, not a config difference),
+    # so the CI check below is what actually disambiguates this node from a
+    # target that merely adopted Psalm as its general analyzer.
+    taint_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "vendor/bin/psalm --taint-analysis")
+    taint_fulfilled = has_psalm_dep and has_psalm_cfg and taint_ci_ok
+    if taint_fulfilled:
+        taint_reason = "vimeo/psalm + psalm.xml present, --taint-analysis gated in CI"
+    elif has_psalm_dep and has_psalm_cfg:
+        taint_reason = "psalm present but --taint-analysis not gated in CI"
+    else:
+        taint_reason = "no psalm dep/config"
+    set_node(
+        "psalm-taint-analysis",
+        taint_fulfilled,
+        taint_reason,
+        has_psalm_dep=has_psalm_dep,
+        has_psalm_cfg=has_psalm_cfg,
+    )
+
     # rector
     # Fulfilment: dead-code suite enabled and fully applied — we approximate as False unless rector.php contains dead-code set
     has_rector = (repo / "rector.php").exists() or (repo / "rector.neon").exists()
@@ -697,6 +733,12 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     for p in req:
         if not fulfilled.get(p, {}).get("fulfilled", False):
             return False, f"blocked by required parent {p}"
+    # required-any (ticket 37): at least one, not all, must be fulfilled.
+    # Combines with the ordinary required parents above via AND (both checks
+    # must pass); within this group the parents combine via OR.
+    req_any = tree["required_any_parents"].get(node, [])
+    if req_any and not any(fulfilled.get(p, {}).get("fulfilled", False) for p in req_any):
+        return False, f"blocked — none of required-any parents fulfilled: {', '.join(req_any)}"
     return True, "required parents fulfilled"
 
 
@@ -974,6 +1016,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             break
         if best:
             req = tree["required_parents"].get(best, [])
+            req_any = tree["required_any_parents"].get(best, [])
             rec = tree["recommended_parents"].get(best, [])
             # Outlook note for recommended parents missing
             outlook = ""
@@ -982,7 +1025,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 if not fulfilled.get(rp, False) and rp not in [r["node"] for r in result]:
                     outlook = f" | outlook: would benefit from {rp} (recommended) — still proposable"
                     break
-            result.append({"n": len(result) + 1, "node": best, "type": "tooling", "required_parents": req, "recommended_parents": rec, "reason": best_reason + outlook})
+            result.append({"n": len(result) + 1, "node": best, "type": "tooling", "required_parents": req, "required_any_parents": req_any, "recommended_parents": rec, "reason": best_reason + outlook})
             # Do not actually mutate repo; just mark fulfilled for simulation
             continue
         # No tooling node unblocked -> fill with structural candidates, but

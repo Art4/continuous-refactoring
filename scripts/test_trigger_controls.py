@@ -72,7 +72,10 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
         # `resolved` parent counts either way (ADR-0008). The chain now
         # extends to level 10 (was 3), and phpstan-deprecation-rules is
         # rejected too (its required parent, phpstan-level-5, never fulfils
-        # under this target's level-0 ceiling).
+        # under this target's level-0 ceiling). Ticket 37: `psalm` is also
+        # rejected here — the mutual-exclusion counterpart of this target's
+        # chosen PHPStan path, since `psalm` is now a php-structural-scan leaf
+        # too.
         self.assertEqual(
             sorted(detected["structural-scan"]["details"]["rejected"]),
             [
@@ -87,6 +90,7 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
                 "phpstan-level-7",
                 "phpstan-level-8",
                 "phpstan-level-9",
+                "psalm",
             ],
         )
 
