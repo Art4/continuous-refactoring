@@ -12,16 +12,23 @@ and a same-day follow-up correction round (Part C) found while reviewing the res
 
 ## Decision — Part A: mutual exclusion (ticket 37)
 
-`psalm` becomes a thirteenth `php-structural-scan` resolved-leaf, alongside `phpstan-level-10`. Whichever
-static-analysis path a target commits to, the introducing action also records the other side's leaf as
-out-of-scope — reusing the existing `docs/refactoring/out-of-scope/<node>.md` rejection convention, no new
-rejection machinery:
+*(Superseded in one respect by Part D below, found the same day before merge: `psalm` does **not** become
+a resolved-leaf after all — a dedicated leaf for it turned out to be redundant. The rest of this section —
+the PHPStan-path/Psalm-path asymmetry, the correction on `phpstan-level-0-baseline`'s equivalence — still
+stands; only the "PHPStan path... commits `out-of-scope/psalm.md`" bullet below is dropped. See Part D.)*
 
-- **PHPStan path:** `phpstan-level-0-baseline`'s introduce MR also commits `out-of-scope/psalm.md`.
+Originally: `psalm` becomes a thirteenth `php-structural-scan` resolved-leaf, alongside `phpstan-level-10`.
+Whichever static-analysis path a target commits to, the introducing action also records the other side's
+leaf as out-of-scope — reusing the existing `docs/refactoring/out-of-scope/<node>.md` rejection convention,
+no new rejection machinery:
+
+- ~~**PHPStan path:** `phpstan-level-0-baseline`'s introduce MR also commits `out-of-scope/psalm.md`.~~
+  Dropped in Part D — no longer needed once `psalm` isn't a leaf.
 - **Psalm path:** since `psalm` has `MR scope: none` (recognition-only, no tree-proposed MR to attach a
   write to), the first scan pass that recognizes it fulfilled writes `out-of-scope/phpstan-level-10.md` if
   not already present — housekeeping performed by the scanning agent, not a code-level write inside
-  `tooling_tree.py` (which stays a pure read-only detector).
+  `tooling_tree.py` (which stays a pure read-only detector). **Still current** — this is the part that
+  actually fixes the bug (see Part D).
 
 **Correction to the ticket's original wording, made during this session's grilling:** the ticket's "What to
 build" text said `phpstan-level-0-baseline`'s Psalm-equivalence branch would be "removed/superseded."
@@ -30,11 +37,11 @@ Implemented literally, that means rejecting `phpstan-level-0-baseline` itself on
 everything beneath it. That would silently make the entire Rector family unreachable for every Psalm-only
 target, a real regression with no prior demand for it. **Decision: keep the equivalence intact.**
 `phpstan-level-0-baseline`'s fulfilment check keeps reading "PHPStan path OR `psalm` fulfilled" exactly as
-ADR-0018 built it. Mutual exclusion targets only the two `php-structural-scan` leaves — `psalm` and
-`phpstan-level-10` — never `phpstan-level-0-baseline` itself.
+ADR-0018 built it. Mutual exclusion targets `phpstan-level-10` (originally: `phpstan-level-10` and `psalm`
+together — see Part D) — never `phpstan-level-0-baseline` itself.
 
-No `tooling_tree.py` code changes were needed for this part beyond the new `psalm` → `php-structural-scan`
-resolved edge row in `php-tooling-tree.md`'s edge table — `load_tree()`/`_parse_edges()` already parse
+No `tooling_tree.py` code changes were needed for this part beyond the (later dropped, Part D) `psalm` →
+`php-structural-scan` resolved edge row in `php-tooling-tree.md`'s edge table — `load_tree()`/`_parse_edges()` already parse
 `resolved` edges generically.
 
 ## Decision — Part B: `psalm-taint-analysis` (ticket 44)
@@ -57,27 +64,27 @@ narrowly:
 
 `psalm-taint-analysis`'s two `required-any` parents are `phpstan-level-4` and `psalm`. Its fulfilment check
 mirrors `phpstan-level-0-baseline`'s ticket-34 CI-self-wiring shape: `vimeo/psalm` + committed `psalm.xml`
-+ (once `ci-runner` is fulfilled) a CI job invoking `vendor/bin/psalm --taint-analysis`. It **is** the
-fourteenth `php-structural-scan` resolved-leaf — see Part C below (corrected from this ADR's original
-"not a resolved-leaf" claim, found wrong the same session it was written).
++ (once `ci-runner` is fulfilled) a CI job invoking `vendor/bin/psalm --taint-analysis`. It **is** a
+`php-structural-scan` resolved-leaf — see Part C below (corrected from this ADR's original "not a
+resolved-leaf" claim, found wrong the same session it was written).
 
 **Known cosmetic wrinkle, accepted rather than engineered around:** adopting `psalm-taint-analysis` on the
 PHPStan path installs `vimeo/psalm` + `psalm.xml`, which makes the `psalm` node's own live-detected
-`fulfilled` flag incidentally read `true` too — even though a prior `out-of-scope/psalm.md`
-mutual-exclusion rejection (Part A) is still in force. This is harmless: rejection checks
-(`_rejected_nodes()`/`_is_effectively_rejected()`) read the out-of-scope file directly, independent of the
-detected-fulfilled flag. Not fixed by disambiguating the `psalm` node's detection further — the CI
-invocation string is already what actually distinguishes `psalm-taint-analysis`'s own fulfilment from
-`psalm`'s, and adding detection complexity to `psalm` itself for a purely cosmetic readout wasn't judged
-worth it.
+`fulfilled` flag incidentally read `true` too. Not fixed by disambiguating the `psalm` node's detection
+further — the CI invocation string is already what actually distinguishes `psalm-taint-analysis`'s own
+fulfilment from `psalm`'s, and adding detection complexity to `psalm` itself for a purely cosmetic readout
+wasn't judged worth it. *(This paragraph originally explained why an `out-of-scope/psalm.md`
+mutual-exclusion rejection stays authoritative regardless — moot after Part D, which established that no
+such file is ever written in the first place.)*
 
 ## Decision — Part C: follow-up correction (same session)
 
 Discussing the result surfaced two further corrections before this ADR's underlying PR was merged — both
 edge-table/prose-only, no `tooling_tree.py` code change needed beyond what Part B already built:
 
-- **`psalm-taint-analysis` is a `php-structural-scan` resolved-leaf after all** (the fourteenth, alongside
-  `psalm`'s thirteenth). Part B's original "not a resolved-leaf — security-scan addition, orthogonal to
+- **`psalm-taint-analysis` is a `php-structural-scan` resolved-leaf after all** (the fourteenth at the time
+  this was written — back to thirteen after Part D drops `psalm`'s own leaf). Part B's original "not a
+  resolved-leaf — security-scan addition, orthogonal to
   structural-quality scope" reasoning didn't survive comparison to `composer-audit`, already one of these
   leaves and itself a pure security tool (dependency-vulnerability scanning). The actual criterion
   (`tooling-tree.md`'s `structural-scan` node: "hold structural refactoring back until deterministic
@@ -94,6 +101,47 @@ edge-table/prose-only, no `tooling_tree.py` code change needed beyond what Part 
   being duplicated across three nodes, and makes the Rector family's Psalm-path reachability independent
   of `phpstan-level-0-baseline`'s own fulfilled state entirely (previously the equivalence was the *only*
   path; now `psalm` unblocks `rector-php-set` directly too).
+
+## Decision — Part D: drop `psalm`'s resolved-leaf (same day, before merge)
+
+Reviewing Part A/C's result together surfaced that `psalm`'s own `php-structural-scan` resolved-leaf is
+redundant. The actual bug (`phpstan-level-10` never resolving on the Psalm path) is already fixed by the
+mutual-exclusion housekeeping on `psalm`'s own node entry, which writes `out-of-scope/phpstan-level-10.md`
+— that alone is sufficient on both paths:
+
+- **PHPStan path:** `phpstan-level-10` resolves normally (fulfilled via the level chain, or rejected if
+  capped, e.g. `php-clean`) — never depended on `psalm` at all.
+- **Psalm path:** `phpstan-level-10` resolves via the existing rejection housekeeping — never depended on
+  `psalm` being its own leaf either.
+
+The only thing `psalm`'s leaf membership ever caused was extra ceremony: on the PHPStan path, `psalm`
+itself is never naturally fulfilled, so making it a leaf meant something had to write
+`out-of-scope/psalm.md` just to resolve *that* leaf — a rejection whose only purpose was to satisfy a leaf
+that didn't need to exist. **Decision: remove the `psalm` → `php-structural-scan` resolved edge**, and with
+it the PHPStan-path `out-of-scope/psalm.md` write (Part A's now-struck bullet above). The Psalm-path write
+to `out-of-scope/phpstan-level-10.md` stays — that one is load-bearing.
+
+This doesn't undermine ticket 37's original "first-class, humanly-inspectable decision" motivation (Part
+A's *Why* #1) — that's already satisfied by the tree structure itself (`static-code-analyzer` with
+`phpstan-level-0-baseline`/`psalm` as explicit siblings, built in ADR-0018/ticket 43), not by the
+resolved-edge/rejection mechanism, which was only ever motivated by the `phpstan-level-10` gating bug
+(*Why* #2).
+
+**`psalm-taint-analysis`'s "Co-presence" bullet needed a rewrite, not just a deletion:** it previously
+explained why its incidental flip of `psalm`'s live-detected `fulfilled` flag (installing
+`vimeo/psalm`+`psalm.xml` on the PHPStan path) was harmless *because* a prior `out-of-scope/psalm.md`
+rejection stayed authoritative. With that file never written, the bullet now explains instead that nothing
+depends on `psalm.fulfilled` being `false` on the PHPStan path any more — not `rector-php-set`'s
+`required-any` gate (already satisfied via `phpstan-level-0-baseline` there regardless), not any
+resolved-leaf (`psalm` isn't one).
+
+## Decision — Part E: `rector-phpunit-set` requires `phpunit` (same review pass)
+
+Unrelated to Parts A–D, raised in the same review: `rector-phpunit-set` (Rector's PHPUnit-modernization
+rule set) had only `rector-php-set` as a required parent — no edge to `phpunit` at all, unlike every other
+tool-specific Rector node's pattern of requiring the tool it rewrites. Added `phpunit` as a second required
+parent (plain `required`, not `required-any` — no OR semantics needed here). No `tooling_tree.py` changes
+needed; a plain `required` edge is parsed generically like every other one.
 
 ## Considered Options
 
@@ -120,29 +168,38 @@ edge-table/prose-only, no `tooling_tree.py` code change needed beyond what Part 
   `required`/direct edges, instead of replacing them.** Rejected: functionally a no-op — a `required-any`
   group containing a node that's already a plain `required` parent is always trivially satisfied whenever
   the `required` check already passes, so it would add prose complexity for zero behavior change.
+- **Keep `psalm` as its own `php-structural-scan` resolved-leaf** (this ADR's original Part A decision).
+  Rejected on same-day review (Part D) — the only thing it ever bought was an extra, purely ceremonial
+  `out-of-scope/psalm.md` write on the PHPStan path; `phpstan-level-10`'s own resolution (already required
+  to fix the underlying bug) was sufficient on its own.
 
-## Consequences
+## Consequences (final state, after Parts A–E)
 
-`php-tooling-tree.md` gains two new resolved edges (`psalm` and `psalm-taint-analysis` →
-`php-structural-scan`, fourteen leaves total), four `required-any` edges across two nodes
-(`psalm-taint-analysis`: `phpstan-level-4`/`psalm`; `rector-php-set`: `phpstan-level-0-baseline`/`psalm`),
-loses three now-redundant direct `required: phpstan-level-0-baseline` edges (`rector-dead-code`,
-`rector-type-coverage`, `rector-php-set` itself), mutual-exclusion MR-scope/housekeeping prose on `psalm`'s
-and `phpstan-level-0-baseline`'s entries, a corrected *Equivalents* section, and a new
-`psalm-taint-analysis` node. `tooling_tree.py` gains the `required-any` edge type end to end
-(`_VALID_EDGE_TYPES`, `load_tree()`, `_is_unblocked()`) and a `psalm-taint-analysis` detection block in
-`detect_nodes()` — no other function needed special-casing, since both `next_candidates()` and `roadmap()`
-already route every ordinary node through the shared `_is_unblocked()` helper, and `resolved_parents`/
-`required_parents`/`required_any_parents` are all parsed generically from the edge table (no node name
-hardcoded in the gating logic itself — the Part C edge changes needed zero further Python changes).
+`php-tooling-tree.md`'s `php-structural-scan` gains one new resolved-leaf, net: `psalm-taint-analysis`
+(thirteen leaves total, up from the original twelve — `psalm` was added in Part A and removed again in
+Part D, a net wash on leaf count but not on the surrounding prose, which records both). `rector-php-set`
+gains a `required-any(phpstan-level-0-baseline, psalm)` gate, replacing its old single `required:
+phpstan-level-0-baseline` parent; `rector-dead-code`/`rector-type-coverage` lose their own now-redundant
+direct `required: phpstan-level-0-baseline` edges (they read the gate transitively via `rector-php-set`
+instead); `psalm-taint-analysis` gains `required-any(phpstan-level-4, psalm)`; `rector-phpunit-set` gains a
+plain `required: phpunit` parent (Part E). `psalm`'s own node entry keeps
+its mutual-exclusion housekeeping bullet (writes `out-of-scope/phpstan-level-10.md` on the Psalm path —
+still the actual bug fix); `phpstan-level-0-baseline` loses the PHPStan-path write it briefly had.
+
+`tooling_tree.py` gains the `required-any` edge type end to end (`_VALID_EDGE_TYPES`, `load_tree()`,
+`_is_unblocked()`) and a `psalm-taint-analysis` detection block in `detect_nodes()` — no other function
+needed special-casing, since both `next_candidates()` and `roadmap()` already route every ordinary node
+through the shared `_is_unblocked()` helper, and `resolved_parents`/`required_parents`/
+`required_any_parents` are all parsed generically from the edge table (no node name hardcoded in the
+gating logic itself — every edge-table-only change across Parts C–E needed zero further Python changes).
+
 `CONTEXT.md` gains **Required-any edge** and **Choice** vocabulary entries. Fixtures: `php-clean` (PHPStan
-path) gained `out-of-scope/psalm.md` and `out-of-scope/psalm-taint-analysis.md`; `php-psalm` (Psalm path)
-gained `out-of-scope/phpstan-level-10.md`, demonstrating the Part A fix, and needed no change for Part C
-(`psalm-taint-analysis` already reads fulfilled there — same `vimeo/psalm`/`psalm.xml` signal as the
-`psalm` node, no CI to gate the taint-specific check on). `scripts/test_tooling_tree.py` gained three new
-test classes (`PsalmMutualExclusionTests`, `PsalmTaintAnalysisTests`, plus `rector-php-set`
-`required-any` coverage) and two regression guards
-(`test_p0_psalm_equivalence_still_unblocks_rector_family`,
-`test_rector_php_set_reachable_via_psalm_alone_even_if_p0_were_false`) for the tension Part A's correction
-addresses, and several existing "fully tooled" synthetic fixtures needed the same
-`out-of-scope/psalm.md`+`out-of-scope/psalm-taint-analysis.md` additions as `php-clean`.
+path) needs only `out-of-scope/psalm-taint-analysis.md` (its earlier `out-of-scope/psalm.md`, added for
+Part A, was deleted again in Part D); `php-psalm` (Psalm path) needs `out-of-scope/phpstan-level-10.md`,
+demonstrating the actual fix, and no change for `psalm-taint-analysis` (reads fulfilled there naturally —
+same `vimeo/psalm`/`psalm.xml` signal as the `psalm` node, no CI to gate the taint-specific check on).
+`scripts/test_tooling_tree.py` gained `PsalmMutualExclusionTests` (phpstan-level-10 resolution, not
+psalm's — Part D removed the psalm-leaf-specific test), `PsalmTaintAnalysisTests`, `rector-php-set`
+`required-any` coverage, and regression guards for the Rector-family reachability tension Part A's
+correction addresses; several existing "fully tooled" synthetic fixtures need
+`out-of-scope/psalm-taint-analysis.md` but not `out-of-scope/psalm.md`.

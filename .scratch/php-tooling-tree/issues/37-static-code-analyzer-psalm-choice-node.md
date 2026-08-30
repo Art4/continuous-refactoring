@@ -59,8 +59,11 @@ re-open), but the node's exact Fulfilment-check/MR-scope prose (mirroring the de
 Already settled (confirmed during ticket 34's grilling — treat as decided, not open):
 
 - [x] Mutual exclusion via auto-written `out-of-scope/` entries, no new rejection mechanism.
-- [x] `psalm` becomes an additional resolved-leaf (feeding `php-structural-scan`, per ticket 43's
-  aggregation-node shape) alongside `phpstan-level-10` (was `phpstan-level-3`).
+- [x] ~~`psalm` becomes an additional resolved-leaf (feeding `php-structural-scan`, per ticket 43's
+  aggregation-node shape) alongside `phpstan-level-10` (was `phpstan-level-3`).~~ **Reversed (follow-up
+  correction, before merge): built this way initially, then found redundant and dropped — see the dated
+  comment below. `phpstan-level-10`'s own mutual-exclusion rejection was always the load-bearing part;
+  `psalm` never needed a leaf of its own on top of it.**
 - [x] A Psalm strictness ratchet (mirroring `phpstan-level-1..10`, via Psalm's `errorLevel`) is explicitly
   **out of scope** for this ticket — noted as a possible third follow-up ticket, not committed to.
 
@@ -118,3 +121,16 @@ Resolved during this session's dedicated grilling (2026-08-30):
 > transitively. See [ticket 44](../../tooling-tree/issues/44-psalm-taint-analysis-node.md)'s own comment for
 > the paired correction (`psalm-taint-analysis` becoming a `php-structural-scan` resolved-leaf) found in the
 > same conversation. Both recorded together in ADR-0019's new Part C.
+
+> **2026-08-30 (second follow-up correction, before merge):** The user asked directly whether `psalm`'s
+> `php-structural-scan` resolved edge could be dropped. On review: yes — the actual bug this ticket fixes
+> (a Psalm-only target never resolving `phpstan-level-10`) is already fixed by the mutual-exclusion
+> housekeeping on `psalm`'s own node entry (writes `out-of-scope/phpstan-level-10.md`); giving `psalm` its
+> own leaf on top of that only ever bought an extra, purely ceremonial `out-of-scope/psalm.md` write on the
+> PHPStan path. Removed the `psalm` → `php-structural-scan` resolved edge entirely — verified safe on both
+> paths (see ADR-0019 Part D). Doesn't undermine this ticket's original "first-class, humanly-inspectable
+> decision" motivation, which was already satisfied by the `static-code-analyzer` tree structure itself
+> (ADR-0018/ticket 43), not by the resolved-edge mechanism. Same conversation also added, unrelated:
+> `rector-phpunit-set` now requires `phpunit` directly (a real gap — it previously only required
+> `rector-php-set`, so nothing stopped PHPUnit-specific Rector rewrites being proposed before PHPUnit
+> itself was adopted). Recorded in ADR-0019 Parts D and E.

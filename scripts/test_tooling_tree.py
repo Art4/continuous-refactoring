@@ -75,12 +75,15 @@ class LoadTreeTests(unittest.TestCase):
         # ticket 43: phpstan-level-10 replaced phpstan-level-3 as the level
         # chain's leaf, and 5 new leaves joined (phpstan-deprecation-rules,
         # rector-php-set, rector-code-quality, rector-phpunit-set,
-        # rector-early-return) — twelve total, up from seven. Ticket 37 adds
-        # `psalm` as a thirteenth leaf, closing the gap where a Psalm-only
-        # target never had a leaf of its own to resolve. Ticket 44's
-        # follow-up adds `psalm-taint-analysis` as a fourteenth leaf — a
+        # rector-early-return) — twelve total, up from seven. Ticket 44's
+        # follow-up adds `psalm-taint-analysis` as a thirteenth leaf — a
         # deterministic security-scan tool exactly like `composer-audit`
-        # (also one of these fourteen), so it gates the same way.
+        # (also one of these thirteen), so it gates the same way. `psalm`
+        # itself is deliberately NOT one of these — ticket 37 originally gave
+        # it its own leaf, found redundant on review and dropped: the actual
+        # bug (a Psalm-only target never resolving `phpstan-level-10`) is
+        # already fixed by that node's own mutual-exclusion rejection
+        # housekeeping, without needing `psalm` to be a leaf too.
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["php-structural-scan"]),
@@ -97,10 +100,10 @@ class LoadTreeTests(unittest.TestCase):
                 "rector-code-quality",
                 "rector-phpunit-set",
                 "rector-early-return",
-                "psalm",
                 "psalm-taint-analysis",
             },
         )
+        self.assertNotIn("psalm", tree["resolved_parents"]["php-structural-scan"])
 
     def test_required_any_parents_of_psalm_taint_analysis(self):
         # ticket 37: a new OR-required-parent edge type — psalm-taint-analysis
@@ -356,17 +359,13 @@ class StructuralScanGateTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
-            # ticket 37: `psalm` is now a 13th php-structural-scan leaf. This
-            # fixture chose the PHPStan path (phpstan.neon above), so a
-            # "fully tooled" scenario needs psalm's mutual-exclusion
-            # rejection written too, same shape as php-clean's real fixture —
-            # otherwise `psalm` sits neither fulfilled nor rejected and this
-            # helper stops being "fully resolved".
-            "docs/refactoring/out-of-scope/psalm.md": "rejected: mutual exclusion (ticket 37) — PHPStan path chosen\n",
-            # ticket 44 follow-up: `psalm-taint-analysis` is now a 14th leaf.
-            # This fixture never adopted vimeo/psalm at all (PHPStan path,
-            # no taint scanning either), so it needs its own rejection too —
-            # same reasoning as psalm.md above.
+            # ticket 44: `psalm-taint-analysis` is a 13th php-structural-scan
+            # leaf. This fixture never adopted vimeo/psalm at all (PHPStan
+            # path, no taint scanning either), so a "fully tooled" scenario
+            # needs its own rejection written too — otherwise it sits neither
+            # fulfilled nor rejected and this helper stops being "fully
+            # resolved". `psalm` itself is not a leaf (ticket 37, dropped as
+            # redundant) so it needs no rejection here.
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
 
@@ -489,15 +488,12 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
-            # ticket 37: `psalm` is now the thirteenth leaf — this fixture
-            # chose the PHPStan path, so it needs psalm's mutual-exclusion
-            # rejection written too (same reasoning as StructuralScanGateTests'
-            # `_fully_tooled_files` above).
-            "docs/refactoring/out-of-scope/psalm.md": "rejected: mutual exclusion (ticket 37) — PHPStan path chosen\n",
-            # ticket 44 follow-up: `psalm-taint-analysis` is now a 14th leaf.
-            # This fixture never adopted vimeo/psalm at all (PHPStan path,
-            # no taint scanning either), so it needs its own rejection too —
-            # same reasoning as psalm.md above.
+            # ticket 44: `psalm-taint-analysis` is the thirteenth leaf — this
+            # fixture never adopted vimeo/psalm at all (PHPStan path, no
+            # taint scanning either), so it needs its own rejection written
+            # too (same reasoning as StructuralScanGateTests'
+            # `_fully_tooled_files` above). `psalm` itself is not a leaf
+            # (ticket 37, dropped as redundant) so it needs no rejection.
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
 
@@ -597,10 +593,13 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
 
 
 class PsalmMutualExclusionTests(unittest.TestCase):
-    """Ticket 37: psalm and phpstan-level-10 are the two php-structural-scan
-    leaves a target's static-analyzer choice must resolve — the actual bug
-    this ticket fixes (a Psalm-only target previously left phpstan-level-10
-    neither fulfilled nor rejected, permanently blocking php-structural-scan)."""
+    """Ticket 37: phpstan-level-10 is the php-structural-scan leaf a target's
+    static-analyzer choice must resolve — the actual bug this ticket fixes (a
+    Psalm-only target previously left phpstan-level-10 neither fulfilled nor
+    rejected, permanently blocking php-structural-scan). `psalm` itself is
+    deliberately not a leaf (found redundant on review, see
+    test_resolved_parents_of_php_structural_scan) — only phpstan-level-10's
+    own resolution matters here."""
 
     def _make_repo(self, files: dict):
         tmp = tempfile.TemporaryDirectory()
@@ -630,7 +629,6 @@ class PsalmMutualExclusionTests(unittest.TestCase):
             self.assertTrue(d["psalm"]["fulfilled"])
             self.assertFalse(d["phpstan-level-10"]["fulfilled"])
             self.assertIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
-            self.assertNotIn("psalm", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()
 
@@ -649,20 +647,23 @@ class PsalmMutualExclusionTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_psalm_rejection_resolves_its_own_leaf_on_phpstan_path(self):
-        # The symmetric case: PHPStan path chosen, psalm rejected — psalm
-        # must no longer block php-structural-scan's thirteenth leaf.
+    def test_phpstan_path_needs_no_psalm_rejection(self):
+        # On the PHPStan path, php-structural-scan resolves without any
+        # psalm-related out-of-scope entry at all — psalm isn't a leaf, so
+        # there's nothing to reject (unlike the earlier design this ticket
+        # tried and dropped, which needed docs/refactoring/out-of-scope/
+        # psalm.md just to satisfy a leaf that didn't need to exist).
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "docs/refactoring/out-of-scope/psalm.md": "rejected: mutual exclusion (ticket 37) — phpstan path chosen\n",
         })
         try:
             d = detect_nodes(root)
             self.assertFalse(d["psalm"]["fulfilled"])
-            self.assertNotIn("psalm", d["php-structural-scan"]["details"]["unresolved"])
+            self.assertTrue(d["phpstan-level-10"]["fulfilled"])
+            self.assertNotIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()
 
@@ -874,14 +875,10 @@ class ComposerAuditGateTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
-            # ticket 37: `psalm` is now one of the "every other leaf" —
-            # written rejected here, same PHPStan-path mutual-exclusion
-            # reasoning as the other "fully tooled" fixtures above.
-            "docs/refactoring/out-of-scope/psalm.md": "rejected: mutual exclusion (ticket 37) — PHPStan path chosen\n",
-            # ticket 44 follow-up: `psalm-taint-analysis` is now a 14th leaf.
-            # This fixture never adopted vimeo/psalm at all (PHPStan path,
-            # no taint scanning either), so it needs its own rejection too —
-            # same reasoning as psalm.md above.
+            # ticket 44: `psalm-taint-analysis` is one of the "every other
+            # leaf" — written rejected here, same PHPStan-path reasoning as
+            # the other "fully tooled" fixtures above. `psalm` itself is not
+            # a leaf (ticket 37, dropped as redundant) so it needs none.
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         })
         try:
