@@ -13,10 +13,11 @@ graph TD
 
     git -->|required| lc
     lc -->|required| edc
+    edc -.->|resolved| ss
     lc -.->|"(language tree attaches here)"| ss
 ```
 
-The dotted edge above is illustrative only — the real edges into `structural-scan` come from the active language tree's leaf nodes (for PHP: see `skills/refactor-scan/references/php-tooling-tree.md`'s edge table) and use the `resolved` type described under `structural-scan` below, not `required` or `recommended`.
+Two dotted edges point into `structural-scan` above. `editorconfig -.->|resolved| ss` is real — declared in this document's own edge table below, since both endpoints are generic-root nodes. `loop-config -.-> ss` (unlabeled) is illustrative only, standing in for the language tree's own leaf edges — the real ones (for PHP: see `skills/refactor-scan/references/php-tooling-tree.md`'s edge table) aren't drawn here. Both kinds use the `resolved` type described under `structural-scan` below, not `required` or `recommended`.
 
 ## Edges
 
@@ -24,8 +25,9 @@ The dotted edge above is illustrative only — the real edges into `structural-s
 |---|---|---|
 | `git` | `loop-config` | required |
 | `loop-config` | `editorconfig` | required |
+| `editorconfig` | `structural-scan` | resolved |
 
-The table above is the only edge this document owns — both rows are generic-to-generic (both endpoints live in this document). A language tree's own edge table is the source for edges into *its own* nodes and into `structural-scan`; an edge whose child lives here instead (e.g. `editorconfig → php-cs-fixer`, declared in `php-tooling-tree.md`'s table since `php-cs-fixer` is a PHP-tree node) is the one case that crosses the other way.
+The table above is this document's own — every row here is generic-to-generic (both endpoints live in this document, `structural-scan` included). Ownership rule: an edge belongs to the file where *both* its endpoints already live as generic-root nodes; an edge with one endpoint in a language tree belongs to that language tree's own edge table instead, even when the other endpoint (`editorconfig`, `structural-scan`) lives here. `editorconfig → php-cs-fixer` is declared in `php-tooling-tree.md` under that rule (`php-cs-fixer` is a PHP-tree node). `structural-scan`'s other seven `resolved` edges — one per PHP-tree leaf — are declared in `php-tooling-tree.md` too, for the same reason: each edge's *other* endpoint is a PHP-tree leaf, not a generic-root node. `editorconfig → structural-scan` above is the one `resolved` edge into `structural-scan` that belongs here instead, because both its endpoints — `editorconfig` and `structural-scan` itself — are already generic-root nodes.
 
 ## Nodes
 
@@ -52,9 +54,11 @@ The table above is the only edge this document owns — both rows are generic-to
 - **Purpose:** settle the most basic formatting conventions (indentation, charset, line endings) before a
   language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
   exists so "later Rector output lands styled." Language-independent, so it lives at the generic root and
-  its `required` parent (`loop-config`, above) is declared in this document's own edge table — only its
-  *outgoing* edge crosses into a language tree today (`skills/refactor-scan/references/php-tooling-tree.md`'s
-  edge table: `editorconfig → php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
+  its `required` parent (`loop-config`, above) is declared in this document's own edge table. Two outgoing
+  edges: `editorconfig → structural-scan` (`resolved`, see `structural-scan` below) stays in this document
+  too, since `structural-scan` is itself a generic-root node; only `editorconfig → php-cs-fixer` crosses
+  into a language tree (`skills/refactor-scan/references/php-tooling-tree.md`'s edge table: `editorconfig →
+  php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
 - **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
   equivalent-detection nuance.
 - **MR scope:** create a default `.editorconfig` when missing — one language-neutral `[*]` section, no
@@ -78,6 +82,6 @@ The table above is the only edge this document owns — both rows are generic-to
 - **Name:** Structural Scan
 - **Tool:** none — this node represents the loop's own structural-deepening work (the `refactor-scan`/`refactor-design`/`refactor-implement`/`refactor-review` cycle applied to the target's own code), not a third-party tool.
 - **Purpose:** hold structural refactoring back until deterministic tooling has had its say — static analysis and a test suite catch regressions that an agent-driven structural change could otherwise introduce silently. Deterministic tools settle first, agent-driven scanning follows.
-- **Fulfilment check:** every leaf node of the active language specialization's tree is **resolved** — fulfilled, or explicitly rejected and recorded under `docs/refactoring/out-of-scope/`. For PHP, the leaf set and the edges into this node are declared in `skills/refactor-scan/references/php-tooling-tree.md`.
-- **Edge type — read this carefully, it deviates from the standard rule:** a standard **required edge** closes the child permanently once a parent is rejected. The edges into `structural-scan` do **not** do that: a rejected leaf still counts as resolved and still unblocks this node once every other leaf also reaches a resolved state. This is deliberate — one declined tooling branch (e.g. Rector rejected as not worth it here) should not permanently forbid ever doing structural work. These edges are labelled `resolved` in a language tree's edge table, never `required` or `recommended`.
+- **Fulfilment check:** every node with a `resolved` edge into this one is **resolved** — fulfilled, or explicitly rejected and recorded under `docs/refactoring/out-of-scope/`. Most of that leaf set is the active language specialization's own tree (for PHP: `skills/refactor-scan/references/php-tooling-tree.md` declares both the leaf set and the edges). One leaf lives at the generic root instead: `editorconfig` (above), whose `resolved` edge into this node is declared in this document's own edge table, not the language tree's.
+- **Edge type — read this carefully, it deviates from the standard rule:** a standard **required edge** closes the child permanently once a parent is rejected. The edges into `structural-scan` do **not** do that: a rejected leaf still counts as resolved and still unblocks this node once every other leaf also reaches a resolved state. This is deliberate — one declined tooling branch (e.g. Rector rejected as not worth it here) should not permanently forbid ever doing structural work. These edges are labelled `resolved`, never `required` or `recommended` — declared in a language tree's own edge table for each language-tree leaf (PHP: `php-tooling-tree.md`), or in this document's own edge table for a generic-root leaf like `editorconfig` (above).
 - **MR scope:** never an MR by itself — fulfilling this node just opens the gate. Once open, `refactor-scan` proposes it like any other node name; the actual codebase walk (hot spots, module/interface/depth/seam vocabulary) that turns it into one concrete candidate is `refactor-design`'s job, run only for the node the human actually picked.

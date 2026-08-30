@@ -48,6 +48,10 @@ class LoadTreeTests(unittest.TestCase):
         # php-cs-fixer (settle basic formatting before style-tool adoption).
         self.assertIn({"from": "loop-config", "to": "editorconfig", "type": "required"}, tree["edges"])
         self.assertIn({"from": "editorconfig", "to": "php-cs-fixer", "type": "recommended"}, tree["edges"])
+        # ticket 41: editorconfig also resolves into structural-scan —
+        # declared in tooling-tree.md's own edge table (both endpoints are
+        # generic-root nodes), not php-tooling-tree.md's.
+        self.assertIn({"from": "editorconfig", "to": "structural-scan", "type": "resolved"}, tree["edges"])
 
     def test_order_contains_nodes(self):
         tree = load_tree()
@@ -67,6 +71,9 @@ class LoadTreeTests(unittest.TestCase):
                 "phpstan-level-3",
                 "rector-dead-code",
                 "rector-type-coverage",
+                # ticket 41: editorconfig, an 8th resolved leaf, declared in
+                # tooling-tree.md's own edge table (generic-to-generic).
+                "editorconfig",
             },
         )
 
@@ -221,6 +228,9 @@ class StructuralScanGateTests(unittest.TestCase):
             "phpstan.neon": "parameters:\n    level: 3\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type",
+            # ticket 41: editorconfig is now an 8th structural-scan leaf —
+            # this "fully tooled" fixture needs it decided (fulfilled) too.
+            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
             # ci-runner + composer-audit's own CI-gate fulfilment (no `require`
             # dep here, so composer-audit only resolves via the "every other
             # leaf resolved" fallback — see ComposerAuditGateTests). Also
@@ -236,6 +246,33 @@ class StructuralScanGateTests(unittest.TestCase):
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
         }
+
+    def test_unresolved_when_only_editorconfig_missing(self):
+        # Every other leaf fulfilled, editorconfig absent and undecided —
+        # structural-scan must stay closed on editorconfig alone (ticket 41).
+        files = self._fully_tooled_files()
+        del files[".editorconfig"]
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["structural-scan"]["fulfilled"])
+            self.assertEqual(d["structural-scan"]["details"]["unresolved"], ["editorconfig"])
+        finally:
+            tmp.cleanup()
+
+    def test_resolves_via_editorconfig_rejection(self):
+        # A rejected editorconfig still unblocks structural-scan, same as
+        # every other resolved leaf (ADR-0008's design intent).
+        files = self._fully_tooled_files()
+        del files[".editorconfig"]
+        tmp, root = self._make_repo(files)
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "editorconfig.md").write_text("rejected\n")
+            d = detect_nodes(root)
+            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
+        finally:
+            tmp.cleanup()
 
     def test_unfulfilled_when_leaves_missing(self):
         tmp, root = self._make_repo({})
@@ -350,6 +387,8 @@ class ComposerAuditGateTests(unittest.TestCase):
             "phpstan.neon": "parameters:\n    level: 3\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type",
+            # ticket 41: editorconfig is now among "every other leaf" too.
+            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
             # No `composer audit` here — deliberate (see docstring). Does
             # invoke phpunit/phpstan though, so phpunit/phpstan-level-3
             # genuinely resolve too (ticket 34's self-wiring); otherwise this

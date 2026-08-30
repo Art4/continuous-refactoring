@@ -27,31 +27,30 @@ still unblocks it) with zero new code.
 **Priority:** low — quality-of-life closure of a gap ticket 01 left open, no urgency, same footing as
 ticket 01 itself.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `skills/refactor-scan/references/tooling-tree.md`: add `editorconfig -> structural-scan` (resolved)
-      to the Edges table; add the real `edc -.->|resolved| ss` line to the diagram; reword the ownership
+- [x] `skills/refactor-scan/references/tooling-tree.md`: added `editorconfig -> structural-scan` (resolved)
+      to the Edges table; added the real `edc -.->|resolved| ss` line to the diagram; reworded the ownership
       paragraph below the table, `editorconfig`'s own node prose (two outgoing edges now, not one), and
       `structural-scan`'s Fulfilment-check/Edge-type bullets (leaf set is no longer purely "the active
       language specialization's tree").
-- [ ] `skills/refactor-scan/references/php-tooling-tree.md`: clarify the "seven `resolved` rows above"
-      sentence to name the 8th, elsewhere-declared leaf; update `composer-audit`'s Stop-conditions bullet
+- [x] `skills/refactor-scan/references/php-tooling-tree.md`: clarified the "seven `resolved` rows above"
+      sentence to name the 8th, elsewhere-declared leaf; updated `composer-audit`'s Stop-conditions bullet
       to add `editorconfig` to its named "every other leaf" list (its fallback-eligibility gate already
       reads this generically from the resolved-parents table, so the prose was about to go stale). No
       diagram change — the new row doesn't live in this file's own table.
-- [ ] `skills/refactor-scan/SKILL.md`: reword the `structural-scan` bullet's "every leaf of the active
+- [x] `skills/refactor-scan/SKILL.md`: reworded the `structural-scan` bullet's "every leaf of the active
       language tree" premise and the "no language tree recognized" bullet (`editorconfig`'s edge lives at
       the generic root regardless of language tree).
-- [ ] `scripts/test_tooling_tree.py`: extend `LoadTreeTests` (new edge assertion, updated 8-name leaf
-      set); add `.editorconfig` to `StructuralScanGateTests._fully_tooled_files()` and to
+- [x] `scripts/test_tooling_tree.py`: extended `LoadTreeTests` (new edge assertion, updated 8-name leaf
+      set); added `.editorconfig` to `StructuralScanGateTests._fully_tooled_files()` and to
       `ComposerAuditGateTests.test_eligible_via_fallback_when_every_other_leaf_resolved`'s fixture (both
-      currently build "every leaf resolved" scenarios that don't account for the new leaf); add two new
+      built "every leaf resolved" scenarios that hadn't accounted for the new leaf); added two new
       `StructuralScanGateTests` cases proving the node genuinely waits on `editorconfig`
       (unresolved-when-missing, resolved-via-rejection).
-- [ ] `fixtures/php/php-clean/project/`: verified no change needed — `.editorconfig` already present and
+- [x] `fixtures/php/php-clean/project/`: confirmed no change needed — `.editorconfig` already present and
       unrejected there since ticket 01.
-- [ ] Run `python3 -m unittest discover -s scripts -p 'test_*.py'` (must stay green) and
-      `python3 scripts/validate_skills.py .` (must report clean) before opening the PR.
+- [x] `python3 -m unittest discover -s scripts -p 'test_*.py'` — 158/158 pass. `python3 scripts/validate_skills.py .` — clean.
 
 ## Comments
 
