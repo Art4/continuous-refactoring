@@ -24,14 +24,14 @@
 
 **Priority:** not set during this grilling session — no urgency signal beyond the original observation; set when scheduled.
 
-**Status:** ready-for-agent
+**Status:** done
 
-- [ ] `php-minimal-version` node entry added to `skills/refactor-scan/references/php-tooling-tree.md` (Name, Tool, Purpose, Fulfilment check, MR scope) and its edge-table rows (`loop-config → php-minimal-version` required, `ci-runner → php-minimal-version` required, `php-minimal-version → rector-php-set` recommended)
-- [ ] Fulfilment check implemented in `tooling_tree.py`, reusing `php_floor_precheck()`'s existing minimum-version computation for signal (a)
-- [ ] Quality-tooling-CI-job PHP-version detection implemented for signal (b), scoped to the jobs that actually invoke phpstan/rector/etc. (reuse the same CI-job-detection style as `composer-audit`/`phpunit`'s own CI-gating checks), not arbitrary compatibility-matrix jobs
-- [ ] `rector-php-set`'s node entry gains `php-minimal-version` as a recommended parent
-- [ ] `next_candidates()`/`roadmap()` exercise the new node with no special-casing beyond the ordinary required/recommended-edge machinery
-- [ ] MR-scope implementation bumps `composer.json`'s floor + the unified app-CI-job version only — no container/job consolidation logic
+- [x] `php-minimal-version` node entry added to `skills/refactor-scan/references/php-tooling-tree.md` (Name, Tool, Purpose, Fulfilment check, MR scope) and its edge-table rows (`loop-config → php-minimal-version` required, `ci-runner → php-minimal-version` required, `php-minimal-version → rector-php-set` recommended)
+- [x] Fulfilment check implemented in `tooling_tree.py`, reusing `php_floor_precheck()`'s existing minimum-version computation for signal (a)
+- [x] Quality-tooling-CI-job PHP-version detection implemented for signal (b), scoped to the jobs that actually invoke phpstan/rector/etc. (reuse the same CI-job-detection style as `composer-audit`/`phpunit`'s own CI-gating checks), not arbitrary compatibility-matrix jobs
+- [x] `rector-php-set`'s node entry gains `php-minimal-version` as a recommended parent
+- [x] `next_candidates()`/`roadmap()` exercise the new node with no special-casing beyond the ordinary required/recommended-edge machinery
+- [x] MR-scope implementation bumps `composer.json`'s floor + the unified app-CI-job version only — no container/job consolidation logic
 
 **Out of scope:** consolidating a separate tooling container/job into the app's own PHP version (a later, distinct concern); a generic (language-neutral) version of this node.
 
@@ -73,3 +73,16 @@
 > become proposable again without any extra mechanism (see *Re-triggering property* above). This is now a
 > second, already-decided precedent for the tree's fulfilled-flag-can-flip-back-to-false question that
 > [ticket 38](38-housekeeping-recurring-node.md) has open for its own (time-driven) reason — noted there.
+
+> **2026-08-31:** Implemented via `/implement`. TDD: 9 new tests in `scripts/test_tooling_tree.py`
+> (`PhpMinimalVersionTests`) written red-first, plus edge-shape coverage in `LoadTreeTests`; full suite
+> (198 tests) green. Reviewed via `/code-review` (Standards + Spec axes in parallel): 0 hard findings on
+> either axis. Two non-blocking Standards notes left as documented follow-up, not applied: (1)
+> `_quality_tooling_ci_php_versions()`'s CI-file glob loop is a third copy of a shape that already existed
+> twice in `tooling_tree.py` (`detect_nodes()` inline, `_has_ci_job_invoking()`) — an `_iter_ci_files()`
+> helper would collapse all three, but matches the file's pre-existing style so wasn't a blocker; (2) the
+> `gap` field name in `php-minimal-version`'s detail dict is a little terse (it holds the required PHP-
+> version floor, not a delta) — documented everywhere it's used, very soft call. Spec axis found no missing
+> requirements, no scope creep, and confirmed all four spot-checked correctness questions (undeterminable
+> floor → fulfilled; quality-tool-job detection genuinely excludes compat-matrix-only jobs; both required
+> parents combine via strict AND; not added as a `php-structural-scan` resolved-leaf).
