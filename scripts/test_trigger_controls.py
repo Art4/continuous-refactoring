@@ -134,7 +134,7 @@ class NonPhpProjectSignalTests(unittest.TestCase):
             (root / "package.json").write_text('{"name": "not-php"}')
             detected = detect_nodes(root)
             self.assertFalse(detected["composer"]["fulfilled"])
-            for node in ("php-cs-fixer", "phpunit", "phpstan-level-0-baseline"):
+            for node in ("php-cs-fixer", "phpunit", "phpstan-level-0"):
                 self.assertFalse(detected[node]["fulfilled"])
 
     def test_next_never_proposes_a_php_leaf_before_composer(self):

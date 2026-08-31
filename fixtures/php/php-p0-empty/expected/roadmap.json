@@ -72,7 +72,7 @@
         "has_psalm_cfg": false
       }
     },
-    "phpstan-level-0-baseline": {
+    "phpstan-level-0": {
       "fulfilled": true,
       "reason": "phpstan level 0 + baseline present",
       "details": {
@@ -263,7 +263,7 @@
       "node": "phpstan-level-1",
       "type": "tooling",
       "required_parents": [
-        "phpstan-level-0-baseline"
+        "phpstan-level-0"
       ],
       "recommended_parents": [],
       "reason": "required parents fulfilled"

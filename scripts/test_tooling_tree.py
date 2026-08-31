@@ -35,7 +35,7 @@ class LoadTreeTests(unittest.TestCase):
         self.assertIn({"from": "git", "to": "loop-config", "type": "required"}, tree["edges"])
         self.assertIn({"from": "loop-config", "to": "composer", "type": "required"}, tree["edges"])
         # check required edge
-        self.assertIn({"from": "phpstan-level-0-baseline", "to": "phpstan-level-1", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "phpstan-level-0", "to": "phpstan-level-1", "type": "required"}, tree["edges"])
         # recommended
         self.assertIn({"from": "php-cs-fixer", "to": "rector-dead-code", "type": "recommended"}, tree["edges"])
         # resolved (ADR-0008, ticket 42): PHP-tree leaves gate their own
@@ -58,7 +58,7 @@ class LoadTreeTests(unittest.TestCase):
 
     def test_order_contains_nodes(self):
         tree = load_tree()
-        for n in ["git", "loop-config", "composer", "phpstan-level-0-baseline", "phpstan-level-1", "rector-dead-code", "structural-scan"]:
+        for n in ["git", "loop-config", "composer", "phpstan-level-0", "phpstan-level-1", "rector-dead-code", "structural-scan"]:
             self.assertIn(n, tree["order"])
 
     def test_resolved_parents_of_structural_scan(self):
@@ -117,11 +117,11 @@ class LoadTreeTests(unittest.TestCase):
 
     def test_required_any_parents_of_rector_php_set(self):
         # ticket 37/44 follow-up: rector-php-set reads the static-analyzer
-        # gate directly via required-any(phpstan-level-0-baseline, psalm)
+        # gate directly via required-any(phpstan-level-0, psalm)
         # instead of relying on it being implicit inside
-        # phpstan-level-0-baseline's own Psalm-equivalence fulfilment check.
+        # phpstan-level-0's own Psalm-equivalence fulfilment check.
         # rector-dead-code/rector-code-quality/rector-early-return no longer
-        # carry their own direct required edge on phpstan-level-0-baseline —
+        # carry their own direct required edge on phpstan-level-0 —
         # they read this transitively via their existing required parent on
         # rector-php-set. rector-type-coverage/rector-phpunit-set are no
         # longer tied to this gate at all (later restructuring moved them
@@ -130,7 +130,7 @@ class LoadTreeTests(unittest.TestCase):
         tree = load_tree()
         self.assertEqual(
             set(tree["required_any_parents"]["rector-php-set"]),
-            {"phpstan-level-0-baseline", "psalm"},
+            {"phpstan-level-0", "psalm"},
         )
         self.assertEqual(tree["required_parents"]["rector-dead-code"], ["rector-php-set"])
         self.assertEqual(tree["required_parents"]["rector-code-quality"], ["rector-php-set"])
@@ -231,7 +231,7 @@ class DetectNodesTests(unittest.TestCase):
             self.assertTrue(d["git"]["fulfilled"])
             self.assertFalse(d["loop-config"]["fulfilled"])
             self.assertFalse(d["composer"]["fulfilled"])
-            self.assertFalse(d["phpstan-level-0-baseline"]["fulfilled"])
+            self.assertFalse(d["phpstan-level-0"]["fulfilled"])
             self.assertFalse(d["structural-scan"]["fulfilled"])
         finally:
             tmp.cleanup()
@@ -265,8 +265,8 @@ class DetectNodesTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"])
-            self.assertIn("psalm", d["phpstan-level-0-baseline"]["reason"].lower())
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
+            self.assertIn("psalm", d["phpstan-level-0"]["reason"].lower())
             # p1 not applicable
             self.assertFalse(d["phpstan-level-1"]["fulfilled"])
         finally:
@@ -274,16 +274,16 @@ class DetectNodesTests(unittest.TestCase):
 
     def test_p0_psalm_equivalence_still_unblocks_rector_family(self):
         # Ticket 37 regression guard: mutual exclusion must NOT touch
-        # phpstan-level-0-baseline's own fulfilled state. If the
+        # phpstan-level-0's own fulfilled state. If the
         # Psalm-equivalence branch were ever replaced by rejecting
-        # phpstan-level-0-baseline itself (ticket 37's literal wording,
+        # phpstan-level-0 itself (ticket 37's literal wording,
         # deliberately not implemented that way — see php-tooling-tree.md's
         # `phpstan` equivalents section), the Rector family would become
         # permanently unreachable for every Psalm-only target on that path
         # alone (a required-parent rejection closes every node beneath it).
         # Ticket 37/44's follow-up made this doubly robust: rector-php-set's
-        # gate is now required-any(phpstan-level-0-baseline, psalm) — psalm
-        # unblocks it directly, independent of phpstan-level-0-baseline's own
+        # gate is now required-any(phpstan-level-0, psalm) — psalm
+        # unblocks it directly, independent of phpstan-level-0's own
         # fulfilled state entirely. rector-dead-code/rector-type-coverage are
         # not checked directly here — they only require rector-php-set
         # fulfilled (an ordinary, unrelated adoption fact), so this one check
@@ -296,7 +296,7 @@ class DetectNodesTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"])
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
             self.assertTrue(d["psalm"]["fulfilled"])
             ok, why = tooling_tree._is_unblocked("rector-php-set", load_tree(), d)
             self.assertTrue(ok, why)
@@ -305,12 +305,12 @@ class DetectNodesTests(unittest.TestCase):
 
     def test_rector_php_set_reachable_via_psalm_alone_even_if_p0_were_false(self):
         # Direct proof of the "doubly robust" claim above: rector-php-set's
-        # required-any(phpstan-level-0-baseline, psalm) unblocks it via psalm
-        # alone, with no dependency on phpstan-level-0-baseline's own
+        # required-any(phpstan-level-0, psalm) unblocks it via psalm
+        # alone, with no dependency on phpstan-level-0's own
         # fulfilled state — unlike before ticket 37/44's follow-up, where the
-        # only path was through phpstan-level-0-baseline's fulfilled flag
+        # only path was through phpstan-level-0's fulfilled flag
         # (itself driven by the equivalence).
-        fulfilled = {"phpstan-level-0-baseline": {"fulfilled": False}, "psalm": {"fulfilled": True}}
+        fulfilled = {"phpstan-level-0": {"fulfilled": False}, "psalm": {"fulfilled": True}}
         ok, why = tooling_tree._is_unblocked("rector-php-set", load_tree(), fulfilled)
         self.assertTrue(ok, why)
 
@@ -323,7 +323,7 @@ class DetectNodesTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"])
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
         finally:
             tmp.cleanup()
 
@@ -336,7 +336,7 @@ class DetectNodesTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"])
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
             self.assertFalse(d["phpstan-level-1"]["fulfilled"])
             # roadmap should not propose p1 when baseline non-empty
             r = roadmap(root, steps=5)
@@ -386,7 +386,7 @@ class StructuralScanGateTests(unittest.TestCase):
             # ci-runner + composer-audit's own CI-gate fulfilment (no `require`
             # dep here, so composer-audit only resolves via the "every other
             # leaf resolved" fallback — see ComposerAuditGateTests). Also
-            # gates phpunit's/phpstan-level-0-baseline's own CI-gating check
+            # gates phpunit's/phpstan-level-0's own CI-gating check
             # (ticket 34) — omitting either invocation here would make this
             # "fully tooled" fixture stop being fully tooled.
             ".github/workflows/ci.yml": (
@@ -763,7 +763,7 @@ class PsalmTaintAnalysisTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_ci_present_but_not_gated_on_taint_flag_stays_unfulfilled(self):
-        # Same ticket-34 CI-self-wiring shape as phpstan-level-0-baseline: once
+        # Same ticket-34 CI-self-wiring shape as phpstan-level-0: once
         # ci-runner exists, a plain `vendor/bin/psalm` invocation (no
         # --taint-analysis) is not enough.
         tmp, root = self._make_repo({
@@ -950,7 +950,7 @@ class ComposerAuditGateTests(unittest.TestCase):
 
 
 class CiSelfWiringTests(unittest.TestCase):
-    """Ticket 34: phpunit's and phpstan-level-0-baseline's own fulfilment
+    """Ticket 34: phpunit's and phpstan-level-0's own fulfilment
     checks self-wire a CI-gating requirement once ci-runner is fulfilled,
     instead of a separate phpunit-ci-job/phpstan-ci-job node."""
 
@@ -1057,7 +1057,7 @@ class CiSelfWiringTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
         finally:
             tmp.cleanup()
 
@@ -1071,8 +1071,8 @@ class CiSelfWiringTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
-            self.assertIn("not gated in CI", d["phpstan-level-0-baseline"]["reason"])
+            self.assertFalse(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+            self.assertIn("not gated in CI", d["phpstan-level-0"]["reason"])
             # the level chain stays blocked too, via the normal required-edge check
             self.assertFalse(d["phpstan-level-1"]["fulfilled"])
         finally:
@@ -1088,7 +1088,7 @@ class CiSelfWiringTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
         finally:
             tmp.cleanup()
 
@@ -1103,7 +1103,7 @@ class CiSelfWiringTests(unittest.TestCase):
         })
         try:
             d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0-baseline"]["fulfilled"], d["phpstan-level-0-baseline"])
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
         finally:
             tmp.cleanup()
 
@@ -1179,7 +1179,7 @@ class RecommendedGateTests(unittest.TestCase):
         return tmp, root
 
     def _p0_fulfilled_files(self):
-        # phpstan-level-0-baseline fulfilled (unblocks rector-php-set via its
+        # phpstan-level-0 fulfilled (unblocks rector-php-set via its
         # required-any gate); php-cs-fixer and phpstan-level-3 both stay
         # undecided (neither fulfilled nor rejected). `.editorconfig` present
         # (ticket 01: php-cs-fixer's own recommended parent) so php-cs-fixer
@@ -1508,7 +1508,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
 
     def test_php_56_floor_blocks_only_the_two_leaves_that_never_ran_that_low(self):
         # composer-audit (needs Composer >=2.4, itself PHP >=7.2.5) and
-        # phpstan-level-0-baseline (phpstan/phpstan has required PHP >=7.1
+        # phpstan-level-0 (phpstan/phpstan has required PHP >=7.1
         # since its first release) never had a version installable on PHP
         # 5.6. php-cs-fixer, phpunit, and test-runner-if-missing all have
         # PHP-5.6-compatible lines (their absolute floor is PHP 5.3), so PHP
@@ -1519,7 +1519,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         })
         try:
             blocked = {b["node"] for b in php_floor_precheck(root)}
-            self.assertEqual(blocked, {"composer-audit", "phpstan-level-0-baseline"})
+            self.assertEqual(blocked, {"composer-audit", "phpstan-level-0"})
         finally:
             tmp.cleanup()
 
@@ -1552,7 +1552,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
                     "phpunit",
                     "test-runner-if-missing",
                     "composer-audit",
-                    "phpstan-level-0-baseline",
+                    "phpstan-level-0",
                 },
             )
         finally:
@@ -1585,7 +1585,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertNotIn("composer-audit", nodes)
-            self.assertNotIn("phpstan-level-0-baseline", nodes)
+            self.assertNotIn("phpstan-level-0", nodes)
             # php-cs-fixer and test-runner-if-missing are PHP-5.6-compatible
             # and unblocked (required parents fulfilled) — still proposed.
             self.assertIn("php-cs-fixer", nodes)
@@ -1604,7 +1604,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             r = roadmap(root, steps=10)
             nodes = [x["node"] for x in r]
             self.assertNotIn("composer-audit", nodes)
-            self.assertNotIn("phpstan-level-0-baseline", nodes)
+            self.assertNotIn("phpstan-level-0", nodes)
         finally:
             tmp.cleanup()
 
@@ -1616,7 +1616,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         try:
             data = tooling_tree.detect_and_roadmap(root)
             blocked = {b["node"] for b in data["php_floor_blocked"]}
-            self.assertEqual(blocked, {"composer-audit", "phpstan-level-0-baseline"})
+            self.assertEqual(blocked, {"composer-audit", "phpstan-level-0"})
         finally:
             tmp.cleanup()
 
@@ -1684,7 +1684,7 @@ class PhpMinimalVersionTests(unittest.TestCase):
 
     def test_not_fulfilled_when_floor_blocks_a_leaf(self):
         # Signal (a): php_floor_precheck() blocks composer-audit (PHP >=7.2)
-        # and phpstan-level-0-baseline (PHP >=7.0) at this floor -- gap is
+        # and phpstan-level-0 (PHP >=7.0) at this floor -- gap is
         # the higher of the two, 7.2.
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
@@ -1763,7 +1763,7 @@ class PhpMinimalVersionTests(unittest.TestCase):
             "composer.json": json.dumps({"require": {"php": ">=5.6"}, "require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "docs/refactoring/config.md": "# Refactoring Loop Config\n",
-            # Invokes phpstan too, so phpstan-level-0-baseline is genuinely
+            # Invokes phpstan too, so phpstan-level-0 is genuinely
             # fulfilled (ticket 34's CI self-wiring) despite CI existing —
             # rector-php-set's required-any parent needs this, independent
             # of php-minimal-version's own gate under test here.
@@ -1858,13 +1858,13 @@ class RoadmapTests(unittest.TestCase):
             # after composer fulfilled, unblocked should include these
             self.assertIn("php-cs-fixer", nodes)
             self.assertIn("phpunit", nodes)
-            self.assertIn("phpstan-level-0-baseline", nodes)
+            self.assertIn("phpstan-level-0", nodes)
             # composer-audit stays blocked here: no ci-runner (required parent)
             # and no real `require` dependency (only the `php` platform
             # pseudo-package) — see ComposerAuditGateTests for its own gating.
             self.assertNotIn("composer-audit", nodes)
             # p0 within 10 (needs composer)
-            self.assertIn("phpstan-level-0-baseline", nodes)
+            self.assertIn("phpstan-level-0", nodes)
         finally:
             tmp.cleanup()
 
@@ -1915,6 +1915,58 @@ class RoadmapTests(unittest.TestCase):
             self.assertEqual(len(r), 10)
             self.assertEqual(r[0]["n"], 1)
             self.assertEqual(r[-1]["n"], 10)
+        finally:
+            tmp.cleanup()
+
+    def test_structural_scan_proposed_once_gate_open_ticket_39(self):
+        # Ticket 39: once every php-structural-scan leaf is resolved
+        # (fulfilled or rejected), roadmap()'s simulation loop used to skip
+        # structural-scan forever (its resolved-gate branch sat *after* the
+        # generic sim_fulfilled skip, so a node marked "fulfilled" the
+        # instant its gate opened was never reached again) and fell through
+        # to a meaningless phpstan-level-N "open chain" filler instead, every
+        # step, for the whole lookahead. Reusing
+        # StructuralScanGateTests._fully_tooled_files's fixture shape (every
+        # leaf fulfilled by file inspection, no rejections needed) — same
+        # fixture that already proves detect_nodes() marks structural-scan
+        # fulfilled; roadmap() must now agree it stays proposable.
+        tmp, root = self._make_repo({
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "phpstan/phpstan-deprecation-rules": "^1.0",
+                    "phpunit/phpunit": "^10.0",
+                    "friendsofphp/php-cs-fixer": "^3.0",
+                },
+                "require": {
+                    "some/real-dep": "^1.0",
+                },
+            }),
+            "composer.lock": "{}",
+            ".php-cs-fixer.php": "<?php return [];",
+            "phpstan.neon": "parameters:\n    level: 10\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
+            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
+            ".github/workflows/ci.yml": (
+                "jobs:\n"
+                "  audit:\n"
+                "    steps:\n"
+                "      - run: composer audit\n"
+                "      - run: vendor/bin/phpunit\n"
+                "      - run: vendor/bin/phpstan analyse\n"
+            ),
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
+        })
+        try:
+            r = roadmap(root, steps=1)
+            self.assertEqual(r[0]["node"], "structural-scan")
+            # And it stays the answer every step, not just the first —
+            # exactly the "ongoing candidate" shape next_candidates() already
+            # gives an exposed resolved-gate node.
+            r10 = roadmap(root, steps=10)
+            self.assertTrue(all(x["node"] == "structural-scan" for x in r10))
         finally:
             tmp.cleanup()
 

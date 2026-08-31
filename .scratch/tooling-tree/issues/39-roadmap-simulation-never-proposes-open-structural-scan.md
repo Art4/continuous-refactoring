@@ -30,20 +30,30 @@ generating phantom PHPStan levels forever.
 **Blocked by:** none — self-contained fix in `skills/refactor-scan/references/tooling_tree.py`'s
 `roadmap()`.
 
-**Status:** needs-triage
+**Status:** done
 
-- [ ] Give `roadmap()`'s simulation loop the same before-the-generic-skip special case
-  `next_candidates()` already has for `structural-scan` (move/duplicate the `node == "structural-scan"`
-  branch ahead of the `if sim_fulfilled.get(node, False): continue` check, mirroring `next_candidates()`'s
-  ordering and its own explanatory comment)
-- [ ] Regenerate `fixtures/php/php-clean/expected/roadmap.json` (and re-check the other 6 fixtures'
-  `expected/roadmap.json` for the same drift — none of them reach a fully-resolved tree today, so none are
-  expected to change, but confirm)
-- [ ] Add a `test_tooling_tree.py` case: a tree state with every `structural-scan` leaf resolved must have
-  `roadmap(steps=1)[0]["node"] == "structural-scan"`
+- [x] Gave `roadmap()`'s simulation loop the same before-the-generic-skip special case
+  `next_candidates()` already has for resolved-gated nodes: the `if tree["resolved_parents"].get(node):`
+  branch (which handles `structural-scan`) now runs ahead of the `if sim_fulfilled.get(node, False):
+  continue` check, mirroring `next_candidates()`'s ordering and carrying the same explanatory comment.
+- [x] Regenerated `fixtures/php/php-clean/expected/roadmap.json` — its 10-step roadmap now reads
+  `structural-scan` throughout instead of the `phpstan-level-11`..`phpstan-level-20` filler. Re-checked the
+  other 6 fixtures' `expected/roadmap.json` via `fixtures/harness/run.sh roadmap <name>` — unchanged, as
+  expected (none reach a fully-resolved tree within 10 steps).
+- [x] Added `RoadmapTests.test_structural_scan_proposed_once_gate_open_ticket_39` in
+  `scripts/test_tooling_tree.py`: a tree state with every `structural-scan` leaf resolved asserts
+  `roadmap(root, steps=1)[0]["node"] == "structural-scan"`, and that it stays the answer for all 10 steps
+  (the "ongoing candidate" shape, not a one-time pick).
+- [x] `python3 -m unittest discover -s scripts -p 'test_*.py'` — 199/199 pass (198 + this ticket's new case).
+  `python3 scripts/validate_skills.py .` — clean.
 
 ## Comments
 
 > **2026-08-30:** Filed while building `fixtures/php/php-clean/` for ticket 27 (Tier 4 negative controls) —
 > not fixed there to keep that ticket's diff scoped to the test harness, not the tooling-tree parser. See
 > `fixtures/php/php-clean/expected/roadmap.json` for the currently-real (buggy) recorded output.
+
+> **2026-08-31:** Fixed alongside ticket 45 (PHPStan reference-file extraction + `phpstan-level-0` rename) —
+> bundled into the same PR as its own commit, per the user's request, rather than a separate PR. The fix
+> itself doesn't touch anything ticket 45 changes; the two only share a PR because both were requested in the
+> same conversation.

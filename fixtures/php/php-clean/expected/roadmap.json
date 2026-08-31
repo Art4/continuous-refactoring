@@ -72,7 +72,7 @@
         "has_psalm_cfg": false
       }
     },
-    "phpstan-level-0-baseline": {
+    "phpstan-level-0": {
       "fulfilled": true,
       "reason": "phpstan level 0 + baseline present",
       "details": {
@@ -251,63 +251,63 @@
   "roadmap": [
     {
       "n": 1,
-      "node": "phpstan-level-11",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 2,
-      "node": "phpstan-level-12",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 3,
-      "node": "phpstan-level-13",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 4,
-      "node": "phpstan-level-14",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 5,
-      "node": "phpstan-level-15",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 6,
-      "node": "phpstan-level-16",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 7,
-      "node": "phpstan-level-17",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 8,
-      "node": "phpstan-level-18",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 9,
-      "node": "phpstan-level-19",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 10,
-      "node": "phpstan-level-20",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
+      "node": "structural-scan",
+      "type": "tooling",
+      "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     }
   ],
   "no_mr_created": true,
