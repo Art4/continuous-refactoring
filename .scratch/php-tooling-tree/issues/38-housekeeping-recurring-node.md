@@ -41,6 +41,14 @@ that the idea was raised, not a design):
   most importantly `structural-scan`'s resolved-gate, which assumes leaves settle and stay settled?
   Should `housekeeping` feed `structural-scan` at all, or stay a deliberately separate, parallel track
   that never gates structural work?
+  **Update 2026-08-30:** this claim is no longer quite accurate — [ticket 35](35-php-upgrade-recommendation-node.md)'s
+  new `php-minimal-version` node is a second, already-decided precedent for a fulfilment check that can
+  flip back to false, settled via its own `/grill-me` session. The two cases differ in *why* they flip:
+  `php-minimal-version` is **fact-driven** (a relative comparison against a moving target — a tool's
+  minimum version or a CI job's tested PHP version changing), not **time-driven** like `housekeeping`'s
+  7-day timer. Worth considering both shapes together in this ticket's own grilling session, especially
+  the `structural-scan` interaction question above — `php-minimal-version` isn't one of `structural-scan`'s
+  resolved-leaves, so it hasn't had to answer that question yet, but `housekeeping` might.
 - [ ] Is "required parent: `composer`" right, or does re-proposing every 7 days need a different kind of
   edge entirely (none of `required`/`recommended`/`resolved` currently express "gate, but also re-trigger
   on a timer")?

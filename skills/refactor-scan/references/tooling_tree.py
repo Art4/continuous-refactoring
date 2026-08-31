@@ -329,6 +329,113 @@ _LEAF_MIN_PHP_VERSION = {
 }
 
 
+# Quality-tooling CI-job invocations — used to scope php-minimal-version's
+# signal (b) to jobs that actually run static analysis / style tooling, not
+# an arbitrary compatibility-matrix job that legitimately tests multiple PHP
+# versions for unrelated reasons.
+_QUALITY_TOOL_NEEDLES = (
+    "vendor/bin/phpstan analyse",
+    "vendor/bin/psalm",
+    "vendor/bin/rector",
+    "vendor/bin/php-cs-fixer",
+)
+
+# GitLab CI top-level keys that are never job names — used by _job_blocks()
+# to tell a GitLab job stanza apart from pipeline-wide configuration.
+_GITLAB_RESERVED_TOP_KEYS = {
+    "stages", "variables", "include", "default", "workflow", "image",
+    "before_script", "after_script", "cache", "pages",
+}
+
+
+def _job_blocks(path: pathlib.Path, text: str) -> list[str]:
+    """Best-effort split of a CI config file into per-job text chunks, keyed
+    on each format's top-level job stanza — not a YAML parser, the same
+    conservative substring-based approximation style as
+    `_has_ci_job_invoking`. GitHub Actions: job keys sit two spaces under a
+    top-level `jobs:` block. GitLab CI: job keys sit at zero indentation,
+    alongside a handful of reserved pipeline-wide keys this excludes.
+    Falls back to treating the whole file as one block when no job stanza is
+    found (e.g. a `.gitlab-ci.yml` that's all top-level keys) — conservative
+    in the same direction `_has_ci_job_invoking` already is."""
+    lines = text.splitlines()
+    if path.name.startswith(".gitlab-ci"):
+        starts = [
+            i for i, l in enumerate(lines)
+            if re.match(r"^[A-Za-z0-9_.\-]+:\s*$", l)
+            and l.split(":", 1)[0].strip().lstrip(".") not in _GITLAB_RESERVED_TOP_KEYS
+        ]
+    else:
+        jobs_start = next((i for i, l in enumerate(lines) if re.match(r"^jobs:\s*$", l)), None)
+        if jobs_start is None:
+            return [text]
+        starts = [
+            i for i in range(jobs_start + 1, len(lines))
+            if re.match(r"^  [A-Za-z0-9_.\-]+:\s*$", lines[i])
+        ]
+    if not starts:
+        return [text]
+    blocks = []
+    for idx, start in enumerate(starts):
+        end = starts[idx + 1] if idx + 1 < len(starts) else len(lines)
+        blocks.append("\n".join(lines[start:end]))
+    return blocks
+
+
+def _extract_php_versions(block: str) -> list[tuple[int, ...]]:
+    """Best-effort PHP-version extraction from one CI job block: GitHub
+    Actions matrix entries (`php-version: ['8.3']`, possibly several) and
+    Docker image tags (`php:8.3`, `php:8.3-cli`, GitLab CI's `image:`)."""
+    versions = []
+    for m in re.finditer(r"php-version:\s*(.+)", block):
+        for vm in re.finditer(r"(\d+\.\d+)", m.group(1)):
+            v = _parse_min_version(vm.group(1))
+            if v:
+                versions.append(v)
+    for m in re.finditer(r"\bphp:(\d+(?:\.\d+)?)", block):
+        v = _parse_min_version(m.group(1))
+        if v:
+            versions.append(v)
+    return versions
+
+
+def _quality_tooling_ci_php_versions(repo: pathlib.Path) -> list[tuple[int, ...]]:
+    """php-minimal-version's signal (b) (see php-tooling-tree.md): the
+    PHP versions tested by CI jobs that invoke a quality tool (phpstan/
+    psalm/rector/php-cs-fixer) — deliberately not any CI job, so a
+    legitimate multi-version compatibility matrix that only runs phpunit
+    doesn't itself trigger a runtime-floor recommendation."""
+    versions: list[tuple[int, ...]] = []
+    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
+        for f in glob.glob(str(repo / pat)):
+            p = pathlib.Path(f)
+            try:
+                text = p.read_text(encoding="utf-8")
+            except OSError:
+                continue
+            for block in _job_blocks(p, text):
+                if not any(needle in block for needle in _QUALITY_TOOL_NEEDLES):
+                    continue
+                versions.extend(_extract_php_versions(block))
+    return versions
+
+
+def _php_minimal_version_gap(repo: pathlib.Path) -> tuple[int, ...] | None:
+    """php-minimal-version's fulfilment check (see php-tooling-tree.md): the
+    highest PHP-version requirement composer.json's declared floor
+    is compared against — the minimum-ever version of any leaf
+    `php_floor_precheck()` currently reports blocked (signal a), plus the
+    highest PHP version any quality-tooling CI job tests (signal b). `None`
+    when neither signal fires — nothing to recommend."""
+    candidates: list[tuple[int, ...]] = []
+    for b in php_floor_precheck(repo):
+        v = _parse_min_version(_LEAF_MIN_PHP_VERSION[b["node"]])
+        if v:
+            candidates.append(v)
+    candidates.extend(_quality_tooling_ci_php_versions(repo))
+    return max(candidates) if candidates else None
+
+
 def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     """Check the target's current PHP floor once against each of
     `_LEAF_MIN_PHP_VERSION`'s five leaves, instead of proposing (and
@@ -540,6 +647,35 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
+    # php-minimal-version: composer.json's declared PHP floor vs.
+    # the highest version actually required — either a leaf
+    # php_floor_precheck() blocks, or a quality-tooling CI job testing a
+    # higher version. A moving-target comparison, not a one-time artefact
+    # check — see this node's own doc entry for the re-triggering
+    # consequence.
+    current_php_floor = _current_php_floor(composer)
+    php_minimal_version_gap = _php_minimal_version_gap(repo)
+    if current_php_floor is None:
+        set_node(
+            "php-minimal-version", True,
+            "PHP floor undeterminable (no composer.json) — nothing to recommend",
+        )
+    elif php_minimal_version_gap is None:
+        set_node("php-minimal-version", True, "no PHP-version gap detected", floor=list(current_php_floor))
+    elif current_php_floor >= php_minimal_version_gap:
+        set_node(
+            "php-minimal-version", True,
+            f"floor {'.'.join(map(str, current_php_floor))} already covers required "
+            f"PHP >= {'.'.join(map(str, php_minimal_version_gap))}",
+            floor=list(current_php_floor), gap=list(php_minimal_version_gap),
+        )
+    else:
+        set_node(
+            "php-minimal-version", False,
+            f"floor {'.'.join(map(str, current_php_floor))} below required "
+            f"PHP >= {'.'.join(map(str, php_minimal_version_gap))}",
+            floor=list(current_php_floor), gap=list(php_minimal_version_gap),
+        )
     # editorconfig
     has_editorconfig = _has_editorconfig(repo)
     set_node("editorconfig", has_editorconfig, ".editorconfig present" if has_editorconfig else "no .editorconfig")

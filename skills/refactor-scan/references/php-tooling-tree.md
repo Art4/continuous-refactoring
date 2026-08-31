@@ -8,6 +8,7 @@ The canonical shape of the PHP specialization's **tooling tree**. This document 
 graph TD
     lc[loop-config]
     ci[ci-runner]
+    pmv[php-minimal-version]
     comp[composer]
     edc[editorconfig]
     cs[php-cs-fixer]
@@ -40,6 +41,8 @@ graph TD
 
     lc -->|required| comp
     lc -->|required| ci
+    lc -->|required| pmv
+    ci -->|required| pmv
     edc -.->|recommended| cs
     comp -->|required| cs
     comp -->|required| unit
@@ -62,6 +65,7 @@ graph TD
     p5 -->|required| dep
     p0 -.->|required-any| rps
     psalm -.->|required-any| rps
+    pmv -.->|recommended| rps
     rps -->|required| rdc
     rps -->|required| rcq
     rps -->|required| rer
@@ -99,6 +103,8 @@ graph TD
 |---|---|---|
 | `loop-config` | `composer` | required |
 | `loop-config` | `ci-runner` | required |
+| `loop-config` | `php-minimal-version` | required |
+| `ci-runner` | `php-minimal-version` | required |
 | `editorconfig` | `php-cs-fixer` | recommended |
 | `composer` | `php-cs-fixer` | required |
 | `composer` | `phpunit` | required |
@@ -121,6 +127,7 @@ graph TD
 | `phpstan-level-5` | `phpstan-deprecation-rules` | required |
 | `phpstan-level-0-baseline` | `rector-php-set` | required-any |
 | `psalm` | `rector-php-set` | required-any |
+| `php-minimal-version` | `rector-php-set` | recommended |
 | `rector-php-set` | `rector-dead-code` | required |
 | `rector-php-set` | `rector-code-quality` | required |
 | `rector-php-set` | `rector-early-return` | required |
@@ -188,6 +195,35 @@ surfaced this rule). Does not apply to `require` (production) dependencies — t
 - **Purpose:** an existing pipeline that later hosts quality jobs.
 - **Fulfilment check:** CI config file present; forge determined from `git remote`; unknown CI → ask, do not record a rejection.
 - **MR scope:** pipeline file only. `composer-audit` is a quality-job child with two parents (this node + `composer`). `phpunit` and `phpstan-level-0-baseline` do not get their own two-parent children — once this node is fulfilled, each self-wires its own CI gate as part of its own fulfilment check instead.
+
+### `php-minimal-version`
+
+- **Name:** PHP Minimum Version
+- **Tool:** none — the tree's own gap detection, not a third-party tool.
+- **Purpose:** detect a gap between `composer.json`'s declared PHP floor and what the tree actually needs,
+  and propose raising the floor to close it. Motivating case: a target that stayed pinned to an old PHP
+  version throughout, solving PHPStan/Rector's own version requirements by running them in a second,
+  parallel higher-PHP container instead — nothing in the tree ever raised the floor mismatch itself as a
+  candidate.
+- **Fulfilment check:** `composer.json`'s declared PHP floor (`_current_php_floor` — `config.platform.php`
+  if pinned, else `require.php`'s lower bound) is at least the maximum of: (a) the minimum-ever PHP version
+  of any leaf `php_floor_precheck()` currently reports blocked, and (b) the highest PHP version tested by a
+  CI job that invokes a quality tool (`vendor/bin/phpstan analyse`, `vendor/bin/psalm`,
+  `vendor/bin/rector`, `vendor/bin/php-cs-fixer`) — not an arbitrary compatibility-matrix job that
+  legitimately tests multiple PHP versions for unrelated reasons. Floor unknown (no `composer.json`, or
+  neither `require.php` nor `config.platform.php` parses) counts as fulfilled — same convention
+  `php_floor_precheck()` itself uses: nothing to recommend without a determinable floor.
+- **MR scope:** narrow — raise `composer.json`'s `require.php` constraint, plus the CI job that tests the
+  app itself if a single unified job exists. Explicitly out of scope: consolidating a separate
+  tooling-only container/job into the app's own version, if the target has one — a distinct, later concern
+  from the gap this node closes.
+- **Re-triggering:** this fulfilment check is a comparison against a moving target, not a one-time artefact
+  check — it can flip back to unfulfilled if a later tool raises its minimum, or a new quality-tooling CI
+  job tests a higher version, without any special mechanism (every fulfilment check here is already
+  re-derived fresh from live repo state each pass). Not retroactive: an already-decided `rector-php-set`
+  candidate is unaffected, only still-open proposals are held back again. Elsewhere in this tree's own
+  design discussions, a recurring `housekeeping` node (re-proposed on a fixed schedule) is the other,
+  time-driven — not fact-driven — case of a fulfilment check that can flip back to false.
 
 ### `composer`
 
@@ -463,6 +499,9 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
   nodes instead — see those nodes' own entries for why they no longer transitively depend on this gate at
   all). No `php-cs-fixer` recommended parent (unlike the sibling Rector nodes below) — decided directly with
   the user; this node is the styling-order exception in the family.
+- **Recommended parent:** `php-minimal-version` — this node's rule set rewrites code to target syntax for a
+  PHP version composer.json may not even declare support for yet; closes the one gap where this family
+  previously had no dependency on the runtime floor at all.
 
 ### `rector-code-quality`
 
