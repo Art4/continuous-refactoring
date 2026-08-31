@@ -275,6 +275,10 @@ Full definition (Fulfilment check, MR scope, Mutual exclusion, Co-presence): `sk
 - **Tool:** PHPStan (`vimeo/psalm`, via the `psalm` node above, fulfils as an equivalent — see the extracted file's *Equivalents* section).
 - **Purpose:** static analysis introduced green at level 0.
 
+Full definition (Fulfilment check, Config, MR scope, Verification, and the cross-cutting *`phpstan`
+equivalents* section — Psalm's equivalence to this node, co-presence, mutual exclusion):
+`skills/refactor-scan/references/php-tooling-tree/phpstan.md`.
+
 ### `phpstan-level-1` through `phpstan-level-10`
 
 - **Names:** `phpstan-level-N` → "PHPStan Level N" for each `N` in 1–10 (e.g. `phpstan-level-4` → "PHPStan Level 4").
@@ -283,6 +287,9 @@ Full definition (Fulfilment check, MR scope, Mutual exclusion, Co-presence): `sk
   throughout, no redesign at any level — `phpstan-level-10` is the chain's resolved-leaf into
   `php-structural-scan` (see that node's own entry); `phpstan-level-1`–`-9` are ordinary intermediate
   nodes.
+
+Full definition (Fulfilment check, Empty baseline, MR scope, Stop conditions, Verification):
+`skills/refactor-scan/references/php-tooling-tree/phpstan.md`.
 
 ### `phpstan-deprecation-rules`
 
@@ -294,10 +301,7 @@ Full definition (Fulfilment check, MR scope, Mutual exclusion, Co-presence): `sk
 - **Required parent:** `phpstan-level-5` — proposed once the chain has reached level 5, a threshold decided
   directly with the user rather than tied to level 10's top.
 
-Full definition for all three above (Fulfilment check, Config, MR scope, Stop conditions, Verification) and
-the cross-cutting *`phpstan` equivalents* section (Psalm's equivalence to `phpstan-level-0`, why the level
-chain doesn't apply under Psalm, co-presence, and how mutual exclusion interacts with this equivalence):
-`skills/refactor-scan/references/php-tooling-tree/phpstan.md`.
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/phpstan.md`.
 
 ### `psalm-taint-analysis`
 
@@ -316,11 +320,15 @@ Full definition (Required-any parents, Fulfilment check, MR scope, Co-presence c
 - **Tool:** Rector (dead-code suite)
 - **Purpose:** remove dead code with rules whose changes are safe to review early.
 
+Full definition (Fulfilment check, MR scope, Required parent): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
+
 ### `rector-type-coverage`
 
 - **Name:** Rector: Type Coverage Set
 - **Tool:** Rector (typing suites)
 - **Purpose:** raise declared type coverage progressively.
+
+Full definition (Fulfilment check, MR scope, recommended-only gating): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
 
 ### `rector-php-set`
 
@@ -329,11 +337,15 @@ Full definition (Required-any parents, Fulfilment check, MR scope, Co-presence c
 - **Purpose:** adopt Rector's own PHP-version-targeted rule set — the common gate the other Rector
   rule-set nodes below wait on, mirroring how `phpstan-level-0`/`psalm` gate the family today.
 
+Full definition (Fulfilment check, MR scope, Required-any parents, Recommended parent): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
+
 ### `rector-code-quality`
 
 - **Name:** Rector: Code Quality Set
 - **Tool:** Rector (code-quality suite)
 - **Purpose:** apply Rector's code-quality rewrites (readability/idiom improvements beyond dead-code removal).
+
+Full definition (Fulfilment check, MR scope, Required parent, Recommended parent): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
 
 ### `rector-phpunit-set`
 
@@ -342,13 +354,15 @@ Full definition (Required-any parents, Fulfilment check, MR scope, Co-presence c
 - **Purpose:** modernize PHPUnit test code (assertion methods, annotations → attributes, etc.) via Rector's
   PHPUnit rule set.
 
+Full definition (Fulfilment check, MR scope, Required parent, Recommended parents): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
+
 ### `rector-early-return`
 
 - **Name:** Rector: Early Return Set
 - **Tool:** Rector (early-return suite)
 - **Purpose:** flatten nested conditionals into early returns via Rector's early-return rule set.
 
-Full definition for all six Rector nodes above (Fulfilment check, MR scope, Required/Required-any/Recommended parents): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
+Full definition (Fulfilment check, MR scope, Required parent, Recommended parent): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
 
 ### `php-structural-scan`
 

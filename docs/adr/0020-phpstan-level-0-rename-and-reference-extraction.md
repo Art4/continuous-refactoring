@@ -71,3 +71,13 @@ pure identifier substitution with no logic change, verified by running every PHP
 against the regenerated `expected/roadmap.json` files. `tree-walk-prompt.md`'s fix is retroactive: a
 tree-walk that previously mis-served `composer`/`phpunit` (by looking for their Fulfilment check under the
 stub heading instead of following the pointer) now reads correctly for all three extracted node families.
+
+> **2026-08-31 (follow-up correction, before merge):** the "one shared pointer line after the group's last
+> stub" shape above was reworked once a fourth node family (ADR-0021) made the pattern's cost visible: a
+> reader landing on `phpstan-level-1`'s stub had no pointer of its own, only an implicit "the file named
+> three stubs down applies to me too." Each of the three PHPStan stubs now carries its own `Full definition
+> (...): phpstan.md` line instead — same target file, but no node's stub depends on a neighbor's proximity
+> to know where its own definition lives. ADR-0021's `rector.md` cluster had the same shared-pointer shape
+> and got the same fix in the same pass; its `psalm.md` cluster's two nodes happened to already carry
+> individual pointers (not adjacent in the parent doc, so a single shared line was never written for them),
+> which is what made the inconsistency visible in the first place.

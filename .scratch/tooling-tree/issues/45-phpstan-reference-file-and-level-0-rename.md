@@ -49,7 +49,8 @@ see below).
       chain, and `phpstan-deprecation-rules`, plus the `phpstan` equivalents section, moved verbatim (only
       cross-reference wording adjusted for the new file boundary).
 - [x] `php-tooling-tree.md`'s *Nodes* section: the four PHPStan sections replaced with three stubs
-      (Name/Tool/Purpose each) and one shared pointer line to the extracted file.
+      (Name/Tool/Purpose each), each with its own pointer line to the extracted file (see 2026-08-31
+      follow-up comment — originally one shared pointer line after the third stub).
 - [x] `tree-walk-prompt.md` step 1: instruction corrected to follow an extracted node's stub pointer.
 - [x] New ADR: `docs/adr/0020-phpstan-level-0-rename-and-reference-extraction.md`.
 - [x] `python3 -m unittest discover -s scripts -p 'test_*.py'` — all pass.
@@ -66,3 +67,8 @@ see below).
 > and bundling in ticket 39's fix (tracked separately — see that ticket's own file). The `tree-walk-prompt.md`
 > gap was surfaced during exploration (pre-existing, affects `composer`/`phpunit` too) and the user confirmed
 > fixing it here rather than deferring.
+
+> **2026-08-31 (follow-up correction, before merge):** the user asked, while extracting the remaining nodes
+> (ticket 46), for every node to always link its own reference file rather than several nodes sharing one
+> collected pointer line. Reworked `phpstan.md`'s three stubs to each carry an individual pointer instead
+> of the one shared line after the third stub. Recorded in [ADR-0020](../../../docs/adr/0020-phpstan-level-0-rename-and-reference-extraction.md)'s own follow-up note.

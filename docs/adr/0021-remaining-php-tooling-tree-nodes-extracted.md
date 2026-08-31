@@ -32,12 +32,24 @@ clusters rather than belonging to either — stay standalone rather than folded 
 `static-code-analyzer` gates `phpstan-level-0` and `psalm` equally; `php-structural-scan` aggregates all
 thirteen `resolved` leaves across every cluster.
 
-Every stub keeps Name/Tool/Purpose inline (the established shape); a node whose file covers more than one
-node states so in a single shared pointer line, mirroring `phpstan.md`'s stub block. Cross-reference prose
-that pointed at another node's content via "above"/"below" now names the file when that content moved to a
-different file (`psalm.md` ↔ `phpstan.md`'s *Equivalents* section, `rector.md` ↔ `phpstan.md`/`psalm.md`'s
-`required-any` parents, `composer-audit.md`/`php-structural-scan.md`'s shared thirteen-leaf list) and keeps
-plain "above"/"below" only where both sides of the reference stayed in the same file.
+Every stub keeps Name/Tool/Purpose inline (the established shape); every node — including each node inside
+a shared cluster file — carries its own `Full definition (...): <file>.md` pointer line naming exactly what
+that node's own section covers (e.g. `rector-early-return`'s pointer names "Fulfilment check, MR scope,
+Required parent, Recommended parent", not "see the whole family"), so no stub depends on a neighboring
+stub's proximity to know where its own definition lives. Cross-reference prose that pointed at another
+node's content via "above"/"below" now names the file when that content moved to a different file
+(`psalm.md` ↔ `phpstan.md`'s *Equivalents* section, `rector.md` ↔ `phpstan.md`/`psalm.md`'s `required-any`
+parents, `composer-audit.md`/`php-structural-scan.md`'s shared thirteen-leaf list) and keeps plain
+"above"/"below" only where both sides of the reference stayed in the same file.
+
+> **2026-08-31 (follow-up correction, before merge):** the Decision text above originally read "a node
+> whose file covers more than one node states so in a single shared pointer line" (one pointer after the
+> cluster's last stub, mirroring how `phpstan.md`'s three stubs first shipped in ADR-0020). The user asked
+> for every node to always link its own reference file rather than several nodes sharing one collected
+> pointer — `rector.md`'s six stubs (which had the single-shared-pointer shape) and `phpstan.md`'s three
+> were reworked to each carry an individual pointer; `psalm.md`'s two nodes already had individual pointers
+> (they aren't adjacent in the parent doc, so a shared line was never written for them), which is what
+> surfaced the inconsistency. Reworded above to match what's actually in `php-tooling-tree.md` now.
 
 ## Considered Options
 
