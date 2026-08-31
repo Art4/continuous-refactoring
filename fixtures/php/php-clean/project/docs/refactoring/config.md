@@ -12,6 +12,6 @@
 - phpunit
 - test-runner-if-missing
 - composer-audit
-- phpstan-level-0-baseline
+- phpstan-level-0
 - rector-dead-code
 - rector-type-coverage

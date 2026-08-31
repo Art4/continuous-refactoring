@@ -72,7 +72,7 @@
         "has_psalm_cfg": true
       }
     },
-    "phpstan-level-0-baseline": {
+    "phpstan-level-0": {
       "fulfilled": true,
       "reason": "psalm fulfils p0 (vimeo/psalm + psalm.xml)",
       "details": {
@@ -291,7 +291,7 @@
       "type": "tooling",
       "required_parents": [],
       "required_any_parents": [
-        "phpstan-level-0-baseline",
+        "phpstan-level-0",
         "psalm"
       ],
       "recommended_parents": [],

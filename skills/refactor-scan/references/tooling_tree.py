@@ -189,7 +189,7 @@ def _has_ci_job_invoking(repo: pathlib.Path, needle: str) -> bool:
     """True if any CI workflow file (GitHub Actions or GitLab CI) contains
     `needle` as a literal substring. The conservative approximation shared by
     every self-wired CI-gate check in this module (`composer-audit`,
-    `phpunit`/`phpstan-level-0-baseline`): presence of the
+    `phpunit`/`phpstan-level-0`): presence of the
     invocation, not proof the job actually fails the pipeline on a red
     result."""
     for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
@@ -316,7 +316,7 @@ def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ..
 #   - composer-audit: the `composer audit` subcommand shipped in Composer
 #     2.4.0 (2022); no earlier Composer release (1.x or 2.0-2.3) ever had it,
 #     and Composer 2.4 itself requires PHP >=7.2.5.
-#   - phpstan-level-0-baseline: phpstan/phpstan's first published release
+#   - phpstan-level-0: phpstan/phpstan's first published release
 #     (0.1) required PHP ~7.0 — it has never run on PHP 5.x; vimeo/psalm
 #     (this node's equivalent fulfiller) has likewise required PHP 7+ since
 #     its earliest releases.
@@ -325,7 +325,7 @@ _LEAF_MIN_PHP_VERSION = {
     "phpunit": "5.3",
     "test-runner-if-missing": "5.3",
     "composer-audit": "7.2",
-    "phpstan-level-0-baseline": "7.0",
+    "phpstan-level-0": "7.0",
 }
 
 
@@ -734,7 +734,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         has_psalm_cfg=has_psalm_cfg,
     )
 
-    # phpstan-level-0-baseline
+    # phpstan-level-0
     # Psalm equivalence: fulfilled without phpstan whenever the `psalm` node
     # (above) is fulfilled — reads that node's computed state instead of
     # re-deriving the raw detection here.
@@ -746,18 +746,18 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # phpstan-level-1..3 chain — those nodes stay CI-agnostic on purpose.
     phpstan_p0_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "vendor/bin/phpstan analyse")
     if psalm_fulfils_p0:
-        set_node("phpstan-level-0-baseline", True, "psalm fulfils p0 (vimeo/psalm + psalm.xml)", has_psalm=True)
+        set_node("phpstan-level-0", True, "psalm fulfils p0 (vimeo/psalm + psalm.xml)", has_psalm=True)
     elif has_phpstan_dep and phpstan_level == 0 and baseline_exists and phpstan_p0_ci_ok:
-        set_node("phpstan-level-0-baseline", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty)
+        set_node("phpstan-level-0", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty)
     elif has_phpstan_dep and phpstan_level == 0 and baseline_exists and not phpstan_p0_ci_ok:
         # locally green, but CI exists and doesn't gate on it yet — the
         # baseline this level sets is only durable once CI enforces it.
-        set_node("phpstan-level-0-baseline", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty)
+        set_node("phpstan-level-0", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty)
     elif has_phpstan_dep and phpstan_level == 0 and not baseline_exists:
         # level 0 but no baseline yet -> not green, not fulfilled
-        set_node("phpstan-level-0-baseline", False, "phpstan level 0 but baseline missing", level=phpstan_level)
+        set_node("phpstan-level-0", False, "phpstan level 0 but baseline missing", level=phpstan_level)
     else:
-        set_node("phpstan-level-0-baseline", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists)
+        set_node("phpstan-level-0", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists)
 
     # phpstan-level-1..10 — phpstan-level-10 is the chain's resolved-leaf
     # into php-structural-scan, see that node
@@ -1123,7 +1123,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 # Need predecessor fulfilled with empty baseline
                 # Predecessor mapping: p1 needs p0 empty, p2 needs p1 empty, etc.
                 lvl = int(node.rsplit("-", 1)[1])
-                pred = "phpstan-level-0-baseline" if lvl == 1 else f"phpstan-level-{lvl - 1}"
+                pred = "phpstan-level-0" if lvl == 1 else f"phpstan-level-{lvl - 1}"
                 # For simulation, check predecessor fulfilled
                 if not sim_fulfilled.get(pred, False):
                     continue
@@ -1137,7 +1137,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                     # If non-empty, p1 not yet proposable — skip
                     continue
                 # Also psalm equivalence blocks
-                if detected.get("phpstan-level-0-baseline", {}).get("details", {}).get("has_psalm"):
+                if detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
                     continue
                 # Alternative: if predecessor just simulated as fulfilled in this roadmap run, assume baseline becomes empty after shrink step? For simplicity allow next level.
                 pass
