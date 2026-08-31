@@ -1918,6 +1918,58 @@ class RoadmapTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_structural_scan_proposed_once_gate_open_ticket_39(self):
+        # Ticket 39: once every php-structural-scan leaf is resolved
+        # (fulfilled or rejected), roadmap()'s simulation loop used to skip
+        # structural-scan forever (its resolved-gate branch sat *after* the
+        # generic sim_fulfilled skip, so a node marked "fulfilled" the
+        # instant its gate opened was never reached again) and fell through
+        # to a meaningless phpstan-level-N "open chain" filler instead, every
+        # step, for the whole lookahead. Reusing
+        # StructuralScanGateTests._fully_tooled_files's fixture shape (every
+        # leaf fulfilled by file inspection, no rejections needed) — same
+        # fixture that already proves detect_nodes() marks structural-scan
+        # fulfilled; roadmap() must now agree it stays proposable.
+        tmp, root = self._make_repo({
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "phpstan/phpstan-deprecation-rules": "^1.0",
+                    "phpunit/phpunit": "^10.0",
+                    "friendsofphp/php-cs-fixer": "^3.0",
+                },
+                "require": {
+                    "some/real-dep": "^1.0",
+                },
+            }),
+            "composer.lock": "{}",
+            ".php-cs-fixer.php": "<?php return [];",
+            "phpstan.neon": "parameters:\n    level: 10\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
+            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
+            ".github/workflows/ci.yml": (
+                "jobs:\n"
+                "  audit:\n"
+                "    steps:\n"
+                "      - run: composer audit\n"
+                "      - run: vendor/bin/phpunit\n"
+                "      - run: vendor/bin/phpstan analyse\n"
+            ),
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
+        })
+        try:
+            r = roadmap(root, steps=1)
+            self.assertEqual(r[0]["node"], "structural-scan")
+            # And it stays the answer every step, not just the first —
+            # exactly the "ongoing candidate" shape next_candidates() already
+            # gives an exposed resolved-gate node.
+            r10 = roadmap(root, steps=10)
+            self.assertTrue(all(x["node"] == "structural-scan" for x in r10))
+        finally:
+            tmp.cleanup()
+
 
 class PortabilityTests(unittest.TestCase):
     """Guards the property the skills/refactor-scan/references/ move exists for:

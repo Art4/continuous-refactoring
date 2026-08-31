@@ -1075,24 +1075,33 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
         for node in priority:
             if node in _NEVER_PROPOSED:
                 continue  # never an MR / never a candidate
-            if sim_fulfilled.get(node, False):
-                continue  # already fulfilled (real or simulated), skip
-            if node in rejected:
-                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
-            if node in php_floor_blocked:
-                continue  # target's PHP floor doesn't meet this leaf's known minimum yet
             if tree["resolved_parents"].get(node):
-                # `resolved` gate: every resolved-parent leaf must be
-                # fulfilled OR rejected — not the standard required-parent
-                # check, which would instead close this node forever on any
-                # rejection. Applies to any resolved-gated node
-                # (structural-scan, and any aggregation node feeding it,
-                # e.g. php-structural-scan) — `gate` (computed fresh this
-                # iteration, above) already resolves an aggregation node's
-                # own status first, so structural-scan's check reads it
-                # correctly regardless of tree["order"] position. An
-                # aggregation node that isn't itself exposed is never a
-                # candidate, whatever its resolved state.
+                # `resolved` gate: checked on its own terms, *before* the
+                # generic sim_fulfilled-skip below — mirrors
+                # next_candidates()'s ordering. sim_fulfilled marks a
+                # resolved-gated node "fulfilled" the instant its gate opens,
+                # but for an *exposed* one that's the gate *opening*, not the
+                # node being delivered and done: it must stay proposable
+                # every iteration once open (e.g. structural-scan keeps
+                # accepting planted structural candidates), not just the one
+                # iteration it first resolves in. Gating this behind the
+                # generic skip made it unreachable once already simulated
+                # fulfilled: once every PHP-tree leaf is resolved, the loop
+                # would skip structural-scan every iteration and fall
+                # through to the phantom phpstan-level-N "open chain" filler
+                # forever instead of ever proposing structural-scan again.
+                #
+                # Every resolved-parent leaf must be fulfilled OR rejected —
+                # not the standard required-parent check, which would
+                # instead close this node forever on any rejection. Applies
+                # to any resolved-gated node (structural-scan, and any
+                # aggregation node feeding it, e.g. php-structural-scan) —
+                # `gate` (computed fresh this iteration, above) already
+                # resolves an aggregation node's own status first, so
+                # structural-scan's check reads it correctly regardless of
+                # tree["order"] position. An aggregation node that isn't
+                # itself exposed is never a candidate, whatever its resolved
+                # state.
                 if node not in tree["exposed_resolved_gate_nodes"]:
                     continue
                 resolved, _unresolved = gate[node]
@@ -1101,6 +1110,12 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 best = node
                 best_reason = "all resolved-parent leaves resolved (fulfilled or rejected)"
                 break
+            if sim_fulfilled.get(node, False):
+                continue  # already fulfilled (real or simulated), skip
+            if node in rejected:
+                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
+            if node in php_floor_blocked:
+                continue  # target's PHP floor doesn't meet this leaf's known minimum yet
             # test-runner-if-missing is fulfilled if phpunit/pest already fulfilled (simulated) —
             # phpunit fulfilled implies a runner is adopted, so proposing this one too is redundant.
             if node == "test-runner-if-missing" and sim_fulfilled.get("phpunit"):
