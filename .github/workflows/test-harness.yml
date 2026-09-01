@@ -86,7 +86,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        fixture: [php-empty, php-partial, php-p0-empty, php-p0-nonempty, php-psalm, php-clean, php-project-with-candidates]
+        fixture: [php-empty, php-partial, php-p0-empty, php-p0-nonempty, php-psalm, php-clean, php-project-with-candidates, non-php-project]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python

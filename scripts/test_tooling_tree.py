@@ -31,9 +31,11 @@ class LoadTreeTests(unittest.TestCase):
     def test_edges_parsed(self):
         tree = load_tree()
         self.assertGreaterEqual(len(tree["edges"]), 15)
-        # generic root (ADR-0008): git -> loop-config, loop-config -> PHP tree roots
+        # generic root (ADR-0008): git -> loop-config, loop-config -> is-php-project
+        # (the PHP specialization's recognition gate, ADR-0022) -> the PHP tree roots.
         self.assertIn({"from": "git", "to": "loop-config", "type": "required"}, tree["edges"])
-        self.assertIn({"from": "loop-config", "to": "composer", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "loop-config", "to": "is-php-project", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "is-php-project", "to": "composer", "type": "required"}, tree["edges"])
         # check required edge
         self.assertIn({"from": "phpstan-level-0", "to": "phpstan-level-1", "type": "required"}, tree["edges"])
         # recommended
@@ -170,10 +172,12 @@ class LoadTreeTests(unittest.TestCase):
         # as composer-audit's ci-runner + composer), and a recommended
         # parent of rector-php-set (its PHP-version-targeted rule set
         # otherwise has no dependency on the runtime floor it rewrites to).
+        # `loop-config` -> `is-php-project` (ADR-0022) replaced the direct
+        # `loop-config` parent once the PHP tree's recognition gate landed.
         tree = load_tree()
         self.assertEqual(
             set(tree["required_parents"]["php-minimal-version"]),
-            {"loop-config", "ci-runner"},
+            {"is-php-project", "ci-runner"},
         )
         self.assertIn("php-minimal-version", tree["recommended_parents"]["rector-php-set"])
         # Deliberately NOT one of php-structural-scan's resolved-parent
@@ -1406,6 +1410,115 @@ class EditorconfigNodeTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class IsPhpProjectTests(unittest.TestCase):
+    """ADR-0022: `is-php-project` — the PHP specialization's recognition
+    gate, declared in `tooling-tree.md` (the generic root), required parent
+    of `composer`/`php-minimal-version` in `php-tooling-tree.md`. `_NEVER_PROPOSED`
+    (like `git`), so it never appears in `next`/`roadmap`/`withheld` itself —
+    only its gating effect on `composer`/`php-minimal-version` is visible
+    there."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _loop_config_only(self):
+        return {"docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"}
+
+    def test_unfulfilled_with_no_composer_json_and_no_php_files(self):
+        tmp, root = self._make_repo({"index.html": "<html></html>\n", "styles.css": "body{}\n"})
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["is-php-project"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_via_php_file_without_composer_json(self):
+        files = self._loop_config_only()
+        files["src/Foo.php"] = "<?php\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["is-php-project"]["fulfilled"])
+            self.assertFalse(d["is-php-project"]["details"]["has_composer_json"])
+            self.assertTrue(d["is-php-project"]["details"]["has_php_files"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_via_composer_json_without_php_files(self):
+        files = self._loop_config_only()
+        files["composer.json"] = json.dumps({"name": "test/app"})
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["is-php-project"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_vendor_php_files_do_not_count(self):
+        files = self._loop_config_only()
+        files["vendor/some-pkg/src/Bar.php"] = "<?php\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["is-php-project"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_composer_and_php_minimal_version_absent_from_next_while_unfulfilled(self):
+        tmp, root = self._make_repo(self._loop_config_only())
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertNotIn("composer", nodes)
+            self.assertNotIn("php-minimal-version", nodes)
+            # ci-runner/editorconfig stay reachable — language-neutral, not
+            # gated by is-php-project.
+            self.assertIn("ci-runner", nodes)
+            self.assertIn("editorconfig", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_composer_released_once_is_php_project_fulfilled(self):
+        files = self._loop_config_only()
+        files["src/Foo.php"] = "<?php\n"
+        tmp, root = self._make_repo(files)
+        try:
+            nodes = [c["node"] for c in next_candidates(root)]
+            self.assertIn("composer", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_never_in_next_roadmap_or_withheld(self):
+        tmp, root = self._make_repo(self._loop_config_only())
+        try:
+            self.assertNotIn("is-php-project", [c["node"] for c in next_candidates(root)])
+            self.assertNotIn("is-php-project", [r["node"] for r in roadmap(root, steps=10)])
+            self.assertNotIn("is-php-project", [w["node"] for w in withheld_candidates(root)])
+        finally:
+            tmp.cleanup()
+
+    def test_retroactively_activates_once_php_appears(self):
+        # The user's own requirement: a target that starts non-PHP and only
+        # later becomes one opens the tree automatically, no separate
+        # mechanism needed — detect_nodes() re-derives from scratch every
+        # call, nothing caches the earlier "no PHP" state.
+        tmp, root = self._make_repo(self._loop_config_only())
+        try:
+            self.assertNotIn("composer", [c["node"] for c in next_candidates(root)])
+            (root / "src").mkdir(parents=True, exist_ok=True)
+            (root / "src" / "Foo.php").write_text("<?php\n")
+            self.assertTrue(detect_nodes(root)["is-php-project"]["fulfilled"])
+            self.assertIn("composer", [c["node"] for c in next_candidates(root)])
+        finally:
+            tmp.cleanup()
+
+
 class PhpVersionReversalTests(unittest.TestCase):
     """php-tooling-tree.md's mechanical reversal: a rejected node's
     `Blocked by: PHP >= X.Y` condition satisfied by the target's current
@@ -1817,33 +1930,48 @@ class RoadmapTests(unittest.TestCase):
 
     def test_empty_roadmap_starts_with_loop_config(self):
         # ADR-0008: with no docs/refactoring/config.md, loop-config is the
-        # first proposable node — required parent of composer/ci-runner
-        # (and, since ticket 01, editorconfig).
-        tmp, root = self._make_repo({})
+        # first proposable node — required parent of ci-runner/editorconfig,
+        # and (via is-php-project, ADR-0022) composer.
+        # ADR-0022: composer now requires is-php-project as well as
+        # loop-config — a bare `.git` repo with no PHP signal never fulfils
+        # it, so a minimal `index.php` is added here to keep testing the
+        # composer cascade; IsPhpProjectTests covers the genuinely-no-PHP
+        # case (composer never reachable at all) separately.
+        tmp, root = self._make_repo({"index.php": "<?php\n"})
         try:
-            r = roadmap(root, steps=5)
+            r = roadmap(root, steps=6)
             self.assertEqual(r[0]["node"], "loop-config")
-            # ticket 01: editorconfig lives in tooling-tree.md, parsed before
-            # php-tooling-tree.md, so it sorts ahead of composer/ci-runner in
-            # tree["order"] — a trivial generic-root node, same footing as
-            # loop-config itself.
-            self.assertEqual(r[1]["node"], "editorconfig")
-            self.assertEqual(r[2]["node"], "composer")
-            self.assertIn(r[3]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
+            # ADR-0022: is-php-project sits between loop-config and
+            # ci-runner/editorconfig in tree["order"] but is never proposed
+            # (_NEVER_PROPOSED) — it never appears in roadmap output itself.
+            self.assertNotIn("is-php-project", [step["node"] for step in r])
+            # ci-runner now sorts ahead of editorconfig — both trivial
+            # generic-root nodes, tooling-tree.md's edge table lists
+            # ci-runner's row first.
+            self.assertEqual(r[1]["node"], "ci-runner")
+            self.assertEqual(r[2]["node"], "editorconfig")
+            self.assertEqual(r[3]["node"], "composer")
+            self.assertIn(r[4]["node"], ["composer-audit", "php-cs-fixer", "phpunit"])
         finally:
             tmp.cleanup()
 
     def test_roadmap_with_loop_config_starts_with_composer(self):
         # With docs/refactoring/config.md already present, loop-config is
         # fulfilled and the roadmap picks up where it used to before ADR-0008
-        # — plus editorconfig (ticket 01), ordered ahead of composer for the
-        # same reason as above.
-        tmp, root = self._make_repo({"docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"})
+        # — plus ci-runner/editorconfig (ticket 01), ordered ahead of
+        # composer for the same reason as above. Needs a PHP signal too,
+        # same as above (ADR-0022).
+        tmp, root = self._make_repo({
+            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "index.php": "<?php\n",
+        })
         try:
-            r = roadmap(root, steps=4)
-            self.assertEqual(r[0]["node"], "editorconfig")
-            self.assertEqual(r[1]["node"], "composer")
-            self.assertIn(r[2]["node"], ["ci-runner", "composer-audit", "php-cs-fixer", "phpunit"])
+            r = roadmap(root, steps=5)
+            self.assertNotIn("is-php-project", [step["node"] for step in r])
+            self.assertEqual(r[0]["node"], "ci-runner")
+            self.assertEqual(r[1]["node"], "editorconfig")
+            self.assertEqual(r[2]["node"], "composer")
+            self.assertIn(r[3]["node"], ["composer-audit", "php-cs-fixer", "phpunit"])
         finally:
             tmp.cleanup()
 

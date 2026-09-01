@@ -1,6 +1,6 @@
 # Tooling Tree
 
-The generic root of every language specialization's **tooling tree**. Two ordinary prerequisites (`git`, `loop-config`) and one downstream gate (`structural-scan`). Language specializations (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attach their first-wave nodes beneath `loop-config`, not beneath `git` directly, and declare the edges into `structural-scan` themselves — this document stays language-neutral. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **tooling tree**).
+The generic root of every language specialization's **tooling tree**. Two ordinary prerequisites (`git`, `loop-config`), one **recognition gate** per language specialization (PHP: `is-php-project`, below — a future CSS/JS specialization adds its own sibling the same way), one ordinary language-neutral first-wave node (`ci-runner`, below), and one downstream gate (`structural-scan`). A recognition gate's *role* is generic — "should this specialization's tree even be reachable on this target" is evaluated fresh every pass regardless of which specializations exist — which is why it lives here rather than in the specialization's own tree doc, even though what a given gate actually detects (PHP files/`composer.json`, for `is-php-project`) is naturally specific to that language. `ci-runner` lives here for a different reason: its content is genuinely language-neutral, but a language tree still references it externally for the language-specific edges hanging off it — the same way `editorconfig` (also below) already works. Everything past a specialization's own recognition gate — its real tooling nodes (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) — attaches beneath that gate instead of beneath `loop-config` directly, and declares its own edges into `structural-scan` itself; this document otherwise stays language-neutral. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **tooling tree**).
 
 ## Diagram
 
@@ -8,10 +8,14 @@ The generic root of every language specialization's **tooling tree**. Two ordina
 graph TD
     git[git]
     lc[loop-config]
+    ipp[is-php-project]
+    ci[ci-runner]
     edc[editorconfig]
     ss[structural-scan]
 
     git -->|required| lc
+    lc -->|required| ipp
+    lc -->|required| ci
     lc -->|required| edc
     edc -.->|resolved| ss
     lc -.->|"(language tree's own aggregation node attaches here)"| ss
@@ -24,6 +28,8 @@ Two dotted edges point into `structural-scan` above. `editorconfig -.->|resolved
 | from (parent) | to (child) | type |
 |---|---|---|
 | `git` | `loop-config` | required |
+| `loop-config` | `is-php-project` | required |
+| `loop-config` | `ci-runner` | required |
 | `loop-config` | `editorconfig` | required |
 | `editorconfig` | `structural-scan` | resolved |
 
@@ -46,6 +52,54 @@ The table above is this document's own — every row here is generic-to-generic 
 - **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write cadence, last-run date, and create-mode.
 - **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
 - **MR scope:** one MR — create `docs/refactoring/config.md` (see `skills/continuous-refactoring/references/refactoring-config.md` for its shape; there is deliberately no stored cadence — the loop never triggers itself). Ordinary node like any other: `refactor-scan` files it as a single `refactor:candidate` issue when missing, same as a PHP tree node, and it is the only candidate filed that pass.
+
+### `is-php-project`
+
+- **Name:** PHP Project Recognition
+- **Tool:** none — recognition-only, the tree's own gate, not a third-party tool.
+- **Purpose:** a **recognition gate** — hold the PHP specialization's entire tree closed until there's a
+  genuine signal the target actually uses PHP, instead of proposing its nodes (`composer` and everything
+  beneath it) on every target regardless of language and relying on a human to reject each one by hand as it
+  becomes reachable. One gate per specialization; this is the first (a future CSS/JS specialization adds its
+  own sibling the same way). The gate's *role* is generic — evaluated fresh every pass, regardless of which
+  specializations exist — even though what this particular gate detects is necessarily PHP-specific.
+- **Fulfilment check:** `composer.json` (or `composer/composer.json`) present, **or** at least one `*.php`
+  file anywhere in the tree, `vendor/` excluded. Deliberately not `composer.json`-only: a PHP project that
+  hasn't adopted Composer yet should still open this tree — including the `composer` node
+  (`skills/refactor-scan/references/php-tooling-tree.md`) that proposes adopting it in the first place.
+  Re-derived fresh every pass, so a target that only later becomes a PHP project opens the tree
+  retroactively — no separate mechanism needed for that.
+- **MR scope:** none — never proposed as a candidate (`tooling_tree.py`'s `_NEVER_PROPOSED`, the same set
+  `git` is in). Rejecting a `required` parent by hand never unblocks its children (unlike a `resolved`
+  parent — see `structural-scan` below), so there is nothing to gain from a human ever filing
+  `docs/refactoring/out-of-scope/is-php-project.md`: leaving it unfulfilled already does everything a
+  rejection could.
+- **Known gap, not fixed by this node:** `php-structural-scan`'s own `resolved` gate
+  (`skills/refactor-scan/references/php-tooling-tree.md`) checks each of its thirteen leaves for "fulfilled,
+  or explicitly rejected under `out-of-scope/`" — it does not understand a leaf permanently closed by an
+  unfulfilled `required` ancestor as a form of resolution. A leaf gated shut by this node (e.g.
+  `composer-audit`) therefore counts as neither fulfilled nor rejected there; `structural-scan` still cannot
+  open via the PHP path on a non-PHP target without a human filing all thirteen leaf-level rejections by
+  hand. This predates `is-php-project` (a target where a human rejected `composer` itself already hit the
+  same wall, since `composer`'s own children never even got proposed to reject) and isn't worsened by it.
+
+### `ci-runner`
+
+- **Name:** CI Runner
+- **Tool:** GitHub Actions / GitLab CI
+- **Purpose:** an existing pipeline that later hosts quality jobs. Language-neutral — a CI pipeline is
+  useful regardless of which language specialization (if any) ends up active, so it stays a direct
+  `loop-config` child here rather than gated behind any specialization's recognition gate. Referenced
+  externally by `skills/refactor-scan/references/php-tooling-tree.md` for the PHP-specific edges that hang
+  off it (`ci-runner → php-minimal-version`, `ci-runner → composer-audit`) — the same way that document
+  already references `editorconfig` (below) for `editorconfig → php-cs-fixer`.
+- **Fulfilment check:** CI config file present; forge determined from `git remote`; unknown CI → ask, do not
+  record a rejection.
+- **MR scope:** pipeline file only. `composer-audit`
+  (`skills/refactor-scan/references/php-tooling-tree/composer-audit.md`) is a quality-job child with two
+  parents (this node + `composer`). `phpunit` and `phpstan-level-0` do not get their own two-parent
+  children — once this node is fulfilled, each self-wires its own CI gate as part of its own fulfilment
+  check instead.
 
 ### `editorconfig`
 

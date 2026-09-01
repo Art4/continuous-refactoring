@@ -11,6 +11,14 @@
       "reason": "docs/refactoring/config.md present",
       "details": {}
     },
+    "is-php-project": {
+      "fulfilled": true,
+      "reason": "composer.json or *.php files present",
+      "details": {
+        "has_composer_json": true,
+        "has_php_files": true
+      }
+    },
     "composer": {
       "fulfilled": true,
       "reason": "composer.json+lock present",
@@ -23,6 +31,16 @@
       "fulfilled": true,
       "reason": "CI config present",
       "details": {}
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "no PHP-version gap detected",
+      "details": {
+        "floor": [
+          8,
+          1
+        ]
+      }
     },
     "editorconfig": {
       "fulfilled": true,
@@ -165,6 +183,14 @@
       "reason": "no phpstan-deprecation-rules dep",
       "details": {}
     },
+    "psalm-taint-analysis": {
+      "fulfilled": false,
+      "reason": "no psalm dep/config",
+      "details": {
+        "has_psalm_dep": false,
+        "has_psalm_cfg": false
+      }
+    },
     "rector-dead-code": {
       "fulfilled": true,
       "reason": "rector dead-code set present",
@@ -223,7 +249,8 @@
           "phpstan-level-6",
           "phpstan-level-7",
           "phpstan-level-8",
-          "phpstan-level-9"
+          "phpstan-level-9",
+          "psalm-taint-analysis"
         ]
       }
     },
@@ -243,7 +270,8 @@
           "phpstan-level-6",
           "phpstan-level-7",
           "phpstan-level-8",
-          "phpstan-level-9"
+          "phpstan-level-9",
+          "psalm-taint-analysis"
         ]
       }
     }
@@ -253,60 +281,90 @@
       "n": 1,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 2,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 3,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 4,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 5,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 6,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 7,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 8,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 9,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     },
     {
       "n": 10,
       "node": "structural-scan",
       "type": "tooling",
+      "required_parents": [],
+      "required_any_parents": [],
+      "recommended_parents": [],
       "reason": "all resolved-parent leaves resolved (fulfilled or rejected)"
     }
   ],
