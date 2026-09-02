@@ -5,70 +5,64 @@ description: Turn the chosen node into a concrete refactoring plan, filing it as
 
 # Refactor Design
 
-Turn the **node** `refactor-prioritize` chose into a **plan** concrete enough to implement, and file it as the issue that carries that plan — this skill is where a node first becomes an issue, not `refactor-scan`. The `/grilling` loop sharpens a structural design; `/domain-modeling` keeps the domain model current as decisions land.
+Turn the **node** `refactor-prioritize` chose into a **plan** concrete enough to implement, and file it as the issue that carries that plan — this is where a node first becomes an issue, not `refactor-scan`. `/grilling` sharpens a structural design; `/domain-modeling` keeps the domain model current as decisions land.
 
 ## Process
 
 ### 1. Check whether it's already fully specified
 
-An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree.md`, or a language specialization's tree) is fully specified by definition — its Tool, Purpose, Fulfilment check, and MR scope are already written in the tree doc. Skip straight to step 5 and file/write the plan from that spec — no codebase search, no grilling, nothing to ground beyond the doc itself.
+An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree.md`, or a language specialization's tree) is fully specified by definition — Tool, Purpose, Fulfilment check, MR scope are already written in the tree doc. Skip straight to step 5 and file/write the plan from that spec — no codebase search, no grilling.
 
-**`loop-config` exception:** not fully specified by the tree doc alone — its MR scope names a human interview, not a fixed spec. Run `skills/continuous-refactoring/references/loop-config-interview.md` in full (explore, ask, summarize, record) before filing anything; skip step 5's usual "carry the tree doc's spec over precisely" move for this node only — file the interview's recorded decisions instead (step 5, below). Steps 2–4 (structural-candidate search, grilling) still don't apply — this stays a tooling-tree node in every other way.
+**`loop-config` exception:** not fully specified by the tree doc alone — its MR scope names a human interview, not a fixed spec. Run `skills/continuous-refactoring/references/loop-config-interview.md` in full (explore, ask, summarize, record) before filing anything; skip step 5's usual "carry the tree doc's spec over precisely" move for this node only — file the interview's recorded decisions instead (step 5). Steps 2–4 (structural-candidate search, grilling) still don't apply — this stays a tooling-tree node in every other way.
 
-The **`structural-scan`** node is not pre-specified — it names an open gate, not a candidate. Continue to step 2 to find one.
+The **`structural-scan`** node names an open gate, not a candidate. Continue to step 2 to find one.
 
 ### 2. Find a structural candidate
 
-This is the codebase walk that used to be `refactor-scan`'s — it only runs here, for the node actually chosen, not speculatively on every pass.
+Only runs here, for the node actually chosen — not speculatively on every pass.
 
-Decide *where* to look before you look:
+Decide *where* to look before you look: the user named a direction (module, subsystem, hot spot) → take it. Otherwise walk back a good stretch of `git log --oneline` for **hot spots** — files/areas that keep coming up — and let those pull your attention first; scattered with no clear hot spot → widen the net.
 
-- If the user named a direction — a module, a subsystem, a hot spot they already feel — take it and skip the inference below.
-- Otherwise walk back a good stretch of the commit history (`git log --oneline`) to find the **hot spots** — files and areas that keep coming up — and let those paths pull your attention first. If changes are scattered with no clear hot spot, widen the net.
+Explore organically, note friction. Look for:
 
-Then explore organically and note where you experience friction. Look for:
-
-- **Shallow modules** — little **depth**: interface nearly as complex as the implementation. Apply the **deletion test**: would deleting it concentrate complexity, or just move it? A "concentrates" is the signal you want.
+- **Shallow modules** — little **depth**: interface nearly as complex as the implementation. Deletion test: would deleting it concentrate complexity, or just move it? "Concentrates" is the signal.
 - Missing **locality** — pure functions extracted for testability, but the real bugs hide in how they're called.
-- Low **leverage** — a lot of interface surface buying little behaviour behind it.
+- Low **leverage** — a lot of interface surface buying little behaviour.
 - Tightly-coupled modules leaking across their **seams**.
 - Untested parts, or parts hard to test through their current interface.
 - **Tooling pressure** — places the fulfilled tooling (PHPStan, Rector, style) keeps flagging.
 
-Use the `/codebase-design` vocabulary (module, interface, depth, seam, leverage, locality) in the candidate description — don't drift into "component," "service," or "API."
+Use `/codebase-design` vocabulary (module, interface, depth, seam, leverage, locality) in the candidate description — not "component," "service," "API."
 
-If more than one genuine friction spot turns up, **pick the single strongest one** — same factors `refactor-prioritize` uses (heat, leverage, tooling pressure, risk) — and set the rest aside for a future pass's walk. One `structural-scan` selection produces exactly one candidate; the loop being continuous is what catches the others later, not filing them all now.
+More than one genuine friction spot → pick the single strongest (same factors as `refactor-prioritize`: heat, leverage, tooling pressure, risk), set the rest aside for a future pass. One selection, one candidate.
 
 ### 3. Ground in the candidate
 
-Read the code the candidate names (and, for a resumed structural candidate, the issue if step 2 already ran in an earlier interrupted pass). Read `CONTEXT.md` and the ADRs in the area. Understand *why* it's a candidate (the friction) before proposing anything.
+Read the code the candidate names (and, for a resumed candidate, the issue). Read `CONTEXT.md` and the ADRs in the area. Understand *why* it's a candidate before proposing anything.
 
 ### 4. Grill toward the seam
 
-Structural candidates only — skip for a tooling-tree node. Run `/grilling` on the candidate. The decision tree hangs off these branches:
+Structural candidates only — skip for a tooling-tree node. Run `/grilling` on the candidate, along these branches:
 
-- **The deepened module** — what does the module become, and what is its one job? What disappears behind it?
-- **The seam** — where is the public boundary, and what is it tested through?
-- **The interface** — what does the interface expose, and does it stay deep (implementation complexity > interface complexity)?
-- **Locality** — what moves together, and what must *not* spread?
-- **Tests that survive** — which existing tests stay, which are rewritten, which new ones appear at the seam?
+- **The deepened module** — what does it become, what is its one job, what disappears behind it?
+- **The seam** — where's the public boundary, tested through what?
+- **The interface** — what does it expose, does it stay deep (implementation complexity > interface complexity)?
+- **Locality** — what moves together, what must *not* spread?
+- **Tests that survive** — which stay, which are rewritten, which new ones appear at the seam?
 
-Side effects happen inline as decisions crystallise (per `/domain-modeling`):
-
-- Naming a module after a concept not in `CONTEXT.md`? Add the term.
-- User rejects a design with a load-bearing reason a future scan should not re-suggest? Offer an ADR.
+Side effects happen inline as decisions crystallise (per `/domain-modeling`): naming a module after a concept not in `CONTEXT.md` → add the term. User rejects a design with a load-bearing reason a future scan shouldn't re-suggest → offer an ADR.
 
 ### 5. File the issue and write the plan
 
-**A tooling-tree node:** before filing, check whether an issue titled exactly `Tooling tree: <Name>` (the node's **Name** from the tree doc, e.g. `Tooling tree: PHPStan Level 0` — never its slug) is already open — if so, that's the issue; don't file a second one (it means a prior pass got this far and was interrupted before `refactor-implement` finished). Otherwise create one titled that way, label **`refactor:candidate`**, and open the body directly with the content itself — Purpose, Fulfilment check, and MR scope carried over precisely (they're load-bearing: that scope *is* the slice ordering, and *is* the plan) — never introduced as a citation or "quoted verbatim" from the tree doc, and never naming the tree doc's file path; the issue reads as its own plan, addressed to whoever's reading it in the target repo, not as tooling citing itself. Skip a `Name:` bullet (it's already the title) and skip `Tool` when it's `none` — the suite's-own-state case doesn't need a bullet to say so.
+**Tooling-tree node:** check first whether an issue titled exactly `Tooling tree: <Name>` (never the slug) is already open — that's the issue, don't file a second one (a prior pass got this far and was interrupted). Otherwise file one titled that way, label **`refactor:candidate`**, body = the tree doc's content directly (Purpose, Fulfilment check, MR scope carried over precisely — they're load-bearing, that scope *is* the plan) — never introduced as a quotation or naming the tree doc's file path; it reads as its own plan. Skip `Name:` (already the title); skip `Tool` when `none`.
 
-**A structural candidate:** create an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), and Signal (which friction signal from step 2 it came from). Then capture the plan on that issue: the deepened module, the seam and interface, the surviving tests, and the ordering of slices (see `refactor-implement`).
+**Structural candidate:** file an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), Signal (which step-2 friction signal). Capture the plan on that issue: deepened module, seam and interface, surviving tests, slice ordering (see `refactor-implement`).
 
-Either way: set the Refactoring Notes' `config.md`'s `Pending candidates` field to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — the marker that lets a future `refactor-scan` resume this exact work instead of proposing something fresh if the pass stops here. `refactor-learn` clears it once a merge request exists.
+Either way: set the Refactoring Notes' `config.md`'s `Pending candidates` to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — lets a future `refactor-scan` resume this exact work if the pass stops here. `refactor-learn` clears it once a merge request exists.
 
-**`loop-config` exception:** if the chosen node *is* `loop-config` itself, two things differ from an ordinary tooling-tree node's filing. First, the issue body is *not* the tree doc's generic Purpose/Fulfilment check/MR scope — it's the decisions step 1's interview recorded: which tracker, which create-mode, and where the Refactoring Notes themselves live, each with its one-line rationale, plus the resulting MR scope (create `config.md` with `Create-mode` set; also create `docs/agents/issue-tracker.md` when the interview chose a local tracker). Second, the Refactoring Notes' `config.md` doesn't exist yet — there's nowhere to write `Pending candidates` at this step either; skip that write here, same as before — `refactor-implement` records it directly when it creates the file.
+**`loop-config` exception:** chosen node *is* `loop-config` → two differences from an ordinary node's filing. The issue body isn't the tree doc's generic spec — it's the interview's recorded decisions (tracker, create-mode, Refactoring Notes location, each with its one-line rationale) plus the resulting MR scope (create `config.md` with `Create-mode` set; also create `docs/agents/issue-tracker.md` when the interview chose a local tracker). And `config.md` doesn't exist yet, so no `Pending candidates` to write here either — `refactor-implement` records it directly when it creates the file.
 
-The plan follows the foundational refactoring rules: behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
+The plan follows the foundational refactoring rules (ADR-0004): behavior-preserving, Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tools over hand-applied moves, own branch unless said otherwise.
 
 ## Output
 
@@ -76,10 +70,10 @@ The filed issue, carrying the plan → `refactor-implement`.
 
 ## Fallback
 
-- **`/codebase-design`**: if installed, use its vocabulary for step 2. Otherwise skip it — the full vocabulary (module, interface, depth, seam, leverage, locality) is already inline in step 2 above; use those terms and don't drift into "component", "service", or "API".
-- **`/grilling`**: if installed, use it. Otherwise the grilling loop mechanics (design tree, frontier, rounds) are inlined at `skills/refactor-design/references/grilling-fallback.md`.
-- **`/domain-modeling`**: if installed, use its discipline. Otherwise the same reference file inlines the side effects this step performs — they're already inline in section 4 above too, and run regardless of whether this skill is installed.
+- **`/codebase-design`**: installed → use its vocabulary for step 2. Otherwise the full vocabulary is already inline in step 2 above.
+- **`/grilling`**: installed → use it. Otherwise mechanics (design tree, frontier, rounds) inlined at `skills/refactor-design/references/grilling-fallback.md`.
+- **`/domain-modeling`**: installed → use its discipline. Otherwise the same reference file inlines these side effects — already inline in section 4 too, and run regardless of whether this skill is installed.
 
 ## Completion criterion
 
-The candidate has an issue (newly filed, or a resumed one) with a written plan on it, and `config.md`'s `Pending candidates` names it. For a structural candidate: module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier). For a tooling tree node: the tree doc's Purpose / Fulfilment check / MR scope, carried onto the issue as its own plan — not introduced as a quotation from the tree doc (`loop-config` carries its interview's recorded decisions instead — see step 5's exception).
+The candidate has an issue (newly filed, or resumed) with a written plan, and `config.md`'s `Pending candidates` names it. Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception).
