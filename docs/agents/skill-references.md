@@ -8,11 +8,11 @@ Every reference from a suite skill to a **global** skill, and how its fallback b
 | `refactor-design` | `/grilling` (Z.8,18) | core (design loop) | self-sufficient | 02 ✓ shipped |
 | `refactor-design` | `/domain-modeling` (Z.8,26) | enrichment (side effects) | crash-safe | 02 ✓ shipped |
 | `refactor-implement` | `/tdd` | core (red→green rules) | self-sufficient | 03 ✓ shipped |
-| `refactor-implement` | `mattpocock/skills` implement skill (`setup-matt-pocock-skills`) | core (review, embedded) | self-sufficient | 10 (ADR-0010) |
+| `refactor-implement` | review (inline, see `review-axes.md`) | core (review) | self-contained | — |
 | `refactor-learn` | `/domain-modeling` | enrichment (ADR/CONTEXT.md side effects) | crash-safe | 10 (ADR-0010) |
 
 Exempt (no global refs): `refactor-prioritize`, `refactor-scan` (moved its `/codebase-design` reference to `refactor-design`, ADR-0010 — the codebase walk for `structural-scan` candidates lives there now).
 
-`refactor-review` retired as a standalone skill (ADR-0010); its two-axis logic and `/code-review` reference are now `refactor-implement`'s, folded in alongside `/tdd`. `continuous-refactoring`'s own `/domain-modeling` reference moved to `refactor-learn`, which now owns the learn step.
+`refactor-review` retired as a standalone skill (ADR-0010); its two-axis logic is now `refactor-implement`'s, inlined alongside the red→green loop discipline. `continuous-refactoring`'s own `/domain-modeling` reference moved to `refactor-learn`, which now owns the learn step.
 
 Keep this table in sync whenever a suite skill adds or drops a global reference — it is the audit ledger for the ADR-0003 convention.

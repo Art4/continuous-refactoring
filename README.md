@@ -32,7 +32,7 @@ ln -s /path/to/continuous-refactoring/skills/* <target>/.agents/skills/
 
 Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skills/`), a symlink on the `skills/` directories there is enough.
 
-The target project needs the engineering-skills setup (`setup-matt-pocock-skills`: issue-tracker config, triage labels, domain docs). If it's missing, the orchestrator points that out.
+The target project needs issue-tracker config, triage labels, and domain docs (see `docs/agents/`).
 
 ## Quick start
 

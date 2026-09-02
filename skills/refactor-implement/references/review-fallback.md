@@ -2,8 +2,7 @@
 
 Backs `refactor-implement`'s `## Fallback` section. Two independent parts:
 the red → green loop discipline (used when `/tdd` isn't installed) and the
-two-axis review discipline (used when the `mattpocock/skills` implement skill
-isn't installed).
+two-axis review discipline (inline when no external review skill is available).
 
 ## Red → green loop, inline
 
