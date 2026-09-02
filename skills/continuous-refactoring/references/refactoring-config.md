@@ -1,6 +1,14 @@
-# Reference: `docs/refactoring/config.md` in the target repo
+# Reference: `config.md`, in the target repo's Refactoring Notes
 
 The config file the suite reads and writes. It doesn't exist on a fresh target repo: `refactor-scan` proposes it (the `loop-config` node, `skills/refactor-scan/references/tooling-tree.md`), `refactor-design` runs a human interview instead of copying the tree doc's generic spec (`skills/continuous-refactoring/references/loop-config-interview.md`) and files the recorded decisions as a single `refactor:candidate` issue, and `refactor-implement` creates the file when that candidate is implemented — the same path any other tooling-tree node takes.
+
+## Where the Refactoring Notes live
+
+The **Refactoring Notes** are the target repo's own folder holding the loop's state — `config.md` (this file), `merge-requests.md`, `out-of-scope/`. Default `docs/refactoring/`; overridable per target, decided once during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`, Q3) and recorded, by that name, in the target's `AGENTS.md`/`CLAUDE.md`.
+
+**Resolution rule**, followed independently by every lifecycle skill (and by the deterministic parser, `skills/refactor-scan/references/tooling_tree.py`) wherever it needs the Refactoring Notes, the same way the suite already resolves "does the tracker support native labels" from `docs/agents/issue-tracker.md` — not a value threaded through the orchestrator's carried-data chain: read the target's `AGENTS.md`, and if that doesn't exist or doesn't name one, `CLAUDE.md` — whichever names a line matching `` Refactoring Notes: `<path>` `` (path backtick-quoted, trailing slash optional) wins. Neither names one → the Refactoring Notes default to `docs/refactoring/`.
+
+Every other skill in this suite refers to this folder by name — "the Refactoring Notes" — never by restating or assuming the concrete path; this section is the one place the resolution rule itself is defined.
 
 ## Structure
 
@@ -52,9 +60,9 @@ is already cheap and always correct there, so there's nothing to gain and a stal
 - **No per-entry metadata** (no timestamp, no "as of which pass") — that kind of field in a versioned,
   repeatedly-rewritten file invites merge conflicts between bookkeeping writes for no operational
   benefit.
-- A node **never appears in `Fulfilled nodes` and `docs/refactoring/out-of-scope/` at the same time** —
-  fulfilled and rejected are different, mutually exclusive states for a node; rejection state lives
-  entirely in `out-of-scope/` (one file per rejected node), never duplicated here. A node moves from
+- A node **never appears in `Fulfilled nodes` and the Refactoring Notes' `out-of-scope/` at the same
+  time** — fulfilled and rejected are different, mutually exclusive states for a node; rejection state
+  lives entirely in `out-of-scope/` (one file per rejected node), never duplicated here. A node moves from
   rejected to fulfilled only through the normal reversal path (an out-of-scope entry removed, then the
   node adopted for real) — see `skills/refactor-scan/references/php-tooling-tree.md`'s Nodes intro and
   `skills/refactor-learn/SKILL.md`.
@@ -76,5 +84,5 @@ There is deliberately no `Cadence` field: the loop never triggers itself — you
 ## Rules
 
 - **`Pending candidates`, `Fulfilled nodes`, and `Skip streak` are `refactor-learn`-written — never by hand.** `Create-mode` and `Focus areas` you can edit by hand any time — that's what they're for. Nobody is expected to hand-edit `Fulfilled nodes` or `Skip streak`; if either drifts wrong, the next pass with parser access re-derives it.
-- The file travels with the repo. Loop state does not live in agent sessions but here (create-mode, focus areas, pending candidates, fulfilled nodes), in the issue tracker (backlog), in `docs/refactoring/merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker as `refactor:delivered`-labeled issues), and in `docs/refactoring/out-of-scope/` (learned rejections).
+- The file travels with the repo. Loop state does not live in agent sessions but here (create-mode, focus areas, pending candidates, fulfilled nodes), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker as `refactor:delivered`-labeled issues), and in the Refactoring Notes' `out-of-scope/` (learned rejections).
 - If the file is missing, that's the `loop-config` tooling-tree node — see above. Ordinary in every way except who writes which field and which branch it lands on for that one candidate — see the `loop-config` exception above.

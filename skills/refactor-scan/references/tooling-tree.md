@@ -52,8 +52,8 @@ The table above is this document's own — every row here is generic-to-generic 
 - **Name:** Refactoring Config
 - **Tool:** none — this is the suite's own state, not a third-party tool.
 - **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write focus areas and merge-request create-mode.
-- **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
-- **MR scope:** one MR — before writing anything, run the interview in `skills/continuous-refactoring/references/loop-config-interview.md`: explore the target repo for tracker/create-mode/config-location signals, ask the human to decide (with a recommended answer for each), then record the decisions. The MR itself creates `docs/refactoring/config.md` with `Create-mode` already set from that interview (see `skills/continuous-refactoring/references/refactoring-config.md` for the file's shape — there is deliberately no stored cadence, the loop never triggers itself) and, when the interview chose a local tracker, `docs/agents/issue-tracker.md` alongside it. `refactor-design` runs the interview and files this node as a single `refactor:candidate` issue carrying its recorded decisions, same as any other tooling-tree node's plan — `refactor-design`'s own step 1 exception spells out why this node alone doesn't skip straight to filing the tree doc's generic spec.
+- **Fulfilment check:** the Refactoring Notes' `config.md` exists in the target repo (see `skills/continuous-refactoring/references/refactoring-config.md` for how the Refactoring Notes' own path is resolved — `docs/refactoring/` by default).
+- **MR scope:** one MR — before writing anything, run the interview in `skills/continuous-refactoring/references/loop-config-interview.md`: explore the target repo for tracker/create-mode/Refactoring-Notes-location signals, ask the human to decide (with a recommended answer for each), then record the decisions. The MR itself creates `config.md` in the Refactoring Notes with `Create-mode` already set from that interview (see `skills/continuous-refactoring/references/refactoring-config.md` for the file's shape — there is deliberately no stored cadence, the loop never triggers itself) and, when the interview chose a local tracker, `docs/agents/issue-tracker.md` alongside it. `refactor-design` runs the interview and files this node as a single `refactor:candidate` issue carrying its recorded decisions, same as any other tooling-tree node's plan — `refactor-design`'s own step 1 exception spells out why this node alone doesn't skip straight to filing the tree doc's generic spec.
 
 ### `is-php-project`
 
@@ -73,9 +73,9 @@ The table above is this document's own — every row here is generic-to-generic 
   retroactively — no separate mechanism needed for that.
 - **MR scope:** none — never proposed as a candidate (`tooling_tree.py`'s `_NEVER_PROPOSED`, the same set
   `git` is in). Rejecting a `required` parent by hand never unblocks its children (unlike a `resolved`
-  parent — see `structural-scan` below), so there is nothing to gain from a human ever filing
-  `docs/refactoring/out-of-scope/is-php-project.md`: leaving it unfulfilled already does everything a
-  rejection could.
+  parent — see `structural-scan` below), so there is nothing to gain from a human ever filing an
+  `out-of-scope/is-php-project.md` entry in the Refactoring Notes: leaving it unfulfilled already does
+  everything a rejection could.
 - **Known gap, not fixed by this node:** `php-structural-scan`'s own `resolved` gate
   (`skills/refactor-scan/references/php-tooling-tree.md`) checks each of its thirteen leaves for "fulfilled,
   or explicitly rejected under `out-of-scope/`" — it does not understand a leaf permanently closed by an
@@ -133,14 +133,14 @@ The table above is this document's own — every row here is generic-to-generic 
   indent_style = space
   indent_size = 4
   ```
-  Ordinary node like any other — rejectable as `wontfix` (`docs/refactoring/out-of-scope/editorconfig.md`)
-  like any other node, no special carve-out.
+  Ordinary node like any other — rejectable as `wontfix` (an `out-of-scope/editorconfig.md` entry in the
+  Refactoring Notes) like any other node, no special carve-out.
 
 ### `structural-scan`
 
 - **Name:** Structural Scan
 - **Tool:** none — this node represents the loop's own structural-deepening work (the `refactor-scan`/`refactor-design`/`refactor-implement`/`refactor-review` cycle applied to the target's own code), not a third-party tool.
 - **Purpose:** hold structural refactoring back until deterministic tooling has had its say — static analysis and a test suite catch regressions that an agent-driven structural change could otherwise introduce silently. Deterministic tools settle first, agent-driven scanning follows.
-- **Fulfilment check:** every node with a `resolved` edge into this one is **resolved** — fulfilled, or explicitly rejected and recorded under `docs/refactoring/out-of-scope/`. Three direct `resolved` parents today: `editorconfig` and `ci-runner` (both above, generic-root leaves) and the active language specialization's own aggregation node (for PHP: `php-structural-scan`, declared in `php-tooling-tree.md`, itself resolved once every one of *its* resolved-parents — the PHP tree's real leaves — is resolved). A future language specialization contributes its own aggregation node the same way, one `resolved` edge each, rather than reaching directly into this node's leaf set.
+- **Fulfilment check:** every node with a `resolved` edge into this one is **resolved** — fulfilled, or explicitly rejected and recorded under the Refactoring Notes' `out-of-scope/`. Three direct `resolved` parents today: `editorconfig` and `ci-runner` (both above, generic-root leaves) and the active language specialization's own aggregation node (for PHP: `php-structural-scan`, declared in `php-tooling-tree.md`, itself resolved once every one of *its* resolved-parents — the PHP tree's real leaves — is resolved). A future language specialization contributes its own aggregation node the same way, one `resolved` edge each, rather than reaching directly into this node's leaf set.
 - **Edge type — read this carefully, it deviates from the standard rule:** a standard **required edge** closes the child permanently once a parent is rejected. The edges into `structural-scan` do **not** do that: a rejected leaf still counts as resolved and still unblocks this node once every other leaf also reaches a resolved state. This is deliberate — one declined tooling branch (e.g. Rector rejected as not worth it here) should not permanently forbid ever doing structural work. These edges are labelled `resolved`, never `required` or `recommended` — declared in a language tree's own edge table for its own aggregation node (PHP: `php-tooling-tree.md`), or in this document's own edge table for a generic-root leaf like `editorconfig` (above). The same `resolved` semantics apply one hop down too: a language specialization's aggregation node is itself resolved once every one of *its* own resolved-parents is resolved.
 - **MR scope:** never an MR by itself — fulfilling this node just opens the gate. Once open, `refactor-scan` proposes it like any other node name; the actual codebase walk (hot spots, module/interface/depth/seam vocabulary) that turns it into one concrete candidate is `refactor-design`'s job, run only for the node the human actually picked.
