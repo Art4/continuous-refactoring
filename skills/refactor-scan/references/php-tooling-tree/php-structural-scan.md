@@ -10,7 +10,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   `php-cs-fixer.md`; `phpstan-level-10`, `phpstan-deprecation-rules` — both `phpstan.md`; `rector-dead-code`,
   `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`, `rector-early-return`
   — all `rector.md`; `psalm-taint-analysis` — `psalm.md`) is itself resolved — fulfilled, or rejected under
-  `docs/refactoring/out-of-scope/`. Identical `resolved`-edge semantics to `structural-scan`'s own gate, one
+  the Refactoring Notes' `out-of-scope/`. Identical `resolved`-edge semantics to `structural-scan`'s own gate, one
   hop down: a rejected leaf here still counts as resolved. `psalm` is deliberately **not** one of these — see
   its own node entry (`psalm.md`) for why a dedicated leaf for it turned out to be redundant; the
   `phpstan-level-10` leaf's own mutual-exclusion rejection (housekeeping on `psalm`'s own node entry) is what

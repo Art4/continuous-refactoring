@@ -15,15 +15,15 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   when already present. Adopting Psalm from scratch is a decision made outside this tree's proposal flow,
   same as choosing Pest over PHPUnit.
 - **Mutual exclusion:** the first scan pass that recognizes this node fulfilled while real
-  PHPStan adoption is absent should write
-  `docs/refactoring/out-of-scope/phpstan-level-10.md` if it isn't already present — this resolves
-  `phpstan-level-10` (the PHPStan level chain's `php-structural-scan` leaf) as rejected instead of leaving
-  it permanently neither-fulfilled-nor-rejected. Because this node has no tree-proposed MR of its own to
-  attach the write to (`MR scope: none`, above), this is housekeeping the scanning agent performs as part
-  of that recognition pass, not part of an MR — the same "an agent records a decision" shape the
+  PHPStan adoption is absent should write an
+  `out-of-scope/phpstan-level-10.md` entry in the Refactoring Notes if it isn't already present — this
+  resolves `phpstan-level-10` (the PHPStan level chain's `php-structural-scan` leaf) as rejected instead of
+  leaving it permanently neither-fulfilled-nor-rejected. Because this node has no tree-proposed MR of its
+  own to attach the write to (`MR scope: none`, above), this is housekeeping the scanning agent performs as
+  part of that recognition pass, not part of an MR — the same "an agent records a decision" shape the
   `out-of-scope/` convention already requires (see `php-tooling-tree.md`'s *Nodes* preamble), just
   triggered by recognition instead of an MR landing. Template (mirrors the shape already used throughout
-  `docs/refactoring/out-of-scope/` in this repo's own fixtures):
+  the Refactoring Notes' `out-of-scope/` in this repo's own fixtures):
   ```markdown
   # Rejection: PHPStan Level 10
 

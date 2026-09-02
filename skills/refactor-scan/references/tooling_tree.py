@@ -264,9 +264,33 @@ def _baseline_exists(repo: pathlib.Path) -> bool:
     return (repo / "phpstan-baseline.neon").exists()
 
 
+def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
+    """Where the suite keeps its own state in this target repo — the
+    Refactoring Notes. Default docs/refactoring/; overridden by a
+    `Refactoring Notes: `<path>`` line in the target's AGENTS.md or
+    CLAUDE.md (loop-config's own interview writes this once, into whichever
+    of the two already existed — never both) — see
+    skills/continuous-refactoring/references/refactoring-config.md for the
+    exact line format this parses."""
+    default = repo / "docs" / "refactoring"
+    for name in ("AGENTS.md", "CLAUDE.md"):
+        p = repo / name
+        if not p.exists():
+            continue
+        try:
+            txt = p.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        m = re.search(r"^Refactoring Notes:\s*`([^`]+)`", txt, re.MULTILINE)
+        if m:
+            return repo / m.group(1).strip().strip("/")
+    return default
+
+
 def _has_loop_config(repo: pathlib.Path) -> bool:
-    """loop-config's fulfilment check: docs/refactoring/config.md exists."""
-    return (repo / "docs" / "refactoring" / "config.md").exists()
+    """loop-config's fulfilment check: the Refactoring Notes' config.md exists
+    (default docs/refactoring/config.md; see _resolve_refactoring_notes_dir)."""
+    return (_resolve_refactoring_notes_dir(repo) / "config.md").exists()
 
 
 def _has_editorconfig(repo: pathlib.Path) -> bool:
@@ -306,7 +330,7 @@ def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ..
     """Parse `**Blocked by:** PHP >= X.Y` from a node's out-of-scope entry,
     if the entry has one (php-tooling-tree.md's mechanical-reversal design;
     only PHP-version rejections are ever auto-detected this way)."""
-    p = repo / "docs" / "refactoring" / "out-of-scope" / f"{node}.md"
+    p = _resolve_refactoring_notes_dir(repo) / "out-of-scope" / f"{node}.md"
     if not p.exists():
         return None
     try:
@@ -563,12 +587,14 @@ def _rejected_nodes(repo: pathlib.Path) -> set[str]:
     """Tooling-tree nodes recorded as out-of-scope for this target repo.
 
     Convention: one file per rejected node at
-    ``docs/refactoring/out-of-scope/<node>.md``. This is the minimal
-    convention needed for structural-scan's `resolved` gate — it does not
-    parse structural-candidate rejections, which are keyed by issue number,
-    not node name.
+    ``<Refactoring Notes>/out-of-scope/<node>.md`` (default
+    ``docs/refactoring/out-of-scope/<node>.md`` — see
+    _resolve_refactoring_notes_dir). This is the minimal convention needed
+    for structural-scan's `resolved` gate — it does not parse
+    structural-candidate rejections, which are keyed by issue number, not
+    node name.
     """
-    d = repo / "docs" / "refactoring" / "out-of-scope"
+    d = _resolve_refactoring_notes_dir(repo) / "out-of-scope"
     if not d.is_dir():
         return set()
     return {p.stem for p in d.glob("*.md")}
@@ -657,8 +683,9 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # git
     set_node("git", has_git, "found .git" if has_git else "no .git")
     # loop-config
+    notes_rel = _resolve_refactoring_notes_dir(repo).relative_to(repo).as_posix()
     has_loop_config = _has_loop_config(repo)
-    set_node("loop-config", has_loop_config, "docs/refactoring/config.md present" if has_loop_config else "no docs/refactoring/config.md")
+    set_node("loop-config", has_loop_config, f"{notes_rel}/config.md present" if has_loop_config else f"no {notes_rel}/config.md")
     # is-php-project: composer.json (recognized location) or at least one
     # *.php file outside vendor/ — see tooling-tree.md's own node entry for
     # the "why not composer.json-only" rationale.

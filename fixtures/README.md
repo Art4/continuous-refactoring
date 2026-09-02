@@ -209,8 +209,8 @@ Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010
 What it does:
 
 1. Reuses `setup_fixture` — isolated copy at `/tmp/continuous-refactoring-tests/<fixture>`, fresh git repo, no remote (safe to commit/branch inside freely).
-2. Seeds a local-markdown issue-tracker override (`docs/agents/issue-tracker.md`, `docs/agents/triage-labels.md`, `.scratch/refactor/issues/`, a minimal `CONTEXT.md`, `docs/adr/`) — the same convention this repo uses for itself — so the skills never touch a real forge.
-3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one pass, note (don't silently fix) ambiguity, write friction notes to `agent-loop-friction-<fixture>.md`.
+2. Seeds `docs/agents/triage-labels.md`, a minimal `CONTEXT.md`, and `docs/adr/` — but deliberately **not** `docs/agents/issue-tracker.md`: with no `origin` remote in this sandbox, that file is left for the subagent's own `loop-config` interview (`skills/continuous-refactoring/references/loop-config-interview.md`) to create, converging on Local Markdown on its own — pre-seeding it would skip the one thing this dry-run mode exists to actually exercise.
+3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one pass, note (don't silently fix) ambiguity, follow the interview's own "no human present" fallback if nobody's here to answer it, write friction notes to `agent-loop-friction-<fixture>.md`.
 4. Prints the sandbox and prompt paths and stops — spawn the subagent yourself (Agent tool, `run_in_background: false`, prompt = the file's contents) and let it run.
 
 Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `docs/refactoring/config.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):

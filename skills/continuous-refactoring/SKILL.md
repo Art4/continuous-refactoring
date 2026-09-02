@@ -18,12 +18,12 @@ Run this on demand whenever you're asked, or via whatever recurring trigger you'
 
 State lives in the target repo, not in the conversation — every lifecycle skill may read these directly; only `refactor-learn` writes them:
 
-- **Config** — `docs/refactoring/config.md`: focus areas, merge-request create-mode, the `Pending candidates` marker, the `Fulfilled nodes` cache, and the `Skip streak` counter `refactor-prioritize` reads as a ranking factor (`skills/continuous-refactoring/references/refactoring-config.md`)
-- **Remembered merge requests** — which suite merge requests are open. When the target's issue tracker natively supports labels (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: `docs/refactoring/merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
-- **Backlog** — `refactor:*` issues on the issue tracker (see `docs/agents/issue-tracker.md`)
-- **Learned rejections** — `docs/refactoring/out-of-scope/` entries from prior passes
+- **Config** — the Refactoring Notes' `config.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request` below), the `Pending candidates` marker, the `Fulfilled nodes` cache, and the `Skip streak` counter `refactor-prioritize` reads as a ranking factor (`skills/continuous-refactoring/references/refactoring-config.md`)
+- **Remembered merge requests** — which suite merge requests are open. When `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: the Refactoring Notes' `merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
+- **Backlog** — `refactor:*` issues on the issue tracker named by `docs/agents/issue-tracker.md` — scaffolded once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`); every place above that needs to know whether the tracker natively supports labels reads this file instead of re-deriving it from `gh`/`glab` each time
+- **Learned rejections** — the Refactoring Notes' `out-of-scope/` entries from prior passes
 
-`docs/refactoring/config.md` is not scaffolded here directly: it's `loop-config`, an ordinary tooling-tree node like any other — `refactor-scan` proposes it, `refactor-design` files it, `refactor-implement` creates the file, same path as any other node.
+The Refactoring Notes' `config.md` is not scaffolded here directly: it's `loop-config`, a tooling-tree node like any other in every way except one — `refactor-scan` proposes it, but `refactor-design` runs a human interview instead of copying the tree doc's generic spec (`skills/continuous-refactoring/references/loop-config-interview.md`), and `refactor-implement` creates the file with `Create-mode` already set from that interview's decisions, not left for `refactor-learn` to fill in later.
 
 ## The pass
 
@@ -45,13 +45,13 @@ Prefer dispatching each step to a fresh subagent when a subagent mechanism is av
 
 ## Opening a merge request
 
-Followed by `refactor-implement` when it opens the reviewable; the create-mode decision itself is recorded into `docs/refactoring/config.md` by `refactor-learn`.
+Followed by `refactor-implement` when it opens the reviewable.
 
-- Read the target repo's `AGENTS.md` / `CLAUDE.md` first. If either names a mode, follow it.
-- Neither does → propose `autonomous` for this merge request; `refactor-learn` records the chosen mode — `autonomous`, `ask-each-time`, or `human-opens` — the first time it's decided. `refactor-learn` follows this same policy for its own bookkeeping merge request (see its `## Process`).
+- Read the Refactoring Notes' `config.md`'s `Create-mode` field and follow it — `autonomous`, `ask-each-time`, or `human-opens`.
+- Create-mode is decided exactly once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`) — not inferred fresh per merge request and not deferred to `refactor-learn`. That interview reads the target's `AGENTS.md` / `CLAUDE.md` first: if either already names a mode, that becomes the recommended (not automatic) answer put to the human; otherwise the recommended answer is `autonomous`. Either way, the human decides, and the answer lands in `Create-mode` when `refactor-implement` creates `config.md`. `refactor-learn` follows the same `Create-mode` field for its own bookkeeping merge request (see its `## Process`); it no longer decides the mode itself except a narrow fallback for a `config.md` that predates this convention.
 - Skills always say **merge request**; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
 
-While fewer than two suite merge requests are open, a pass may deliver one more. Always stack it (base = whatever suite branch is currently open) rather than branching parallel off the default branch — never both open against the default branch at once, regardless of whether the new candidate is a tooling-tree child of what's in flight. This trades a little throughput (a pass can't parallelize two truly unrelated candidates) for a stronger guarantee: no two suite branches ever touch `docs/refactoring/config.md` concurrently, which is what previously let a bookkeeping-style field accumulate repeated merge conflicts across overlapping branches. After the base merges, the next pass retargets or rebases the child.
+While fewer than two suite merge requests are open, a pass may deliver one more. Always stack it (base = whatever suite branch is currently open) rather than branching parallel off the default branch — never both open against the default branch at once, regardless of whether the new candidate is a tooling-tree child of what's in flight. This trades a little throughput (a pass can't parallelize two truly unrelated candidates) for a stronger guarantee: no two suite branches ever touch the Refactoring Notes' `config.md` concurrently, which is what previously let a bookkeeping-style field accumulate repeated merge conflicts across overlapping branches. After the base merges, the next pass retargets or rebases the child.
 
 The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
