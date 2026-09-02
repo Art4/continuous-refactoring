@@ -27,7 +27,7 @@ Either way: set the Refactoring Notes' `config.md`'s `Pending candidates` to thi
 
 **`loop-config` exception:** chosen node *is* `loop-config` → the issue body isn't the tree doc's generic spec, it's what `skills/continuous-refactoring/references/loop-config-interview.md`'s `## Record` names (the interview's decisions, each with its one-line rationale). And `config.md` doesn't exist yet, so no `Pending candidates` to write here either — `refactor-implement` records it directly when it creates the file.
 
-The plan follows the foundational refactoring rules (ADR-0004): behavior-preserving, Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tools over hand-applied moves, own branch unless said otherwise.
+The plan follows the foundational refactoring rules: `skills/continuous-refactoring/references/foundational-refactoring-rules.md`.
 
 ## Output
 

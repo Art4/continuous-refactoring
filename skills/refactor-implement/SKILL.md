@@ -5,11 +5,11 @@ description: Execute a designed refactor plan test-first, slice by slice, at the
 
 # Refactor Implement
 
-Execute a **plan** (from `refactor-design`) as vertical slices, red → green, at the agreed **seam** — then review the diff and open the merge request. The review that used to be `refactor-review`'s own step happens here, before the MR goes up.
+Execute a **plan** (from `refactor-design`) as vertical slices, red → green, at the agreed **seam** — then review the diff (this step's own job, not a separate one) and open the merge request.
 
 Use `/tdd` if installed for what a good test is and the red → green rules; otherwise `## Fallback` below governs.
 
-Every slice follows the foundational refactoring rules (ADR-0004): behavior-preserving, deterministic tools do the moves they can, work lives on the refactor's own branch unless said otherwise.
+Every slice follows the foundational refactoring rules: `skills/continuous-refactoring/references/foundational-refactoring-rules.md`.
 
 ## Process
 
@@ -48,7 +48,7 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `config.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil (e.g. PHPStan-level shrinking before the next level) → don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
 
-Wait for CI if the target runs it — confirm via the forge's actual CI status (`gh pr checks` or equivalent), not a local rerun of step 3's checks: CI environment can disagree with local in ways only the real run surfaces. Red CI is a review finding like any other — back to step 2/1.
+Wait for CI if the target runs it — confirm via the forge's actual CI status (`gh pr checks` or equivalent), not a local rerun of step 3's checks. Red CI is a review finding like any other — back to step 2/1.
 
 The candidate branch stays checked out after this. `refactor-learn`'s bookkeeping writes go out on their own separate branch/MR, never this one (the `loop-config`-in-flight case is the one exception, which `refactor-learn` handles).
 

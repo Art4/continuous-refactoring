@@ -8,7 +8,7 @@ disable-model-invocation: true
 
 One **pass** of the loop: does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
-This skill is a thin data pipe (ADR-0010): it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It decides nothing a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize`/`refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes. Tracing a bug in the loop's behavior? Look in the responsible lifecycle skill, not here.
+This skill is a thin data pipe: it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It decides nothing a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize`/`refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes.
 
 A completed candidate is delivered as a **merge request** remembered in the target repo. Git is the only hard requirement — missing tools enter the language **tooling tree** as small candidates instead of gating the loop. A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
 
@@ -45,7 +45,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 5. **Implement.** Run `/refactor-implement` — one candidate, one branch, created here. Reviews its own diff (standards + spec) until clean, looping back to its own earlier steps on findings, before opening the merge request. Carries the opened MR to step 6.
 
-6. **Learn, closing call — always**, even when nothing past step 3 ran (a pass that only did step 2 is still complete). Run `/refactor-learn` with the freshly opened MR, if any. Records it in the ledger with `refactor:delivered`, clears `Pending candidates`, captures ADR/`CONTEXT.md` updates, writes `Fulfilled nodes` last. `refactor-learn` is the suite's only writer, called at most twice a pass.
+6. **Learn, closing call — always**, even when nothing past step 3 ran (a pass that only did step 2 is still complete). Run `/refactor-learn` with the freshly opened MR, if any. Records it in the ledger with `refactor:delivered`, clears `Pending candidates`, captures ADR/`CONTEXT.md` updates, writes `Fulfilled nodes` last.
 
 ## Opening a merge request
 
@@ -53,7 +53,7 @@ Followed by `refactor-implement` when it opens the reviewable, and by `refactor-
 
 ## Fallback
 
-The suite must keep working in a target repo with none of the global skills installed. Each lifecycle skill's own `## Fallback` covers its step: **crash-safe** (skip the global skill with a note — the step's core is already inline) or **self-sufficient** (the fallback inlines the part of the global skill the step uses). The orchestrator engages no global skill itself. Authoritative inventory of every global reference and its fallback type: `docs/agents/skill-references.md`, enforced by `scripts/validate_skills.py`.
+The suite must keep working in a target repo with none of the global skills installed. Each lifecycle skill's own `## Fallback` covers its step: **crash-safe** (skip the global skill with a note — the step's core is already inline) or **self-sufficient** (the fallback inlines the part of the global skill the step uses). The orchestrator engages no global skill itself.
 
 ## Closing report
 

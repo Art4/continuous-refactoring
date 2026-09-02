@@ -12,7 +12,7 @@ description: Propose every currently-unblocked tooling-tree node from config.md/
 ### 1. Check preconditions
 
 - No git repository → stop the pass, report it, propose nothing.
-- Five or more open `refactor:candidate` issues → stop, propose nothing new; let existing work clear first. Rare now that `refactor-design` files at most one issue per pass — fires only when older interrupted-pass issues are piling up.
+- Five or more open `refactor:candidate` issues → stop, propose nothing new; let existing work clear first.
 
 ### 2. Resume pending work first
 
@@ -45,7 +45,7 @@ Run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo>` and 
 
 ## Output
 
-Handed onward by the orchestrator, plainly, no narrative summary:
+Handed onward by the orchestrator, plainly:
 
 - Which precondition stopped the pass, if one did — nothing below applies this pass.
 - **Findings** (possibly empty) → `refactor-learn`.

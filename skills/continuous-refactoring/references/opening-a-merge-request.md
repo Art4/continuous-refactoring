@@ -6,7 +6,7 @@ Rules for any suite skill opening or basing a merge request (MR): `refactor-impl
 
 **Vocabulary.** Skills always say **merge request**; talking to the human, use the forge's own word (pull request on GitHub, merge request on GitLab).
 
-**Basing/stacking.** While fewer than two suite MRs are open, a pass may deliver one more — always **stack** it (base = whatever suite branch is currently open), never branch parallel off the default branch. This holds regardless of whether the new candidate is a tooling-tree child of what's in flight (ADR-0015: keeps two branches from ever writing the Refactoring Notes' `config.md` concurrently — the previous conditional-stacking rule caused repeated merge conflicts there). After the base merges, the next pass retargets or rebases the child.
+**Basing/stacking.** While fewer than two suite MRs are open, a pass may deliver one more — always **stack** it (base = whatever suite branch is currently open), never branch parallel off the default branch. This holds regardless of whether the new candidate is a tooling-tree child of what's in flight — it keeps two branches from ever writing the Refactoring Notes' `config.md` concurrently (a past conditional version of this rule caused repeated merge conflicts there). After the base merges, the next pass retargets or rebases the child.
 
 **Description.** Opens with one or two plain sentences for a human who doesn't know the suite's vocabulary — what this unlocks for the project, not which tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
 
