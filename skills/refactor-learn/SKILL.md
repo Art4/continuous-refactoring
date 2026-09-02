@@ -11,14 +11,7 @@ The orchestrator calls this skill up to **twice** a pass: an **early call**, rig
 
 **Land every write below via a dedicated bookkeeping branch/MR off the default branch — never a direct commit** (ADR-0011). Before writing, in either call: confirm you aren't still on the candidate branch `refactor-implement` left checked out — these writes aren't part of that review. Pull the default branch's latest, then create (or reuse, if one from an earlier interrupted pass is still open) a small bookkeeping branch off it, commit the writes there, and open (or update) that MR, using the create-mode policy at `skills/continuous-refactoring/references/opening-a-merge-request.md`. Exception: the `loop-config`-in-flight case below, where the file being written doesn't exist anywhere except the `loop-config` candidate's own branch yet — that write rides the candidate's own already-open, already-reviewed MR instead.
 
-**Finding the bookkeeping branch — deterministic, no memory required, never search for a name.** Named `refactor-learn/bookkeeping-N`, N starting at 1, numbers never reused even once merged or deleted.
-
-1. `git symbolic-ref refs/remotes/origin/HEAD` (or equivalent) for the default branch, then `git ls-remote --heads origin 'refactor-learn/bookkeeping-*'` for every bookkeeping branch that exists remotely. None found → start fresh at N=1 (step 4).
-2. Otherwise take the highest N. `git merge-base --is-ancestor origin/refactor-learn/bookkeeping-N origin/<default-branch>` exits `0` → already merged, not reusable → step 4 with N+1.
-3. Not an ancestor (still open) → **reuse it**: `git fetch origin refactor-learn/bookkeeping-N && git checkout -B refactor-learn/bookkeeping-N origin/refactor-learn/bookkeeping-N`. Skip step 4.
-4. Pull the default branch's latest, `git checkout -B refactor-learn/bookkeeping-<N+1> origin/<default-branch>`.
-
-Never invent a different name, never `find`/`grep`/browse history to locate "the last bookkeeping branch" — the listing above is authoritative and cheap for a fresh subagent with no memory of earlier passes.
+**Finding the bookkeeping branch — deterministic, no memory required, never search for a name.** Named `refactor-learn/bookkeeping-N` (N starting at 1, never reused). Algorithm: `skills/refactor-learn/references/bookkeeping-branch.md`.
 
 **Before deleting or abandoning any branch carrying an unmerged bookkeeping write**, land that record first: `skills/refactor-learn/references/never-delete-without-record.md` (ADR-0023).
 
