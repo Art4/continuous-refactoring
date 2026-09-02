@@ -11,7 +11,7 @@ Rank the **proposals** `refactor-scan` handed the orchestrator this pass, and re
 
 ### 1. Check whether anything should start at all
 
-Get the remembered set of in-flight suite merge requests: every issue labeled `refactor:delivered` when the target's issue tracker natively supports labels (GitHub, GitLab), otherwise `docs/refactoring/merge-requests.md` directly (local state docs are fair game for any skill — only the external tracker/git reconciliation is `refactor-scan`'s alone). **Two or more already open?** Stop here: report which ones, and that the pass ends without starting new work while they await review/merge. This overrides everything below.
+Get the remembered set of in-flight suite merge requests: every issue labeled `refactor:delivered` when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab), otherwise `docs/refactoring/merge-requests.md` directly (local state docs are fair game for any skill — only the external tracker/git reconciliation is `refactor-scan`'s alone). **Two or more already open?** Stop here: report which ones, and that the pass ends without starting new work while they await review/merge. This overrides everything below.
 
 Otherwise, drop any proposal already in that set from consideration — it already has an open merge request delivering it, so it isn't something to *start*.
 

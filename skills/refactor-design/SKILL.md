@@ -13,6 +13,8 @@ Turn the **node** `refactor-prioritize` chose into a **plan** concrete enough to
 
 An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree.md`, or a language specialization's tree) is fully specified by definition — its Tool, Purpose, Fulfilment check, and MR scope are already written in the tree doc. Skip straight to step 5 and file/write the plan from that spec — no codebase search, no grilling, nothing to ground beyond the doc itself.
 
+**`loop-config` exception:** not fully specified by the tree doc alone — its MR scope names a human interview, not a fixed spec. Run `skills/continuous-refactoring/references/loop-config-interview.md` in full (explore, ask, summarize, record) before filing anything; skip step 5's usual "carry the tree doc's spec over precisely" move for this node only — file the interview's recorded decisions instead (step 5, below). Steps 2–4 (structural-candidate search, grilling) still don't apply — this stays a tooling-tree node in every other way.
+
 The **`structural-scan`** node is not pre-specified — it names an open gate, not a candidate. Continue to step 2 to find one.
 
 ### 2. Find a structural candidate
@@ -64,7 +66,7 @@ Side effects happen inline as decisions crystallise (per `/domain-modeling`):
 
 Either way: set `docs/refactoring/config.md`'s `Pending candidates` field to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — the marker that lets a future `refactor-scan` resume this exact work instead of proposing something fresh if the pass stops here. `refactor-learn` clears it once a merge request exists.
 
-**`loop-config` exception:** if the chosen node *is* `loop-config` itself, `docs/refactoring/config.md` doesn't exist yet — there's nowhere to write `Pending candidates` at this step. Skip the write here; `refactor-implement` records it directly when it creates the file (its own `## Fallback`-adjacent step, not a grilling or domain-modeling concern).
+**`loop-config` exception:** if the chosen node *is* `loop-config` itself, two things differ from an ordinary tooling-tree node's filing. First, the issue body is *not* the tree doc's generic Purpose/Fulfilment check/MR scope — it's the decisions step 1's interview recorded: which tracker, which create-mode, and the confirmed storage location, each with its one-line rationale, plus the resulting MR scope (create `config.md` with `Create-mode` set; also create `docs/agents/issue-tracker.md` when the interview chose a local tracker). Second, `docs/refactoring/config.md` doesn't exist yet — there's nowhere to write `Pending candidates` at this step either; skip that write here, same as before — `refactor-implement` records it directly when it creates the file.
 
 The plan follows the foundational refactoring rules: behavior-preserving only, decomposed into the Kent Beck technique vocabulary, Strangler Fig for wide migrations, deterministic tool moves where a tool can do it — never hand-applied by the agent — and delivered on its own branch unless the human or the plan says otherwise.
 
@@ -80,4 +82,4 @@ The filed issue, carrying the plan → `refactor-implement`.
 
 ## Completion criterion
 
-The candidate has an issue (newly filed, or a resumed one) with a written plan on it, and `config.md`'s `Pending candidates` names it. For a structural candidate: module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier). For a tooling tree node: the tree doc's Purpose / Fulfilment check / MR scope, carried onto the issue as its own plan — not introduced as a quotation from the tree doc.
+The candidate has an issue (newly filed, or a resumed one) with a written plan on it, and `config.md`'s `Pending candidates` names it. For a structural candidate: module, seam, interface, surviving tests, slice order — and the design survives the grilling (no open frontier). For a tooling tree node: the tree doc's Purpose / Fulfilment check / MR scope, carried onto the issue as its own plan — not introduced as a quotation from the tree doc (`loop-config` carries its interview's recorded decisions instead — see step 5's exception).

@@ -51,9 +51,9 @@ The table above is this document's own — every row here is generic-to-generic 
 
 - **Name:** Refactoring Config
 - **Tool:** none — this is the suite's own state, not a third-party tool.
-- **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write cadence, last-run date, and create-mode.
+- **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write focus areas and merge-request create-mode.
 - **Fulfilment check:** `docs/refactoring/config.md` exists in the target repo.
-- **MR scope:** one MR — create `docs/refactoring/config.md` (see `skills/continuous-refactoring/references/refactoring-config.md` for its shape; there is deliberately no stored cadence — the loop never triggers itself). Ordinary node like any other: `refactor-scan` files it as a single `refactor:candidate` issue when missing, same as a PHP tree node, and it is the only candidate filed that pass.
+- **MR scope:** one MR — before writing anything, run the interview in `skills/continuous-refactoring/references/loop-config-interview.md`: explore the target repo for tracker/create-mode/config-location signals, ask the human to decide (with a recommended answer for each), then record the decisions. The MR itself creates `docs/refactoring/config.md` with `Create-mode` already set from that interview (see `skills/continuous-refactoring/references/refactoring-config.md` for the file's shape — there is deliberately no stored cadence, the loop never triggers itself) and, when the interview chose a local tracker, `docs/agents/issue-tracker.md` alongside it. `refactor-design` runs the interview and files this node as a single `refactor:candidate` issue carrying its recorded decisions, same as any other tooling-tree node's plan — `refactor-design`'s own step 1 exception spells out why this node alone doesn't skip straight to filing the tree doc's generic spec.
 
 ### `is-php-project`
 

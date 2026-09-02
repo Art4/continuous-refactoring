@@ -24,9 +24,9 @@ Read `docs/refactoring/config.md`'s `Pending candidates` field (`skills/continuo
 
 ### 3. Detect closed/merged remembered state
 
-Get the remembered set: every issue labeled `refactor:delivered` when the target's issue tracker natively supports labels (GitHub, GitLab), otherwise every entry in `docs/refactoring/merge-requests.md`. For each, check the external issue tracker/git: is the merge request still open, and is the issue still open?
+Get the remembered set: every issue labeled `refactor:delivered` when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab), otherwise every entry in `docs/refactoring/merge-requests.md`. For each, check the external issue tracker/git: is the merge request still open, and is the issue still open?
 
-(Whether the tracker natively supports labels only changes *where* a merge request's record lives — tracker labels vs. `docs/refactoring/merge-requests.md` — never *whether* `refactor-implement` opened a real one. Don't read "no native label mechanism" as "no real merge request exists to reconcile" — a target with forge push access still has real ones, this step just needs a different way to check their status below.)
+(Whether `docs/agents/issue-tracker.md` names a native-label tracker only changes *where* a merge request's record lives — tracker labels vs. `docs/refactoring/merge-requests.md` — never *whether* `refactor-implement` opened a real one. Don't read "names no native-label tracker" as "no real merge request exists to reconcile" — a target with forge push access still has real ones, this step just needs a different way to check their status below.)
 
 **No `gh`/`glab` (or other forge API/token) available** — common on a target with no CLI or credentials configured, real MRs opened by pushing directly rather than through the API. Fall back to git-only reconciliation instead of skipping this step:
 
