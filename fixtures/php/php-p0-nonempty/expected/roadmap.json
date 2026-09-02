@@ -11,6 +11,14 @@
       "reason": "no docs/refactoring/config.md",
       "details": {}
     },
+    "is-php-project": {
+      "fulfilled": true,
+      "reason": "composer.json or *.php files present",
+      "details": {
+        "has_composer_json": true,
+        "has_php_files": true
+      }
+    },
     "composer": {
       "fulfilled": true,
       "reason": "composer.json+lock present",
@@ -23,6 +31,16 @@
       "fulfilled": true,
       "reason": "CI config present",
       "details": {}
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "no PHP-version gap detected",
+      "details": {
+        "floor": [
+          8,
+          1
+        ]
+      }
     },
     "editorconfig": {
       "fulfilled": false,
@@ -278,7 +296,9 @@
         "phpstan-level-0",
         "psalm"
       ],
-      "recommended_parents": [],
+      "recommended_parents": [
+        "php-minimal-version"
+      ],
       "reason": "required parents fulfilled"
     },
     {

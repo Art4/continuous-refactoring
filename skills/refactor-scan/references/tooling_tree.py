@@ -31,11 +31,15 @@ _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 # Ordinary required-gated nodes that must never be surfaced as a proposable
 # candidate, regardless of their own fulfilled state: `git` (never an MR),
 # `static-code-analyzer` (pure plumbing), `psalm` (recognition-only — same
-# fait-accompli shape Pest already gets for `phpunit`). Resolved-gated
-# aggregation nodes (`php-structural-scan`) are excluded separately via
+# fait-accompli shape Pest already gets for `phpunit`), `is-php-project`
+# (recognition-only gate for the whole PHP specialization — rejecting a
+# required parent never unblocks its children, so a human filing an
+# out-of-scope entry for it would never accomplish anything leaving it
+# unfulfilled doesn't already). Resolved-gated aggregation nodes
+# (`php-structural-scan`) are excluded separately via
 # `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
 # required-gated nodes instead.
-_NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm"}
+_NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project"}
 
 # The PHPStan level chain (1..10) — used by roadmap()'s per-level
 # empty-baseline gate and its open-chain filler.
@@ -152,6 +156,18 @@ def _read_composer(repo: pathlib.Path) -> dict | None:
 
 def _has_composer_json(repo: pathlib.Path) -> bool:
     return (repo / "composer.json").exists() or (repo / "composer" / "composer.json").exists()
+
+
+def _has_php_files(repo: pathlib.Path) -> bool:
+    """True if the target repo contains at least one *.php file anywhere in
+    the tree, `vendor/` excluded (Composer's own dependency directory, never
+    project code) — used alongside `_has_composer_json` by `is-php-project`'s
+    fulfilment check (a PHP project without Composer yet should still open
+    the tree)."""
+    for f in repo.rglob("*.php"):
+        if "vendor" not in f.relative_to(repo).parts:
+            return True
+    return False
 
 
 def _has_dep(composer: dict | None, name: str) -> bool:
@@ -643,6 +659,16 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # loop-config
     has_loop_config = _has_loop_config(repo)
     set_node("loop-config", has_loop_config, "docs/refactoring/config.md present" if has_loop_config else "no docs/refactoring/config.md")
+    # is-php-project: composer.json (recognized location) or at least one
+    # *.php file outside vendor/ — see tooling-tree.md's own node entry for
+    # the "why not composer.json-only" rationale.
+    has_php_files = _has_php_files(repo)
+    is_php_project = has_composer_json or has_php_files
+    set_node(
+        "is-php-project", is_php_project,
+        "composer.json or *.php files present" if is_php_project else "no composer.json and no *.php files found",
+        has_composer_json=has_composer_json, has_php_files=has_php_files,
+    )
     # composer
     set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
     # ci-runner

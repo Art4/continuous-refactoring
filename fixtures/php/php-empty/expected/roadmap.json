@@ -11,6 +11,14 @@
       "reason": "no docs/refactoring/config.md",
       "details": {}
     },
+    "is-php-project": {
+      "fulfilled": true,
+      "reason": "composer.json or *.php files present",
+      "details": {
+        "has_composer_json": false,
+        "has_php_files": true
+      }
+    },
     "composer": {
       "fulfilled": false,
       "reason": "missing composer.json or lock",
@@ -22,6 +30,11 @@
     "ci-runner": {
       "fulfilled": false,
       "reason": "no CI config",
+      "details": {}
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "PHP floor undeterminable (no composer.json) \u2014 nothing to recommend",
       "details": {}
     },
     "editorconfig": {
@@ -240,10 +253,11 @@
     },
     "structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: editorconfig, php-structural-scan",
+      "reason": "waiting on: editorconfig, ci-runner, php-structural-scan",
       "details": {
         "unresolved": [
           "editorconfig",
+          "ci-runner",
           "php-structural-scan"
         ],
         "rejected": []
@@ -264,7 +278,7 @@
     },
     {
       "n": 2,
-      "node": "editorconfig",
+      "node": "ci-runner",
       "type": "tooling",
       "required_parents": [
         "loop-config"
@@ -275,7 +289,7 @@
     },
     {
       "n": 3,
-      "node": "composer",
+      "node": "editorconfig",
       "type": "tooling",
       "required_parents": [
         "loop-config"
@@ -286,10 +300,10 @@
     },
     {
       "n": 4,
-      "node": "ci-runner",
+      "node": "composer",
       "type": "tooling",
       "required_parents": [
-        "loop-config"
+        "is-php-project"
       ],
       "required_any_parents": [],
       "recommended_parents": [],

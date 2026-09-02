@@ -11,6 +11,14 @@
       "reason": "no docs/refactoring/config.md",
       "details": {}
     },
+    "is-php-project": {
+      "fulfilled": true,
+      "reason": "composer.json or *.php files present",
+      "details": {
+        "has_composer_json": true,
+        "has_php_files": true
+      }
+    },
     "composer": {
       "fulfilled": true,
       "reason": "composer.json+lock present",
@@ -23,6 +31,16 @@
       "fulfilled": false,
       "reason": "no CI config",
       "details": {}
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "no PHP-version gap detected",
+      "details": {
+        "floor": [
+          8,
+          1
+        ]
+      }
     },
     "editorconfig": {
       "fulfilled": false,
@@ -166,6 +184,14 @@
       "reason": "no phpstan-deprecation-rules dep",
       "details": {}
     },
+    "psalm-taint-analysis": {
+      "fulfilled": false,
+      "reason": "no psalm dep/config",
+      "details": {
+        "has_psalm_dep": false,
+        "has_psalm_cfg": false
+      }
+    },
     "rector-dead-code": {
       "fulfilled": false,
       "reason": "no rector dead-code",
@@ -210,7 +236,7 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return",
+      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return, psalm-taint-analysis",
       "details": {
         "unresolved": [
           "composer-audit",
@@ -221,17 +247,19 @@
           "rector-php-set",
           "rector-code-quality",
           "rector-phpunit-set",
-          "rector-early-return"
+          "rector-early-return",
+          "psalm-taint-analysis"
         ],
         "rejected": []
       }
     },
     "structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: editorconfig, php-structural-scan",
+      "reason": "waiting on: editorconfig, ci-runner, php-structural-scan",
       "details": {
         "unresolved": [
           "editorconfig",
+          "ci-runner",
           "php-structural-scan"
         ],
         "rejected": []
@@ -246,26 +274,29 @@
       "required_parents": [
         "git"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
     {
       "n": 2,
-      "node": "editorconfig",
-      "type": "tooling",
-      "required_parents": [
-        "loop-config"
-      ],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 3,
       "node": "ci-runner",
       "type": "tooling",
       "required_parents": [
         "loop-config"
       ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 3,
+      "node": "editorconfig",
+      "type": "tooling",
+      "required_parents": [
+        "loop-config"
+      ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -277,6 +308,7 @@
         "composer",
         "ci-runner"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "real require dependency present"
     },
@@ -287,6 +319,7 @@
       "required_parents": [
         "static-code-analyzer"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -297,6 +330,7 @@
       "required_parents": [
         "phpstan-level-0"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -307,6 +341,7 @@
       "required_parents": [
         "phpstan-level-1"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -317,6 +352,7 @@
       "required_parents": [
         "phpstan-level-2"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -327,6 +363,7 @@
       "required_parents": [
         "phpstan-level-3"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     },
@@ -337,6 +374,7 @@
       "required_parents": [
         "phpstan-level-4"
       ],
+      "required_any_parents": [],
       "recommended_parents": [],
       "reason": "required parents fulfilled"
     }

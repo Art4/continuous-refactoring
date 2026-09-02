@@ -1,12 +1,12 @@
 # PHP Tooling Tree
 
-The canonical shape of the PHP specialization's **tooling tree**. This document records the form only — nodes and edges below `loop-config` (see `skills/refactor-scan/references/tooling-tree.md` for the generic root, and for `structural-scan`, this tree's downstream gate). Fulfilment and rejection state lives in each target repo under `docs/refactoring/`. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **required-any edge**, **recommended edge**).
+The canonical shape of the PHP specialization's **tooling tree**. This document records the form only — nodes and edges below this specialization's own **recognition gate**, `is-php-project` (see `skills/refactor-scan/references/tooling-tree.md` for the generic root — `is-php-project`'s own definition, `loop-config`, `structural-scan`, and `ci-runner`, referenced below purely for the PHP-specific edges hanging off it). Fulfilment and rejection state lives in each target repo under `docs/refactoring/`. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **required-any edge**, **recommended edge**).
 
 ## Diagram
 
 ```mermaid
 graph TD
-    lc[loop-config]
+    ipp[is-php-project]
     ci[ci-runner]
     pmv[php-minimal-version]
     comp[composer]
@@ -39,9 +39,8 @@ graph TD
     phpss[php-structural-scan]
     ss[structural-scan]
 
-    lc -->|required| comp
-    lc -->|required| ci
-    lc -->|required| pmv
+    ipp -->|required| comp
+    ipp -->|required| pmv
     ci -->|required| pmv
     edc -.->|recommended| cs
     comp -->|required| cs
@@ -101,9 +100,8 @@ graph TD
 
 | from (parent) | to (child) | type |
 |---|---|---|
-| `loop-config` | `composer` | required |
-| `loop-config` | `ci-runner` | required |
-| `loop-config` | `php-minimal-version` | required |
+| `is-php-project` | `composer` | required |
+| `is-php-project` | `php-minimal-version` | required |
 | `ci-runner` | `php-minimal-version` | required |
 | `editorconfig` | `php-cs-fixer` | recommended |
 | `composer` | `php-cs-fixer` | required |
@@ -187,14 +185,6 @@ non-vulnerable version of that same tool be adopted later; refusing it here woul
 of enabling it. Applies tree-wide to every `require-dev` node (`phpunit` below is the concrete case that
 surfaced this rule). Does not apply to `require` (production) dependencies — that's exactly what
 `composer-audit` (below) exists to police.
-
-### `ci-runner`
-
-- **Name:** CI Runner
-- **Tool:** GitHub Actions / GitLab CI
-- **Purpose:** an existing pipeline that later hosts quality jobs.
-
-Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/ci-runner.md`.
 
 ### `php-minimal-version`
 
