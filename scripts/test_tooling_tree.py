@@ -25,6 +25,8 @@ withheld_candidates = tooling_tree.withheld_candidates
 php_version_reversal_findings = tooling_tree.php_version_reversal_findings
 php_floor_precheck = tooling_tree.php_floor_precheck
 _is_baseline_empty = tooling_tree._is_baseline_empty
+_resolve_refactoring_notes_dir = tooling_tree._resolve_refactoring_notes_dir
+_rejected_nodes = tooling_tree._rejected_nodes
 
 
 class LoadTreeTests(unittest.TestCase):
@@ -349,6 +351,83 @@ class DetectNodesTests(unittest.TestCase):
             r = roadmap(root, steps=5)
             nodes = [x["node"] for x in r]
             self.assertNotIn("phpstan-level-1", nodes[:2])  # at least not immediate
+        finally:
+            tmp.cleanup()
+
+
+class RefactoringNotesResolutionTests(unittest.TestCase):
+    """`_resolve_refactoring_notes_dir` — the Refactoring Notes' path,
+    default docs/refactoring/, overridable via a `Refactoring Notes:
+    `<path>`` line in AGENTS.md/CLAUDE.md (skills/continuous-refactoring/
+    references/refactoring-config.md's resolution rule)."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_default_with_neither_file_present(self):
+        tmp, root = self._make_repo({})
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "docs" / "refactoring")
+        finally:
+            tmp.cleanup()
+
+    def test_default_when_agents_md_present_without_the_line(self):
+        tmp, root = self._make_repo({"AGENTS.md": "# Agents\n\nSome other instructions.\n"})
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "docs" / "refactoring")
+        finally:
+            tmp.cleanup()
+
+    def test_custom_path_from_agents_md(self):
+        tmp, root = self._make_repo({
+            "AGENTS.md": "## Continuous-refactoring suite\n\nRefactoring Notes: `custom/path/` — notes.\n",
+            "custom/path/config.md": "# Refactoring Loop Config\n",
+        })
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "custom" / "path")
+            d = detect_nodes(root)
+            self.assertTrue(d["loop-config"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_custom_path_from_claude_md_when_no_agents_md(self):
+        tmp, root = self._make_repo({
+            "CLAUDE.md": "Refactoring Notes: `notes/refactor/`\n",
+            "notes/refactor/config.md": "# Refactoring Loop Config\n",
+        })
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "notes" / "refactor")
+            d = detect_nodes(root)
+            self.assertTrue(d["loop-config"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_agents_md_without_line_falls_through_to_claude_md(self):
+        tmp, root = self._make_repo({
+            "AGENTS.md": "# Agents\n\nNo suite section here.\n",
+            "CLAUDE.md": "Refactoring Notes: `alt/notes/`\n",
+        })
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "alt" / "notes")
+        finally:
+            tmp.cleanup()
+
+    def test_out_of_scope_honors_custom_path(self):
+        tmp, root = self._make_repo({
+            "AGENTS.md": "Refactoring Notes: `custom/path/`\n",
+            "custom/path/out-of-scope/psalm.md": "# psalm\n\nRejected.\n",
+        })
+        try:
+            self.assertIn("psalm", _rejected_nodes(root))
+            # the default location has nothing, so it must not be found there
+            self.assertFalse((root / "docs" / "refactoring" / "out-of-scope" / "psalm.md").exists())
         finally:
             tmp.cleanup()
 

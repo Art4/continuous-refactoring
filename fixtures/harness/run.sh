@@ -367,26 +367,14 @@ for r in d['roadmap']:
 run_agent_loop() {
     log_info "=== Agent loop (full pass, subagent-observed) — fixture: $FIXTURE ==="
 
-    # Local issue-tracker override so the skills never touch a real forge —
-    # same convention this repo uses for itself (docs/agents/issue-tracker.md).
-    mkdir -p "$FIXTURE_DST/docs/agents" "$FIXTURE_DST/.scratch/refactor/issues"
-    cat > "$FIXTURE_DST/docs/agents/issue-tracker.md" <<'EOF'
-# Issue tracker: Local Markdown
-
-Issues live as markdown files in `.scratch/refactor/issues/`, one file per
-issue, numbered from `01`. A `Status:` / `Labels:` line near the top records
-triage state (see `docs/agents/triage-labels.md`). Comments append under a
-`## Comments` heading at the bottom of the file.
-
-## When a skill says "file an issue"
-
-Create a new file at `.scratch/refactor/issues/<NN>-<slug>.md`.
-
-## When a skill says "check the external tracker"
-
-Read the files under `.scratch/refactor/issues/` directly — there is no
-external forge in this sandbox.
-EOF
+    # docs/agents/issue-tracker.md is deliberately NOT pre-seeded here — the
+    # loop-config interview (skills/continuous-refactoring/references/
+    # loop-config-interview.md) is what's supposed to create it, and this
+    # sandbox has no `origin` remote, so Explore finds nothing and the
+    # interview's own recommendation should converge on Local Markdown on
+    # its own. Pre-seeding it would skip the one thing this dry-run mode
+    # exists to actually exercise.
+    mkdir -p "$FIXTURE_DST/docs/agents"
     cat > "$FIXTURE_DST/docs/agents/triage-labels.md" <<'EOF'
 # Triage Labels
 
@@ -404,7 +392,7 @@ EOF
     fi
     mkdir -p "$FIXTURE_DST/docs/adr"
     git -C "$FIXTURE_DST" add -A
-    git -C "$FIXTURE_DST" -c user.name="Test Runner" -c user.email="test@ci.local" commit -q -m "Seed local issue-tracker override for agent-loop sandbox"
+    git -C "$FIXTURE_DST" -c user.name="Test Runner" -c user.email="test@ci.local" commit -q -m "Seed triage-labels/CONTEXT.md for agent-loop sandbox"
 
     local prompt_file="/tmp/continuous-refactoring-tests/agent-loop-prompt-$FIXTURE.md"
     local friction_file="$FIXTURE_DST/../agent-loop-friction-$FIXTURE.md"
@@ -427,14 +415,18 @@ to run it.
 
 Run exactly one pass. Where the skill text is ambiguous or you have to guess
 at a behavior it doesn't spell out, do not silently improvise past it and do
-not edit the skill files — note the ambiguity instead. When the pass ends
-(or stops itself per its own completion criterion), append your findings to:
+not edit the skill files — note the ambiguity instead. If the loop-config
+interview runs and there is nobody here to answer it, follow its own
+"## If no human is present to ask" section (skills/continuous-refactoring/
+references/loop-config-interview.md) rather than guessing past it. When the
+pass ends (or stops itself per its own completion criterion), append your
+findings to:
     $friction_file
 covering: what you did each step, any ambiguity or guessed behavior, and
 whether each step's completion criterion was actually met.
 EOF
 
-    log_info "Sandbox ready: $FIXTURE_DST (git initialized, no remote, tracker/CONTEXT.md/docs/adr seeded)"
+    log_info "Sandbox ready: $FIXTURE_DST (git initialized, no remote, triage-labels/CONTEXT.md/docs/adr seeded)"
     log_info "Prompt written: $prompt_file"
     log_info "Next step (manual — this script cannot spawn a Claude Code subagent itself):"
     log_info "  spawn an Agent-tool subagent with the contents of $prompt_file, let it run, then inspect"
