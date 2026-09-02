@@ -67,10 +67,13 @@ class LoadTreeTests(unittest.TestCase):
         # ticket 42: structural-scan's direct resolved parents are now just
         # editorconfig (generic-root leaf) and php-structural-scan (the PHP
         # tree's own aggregation node) — not the seven PHP leaves directly.
+        # ADR-0022 (follow-up): ci-runner joined as a third generic-root
+        # resolved-parent — deterministic tooling settling first includes
+        # having somewhere for quality jobs to run at all.
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["structural-scan"]),
-            {"editorconfig", "php-structural-scan"},
+            {"editorconfig", "ci-runner", "php-structural-scan"},
         )
 
     def test_resolved_parents_of_php_structural_scan(self):
@@ -439,16 +442,16 @@ class StructuralScanGateTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_unfulfilled_when_leaves_missing(self):
-        # ticket 42: structural-scan's own `unresolved` now names its two
-        # direct resolved-parents (editorconfig, php-structural-scan), not
-        # the individual PHP leaves — those live one hop down, on
-        # php-structural-scan's own `unresolved` (see
-        # PhpStructuralScanAggregationTests).
+        # ticket 42: structural-scan's own `unresolved` now names its direct
+        # resolved-parents (editorconfig, php-structural-scan — plus
+        # ci-runner per ADR-0022's follow-up), not the individual PHP
+        # leaves — those live one hop down, on php-structural-scan's own
+        # `unresolved` (see PhpStructuralScanAggregationTests).
         tmp, root = self._make_repo({})
         try:
             d = detect_nodes(root)
             self.assertFalse(d["structural-scan"]["fulfilled"])
-            self.assertEqual(set(d["structural-scan"]["details"]["unresolved"]), {"editorconfig", "php-structural-scan"})
+            self.assertEqual(set(d["structural-scan"]["details"]["unresolved"]), {"editorconfig", "ci-runner", "php-structural-scan"})
             self.assertIn("composer-audit", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()

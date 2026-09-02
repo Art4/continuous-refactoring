@@ -244,10 +244,11 @@
     },
     "structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: editorconfig, php-structural-scan",
+      "reason": "waiting on: editorconfig, ci-runner, php-structural-scan",
       "details": {
         "unresolved": [
           "editorconfig",
+          "ci-runner",
           "php-structural-scan"
         ],
         "rejected": [

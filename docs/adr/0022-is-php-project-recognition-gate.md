@@ -5,6 +5,16 @@
 > specialization lives here, even though what a given gate detects is necessarily specific to that language.
 > Continues [ADR-0021](0021-remaining-php-tooling-tree-nodes-extracted.md): `ci-runner`'s extracted file
 > (`php-tooling-tree/ci-runner.md`) is folded back inline, moving with the node to `tooling-tree.md`.
+>
+> **2026-09-02 (follow-up correction, before merge):** the Decision below originally left `ci-runner` with
+> no edge into `structural-scan` at all, and drew the diagram's illustrative "(language tree's own
+> aggregation node attaches here)" arrow from `loop-config`. The user asked for two corrections: `ci-runner`
+> gets its own direct `resolved` edge into `structural-scan` — deterministic tooling settling first (this
+> node's whole reason for existing in that gate) includes having somewhere for quality jobs to run at all,
+> not just the leaf tools that eventually run inside it; and the illustrative arrow moves to originate at
+> `is-php-project` instead of `loop-config`, since that's where the PHP tree itself now attaches. Both
+> incorporated below — `tooling-tree.md`'s diagram/edge table and `structural-scan`'s own node entry updated
+> to match, all 8 fixtures regenerated (detail-only change, no reachability/order shift).
 
 `skills/refactor-scan/references/tooling_tree.py`'s `detect_nodes()` never checked whether a target repo is
 a PHP project at all before evaluating the PHP tree — `composer`, `phpstan-level-0`, every leaf, all
@@ -51,6 +61,14 @@ gate, and never `loop-config` directly.
 - Net effect: `php-tooling-tree.md` now references exactly two externally-defined nodes
   (`editorconfig`, `ci-runner`) plus its own recognition gate (`is-php-project`) — `loop-config` itself no
   longer appears there at all, and the document's own node section begins with `is-php-project`.
+- `ci-runner` also gets a direct `resolved` edge into `structural-scan`, declared in `tooling-tree.md` (both
+  endpoints already generic-root nodes) — `structural-scan`'s resolved-parent count goes from two to three
+  (`editorconfig`, `ci-runner`, the active specialization's own aggregation node). The diagram's illustrative
+  "(language tree's own aggregation node attaches here)" arrow — standing in for
+  `php-structural-scan → structural-scan`, never itself a real edge — moves from originating at
+  `loop-config` to originating at `is-php-project`, matching where the PHP tree itself now attaches;
+  `is-php-project` is **not** itself a resolved-parent of `structural-scan`, only the diagram's illustrative
+  anchor point — it stays a `required` parent of `composer`/`php-minimal-version` only.
 
 ## Considered Options
 
@@ -78,10 +96,16 @@ permanently unproposed — `next`/`roadmap`/`withheld` never surface them — wh
 (language-neutral) remain reachable as before. `tooling_tree.py` gains one new hardcoded detection helper
 (`_has_php_files`) and one new `set_node` call in `detect_nodes()`; no change needed in `_is_unblocked`,
 `next_candidates`, `roadmap`, or `withheld_candidates` — required-edge closure is already generic and
-edge-table-driven. All 7 existing PHP fixtures regenerated (`fixtures/php/*/expected/roadmap.json`): no
-step-count or reachability change in any of them (each already carries a real PHP signal), only a cosmetic
-ordering shift — `ci-runner` now sorts ahead of `editorconfig` in the roadmap, since `tooling-tree.md`'s
-edge table lists `is-php-project`/`ci-runner` before `editorconfig`. A new eighth fixture,
+edge-table-driven, and `structural-scan`'s new third resolved-parent needs no code change either (its
+resolved-parents are derived purely from the edge table `load_tree()` already parses). All 7 existing PHP
+fixtures regenerated (`fixtures/php/*/expected/roadmap.json`): no step-count or reachability change in any
+of them (each already carries a real PHP signal, and every fixture but `php-empty`/`php-partial`/`php-psalm`/
+`php-project-with-candidates` already has `ci-runner` fulfilled) — a cosmetic roadmap-ordering shift
+(`ci-runner` now sorts ahead of `editorconfig`, since `tooling-tree.md`'s edge table lists
+`is-php-project`/`ci-runner` before `editorconfig`), and, for the fixtures where `ci-runner` isn't yet
+fulfilled, `structural-scan`'s own `detected` entry now names `ci-runner` alongside `editorconfig`/
+`php-structural-scan` in its `unresolved` list (`LoadTreeTests.test_resolved_parents_of_structural_scan`,
+`StructuralScanGateTests.test_unfulfilled_when_leaves_missing` updated to match). A new eighth fixture,
 `fixtures/php/non-php-project/` (a static HTML/CSS/JS site, no PHP anywhere), demonstrates the gate closed;
 added to the CI roadmap matrix (`.github/workflows/test-harness.yml`).
 
