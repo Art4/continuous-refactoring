@@ -102,15 +102,20 @@ of mode.
   (`Create-mode: autonomous`)
 - **Ask each time** — check with you before opening each one.
   (`Create-mode: ask-each-time`)
-- **You open them** — the suite prepares branch + change, you push/open it.
+- **You open them** — the suite prepares branch + change, you push/open it
+  (forge access exists), or commit it yourself directly (it doesn't).
   (`Create-mode: human-opens`)
 
-Recommendation: whatever `AGENTS.md`/`CLAUDE.md` already named, said
-explicitly ("AGENTS.md already says autonomous"); both files disagree →
-name the conflict in the question body, recommend `ask-each-time` as the
-safer tie-break (resolving the underlying disagreement is the target
-repo's problem, not this interview's); neither names one → recommend
-**Autonomous**, the suite's existing default bias.
+Recommendation: `## Explore` found no git remote at all → recommend
+**You open them** — `autonomous`/`ask-each-time` both mean "push and open a
+merge request," which has nowhere to go yet; naming this now avoids every
+future pass hitting `opening-a-merge-request.md`'s "No forge/remote
+available" as a surprise. A remote exists → whatever `AGENTS.md`/`CLAUDE.md`
+already named, said explicitly ("AGENTS.md already says autonomous"); both
+files disagree → name the conflict in the question body, recommend
+`ask-each-time` as the safer tie-break (resolving the underlying
+disagreement is the target repo's problem, not this interview's); neither
+names one → recommend **Autonomous**, the suite's existing default bias.
 
 **Q3 — where should the suite keep its own metadata?**
 

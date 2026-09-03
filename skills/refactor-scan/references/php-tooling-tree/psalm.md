@@ -58,7 +58,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   that chose Psalm as its general analyzer, unlocks this node.
 - **Fulfilment check:** `vimeo/psalm` present as a dependency (dev or prod), a committed
   `psalm.xml`/`psalm.xml.dist`, and — once `ci-runner` is fulfilled — a CI job that actually invokes
-  `vendor/bin/psalm --taint-analysis` (self-wired CI gate, same ticket-34 shape as
+  `vendor/bin/psalm --taint-analysis` (self-wired CI gate, same shape as
   `phpstan-level-0`'s own CI check; no CI yet still fulfils the node on local adoption alone).
 - **MR scope:** on the Psalm path, `vimeo/psalm` and `psalm.xml` already exist (via the `psalm` node) —
   this MR only wires the `--taint-analysis` CI invocation. On the PHPStan path, this MR additionally runs

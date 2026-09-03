@@ -23,7 +23,7 @@ survive.
 ## `/domain-modeling` discipline, inline
 
 Skip with a note if unavailable — the side effects this step performs are
-already inline in step 4 of `## Process` and run regardless: add resolved
+already inline in `structural-candidate.md` step 4 and run regardless: add resolved
 terms to `CONTEXT.md` (a glossary and nothing else — no implementation
 details) as they crystallise, and offer an ADR under `docs/adr/` when the
 user rejects a design with a load-bearing reason a future scan should not

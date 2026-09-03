@@ -659,13 +659,127 @@ class ReferencesDirTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class SizeTests(unittest.TestCase):
+    def test_under_limit_ok(self):
+        text = "---\nname: x\ndescription: y\n---\n\n" + "word " * 100
+        self.assertEqual(vs.size_issues({"x": text}), [])
+
+    def test_over_limit_flagged(self):
+        text = "---\nname: x\ndescription: y\n---\n\n" + "word " * (vs.SKILL_MD_WORD_LIMIT + 1)
+        issues = vs.size_issues({"x": text})
+        self.assertEqual(len(issues), 1)
+        self.assertIn("size advisory", issues[0].message)
+
+    def test_frontmatter_not_counted_toward_limit(self):
+        # A huge frontmatter block alone must not trip the limit -- only the
+        # body counts.
+        frontmatter = "---\n" + "field: value\n" * (vs.SKILL_MD_WORD_LIMIT + 1) + "---\n\nshort body"
+        self.assertEqual(vs.size_issues({"x": frontmatter}), [])
+
+
+class OrphanedReferenceTests(unittest.TestCase):
+    def test_referenced_file_not_flagged(self):
+        refs = [("refactor-scan", "skills/refactor-scan/references/foo.md")]
+        all_text = {
+            "skills/refactor-scan/SKILL.md": "See `skills/refactor-scan/references/foo.md` for details.",
+            "skills/refactor-scan/references/foo.md": "The details.",
+        }
+        self.assertEqual(vs.orphaned_reference_issues(refs, all_text), [])
+
+    def test_unreferenced_file_flagged(self):
+        refs = [("refactor-scan", "skills/refactor-scan/references/foo.md")]
+        all_text = {
+            "skills/refactor-scan/SKILL.md": "Nothing points anywhere.",
+            "skills/refactor-scan/references/foo.md": "Orphaned content.",
+        }
+        issues = vs.orphaned_reference_issues(refs, all_text)
+        self.assertEqual(len(issues), 1)
+        self.assertIn("orphan advisory", issues[0].message)
+
+    def test_referenced_from_another_skill_not_flagged(self):
+        # Cross-skill pointers count too -- refactor-design can be the only
+        # thing naming a file that ships under continuous-refactoring/.
+        refs = [("continuous-refactoring", "skills/continuous-refactoring/references/shared.md")]
+        all_text = {
+            "skills/continuous-refactoring/references/shared.md": "Shared rule.",
+            "skills/refactor-design/SKILL.md": "See `skills/continuous-refactoring/references/shared.md`.",
+        }
+        self.assertEqual(vs.orphaned_reference_issues(refs, all_text), [])
+
+
+class DuplicationTests(unittest.TestCase):
+    LONG = "This sentence has more than fifteen words in it so it should count as a real duplication candidate."
+
+    def test_unique_sentences_ok(self):
+        all_text = {
+            "a.md": self.LONG,
+            "b.md": "A completely different sentence that also has plenty of words in it to pass the threshold.",
+        }
+        self.assertEqual(vs.duplication_issues(all_text), [])
+
+    def test_duplicate_sentence_flagged(self):
+        all_text = {"a.md": self.LONG, "b.md": self.LONG}
+        issues = vs.duplication_issues(all_text)
+        self.assertEqual(len(issues), 1)
+        self.assertIn("duplication advisory", issues[0].message)
+
+    def test_short_sentence_not_flagged(self):
+        short = "Too short to matter."
+        all_text = {"a.md": short, "b.md": short}
+        self.assertEqual(vs.duplication_issues(all_text), [])
+
+    def test_code_fence_ignored(self):
+        block = "```\n" + self.LONG + "\n```"
+        all_text = {"a.md": block, "b.md": block}
+        self.assertEqual(vs.duplication_issues(all_text), [])
+
+    def test_allowlisted_pair_not_flagged(self):
+        all_text = {"a.md": self.LONG, "b.md": self.LONG}
+        issues = vs.duplication_issues(all_text, allow={frozenset({"a.md", "b.md"})})
+        self.assertEqual(issues, [])
+
+    def test_repeat_within_same_file_not_flagged(self):
+        # Single source of truth is a cross-file concern; a file repeating
+        # its own sentence is a different (unaddressed) smell.
+        all_text = {"a.md": self.LONG + " " + self.LONG}
+        self.assertEqual(vs.duplication_issues(all_text), [])
+
+
+class CompletionClarityTests(unittest.TestCase):
+    def test_checkable_criterion_ok(self):
+        skills = {"x": "## Completion criterion\nThe branch exists and CI is green."}
+        self.assertEqual(vs.completion_clarity_issues(skills), [])
+
+    def test_vague_phrase_flagged(self):
+        skills = {"x": "## Completion criterion\nThe change is properly implemented."}
+        issues = vs.completion_clarity_issues(skills)
+        self.assertEqual(len(issues), 1)
+        self.assertIn("clarity advisory", issues[0].message)
+
+    def test_missing_section_skipped(self):
+        skills = {"x": "## Process\nDo the thing."}
+        self.assertEqual(vs.completion_clarity_issues(skills), [])
+
+    def test_vague_phrase_outside_section_not_flagged(self):
+        skills = {"x": "Properly implemented is mentioned here.\n\n## Completion criterion\nThe branch exists."}
+        self.assertEqual(vs.completion_clarity_issues(skills), [])
+
+
+class IsAdvisoryTests(unittest.TestCase):
+    def test_advisory_message_true(self):
+        self.assertTrue(vs.is_advisory(vs.Issue("x", "size advisory: too long")))
+
+    def test_error_message_false(self):
+        self.assertFalse(vs.is_advisory(vs.Issue("x", "missing frontmatter")))
+
+
 class EndToEndTests(unittest.TestCase):
     def test_real_repo_passes(self):
         repo = pathlib.Path(__file__).resolve().parents[1]
         issues = vs.validate_repo(repo)
-        # Contract consistency issues are advisory (orchestrator steps are
-        # intentionally brief); exclude them from the hard-fail check.
-        errors = [i for i in issues if vs.ADVISORY_PREFIX not in i.message]
+        # Advisory issues (contract consistency, size, orphaned references,
+        # duplication, completion clarity) are warnings, not hard failures.
+        errors = [i for i in issues if not vs.is_advisory(i)]
         self.assertEqual(errors, [], msg="\n".join(str(i) for i in errors))
 
 

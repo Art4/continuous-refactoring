@@ -6,82 +6,64 @@ disable-model-invocation: true
 
 # Continuous Refactoring
 
-The **loop pass** — the stateful, repeatable sequence that keeps a project under continuous refactoring. Each pass does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
+One **loop pass**: does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
-This skill is a thin data pipe: it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It does not read shared state itself and does not decide anything a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize` and `refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes. If you're tracing a bug in the loop, look in the lifecycle skill responsible for that decision, not here.
+This skill is a thin data pipe: it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It decides nothing a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize`/`refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes.
 
-A completed candidate is delivered as a **merge request** remembered in the target repo; later passes react to that state. Git is the only hard requirement — missing tools enter the language's **tooling tree** as small candidates instead of gating the loop. A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
+A completed candidate is delivered as a **merge request** remembered in the target repo. Git is the only hard requirement — missing tools enter the language **tooling tree** as small candidates instead of gating the loop. A **required edge** gates a child until every required parent is fulfilled; a **recommended edge** only advises — the child stays proposable even when the recommended parent was rejected.
 
-Run this on demand whenever you're asked, or via whatever recurring trigger you've set up outside the suite — the loop has no stored schedule of its own; it does the same one pass regardless of how often it's invoked.
+Run this on demand, or via your own recurring trigger — the loop has no schedule of its own.
 
 ## Loop state
 
-State lives in the target repo, not in the conversation — every lifecycle skill may read these directly; only `refactor-learn` writes them:
+State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-design` files backlog issues and sets `Pending candidates`; `refactor-implement` sets `Create-mode` while delivering `loop-config`) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
 
-- **Config** — the Refactoring Notes' `config.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request` below), the `Pending candidates` marker, the `Fulfilled nodes` cache, and the `Skip streak` counter `refactor-prioritize` reads as a ranking factor (`skills/continuous-refactoring/references/refactoring-config.md`)
-- **Remembered merge requests** — which suite merge requests are open. When `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab): every issue labeled `refactor:delivered` — its merge request, base branch, and (from the issue's title) tooling-tree node come straight from the tracker, no file. Otherwise: the Refactoring Notes' `merge-requests.md`, a committed ledger holding the same facts (URL, candidate issue, tooling-tree node if any, base branch)
-- **Backlog** — `refactor:*` issues on the issue tracker named by `docs/agents/issue-tracker.md` — scaffolded once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`); every place above that needs to know whether the tracker natively supports labels reads this file instead of re-deriving it from `gh`/`glab` each time
-- **Learned rejections** — the Refactoring Notes' `out-of-scope/` entries from prior passes
+- **Config** — the Refactoring Notes' `config.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request`), `Pending candidates`, `Fulfilled nodes` cache, `Skip streak` (`skills/continuous-refactoring/references/refactoring-config.md`).
+- **Remembered MRs** — every issue labeled `refactor:delivered`, when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab); otherwise the Refactoring Notes' `merge-requests.md`, a committed ledger with the same facts.
+- **Backlog** — `refactor:*` issues on the tracker named by `docs/agents/issue-tracker.md` — scaffolded once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`); every place that needs "does the tracker support native labels" reads this file rather than re-deriving it from `gh`/`glab`.
+- **Learned rejections** — the Refactoring Notes' `out-of-scope/` entries.
 
-The Refactoring Notes' `config.md` is not scaffolded here directly: it's `loop-config`, a tooling-tree node like any other in every way except one — `refactor-scan` proposes it, but `refactor-design` runs a human interview instead of copying the tree doc's generic spec (`skills/continuous-refactoring/references/loop-config-interview.md`), and `refactor-implement` creates the file with `Create-mode` already set from that interview's decisions, not left for `refactor-learn` to fill in later.
+The Refactoring Notes' `config.md` isn't scaffolded here — it's `loop-config`, a tooling-tree node like any other except one thing: `refactor-scan` proposes it, but `refactor-design` runs a human interview instead of copying the tree doc's generic spec, and `refactor-implement` creates the file with `Create-mode` already set from that interview, not left for `refactor-learn` to fill in later.
 
 ## The pass
 
-Each numbered step runs the named lifecycle skill and carries its output to the next step. Stop between steps where the skill itself stops for user input.
+Each step runs the named lifecycle skill and carries its output to the next. Stop between steps where the skill itself stops for user input.
 
-Prefer dispatching each step to a fresh subagent when a subagent mechanism is available — hand it this pass's carried-forward input, bring back only its stated `## Output`. This isn't just a performance choice: it's what actually keeps this skill a thin data pipe instead of an inline re-implementation — a lifecycle skill's own reasoning (which files it read, what it considered and rejected) stays inside that subagent's own context instead of leaking into the orchestrator's, so the only thing carried from one step to the next is what the skill's own `## Output` names. With no subagent mechanism available, run each step inline instead, in the same order.
+Prefer dispatching each step to a fresh subagent: hand it this pass's carried-forward input, bring back only its stated `## Output`. That keeps a skill's own reasoning inside its own context instead of leaking into the orchestrator's. No subagent mechanism available → run each step inline instead, same order.
 
-1. **Scan.** Run `/refactor-scan`. It checks its own preconditions first — git, backlog size — and resumes any `Pending candidates` before proposing anything fresh. Two outcomes end the pass here, before anything else runs: no git repository (nothing else runs, not even step 5), or the backlog is already full (skip to step 5 with whatever findings scan reported, no new candidate this pass). A third outcome — scan detects an already-open merge request with newer reviewer activity than its own last commit — is a **resume-candidate**: skip straight to step 5 with it (steps 2–4 don't run; the candidate already has a design and an open merge request, only the fix loop applies). Every other outcome carries scan's **findings** (closed/merged issues or MRs, possibly empty) into step 2 and **proposals** (the resumed pending candidate, or every currently-unblocked node's Name, never slugs) into step 3.
+1. **Scan.** Run `/refactor-scan` — checks preconditions (git, backlog size) and resumes `Pending candidates` before proposing anything fresh.
+   - No git repository → pass ends now, nothing else runs (not even step 6).
+   - Backlog full → skip to step 5 with scan's findings, no new candidate.
+   - Resume-candidate (an open MR with reviewer activity newer than its last commit) → skip straight to step 5 with it; steps 2–4 don't run.
+   - Otherwise → **findings** (possibly empty) go to step 2, **proposals** (every unblocked node's Name, never slugs) go to step 3.
 
-2. **Learn, early call — findings only.** If step 1 produced any findings, run `/refactor-learn` on them now, before prioritising — it resolves each one (`done` / `wontfix` + out-of-scope entry) and updates the ledger immediately. This can't wait until step 5: step 3 reads the ledger to decide whether two merge requests are already open, and a finding scan just made (a remembered one merged or closed) has to be reflected there first, or step 3 would count a slot as occupied that this pass itself just freed. Skip this call entirely when step 1 had no findings — it is not a bookkeeping-only pass by itself, just an early half of one.
+2. **Learn, early call — only if step 1 found something.** Run `/refactor-learn` on the findings before prioritising: step 3 reads the ledger, and a finding this pass just resolved (an MR merged or closed) must land there first. No findings → skip this call entirely.
 
-3. **Prioritise.** Run `/refactor-prioritize` on scan's proposals, against the now-current ledger. It stops the pass here (skip to step 5) if two suite merge requests are already open, or if every proposal is already in flight. Otherwise it hands one chosen node forward with its rationale.
+3. **Prioritise.** Run `/refactor-prioritize` on scan's proposals against the now-current ledger. Stops the pass (skip to step 5) if two suite MRs are already open, or every proposal is already in flight. Otherwise hands forward one chosen node with its rationale.
 
-4. **Design.** Run `/refactor-design` on the chosen node. It files the node as an issue (the point at which a node first becomes one) and writes the plan onto it. If the candidate is tiny and the user wants to skip ahead, that's their call — flag it and go. Carries the filed issue/plan into step 5.
+4. **Design.** Run `/refactor-design` on the chosen node — files it as an issue (its first time becoming one) and writes the plan onto it. Carries the filed issue/plan to step 5.
 
-5. **Implement.** Run `/refactor-implement`. One candidate, one branch; slices stay on that branch, and the branch only exists once this step creates it. It reviews its own diff along both axes (the check that used to be `refactor-review`'s own step) until clean — the change it describes matches what the plan asked for — before opening the merge request, looping back to its own earlier steps on findings rather than handing off to another skill. Carries the opened merge request into step 6.
+5. **Implement.** Run `/refactor-implement` — one candidate, one branch, created here. Reviews its own diff (standards + spec) until clean, looping back to its own earlier steps on findings, before opening the merge request. Carries the opened MR to step 6.
 
-6. **Learn, closing call.** Run `/refactor-learn` with the freshly opened merge request (if step 5 ran) — this call always happens, even when nothing past step 3 did (a pass that only did step 2's early reconciliation is still a complete pass). It records the merge request in the ledger with the `refactor:delivered` label, clears `Pending candidates`, captures ADRs/`CONTEXT.md` updates, and writes `Fulfilled nodes`, unconditionally, last (full overwrite if this pass had parser access, additive otherwise). `refactor-learn` is the only skill that writes any of the state listed above — across both calls in a pass, never more than twice.
+6. **Learn, closing call — always**, even when nothing past step 3 ran (a pass that only did step 2 is still complete). Run `/refactor-learn` with the freshly opened MR, if any. Records it in the ledger with `refactor:delivered`, clears `Pending candidates`, captures ADR/`CONTEXT.md` updates, writes `Fulfilled nodes` last.
 
 ## Opening a merge request
 
-Followed by `refactor-implement` when it opens the reviewable.
-
-- Read the Refactoring Notes' `config.md`'s `Create-mode` field and follow it — `autonomous`, `ask-each-time`, or `human-opens`.
-- Create-mode is decided exactly once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`) — not inferred fresh per merge request and not deferred to `refactor-learn`. That interview reads the target's `AGENTS.md` / `CLAUDE.md` first: if either already names a mode, that becomes the recommended (not automatic) answer put to the human; otherwise the recommended answer is `autonomous`. Either way, the human decides, and the answer lands in `Create-mode` when `refactor-implement` creates `config.md`. `refactor-learn` follows the same `Create-mode` field for its own bookkeeping merge request (see its `## Process`); it no longer decides the mode itself except a narrow fallback for a `config.md` that predates this convention.
-- Skills always say **merge request**; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
-
-While fewer than two suite merge requests are open, a pass may deliver one more. Always stack it (base = whatever suite branch is currently open) rather than branching parallel off the default branch — never both open against the default branch at once, regardless of whether the new candidate is a tooling-tree child of what's in flight. This trades a little throughput (a pass can't parallelize two truly unrelated candidates) for a stronger guarantee: no two suite branches ever touch the Refactoring Notes' `config.md` concurrently, which is what previously let a bookkeeping-style field accumulate repeated merge conflicts across overlapping branches. After the base merges, the next pass retargets or rebases the child.
-
-The description opens in plain language, one or two sentences, for a human who doesn't know the suite's vocabulary: what this unlocks for the project, not what tree node it fulfils. Then the plain facts: link the candidate, what changed, which tests survive, what CI proves.
-
-For a tooling-tree candidate, close with an outlook: one plain sentence a human can read, naming the next node by its **Name** and working its Purpose into that same sentence (e.g. "next up: Composer — dependency management for the Composer-stack track"). Nothing about how that was determined belongs in it — no shell command, no file path, no `Purpose:`-labelled field.
-
-To determine what's next: re-run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1` against the now-changed working tree and look up whatever node slug it reports in the tree doc, using its Name (never the slug the script returned). If `python3` isn't available or running it isn't permitted, dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; with no sub-agent mechanism, run that prompt's steps yourself inline.
-
-A structural candidate carries no outlook — there's no single "next child" a deepening unlocks the way a tree node does. No type enum — outlook is settled, a type enum is a separate, still-undecided question.
+Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), stacking, description, outlook — in `skills/continuous-refactoring/references/opening-a-merge-request.md`.
 
 ## Fallback
 
-The suite must keep working in a target repo with none of the global skills installed. Each lifecycle skill self-contains its own step: its own `## Fallback` section means "use the global skill if installed, else the inline fallback". Two fallback depths apply: **crash-safe** means skip the global skill with a note — the step's core is already inline; **self-sufficient** means the fallback inlines the part of the global skill the step uses. The orchestrator engages no global skill itself — that one reference now lives in `refactor-learn`, which owns the learn step — every fallback lives in the lifecycle skill that uses it: `refactor-design`, `refactor-implement`, and `refactor-learn` each carry their own, per their `## Fallback` sections.
-
-The authoritative inventory of every global reference and its fallback type lives in `docs/agents/skill-references.md` and is enforced by the Tier 1 validator (`scripts/validate_skills.py`) — that ledger, not this section, is the one place naming which global skill backs which step.
+The suite must keep working in a target repo with none of the global skills installed. Each lifecycle skill's own `## Fallback` covers its step: **crash-safe** (skip the global skill with a note — the step's core is already inline) or **self-sufficient** (the fallback inlines the part of the global skill the step uses). The orchestrator engages no global skill itself.
 
 ## Closing report
 
-Wherever the pass ends — completed, stopped early by a precondition, or nothing survived prioritising — close with exactly two lines to the human. Each lifecycle skill's own `## Output` is handoff data carried to the *next skill* — separate from this closing report. Name any tooling-tree node by its **Name** (never its slug).
+Wherever the pass ends, close with exactly two lines to the human — a lifecycle skill's own `## Output` is handoff data for the *next skill*, separate from this. Name any tooling-tree node by its Name, never its slug.
 
 - **Status:** one line, what happened this pass.
 - **Next:** one line, what the human can or should do now.
 
-One example pair per stopping point already named above and in `## Completion criterion`:
-
-- No git repository: "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun."
-- Backlog full, or two merge requests already open: "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then."
-- Nothing survived prioritising: "Status: nothing to work on this pass — every proposal already in flight. Next: nothing needed, rerun later."
-- A candidate delivered: "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands."
-- Bookkeeping-only pass (only step 2's early call ran): "Status: reconciled 1 merged candidate, nothing new started. Next: nothing needed, rerun later."
+Examples: "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun." / "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then." / "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands." / "Status: Refactoring Config prepared on local branch `refactor/loop-config` — no forge/remote here, so nothing was pushed. Next: commit it yourself, or push it and open the merge request once you have forge access."
 
 ## Completion criterion
 
-One full pass completed and the loop state updated — `refactor-learn` ran at least once (even a bookkeeping-only pass), `Fulfilled nodes` is written, and the pass's own outcome is recorded: the delivered candidate sits `refactor:delivered` with its merge request remembered, or the issue closed, or nothing was actionable this pass and that's reported.
+One full pass completed and loop state updated: `refactor-learn` ran at least once, `Fulfilled nodes` is written, and the pass's outcome is recorded — a delivered candidate sits `refactor:delivered` with its MR remembered, the issue closed, nothing was actionable and that's reported, or (no forge/remote available) the candidate sits prepared on its own branch, handed to the human, per `opening-a-merge-request.md`.

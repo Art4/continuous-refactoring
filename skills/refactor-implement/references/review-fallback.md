@@ -27,7 +27,8 @@ This carries the contract `refactor-review` used to own.
 
 - **Spec axis** — does it faithfully implement the plan on the candidate
   issue: requirements missing or partial, behaviour that wasn't asked for
-  (scope creep), requirements that look implemented but wrong?
+  (scope creep), requirements that look implemented but wrong? Quote the
+  plan line each finding is checked against.
 - **Standards axis** — review the diff against the repo's documented coding
   standards (see `docs/agents/domain.md`, any
   `CODING_STANDARDS.md`/`CONTRIBUTING.md`). On top of documented standards,
