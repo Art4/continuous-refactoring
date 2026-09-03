@@ -294,7 +294,7 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
     `Refactoring Notes: `<path>`` line in the target's AGENTS.md or
     CLAUDE.md (loop-config's own interview writes this once, into whichever
     of the two already existed — never both) — see
-    skills/continuous-refactoring/references/refactoring-config.md for the
+    skills/continuous-refactoring/references/refactoring-bookkeeping.md for the
     exact line format this parses."""
     default = repo / "docs" / "refactoring"
     for name in ("AGENTS.md", "CLAUDE.md"):
@@ -312,9 +312,9 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
 
 
 def _has_loop_config(repo: pathlib.Path) -> bool:
-    """loop-config's fulfilment check: the Refactoring Notes' config.md exists
-    (default docs/refactoring/config.md; see _resolve_refactoring_notes_dir)."""
-    return (_resolve_refactoring_notes_dir(repo) / "config.md").exists()
+    """loop-config's fulfilment check: the Refactoring Notes' bookkeeping.md exists
+    (default docs/refactoring/bookkeeping.md; see _resolve_refactoring_notes_dir)."""
+    return (_resolve_refactoring_notes_dir(repo) / "bookkeeping.md").exists()
 
 
 def _has_editorconfig(repo: pathlib.Path) -> bool:
@@ -745,7 +745,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # loop-config
     notes_rel = _resolve_refactoring_notes_dir(repo).relative_to(repo).as_posix()
     has_loop_config = _has_loop_config(repo)
-    set_node("loop-config", has_loop_config, f"{notes_rel}/config.md present" if has_loop_config else f"no {notes_rel}/config.md")
+    set_node("loop-config", has_loop_config, f"{notes_rel}/bookkeeping.md present" if has_loop_config else f"no {notes_rel}/bookkeeping.md")
     # is-php-project: composer.json (recognized location) or at least one
     # *.php file outside vendor/ — see tooling-tree.md's own node entry for
     # the "why not composer.json-only" rationale.

@@ -213,15 +213,15 @@ What it does:
 3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one pass, note (don't silently fix) ambiguity, follow the interview's own "no human present" fallback if nobody's here to answer it, write friction notes to `agent-loop-friction-<fixture>.md`.
 4. Prints the sandbox and prompt paths and stops — spawn the subagent yourself (Agent tool, `run_in_background: false`, prompt = the file's contents) and let it run.
 
-Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `docs/refactoring/config.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):
+Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `docs/refactoring/bookkeeping.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):
 
 ```bash
 source fixtures/harness/lib/assertions.sh
-assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/docs/refactoring/config.md"
+assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/docs/refactoring/bookkeeping.md"
 assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2 = after setup_fixture's init + tracker-seed commits
 ```
 
-`php-partial` is a good default target — no `docs/refactoring/config.md` yet, so a pass exercises the `loop-config` bootstrap exception before reasoning about `composer`'s children. Any fixture name works; nothing here depends on `php-partial` specifically.
+`php-partial` is a good default target — no `docs/refactoring/bookkeeping.md` yet, so a pass exercises the `loop-config` bootstrap exception before reasoning about `composer`'s children. Any fixture name works; nothing here depends on `php-partial` specifically.
 
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting
@@ -271,7 +271,7 @@ The fixture contains five planted candidates that a `refactor-scan` should disco
 
 After a successful loop pass, the fixture should produce:
 
-- `expected/docs/refactoring/config.md` — Loop configuration (cadence: weekly)
+- `expected/docs/refactoring/bookkeeping.md` — Loop configuration (cadence: weekly)
 - `expected/docs/refactoring/merge-requests.md` — No open merge requests
 
 ## Usage

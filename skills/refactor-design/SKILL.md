@@ -15,6 +15,8 @@ An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree
 
 **`loop-config` exception:** not fully specified by the tree doc alone — its MR scope names a human interview, not a fixed spec. Run `skills/continuous-refactoring/references/loop-config-interview.md` in full (explore, ask, summarize, record) before filing anything; skip step 5's usual "carry the tree doc's spec over precisely" move for this node only — file the interview's recorded decisions instead (step 5). Steps 2–4 (structural-candidate search, grilling) still don't apply — this stays a tooling-tree node in every other way.
 
+**An externally-labeled candidate** (`refactor-scan` step 3b — an issue a human or another process labeled `refactor:candidate` directly, not one this loop designed): not fully specified by definition, even if its body already reads like a complete request — confirm it names a concrete module/seam/interface before skipping ahead. Run steps 2–4 (structural-candidate search, grounding, grilling) using the issue's own stated request as the starting friction signal in place of a fresh codebase search's, then continue at step 5, updating that same issue (not filing a second one) with the sharpened plan. Already fully specified as written → skip straight to step 5 like any other pre-specified candidate.
+
 The **`structural-scan`** node names an open gate, not a candidate. Steps 2–4 (find a candidate, ground in it, grill toward the seam) live at `skills/refactor-design/references/structural-candidate.md` — run them in full, then return here for step 5.
 
 ### 5. File the issue and write the plan
@@ -23,9 +25,9 @@ The **`structural-scan`** node names an open gate, not a candidate. Steps 2–4 
 
 **Structural candidate:** file an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), Signal (which step-2 friction signal). Capture the plan on that issue: deepened module, seam and interface, surviving tests, slice ordering (see `refactor-implement`).
 
-Either way: set the Refactoring Notes' `config.md`'s `Pending candidates` to this issue (`skills/continuous-refactoring/references/refactoring-config.md`) — lets a future `refactor-scan` resume this exact work if the pass stops here. `refactor-learn` clears it once a merge request exists.
+Either way: set the Refactoring Notes' `bookkeeping.md`'s `Pending candidates` to this issue (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — lets a future `refactor-scan` resume this exact work if the pass stops here. `refactor-learn` clears it once a merge request exists.
 
-**`loop-config` exception:** chosen node *is* `loop-config` → the issue body isn't the tree doc's generic spec, it's what `skills/continuous-refactoring/references/loop-config-interview.md`'s `## Record` names (the interview's decisions, each with its one-line rationale). And `config.md` doesn't exist yet, so no `Pending candidates` to write here either — `refactor-implement` records it directly when it creates the file.
+**`loop-config` exception:** chosen node *is* `loop-config` → the issue body isn't the tree doc's generic spec, it's what `skills/continuous-refactoring/references/loop-config-interview.md`'s `## Record` names (the interview's decisions, each with its one-line rationale). And `bookkeeping.md` doesn't exist yet, so no `Pending candidates` to write here either — `refactor-implement` records it directly when it creates the file.
 
 The plan follows the foundational refactoring rules: `skills/continuous-refactoring/references/foundational-refactoring-rules.md`.
 
@@ -41,4 +43,4 @@ The filed issue, carrying the plan → `refactor-implement`.
 
 ## Completion criterion
 
-The candidate has an issue (newly filed, or resumed) with a written plan, and `config.md`'s `Pending candidates` names it. Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception).
+The candidate has an issue (newly filed, or resumed) with a written plan, and `bookkeeping.md`'s `Pending candidates` names it. Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception).

@@ -237,8 +237,8 @@ run_tier2() {
     done
 
     # Check expected docs
-    assert_file_exists "$FIXTURE_SRC/expected/docs/refactoring/config.md"
-    assert_config_format "$FIXTURE_SRC/expected/docs/refactoring/config.md"
+    assert_file_exists "$FIXTURE_SRC/expected/docs/refactoring/bookkeeping.md"
+    assert_config_format "$FIXTURE_SRC/expected/docs/refactoring/bookkeeping.md"
 }
 
 # Tier 3: Ground Truth Tests
@@ -432,7 +432,7 @@ EOF
     log_info "  spawn an Agent-tool subagent with the contents of $prompt_file, let it run, then inspect"
     log_info "  $FIXTURE_DST (git log, docs/refactoring/, .scratch/refactor/issues/) and $friction_file"
     log_info "Optional post-run structural check once the pass has run:"
-    log_info "  assert_config_format \"$FIXTURE_DST/docs/refactoring/config.md\"  (source fixtures/harness/lib/assertions.sh first)"
+    log_info "  assert_config_format \"$FIXTURE_DST/docs/refactoring/bookkeeping.md\"  (source fixtures/harness/lib/assertions.sh first)"
 }
 
 # Tier 4: Trigger/discoverability tests (ticket 27) — explicit + implicit
@@ -479,8 +479,8 @@ run_tier4() {
         else
             log_info "No-git negative control: expected wording not found in $out (advisory, non-blocking)"
         fi
-        if [[ -f "$no_git_dir/docs/refactoring/config.md" ]]; then
-            log_fail "No-git negative control: docs/refactoring/config.md was written despite no git repository"
+        if [[ -f "$no_git_dir/docs/refactoring/bookkeeping.md" ]]; then
+            log_fail "No-git negative control: docs/refactoring/bookkeeping.md was written despite no git repository"
         else
             log_pass "No-git negative control: no loop state written"
         fi

@@ -247,7 +247,7 @@ class DetectNodesTests(unittest.TestCase):
 
     def test_loop_config_fulfilled_when_config_md_present(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
         })
         try:
             d = detect_nodes(root)
@@ -359,7 +359,7 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
     """`_resolve_refactoring_notes_dir` — the Refactoring Notes' path,
     default docs/refactoring/, overridable via a `Refactoring Notes:
     `<path>`` line in AGENTS.md/CLAUDE.md (skills/continuous-refactoring/
-    references/refactoring-config.md's resolution rule)."""
+    references/refactoring-bookkeeping.md's resolution rule)."""
 
     def _make_repo(self, files: dict):
         tmp = tempfile.TemporaryDirectory()
@@ -388,7 +388,7 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
     def test_custom_path_from_agents_md(self):
         tmp, root = self._make_repo({
             "AGENTS.md": "## Continuous-refactoring suite\n\nRefactoring Notes: `custom/path/` — notes.\n",
-            "custom/path/config.md": "# Refactoring Loop Config\n",
+            "custom/path/bookkeeping.md": "# Refactoring Loop Config\n",
         })
         try:
             self.assertEqual(_resolve_refactoring_notes_dir(root), root / "custom" / "path")
@@ -400,7 +400,7 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
     def test_custom_path_from_claude_md_when_no_agents_md(self):
         tmp, root = self._make_repo({
             "CLAUDE.md": "Refactoring Notes: `notes/refactor/`\n",
-            "notes/refactor/config.md": "# Refactoring Loop Config\n",
+            "notes/refactor/bookkeeping.md": "# Refactoring Loop Config\n",
         })
         try:
             self.assertEqual(_resolve_refactoring_notes_dir(root), root / "notes" / "refactor")
@@ -1477,7 +1477,7 @@ class EditorconfigNodeTests(unittest.TestCase):
 
     def _loop_config_and_composer_files(self):
         return {
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
             "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         }
@@ -1501,7 +1501,7 @@ class EditorconfigNodeTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_blocked_until_loop_config_fulfilled(self):
-        tmp, root = self._make_repo({})  # no docs/refactoring/config.md
+        tmp, root = self._make_repo({})  # no docs/refactoring/bookkeeping.md
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertNotIn("editorconfig", nodes)
@@ -1510,7 +1510,7 @@ class EditorconfigNodeTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_proposable_once_loop_config_fulfilled(self):
-        tmp, root = self._make_repo({"docs/refactoring/config.md": "# Refactoring Loop Config\n"})
+        tmp, root = self._make_repo({"docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n"})
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("editorconfig", nodes)
@@ -1574,7 +1574,7 @@ class IsPhpProjectTests(unittest.TestCase):
         return tmp, root
 
     def _loop_config_only(self):
-        return {"docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"}
+        return {"docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"}
 
     def test_unfulfilled_with_no_composer_json_and_no_php_files(self):
         tmp, root = self._make_repo({"index.html": "<html></html>\n", "styles.css": "body{}\n"})
@@ -1834,7 +1834,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
             # ticket 01: decided (fulfilled), so php-cs-fixer's own recommended
             # gate doesn't interfere with what this test actually exercises.
@@ -1855,7 +1855,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
         })
         try:
@@ -1991,7 +1991,7 @@ class PhpMinimalVersionTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
         })
         try:
             nodes = [c["node"] for c in next_candidates(root)]
@@ -2003,7 +2003,7 @@ class PhpMinimalVersionTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
         })
         try:
@@ -2020,7 +2020,7 @@ class PhpMinimalVersionTests(unittest.TestCase):
         files = {
             "composer.json": json.dumps({"require": {"php": ">=5.6"}, "require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
             # Invokes phpstan too, so phpstan-level-0 is genuinely
             # fulfilled (ticket 34's CI self-wiring) despite CI existing —
             # rector-php-set's required-any parent needs this, independent
@@ -2074,7 +2074,7 @@ class RoadmapTests(unittest.TestCase):
         return tmp, root
 
     def test_empty_roadmap_starts_with_loop_config(self):
-        # ADR-0008: with no docs/refactoring/config.md, loop-config is the
+        # ADR-0008: with no docs/refactoring/bookkeeping.md, loop-config is the
         # first proposable node — required parent of ci-runner/editorconfig,
         # and (via is-php-project, ADR-0022) composer.
         # ADR-0022: composer now requires is-php-project as well as
@@ -2101,13 +2101,13 @@ class RoadmapTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_roadmap_with_loop_config_starts_with_composer(self):
-        # With docs/refactoring/config.md already present, loop-config is
+        # With docs/refactoring/bookkeeping.md already present, loop-config is
         # fulfilled and the roadmap picks up where it used to before ADR-0008
         # — plus ci-runner/editorconfig (ticket 01), ordered ahead of
         # composer for the same reason as above. Needs a PHP signal too,
         # same as above (ADR-0022).
         tmp, root = self._make_repo({
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
             "index.php": "<?php\n",
         })
         try:
@@ -2204,7 +2204,7 @@ class RoadmapTests(unittest.TestCase):
         # fixture that already proves detect_nodes() marks structural-scan
         # fulfilled; roadmap() must now agree it stays proposable.
         tmp, root = self._make_repo({
-            "docs/refactoring/config.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
             "composer.json": json.dumps({
                 "require-dev": {
                     "phpstan/phpstan": "^1.0",

@@ -1,6 +1,6 @@
 # PHP Tooling Tree
 
-The canonical shape of the PHP specialization's **tooling tree**. This document records the form only — nodes and edges below this specialization's own **recognition gate**, `is-php-project` (see `skills/refactor-scan/references/tooling-tree.md` for the generic root — `is-php-project`'s own definition, `loop-config`, `structural-scan`, and `ci-runner`, referenced below purely for the PHP-specific edges hanging off it). Fulfilment and rejection state lives in each target repo's Refactoring Notes (`skills/continuous-refactoring/references/refactoring-config.md`). Vocabulary: `CONTEXT.md` (**node**, **required edge**, **required-any edge**, **recommended edge**).
+The canonical shape of the PHP specialization's **tooling tree**. This document records the form only — nodes and edges below this specialization's own **recognition gate**, `is-php-project` (see `skills/refactor-scan/references/tooling-tree.md` for the generic root — `is-php-project`'s own definition, `loop-config`, `structural-scan`, and `ci-runner`, referenced below purely for the PHP-specific edges hanging off it). Fulfilment and rejection state lives in each target repo's Refactoring Notes (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`). Vocabulary: `CONTEXT.md` (**node**, **required edge**, **required-any edge**, **recommended edge**).
 
 ## Diagram
 
