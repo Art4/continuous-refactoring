@@ -1,15 +1,27 @@
 # Continuous Refactoring
 
-A portable agent-skill suite that keeps a software project under **continuous refactoring** — as a stateful, repeatable loop instead of a one-shot action.
+> Paying down technical debt. Now. Automatically.
 
+[![Test Harness](https://github.com/Art4/continuous-refactoring/actions/workflows/test-harness.yml/badge.svg)](https://github.com/Art4/continuous-refactoring/actions/workflows/test-harness.yml)
+[![skills-validation](https://github.com/Art4/continuous-refactoring/actions/workflows/skills-validation.yml/badge.svg)](https://github.com/Art4/continuous-refactoring/actions/workflows/skills-validation.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+
+A portable agent-skill suite for [Claude Code](https://claude.com/claude-code) that keeps a
+software project under **continuous refactoring**: scan, prioritise, design, implement, learn —
+on repeat, as a stateful, repeatable loop instead of a one-shot action.
+
+```mermaid
+flowchart LR
+    Scan[Scan] --> Prioritize[Prioritize]
+    Prioritize --> Design[Design]
+    Design --> Implement[Implement]
+    Implement --> Learn[Learn]
+    Learn -.-> Scan
 ```
-scan (propose nodes, detect closed MRs) → prioritise → design (grill, file the issue) → implement (tdd + review)
-   └────────────────────────────────── learn (ledger / ADR / CONTEXT.md / issue status) ←──────┘
-```
 
-The orchestrator carries each skill's output to the next skill's input (ADR-0010) — no skill re-derives its own context from shared state.
+The orchestrator carries each skill's output to the next skill's input — no skill re-derives its own context from shared state.
 
-The core is language-neutral; the first specialization is a **general PHP project** (code style, Rector, PHPStan via the tooling tree).
+The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md); the first specialization is a **[general PHP project](skills/refactor-scan/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
 
 ## Skills
 
@@ -32,7 +44,7 @@ ln -s /path/to/continuous-refactoring/skills/* <target>/.agents/skills/
 
 Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skills/`), a symlink on the `skills/` directories there is enough.
 
-The target project needs the engineering-skills setup (`setup-matt-pocock-skills`: issue-tracker config, triage labels, domain docs). If it's missing, the orchestrator points that out.
+The target project needs the engineering-skills setup (`setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills), see [aihero.dev](https://www.aihero.dev/): issue-tracker config, triage labels, domain docs). If it's missing, the orchestrator points that out.
 
 ## Quick start
 
@@ -49,3 +61,15 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human and [skills/continuous-refactoring/references/refactoring-bookkeeping.md](skills/continuous-refactoring/references/refactoring-bookkeeping.md) for the config file.
 
 See [Known limitations](docs/known-limitations.md) for setup gotchas that don't have a suite-side fix (e.g. GitHub App permission scopes).
+
+## Contributing
+
+Bug reports, feature requests, and pull requests are welcome — see [CONTRIBUTING.md](CONTRIBUTING.md).
+
+## License
+
+MIT — see [LICENSE](LICENSE).
+
+---
+
+Built by [Artur Weigandt](https://weigandtlabs.de) — PHP refactoring, freelance.

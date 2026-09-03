@@ -13,7 +13,7 @@ The comparison the whole command exists to produce is invalid on any such machin
 
 **Why:** Found running `lift php-partial --opencode` for real (ticket 27's own verification pass,
 2026-08-30). The "without-skill" transcript opens with `→ Skill "continuous-refactoring"` and goes on to
-read `/home/artur/.agents/skills/refactor-scan/SKILL.md`, `.../refactor-design/SKILL.md`, etc. — full
+read `~/.agents/skills/refactor-scan/SKILL.md`, `.../refactor-design/SKILL.md`, etc. — full
 process fidelity, not a naive baseline. `ls -la ~/.agents/skills` on that machine confirms all six of this
 repo's skills are symlinked there permanently. `fixtures/README.md`'s existing isolation language ("only
 skills from this repo, no global `~/.config/opencode/skills`") only accounts for one global path and
