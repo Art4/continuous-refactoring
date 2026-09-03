@@ -19,7 +19,7 @@ flowchart LR
 
 The orchestrator carries each skill's output to the next skill's input — no skill re-derives its own context from shared state.
 
-The core is language-neutral; the first specialization is a **general PHP project** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
+The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md); the first specialization is a **[general PHP project](skills/refactor-scan/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
 
 ## Skills
 
