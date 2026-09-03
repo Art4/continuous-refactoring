@@ -17,7 +17,7 @@ flowchart LR
     Learn -.-> Scan
 ```
 
-The orchestrator carries each skill's output to the next skill's input (ADR-0010) — no skill re-derives its own context from shared state.
+The orchestrator carries each skill's output to the next skill's input — no skill re-derives its own context from shared state.
 
 The core is language-neutral; the first specialization is a **general PHP project** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
 
