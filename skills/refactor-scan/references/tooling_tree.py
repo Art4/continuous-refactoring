@@ -1015,6 +1015,21 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
                 ok, why = _composer_audit_extra_gate(has_real_dep, tree, resolved_check, rejected)
                 if not ok:
                     continue
+            if node in _PHPSTAN_LEVEL_NODES:
+                # Empty-baseline stop condition (php-tooling-tree/phpstan.md's
+                # "Stop conditions": baseline non-empty -> do not propose the
+                # next level). _is_unblocked() above only checks required-
+                # parent fulfilment (predecessor level reached), which says
+                # nothing about the *current* baseline's contents — a real
+                # target sitting on a fulfilled level with real, unshrunk
+                # baseline entries would otherwise get the next level
+                # proposed regardless. roadmap() already applies this same
+                # gate during its own simulation; next_candidates() needs it
+                # too since it's the set refactor-scan actually proposes from.
+                if not _is_baseline_empty(repo):
+                    continue
+                if detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
+                    continue
             result.append({"node": node, "reason": why})
         if limit is not None and len(result) >= limit:
             break

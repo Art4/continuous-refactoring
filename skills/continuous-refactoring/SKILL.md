@@ -16,7 +16,7 @@ Run this on demand, or via your own recurring trigger — the loop has no schedu
 
 ## Loop state
 
-State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; only `refactor-learn` writes it:
+State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-design` files backlog issues and sets `Pending candidates`; `refactor-implement` sets `Create-mode` while delivering `loop-config`) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
 
 - **Config** — the Refactoring Notes' `config.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request`), `Pending candidates`, `Fulfilled nodes` cache, `Skip streak` (`skills/continuous-refactoring/references/refactoring-config.md`).
 - **Remembered MRs** — every issue labeled `refactor:delivered`, when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab); otherwise the Refactoring Notes' `merge-requests.md`, a committed ledger with the same facts.
