@@ -42,7 +42,7 @@ Delegate to the `mattpocock/skills` implement skill (`setup-matt-pocock-skills`)
 - **Standards** — does the diff conform to this repo's documented standards and the fulfilled tooling?
 - **Spec** — does it faithfully implement the plan on the candidate issue: missing/partial requirements, scope creep, requirements that look implemented but wrong?
 
-Findings on either axis send the work back to step 2 (structural) or step 1 (tooling-tree) — implement, don't hand off. Report the two axes separately, one line per finding (file, issue, fix).
+Findings on either axis send the work back to step 2 (structural) or step 1 (tooling-tree) — implement, don't hand off. Report the two axes separately, one line per finding (file, issue, fix); on the Spec axis, quote the plan line each finding is checked against.
 
 ### 5. Open the merge request
 

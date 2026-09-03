@@ -21,11 +21,13 @@ Otherwise drop any proposal already in that set — it already has an open MR, s
 
 For each surviving proposal, assess:
 
-- **Heat** — in a hot spot (frequently changing area)? Pays off faster, unblocks more upcoming change.
-- **Leverage** — how much future change does deepening this module unlock? A module many others call is high-leverage; an uncalled leaf is not.
-- **Tooling pressure** — is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so it's re-failing every CI run until fixed.
-- **Risk** — how hard to reverse, how wide the blast radius? Prefer reversible, low-risk refactors early while the habit is forming.
-- **Skip streak** — consecutive prior passes that proposed this without choosing it (the Refactoring Notes' `config.md`'s `Skip streak`, read-only here — `refactor-learn` writes it). A longer streak weighs increasingly toward choosing it, so a `required` sibling that never wins on the other four alone doesn't starve indefinitely — but it's one factor among five, not a forced pick.
+| Factor | Question |
+|---|---|
+| **Heat** | In a hot spot (frequently changing area)? Pays off faster, unblocks more upcoming change. |
+| **Leverage** | How much future change does deepening this module unlock? A module many others call is high-leverage; an uncalled leaf is not. |
+| **Tooling pressure** | Is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so it's re-failing every CI run until fixed. |
+| **Risk** | How hard to reverse, how wide the blast radius? Prefer reversible, low-risk refactors early while the habit is forming. |
+| **Skip streak** | Consecutive prior passes that proposed this without choosing it (the Refactoring Notes' `config.md`'s `Skip streak`, read-only here — `refactor-learn` writes it). A longer streak weighs increasingly toward choosing it, so a `required` sibling that never wins on the other four alone doesn't starve indefinitely — but it's one factor among five, not a forced pick. |
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 
