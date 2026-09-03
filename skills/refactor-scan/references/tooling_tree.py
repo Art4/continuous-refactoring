@@ -1103,6 +1103,109 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
     return result
 
 
+def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict | None = None) -> list[dict]:
+    """Every node this one candidate's fulfilment newly makes proposable —
+    the fan-out an MR's outlook diagram draws
+    (``opening-a-merge-request.md``), distinct from ``roadmap(steps=1)``'s
+    single top-priority pick.
+
+    Walks ``landed_node``'s direct children in the edge table. A child
+    that's never itself a real candidate — ``_NEVER_PROPOSED`` for
+    structural/plumbing reasons (``static-code-analyzer``), or a
+    resolved-gated aggregation node that isn't itself exposed
+    (``php-structural-scan``) — is walked *through* to its own children
+    instead of being reported, the same "not proposed itself, but its
+    resolved-ness matters" treatment ``next_candidates()`` gives these
+    nodes. The walk only continues past such a node while it's actually
+    fulfilled/resolved right now; otherwise that branch contributes
+    nothing and stops there.
+
+    "Newly" unblocked is decided by a counterfactual: would this same node
+    already have been proposable with ``landed_node``'s own fulfilled flag
+    forced back to `False`? A `required-any` child also reachable via
+    another already-fulfilled sibling parent answers yes — excluded, it
+    was reachable before this candidate too, not newly opened by it.
+    Every other gate ``next_candidates()`` applies (rejected, PHP floor,
+    undecided recommended parents, `composer-audit`'s extra condition, the
+    PHPStan baseline stop-condition) is independent of ``landed_node``'s
+    own flag, so a node's current membership in ``next_candidates()``
+    already answers those for both the "now" and "before" snapshots alike
+    — only the required/required-any check itself needs re-evaluating
+    under the counterfactual, not a second full tree scan.
+    """
+    repo = pathlib.Path(repo)
+    if tree is None:
+        tree = load_tree()
+    if landed_node not in tree["nodes"]:
+        return []
+
+    detected = detect_nodes(repo, tree)
+    detected["git"]["fulfilled"] = True  # never proposed
+    rejected = _rejected_nodes(repo)
+
+    # Counterfactual snapshot: landed_node never happened.
+    # static-code-analyzer's own fulfilled flag is hardcoded to mirror
+    # composer's (detect_nodes, above) rather than being independently
+    # detected — keep that same derivation consistent here, or the
+    # counterfactual would misreport composer's own downstream plumbing.
+    detected_without = {k: dict(v) for k, v in detected.items()}
+    detected_without[landed_node]["fulfilled"] = False
+    if "static-code-analyzer" in detected_without:
+        detected_without["static-code-analyzer"]["fulfilled"] = detected_without.get("composer", {}).get("fulfilled", False)
+    if landed_node == "psalm" and detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
+        # phpstan-level-0's own fulfilled flag came from the Psalm-equivalence
+        # branch above (`psalm_fulfils_p0`) -- that branch's if/elif shortcut
+        # means we can't tell whether the real, independent PHPStan check
+        # would also have passed once psalm's flag is hidden. Counting it as
+        # unfulfilled too is the safe direction to be wrong in: it risks one
+        # extra diagram entry (rector-php-set attributed to psalm even if
+        # phpstan-level-0 would have covered it too), never a silently
+        # missing one for a genuinely psalm-only target.
+        detected_without["phpstan-level-0"]["fulfilled"] = False
+
+    gate_now = _resolved_gate_status(tree, lambda n: detected.get(n, {}).get("fulfilled", False), rejected)
+    gate_without = _resolved_gate_status(tree, lambda n: detected_without.get(n, {}).get("fulfilled", False), rejected)
+    next_now = {c["node"] for c in next_candidates(repo, tree=tree)}
+
+    children_of: dict[str, list[dict]] = {}
+    for e in tree["edges"]:
+        children_of.setdefault(e["from"], []).append(e)
+
+    result: list[dict] = []
+    seen: set[str] = set()
+    frontier: list[tuple[str, str]] = [(e["to"], e["type"]) for e in children_of.get(landed_node, [])]
+    while frontier:
+        child, edge_type = frontier.pop(0)
+        if child in seen:
+            continue
+        seen.add(child)
+
+        pass_through = child in _NEVER_PROPOSED or (
+            tree["resolved_parents"].get(child) and child not in tree["exposed_resolved_gate_nodes"]
+        )
+        if pass_through:
+            if tree["resolved_parents"].get(child):
+                fulfilled_now = gate_now.get(child, (False, []))[0]
+            else:
+                fulfilled_now = detected.get(child, {}).get("fulfilled", False)
+            if fulfilled_now:
+                frontier.extend((e["to"], e["type"]) for e in children_of.get(child, []))
+            continue
+
+        if child not in next_now:
+            continue  # not a real candidate right now — blocked by something else too
+
+        if tree["resolved_parents"].get(child):
+            already_before = gate_without.get(child, (False, []))[0]
+        else:
+            already_before, _why = _is_unblocked(child, tree, detected_without)
+        if already_before:
+            continue  # reachable via some other already-fulfilled parent too — not new
+
+        result.append({"node": child, "type": edge_type})
+    return result
+
+
 def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[dict]:
     """Nodes that would otherwise be in ``next_candidates()`` (required
     parents fulfilled, not rejected, not yet fulfilled) but stay withheld
@@ -1365,10 +1468,14 @@ if __name__ == "__main__":
     ap.add_argument("--steps", type=int, default=10, help="depth of the simulated `roadmap` lookahead — does not bound `next`, which is always every currently-unblocked node")
     ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree). Only scopes edges/gating (next, roadmap, tree.edges) -- detect_nodes' per-tool filesystem checks are hardcoded and always run regardless of --tree, so 'detected' in the JSON output may list nodes your override tree doesn't even define")
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
+    ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (opening-a-merge-request.md's outlook diagram) -- additive, does not change next/roadmap/detected")
     args = ap.parse_args()
     repo = pathlib.Path(args.repo)
     tree_md = pathlib.Path(args.tree) if args.tree else None
     data = detect_and_roadmap(repo, steps=args.steps, tree_md=tree_md)
+    if args.unblocked_by:
+        tree = load_tree(tree_md=tree_md)
+        data["unblocked_by"] = directly_unblocked_children(repo, args.unblocked_by, tree=tree)
     # also add branch check: ensure no extra branches created
     # include git status
     print(json.dumps(data, indent=2))

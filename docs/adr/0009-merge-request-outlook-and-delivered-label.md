@@ -5,6 +5,8 @@
 > Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): who applies these labels changes — `refactor-learn` writes them, not the orchestrator inline. The labels and description shape decided here are unchanged.
 >
 > Amended by [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): bookkeeping writes no longer land as a direct commit to the default branch — they go out through their own merge request.
+>
+> Amended by [ADR-0027](0027-mr-outlook-diagram-of-unblocked-nodes.md): the outlook sentence stays exactly as decided here; a Mermaid diagram is added alongside it, and the type-enum question this ADR left open is settled (none).
 
 Testing the suite end-to-end surfaced two problems with what ADR-0006 left the merge-request description as ("plain: link the candidate, what changed, which tests survive, what CI proves. No outlook, no type enum.") and with reusing `ready-for-human` for "a merge request is open, awaiting review."
 

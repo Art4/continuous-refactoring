@@ -22,6 +22,7 @@ detect_nodes = tooling_tree.detect_nodes
 roadmap = tooling_tree.roadmap
 next_candidates = tooling_tree.next_candidates
 withheld_candidates = tooling_tree.withheld_candidates
+directly_unblocked_children = tooling_tree.directly_unblocked_children
 php_version_reversal_findings = tooling_tree.php_version_reversal_findings
 php_floor_precheck = tooling_tree.php_floor_precheck
 _is_baseline_empty = tooling_tree._is_baseline_empty
@@ -2266,6 +2267,112 @@ class PortabilityTests(unittest.TestCase):
         module_dir = pathlib.Path(tooling_tree.__file__).resolve().parent
         self.assertTrue((module_dir / "tooling-tree.md").exists())
         self.assertTrue((module_dir / "php-tooling-tree.md").exists())
+
+
+class DirectlyUnblockedChildrenTests(unittest.TestCase):
+    """The MR outlook's fan-out diagram data (opening-a-merge-request.md,
+    ticket 47/ADR-0027): every node landed_node's fulfilment newly makes
+    proposable, not next_candidates()'s full current set."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_multi_child_fan_out_from_composer(self):
+        # composer alone (no phpunit/cs-fixer/CI configured yet) unblocks
+        # three siblings at once: phpunit and test-runner-if-missing
+        # directly, phpstan-level-0 through the static-code-analyzer
+        # walk-through (a pure organizational node, never itself reported).
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            got = {(c["node"], c["type"]) for c in directly_unblocked_children(root, "composer")}
+            self.assertEqual(
+                got,
+                {("phpunit", "required"), ("test-runner-if-missing", "required"), ("phpstan-level-0", "required")},
+            )
+            self.assertNotIn("static-code-analyzer", {c["node"] for c in directly_unblocked_children(root, "composer")})
+        finally:
+            tmp.cleanup()
+
+    def test_required_any_child_reported_when_only_path(self):
+        # Psalm-only target, no real PHPStan config: landing psalm is the
+        # *only* thing that unblocks rector-php-set (required-any(
+        # phpstan-level-0, psalm)) -- must be reported.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1", "vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            got = [(c["node"], c["type"]) for c in directly_unblocked_children(root, "psalm")]
+            self.assertIn(("rector-php-set", "required-any"), got)
+        finally:
+            tmp.cleanup()
+
+    def test_required_any_child_excluded_when_already_reachable_via_sibling(self):
+        # psalm already fulfilled independently -- landing phpstan-level-4
+        # does NOT newly unblock psalm-taint-analysis (required-any(
+        # phpstan-level-4, psalm)): psalm already covered it.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require": {"php": ">=8.1", "vimeo/psalm": "^5.0"}}),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            got = {c["node"] for c in directly_unblocked_children(root, "phpstan-level-4")}
+            self.assertNotIn("psalm-taint-analysis", got)
+        finally:
+            tmp.cleanup()
+
+    def test_resolved_gate_walk_through_to_structural_scan(self):
+        # phpunit is the last of php-structural-scan's thirteen leaves to
+        # resolve (the other twelve rejected via out-of-scope, same for
+        # structural-scan's other two resolved-parents, editorconfig and
+        # ci-runner) -- landing it must report structural-scan itself, not
+        # the never-exposed php-structural-scan aggregation node in between.
+        other_leaves = [
+            "composer-audit", "test-runner-if-missing", "php-cs-fixer", "phpstan-level-10",
+            "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
+            "rector-php-set", "rector-code-quality", "rector-phpunit-set",
+            "rector-early-return", "psalm-taint-analysis", "editorconfig", "ci-runner",
+        ]
+        files = {
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+        }
+        for leaf in other_leaves:
+            files[f"docs/refactoring/out-of-scope/{leaf}.md"] = "rejected\n"
+        tmp, root = self._make_repo(files)
+        try:
+            got = [(c["node"], c["type"]) for c in directly_unblocked_children(root, "phpunit")]
+            self.assertEqual(got, [("structural-scan", "resolved")])
+        finally:
+            tmp.cleanup()
+
+    def test_unknown_landed_node_returns_empty(self):
+        tmp, root = self._make_repo({})
+        try:
+            self.assertEqual(directly_unblocked_children(root, "not-a-real-node"), [])
+        finally:
+            tmp.cleanup()
+
+    def test_no_children_when_nothing_new(self):
+        # Empty repo: loop-config isn't fulfilled, so forcing it "unfulfilled"
+        # in the counterfactual changes nothing real -- no children to report.
+        tmp, root = self._make_repo({})
+        try:
+            self.assertEqual(directly_unblocked_children(root, "loop-config"), [])
+        finally:
+            tmp.cleanup()
 
 
 if __name__ == "__main__":
