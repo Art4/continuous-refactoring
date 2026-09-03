@@ -1054,6 +1054,18 @@ class CiSelfWiringTests(unittest.TestCase):
     _CI_YML_PHPUNIT = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit\n"
     _CI_YML_PEST = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/pest\n"
     _CI_YML_PHPSTAN = "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/phpstan analyse\n"
+    _CI_YML_PHPSTAN_EPHEMERAL = (
+        "jobs:\n  analyse:\n    steps:\n      - run: |\n"
+        "          composer require --dev phpstan/phpstan\n"
+        "          vendor/bin/phpstan analyse\n"
+    )
+    _CI_YML_PHPSTAN_MENTIONED_ONLY = (
+        "jobs:\n  lint:\n    steps:\n"
+        "      - run: echo 'consider adding phpstan/phpstan later'\n"
+    )
+    _CI_YML_PHPSTAN_INSTALLED_NOT_RUN = (
+        "jobs:\n  install:\n    steps:\n      - run: composer require --dev phpstan/phpstan\n"
+    )
 
     def test_phpunit_fulfilled_on_adoption_alone_without_ci(self):
         tmp, root = self._make_repo({
@@ -1175,6 +1187,57 @@ class CiSelfWiringTests(unittest.TestCase):
         try:
             d = detect_nodes(root)
             self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_p0_fulfilled_via_ephemeral_ci_install(self):
+        # phpstan/phpstan absent from composer.json entirely (a target may
+        # deliberately keep its own manifest free of pure-analysis tooling)
+        # -- but a CI job installs it at runtime and invokes it. Same
+        # fulfilment as a committed dependency.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_EPHEMERAL,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+            self.assertTrue(d["phpstan-level-0"]["details"]["ephemeral_ci_dep"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_p0_not_fulfilled_on_mention_alone(self):
+        # "phpstan" appearing in CI text with neither a real `composer
+        # require` nor an invocation must not false-positive.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_MENTIONED_ONLY,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+        finally:
+            tmp.cleanup()
+
+    def test_phpstan_p0_not_fulfilled_when_ephemeral_install_never_run(self):
+        # Installed at CI runtime but never actually invoked -- not gated,
+        # same "not gated in CI" outcome as a committed-but-unwired dep.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_INSTALLED_NOT_RUN,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
         finally:
             tmp.cleanup()
 
