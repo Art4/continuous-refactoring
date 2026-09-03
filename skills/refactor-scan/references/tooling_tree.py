@@ -583,6 +583,42 @@ def _undecided_recommended_parents(node: str, tree: dict, detected: dict, reject
     return [rp for rp in tree["recommended_parents"].get(node, []) if not _is_decided(rp, tree, detected, rejected)]
 
 
+def _is_permanently_gated(node: str, tree: dict, detected: dict, _seen: set[str] | None = None) -> bool:
+    """True once `node` sits behind an unfulfilled recognition/detection
+    gate (`_NEVER_PROPOSED` — `is-php-project`, `static-code-analyzer`,
+    `psalm`) somewhere in its required-parent closure: a real, currently-
+    false signal about the target itself (wrong language, no static
+    analyzer adopted) that no pass or human ever decides on — unlike
+    `_is_effectively_rejected`, nobody rejected anything here."""
+    if _seen is None:
+        _seen = set()
+    if node in _seen:
+        return False
+    _seen.add(node)
+    if node in _NEVER_PROPOSED and not detected.get(node, {}).get("fulfilled", False):
+        return True
+    if any(_is_permanently_gated(p, tree, detected, _seen) for p in tree["required_parents"].get(node, [])):
+        return True
+    req_any = tree["required_any_parents"].get(node, [])
+    if req_any and all(_is_permanently_gated(p, tree, detected, _seen) for p in req_any):
+        return True
+    return False
+
+
+def _recommended_gate_moot(node: str, tree: dict, detected: dict) -> bool:
+    """True when `node` has at least one `recommended` parent and *every*
+    one of them is permanently gated (see `_is_permanently_gated`) — the
+    recommended edge can never actually release on this target, so
+    surfacing `node` as "withheld, waiting on X" is noise: X will never
+    reach a decided state through ordinary loop action (e.g.
+    `rector-type-coverage` on a non-PHP target, whose four recommended
+    parents all bottom out at the unfulfilled `is-php-project` gate, despite
+    `rector-type-coverage` itself carrying no required parent of its own to
+    be blocked by directly)."""
+    parents = tree["recommended_parents"].get(node, [])
+    return bool(parents) and all(_is_permanently_gated(p, tree, detected) for p in parents)
+
+
 def _rejected_nodes(repo: pathlib.Path) -> set[str]:
     """Tooling-tree nodes recorded as out-of-scope for this target repo.
 
@@ -1004,6 +1040,8 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
                 continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
             if node in php_floor_blocked:
                 continue  # target's PHP floor doesn't meet this leaf's known minimum yet
+            if _recommended_gate_moot(node, tree, detected):
+                continue  # every recommended parent permanently gated (e.g. whole PHP tree closed by is-php-project) — not actionable, not even withheld
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
@@ -1063,6 +1101,8 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
             continue
         if node in php_floor_blocked:
             continue  # no recommended edge targets these leaves today, but stays consistent if one ever does
+        if _recommended_gate_moot(node, tree, detected):
+            continue  # every recommended parent permanently gated — see next_candidates()
         ok, _why = _is_unblocked(node, tree, detected)
         if not ok:
             continue

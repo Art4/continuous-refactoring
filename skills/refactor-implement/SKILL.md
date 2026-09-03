@@ -46,7 +46,7 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 ### 5. Open the merge request
 
-Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `config.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil (e.g. PHPStan-level shrinking before the next level) → don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
+Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `config.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil (e.g. PHPStan-level shrinking before the next level) → don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
 
 Wait for CI if the target runs it — confirm via the forge's actual CI status (`gh pr checks` or equivalent), not a local rerun of step 3's checks. Red CI is a review finding like any other — back to step 2/1.
 
@@ -63,4 +63,4 @@ The opened merge request → `refactor-learn`.
 
 ## Completion criterion
 
-The branch exists with the work on it, review is clean on both axes, MR is open (CI green where the target runs it). Structural: every slice implemented red → green, full suite green, fulfilled tooling clean on touched files. Tooling-tree node: the MR-scope change is made and its Fulfilment check passes.
+The branch exists with the work on it, review is clean on both axes, MR is open (CI green where the target runs it) — or, no forge/remote at all, the branch is handed to the human per `opening-a-merge-request.md` instead. Structural: every slice implemented red → green, full suite green, fulfilled tooling clean on touched files. Tooling-tree node: the MR-scope change is made and its Fulfilment check passes.

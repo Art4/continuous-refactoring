@@ -56,6 +56,6 @@ Then, regardless of whether an MR opened this pass — via the dedicated bookkee
 
 ## Completion criterion
 
-**Early call:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's file removed, or an explicit "asked the human, waiting"), the remembered set reflects it before `refactor-prioritize` runs, and every write went out through the dedicated bookkeeping MR.
+**Early call:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's file removed, or an explicit "asked the human, waiting"), the remembered set reflects it before `refactor-prioritize` runs, and every write went out through the dedicated bookkeeping branch (opened as an MR, or — no forge/remote available — handed to the human per `opening-a-merge-request.md`).
 
-**Closing call:** a freshly delivered candidate (if any) is remembered (label or ledger, whichever applies) with `Pending candidates` cleared and `refactor:delivered` applied, `Fulfilled nodes` and `Skip streak` are written (full re-derivation when the parser ran, additive/narrow otherwise), and every write went out through an MR — the dedicated bookkeeping one, or the `loop-config` candidate's own — never a direct commit to the default branch.
+**Closing call:** a freshly delivered candidate (if any) is remembered (label or ledger, whichever applies) with `Pending candidates` cleared and `refactor:delivered` applied, `Fulfilled nodes` and `Skip streak` are written (full re-derivation when the parser ran, additive/narrow otherwise), and every write went out through a branch — the dedicated bookkeeping one, or the `loop-config` candidate's own — never a direct commit to the default branch (opened as an MR where forge access exists).

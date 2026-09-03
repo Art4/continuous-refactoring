@@ -62,8 +62,8 @@ Wherever the pass ends, close with exactly two lines to the human — a lifecycl
 - **Status:** one line, what happened this pass.
 - **Next:** one line, what the human can or should do now.
 
-Examples: "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun." / "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then." / "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands."
+Examples: "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun." / "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then." / "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands." / "Status: Refactoring Config prepared on local branch `refactor/loop-config` — no forge/remote here, so nothing was pushed. Next: commit it yourself, or push it and open the merge request once you have forge access."
 
 ## Completion criterion
 
-One full pass completed and loop state updated: `refactor-learn` ran at least once, `Fulfilled nodes` is written, and the pass's outcome is recorded — a delivered candidate sits `refactor:delivered` with its MR remembered, or the issue closed, or nothing was actionable and that's reported.
+One full pass completed and loop state updated: `refactor-learn` ran at least once, `Fulfilled nodes` is written, and the pass's outcome is recorded — a delivered candidate sits `refactor:delivered` with its MR remembered, the issue closed, nothing was actionable and that's reported, or (no forge/remote available) the candidate sits prepared on its own branch, handed to the human, per `opening-a-merge-request.md`.

@@ -22,7 +22,7 @@ Read the Refactoring Notes' `config.md`'s `Pending candidates` field (`skills/co
 
 Get the remembered set — every issue labeled `refactor:delivered` when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab), otherwise every entry in the Refactoring Notes' `merge-requests.md`. For each, check the external tracker/git: is the MR still open, is the issue still open?
 
-No `gh`/`glab` (or other forge API/token) available → fall back to git-only reconciliation instead of skipping this step (never attempt to install `gh`/`glab` here either — treat their absence as exactly this fallback's trigger): `skills/refactor-scan/references/git-only-reconciliation.md`.
+No `gh`/`glab` (or other forge API/token) available → fall back to git-only reconciliation instead of skipping this step (never attempt to install `gh`/`glab` here either — treat their absence as exactly this fallback's trigger): `skills/refactor-scan/references/git-only-reconciliation.md`. No remote at all (`git remote -v` empty) → the same file's local-only variant — a remembered candidate may have been merged or rejected by a human working purely locally, per `opening-a-merge-request.md`'s "No forge/remote available".
 
 - **Merged** → a finding: delivered.
 - **Closed without merge** → a finding: declined — note whether closing comments give a maintainer's structural reason (out-of-scope material) or not.
