@@ -17,11 +17,15 @@ Every slice follows the foundational refactoring rules: `skills/continuous-refac
 
 Create the branch the plan names, or check it out if it already exists (a returning pass, e.g. after a review finding). No earlier skill creates it — this step's job.
 
+Self-assign the candidate issue here too — work has actually started, the moment ownership should become visible (not at design time, where the issue might sit unpicked as a resumable `Pending candidates` entry for a while — assigning it there would misleadingly claim ownership before anyone starts). Whatever the target's tracker names in `docs/agents/issue-tracker.md` — a native tracker's own assignee mechanic (e.g. `gh issue edit <n> --add-assignee @me` on GitHub, or the GitLab equivalent) for a native-label tracker, or that tracker's own convention for marking ownership for Local Markdown or another named convention. No assignee mechanic exists for the tracker in use → skip silently, not a blocker.
+
+A resume-candidate carrying an unaddressed `CHANGES_REQUESTED` review (from `refactor-scan` step 3) → read that review's comments/body first and treat them as this pass's findings to address, before re-examining the rest of the branch.
+
 Structural candidate: list the seams the plan names and confirm them with the user. **No test is written at an unconfirmed seam** — testing at the wrong seam is how refactors produce tests that break under refactoring.
 
 Tooling-tree node: no seam to confirm — its scope is a config/dependency change (see the tree doc's MR scope), not code. Skip straight to making that change; no red → green cycle, only its Fulfilment check (step 3).
 
-**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending candidates` (the Refactoring Notes' `config.md` didn't exist yet). Creating the file here, perform every write `skills/continuous-refactoring/references/loop-config-interview.md`'s `## Record` names (Create-mode, tracker file, the `Refactoring Notes:` line) — the interview already decided these, don't leave them unset or invent placeholders. Two things `## Record` doesn't cover, this step's own addition: set `Pending candidates` to this candidate's issue, and `Focus areas` only if the interview named one. Leave `Fulfilled nodes` unset — still `refactor-learn`'s field, filled in its own follow-up commit. All of it in the same MR as `config.md` — this node's only one.
+**`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending candidates` (the Refactoring Notes' `bookkeeping.md` didn't exist yet). Creating the file here, perform every write `skills/continuous-refactoring/references/loop-config-interview.md`'s `## Record` names (Create-mode, tracker file, the `Refactoring Notes:` line) — the interview already decided these, don't leave them unset or invent placeholders. Two things `## Record` doesn't cover, this step's own addition: set `Pending candidates` to this candidate's issue, and `Focus areas` only if the interview named one. Leave `Fulfilled nodes` unset — still `refactor-learn`'s field, filled in its own follow-up commit. All of it in the same MR as `bookkeeping.md` — this node's only one.
 
 ### 2. One slice at a time
 
@@ -46,9 +50,13 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 ### 5. Open the merge request
 
-Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `config.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil (e.g. PHPStan-level shrinking before the next level) → don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
+Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil (e.g. PHPStan-level shrinking before the next level) → don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
 
 Wait for CI if the target runs it — confirm via the forge's actual CI status (`gh pr checks` or equivalent), not a local rerun of step 3's checks. Red CI is a review finding like any other — back to step 2/1.
+
+**Before writing anything in the closing report that claims work is done, fixed, or CI is green — re-check current state fresh.** A new `gh pr diff`/`gh pr checks`/`gh pr view` call (or forge equivalent) run in *this* pass, never memory of what an earlier step in this same pass intended or attempted. A diff byte-identical to a still-red prior round is still red — stating it's fixed because an earlier pass meant to fix it is exactly the failure this guards against.
+
+**CI status unreadable via the API** (403, or nothing usable returned) — don't guess, and don't claim green. State plainly in the closing report that live CI status couldn't be confirmed via API and that verification instead ran locally in an environment equivalent to CI (name which checks). This is the documented fallback, not a silent workaround — see `docs/known-limitations.md`.
 
 The candidate branch stays checked out after this. `refactor-learn`'s bookkeeping writes go out on their own separate branch/MR, never this one (the `loop-config`-in-flight case is the one exception, which `refactor-learn` handles).
 

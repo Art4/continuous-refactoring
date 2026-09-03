@@ -79,6 +79,18 @@ mid-run without the human explicitly changing it.
    - **Good/defensible** (per the persona's bar) → merge (adapt the merge method to the repo's actual
      settings). Minor concerns don't block the merge but still get logged, unless the persona is
      Nur-Beobachter, which never merges regardless.
+   - **After merging, verify the merge actually landed the branch's content** — `gh pr merge`
+     reporting success is not proof the base branch now matches the branch's tip; a real conflict
+     can be silently resolved in favor of the wrong side with no error surfaced. Diff the touched
+     files: `git fetch origin && git diff <branch-tip-sha> origin/<base-branch> -- <touched-files>`
+     should be empty (or, for a true merge commit, diff the merge commit against both parents and
+     confirm it matches the branch-side parent's tree on those files, not the base's stale
+     pre-merge value). Catch this before moving to the next MR, not at the end of the round.
+   - **If verification fails** (a silent bad merge caught) — log it under `## ⚠️ Auffälligkeit`
+     immediately, per *Anomaly detection* below, and fix it the same way any correction lands: a
+     normal follow-up MR (`git revert -m 1 <merge-commit-sha>`, or a corrective commit) per the
+     "Reverts always go through the normal MR workflow" rule — never a force-push or history
+     rewrite, even to fix your own mistake.
    - **Questionable/broken/out of scope** → `request-changes` with a concrete, actionable reason; leave
      the MR open rather than closing it, except for a clearly orphaned/wrong MR. Nur-Beobachter logs the
      same judgment but takes no blocking action.

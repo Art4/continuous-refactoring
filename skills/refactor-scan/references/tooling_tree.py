@@ -218,6 +218,30 @@ def _has_ci_job_invoking(repo: pathlib.Path, needle: str) -> bool:
     return False
 
 
+def _has_ephemeral_ci_dep(repo: pathlib.Path, package_name: str, invocation_needle: str) -> bool:
+    """True if a CI workflow file both installs `package_name` at runtime
+    (a `composer require[--dev] <package_name>` invocation, tolerant of
+    flag order/spacing) and invokes it (`invocation_needle`) in the same
+    job body — an ephemeral, not-committed-to-composer.json dependency
+    that's still a real, wired CI gate (a target may deliberately keep
+    its own dependency manifest free of pure-analysis tooling). Requires
+    both signals in the *same file*, the same approximation every other
+    self-wired CI-gate check in this module already makes (see
+    `_has_ci_job_invoking`)."""
+    require_pattern = re.compile(
+        r"composer\s+require(?:\s+--dev|\s+-{1,2}dev)?\s+" + re.escape(package_name) + r"\b"
+    )
+    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
+        for f in glob.glob(str(repo / pat)):
+            try:
+                text = pathlib.Path(f).read_text(encoding="utf-8")
+            except OSError:
+                continue
+            if require_pattern.search(text) and invocation_needle in text:
+                return True
+    return False
+
+
 def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
     """composer-audit's real fulfilment (php-tooling-tree.md): a CI job that
     runs `composer audit`, gating the pipeline on known advisories."""
@@ -270,7 +294,7 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
     `Refactoring Notes: `<path>`` line in the target's AGENTS.md or
     CLAUDE.md (loop-config's own interview writes this once, into whichever
     of the two already existed — never both) — see
-    skills/continuous-refactoring/references/refactoring-config.md for the
+    skills/continuous-refactoring/references/refactoring-bookkeeping.md for the
     exact line format this parses."""
     default = repo / "docs" / "refactoring"
     for name in ("AGENTS.md", "CLAUDE.md"):
@@ -288,9 +312,9 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
 
 
 def _has_loop_config(repo: pathlib.Path) -> bool:
-    """loop-config's fulfilment check: the Refactoring Notes' config.md exists
-    (default docs/refactoring/config.md; see _resolve_refactoring_notes_dir)."""
-    return (_resolve_refactoring_notes_dir(repo) / "config.md").exists()
+    """loop-config's fulfilment check: the Refactoring Notes' bookkeeping.md exists
+    (default docs/refactoring/bookkeeping.md; see _resolve_refactoring_notes_dir)."""
+    return (_resolve_refactoring_notes_dir(repo) / "bookkeeping.md").exists()
 
 
 def _has_editorconfig(repo: pathlib.Path) -> bool:
@@ -721,7 +745,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # loop-config
     notes_rel = _resolve_refactoring_notes_dir(repo).relative_to(repo).as_posix()
     has_loop_config = _has_loop_config(repo)
-    set_node("loop-config", has_loop_config, f"{notes_rel}/config.md present" if has_loop_config else f"no {notes_rel}/config.md")
+    set_node("loop-config", has_loop_config, f"{notes_rel}/bookkeeping.md present" if has_loop_config else f"no {notes_rel}/bookkeeping.md")
     # is-php-project: composer.json (recognized location) or at least one
     # *.php file outside vendor/ — see tooling-tree.md's own node entry for
     # the "why not composer.json-only" rationale.
@@ -834,19 +858,24 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # configured level), so gating it once here covers the whole
     # phpstan-level-1..3 chain — those nodes stay CI-agnostic on purpose.
     phpstan_p0_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "vendor/bin/phpstan analyse")
+    # A target may deliberately keep phpstan out of its own composer.json,
+    # installing it at CI-runtime only instead — still a real, wired gate,
+    # just not detectable via composer.json alone.
+    ephemeral_ci_dep = has_ci and _has_ephemeral_ci_dep(repo, "phpstan/phpstan", "vendor/bin/phpstan analyse")
+    has_phpstan_dep_or_ephemeral = has_phpstan_dep or ephemeral_ci_dep
     if psalm_fulfils_p0:
         set_node("phpstan-level-0", True, "psalm fulfils p0 (vimeo/psalm + psalm.xml)", has_psalm=True)
-    elif has_phpstan_dep and phpstan_level == 0 and baseline_exists and phpstan_p0_ci_ok:
-        set_node("phpstan-level-0", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty)
-    elif has_phpstan_dep and phpstan_level == 0 and baseline_exists and not phpstan_p0_ci_ok:
+    elif has_phpstan_dep_or_ephemeral and phpstan_level == 0 and baseline_exists and phpstan_p0_ci_ok:
+        set_node("phpstan-level-0", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty, ephemeral_ci_dep=ephemeral_ci_dep)
+    elif has_phpstan_dep_or_ephemeral and phpstan_level == 0 and baseline_exists and not phpstan_p0_ci_ok:
         # locally green, but CI exists and doesn't gate on it yet — the
         # baseline this level sets is only durable once CI enforces it.
-        set_node("phpstan-level-0", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty)
-    elif has_phpstan_dep and phpstan_level == 0 and not baseline_exists:
+        set_node("phpstan-level-0", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty, ephemeral_ci_dep=ephemeral_ci_dep)
+    elif has_phpstan_dep_or_ephemeral and phpstan_level == 0 and not baseline_exists:
         # level 0 but no baseline yet -> not green, not fulfilled
-        set_node("phpstan-level-0", False, "phpstan level 0 but baseline missing", level=phpstan_level)
+        set_node("phpstan-level-0", False, "phpstan level 0 but baseline missing", level=phpstan_level, ephemeral_ci_dep=ephemeral_ci_dep)
     else:
-        set_node("phpstan-level-0", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists)
+        set_node("phpstan-level-0", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
 
     # phpstan-level-1..10 — phpstan-level-10 is the chain's resolved-leaf
     # into php-structural-scan, see that node

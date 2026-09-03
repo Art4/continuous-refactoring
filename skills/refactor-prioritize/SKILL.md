@@ -11,7 +11,7 @@ Rank the **proposals** `refactor-scan` handed the orchestrator this pass, and re
 
 ### 1. Check whether anything should start at all
 
-Get the remembered set of in-flight suite MRs: every issue labeled `refactor:delivered` when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab), otherwise the Refactoring Notes' `merge-requests.md` directly. **Two or more already open?** Stop here: report which, and that the pass ends without starting new work while they await review/merge. Overrides everything below.
+Get the remembered set of in-flight suite MRs: `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → every open `refactor:candidate` issue that carries a linked pull request (the tracker's native issue↔closing-PR cross-reference); otherwise the Refactoring Notes' `merge-requests.md` directly. **Two or more already open?** Stop here: report which, and that the pass ends without starting new work while they await review/merge. Overrides everything below.
 
 Otherwise drop any proposal already in that set — it already has an open MR, so it isn't something to *start*.
 
@@ -27,7 +27,7 @@ For each surviving proposal, assess:
 | **Leverage** | How much future change does deepening this module unlock? A module many others call is high-leverage; an uncalled leaf is not. |
 | **Tooling pressure** | Is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so it's re-failing every CI run until fixed. |
 | **Risk** | How hard to reverse, how wide the blast radius? Prefer reversible, low-risk refactors early while the habit is forming. |
-| **Skip streak** | Consecutive prior passes that proposed this without choosing it (the Refactoring Notes' `config.md`'s `Skip streak`, read-only here — `refactor-learn` writes it). A longer streak weighs increasingly toward choosing it, so a `required` sibling that never wins on the other four alone doesn't starve indefinitely — but it's one factor among five, not a forced pick. |
+| **Skip streak** | Consecutive prior passes that proposed this without choosing it (the Refactoring Notes' `bookkeeping.md`'s `Skip streak`, read-only here — `refactor-learn` writes it). A longer streak weighs increasingly toward choosing it, so a `required` sibling that never wins on the other four alone doesn't starve indefinitely — but it's one factor among five, not a forced pick. |
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 

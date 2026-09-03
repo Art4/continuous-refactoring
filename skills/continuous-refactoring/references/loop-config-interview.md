@@ -10,7 +10,7 @@ merge requests get opened, and where the suite's own notes live are facts
 about *this* target and *this* human's preference — not something a tree
 doc can get right for every target by guessing. Run this once, the first
 time `loop-config` is chosen; it never runs again for a target whose
-Refactoring Notes (see `## Explore`) already hold a `config.md`.
+Refactoring Notes (see `## Explore`) already hold a `bookkeeping.md`.
 
 Four parts, in order: **Explore**, **Ask**, **Summarize**, **Record**.
 
@@ -34,16 +34,16 @@ Read-only. No writes, no questions yet.
   only offered as a recommendation the human still confirms. Both exist and
   disagree → note the conflict explicitly.
 - **`CONTEXT.md`.** Note whether it exists — informational only.
-- **Refactoring Notes / `config.md`.** Check whether `AGENTS.md`, then
+- **Refactoring Notes / `bookkeeping.md`.** Check whether `AGENTS.md`, then
   `CLAUDE.md`, already names a `Refactoring Notes:` line (`## Record`
-  below) — if one does, that's where to look for `config.md`; if neither
+  below) — if one does, that's where to look for `bookkeeping.md`; if neither
   does, check the default `docs/refactoring/`. Note whether the folder
-  exists, and separately whether `config.md` already exists inside it.
+  exists, and separately whether `bookkeeping.md` already exists inside it.
   Should be rare to impossible on a genuinely fresh target — `loop-config`'s
-  own Fulfilment check already gates on `config.md` *not* existing wherever
+  own Fulfilment check already gates on `bookkeeping.md` *not* existing wherever
   it resolves to. If it's there anyway (a resumed pass, an out-of-band
   write): **don't re-run the interview.** Read what's already recorded —
-  `config.md`'s `Create-mode` if set, `docs/agents/issue-tracker.md` if it
+  `bookkeeping.md`'s `Create-mode` if set, `docs/agents/issue-tracker.md` if it
   exists (its title names which tracker — see `## Record`) — and skip
   asking whatever's already answered. If all three questions below are
   already answered this way, skip straight to `## Summarize` with a recap
@@ -119,7 +119,7 @@ names one → recommend **Autonomous**, the suite's existing default bias.
 
 **Q3 — where should the suite keep its own metadata?**
 
-A folder is needed to store the loop's own state: `config.md` (this
+A folder is needed to store the loop's own state: `bookkeeping.md` (this
 interview's own decisions), `merge-requests.md` (in-flight merge-request
 bookkeeping, only when the tracker has no native labels), and
 `out-of-scope/` (learned rejections) — together, the **Refactoring
@@ -166,17 +166,22 @@ What `refactor-design` files as this candidate's plan
 `refactor-implement` performs the actual writes later, from that plan
 (`skills/refactor-implement/SKILL.md` step 1's `loop-config` exception):
 
-- **Create-mode** → the Refactoring Notes' `config.md`'s `Create-mode`
-  field.
+- **Create-mode** → the Refactoring Notes' `bookkeeping.md`'s `Create-mode`
+  field — the sole write-authority (`docs/adr/0025-agents-md-gets-a-create-mode-pointer-not-the-value.md`).
+  `AGENTS.md`/`CLAUDE.md` (below) gets only a read-only pointer to it, never
+  the value itself.
 - **Tracker choice** → `docs/agents/issue-tracker.md`, created fresh:
   - **GitHub or GitLab:** title names which (`# Issue tracker: GitHub` /
     `GitLab`) — the one signal every lifecycle skill now reads instead of
     re-probing `gh`/`glab` independently. Below the title: which remote,
-    that labels are native (`refactor:candidate`, `refactor:delivered`,
-    and the triage roles from `docs/agents/triage-labels.md` apply
-    directly, no local mirror), and the two operations every skill needs
-    ("file an issue": `gh`/`glab issue create` or the forge UI on
-    `origin`; "check the external tracker": query the forge directly).
+    that labels are native (`refactor:candidate`, and the triage roles
+    from `docs/agents/triage-labels.md` apply directly, no local mirror —
+    no `refactor:delivered` or other in-flight label; a candidate's
+    linked pull request, native to the tracker, is what's in flight —
+    `docs/adr/0026-drop-delivered-label-use-native-pr-linkage.md`), and
+    the two operations every skill needs ("file an issue": `gh`/`glab
+    issue create` or the forge UI on `origin`; "check the external
+    tracker": query the forge directly).
   - **Local Markdown:** write
     `skills/continuous-refactoring/references/local-issue-tracker-template.md`'s
     content verbatim — don't restate it here, avoid two drifting copies.
@@ -195,11 +200,17 @@ What `refactor-design` files as this candidate's plan
   Refactoring Notes: `docs/refactoring/` — the continuous-refactoring
   suite's own config, in-flight merge-request bookkeeping, and
   rejected-tooling records live here.
+
+  Create-mode: see the Refactoring Notes' `bookkeeping.md` — that file is
+  the sole authoritative value, this is a pointer, not a copy.
+
+  Backlog label: `refactor:candidate` (native tracker only — see
+  `docs/agents/issue-tracker.md`).
   ```
 
   Every other skill in the suite refers to this folder by name — "the
   Refactoring Notes" — never by restating the concrete path (see
-  `skills/continuous-refactoring/references/refactoring-config.md` for the
+  `skills/continuous-refactoring/references/refactoring-bookkeeping.md` for the
   resolution rule every skill, and the deterministic parser, follow). Also
   gates whether the interview (and the candidate) proceeds at all — see
   Q3's **No** case above.

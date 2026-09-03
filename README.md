@@ -16,7 +16,7 @@ The core is language-neutral; the first specialization is a **general PHP projec
 | Skill | Purpose |
 |---|---|
 | `continuous-refactoring` | Orchestrator — runs a loop pass (cadence or on-demand), passes each skill's output to the next |
-| `refactor-scan` | Propose every currently-unblocked tooling-tree node from `config.md`; detect (never file) closed/merged issues and MRs |
+| `refactor-scan` | Propose every currently-unblocked tooling-tree node from `bookkeeping.md`; detect (never file) closed/merged issues and MRs |
 | `refactor-prioritize` | Rank the proposals, recommend the next one |
 | `refactor-design` | Grill/search the chosen node → plan, files it as an issue |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
@@ -40,10 +40,12 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 
 ## Loop state
 
-- **Config + last run:** `docs/refactoring/config.md` in the target repo
+- **Config + last run:** `docs/refactoring/bookkeeping.md` in the target repo
 - **Remembered merge requests:** `docs/refactoring/merge-requests.md`
 - **Backlog:** `refactor:*` issues on the issue tracker
 - **Learned rejections:** `docs/refactoring/out-of-scope/`
 - **Domain language:** `CONTEXT.md` · decisions: `docs/adr/`
 
-See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human and [skills/continuous-refactoring/references/refactoring-config.md](skills/continuous-refactoring/references/refactoring-config.md) for the config file.
+See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human and [skills/continuous-refactoring/references/refactoring-bookkeeping.md](skills/continuous-refactoring/references/refactoring-bookkeeping.md) for the config file.
+
+See [Known limitations](docs/known-limitations.md) for setup gotchas that don't have a suite-side fix (e.g. GitHub App permission scopes).

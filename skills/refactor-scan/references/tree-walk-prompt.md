@@ -1,12 +1,12 @@
 # Reference: manual tree-walk prompt (python3 unavailable)
 
-When `python3` can't run — not installed, or executing it isn't permitted in the current harness — `refactor-scan` step 4 and `continuous-refactoring`'s outlook step dispatch a sub-agent with the prompt below instead of running `tooling_tree.py`. Fill in `{TARGET_REPO}` (the target repo's path), `{REFACTORING_NOTES}` (the Refactoring Notes' path relative to `{TARGET_REPO}` — read `{TARGET_REPO}/AGENTS.md`, then `{TARGET_REPO}/CLAUDE.md`, for a `` Refactoring Notes: `<path>` `` line; `docs/refactoring` if neither names one — see `skills/continuous-refactoring/references/refactoring-config.md`), and `{N}` (`all` for the proposal step — the set is never capped — `1` for the outlook) before dispatching. With no sub-agent mechanism available, run the same steps yourself inline instead.
+When `python3` can't run — not installed, or executing it isn't permitted in the current harness — `refactor-scan` step 4 and `continuous-refactoring`'s outlook step dispatch a sub-agent with the prompt below instead of running `tooling_tree.py`. Fill in `{TARGET_REPO}` (the target repo's path), `{REFACTORING_NOTES}` (the Refactoring Notes' path relative to `{TARGET_REPO}` — read `{TARGET_REPO}/AGENTS.md`, then `{TARGET_REPO}/CLAUDE.md`, for a `` Refactoring Notes: `<path>` `` line; `docs/refactoring` if neither names one — see `skills/continuous-refactoring/references/refactoring-bookkeeping.md`), and `{N}` (`all` for the proposal step — the set is never capped — `1` for the outlook) before dispatching. With no sub-agent mechanism available, run the same steps yourself inline instead.
 
 ---
 
 Read `skills/refactor-scan/references/tooling-tree.md` in full, plus the active language specialization's tree doc if one applies to `{TARGET_REPO}` (PHP: `skills/refactor-scan/references/php-tooling-tree.md`). Build the combined edge table from both, keeping the order rows appear in the docs (generic root first, then the specialization).
 
-Before walking, read `{TARGET_REPO}/{REFACTORING_NOTES}/config.md`'s `Fulfilled nodes` field, if the file exists — a listed slug is already fulfilled; skip step 1 below for it entirely, don't re-derive it. Nodes not listed there still get evaluated fresh as usual.
+Before walking, read `{TARGET_REPO}/{REFACTORING_NOTES}/bookkeeping.md`'s `Fulfilled nodes` field, if the file exists — a listed slug is already fulfilled; skip step 1 below for it entirely, don't re-derive it. Nodes not listed there still get evaluated fresh as usual.
 
 For each node, in that order:
 

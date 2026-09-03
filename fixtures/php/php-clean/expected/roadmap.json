@@ -8,7 +8,7 @@
     },
     "loop-config": {
       "fulfilled": true,
-      "reason": "docs/refactoring/config.md present",
+      "reason": "docs/refactoring/bookkeeping.md present",
       "details": {}
     },
     "is-php-project": {

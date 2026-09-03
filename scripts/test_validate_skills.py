@@ -211,7 +211,7 @@ class LocalRefTests(unittest.TestCase):
         tmp, root = self._repo()
         try:
             text = (
-                "Config lives in `docs/refactoring/config.md`, remembered merge requests "
+                "Config lives in `docs/refactoring/bookkeeping.md`, remembered merge requests "
                 "in `docs/refactoring/merge-requests.md`, learned rejections under "
                 "`docs/refactoring/out-of-scope/`."
             )

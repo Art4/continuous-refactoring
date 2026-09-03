@@ -18,12 +18,12 @@ Run this on demand, or via your own recurring trigger — the loop has no schedu
 
 State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-design` files backlog issues and sets `Pending candidates`; `refactor-implement` sets `Create-mode` while delivering `loop-config`) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
 
-- **Config** — the Refactoring Notes' `config.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request`), `Pending candidates`, `Fulfilled nodes` cache, `Skip streak` (`skills/continuous-refactoring/references/refactoring-config.md`).
-- **Remembered MRs** — every issue labeled `refactor:delivered`, when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab); otherwise the Refactoring Notes' `merge-requests.md`, a committed ledger with the same facts.
+- **Config** — the Refactoring Notes' `bookkeeping.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request`), `Pending candidates`, `Fulfilled nodes` cache, `Skip streak` (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`).
+- **Remembered MRs** — every open `refactor:candidate` issue with a linked pull request (the tracker's native issue↔closing-PR cross-reference), when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab); otherwise the Refactoring Notes' `merge-requests.md`, a committed ledger with the same facts.
 - **Backlog** — `refactor:*` issues on the tracker named by `docs/agents/issue-tracker.md` — scaffolded once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`); every place that needs "does the tracker support native labels" reads this file rather than re-deriving it from `gh`/`glab`.
 - **Learned rejections** — the Refactoring Notes' `out-of-scope/` entries.
 
-The Refactoring Notes' `config.md` isn't scaffolded here — it's `loop-config`, a tooling-tree node like any other except one thing: `refactor-scan` proposes it, but `refactor-design` runs a human interview instead of copying the tree doc's generic spec, and `refactor-implement` creates the file with `Create-mode` already set from that interview, not left for `refactor-learn` to fill in later.
+The Refactoring Notes' `bookkeeping.md` isn't scaffolded here — it's `loop-config`, a tooling-tree node like any other except one thing: `refactor-scan` proposes it, but `refactor-design` runs a human interview instead of copying the tree doc's generic spec, and `refactor-implement` creates the file with `Create-mode` already set from that interview, not left for `refactor-learn` to fill in later.
 
 ## The pass
 
@@ -45,7 +45,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 5. **Implement.** Run `/refactor-implement` — one candidate, one branch, created here. Reviews its own diff (standards + spec) until clean, looping back to its own earlier steps on findings, before opening the merge request. Carries the opened MR to step 6.
 
-6. **Learn, closing call — always**, even when nothing past step 3 ran (a pass that only did step 2 is still complete). Run `/refactor-learn` with the freshly opened MR, if any. Records it in the ledger with `refactor:delivered`, clears `Pending candidates`, captures ADR/`CONTEXT.md` updates, writes `Fulfilled nodes` last.
+6. **Learn, closing call — always**, even when nothing past step 3 ran (a pass that only did step 2 is still complete). Run `/refactor-learn` with the freshly opened MR, if any. Records it (its `Closes #<n>` link on a native tracker, or the ledger), clears `Pending candidates`, captures ADR/`CONTEXT.md` updates, writes `Fulfilled nodes` last.
 
 ## Opening a merge request
 
@@ -59,6 +59,8 @@ The suite must keep working in a target repo with none of the global skills inst
 
 Wherever the pass ends, close with exactly two lines to the human — a lifecycle skill's own `## Output` is handoff data for the *next skill*, separate from this. Name any tooling-tree node by its Name, never its slug.
 
+Every claim in **Status** must reflect state freshly confirmed this pass, not an earlier step's stated intent — if `refactor-implement` reported CI green, that means a check run *this* pass, not a memory of what an earlier round meant to fix. When state can't be freshly confirmed (no forge/remote, or CI status unreadable via API), say so explicitly rather than reporting an assumed outcome.
+
 - **Status:** one line, what happened this pass.
 - **Next:** one line, what the human can or should do now.
 
@@ -66,4 +68,4 @@ Examples: "Status: no git repository found — the loop can't run here. Next: in
 
 ## Completion criterion
 
-One full pass completed and loop state updated: `refactor-learn` ran at least once, `Fulfilled nodes` is written, and the pass's outcome is recorded — a delivered candidate sits `refactor:delivered` with its MR remembered, the issue closed, nothing was actionable and that's reported, or (no forge/remote available) the candidate sits prepared on its own branch, handed to the human, per `opening-a-merge-request.md`.
+One full pass completed and loop state updated: `refactor-learn` ran at least once, `Fulfilled nodes` is written, and the pass's outcome is recorded — a delivered candidate's MR carries `Closes #<n>`, discoverable via the tracker's native linkage (or remembered in the ledger, on a local tracker), the issue closed once merged, nothing was actionable and that's reported, or (no forge/remote available) the candidate sits prepared on its own branch, handed to the human, per `opening-a-merge-request.md`.
