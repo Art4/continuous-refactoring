@@ -59,6 +59,8 @@ The suite must keep working in a target repo with none of the global skills inst
 
 Wherever the pass ends, close with exactly two lines to the human — a lifecycle skill's own `## Output` is handoff data for the *next skill*, separate from this. Name any tooling-tree node by its Name, never its slug.
 
+Every claim in **Status** must reflect state freshly confirmed this pass, not an earlier step's stated intent — if `refactor-implement` reported CI green, that means a check run *this* pass, not a memory of what an earlier round meant to fix. When state can't be freshly confirmed (no forge/remote, or CI status unreadable via API), say so explicitly rather than reporting an assumed outcome.
+
 - **Status:** one line, what happened this pass.
 - **Next:** one line, what the human can or should do now.
 
