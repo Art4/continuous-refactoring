@@ -39,21 +39,28 @@ The table above is this document's own — every row here is generic-to-generic 
 
 ## Nodes
 
+A node's full definition lives in its own file under `tooling-tree/` (sibling to this document) — this
+document's version of the per-node-file split `php-tooling-tree.md` already uses
+(`skills/refactor-scan/references/php-tooling-tree/`). Every node also carries a **Name** — the
+human-readable label issue titles, merge requests, and chat status use instead of the node's slug. The stub
+left behind here keeps Name, Tool, and Purpose inline so that label is available without opening the
+extracted file; Fulfilment check, MR scope, and any further node-specific fields move to the extracted file.
+
 ### `git`
 
 - **Name:** Git
 - **Tool:** git
 - **Purpose:** version control — the loop reads history from it and delivers through it.
-- **Fulfilment check:** target is a git repository.
-- **MR scope:** never an MR — the only hard requirement; without it the suite does not run. If missing, `refactor-scan` stops the pass immediately and reports it; nothing is filed.
+
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/git.md`.
 
 ### `loop-config`
 
 - **Name:** Refactoring Config
 - **Tool:** none — this is the suite's own state, not a third-party tool.
 - **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write focus areas and merge-request create-mode.
-- **Fulfilment check:** the Refactoring Notes' `bookkeeping.md` exists in the target repo (see `skills/continuous-refactoring/references/refactoring-bookkeeping.md` for how the Refactoring Notes' own path is resolved — `docs/refactoring/` by default).
-- **MR scope:** one MR — before writing anything, run the interview in `skills/continuous-refactoring/references/loop-config-interview.md`: explore the target repo for tracker/create-mode/Refactoring-Notes-location signals, ask the human to decide (with a recommended answer for each), then record the decisions. The MR itself creates `bookkeeping.md` in the Refactoring Notes with `Create-mode` already set from that interview (see `skills/continuous-refactoring/references/refactoring-bookkeeping.md` for the file's shape — there is deliberately no stored cadence, the loop never triggers itself) and, when the interview chose a local tracker, `docs/agents/issue-tracker.md` alongside it. `refactor-design` runs the interview and files this node as a single `refactor:candidate` issue carrying its recorded decisions, same as any other tooling-tree node's plan — `refactor-design`'s own step 1 exception spells out why this node alone doesn't skip straight to filing the tree doc's generic spec.
+
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/loop-config.md`.
 
 ### `is-php-project`
 
@@ -65,25 +72,8 @@ The table above is this document's own — every row here is generic-to-generic 
   becomes reachable. One gate per specialization; this is the first (a future CSS/JS specialization adds its
   own sibling the same way). The gate's *role* is generic — evaluated fresh every pass, regardless of which
   specializations exist — even though what this particular gate detects is necessarily PHP-specific.
-- **Fulfilment check:** `composer.json` (or `composer/composer.json`) present, **or** at least one `*.php`
-  file anywhere in the tree, `vendor/` excluded. Deliberately not `composer.json`-only: a PHP project that
-  hasn't adopted Composer yet should still open this tree — including the `composer` node
-  (`skills/refactor-scan/references/php-tooling-tree.md`) that proposes adopting it in the first place.
-  Re-derived fresh every pass, so a target that only later becomes a PHP project opens the tree
-  retroactively — no separate mechanism needed for that.
-- **MR scope:** none — never proposed as a candidate (`tooling_tree.py`'s `_NEVER_PROPOSED`, the same set
-  `git` is in). Rejecting a `required` parent by hand never unblocks its children (unlike a `resolved`
-  parent — see `structural-scan` below), so there is nothing to gain from a human ever filing an
-  `out-of-scope/is-php-project.md` entry in the Refactoring Notes: leaving it unfulfilled already does
-  everything a rejection could.
-- **Known gap, not fixed by this node:** `php-structural-scan`'s own `resolved` gate
-  (`skills/refactor-scan/references/php-tooling-tree.md`) checks each of its thirteen leaves for "fulfilled,
-  or explicitly rejected under `out-of-scope/`" — it does not understand a leaf permanently closed by an
-  unfulfilled `required` ancestor as a form of resolution. A leaf gated shut by this node (e.g.
-  `composer-audit`) therefore counts as neither fulfilled nor rejected there; `structural-scan` still cannot
-  open via the PHP path on a non-PHP target without a human filing all thirteen leaf-level rejections by
-  hand. This predates `is-php-project` (a target where a human rejected `composer` itself already hit the
-  same wall, since `composer`'s own children never even got proposed to reject) and isn't worsened by it.
+
+Full definition (Fulfilment check, MR scope, Known gap): `skills/refactor-scan/references/tooling-tree/is-php-project.md`.
 
 ### `ci-runner`
 
@@ -98,13 +88,8 @@ The table above is this document's own — every row here is generic-to-generic 
   parent of `structural-scan` (below) in its own right — deterministic tooling settling first (this node's
   whole reason for existing in `structural-scan`'s gate) includes having somewhere for quality jobs to run
   at all, not just the language-specific tools that eventually run inside it.
-- **Fulfilment check:** CI config file present; forge determined from `git remote`; unknown CI → ask, do not
-  record a rejection.
-- **MR scope:** pipeline file only. `composer-audit`
-  (`skills/refactor-scan/references/php-tooling-tree/composer-audit.md`) is a quality-job child with two
-  parents (this node + `composer`). `phpunit` and `phpstan-level-0` do not get their own two-parent
-  children — once this node is fulfilled, each self-wires its own CI gate as part of its own fulfilment
-  check instead.
+
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/ci-runner.md`.
 
 ### `editorconfig`
 
@@ -118,29 +103,13 @@ The table above is this document's own — every row here is generic-to-generic 
   too, since `structural-scan` is itself a generic-root node; only `editorconfig → php-cs-fixer` crosses
   into a language tree (`skills/refactor-scan/references/php-tooling-tree.md`'s edge table: `editorconfig →
   php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
-- **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
-  equivalent-detection nuance.
-- **MR scope:** create a default `.editorconfig` when missing — one language-neutral `[*]` section, no
-  per-language stanza:
-  ```
-  root = true
 
-  [*]
-  charset = utf-8
-  end_of_line = lf
-  insert_final_newline = true
-  trim_trailing_whitespace = true
-  indent_style = space
-  indent_size = 4
-  ```
-  Ordinary node like any other — rejectable as `wontfix` (an `out-of-scope/editorconfig.md` entry in the
-  Refactoring Notes) like any other node, no special carve-out.
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/editorconfig.md`.
 
 ### `structural-scan`
 
 - **Name:** Structural Scan
 - **Tool:** none — this node represents the loop's own structural-deepening work (the `refactor-scan`/`refactor-design`/`refactor-implement`/`refactor-review` cycle applied to the target's own code), not a third-party tool.
 - **Purpose:** hold structural refactoring back until deterministic tooling has had its say — static analysis and a test suite catch regressions that an agent-driven structural change could otherwise introduce silently. Deterministic tools settle first, agent-driven scanning follows.
-- **Fulfilment check:** every node with a `resolved` edge into this one is **resolved** — fulfilled, or explicitly rejected and recorded under the Refactoring Notes' `out-of-scope/`. Three direct `resolved` parents today: `editorconfig` and `ci-runner` (both above, generic-root leaves) and the active language specialization's own aggregation node (for PHP: `php-structural-scan`, declared in `php-tooling-tree.md`, itself resolved once every one of *its* resolved-parents — the PHP tree's real leaves — is resolved). A future language specialization contributes its own aggregation node the same way, one `resolved` edge each, rather than reaching directly into this node's leaf set.
-- **Edge type — read this carefully, it deviates from the standard rule:** a standard **required edge** closes the child permanently once a parent is rejected. The edges into `structural-scan` do **not** do that: a rejected leaf still counts as resolved and still unblocks this node once every other leaf also reaches a resolved state. This is deliberate — one declined tooling branch (e.g. Rector rejected as not worth it here) should not permanently forbid ever doing structural work. These edges are labelled `resolved`, never `required` or `recommended` — declared in a language tree's own edge table for its own aggregation node (PHP: `php-tooling-tree.md`), or in this document's own edge table for a generic-root leaf like `editorconfig` (above). The same `resolved` semantics apply one hop down too: a language specialization's aggregation node is itself resolved once every one of *its* own resolved-parents is resolved.
-- **MR scope:** never an MR by itself — fulfilling this node just opens the gate. Once open, `refactor-scan` proposes it like any other node name; the actual codebase walk (hot spots, module/interface/depth/seam vocabulary) that turns it into one concrete candidate is `refactor-design`'s job, run only for the node the human actually picked.
+
+Full definition (Fulfilment check, Edge type, MR scope): `skills/refactor-scan/references/tooling-tree/structural-scan.md`.

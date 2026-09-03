@@ -99,7 +99,19 @@ VOCAB_ALLOW = {
 # duplication_issues() false positives: a shared sentence between two paths
 # that's a deliberate, reviewed exception rather than accidental drift.
 # Keyed by frozenset({path_a, path_b}) — order-independent.
-DUPLICATION_ALLOW = {}
+DUPLICATION_ALLOW = {
+    # A node's Purpose is deliberately duplicated verbatim between its stub
+    # (tooling-tree.md) and its extracted file (tooling-tree.md's own ##
+    # Nodes intro) — same convention php-tooling-tree.md established first.
+    frozenset({
+        "skills/refactor-scan/references/tooling-tree.md",
+        "skills/refactor-scan/references/tooling-tree/ci-runner.md",
+    }): "Purpose duplicated between stub and extracted node file, by design",
+    frozenset({
+        "skills/refactor-scan/references/tooling-tree.md",
+        "skills/refactor-scan/references/tooling-tree/is-php-project.md",
+    }): "Purpose duplicated between stub and extracted node file, by design",
+}
 
 
 @dataclass(frozen=True)
