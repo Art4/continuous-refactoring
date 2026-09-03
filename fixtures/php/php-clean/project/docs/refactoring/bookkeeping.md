@@ -4,6 +4,9 @@
 
 **Focus areas:** none
 
+**Pending candidates:**
+- none
+
 **Fulfilled nodes:**
 - loop-config
 - composer
@@ -15,6 +18,3 @@
 - phpstan-level-0
 - rector-dead-code
 - rector-type-coverage
-
-**Pending candidates:**
-- none

@@ -19,17 +19,19 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 
 **Focus areas:** order intake, billing
 
-**Fulfilled nodes:**
-- loop-config
-- composer (#77)
-- ci-runner (#78)
-
 **Pending candidates:**
 - none
 
 **Skip streak:**
 - php-cs-fixer: 3
+
+**Fulfilled nodes:**
+- loop-config
+- composer (#77)
+- ci-runner (#78)
 ```
+
+`Fulfilled nodes` sorts last, not alphabetically or by write-frequency — it's the field most likely to grow long as the tree gets worked through, and the only-ever-growing one; keeping it below every other field means `Create-mode`, `Focus areas`, `Pending candidates`, and `Skip streak` stay visible together without scrolling past it.
 
 ## Fields
 
@@ -37,9 +39,9 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 |---|---|---|
 | `Create-mode` | How merge requests get opened: `autonomous`, `ask-each-time`, or `human-opens` | `refactor-implement`, once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`) — hand-editable after that, same as `Focus areas` |
 | `Focus areas` | Areas scans should target first | you, any time |
-| `Fulfilled nodes` | Tooling-tree node **slugs** (never Names — internal bookkeeping stays keyed by the slug) already confirmed fulfilled, one per bulleted line, each carrying the delivering issue # (`- <slug> (#<issue>)`) when known — see *Fulfilled nodes* below | `refactor-learn`, every closing call — see *Fulfilled nodes* below |
 | `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue `refactor-design` just filed, not yet delivered as a merge request. Written as a list purely for formatting consistency with `Fulfilled nodes` and easier diffing — it still holds at most one entry; the suite tracks exactly one thing in flight at a time (`refactor-scan`/`refactor-prioritize`), this is not a multi-pending queue. | `refactor-design` sets it when it files; `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the candidate is resolved another way |
 | `Skip streak` | Tooling-tree node slugs paired with a consecutive-skip count (`- <slug>: <N>`), omitted entirely when empty (no bullet at all, not even `- none` — an empty field and a field that's never had an entry look the same, and that's fine: both mean "nothing has ever been skipped"). One of `refactor-prioritize`'s five ranking factors — see *Skip streak* below | `refactor-learn`, every closing call — see *Skip streak* below |
+| `Fulfilled nodes` | Tooling-tree node **slugs** (never Names — internal bookkeeping stays keyed by the slug) already confirmed fulfilled, one per bulleted line, each carrying the delivering issue # (`- <slug> (#<issue>)`) when known — see *Fulfilled nodes* below. Sorts last — see the note above the table. | `refactor-learn`, every closing call — see *Fulfilled nodes* below |
 
 `Pending candidates` exists so a pass interrupted between design and implement doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass.
 
