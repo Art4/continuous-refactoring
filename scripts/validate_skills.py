@@ -81,6 +81,9 @@ EXEMPT_LOCAL_PREFIXES = {
 VOCAB_ALLOW = {
     ("refactor-design", "boundary"): "defines the 'seam' term — 'public boundary' is the definition, not a synonym replacement",
     ("refactor-scan", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
+    ("refactor-scan", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
+    ("refactor-scan", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
+    ("refactor-scan", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
 }
 
 
@@ -251,7 +254,7 @@ def ticket_ref_issues(text, skill=""):
     backtick-restricted (unlike scratch_ref_issues) — these aren't file
     paths, they're inline citations."""
     issues = []
-    for m in re.finditer(r"\b[Tt]icket\s+\d+\b|\bPR\s*#\d+\b|\bpull request\s*#\d+\b", text):
+    for m in re.finditer(r"\b[Tt]icket[\s-]+\d+\b|\bPR\s*#\d+\b|\bpull request\s*#\d+\b", text):
         ref = m.group(0)
         issues.append(Issue(
             skill or ref,
@@ -573,6 +576,33 @@ def adr_staleness_issues(skills_text, adr_dir):
 # Whole-repo orchestration
 # --------------------------------------------------------------------------
 
+_CROSS_SKILL_REF_RE = re.compile(r"skills/[a-z0-9_-]+/references/[a-zA-Z0-9_./-]+\.(?:md|py)")
+
+
+def _augment_with_cross_skill_refs(skills_text_full, repo_root):
+    """A skill's own text may point at a reference file shipped under a
+    *different* skill's directory — e.g. ``refactor-design`` and
+    ``refactor-implement`` both point at
+    ``skills/continuous-refactoring/references/foundational-refactoring-rules.md``
+    rather than each restating the rules inline. Pull such a file's content
+    into the pointing skill's full text too, one hop deep, so a semantic
+    check reading "this skill's full text" sees what the skill actually
+    directs a reader to, not just what ships in its own ``references/``."""
+    augmented = dict(skills_text_full)
+    for name, text in skills_text_full.items():
+        own_prefix = f"skills/{name}/"
+        extra = []
+        for path in sorted(set(_CROSS_SKILL_REF_RE.findall(text))):
+            if path.startswith(own_prefix):
+                continue  # already included via this skill's own references/ scan
+            f = repo_root / path
+            if f.is_file():
+                extra.append(f.read_text())
+        if extra:
+            augmented[name] = text + "\n" + "\n".join(extra)
+    return augmented
+
+
 def validate_repo(repo_root):
     repo_root = pathlib.Path(repo_root)
     issues = []
@@ -594,6 +624,14 @@ def validate_repo(repo_root):
         glossary = parse_glossary(context_text)
 
     skills_text = {}
+    # Full text per skill — SKILL.md plus every file it ships under
+    # references/, concatenated. Progressive disclosure moved a lot of a
+    # skill's actual content out of SKILL.md and behind a pointer (see
+    # writing-for-agents): the semantic checks below (glossary usage, ADR-0004
+    # propagation, cross-skill contract terms) are about what the *skill*
+    # says, not what its entry-point file happens to say directly, so they
+    # read this instead of skills_text.
+    skills_text_full = {}
 
     for d in sorted(skills_dir.iterdir()):
         if not d.is_dir():
@@ -604,6 +642,7 @@ def validate_repo(repo_root):
             continue
         text = md.read_text()
         skills_text[d.name] = text
+        full_parts = [text]
         shipped = any(shipped for _, shipped in ledger.get(d.name, []))
         issues += frontmatter_issues(text, d.name)
         issues += section_issues(text, d.name, requires_fallback=shipped)
@@ -630,19 +669,34 @@ def validate_repo(repo_root):
             issues += adr_issues(ref_text, skill=ref_skill)
             issues += scratch_ref_issues(ref_text, skill=ref_skill)
             issues += ticket_ref_issues(ref_text, skill=ref_skill)
+            full_parts.append(ref_text)
 
-    issues += vocab_issues(glossary.terms, glossary.avoid, skills_text, set(VOCAB_ALLOW))
+        skills_text_full[d.name] = "\n".join(full_parts)
+
+    issues += vocab_issues(glossary.terms, glossary.avoid, skills_text_full, set(VOCAB_ALLOW))
 
     # --- Tier 2: semantic checks ---
     adr_dir = repo_root / "docs" / "adr"
-    issues += adr0004_propagation_issues(skills_text)
+    # ADR-0004 propagation alone reads cross-skill pointers too: its rules
+    # now live in a shared continuous-refactoring reference both
+    # refactor-design and refactor-implement point at instead of each
+    # restating them. The other checks below want a skill's *own*
+    # vocabulary and stay on the un-augmented text — augmenting generally
+    # would pull an entire pointed-at file's unrelated prose into every
+    # skill that names it for one narrow reason (e.g. refactor-implement
+    # citing one section of php-tooling-tree/phpunit.md).
+    adr0004_targets = {"refactor-design", "refactor-implement"}
+    adr0004_text = _augment_with_cross_skill_refs(
+        {k: v for k, v in skills_text_full.items() if k in adr0004_targets}, repo_root
+    )
+    issues += adr0004_propagation_issues(adr0004_text)
 
-    orchestrator_text = skills_text.get(ORCHESTRATOR, "")
+    orchestrator_text = skills_text_full.get(ORCHESTRATOR, "")
     if orchestrator_text:
-        issues += contract_consistency_issues(orchestrator_text, skills_text)
+        issues += contract_consistency_issues(orchestrator_text, skills_text_full)
 
     if context_text:
-        issues += glossary_reverse_issues(skills_text, context_text)
+        issues += glossary_reverse_issues(skills_text_full, context_text)
 
     if adr_dir.is_dir():
         issues += adr_staleness_issues(skills_text, adr_dir)

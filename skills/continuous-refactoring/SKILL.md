@@ -6,7 +6,7 @@ disable-model-invocation: true
 
 # Continuous Refactoring
 
-One **pass** of the loop: does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
+One **loop pass**: does only the work due since the last pass, then records what it learned so the next pass starts from state, not from zero.
 
 This skill is a thin data pipe: it calls each lifecycle skill in order and carries that skill's output forward as the next skill's input. It decides nothing a lifecycle skill could decide — `refactor-scan` detects, `refactor-prioritize`/`refactor-design` decide, `refactor-implement` executes, `refactor-learn` writes.
 
