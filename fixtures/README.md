@@ -159,11 +159,11 @@ rm -rf $DST && mkdir -p $(dirname $DST) && cp -r $SRC $DST
 
 # 2a. Run from repo root so opencode finds skills/refactor-scan/references/php-tooling-tree.md (needs --auto to allow reading /tmp fixture)
 opencode run -m opencode/muse-spark-1.2-contributor-free --auto \
-  --dir /home/artur/projects/continuous-refactoring \
+  --dir "$(pwd)" \
   "For fixture at /tmp/continuous-refactoring-tests/$FIXTURE (copied from fixtures/php/$FIXTURE), show which tools are recognized per skills/refactor-scan/references/php-tooling-tree.md, whether decisions are correct, and list the next 10 MRs in order without creating branches/MRs. Use deterministic tree: required edge gates, recommended only outlook, empty-baseline absent OR empty ignoreErrors, psalm fulfils p0."
 
 # 2b. Alternative: run inside fixture with skills symlink (exactly what run.sh does)
-mkdir -p $DST/.agents && ln -sfn /home/artur/projects/continuous-refactoring/skills $DST/.agents/skills
+mkdir -p $DST/.agents && ln -sfn "$(pwd)/skills" $DST/.agents/skills
 timeout 60 opencode run -m opencode/muse-spark-1.2-contributor-free --auto --dir $DST \
   "List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md." 2>&1 | head -n 80
 # log: /tmp/opencode-$FIXTURE.log
