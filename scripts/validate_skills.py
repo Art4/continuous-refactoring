@@ -38,6 +38,16 @@ Tier 2 — semantic:
   parsed into a dependency graph; skills referencing a superseded ADR without
   noting the successor are flagged
 
+Tier 2 — writing-for-agents advisories (warnings, never fail the build):
+- Size: a SKILL.md past a word-count guideline — a prompt to disclose more
+  into references/, not a hard limit
+- Orphaned references: a references/ file no SKILL.md or other reference
+  file ever names by path
+- Duplication: the same long sentence appearing verbatim in two files —
+  single source of truth restated instead of pointed at
+- Completion clarity: a Completion criterion section using a vague,
+  subjective phrase instead of a checkable condition
+
 Usage:
     pip install pyyaml          # only non-stdlib dependency
     python3 scripts/validate_skills.py [REPO_ROOT]
@@ -85,6 +95,11 @@ VOCAB_ALLOW = {
     ("refactor-scan", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
     ("refactor-scan", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
 }
+
+# duplication_issues() false positives: a shared sentence between two paths
+# that's a deliberate, reviewed exception rather than accidental drift.
+# Keyed by frozenset({path_a, path_b}) — order-independent.
+DUPLICATION_ALLOW = {}
 
 
 @dataclass(frozen=True)
@@ -374,6 +389,15 @@ CONTRACT_COVERAGE_THRESHOLD = 0.2
 MAX_MISSING_TERMS = 5
 ADVISORY_PREFIX = "contract advisory"
 
+
+def is_advisory(issue):
+    """True for any advisory-only issue — contract/size/orphan/duplication/
+    clarity — that a caller (main(), a test) should exclude from a hard
+    failure. Every advisory check's message names its category ending in
+    the word "advisory"; one shared test instead of a growing list of
+    per-category prefixes to keep in sync."""
+    return "advisory" in issue.message
+
 # Words too common to carry contract signal.
 _ORCH_STOP = frozenset({
     "the", "a", "an", "of", "and", "or", "in", "on", "to", "for", "is",
@@ -573,6 +597,141 @@ def adr_staleness_issues(skills_text, adr_dir):
 
 
 # --------------------------------------------------------------------------
+# Tier 2 — writing-for-agents advisories
+#
+# Four checks lifted from the writing-for-agents skill's own levers, each
+# heuristic enough to warrant "advisory" rather than a hard fail: a growing
+# SKILL.md (progressive disclosure), a references/ file nothing points at
+# (a document with no pointer at all), the same long sentence restated in
+# two places (single source of truth), and a vague completion criterion
+# (checkable vs. fuzzy).
+# --------------------------------------------------------------------------
+
+SKILL_MD_WORD_LIMIT = 1500
+
+
+def size_issues(skills_text):
+    """Advisory: a SKILL.md entry point past this word count is a sign more
+    of it belongs in references/ instead — the ceiling is a prompt to look,
+    not a rule anything must obey exactly."""
+    issues = []
+    for skill, text in skills_text.items():
+        body = re.sub(r"^---\n.*?\n---\n", "", text, count=1, flags=re.S)
+        word_count = len(body.split())
+        if word_count > SKILL_MD_WORD_LIMIT:
+            issues.append(
+                Issue(
+                    skill,
+                    f"size advisory: SKILL.md is {word_count} words (over the "
+                    f"{SKILL_MD_WORD_LIMIT}-word guideline) — consider moving "
+                    "more of it into references/",
+                )
+            )
+    return issues
+
+
+def orphaned_reference_issues(reference_files, all_text_by_path):
+    """Advisory: a file shipped under some skill's references/ that no
+    SKILL.md or other reference file ever names by path — a context
+    pointer with nothing pointing at it, disclosed content nobody reaches.
+    ``reference_files``: iterable of (skill, relative_path) for every file
+    under a skill's references/. ``all_text_by_path``: {path: text} for
+    every SKILL.md and reference file in the suite (path relative to the
+    suite root, e.g. ``skills/refactor-scan/references/foo.md``)."""
+    issues = []
+    for skill, rel_path in reference_files:
+        haystack = "\n".join(t for p, t in all_text_by_path.items() if p != rel_path)
+        if rel_path not in haystack:
+            issues.append(
+                Issue(
+                    skill,
+                    f"orphan advisory: {rel_path} ships under references/ but "
+                    "no SKILL.md or other reference file names it — dead "
+                    "disclosed content, or a pointer that got lost",
+                )
+            )
+    return issues
+
+
+DUPLICATION_MIN_WORDS = 15
+_SENTENCE_SPLIT_RE = re.compile(r"(?<=[.?!])\s+(?=[A-Z`*\d])")
+_CODE_FENCE_RE = re.compile(r"```.*?```", re.S)
+
+
+def _long_sentences(text):
+    """Yield normalised sentences of at least DUPLICATION_MIN_WORDS words,
+    skipping fenced code blocks (commands/config repeat legitimately)."""
+    text = _CODE_FENCE_RE.sub("", text)
+    for raw in _SENTENCE_SPLIT_RE.split(text):
+        norm = re.sub(r"\s+", " ", raw).strip(" -*`")
+        if len(norm.split()) >= DUPLICATION_MIN_WORDS:
+            yield norm
+
+
+def duplication_issues(all_text_by_path, allow=frozenset()):
+    """Advisory: the same long sentence verbatim in two files — the
+    single-source-of-truth violation writing-for-agents warns about (a fact
+    restated instead of pointed at drifts the moment one copy is edited and
+    not the other). Exact-match only: catches copy-paste duplication, not
+    paraphrased restatement. ``allow``: set of (path_a, path_b) pairs
+    (either order) whose overlap is a deliberate, reviewed exception."""
+    issues = []
+    seen_at = {}
+    flagged = set()
+    for path, text in sorted(all_text_by_path.items()):
+        for sentence in _long_sentences(text):
+            key = sentence.lower()
+            if key in seen_at:
+                other = seen_at[key]
+                if other == path or key in flagged:
+                    continue
+                if frozenset({other, path}) in allow:
+                    continue
+                flagged.add(key)
+                preview = sentence if len(sentence) <= 90 else sentence[:87] + "..."
+                issues.append(
+                    Issue(
+                        path,
+                        f"duplication advisory: a {len(sentence.split())}-word "
+                        f"sentence also appears verbatim in {other}: \"{preview}\"",
+                    )
+                )
+            else:
+                seen_at[key] = path
+    return issues
+
+
+VAGUE_COMPLETION_PHRASES = [
+    "understanding reached", "properly implemented", "properly done",
+    "correctly implemented", "correctly done", "adequately",
+    "sufficiently", "reasonably confident", "good enough", "as appropriate",
+]
+
+
+def completion_clarity_issues(skills_text):
+    """Advisory: a Completion criterion section using a vague, subjective
+    phrase instead of a checkable condition — the clarity lever
+    writing-for-agents ties to premature completion (a fuzzy bound invites
+    ending the step before it's genuinely done)."""
+    issues = []
+    for skill, text in skills_text.items():
+        m = re.search(r"## Completion criterion\n(.*?)(?=\n## |\Z)", text, re.S)
+        if not m:
+            continue
+        section = m.group(1)
+        for phrase in VAGUE_COMPLETION_PHRASES:
+            if re.search(re.escape(phrase), section, re.I):
+                issues.append(
+                    Issue(
+                        skill,
+                        f"clarity advisory: Completion criterion uses the vague "
+                        f"phrase '{phrase}' — state a checkable condition instead",
+                    )
+                )
+    return issues
+
+
+# --------------------------------------------------------------------------
 # Whole-repo orchestration
 # --------------------------------------------------------------------------
 
@@ -632,6 +791,12 @@ def validate_repo(repo_root):
     # says, not what its entry-point file happens to say directly, so they
     # read this instead of skills_text.
     skills_text_full = {}
+    # path (relative to repo root, e.g. "skills/refactor-scan/SKILL.md" or
+    # ".../references/foo.md") -> text, for every file in scope below — the
+    # orphan-reference and duplication advisories both need to see the whole
+    # suite at once, not one skill at a time.
+    all_text_by_path = {}
+    reference_files = []  # (skill, relative_path) for every references/ file
 
     for d in sorted(skills_dir.iterdir()):
         if not d.is_dir():
@@ -642,6 +807,7 @@ def validate_repo(repo_root):
             continue
         text = md.read_text()
         skills_text[d.name] = text
+        all_text_by_path[md.relative_to(repo_root).as_posix()] = text
         full_parts = [text]
         shipped = any(shipped for _, shipped in ledger.get(d.name, []))
         issues += frontmatter_issues(text, d.name)
@@ -665,11 +831,14 @@ def validate_repo(repo_root):
                 continue
             ref_text = ref_file.read_text()
             ref_skill = f"{d.name}/references/{ref_file.relative_to(references_dir)}"
+            ref_rel_path = ref_file.relative_to(repo_root).as_posix()
             issues += local_ref_issues(ref_text, repo_root, skill=ref_skill)
             issues += adr_issues(ref_text, skill=ref_skill)
             issues += scratch_ref_issues(ref_text, skill=ref_skill)
             issues += ticket_ref_issues(ref_text, skill=ref_skill)
             full_parts.append(ref_text)
+            all_text_by_path[ref_rel_path] = ref_text
+            reference_files.append((d.name, ref_rel_path))
 
         skills_text_full[d.name] = "\n".join(full_parts)
 
@@ -701,6 +870,12 @@ def validate_repo(repo_root):
     if adr_dir.is_dir():
         issues += adr_staleness_issues(skills_text, adr_dir)
 
+    # --- writing-for-agents advisories ---
+    issues += size_issues(skills_text)
+    issues += orphaned_reference_issues(reference_files, all_text_by_path)
+    issues += duplication_issues(all_text_by_path, allow=set(DUPLICATION_ALLOW))
+    issues += completion_clarity_issues(skills_text)
+
     return sorted(issues, key=lambda i: (i.skill, i.message))
 
 
@@ -716,11 +891,11 @@ def main(argv=None):
     args = ap.parse_args(argv)
 
     issues = validate_repo(args.root)
-    errors = [i for i in issues if ADVISORY_PREFIX not in i.message]
+    errors = [i for i in issues if not is_advisory(i)]
     if issues:
         print("Suite skill validation report:")
         for i in issues:
-            prefix = "warning" if ADVISORY_PREFIX in i.message else "error"
+            prefix = "warning" if is_advisory(i) else "error"
             print(f"  {prefix}: {i.skill}: {i.message}")
     else:
         print("All suite skills validated clean.")
