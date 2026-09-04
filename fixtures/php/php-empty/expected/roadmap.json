@@ -94,7 +94,7 @@
     },
     "phpstan-level-0": {
       "fulfilled": false,
-      "reason": "missing phpstan or level 0 or baseline",
+      "reason": "missing phpstan, no level configured, or no baseline",
       "details": {
         "has_phpstan": false,
         "level": null,

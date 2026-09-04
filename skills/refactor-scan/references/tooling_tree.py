@@ -917,19 +917,26 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # just not detectable via composer.json alone.
     ephemeral_ci_dep = has_ci and _has_ephemeral_ci_dep(repo, "phpstan/phpstan", "vendor/bin/phpstan analyse")
     has_phpstan_dep_or_ephemeral = has_phpstan_dep or ephemeral_ci_dep
+    # `phpstan_level == 0` here would mean this node goes right back to
+    # unfulfilled the moment a project advances to level 1 — breaking the
+    # level-1..10 chain's own required-parent-stays-fulfilled assumption
+    # (a level-N node requires its predecessor fulfilled, forever, not just
+    # at the moment it was first reached). Level 0's own checks (dep +
+    # baseline + CI gate) are satisfied by any parsed level, so this reads
+    # "some level is configured", not "level is still exactly 0".
     if psalm_fulfils_p0:
         set_node("phpstan-level-0", True, "psalm fulfils p0 (vimeo/psalm + psalm.xml)", has_psalm=True)
-    elif has_phpstan_dep_or_ephemeral and phpstan_level == 0 and baseline_exists and phpstan_p0_ci_ok:
+    elif has_phpstan_dep_or_ephemeral and phpstan_level is not None and baseline_exists and phpstan_p0_ci_ok:
         set_node("phpstan-level-0", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty, ephemeral_ci_dep=ephemeral_ci_dep)
-    elif has_phpstan_dep_or_ephemeral and phpstan_level == 0 and baseline_exists and not phpstan_p0_ci_ok:
+    elif has_phpstan_dep_or_ephemeral and phpstan_level is not None and baseline_exists and not phpstan_p0_ci_ok:
         # locally green, but CI exists and doesn't gate on it yet — the
         # baseline this level sets is only durable once CI enforces it.
         set_node("phpstan-level-0", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty, ephemeral_ci_dep=ephemeral_ci_dep)
-    elif has_phpstan_dep_or_ephemeral and phpstan_level == 0 and not baseline_exists:
-        # level 0 but no baseline yet -> not green, not fulfilled
-        set_node("phpstan-level-0", False, "phpstan level 0 but baseline missing", level=phpstan_level, ephemeral_ci_dep=ephemeral_ci_dep)
+    elif has_phpstan_dep_or_ephemeral and phpstan_level is not None and not baseline_exists:
+        # some level configured but no baseline yet -> not green, not fulfilled
+        set_node("phpstan-level-0", False, "phpstan level configured but baseline missing", level=phpstan_level, ephemeral_ci_dep=ephemeral_ci_dep)
     else:
-        set_node("phpstan-level-0", False, "missing phpstan or level 0 or baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
+        set_node("phpstan-level-0", False, "missing phpstan, no level configured, or no baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
 
     # phpstan-level-1..10 — phpstan-level-10 is the chain's resolved-leaf
     # into php-structural-scan, see that node
@@ -993,11 +1000,18 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         for p in [repo / "rector.php", repo / "rector.neon"]:
             if p.exists():
                 txt += p.read_text(encoding="utf-8")
-        has_rector_dead = "DeadCode" in txt or "dead-code" in txt.lower()
+        # Substring detection has to tolerate both Rector SetList naming
+        # styles actually seen in the wild: older/prose-ish "DeadCode" and
+        # the current SetList::DEAD_CODE-style ALL_CAPS-with-underscores
+        # constants. Lowercasing alone doesn't bridge the two — "DEAD_CODE"
+        # lowercases to "dead_code", not "dead-code" — so each check
+        # normalizes underscores to hyphens before comparing.
+        norm = txt.lower().replace("_", "-")
+        has_rector_dead = "DeadCode" in txt or "dead-code" in norm
         has_rector_types = "Type" in txt or "type" in txt.lower()
-        has_rector_php_set = "LevelSetList" in txt or "php-set" in txt.lower()
-        has_rector_code_quality = "CodeQuality" in txt or "code-quality" in txt.lower()
-        has_rector_phpunit_set = "PHPUnitSetList" in txt or "phpunit-set" in txt.lower()
+        has_rector_php_set = "LevelSetList" in txt or "php-set" in norm
+        has_rector_code_quality = "CodeQuality" in txt or "code-quality" in norm
+        has_rector_phpunit_set = "PHPUnitSetList" in txt or "phpunit-set" in norm
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
     # rector-php-set and its 2 children: same has_rector-gated

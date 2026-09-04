@@ -1373,6 +1373,73 @@ class CiSelfWiringTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_phpstan_p0_stays_fulfilled_once_advanced_past_level_zero(self):
+        # Regression guard: phpstan-level-0's own fulfilment check must not
+        # require the config to still literally say `level: 0` once the
+        # project has moved on to a higher level — every level-0 check
+        # (dep present, baseline committed, CI gated) is still satisfied by
+        # a project at level 1+, and phpstan-level-1's own required-parent
+        # check depends on phpstan-level-0 staying reported as fulfilled.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 1\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+            self.assertTrue(d["phpstan-level-1"]["fulfilled"], d["phpstan-level-1"])
+        finally:
+            tmp.cleanup()
+
+
+class RectorSetListUnderscoreCasingTests(unittest.TestCase):
+    """Rector's current SetList API names sets as ALL_CAPS-with-underscore
+    class constants (e.g. `SetList::DEAD_CODE`, `SetList::CODE_QUALITY`),
+    not the older PascalCase-ish prose the substring detection originally
+    matched. Lowercasing alone doesn't bridge the two: "DEAD_CODE" lowers to
+    "dead_code", not "dead-code" -- detection must tolerate both forms."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_dead_code_and_code_quality_detected_via_underscore_constants(self):
+        tmp, root = self._make_repo({
+            "rector.php": (
+                "<?php\nreturn RectorConfig::configure()->withSets(["
+                "SetList::DEAD_CODE, SetList::CODE_QUALITY, LevelSetList::UP_TO_PHP_82,"
+                "]);\n"
+            ),
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["rector-dead-code"]["fulfilled"], d["rector-dead-code"])
+            self.assertTrue(d["rector-code-quality"]["fulfilled"], d["rector-code-quality"])
+            self.assertTrue(d["rector-php-set"]["fulfilled"], d["rector-php-set"])
+        finally:
+            tmp.cleanup()
+
+    def test_dead_code_and_code_quality_still_detected_via_old_pascalcase_prose(self):
+        # Not a regression against the original (still-valid) detection style.
+        tmp, root = self._make_repo({
+            "rector.php": "<?php // DeadCode CodeQuality LevelSetList",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["rector-dead-code"]["fulfilled"], d["rector-dead-code"])
+            self.assertTrue(d["rector-code-quality"]["fulfilled"], d["rector-code-quality"])
+        finally:
+            tmp.cleanup()
+
 
 class RejectionRespectedTests(unittest.TestCase):
     """A node with an out-of-scope entry stays out of next_candidates()/
