@@ -19,11 +19,15 @@ An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree
 
 The **`structural-scan`** node names an open gate, not a candidate. Steps 2–4 (find a candidate, ground in it, grill toward the seam) live at `skills/refactor-design/references/structural-candidate.md` — run them in full, then return here for step 5.
 
+**A "PHPStan Level N — baseline shrink" candidate** (`refactor-scan` step 4b) is the same shape as `structural-scan`: a gate named generically, not yet a specific plan. Run `skills/refactor-design/references/phpstan-baseline-shrink.md` in full (resume an already-open group, read the baseline, group by root cause, pick one, plan the fix), then continue here at step 5. Steps 2–4 above (structural-candidate search, grilling) don't apply — this candidate's own reference file is the whole procedure.
+
 ### 5. File the issue and write the plan
 
 **Tooling-tree node:** check first whether an issue titled exactly `Tooling tree: <Name>` (never the slug) is already open — that's the issue, don't file a second one (a prior pass got this far and was interrupted). Otherwise file one titled that way, label **`refactor:candidate`**, body = the tree doc's content directly (Purpose, Fulfilment check, MR scope carried over precisely — they're load-bearing, that scope *is* the plan) — never introduced as a quotation or naming the tree doc's file path; it reads as its own plan. Skip `Name:` (already the title); skip `Tool` when `none`.
 
 **Structural candidate:** file an issue labelled **`refactor:candidate`** naming Where (module/files), Problem (the friction, in the project's domain language), Signal (which step-2 friction signal). Capture the plan on that issue: deepened module, seam and interface, surviving tests, slice ordering (see `refactor-implement`).
+
+**PHPStan baseline-shrink candidate:** title, label, and body already decided by `phpstan-baseline-shrink.md` step 4 above — file (or resume) exactly as it says, then continue below the same as any other candidate.
 
 Either way, then: `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → **skip writing `Pending candidates`** — nothing needs it. `refactor-implement` running later this same pass opens a branch/MR that `refactor-scan` step 3's native-tracker reconciliation already discovers on its own; the pass ending here instead means a future pass simply rediscovers this same issue via step 3b (still open, still `refactor:candidate`, not yet accounted for) and re-proposes it normally — this step's own dedupe above already stops it from being refiled. No native-label tracker → unchanged: set the Refactoring Notes' `bookkeeping.md`'s `Pending candidates` to this issue (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) via the dedicated bookkeeping branch — lets a future `refactor-scan` resume this exact work if the pass stops here; `refactor-learn` clears it once a merge request exists.
 
@@ -43,4 +47,4 @@ The filed issue, carrying the plan → `refactor-implement`.
 
 ## Completion criterion
 
-The candidate has an issue (newly filed, or resumed) with a written plan, and — no native-label tracker only — `bookkeeping.md`'s `Pending candidates` names it (a native-label tracker deliberately skips this write; see step 5). Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception).
+The candidate has an issue (newly filed, or resumed) with a written plan, and — no native-label tracker only — `bookkeeping.md`'s `Pending candidates` names it (a native-label tracker deliberately skips this write; see step 5). Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception). PHPStan baseline-shrink: one root-cause group picked (or resumed), a fix planned for this MR's slice of it — see `phpstan-baseline-shrink.md`.

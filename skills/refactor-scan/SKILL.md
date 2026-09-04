@@ -52,6 +52,18 @@ Run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo>` and 
 - **`structural-scan`** — proposed once every node with a `resolved` edge into it is resolved (fulfilled, or explicitly rejected under the Refactoring Notes' `out-of-scope/`): `editorconfig` at the generic root, plus the active language specialization's own aggregation node (PHP: `php-structural-scan`), itself resolved once every one of its own resolved-parents is resolved (`skills/refactor-scan/references/tooling-tree.md`). Only `structural-scan` is ever proposed this way — `php-structural-scan` is pure plumbing, never a candidate. Proposing it is just naming it; the codebase walk happens in `refactor-design`, only for the node actually chosen.
 - **No language tree recognized**: `structural-scan` still waits on `editorconfig`, the generic-root leaf — not immediately proposable just because no language-specific tree applies.
 
+### 4b. Detect baseline-shrink candidates
+
+PHP tree only, for now (`skills/refactor-scan/references/php-tooling-tree/phpstan.md`'s Stop
+conditions for the level chain: *"Baseline is non-empty → do not propose the next level; the loop
+proposes shrinking work... until the baseline becomes empty"* — this step is that promise, kept). Read
+`detected` from step 4's own `tooling_tree.py` run (no second invocation) — find the highest `N` where
+`phpstan-level-N` is `fulfilled`. Its `details.baseline_empty` is `false` → propose **"PHPStan Level
+N — baseline shrink"** alongside step 4's other proposals, same generic shape as how `structural-scan`
+itself gets proposed (naming the gate, not yet a specific plan — `refactor-design` does the baseline
+read and picks a concrete group only for the candidate actually chosen). No `phpstan-level-N` node
+ever fulfilled yet, or the fulfilled one's baseline is already empty → nothing to propose here.
+
 ## Output
 
 Handed onward by the orchestrator, plainly:
@@ -59,7 +71,7 @@ Handed onward by the orchestrator, plainly:
 - Which precondition stopped the pass, if one did — nothing below applies this pass.
 - **Findings** (possibly empty) → `refactor-learn`.
 - **A resume-candidate**, if one was detected → straight to `refactor-implement`, bypassing `refactor-prioritize`/`refactor-design`.
-- **Proposals** — the pending candidate alone, or every currently-unblocked node's Name (never slugs, never capped) plus any externally-labeled candidate from step 3b, or none → `refactor-prioritize`. Every node currently unblocked (required parents fulfilled, not rejected, every recommended parent already decided) — never a priority-truncated subset. Alongside it, name every `withheld` node and which parent(s) it's waiting on (e.g. "Rector: Type Coverage Set — waiting on: PHP CS Fixer").
+- **Proposals** — the pending candidate alone, or every currently-unblocked node's Name (never slugs, never capped) plus any externally-labeled candidate from step 3b and any baseline-shrink candidate from step 4b, or none → `refactor-prioritize`. Every node currently unblocked (required parents fulfilled, not rejected, every recommended parent already decided) — never a priority-truncated subset. Alongside it, name every `withheld` node and which parent(s) it's waiting on (e.g. "Rector: Type Coverage Set — waiting on: PHP CS Fixer").
 
 ## Completion criterion
 
