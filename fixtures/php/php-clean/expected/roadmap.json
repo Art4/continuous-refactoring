@@ -27,6 +27,13 @@
         "has_lock": true
       }
     },
+    "psr-4": {
+      "fulfilled": true,
+      "reason": "autoload.psr-4 declared and in use",
+      "details": {
+        "declared": true
+      }
+    },
     "ci-runner": {
       "fulfilled": true,
       "reason": "CI config present",
