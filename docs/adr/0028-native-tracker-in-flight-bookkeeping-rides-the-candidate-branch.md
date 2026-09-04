@@ -95,3 +95,7 @@ separate exception. `skills/refactor-learn/references/bookkeeping-branch.md` (th
 lookup algorithm) gains a note that it doesn't run at all in the fold-in case. Non-native trackers,
 and any pass where no candidate branch is open to ride, are unaffected — the dedicated bookkeeping
 branch/MR mechanism ADR-0011 designed still governs there, unchanged.
+
+This ADR is maintainer-facing paper trail only — no skill cites it by number, per the suite's own
+convention (matching ADR-0011 and ADR-0015, the two it sits directly beside); the rule itself is
+stated inline, in plain prose, in `refactor-learn/SKILL.md` and `bookkeeping-branch.md`.
