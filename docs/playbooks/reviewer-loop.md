@@ -71,6 +71,12 @@ mid-run without the human explicitly changing it.
 1. Query `gh issue list --state all` / `gh pr list --state all` against the target repo, diff against
    the last known state (the previous log entry).
 2. **For every new/updated open MR:**
+   - **Draft** (`gh pr view <n> --json isDraft`) → not ready for review yet, skip it this round — no
+     `request-changes`, no escalation, not a hang. On a native-label tracker this is the suite's own
+     candidate-MR fold-in signal (`skills/continuous-refactoring/references/opening-a-merge-request.md`'s
+     *Draft candidate MRs*): the implementation landed, the bookkeeping commit hasn't yet. Only worth a
+     second look if it's *still* draft across several consecutive rounds with no new commits — then it's
+     the suite's own stuck-fold-in case, log it as a quiet observation, not an anomaly.
    - Check `gh pr view <n> --json mergedBy,state` — **if it's already MERGED and not by the reviewer
      itself, that's an incident** (see *Anomaly detection* below), not a routine action.
    - Read the diff + description, judge it per the chosen persona's bar (see *Personas*).

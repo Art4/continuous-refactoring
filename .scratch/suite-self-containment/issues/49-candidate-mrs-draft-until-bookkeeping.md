@@ -22,32 +22,46 @@ tracker, same-pass implement+learn) — ADR-0028 already merged
 ergonomics gap that will recur every time a reviewer (human or automated) catches a candidate mid
 fold-in.
 
-**Status:** needs-triage
+**Status:** done
 
-Open design questions:
-
-- [ ] Non-native-tracker case, or a native tracker where the fold-in exception doesn't apply (a
-  separate bookkeeping branch/MR still follows later, per ADR-0011/ADR-0029's non-native path) —
-  does the candidate MR open as a normal (non-draft) MR there, since there's no single same-branch
-  closing step to key the transition off? Working assumption from the originating memory, not yet
-  settled.
-- [ ] Should draft status suppress `refactor-scan` step 3's native-tracker reconciliation from
-  treating the MR as a genuine open candidate-in-flight, or is it still correct to detect it
-  regardless of draft state (i.e. is "draft" purely a human/reviewer signal, invisible to the
-  suite's own logic)?
-- [ ] Where exactly does the "mark ready for review" step live — its own explicit new step in
-  `refactor-learn/SKILL.md`'s closing call, right after the fold-in commit push, or folded into the
-  existing fold-in step's description?
-- [ ] What happens if the closing-call fold-in commit never lands in the same pass (an interrupted
-  pass, matching the tradeoff ADR-0029 already accepted for the `Pending candidates` write) — does
-  the MR stay draft indefinitely until a future pass's `refactor-learn` catches up, and is that an
-  acceptable steady state (a draft MR sitting open is arguably a *better* visible signal of "not
-  actually done yet" than ADR-0029's silent nothing-written state)?
-- [ ] Forge-specific mechanics: `gh pr create --draft` / `gh pr ready` for GitHub — confirm the
-  GitLab equivalent before writing this into `opening-a-merge-request.md`.
+- [x] Non-native-tracker / no-fold-in case → normal (non-draft) MR, confirmed as the working
+  assumption.
+- [x] `refactor-scan` step 3 needs no logic change for reconciliation — "still open, nothing
+  changed → no finding" already treats a draft the same as any other quiet open MR. Added a
+  clarifying line anyway.
+- [x] "Mark ready for review" lives as the last bullet of `refactor-learn`'s closing-call write
+  list — after every other fold-in write, since undrafting should only happen once everything is
+  actually pushed.
+- [x] **Solved directly in this ticket, not spun out**: an interrupted pass leaving a candidate
+  stuck in draft forever turned out to be a real, previously-invisible gap — nothing in
+  `refactor-scan`'s existing reconciliation would ever resume it, since it requires reviewer
+  activity that a correctly-draft, unreviewed MR will never get. Fixed with a new finding type
+  ("fold-in still owed"): `refactor-scan` step 3 checks reviewer activity first (regardless of
+  draft status — a human comment always wins), then draft status; `refactor-learn`'s early call
+  checks out the stale branch and finishes the fold-in, same writes as the closing call.
+- [x] Forge mechanics confirmed and written into `opening-a-merge-request.md`: `gh pr create
+  --draft` / `gh pr ready` (GitHub), `glab mr create --draft` / `glab mr update <n> --ready`
+  (GitLab).
+- [x] `docs/playbooks/reviewer-loop.md` gets a rule: skip a draft MR, don't treat it as a hang;
+  escalate only if it stays draft across several rounds with no new commits.
+- [x] `CONTEXT.md`'s **Findings** definition broadened to include the new "fold-in still owed"
+  outcome.
+- [x] New ADR-0031, amending ADR-0028. `refactor-learn/SKILL.md`'s `Fulfilled nodes`/`Skip streak`
+  write procedure extracted to its own reference file along the way (word-count advisory).
+  `python3 -m unittest discover -s scripts -p 'test_*.py'` (240/240) and
+  `python3 scripts/validate_skills.py` (same 5 pre-existing advisory warnings) both green.
 
 ## Comments
 
 > **2026-09-04:** Filed from the `Art4/legacy-todo` reviewer-loop findings log (PR #114 finding) and
 > the `candidate-mrs-as-draft-until-bookkeeping` memory, per the user's request to prepare "für
-> später" ideas for fixing. Not yet grilled.
+> später" ideas for fixing.
+
+> **2026-09-04 (later):** Design settled via a `/grill-me` session (in German). Researched GitHub's
+> and GitLab's CLI draft-mechanics directly rather than guessing. The user pushed back on one
+> recommendation (Q7): reviewer activity is checked *before* draft status, not the other way
+> round — a human comment on a draft still wins over the mechanical fold-in-owed default. The user
+> also chose to solve the interrupted-pass steady-state question directly in this ticket rather
+> than spinning it into a separate one, once it became clear nothing in the existing suite would
+> ever resume a permanently-stuck draft on its own. Implemented in the same session on branch
+> `tickets/49-draft-candidate-mrs-until-fold-in`.

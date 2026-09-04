@@ -81,5 +81,5 @@ The tooling-tree node names `refactor-scan` hands the orchestrator, every curren
 _Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
 
 **Findings**:
-Remembered issues or merge requests `refactor-scan` detects have since merged or closed on the external tracker — handed to `refactor-learn` to act on. Scan only notices; it never decides the outcome itself.
+Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Handed to `refactor-learn` to act on. Scan only notices; it never decides the outcome itself.
 _Avoid_: events, notifications
