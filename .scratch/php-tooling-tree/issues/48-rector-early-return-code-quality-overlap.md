@@ -26,29 +26,47 @@ history later.
 **Priority:** low — cosmetic/no-op-adoption risk only, not a bug; the PR that surfaced it disclosed
 the situation plainly.
 
-**Status:** needs-triage
+**Status:** done
 
-Open design questions:
-
-- [ ] Is the current overlap a property of the pinned Rector version specifically (does upstream
-  Rector ever ship real early-return-only rules distinct from code-quality, meaning the split is
-  forward-looking and correct), or is early-return conceptually always a subset of code-quality's
-  broader modernization goal, making the split permanently redundant?
-- [ ] If merged: does `rector-code-quality`'s own MR scope prose need to explicitly absorb
-  early-return's Purpose text, and does anything reference `rector-early-return`'s slug elsewhere
-  that would need updating — `rector-type-coverage`'s recommended-parent chain (`rector.md` line 44)
-  currently names it explicitly ("waits on `rector-dead-code` and `rector-early-return` both
-  decided").
-- [ ] If kept separate with a smarter Fulfilment check: what should "detect known no-op" look like
-  mechanically — a version-pinned rule-set-emptiness check inside `tooling_tree.py`, or a documented
-  manual judgment call left to the agent adopting it?
-- [ ] Does this affect `rector-type-coverage`'s existing "waits on `rector-dead-code` and
-  `rector-early-return` both decided" gate — if early-return disappears as a node, does
-  type-coverage's gate simplify to just `rector-dead-code`, or does it need a different replacement
-  signal?
+- [x] Researched upstream directly (`rectorphp/rector-src`) rather than guessing: confirmed the
+  overlap is not version-specific — `config/set/early-return.php` is `$rectorConfig->rules([])`
+  with the comment "all early return rules were moved to code quality set or deprecated," the end
+  of a multi-year, deliberate depopulation (individual rules removed/deprecated since 2022, the
+  last ones folded into `CODE_QUALITY` or deprecated outright as of early August 2026). Settled the
+  three-way choice: **merge/drop** (not "keep as forward-compatible," not "smart-skip Fulfilment
+  check" — the latter would have been the only version-aware Fulfilment check in the whole tree,
+  for a permanently-empty set).
+- [x] `rector-early-return` retired as a node: section removed from `rector.md`, diagram entry + 4
+  edge-table rows + `Nodes`-section stub removed from `php-tooling-tree.md`, leaf dropped from
+  `php-structural-scan.md`/`composer-audit.md` (thirteen → twelve), detection removed from
+  `tooling_tree.py`.
+- [x] `rector-code-quality`'s Purpose text extended to name the absorbed early-return behavior
+  ("flattens nested conditionals into early returns") — settled via grilling rather than relying on
+  the pre-existing generic wording alone.
+- [x] `rector-type-coverage`'s recommended-parent gate: `rector-early-return` **swapped for**
+  `rector-code-quality`, not dropped outright — preserves the gate's original "control flow
+  flattened first" rationale, now carried by the node that actually performs the flattening.
+- [x] `scripts/test_tooling_tree.py` updated to match (edge/leaf assertions, fixture `rector.php`
+  strings no longer need an `EarlyReturn` marker); `fixtures/php/*/expected/roadmap.json` (all 8) and
+  `fixtures/php/php-clean/project/rector.php` regenerated against the real parser.
+  `python3 -m unittest discover -s scripts -p 'test_*.py'` (240/240) and
+  `python3 scripts/validate_skills.py` (same 5 pre-existing advisory warnings) both green.
+- [x] New ADR: `docs/adr/0030-drop-rector-early-return-node-merge-into-code-quality.md`, amending
+  ADR-0019 and ADR-0021.
+- [x] `legacy-todo`'s already-fulfilled `rector-early-return (#112)` bookkeeping entry: confirmed no
+  migration needed — `Fulfilled nodes` self-heals via the parser's own re-derivation.
 
 ## Comments
 
 > **2026-09-04:** Filed from the `Art4/legacy-todo` reviewer-loop findings log (PR #112 finding) and
 > the `rector-early-return-node-redundant` memory, per the user's request to prepare "für später"
-> ideas for fixing. Not yet grilled.
+> ideas for fixing.
+
+> **2026-09-04 (later):** Design settled via a `/grill-me` session (in German). Upstream research
+> (see checklist) ruled out the "wait for it to un-overlap" option before the first question was
+> even asked. Key decisions: clean node removal + ADR as the sole historical record (no skill-text
+> stub), `rector-type-coverage`'s gate swaps in `rector-code-quality` rather than losing the
+> "flattened first" prerequisite, `rector-code-quality`'s Purpose text explicitly absorbs the
+> early-return description, `legacy-todo`'s existing fulfilled-node entry needs no migration.
+> Implemented in the same session on branch `tickets/48-drop-rector-early-return-node` — see the
+> checklist above for the full file list.

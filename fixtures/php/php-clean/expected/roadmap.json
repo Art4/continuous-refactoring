@@ -95,7 +95,8 @@
       "reason": "phpstan level 0 + baseline present",
       "details": {
         "level": 0,
-        "baseline_empty": true
+        "baseline_empty": true,
+        "ephemeral_ci_dep": false
       }
     },
     "phpstan-level-1": {
@@ -222,13 +223,6 @@
     "rector-phpunit-set": {
       "fulfilled": true,
       "reason": "rector phpunit set present",
-      "details": {
-        "has_rector": true
-      }
-    },
-    "rector-early-return": {
-      "fulfilled": true,
-      "reason": "rector early-return set present",
       "details": {
         "has_rector": true
       }

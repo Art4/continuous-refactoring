@@ -91,7 +91,10 @@ class LoadTreeTests(unittest.TestCase):
         # it its own leaf, found redundant on review and dropped: the actual
         # bug (a Psalm-only target never resolving `phpstan-level-10`) is
         # already fixed by that node's own mutual-exclusion rejection
-        # housekeeping, without needing `psalm` to be a leaf too.
+        # housekeeping, without needing `psalm` to be a leaf too. Ticket 48
+        # later dropped `rector-early-return` itself (its rule set shipped
+        # permanently empty upstream, folded into `rector-code-quality`) —
+        # back down to twelve.
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["php-structural-scan"]),
@@ -107,11 +110,11 @@ class LoadTreeTests(unittest.TestCase):
                 "rector-php-set",
                 "rector-code-quality",
                 "rector-phpunit-set",
-                "rector-early-return",
                 "psalm-taint-analysis",
             },
         )
         self.assertNotIn("psalm", tree["resolved_parents"]["php-structural-scan"])
+        self.assertNotIn("rector-early-return", tree["resolved_parents"]["php-structural-scan"])
 
     def test_required_any_parents_of_psalm_taint_analysis(self):
         # ticket 37: a new OR-required-parent edge type — psalm-taint-analysis
@@ -128,13 +131,15 @@ class LoadTreeTests(unittest.TestCase):
         # gate directly via required-any(phpstan-level-0, psalm)
         # instead of relying on it being implicit inside
         # phpstan-level-0's own Psalm-equivalence fulfilment check.
-        # rector-dead-code/rector-code-quality/rector-early-return no longer
+        # rector-dead-code/rector-code-quality no longer
         # carry their own direct required edge on phpstan-level-0 —
         # they read this transitively via their existing required parent on
         # rector-php-set. rector-type-coverage/rector-phpunit-set are no
         # longer tied to this gate at all (later restructuring moved them
         # onto sibling Rector nodes instead, via recommended edges — see
         # test_rector_type_coverage_and_phpunit_set_gate_via_siblings_now).
+        # Ticket 48 dropped the sixth Rector node, rector-early-return
+        # (folded into rector-code-quality) — two direct children remain.
         tree = load_tree()
         self.assertEqual(
             set(tree["required_any_parents"]["rector-php-set"]),
@@ -142,7 +147,7 @@ class LoadTreeTests(unittest.TestCase):
         )
         self.assertEqual(tree["required_parents"]["rector-dead-code"], ["rector-php-set"])
         self.assertEqual(tree["required_parents"]["rector-code-quality"], ["rector-php-set"])
-        self.assertEqual(tree["required_parents"]["rector-early-return"], ["rector-php-set"])
+        self.assertNotIn("rector-early-return", tree["required_parents"])
         self.assertEqual(tree["required_parents"]["rector-type-coverage"], [])
         self.assertEqual(tree["required_parents"]["rector-phpunit-set"], ["phpunit"])
         # Exactly these two nodes use required-any today.
@@ -155,11 +160,15 @@ class LoadTreeTests(unittest.TestCase):
         # Follow-up restructuring: rector-type-coverage/rector-phpunit-set
         # lost their direct required: rector-php-set edge, gated instead via
         # recommended edges from sibling Rector nodes (dead-code/
-        # early-return for type-coverage; code-quality for phpunit-set).
+        # code-quality for type-coverage; code-quality for phpunit-set).
+        # Ticket 48: rector-type-coverage's second recommended parent used to
+        # be rector-early-return (control-flow flattening); once that node
+        # was dropped, rector-code-quality — which absorbed its rules — took
+        # over the gate slot instead of the slot disappearing.
         tree = load_tree()
         self.assertEqual(
             set(tree["recommended_parents"]["rector-type-coverage"]),
-            {"rector-dead-code", "rector-early-return", "php-cs-fixer", "phpstan-level-3"},
+            {"rector-dead-code", "rector-code-quality", "php-cs-fixer", "phpstan-level-3"},
         )
         self.assertEqual(
             set(tree["recommended_parents"]["rector-phpunit-set"]),
@@ -464,9 +473,9 @@ class StructuralScanGateTests(unittest.TestCase):
             # php-structural-scan by fulfilment alone.
             "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            # ticket 43: also fulfils rector-php-set/-code-quality/-phpunit-set/
-            # -early-return (substring-detected, same style as DeadCode/Type).
-            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
+            # ticket 43: also fulfils rector-php-set/-code-quality/-phpunit-set
+            # (substring-detected, same style as DeadCode/Type).
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             # ticket 41: editorconfig is now an 8th structural-scan leaf —
             # this "fully tooled" fixture needs it decided (fulfilled) too.
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
@@ -556,7 +565,7 @@ class StructuralScanGateTests(unittest.TestCase):
         # Drop only the "Type"/"type" markers (rector-type-coverage) — keep
         # every other ticket-43 rector marker so only this one leaf is
         # unfulfilled-and-rejected, not incidentally several more.
-        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList EarlyReturn"
+        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList"
         tmp, root = self._make_repo(files)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
@@ -604,7 +613,7 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
             # ticket 43: level chain now reaches phpstan-level-10 (was 3).
             "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             ".github/workflows/ci.yml": (
                 "jobs:\n"
                 "  audit:\n"
@@ -643,7 +652,7 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         # rejected leaf still counts as resolved, unlike a required parent.
         files = self._fully_tooled_php_leaves()
         # Drop only the "Type"/"type" markers (rector-type-coverage).
-        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList EarlyReturn"
+        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList"
         tmp, root = self._make_repo(files)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
@@ -983,7 +992,7 @@ class ComposerAuditGateTests(unittest.TestCase):
             # ticket 43: level chain now reaches phpstan-level-10 (was 3).
             "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             # ticket 42: editorconfig is no longer one of composer-audit's
             # siblings (it gates structural-scan directly, not
             # php-structural-scan) — kept here anyway, harmless, so this
@@ -1336,12 +1345,14 @@ class RecommendedGateTests(unittest.TestCase):
         # itself stays proposable here — its undecided status under test is
         # about rector-dead-code's gate, not php-cs-fixer's own. `rector.php`
         # fulfils rector-php-set only (ticket 43) — no DeadCode/Type/
-        # EarlyReturn markers, so rector-dead-code/rector-type-coverage/
-        # rector-early-return all stay unfulfilled, exactly what each test
+        # CodeQuality markers, so rector-dead-code/rector-type-coverage/
+        # rector-code-quality all stay unfulfilled, exactly what each test
         # below is probing. rector-type-coverage no longer has rector-php-set
         # as a required parent at all (follow-up restructuring) — it's gated
-        # by rector-dead-code/rector-early-return as recommended parents
-        # instead, alongside php-cs-fixer/phpstan-level-3.
+        # by rector-dead-code/rector-code-quality as recommended parents
+        # instead, alongside php-cs-fixer/phpstan-level-3 (ticket 48:
+        # rector-code-quality replaced the now-dropped rector-early-return
+        # in this gate).
         return {
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
@@ -1406,9 +1417,11 @@ class RecommendedGateTests(unittest.TestCase):
         # via the required chain -> counts as phpstan-level-3 "decided" for
         # rector-type-coverage's recommended edge (php-cs-fixer is decided
         # here too, via fulfilment, so it isn't the thing under test).
-        # rector-type-coverage also gained rector-dead-code/rector-early-return
-        # as recommended parents (follow-up restructuring) — decided here via
-        # rejection, since this fixture's rector.php doesn't fulfil either.
+        # rector-type-coverage also gained rector-dead-code/rector-code-quality
+        # as recommended parents (follow-up restructuring; ticket 48 swapped
+        # in rector-code-quality where rector-early-return used to be) —
+        # decided here via rejection, since this fixture's rector.php doesn't
+        # fulfil either.
         files = self._p0_fulfilled_files()
         files["composer.json"] = json.dumps({"require-dev": {
             "phpstan/phpstan": "^1.0",
@@ -1420,7 +1433,7 @@ class RecommendedGateTests(unittest.TestCase):
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
             (root / "docs" / "refactoring" / "out-of-scope" / "rector-dead-code.md").write_text("rejected\n")
-            (root / "docs" / "refactoring" / "out-of-scope" / "rector-early-return.md").write_text("rejected\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "rector-code-quality.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-type-coverage", nodes)
         finally:
@@ -1433,7 +1446,7 @@ class RecommendedGateTests(unittest.TestCase):
             self.assertEqual(withheld["rector-dead-code"], {"php-cs-fixer"})
             self.assertEqual(
                 withheld["rector-type-coverage"],
-                {"rector-dead-code", "rector-early-return", "php-cs-fixer", "phpstan-level-3"},
+                {"rector-dead-code", "rector-code-quality", "php-cs-fixer", "phpstan-level-3"},
             )
         finally:
             tmp.cleanup()
@@ -2221,7 +2234,7 @@ class RoadmapTests(unittest.TestCase):
             ".php-cs-fixer.php": "<?php return [];",
             "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList EarlyReturn",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
             ".github/workflows/ci.yml": (
                 "jobs:\n"
@@ -2334,8 +2347,8 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_resolved_gate_walk_through_to_structural_scan(self):
-        # phpunit is the last of php-structural-scan's thirteen leaves to
-        # resolve (the other twelve rejected via out-of-scope, same for
+        # phpunit is the last of php-structural-scan's twelve leaves to
+        # resolve (the other eleven rejected via out-of-scope, same for
         # structural-scan's other two resolved-parents, editorconfig and
         # ci-runner) -- landing it must report structural-scan itself, not
         # the never-exposed php-structural-scan aggregation node in between.
@@ -2343,7 +2356,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             "composer-audit", "test-runner-if-missing", "php-cs-fixer", "phpstan-level-10",
             "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
             "rector-php-set", "rector-code-quality", "rector-phpunit-set",
-            "rector-early-return", "psalm-taint-analysis", "editorconfig", "ci-runner",
+            "psalm-taint-analysis", "editorconfig", "ci-runner",
         ]
         files = {
             "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
