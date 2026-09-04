@@ -1,5 +1,7 @@
 # Finding the bookkeeping branch
 
+**Doesn't run at all** when `refactor-learn/SKILL.md`'s native-tracker in-flight fold-in exception applies — the writes ride the candidate's own already-open branch instead, no dedicated branch to find or create. Only relevant when that exception doesn't apply: no candidate MR opened this pass, or the tracker has no native labels.
+
 Deterministic, no memory required, never search for a name. Named `refactor-learn/bookkeeping-N`, N starting at 1, numbers never reused even once merged or deleted.
 
 1. `git symbolic-ref refs/remotes/origin/HEAD` (or equivalent) for the default branch, then `git ls-remote --heads origin 'refactor-learn/bookkeeping-*'` for every bookkeeping branch that exists remotely. None found → start fresh at N=1 (step 4).
