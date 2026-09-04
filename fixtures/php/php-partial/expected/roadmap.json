@@ -27,6 +27,13 @@
         "has_lock": true
       }
     },
+    "psr-4": {
+      "fulfilled": false,
+      "reason": "no autoload.psr-4 declared",
+      "details": {
+        "declared": false
+      }
+    },
     "ci-runner": {
       "fulfilled": false,
       "reason": "no CI config",
@@ -230,9 +237,10 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
+      "reason": "waiting on: psr-4, composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
       "details": {
         "unresolved": [
+          "psr-4",
           "composer-audit",
           "phpstan-level-10",
           "phpstan-deprecation-rules",
@@ -295,6 +303,17 @@
     },
     {
       "n": 4,
+      "node": "psr-4",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 5,
       "node": "composer-audit",
       "type": "tooling",
       "required_parents": [
@@ -306,7 +325,7 @@
       "reason": "real require dependency present"
     },
     {
-      "n": 5,
+      "n": 6,
       "node": "phpstan-level-0",
       "type": "tooling",
       "required_parents": [
@@ -317,7 +336,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 7,
       "node": "phpstan-level-1",
       "type": "tooling",
       "required_parents": [
@@ -328,7 +347,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
       "node": "phpstan-level-2",
       "type": "tooling",
       "required_parents": [
@@ -339,7 +358,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 8,
+      "n": 9,
       "node": "phpstan-level-3",
       "type": "tooling",
       "required_parents": [
@@ -350,22 +369,11 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 9,
+      "n": 10,
       "node": "phpstan-level-4",
       "type": "tooling",
       "required_parents": [
         "phpstan-level-3"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 10,
-      "node": "phpstan-level-5",
-      "type": "tooling",
-      "required_parents": [
-        "phpstan-level-4"
       ],
       "required_any_parents": [],
       "recommended_parents": [],

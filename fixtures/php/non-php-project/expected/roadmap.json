@@ -27,6 +27,13 @@
         "has_lock": false
       }
     },
+    "psr-4": {
+      "fulfilled": false,
+      "reason": "no autoload.psr-4 declared",
+      "details": {
+        "declared": false
+      }
+    },
     "ci-runner": {
       "fulfilled": false,
       "reason": "no CI config",
@@ -225,9 +232,10 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpunit, test-runner-if-missing, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
+      "reason": "waiting on: psr-4, composer-audit, phpunit, test-runner-if-missing, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
       "details": {
         "unresolved": [
+          "psr-4",
           "composer-audit",
           "phpunit",
           "test-runner-if-missing",

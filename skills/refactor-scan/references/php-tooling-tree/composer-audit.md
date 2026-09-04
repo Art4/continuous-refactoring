@@ -14,7 +14,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   `require` block names at least one real package (platform pseudo-packages — `php`, `hhvm`, `ext-*`,
   `lib-*`, `composer-plugin-api`, `composer-runtime-api` — don't count; `composer audit` has nothing to
   check without a real dependency), **or** (b) every other leaf feeding `php-structural-scan`
-  (`php-structural-scan.md`) — `phpunit`, `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-10`,
+  (`php-structural-scan.md`) — `psr-4` (`psr-4.md`), `phpunit`, `test-runner-if-missing`, `php-cs-fixer`, `phpstan-level-10`,
   `phpstan-deprecation-rules` (`phpstan.md`), `rector-dead-code`, `rector-type-coverage`, `rector-php-set`,
   `rector-code-quality`, `rector-phpunit-set` (`rector.md`), `psalm-taint-analysis`
   (`psalm.md`) — is already resolved — so a dependency-free target still eventually resolves this leaf

@@ -20,33 +20,49 @@ PSR-4-mapped test layout).
 **Priority:** low — no discovered bug motivates urgency; a proposed tree enhancement, not a fix
 (same framing as ticket 38's housekeeping node).
 
-**Status:** needs-triage
+**Status:** done
 
-Open design questions:
-
-- [ ] Where does this sit in the tree — recommended parent `composer` as sketched in the
-  originating memory, or does it need a `required` edge from something (is namespacing app code a
-  prerequisite the tree should force before other structural nodes, or purely opt-in)?
-- [ ] `Tool:` field — `none` (a `composer.json` config change, not a package adoption) as the memory
-  suggests; confirm against the existing convention for config-only nodes rather than
-  tool-adoption nodes.
-- [ ] Fulfilment check: full-repo PSR-4 compliance (every source file namespaced and mapped), or a
-  lower bar (an `autoload` PSR-4 section exists and at least new/touched files comply, migrating
-  incrementally)? A flat, unnamespaced legacy codebase like `legacy-todo` could make "full
-  compliance" a large, disruptive single MR rather than the tree's usual small-step shape.
-- [ ] MR scope: a single MR (declare the mapping + move/namespace every file), or, like the
-  PHPStan-level/Rector-level nodes, adopted incrementally in slices — and if incremental, what
-  determines a slice boundary (per-file? per-directory?)?
-- [ ] Downstream updates this would trigger once decided: `phpstan.md`'s `paths` resolution note
-  (stop falling back to `src` once a PSR-4 mapping can be assumed present) and `phpunit.md`'s
-  `tests/Unit/` namespace-prefix derivation (currently ad hoc from `composer.json` `name` alone) —
-  confirm both actually need edits, or whether one turns out to be a non-issue once grilled.
-- [ ] Interaction with `structural-scan`'s resolved-gate — should `psr-4` become one of its resolved
-  parents (structural work waits on it being decided), or stay a parallel, non-gating tooling node
-  like most others in the family?
+- [x] `composer` is a `required` parent, not `recommended` as originally sketched — a `psr-4`
+  mapping is literally a field inside `composer.json`, impossible without it; `recommended` would
+  wrongly allow it to stay proposable even with `composer` rejected outright.
+- [x] `Tool:` `none` — confirmed against the `.editorconfig` precedent ("plain-text convention
+  file... not a runnable tool").
+- [x] Fulfilment check settled at a deliberately **low** bar, mirroring `phpstan-level-0`'s empty
+  baseline rather than demanding full-repo compliance: `autoload.psr-4` declared **and** at least
+  one real file verifiably namespaced under it — declaration alone isn't enough (the same
+  "adopted, not just configured" bar ticket 48 showed the tree needs). Full migration is
+  deliberately **not** this node's job — every remaining file becomes ordinary `structural-scan`
+  work instead, discovered incrementally like any other deepening.
+- [x] MR scope, matching the above: declare the mapping + migrate exactly one file as proof, not
+  every file.
+- [x] `phpstan.md`'s `paths` resolution needs no change — already generic, the `src` fallback
+  simply stops triggering once a real `autoload` section exists.
+- [x] `phpunit.md`'s `tests/Unit/` namespace now derives from `psr-4`'s own declared root namespace
+  once fulfilled (avoiding two sources of truth that could drift), falling back to the previous
+  `composer.json` `name`-derivation otherwise.
+- [x] `psr-4` **does** become a resolved-parent of `php-structural-scan` — a thirteenth leaf,
+  gating structural work on a different basis than every other leaf (a code-organization
+  convention, not a checking tool), but the same underlying reasoning: settled before agent-driven
+  structural changes begin.
+- [x] New ADR-0032. `tooling_tree.py` gains `_psr4_root_namespace`/`_has_verified_psr4_autoload` and
+  a `detect_nodes()` entry; `PsrFourGateTests` added to `scripts/test_tooling_tree.py`; every
+  `fixtures/php/*/expected/roadmap.json` regenerated against the real parser;
+  `fixtures/php/php-clean/project/composer.json` gained a real `autoload.psr-4` section (its
+  existing `src/Greeter.php` was already namespaced, just not wired up).
+  `python3 -m unittest discover -s scripts -p 'test_*.py'` (247/247) and
+  `python3 scripts/validate_skills.py` (same 5 pre-existing advisory warnings) both green.
 
 ## Comments
 
 > **2026-09-04:** Filed from the `psr4-tooling-tree-node-idea` memory (raised 2026-09-04 during the
 > `Art4/legacy-todo` reviewer-loop run), per the user's request to prepare "für später" ideas for
-> fixing. Not yet grilled.
+> fixing.
+
+> **2026-09-04 (later):** Design settled via a `/grill-me` session (in German) — the last of the
+> three "für später" tickets (48, 49, 50). Researched the existing `.editorconfig`/`phpstan-level-0`
+> precedents directly rather than guessing at conventions. Corrected the originating memory's
+> `composer`-as-`recommended` framing to `required`. Settled the node's biggest open question —
+> full compliance vs. a low, mechanism-only bar — in favor of the low bar, deliberately deferring
+> the actual file-by-file migration to ordinary structural-scan work rather than having this node
+> pretend to own a potentially large, disruptive migration. Implemented in the same session on
+> branch `tickets/50-psr4-app-source-autoloading-node`.

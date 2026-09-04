@@ -94,11 +94,14 @@ class LoadTreeTests(unittest.TestCase):
         # housekeeping, without needing `psalm` to be a leaf too. Ticket 48
         # later dropped `rector-early-return` itself (its rule set shipped
         # permanently empty upstream, folded into `rector-code-quality`) —
-        # back down to twelve.
+        # back down to twelve. Ticket 50 added `psr-4` as a new thirteenth
+        # leaf — gating on a different basis than every other leaf here (a
+        # code-organization convention, not a checking tool).
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["php-structural-scan"]),
             {
+                "psr-4",
                 "composer-audit",
                 "phpunit",
                 "test-runner-if-missing",
@@ -465,8 +468,14 @@ class StructuralScanGateTests(unittest.TestCase):
                     "phpunit/phpunit": "^10.0",
                     "friendsofphp/php-cs-fixer": "^3.0",
                 },
+                # ticket 50: psr-4 is a 13th php-structural-scan leaf — a
+                # "fully tooled" fixture needs a real, verified mapping
+                # (declaration alone isn't enough, see PsrFourGateTests),
+                # not just a rejection.
+                "autoload": {"psr-4": {"App\\": "src/"}},
             }),
             "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
             ".php-cs-fixer.php": "<?php return [];",
             # ticket 43: level chain now reaches phpstan-level-10 (was 3) —
             # a "fully tooled" fixture must reach the new top to resolve
@@ -596,9 +605,10 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         return tmp, root
 
     def _fully_tooled_php_leaves(self):
-        # Every one of php-structural-scan's twelve leaves (ticket 43: was
-        # seven) fulfilled — deliberately omits .editorconfig, which is not
-        # one of its siblings (it gates structural-scan directly instead).
+        # Every one of php-structural-scan's thirteen leaves (ticket 43: was
+        # seven; ticket 50 added psr-4 as the thirteenth) fulfilled —
+        # deliberately omits .editorconfig, which is not one of its
+        # siblings (it gates structural-scan directly instead).
         return {
             "composer.json": json.dumps({
                 "require-dev": {
@@ -607,8 +617,10 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
                     "phpunit/phpunit": "^10.0",
                     "friendsofphp/php-cs-fixer": "^3.0",
                 },
+                "autoload": {"psr-4": {"App\\": "src/"}},
             }),
             "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
             ".php-cs-fixer.php": "<?php return [];",
             # ticket 43: level chain now reaches phpstan-level-10 (was 3).
             "phpstan.neon": "parameters:\n    level: 10\n",
@@ -622,7 +634,8 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
             ),
-            # ticket 44: `psalm-taint-analysis` is the thirteenth leaf — this
+            # ticket 44: `psalm-taint-analysis` is one of the thirteen leaves
+            # (ticket 50: psr-4 is now fulfilled instead, above) — this
             # fixture never adopted vimeo/psalm at all (PHPStan path, no
             # taint scanning either), so it needs its own rejection written
             # too (same reasoning as StructuralScanGateTests'
@@ -915,6 +928,96 @@ class PsalmTaintAnalysisTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class PsrFourGateTests(unittest.TestCase):
+    """Ticket 50: `psr-4` — declared AND verifiably in use, not declaration
+    alone (php-tooling-tree/psr-4.md's Fulfilment check)."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_required_parent_is_composer(self):
+        tree = load_tree()
+        self.assertEqual(tree["required_parents"]["psr-4"], ["composer"])
+
+    def test_unfulfilled_when_no_autoload_declared(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"])
+            self.assertFalse(d["psr-4"]["details"]["declared"])
+        finally:
+            tmp.cleanup()
+
+    def test_unfulfilled_when_declared_but_unused(self):
+        # A declaration nothing yet uses is a claim, not evidence — the
+        # exact pattern ticket 48 flagged as a problem for a different node.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}}),
+            "composer.lock": "{}",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"])
+            self.assertTrue(d["psr-4"]["details"]["declared"])
+            self.assertIn("declared but no file", d["psr-4"]["reason"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_when_declared_and_a_real_file_uses_it(self):
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}}),
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+    def test_unfulfilled_when_file_under_mapped_dir_uses_a_different_namespace(self):
+        # A file exists under the mapped directory, but doesn't actually
+        # declare the mapped namespace — not proof the mapping is in use.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}}),
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace SomethingElse;\n\nclass Example\n{\n}\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_with_array_of_directories(self):
+        # Composer's own schema allows a psr-4 prefix to map to a list of
+        # directories, not just one — must not assume a bare string.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": ["src/", "lib/"]}}}),
+            "composer.lock": "{}",
+            "lib/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+    def test_resolved_parent_of_php_structural_scan(self):
+        tree = load_tree()
+        self.assertIn("psr-4", tree["resolved_parents"]["php-structural-scan"])
+
+
 class ComposerAuditGateTests(unittest.TestCase):
     """php-tooling-tree.md's composer-audit stop conditions: proposable once
     ci-runner + composer are fulfilled, and (a real `require` dependency
@@ -1014,6 +1117,10 @@ class ComposerAuditGateTests(unittest.TestCase):
             # the other "fully tooled" fixtures above. `psalm` itself is not
             # a leaf (ticket 37, dropped as redundant) so it needs none.
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
+            # ticket 50: `psr-4` joined the same "every other leaf" set —
+            # rejected here rather than adopted, simplest way to keep this
+            # fixture focused on composer-audit's own fallback logic.
+            "docs/refactoring/out-of-scope/psr-4.md": "rejected: not adopting namespacing yet\n",
         })
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
@@ -2110,7 +2217,7 @@ class RoadmapTests(unittest.TestCase):
             self.assertEqual(r[1]["node"], "ci-runner")
             self.assertEqual(r[2]["node"], "editorconfig")
             self.assertEqual(r[3]["node"], "composer")
-            self.assertIn(r[4]["node"], ["composer-audit", "php-cs-fixer", "phpunit"])
+            self.assertIn(r[4]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
         finally:
             tmp.cleanup()
 
@@ -2130,7 +2237,7 @@ class RoadmapTests(unittest.TestCase):
             self.assertEqual(r[0]["node"], "ci-runner")
             self.assertEqual(r[1]["node"], "editorconfig")
             self.assertEqual(r[2]["node"], "composer")
-            self.assertIn(r[3]["node"], ["composer-audit", "php-cs-fixer", "phpunit"])
+            self.assertIn(r[3]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
         finally:
             tmp.cleanup()
 
@@ -2229,8 +2336,10 @@ class RoadmapTests(unittest.TestCase):
                 "require": {
                     "some/real-dep": "^1.0",
                 },
+                "autoload": {"psr-4": {"App\\": "src/"}},
             }),
             "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
             ".php-cs-fixer.php": "<?php return [];",
             "phpstan.neon": "parameters:\n    level: 10\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
@@ -2299,8 +2408,8 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
 
     def test_multi_child_fan_out_from_composer(self):
         # composer alone (no phpunit/cs-fixer/CI configured yet) unblocks
-        # three siblings at once: phpunit and test-runner-if-missing
-        # directly, phpstan-level-0 through the static-code-analyzer
+        # four siblings at once: phpunit, test-runner-if-missing, and
+        # psr-4 directly, phpstan-level-0 through the static-code-analyzer
         # walk-through (a pure organizational node, never itself reported).
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
@@ -2310,7 +2419,12 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             got = {(c["node"], c["type"]) for c in directly_unblocked_children(root, "composer")}
             self.assertEqual(
                 got,
-                {("phpunit", "required"), ("test-runner-if-missing", "required"), ("phpstan-level-0", "required")},
+                {
+                    ("phpunit", "required"),
+                    ("test-runner-if-missing", "required"),
+                    ("phpstan-level-0", "required"),
+                    ("psr-4", "required"),
+                },
             )
             self.assertNotIn("static-code-analyzer", {c["node"] for c in directly_unblocked_children(root, "composer")})
         finally:
@@ -2347,13 +2461,13 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_resolved_gate_walk_through_to_structural_scan(self):
-        # phpunit is the last of php-structural-scan's twelve leaves to
-        # resolve (the other eleven rejected via out-of-scope, same for
+        # phpunit is the last of php-structural-scan's thirteen leaves to
+        # resolve (the other twelve rejected via out-of-scope, same for
         # structural-scan's other two resolved-parents, editorconfig and
         # ci-runner) -- landing it must report structural-scan itself, not
         # the never-exposed php-structural-scan aggregation node in between.
         other_leaves = [
-            "composer-audit", "test-runner-if-missing", "php-cs-fixer", "phpstan-level-10",
+            "psr-4", "composer-audit", "test-runner-if-missing", "php-cs-fixer", "phpstan-level-10",
             "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
             "rector-php-set", "rector-code-quality", "rector-phpunit-set",
             "psalm-taint-analysis", "editorconfig", "ci-runner",

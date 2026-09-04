@@ -25,7 +25,7 @@ The convention `tests/README.md` documents — a human may adapt it for the targ
 
 `Fakes/` and `Fixtures/` never get their own `phpunit.xml.dist` testsuite — nothing in them is a test case, so PHPUnit has nothing to run there.
 
-`autoload-dev` in `composer.json`, one entry per folder actually in use: PSR-4 for `tests/Unit/` (namespace prefix derived from the target's own `composer.json` `name`, e.g. `art4/legacy-todo` → `Art4\LegacyTodo\Tests\Unit\`), `psr-0` for `tests/Psr0/`, `classmap` for `tests/Legacy/` (it isn't autoload-mappable by definition — that's exactly why it's not in `Unit/`).
+`autoload-dev` in `composer.json`, one entry per folder actually in use: PSR-4 for `tests/Unit/`, `psr-0` for `tests/Psr0/`, `classmap` for `tests/Legacy/` (it isn't autoload-mappable by definition — that's exactly why it's not in `Unit/`). `tests/Unit/`'s namespace prefix: the `psr-4` node (`psr-4.md`) is fulfilled → derive it from that node's own declared app-source root namespace (e.g. root namespace `Art4\LegacyTodo\` → `Art4\LegacyTodo\Tests\Unit\`) — one source of truth for the target's namespace, not two that could drift apart. `psr-4` isn't fulfilled yet → fall back to deriving the prefix independently from `composer.json`'s own `name` field (e.g. `art4/legacy-todo` → `Art4\LegacyTodo\Tests\Unit\`), same as before this node existed.
 
 ## Creating or growing `tests/README.md`
 

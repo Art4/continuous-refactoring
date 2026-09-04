@@ -27,6 +27,13 @@
         "has_lock": false
       }
     },
+    "psr-4": {
+      "fulfilled": false,
+      "reason": "no autoload.psr-4 declared",
+      "details": {
+        "declared": false
+      }
+    },
     "ci-runner": {
       "fulfilled": false,
       "reason": "no CI config",
@@ -225,9 +232,10 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpunit, test-runner-if-missing, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
+      "reason": "waiting on: psr-4, composer-audit, phpunit, test-runner-if-missing, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
       "details": {
         "unresolved": [
+          "psr-4",
           "composer-audit",
           "phpunit",
           "test-runner-if-missing",
@@ -304,6 +312,17 @@
     },
     {
       "n": 5,
+      "node": "psr-4",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 6,
       "node": "php-cs-fixer",
       "type": "tooling",
       "required_parents": [
@@ -316,7 +335,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 7,
       "node": "phpunit",
       "type": "tooling",
       "required_parents": [
@@ -327,7 +346,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
       "node": "rector-phpunit-set",
       "type": "tooling",
       "required_parents": [
@@ -341,7 +360,7 @@
       "reason": "required parents fulfilled | outlook: would benefit from rector-code-quality (recommended) \u2014 still proposable"
     },
     {
-      "n": 8,
+      "n": 9,
       "node": "rector-type-coverage",
       "type": "tooling",
       "required_parents": [],
@@ -355,14 +374,8 @@
       "reason": "required parents fulfilled | outlook: would benefit from rector-dead-code (recommended) \u2014 still proposable"
     },
     {
-      "n": 9,
-      "node": "phpstan-level-11",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
-    },
-    {
       "n": 10,
-      "node": "phpstan-level-12",
+      "node": "phpstan-level-11",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     }

@@ -170,6 +170,49 @@ def _has_php_files(repo: pathlib.Path) -> bool:
     return False
 
 
+def _psr4_root_namespace(composer: dict | None) -> str | None:
+    """The declared PSR-4 root namespace for the app's own source, if any —
+    the first entry in `autoload.psr-4` (composer.json), trailing backslash
+    stripped. `None` when no `autoload.psr-4` section exists at all, or it's
+    empty. `phpunit.md`'s `tests/Unit/` namespace derivation reads this once
+    `psr-4` is fulfilled, instead of independently re-deriving from
+    `composer.json`'s `name` field."""
+    if not composer:
+        return None
+    psr4 = (composer.get("autoload") or {}).get("psr-4") or {}
+    for prefix in psr4:
+        return prefix.rstrip("\\")
+    return None
+
+
+def _has_verified_psr4_autoload(repo: pathlib.Path, composer: dict | None) -> bool:
+    """True only once `autoload.psr-4` is both declared AND actually used —
+    at least one real `.php` file under one of its mapped directories
+    carries a `namespace` declaration matching the mapped prefix.
+    Declaration alone (an autoload section nothing yet uses) is deliberately
+    not enough — a claim, not evidence the mechanism works
+    (`php-tooling-tree/psr-4.md`)."""
+    if not composer:
+        return False
+    psr4 = (composer.get("autoload") or {}).get("psr-4") or {}
+    for prefix, dirs in psr4.items():
+        prefix_stripped = prefix.rstrip("\\")
+        if not prefix_stripped:
+            continue
+        for d in ([dirs] if isinstance(dirs, str) else dirs):
+            base = repo / d
+            if not base.is_dir():
+                continue
+            for f in base.rglob("*.php"):
+                try:
+                    txt = f.read_text(encoding="utf-8")
+                except OSError:
+                    continue
+                if re.search(rf"^\s*namespace\s+{re.escape(prefix_stripped)}\b", txt, re.MULTILINE):
+                    return True
+    return False
+
+
 def _has_dep(composer: dict | None, name: str) -> bool:
     if not composer:
         return False
@@ -758,6 +801,17 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     )
     # composer
     set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
+    # psr-4: declared AND verifiably in use — see _has_verified_psr4_autoload's
+    # own docstring for why declaration alone isn't enough.
+    has_psr4_declared = _psr4_root_namespace(composer) is not None
+    psr4_verified = _has_verified_psr4_autoload(repo, composer)
+    if psr4_verified:
+        psr4_reason = "autoload.psr-4 declared and in use"
+    elif has_psr4_declared:
+        psr4_reason = "autoload.psr-4 declared but no file under it uses the namespace yet"
+    else:
+        psr4_reason = "no autoload.psr-4 declared"
+    set_node("psr-4", psr4_verified, psr4_reason, declared=has_psr4_declared)
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
     # php-minimal-version: composer.json's declared PHP floor vs.
