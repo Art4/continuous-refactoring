@@ -1437,30 +1437,25 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 sim_ok, sim_why = _composer_audit_extra_gate(has_real_dep, tree, sim_fulfilled, rejected)
                 if not sim_ok:
                     continue
-            # For phpstan levels, additional empty-baseline gate (same rule
-            # throughout the 1..10 chain)
+            # For phpstan levels, the level chain's own empty-baseline gate
+            # (phpstan.md's Stop conditions): predecessor level fulfilled AND
+            # its baseline currently empty. roadmap() is a deterministic
+            # simulation over real repo state, not a second engine — it
+            # doesn't simulate baseline-shrink candidates landing (that's
+            # real, skill-prose-driven work: refactor-scan step 4b proposes
+            # the gate, refactor-design's phpstan-baseline-shrink.md picks
+            # the fix). A non-empty baseline just stops the chain here for
+            # the rest of this simulation, same as it does for real in
+            # next_candidates().
             if node in _PHPSTAN_LEVEL_NODES:
-                # Need predecessor fulfilled with empty baseline
-                # Predecessor mapping: p1 needs p0 empty, p2 needs p1 empty, etc.
                 lvl = int(node.rsplit("-", 1)[1])
                 pred = "phpstan-level-0" if lvl == 1 else f"phpstan-level-{lvl - 1}"
-                # For simulation, check predecessor fulfilled
                 if not sim_fulfilled.get(pred, False):
                     continue
-                # Check baseline empty per current repo state (or simulated after fulfilling pred? assume after pred fulfilled baseline becomes empty?)
-                # For deterministic roadmap, we assume after p0 fulfilled, baseline may be non-empty -> p1 blocked until shrink.
-                # Our detection says baseline_empty reflects current file state.
-                # For simulation without shrinking, p1 would be blocked if baseline non-empty.
-                # But to keep roadmap simple, we allow p1 if baseline_empty true, else skip and let tooling pressure fill?
-                # We'll check actual baseline_empty
                 if not _is_baseline_empty(repo):
-                    # If non-empty, p1 not yet proposable — skip
                     continue
-                # Also psalm equivalence blocks
                 if detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
                     continue
-                # Alternative: if predecessor just simulated as fulfilled in this roadmap run, assume baseline becomes empty after shrink step? For simplicity allow next level.
-                pass
             # For rector nodes: require p0 fulfilled (already checked), recommended parents are advisory not blocking
             # Choose best by priority order (first found)
             best = node

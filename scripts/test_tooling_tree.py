@@ -1394,6 +1394,33 @@ class CiSelfWiringTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_fulfilled_level_exposes_non_empty_baseline_in_details(self):
+        # Regression guard for ticket 51's baseline-shrink mechanism:
+        # refactor-scan step 4b reads detect_nodes()'s own output to find
+        # the highest fulfilled phpstan-level-N and check its baseline —
+        # no separate detection path exists, so `fulfilled` staying True
+        # alongside `details.baseline_empty` staying False (real, unshrunk
+        # findings) is the exact signal that mechanism depends on.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 1\n",
+            "phpstan-baseline.neon": (
+                "parameters:\n    ignoreErrors:\n"
+                "        -\n"
+                "            message: '#^Variable \\$db might not be defined\\.$#'\n"
+                "            count: 1\n"
+                "            path: db.php\n"
+            ),
+            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN,
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-1"]["fulfilled"], d["phpstan-level-1"])
+            self.assertFalse(d["phpstan-level-1"]["details"]["baseline_empty"], d["phpstan-level-1"])
+        finally:
+            tmp.cleanup()
+
 
 class RectorSetListUnderscoreCasingTests(unittest.TestCase):
     """Rector's current SetList API names sets as ALL_CAPS-with-underscore

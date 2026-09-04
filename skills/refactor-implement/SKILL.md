@@ -25,6 +25,8 @@ Structural candidate: list the seams the plan names and confirm them with the us
 
 Tooling-tree node: no seam to confirm — its scope is a config/dependency change (see the tree doc's MR scope), not code. Skip straight to making that change; no red → green cycle, only its Fulfilment check (step 3).
 
+Baseline-shrink candidate: no seam to confirm either — `refactor-design` already picked the group and files (`phpstan-baseline-shrink.md` step 3). No red → green cycle: this satisfies a static-analysis finding without introducing new behavior, so there's no new test to write at a seam — the full test suite (step 3) is what catches an unintended behavior change instead.
+
 **`loop-config` exception — this node itself:** `refactor-design` couldn't write `Pending candidates` (the Refactoring Notes' `bookkeeping.md` didn't exist yet). Creating the file here, perform every write `skills/continuous-refactoring/references/loop-config-interview.md`'s `## Record` names (Create-mode, tracker file, the `Refactoring Notes:` line) — the interview already decided these, don't leave them unset or invent placeholders. Two things `## Record` doesn't cover, this step's own addition: set `Pending candidates` to this candidate's issue, and `Focus areas` only if the interview named one. Leave `Fulfilled nodes` unset — still `refactor-learn`'s field, filled in its own follow-up commit. All of it in the same MR as `bookkeeping.md` — this node's only one.
 
 ### 2. One slice at a time
@@ -33,11 +35,15 @@ Skipped for a tooling-tree node (step 1 already made its one change). Structural
 
 Each slice: write the failing test first (red), then only enough code to pass it (green). One seam, one test, one minimal implementation per cycle. Don't anticipate future slices or add speculative features.
 
+Baseline-shrink candidate: skip the red → green cycle (step 1) — make the planned fix file by file, **one commit per file fixed** (or per otherwise-distinct reduction), even within the same MR. A clean, reviewable trail of exactly which reduction landed where, since a group may take more than one MR to fully clear (step 5's multi-MR `Closes` handling already covers that case).
+
 ### 3. Verify the loop on completion
 
 Structural candidate, slices done: run the full test suite (surviving plan tests plus new seam tests, all green) and the fulfilled tooling (PHPStan, Rector, style) over touched files — must not regress mechanical quality.
 
 Tooling-tree node: no test suite to judge it — the node's own **Fulfilment check** from the tree doc is the acceptance check. Run or confirm exactly what it specifies.
+
+Baseline-shrink candidate: regenerate `phpstan-baseline.neon` and confirm the touched files' entries for the chosen group are gone — full removal for what this MR actually touched; reducing the group overall is enough, it doesn't have to empty in one MR (`phpstan-baseline-shrink.md` step 3). Also run the full test suite over touched files, same as a structural candidate — real application code changed here too, even though no new test was written.
 
 ### 4. Review the diff
 
@@ -50,7 +56,7 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 ### 5. Open the merge request
 
-Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil (e.g. PHPStan-level shrinking before the next level) → don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
+Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil — the common case for a baseline-shrink candidate, whose chosen group can span more MRs than fit this pass — don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
 
 `docs/agents/issue-tracker.md` names a native-label tracker and `refactor-learn`'s native-tracker in-flight fold-in exception applies (its closing call will ride this same branch later this pass) → open the MR **as a draft** (`skills/continuous-refactoring/references/opening-a-merge-request.md`'s *Draft candidate MRs*) — the fold-in commit landing and marking it ready for review is `refactor-learn`'s job, not this step's. No native-label tracker, or the fold-in exception doesn't apply → open it normally, same as always.
 
@@ -73,4 +79,4 @@ The opened merge request → `refactor-learn`.
 
 ## Completion criterion
 
-The branch exists with the work on it, review is clean on both axes, MR is open (CI green where the target runs it) — or, no forge/remote at all, the branch is handed to the human per `opening-a-merge-request.md` instead. Structural: every slice implemented red → green, full suite green, fulfilled tooling clean on touched files. Tooling-tree node: the MR-scope change is made and its Fulfilment check passes.
+The branch exists with the work on it, review is clean on both axes, MR is open (CI green where the target runs it) — or, no forge/remote at all, the branch is handed to the human per `opening-a-merge-request.md` instead. Structural: every slice implemented red → green, full suite green, fulfilled tooling clean on touched files. Tooling-tree node: the MR-scope change is made and its Fulfilment check passes. Baseline-shrink candidate: the touched files' entries for the chosen group are confirmed gone from the regenerated baseline, one commit per file fixed, full suite green.

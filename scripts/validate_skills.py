@@ -94,6 +94,8 @@ VOCAB_ALLOW = {
     ("refactor-scan", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("refactor-scan", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
     ("refactor-scan", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
+    ("refactor-design", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
+    ("refactor-implement", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
 }
 
 # duplication_issues() false positives: a shared sentence between two paths
