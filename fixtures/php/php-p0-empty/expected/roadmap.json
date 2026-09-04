@@ -95,7 +95,8 @@
       "reason": "phpstan level 0 + baseline present",
       "details": {
         "level": 0,
-        "baseline_empty": true
+        "baseline_empty": true,
+        "ephemeral_ci_dep": false
       }
     },
     "phpstan-level-1": {
@@ -226,16 +227,9 @@
         "has_rector": false
       }
     },
-    "rector-early-return": {
-      "fulfilled": false,
-      "reason": "no rector early-return set",
-      "details": {
-        "has_rector": false
-      }
-    },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return, psalm-taint-analysis",
+      "reason": "waiting on: composer-audit, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
       "details": {
         "unresolved": [
           "composer-audit",
@@ -246,7 +240,6 @@
           "rector-php-set",
           "rector-code-quality",
           "rector-phpunit-set",
-          "rector-early-return",
           "psalm-taint-analysis"
         ],
         "rejected": []

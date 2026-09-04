@@ -934,7 +934,6 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     has_rector_php_set = False
     has_rector_code_quality = False
     has_rector_phpunit_set = False
-    has_rector_early_return = False
     if has_rector:
         txt = ""
         for p in [repo / "rector.php", repo / "rector.neon"]:
@@ -945,15 +944,13 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         has_rector_php_set = "LevelSetList" in txt or "php-set" in txt.lower()
         has_rector_code_quality = "CodeQuality" in txt or "code-quality" in txt.lower()
         has_rector_phpunit_set = "PHPUnitSetList" in txt or "phpunit-set" in txt.lower()
-        has_rector_early_return = "EarlyReturn" in txt or "early-return" in txt.lower()
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
-    # rector-php-set and its 3 children: same has_rector-gated
+    # rector-php-set and its 2 children: same has_rector-gated
     # substring-detection style as dead-code/type-coverage above.
     set_node("rector-php-set", has_rector_php_set, "rector php-version set present" if has_rector_php_set else "no rector php-version set", has_rector=has_rector)
     set_node("rector-code-quality", has_rector_code_quality, "rector code-quality set present" if has_rector_code_quality else "no rector code-quality set", has_rector=has_rector)
     set_node("rector-phpunit-set", has_rector_phpunit_set, "rector phpunit set present" if has_rector_phpunit_set else "no rector phpunit set", has_rector=has_rector)
-    set_node("rector-early-return", has_rector_early_return, "rector early-return set present" if has_rector_early_return else "no rector early-return set", has_rector=has_rector)
 
     # Resolved-gated nodes: structural-scan, and PHP's own aggregation node
     # php-structural-scan feeding it — fulfilled once every one of a node's

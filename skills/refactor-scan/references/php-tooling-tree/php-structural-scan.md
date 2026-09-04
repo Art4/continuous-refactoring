@@ -4,11 +4,11 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
 
 - **Name:** PHP Structural Scan (internal — never proposed; see below)
 - **Tool:** none — pure aggregation node, no fulfilment check or MR scope of its own.
-- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of thirteen direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way).
-- **Fulfilment check:** every one of its thirteen `resolved` parents (`composer-audit` — `composer-audit.md`;
+- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of twelve direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way).
+- **Fulfilment check:** every one of its twelve `resolved` parents (`composer-audit` — `composer-audit.md`;
   `phpunit` — `phpunit.md`; `test-runner-if-missing` — `test-runner-if-missing.md`; `php-cs-fixer` —
   `php-cs-fixer.md`; `phpstan-level-10`, `phpstan-deprecation-rules` — both `phpstan.md`; `rector-dead-code`,
-  `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`, `rector-early-return`
+  `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`
   — all `rector.md`; `psalm-taint-analysis` — `psalm.md`) is itself resolved — fulfilled, or rejected under
   the Refactoring Notes' `out-of-scope/`. Identical `resolved`-edge semantics to `structural-scan`'s own gate, one
   hop down: a rejected leaf here still counts as resolved. `psalm` is deliberately **not** one of these — see

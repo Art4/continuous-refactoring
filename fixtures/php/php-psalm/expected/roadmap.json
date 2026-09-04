@@ -215,16 +215,9 @@
         "has_rector": false
       }
     },
-    "rector-early-return": {
-      "fulfilled": false,
-      "reason": "no rector early-return set",
-      "details": {
-        "has_rector": false
-      }
-    },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: composer-audit, php-cs-fixer, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, rector-early-return",
+      "reason": "waiting on: composer-audit, php-cs-fixer, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set",
       "details": {
         "unresolved": [
           "composer-audit",
@@ -234,8 +227,7 @@
           "rector-type-coverage",
           "rector-php-set",
           "rector-code-quality",
-          "rector-phpunit-set",
-          "rector-early-return"
+          "rector-phpunit-set"
         ],
         "rejected": [
           "phpstan-level-10"
@@ -346,19 +338,6 @@
     },
     {
       "n": 8,
-      "node": "rector-early-return",
-      "type": "tooling",
-      "required_parents": [
-        "rector-php-set"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [
-        "php-cs-fixer"
-      ],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 9,
       "node": "rector-phpunit-set",
       "type": "tooling",
       "required_parents": [
@@ -372,18 +351,24 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 10,
+      "n": 9,
       "node": "rector-type-coverage",
       "type": "tooling",
       "required_parents": [],
       "required_any_parents": [],
       "recommended_parents": [
         "rector-dead-code",
-        "rector-early-return",
+        "rector-code-quality",
         "php-cs-fixer",
         "phpstan-level-3"
       ],
       "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
+    },
+    {
+      "n": 10,
+      "node": "phpstan-level-11",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
     }
   ],
   "no_mr_created": true,
