@@ -25,7 +25,7 @@ The directed graph of adoption steps a target repo climbs — a generic root (`s
 _Avoid_: baseline, floor, bootstrap, onboarding
 
 **Refactoring Notes**:
-The target repo's own folder holding the loop's state — `config.md`, `merge-requests.md`, `out-of-scope/`. Default `docs/refactoring/`; overridable per target, decided once during `loop-config`'s own interview and recorded, by this name, in that target's `AGENTS.md`/`CLAUDE.md` (`skills/continuous-refactoring/references/refactoring-config.md`) — every other skill refers to it by this name, never by restating the concrete path.
+The target repo's own folder holding the loop's state — `bookkeeping.md`, `merge-requests.md`, `out-of-scope/`. Default `docs/refactoring/`; overridable per target, decided once during `loop-config`'s own interview and recorded, by this name, in that target's `AGENTS.md`/`CLAUDE.md` (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — every other skill refers to it by this name, never by restating the concrete path.
 _Avoid_: suite folder, config folder, state folder
 
 **Required edge**:
