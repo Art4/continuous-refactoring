@@ -8,6 +8,14 @@ Only runs here, for the node actually chosen — not speculatively on every pass
 
 Decide *where* to look before you look: the user named a direction (module, subsystem, hot spot) → take it. Otherwise walk back a good stretch of `git log --oneline` for **hot spots** — files/areas that keep coming up — and let those pull your attention first; scattered with no clear hot spot → widen the net.
 
+The Refactoring Notes' `bookkeeping.md` may also name a **`Refactoring goal`**
+(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — a stated target *shape*
+for structural work (e.g. "convert legacy procedural code to OOP"), as opposed to `Focus areas`'
+*where*. When set, treat it as an added lens on top of wherever you're looking: friction that keeps
+the code away from the stated shape is a genuine signal in its own right, on top of the list below
+(e.g. global mutable state and include-based coupling are strong signals when the goal names OOP).
+Unset → look for friction exactly as today, no change.
+
 Explore organically, note friction. Look for:
 
 - **Shallow modules** — little **depth**: interface nearly as complex as the implementation. Deletion test: would deleting it concentrate complexity, or just move it? "Concentrates" is the signal.
@@ -34,5 +42,9 @@ Structural candidates only — skip for a tooling-tree node. Run `/grilling` on 
 - **The interface** — what does it expose, does it stay deep (implementation complexity > interface complexity)?
 - **Locality** — what moves together, what must *not* spread?
 - **Tests that survive** — which stay, which are rewritten, which new ones appear at the seam?
+- **Against the stated goal** — only when `bookkeeping.md` names a `Refactoring goal`: does the
+  deepened module, as designed, actually move the code toward it? A design that satisfies every
+  other branch but drifts away from (or simply ignores) a stated goal is worth reconsidering. No
+  goal set → skip this branch, same as today.
 
 Side effects happen inline as decisions crystallise (per `/domain-modeling`): naming a module after a concept not in `CONTEXT.md` → add the term. User rejects a design with a load-bearing reason a future scan shouldn't re-suggest → offer an ADR.
