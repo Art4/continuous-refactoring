@@ -80,3 +80,6 @@ general suite capability (not just for `Art4/legacy-todo`).
 > instruction change — no `tooling_tree.py` or test changes needed, since `bookkeeping.md`'s fields
 > were confirmed never programmatically parsed. Validator and test suite run clean before opening the
 > PR (see the PR itself for the exact numbers).
+
+> **2026-09-05 (merged):** PR #53 merged into `main` (`d70e1d2`). Ticket closed out; local branch
+> deleted, both locally and on origin.
