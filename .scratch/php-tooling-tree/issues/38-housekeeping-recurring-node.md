@@ -7,8 +7,9 @@ node: it re-proposes itself periodically instead of staying fulfilled forever on
 - Re-proposed whenever the last housekeeping pass is more than 7 days ago. The date of the last pass is
   recorded in `docs/refactoring/config.md`.
 - Bundles several periodic maintenance concerns into one recurring MR: the `composer audit` call,
-  `test-runner-if-missing`, a `composer update` run, and (per ticket 34's own grilling) a check that
-  adopted dev tools are actually wired into CI.
+  `test-runner-if-missing`, a `composer update` run, (per ticket 34's own grilling) a check that
+  adopted dev tools are actually wired into CI, and (per the `Art4/legacy-todo` reviewer-loop run,
+  2026-09-05) working down Psalm's own `psalm-baseline.xml` — see *Why* below.
 
 **Why:** Came up while grilling ticket 34 as a considered alternative to that ticket's CI-gating
 self-wiring fix — a broader, recurring mechanism that would keep catching "adopted but not enforced/not
@@ -20,6 +21,20 @@ already-well-understood fix would have blocked that ticket on a much bigger, unr
 `composer update` in particular is not modeled anywhere in the tree today — there is no existing node for
 "dependencies are kept reasonably current" (only `composer-audit`'s narrower "no *known* vulnerable
 dependency" check).
+
+**Psalm baseline shrink, added 2026-09-05:** ticket 51/ADR-0033 built a baseline-shrink mechanism for
+PHPStan's level chain (`refactor-scan` step 4b, `refactor-design`'s `phpstan-baseline-shrink.md`) —
+deliberately scoped PHPStan-only, Psalm's own suppression format (`psalm-baseline.xml`) left for a
+separate future ticket. Confirmed live on `Art4/legacy-todo`: `psalm-taint-analysis`'s own Fulfilment
+check never required an empty baseline to begin with (unlike PHPStan's level nodes), so once adopted
+it stays "fulfilled" forever regardless of how many findings sit in `psalm-baseline.xml` — 25 real,
+tracked tainted-data findings landed there (PR #151) with nothing in the suite ever proposing to work
+them down. Parking the idea here rather than as its own ticket, since it's the same shape of concern
+this ticket already exists to hold ("adopted but not actually being kept current/complete" — same
+family as `composer update`) — worth deciding during this ticket's own grilling whether it's a
+`housekeeping` MR concern, or turns out to want the exact ticket-51 mechanism transplanted onto
+Psalm's own format instead (a `refactor-scan`/`refactor-design` change, not a recurring node) once
+this ticket actually gets designed.
 
 **Blocked by:** none, but this is the least-designed of the three ideas that came out of ticket 34's
 grilling and needs its own dedicated `/grill-me` session from a much earlier stage than usual — likely
@@ -60,9 +75,24 @@ that the idea was raised, not a design):
   its bundled concerns (well, `composer audit` aside) are inherently PHP-specific? If generic, this likely
   needs its own ADR, not just a `php-tooling-tree.md` node entry — recurring nodes would be a rule change
   to the tree model itself, the same weight as ADR-0016's recommended-edge change.
+- [ ] **Psalm baseline shrink — does it actually belong in `housekeeping`, or does it want ticket 51's
+  own mechanism instead?** `psalm-baseline.xml` findings are structurally similar to PHPStan's
+  baseline entries (a suppressed-but-real finding, groupable by root cause, fixable a few at a time) —
+  arguably wants the same `refactor-scan` step 4b / `refactor-design` treatment ticket 51 built, not a
+  bundled once-a-week MR that would either dump too many fixes in one recurring pass or under-address
+  a real security-relevant backlog (SQL injection/XSS findings) by only touching it every 7 days.
+  Decide during this ticket's own grilling rather than assuming the bundle shape fits.
 
 ## Comments
 
 > **2026-08-30:** Filed as a follow-up from ticket 34's `/grill-me` session (in German), parked
 > deliberately rather than designed — see `.scratch/php-tooling-tree/issues/34-ci-quality-job-wiring.md`'s
 > comments for the grilling transcript context this idea was raised in.
+
+> **2026-09-05:** Added Psalm baseline-shrink as a bundled concern, per the user's explicit request,
+> after ticket 51 (PHPStan-only baseline-shrink mechanism) shipped and the same gap was confirmed live
+> for Psalm on `Art4/legacy-todo` (PR #151, 25 tainted-data findings landed with no mechanism to work
+> them down — `psalm-taint-analysis`'s own Fulfilment check never required an empty baseline to begin
+> with). Not designed here either — same "parked, not decided" status as everything else in this
+> ticket; flagged as a real open question whether it even fits the `housekeeping` bundle shape at all,
+> or wants ticket 51's own mechanism transplanted onto Psalm's format instead.
