@@ -142,10 +142,11 @@ survives prioritising. Next pass, `refactor-scan` proposes `loop-config`
 again from scratch and this interview runs again, since nothing was
 recorded.
 
-**Not asked here: `Focus areas`.** Free-form, no filesystem signal to
-recommend from, and a fourth unanchored question risks rubber-stamping the
-whole round. Stays hand-editable any time, same as `Create-mode` — a
-natural addition for a later, focused pass, not folded in here.
+**Not asked here: `Focus areas` or `Refactoring goal`.** Both free-form, no
+filesystem signal to recommend from, and piling on unanchored questions
+risks rubber-stamping the whole round. Both stay hand-editable any time,
+same as `Create-mode` — natural additions for a later, focused pass, not
+folded in here.
 
 ## Summarize
 
