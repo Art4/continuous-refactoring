@@ -620,7 +620,18 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     closure a `required` edge already causes for proposability, made
     explicit here because `recommended`-edge gating (unlike `required`-edge
     gating) must tell "permanently rejected" apart from "not reached yet":
-    only the former releases a `recommended`-gated child."""
+    only the former releases a `recommended`-gated child. Also used by
+    `_resolved_gate_status()` for the same "closed for good" question one
+    level down: a `resolved`-gate leaf that isn't itself rejected but sits
+    behind a rejected required parent (e.g. `phpstan-level-10` behind a
+    rejected `phpstan-level-6`) must still count as resolved, the same as a
+    directly-rejected leaf already does.
+
+    A `required-any` parent only closes this way once *every* one of its
+    options is effectively rejected — rejecting just one of several
+    required-any options must not close the child, since any of the others
+    fulfilling it still would (mirrors `_is_permanently_gated`'s identical
+    required-any handling for its own, unrelated gate condition)."""
     if _seen is None:
         _seen = set()
     if node in _seen:
@@ -628,10 +639,15 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     _seen.add(node)
     if node in rejected:
         return True
-    return any(
+    if any(
         _is_effectively_rejected(p, tree, rejected, _seen)
         for p in tree["required_parents"].get(node, [])
-    )
+    ):
+        return True
+    req_any = tree["required_any_parents"].get(node, [])
+    if req_any and all(_is_effectively_rejected(p, tree, rejected, _seen) for p in req_any):
+        return True
+    return False
 
 
 def _is_decided(node: str, tree: dict, detected: dict, rejected: set[str]) -> bool:
@@ -710,9 +726,11 @@ def _resolved_gate_status(
     one or more `resolved` parents — generic over any such node (today:
     ``structural-scan``, and PHP's own aggregation node ``php-structural-
     scan`` feeding it), not hardcoded to one node name. A node is resolved
-    once every one of its resolved-parent leaves is itself fulfilled or
-    recorded as rejected — unlike a required parent, a rejected
-    resolved parent still counts as resolved.
+    once every one of its resolved-parent leaves is itself fulfilled,
+    recorded as rejected, or effectively rejected (``_is_effectively_rejected``
+    — closed for good because a required ancestor of the leaf is rejected,
+    even though the leaf itself was never explicitly rejected) — unlike a
+    required parent, a rejected resolved parent still counts as resolved.
 
     Computed in dependency order so an aggregation node (whose own
     resolved-parents are ordinary leaves) is resolved *before* a node that
@@ -735,7 +753,10 @@ def _resolved_gate_status(
                 continue  # a resolved-gated leaf not yet computed this pass -- defer
             unresolved = [
                 leaf for leaf in leaves
-                if not ((computed[leaf][0] if leaf in computed else fulfilled_lookup(leaf)) or leaf in rejected)
+                if not (
+                    (computed[leaf][0] if leaf in computed else fulfilled_lookup(leaf))
+                    or _is_effectively_rejected(leaf, tree, rejected)
+                )
             ]
             computed[node] = (not unresolved, unresolved)
             pending.discard(node)

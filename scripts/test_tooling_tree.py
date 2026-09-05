@@ -676,6 +676,26 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_ancestor_rejected_leaf_still_resolves_php_structural_scan(self):
+        # Ticket 53: phpstan-level-10 (the actual leaf) isn't itself
+        # rejected, but phpstan-level-6 -- a required ancestor two hops up
+        # its own chain -- is. Per the maintainer's own decision, only the
+        # directly-rejected node gets an out-of-scope entry; the chain above
+        # it (7-10) must still count as resolved via _is_effectively_rejected,
+        # not stay stuck in `unresolved` forever waiting for an entry nobody
+        # is going to write.
+        files = self._fully_tooled_php_leaves()
+        files["phpstan.neon"] = "parameters:\n    level: 3\n"  # below the rejected level-6
+        tmp, root = self._make_repo(files)
+        try:
+            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
+            (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-6.md").write_text("rejected: declined\n")
+            d = detect_nodes(root)
+            self.assertFalse(d["phpstan-level-10"]["fulfilled"], d["phpstan-level-10"])
+            self.assertTrue(d["php-structural-scan"]["fulfilled"], d["php-structural-scan"])
+        finally:
+            tmp.cleanup()
+
     def test_structural_scan_resolves_only_once_php_structural_scan_resolves(self):
         # Two-hop regression: structural-scan must read php-structural-scan's
         # already-computed status regardless of tree["order"] position.
@@ -737,6 +757,27 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
             self.assertNotIn("php-structural-scan", [x["node"] for x in w])
         finally:
             tmp.cleanup()
+
+
+class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
+    """Ticket 53: `_is_effectively_rejected` must treat a `required-any`
+    parent group the same way `_is_permanently_gated` already treats it for
+    its own, unrelated gate condition -- closed only once *every* option in
+    the group is (recursively) effectively rejected, never on a single
+    option alone, since any of the others fulfilling it still would. Unit
+    tests directly against the function (same precedent as `_is_unblocked`
+    being called directly elsewhere in this file) -- `rector-php-set`'s real
+    `required-any(phpstan-level-0, psalm)` gate is the concrete case."""
+
+    def test_single_required_any_option_rejected_does_not_close(self):
+        tree = load_tree()
+        rejected = {"phpstan-level-0"}
+        self.assertFalse(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
+
+    def test_all_required_any_options_rejected_does_close(self):
+        tree = load_tree()
+        rejected = {"phpstan-level-0", "psalm"}
+        self.assertTrue(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
 
 
 class PsalmMutualExclusionTests(unittest.TestCase):
