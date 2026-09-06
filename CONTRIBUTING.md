@@ -57,6 +57,12 @@ CI enforces this: a PR touching `skills/**`, `docs/**` (outside `docs/adr/**`), 
    - <fragment 1's content>
    - <fragment 2's content>
    ```
+   Also add a link reference for it at the bottom of the file, comparing against the *previous*
+   tag (or, for the very first release, linking straight to its own release page):
+   ```
+   [X.Y.Z]: https://github.com/Art4/continuous-refactoring/compare/<previous-tag>...X.Y.Z
+   ```
+   Without this, `[X.Y.Z]` in the heading is inert text, not a link.
 3. Delete the fragment files that section was built from.
 4. Commit, tag `X.Y.Z`, push the tag.
 5. `gh release create X.Y.Z --title X.Y.Z --notes-file -` (piping in the same section's body,

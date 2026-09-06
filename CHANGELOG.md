@@ -64,3 +64,7 @@ Initial release.
 - Every skill's `SKILL.md` radically shrunk for token economy, detail moved into `references/`.
   (#33)
 - Repo prepared for going public. (#37)
+
+[0.3.0]: https://github.com/Art4/continuous-refactoring/compare/0.2.0...0.3.0
+[0.2.0]: https://github.com/Art4/continuous-refactoring/compare/0.1.0...0.2.0
+[0.1.0]: https://github.com/Art4/continuous-refactoring/releases/tag/0.1.0
