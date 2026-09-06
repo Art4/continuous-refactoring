@@ -63,7 +63,7 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 
 See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human ([housekeeping](docs/playbooks/housekeeping.md) has its own) and [skills/continuous-refactoring/references/refactoring-bookkeeping.md](skills/continuous-refactoring/references/refactoring-bookkeeping.md) for the config file.
 
-See [Known limitations](docs/known-limitations.md) for setup gotchas that don't have a suite-side fix (e.g. GitHub App permission scopes).
+See [Known limitations](docs/known-limitations.md) for setup gotchas that don't have a suite-side fix (e.g. GitHub App permission scopes), and the [FAQ](docs/FAQ.md) for why the suite is designed the way it is.
 
 ## Contributing
 
