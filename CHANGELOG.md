@@ -4,6 +4,30 @@ All notable changes to this project are documented here. Format inspired by
 [Keep a Changelog](https://keepachangelog.com/), kept flat (no `Added`/`Changed`/`Fixed`
 subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries are produced.
 
+## [0.3.0] - 2026-09-06
+
+- Fixed two tooling-tree parser false negatives (`phpstan-level-0` and Rector's set-name casing)
+  that could report an already-adopted node as unfulfilled. (#48)
+- `refactor-scan` now proposes PHPStan baseline-shrink candidates: incrementally reducing an
+  existing baseline file instead of leaving it frozen forever. (#49)
+- Fixed a staleness bug: the bookkeeping write now reads a fresh `origin/main` immediately before
+  writing, instead of a snapshot that could be several commits behind. (#50)
+- Fixed the resolved-gate cascade to correctly propagate through a rejected required ancestor,
+  instead of leaving descendants stuck — including the same fix applied to `composer-audit`'s own
+  fallback gate. (#51, #55)
+- Added a `Refactoring goal` field that steers which structural candidates the loop searches for
+  next. (#53)
+- Fixed Psalm-equivalence detection to respect the documented co-presence rule instead of a
+  stricter, undocumented one. (#57)
+- Added the `continuous-housekeeping` skill: a separate, recurring maintenance sweep (default
+  weekly) for dependency currency, tooling-deprecation cleanup, and documentation sync — plus a
+  `Housekeeping` field tooling-tree nodes can contribute to. (#58)
+- Added `docs/FAQ.md`, answering recurring questions about the suite's own design decisions,
+  linked from the README. (#59)
+- Added a `CHANGELOG.md` fragment-file mechanism: noteworthy changes drop a `.changelog.d/*.md`
+  fragment (enforced by CI via the `no-changelog` label escape hatch), consolidated into
+  `CHANGELOG.md` — and the fragments deleted — at release time. (#60)
+
 ## [0.2.0] - 2026-09-04
 
 - Folded native-tracker in-flight bookkeeping into the candidate's own branch instead of a shared
