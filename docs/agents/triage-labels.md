@@ -14,3 +14,11 @@ The skills speak in terms of five canonical triage roles. This file maps those r
 When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
 
 Edit the right-hand column to match whatever vocabulary you actually use.
+
+## Other labels
+
+Not a triage role, but recorded here as this repo's home for label vocabulary:
+
+| Label | Meaning |
+| --- | --- |
+| `no-changelog` | Bypasses the changelog-fragment CI check — see `CONTRIBUTING.md`'s "Changelog" section |
