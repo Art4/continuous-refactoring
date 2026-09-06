@@ -1086,12 +1086,20 @@ def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: d
     resolved-parents, which is just {editorconfig, php-structural-scan}) is
     already resolved — independent alternatives, not ordered.
     `resolved_check` maps node name to a bool: already fulfilled (real or
-    simulated)."""
+    simulated). A leaf counts as resolved when fulfilled, directly rejected,
+    or effectively rejected (`_is_effectively_rejected` — closed for good
+    because a required ancestor of the leaf is rejected, e.g.
+    `phpstan-level-10` behind a rejected `phpstan-level-6`) — the same
+    `resolved`-gate semantics `_resolved_gate_status()` already applies to
+    the same leaf set, one gate condition over."""
     if has_real_dep:
         return True, "real require dependency present"
     leaves = tree["resolved_parents"].get("php-structural-scan", [])
     other_leaves = [leaf for leaf in leaves if leaf != "composer-audit"]
-    unresolved = [leaf for leaf in other_leaves if not (resolved_check.get(leaf, False) or leaf in rejected)]
+    unresolved = [
+        leaf for leaf in other_leaves
+        if not (resolved_check.get(leaf, False) or _is_effectively_rejected(leaf, tree, rejected))
+    ]
     if not unresolved:
         return True, "no real dependency yet, but every other leaf feeding php-structural-scan is resolved"
     return False, f"no real dependency yet, waiting on: {', '.join(unresolved)}"

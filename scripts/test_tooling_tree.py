@@ -1169,6 +1169,56 @@ class ComposerAuditGateTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_eligible_via_fallback_when_leaf_effectively_rejected_through_ancestor(self):
+        # Ticket 55: phpstan-level-10 (the actual php-structural-scan leaf)
+        # isn't itself rejected and isn't fulfilled either -- only
+        # phpstan-level-6, a required ancestor up its own chain, is (per
+        # ticket 53's own decision, only the directly-rejected node gets an
+        # out-of-scope entry). _composer_audit_extra_gate's "every other
+        # leaf resolved" fallback must count phpstan-level-10 as resolved
+        # via _is_effectively_rejected the same way _resolved_gate_status
+        # already does (ticket 53/ADR-0035) -- before this ticket's fix it
+        # used a raw `leaf in rejected` check and stayed stuck forever,
+        # exactly the live gap found on Art4/legacy-todo.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "phpstan/phpstan-deprecation-rules": "^1.0",
+                    "phpunit/phpunit": "^10.0",
+                    "friendsofphp/php-cs-fixer": "^3.0",
+                },
+            }),
+            "composer.lock": "{}",
+            ".php-cs-fixer.php": "<?php return [];",
+            "phpstan.neon": "parameters:\n    level: 5\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
+            # No `composer audit` here -- deliberate, so composer-audit's own
+            # fallback path (not direct CI-job fulfilment) is what's under
+            # test. Does invoke phpunit/phpstan, so those leaves genuinely
+            # resolve too (ticket 34's self-wiring).
+            ".github/workflows/ci.yml": (
+                "jobs:\n"
+                "  build:\n"
+                "    steps:\n"
+                "      - run: vendor/bin/phpunit\n"
+                "      - run: vendor/bin/phpstan analyse\n"
+            ),
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
+            "docs/refactoring/out-of-scope/psr-4.md": "rejected: not adopting namespacing yet\n",
+            # The rejection that matters: phpstan-level-6 only, never
+            # phpstan-level-10 itself.
+            "docs/refactoring/out-of-scope/phpstan-level-6.md": "rejected: declined\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["phpstan-level-10"]["fulfilled"], d["phpstan-level-10"])
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
+            self.assertIn("composer-audit", nodes)
+        finally:
+            tmp.cleanup()
+
     def test_fulfilled_once_ci_job_present(self):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),

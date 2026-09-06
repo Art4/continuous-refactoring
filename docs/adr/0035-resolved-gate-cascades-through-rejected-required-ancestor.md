@@ -50,3 +50,14 @@ via the extended `_is_effectively_rejected()`) got smarter. `_is_effectively_rej
 existing call sites (`_is_decided()`, `_undecided_recommended_parents()`, both for `recommended`-edge
 gating) pick up the `required-any` fix too as a side effect — a strict improvement there as well,
 not a behavior change anyone asked to avoid.
+
+**Update, a second `resolved`-gate condition found with the same bare `leaf in rejected` check:**
+`_composer_audit_extra_gate()` computes its own "every other leaf feeding `php-structural-scan` is
+resolved" fallback over the exact same leaf set `_resolved_gate_status()` reads — but it wasn't one of
+the call sites touched above, since it didn't call `_is_effectively_rejected()` at all yet; it had its
+own, separate, unfixed `leaf in rejected` check. Found live on the same target repo this decision was
+originally written for: rejecting `phpstan-level-6` closed `php-structural-scan`'s own gate correctly,
+but left `composer-audit` permanently unproposable, since its fallback still saw `phpstan-level-10` as
+neither fulfilled nor rejected. Fixed the same way: swapped the bare check for
+`_is_effectively_rejected()`. No new decision here — this is the same rule from *Decision* above,
+applied to a call site that existed all along but wasn't yet wired up.
