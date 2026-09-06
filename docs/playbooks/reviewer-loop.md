@@ -106,11 +106,14 @@ mid-run without the human explicitly changing it.
    - **Real structural code changes** (not just tooling adoption) get closer scrutiny: small and well
      covered by new/existing tests, CI green → treat normally; large/risky/thin on tests → look closer or
      escalate.
-   - For larger/riskier changes (e.g. a runtime version bump), reading the diff alone isn't enough:
-     **check the branch out locally, run its lint/build equivalent, and click through the target
-     application's central user path** (no browser available: `curl` with a cookie jar through
-     register/login/CRUD/logout or the equivalent) before merging. Record the test result as a PR
-     comment.
+   - **Any change that touches the target application's actual runtime behavior** — not just the
+     larger/riskier ones (a routine-looking refactor regresses behavior just as easily as a runtime
+     version bump does) — gets the same treatment reading the diff alone can't provide: **check the
+     branch out locally, start the application, and click through its central user path** (no browser
+     available: `curl` with a cookie jar through register/login/CRUD/logout or the equivalent,
+     covering the requirements the target states it must preserve) before merging. Record the test
+     result as a PR comment. Pure tooling/CI/config/docs-only changes (nothing in the app's own
+     runtime code changed) are exempt — there's no behavior to exercise.
 3. **New issues:** read only, log the title and a short assessment.
 4. Update the quiet-round counter (above) and write the round's log entry.
 
