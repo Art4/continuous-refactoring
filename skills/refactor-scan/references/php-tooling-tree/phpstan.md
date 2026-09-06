@@ -56,7 +56,12 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Fulfilment check:** PHPStan's deprecation rules enabled (the bundled deprecation ruleset or equivalent
   extension) and the current `phpstan.neon` run green with them on.
 - **MR scope:** dependency/config addition enabling the ruleset, no production-code change beyond fixing
-  surfaced deprecations.
+  surfaced deprecations. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
+  `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
+  (`skills/continuous-housekeeping/references/template-file-format.md`).
+- **Housekeeping:** after any dependency update, re-run PHPStan and check for newly-surfaced deprecation
+  warnings (a dependency bump can start calling a now-deprecated API this ruleset didn't flag before);
+  fix in scope.
 - **Required parent:** `phpstan-level-5` — proposed once the chain has reached level 5, a threshold decided
   directly with the user rather than tied to level 10's top.
 

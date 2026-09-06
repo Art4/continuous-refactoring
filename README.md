@@ -33,6 +33,7 @@ The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md);
 | `refactor-design` | Grill/search the chosen node → plan, files it as an issue |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
 | `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
+| `continuous-housekeeping` | Separate, recurring maintenance sweep (own cadence, default weekly) — dependency currency, tooling-deprecation cleanup, documentation sync; not part of the pipeline above |
 
 ## Installing in a target project
 
@@ -48,7 +49,8 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 
 ## Quick start
 
-1. **Start the loop:** `/continuous-refactoring` — the orchestrator scaffolds `docs/refactoring/` (cadence, default weekly) and runs the first pass.
+1. **Start the loop:** `/continuous-refactoring` — the orchestrator scaffolds `docs/refactoring/` and runs the first pass. No cadence of its own; trigger it however often fits (by hand, or your own scheduler).
+2. **Optional — recurring maintenance:** `/continuous-housekeeping` — a separate, on-its-own-cadence sweep (default weekly) for dependency currency and tooling-deprecation cleanup; unrelated to the loop pass above.
 
 ## Loop state
 
@@ -57,6 +59,7 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 - **Backlog:** `refactor:*` issues on the issue tracker
 - **Learned rejections:** `docs/refactoring/out-of-scope/`
 - **Domain language:** `CONTEXT.md` · decisions: `docs/adr/`
+- **Housekeeping checklist** (only once some node has contributed to it): `docs/refactoring/housekeeping-template.md` — see `continuous-housekeeping`
 
 See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human and [skills/continuous-refactoring/references/refactoring-bookkeeping.md](skills/continuous-refactoring/references/refactoring-bookkeeping.md) for the config file.
 

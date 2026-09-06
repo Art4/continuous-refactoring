@@ -44,44 +44,54 @@ the shape sketched above.
 **Priority:** low — no discovered bug motivates urgency (contrast with ticket 37's structural-scan gap);
 this is a proposed enhancement, not a fix.
 
-**Status:** needs-triage
+**Status:** done
 
-Open design questions (none of these were resolved during ticket 34's grilling — this ticket only records
-that the idea was raised, not a design):
+**Settled design** (superseding every sketch above — the shape here is what actually got built):
 
-- [ ] **Breaks the tree's monotonic assumption.** Every other node's `fulfilled` flag only ever needs to
-  flip false→true in practice (`detect_nodes()` is stateless/recomputed each scan, but nothing currently
-  *depends* on a previously-fulfilled node becoming unfulfilled again). A node whose fulfilment is
-  time-based would flip true→false on a schedule. Does this interact badly with anything downstream —
-  most importantly `structural-scan`'s resolved-gate, which assumes leaves settle and stay settled?
-  Should `housekeeping` feed `structural-scan` at all, or stay a deliberately separate, parallel track
-  that never gates structural work?
-  **Update 2026-08-30:** this claim is no longer quite accurate — [ticket 35](35-php-upgrade-recommendation-node.md)'s
-  new `php-minimal-version` node is a second, already-decided precedent for a fulfilment check that can
-  flip back to false, settled via its own `/grill-me` session. The two cases differ in *why* they flip:
-  `php-minimal-version` is **fact-driven** (a relative comparison against a moving target — a tool's
-  minimum version or a CI job's tested PHP version changing), not **time-driven** like `housekeeping`'s
-  7-day timer. Worth considering both shapes together in this ticket's own grilling session, especially
-  the `structural-scan` interaction question above — `php-minimal-version` isn't one of `structural-scan`'s
-  resolved-leaves, so it hasn't had to answer that question yet, but `housekeeping` might.
-- [ ] Is "required parent: `composer`" right, or does re-proposing every 7 days need a different kind of
-  edge entirely (none of `required`/`recommended`/`resolved` currently express "gate, but also re-trigger
-  on a timer")?
-- [ ] Does bundling composer-audit/test-runner-if-missing/composer-update/CI-wiring into *one* recurring
-  MR make sense, or should each remain (or become) its own independently-recurring check?
-- [ ] How does `docs/refactoring/config.md` record the last-housekeeping date — new field, format,
-  who/what writes it (presumably `refactor-learn`, matching its "only writer" role)?
-- [ ] Is this PHP-tree-specific, or does it belong in the generic root (`tooling-tree.md`) since none of
-  its bundled concerns (well, `composer audit` aside) are inherently PHP-specific? If generic, this likely
-  needs its own ADR, not just a `php-tooling-tree.md` node entry — recurring nodes would be a rule change
-  to the tree model itself, the same weight as ADR-0016's recommended-edge change.
-- [ ] **Psalm baseline shrink — does it actually belong in `housekeeping`, or does it want ticket 51's
-  own mechanism instead?** `psalm-baseline.xml` findings are structurally similar to PHPStan's
-  baseline entries (a suppressed-but-real finding, groupable by root cause, fixable a few at a time) —
-  arguably wants the same `refactor-scan` step 4b / `refactor-design` treatment ticket 51 built, not a
-  bundled once-a-week MR that would either dump too many fixes in one recurring pass or under-address
-  a real security-relevant backlog (SQL injection/XSS findings) by only touching it every 7 days.
-  Decide during this ticket's own grilling rather than assuming the bundle shape fits.
+- **Not a tooling-tree node.** A new, standalone skill, `continuous-housekeeping` — structurally a peer
+  of `continuous-refactoring` itself, not a step inside it and not something `refactor-scan`/
+  `refactor-prioritize` ever touch. Resolves the "breaks the tree's monotonic assumption" question
+  outright: it was never part of `next_candidates()`/`roadmap()` to begin with.
+- **Cadence:** configurable per target, default weekly (not the originally-guessed 7 days) — decided
+  once via the skill's own tiny setup interview, recorded as a new `Housekeeping cadence` field in
+  `bookkeeping.md`.
+- **No stored "last run" date.** Due-ness comes from searching the tracker for the most recent
+  `Housekeeping — <date>`-titled issue and comparing its age to the cadence — tracker-agnostic, via the
+  same `docs/agents/issue-tracker.md` abstraction every other skill in the suite already uses.
+- **Generic mechanism, PHP-specific content, cleanly separated by layer.** The skill itself is entirely
+  generic. What gets checked each cycle is contributed by individual tooling-tree nodes: a node's own
+  doc may name an optional `Housekeeping` field (documented once, generically, in `CONTEXT.md`'s
+  **Tooling tree** entry). When that node's own delivering MR lands, it also appends its `Housekeeping`
+  line to the Refactoring Notes' new `housekeeping-template.md`, creating the file fresh if needed.
+  `continuous-housekeeping` never walks the tree itself — it just reads whatever's accumulated.
+- **Contributed so far:** `composer` (composer update), `composer-audit` (review the audit report for
+  anything CI's own point-in-time gate can't catch after the fact), `phpstan-deprecation-rules` (re-check
+  for newly-surfaced deprecations after a dependency bump), `php-minimal-version` (a newer PHP
+  patch/minor of the same declared line — deliberately distinct from that node's own Fulfilment check,
+  which only asks whether the floor is *correct*, not *current*). One exception: if `php-minimal-version`
+  is already fulfilled on the very first scan (no delivering MR of its own ever runs), `loop-config`'s
+  own first MR contributes the line instead.
+- **One issue per due cycle**, cumulative checklist — not independently-recurring per-concern items.
+- **Psalm baseline shrink stays out of this ticket entirely** — a security-relevant backlog deserves
+  ticket 51's own continuous, pass-by-pass treatment transplanted onto Psalm's format, not a once-a-cycle
+  sweep; left for its own, separate ticket.
+- **ADR-0037** records this decision.
+
+Open design questions from before grilling (kept for the record; each resolved below):
+
+- [x] **Breaks the tree's monotonic assumption?** Moot — not a tree node at all, never part of
+  `next_candidates()`/`roadmap()`, so nothing about `structural-scan`'s resolved-gate is affected.
+- [x] "Required parent: `composer`" edge type — moot, no tree edges at all; a standalone skill needs none.
+- [x] Bundling into one recurring MR vs. independently-recurring checks — one issue per due cycle, whose
+  checklist accumulates from however many nodes have contributed, confirmed during grilling.
+- [x] How the last-housekeeping date is recorded — it isn't. Due-ness is derived from tracker history
+  (most recent `Housekeeping — <date>` issue) each time, no stored date field.
+- [x] PHP-tree-specific or generic root? Both, cleanly separated: the skill/cadence/interview/template-file
+  mechanism is generic; only the individual node contributions (composer, composer-audit,
+  phpstan-deprecation-rules, php-minimal-version) are PHP-specific. ADR-0037 written, matching the
+  anticipated ADR-0016-weight change.
+- [x] Psalm baseline shrink — confirmed out of scope for this ticket; wants ticket 51's own mechanism on
+  Psalm's format instead, as its own separate ticket.
 
 ## Comments
 
@@ -96,3 +106,22 @@ that the idea was raised, not a design):
 > with). Not designed here either — same "parked, not decided" status as everything else in this
 > ticket; flagged as a real open question whether it even fits the `housekeeping` bundle shape at all,
 > or wants ticket 51's own mechanism transplanted onto Psalm's format instead.
+
+> **2026-09-06:** Grilled (`/grill-me`, German, five rounds) starting from "should this be a tree node
+> at all" as anticipated. Settled on a standalone `continuous-housekeeping` skill, informed by a
+> real-world reference example the user shared (a working housekeeping skill + issue template from
+> their own practice) — used purely as anonymized structural inspiration, no identifying detail from it
+> carried into this ticket, the ADR, or the implementation. Key departures from the reference material
+> during grilling: cadence made configurable (default weekly, not a fixed interval), tracker-agnostic
+> (the reference was GitLab-specific), and the checklist itself made dynamic — individual tooling-tree
+> nodes contribute their own `Housekeeping` line to an accumulating template file as part of their own
+> delivering MR, rather than a fixed bundle hardcoded into the skill. Implemented on branch
+> `tickets/38-continuous-housekeeping`: new skill (`skills/continuous-housekeeping/`, `SKILL.md` +
+> `cadence-interview.md` + `template-file-format.md`), `Housekeeping` fields added to `composer`,
+> `composer-audit`, `phpstan-deprecation-rules`, and `php-minimal-version` (plus the `loop-config`
+> exception for the latter), new `Housekeeping cadence` bookkeeping field, `CONTEXT.md` vocabulary
+> additions, README updates (including an incidental fix to a pre-existing, unrelated inaccuracy — the
+> main loop was wrongly described as having a stored cadence), ADR-0037. No `tooling_tree.py` changes —
+> pure documentation/skill content, no new detection logic. 257/257 tests pass (unchanged, no new
+> Python logic); validator clean (same 5 pre-existing warnings, after fixing several
+> self-inflicted glossary-avoid-term violations in the new skill's own prose).
