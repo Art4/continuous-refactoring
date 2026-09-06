@@ -145,3 +145,17 @@ Open design questions from before grilling (kept for the record; each resolved b
 > orchestrator step 0 that just checks due-ness and runs `continuous-housekeeping` to completion first,
 > as a fully independent action, only when the target already opted in (`Housekeeping cadence` set) —
 > chosen. `continuous-refactoring/SKILL.md`, README, and ADR-0037 updated on the same branch/PR.
+
+> **2026-09-06 (review, third round — discoverability):** User pointed out nothing in a target repo
+> ever tells a human `continuous-housekeeping` exists. Planned (via `/plan`) and implemented four
+> pieces on the same branch/PR: (1) a node's own delivering MR that touches
+> `housekeeping-template.md` now mentions it in the MR's plain-facts block
+> (`opening-a-merge-request.md`), (2) this suite's own `README.md` (not the target's — corrected
+> mid-plan after an initial misreading) gets a link to a new playbook, (3) a new
+> `docs/playbooks/housekeeping.md`, human-facing, mirroring `loop.md`'s own shape, (4) a "cold-start"
+> case found during planning: a target where every `Housekeeping`-capable node was already fulfilled
+> before this feature existed (`Art4/legacy-todo` exactly) has no future node MR to ever mention the
+> skill — `continuous-refactoring`'s own closing report now names this directly in its **Next** line,
+> repeating every pass until the target opts in, no new bookkeeping field needed (self-clearing once
+> `Housekeeping cadence` is set). 257/257 tests pass; validator clean after fixing one self-inflicted
+> issue (a bolded "and" the domain-term checker read as an undefined glossary term).
