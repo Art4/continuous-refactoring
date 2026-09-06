@@ -43,6 +43,13 @@ mid-run without the human explicitly changing it.
 - **No direct contact with the agent being watched.** The only channels are the forge itself — comments
   on issues/merge requests, reviews (approve/request-changes), merge/reject — and the findings log. No
   messaging, no access to the other agent's own session.
+- **Own forge identity, always.** Every forge write the reviewer makes (comment, label, merge, issue
+  create/close) goes through the reviewer's own credentials — a human's personal `gh`/`glab` login, not
+  whatever bot identity or wrapper script (e.g. a GitHub App bot's own `bot-gh-refactor.sh`-style
+  wrapper) the watched agent was told to use for its own writes. The point of this playbook is a real
+  trust boundary between the two roles; sharing the same forge identity erases that boundary in the one
+  place it's externally visible (`mergedBy`, comment/issue author) and makes reviewer actions
+  indistinguishable from the watched agent's own, defeating a large part of why this observation exists.
 - **Allowed actions:** comment on issues/merge requests; merge, or reject with a stated reason
   (`request-changes`, left open by default so the work can be corrected, rather than closed) — except
   under the Nur-Beobachter persona, which never merges or blockingly rejects.
