@@ -33,3 +33,32 @@ If your change touches the skills themselves (`skills/**`), skim
 [AGENTS.md](AGENTS.md) and [CONTEXT.md](CONTEXT.md) first — they define the vocabulary and the
 orchestrator's data-flow rules (ADR-0010) that every skill follows. The `docs/adr/` directory
 records why past design decisions were made; check it before re-litigating one.
+
+## Changelog
+
+If your change has a noteworthy, user-visible effect — a new or changed skill capability, a
+bugfix, a breaking change — add a fragment file: `.changelog.d/<slug>.md` (prefix the slug with
+your ticket or PR number when you have one, e.g. `.changelog.d/62-faq-section.md`). One short,
+user-facing sentence or paragraph; no category tags. Internal-only work (ticket bookkeeping,
+`.scratch/` maintenance, CI tuning, wording fixes with no behaviour change) needs none.
+
+CI enforces this: a PR touching `skills/**`, `docs/**` (outside `docs/adr/**`), `README.md`, or
+`CONTRIBUTING.md` without a `.changelog.d/*.md` fragment fails, unless it carries the
+`no-changelog` label.
+
+**Cutting a release** (maintainer-only, by hand):
+
+1. Collect every file under `.changelog.d/`.
+2. Pick the next version (SemVer) and today's date, and add a new section to the top of
+   [CHANGELOG.md](CHANGELOG.md):
+   ```markdown
+   ## [X.Y.Z] - YYYY-MM-DD
+
+   - <fragment 1's content>
+   - <fragment 2's content>
+   ```
+3. Delete the fragment files that section was built from.
+4. Commit, tag `X.Y.Z`, push the tag.
+5. `gh release create X.Y.Z --title X.Y.Z --notes-file -` (piping in the same section's body,
+   minus the heading) — or `gh release edit` if the release already exists — so the GitHub
+   release page carries the same text instead of staying empty.

@@ -18,6 +18,12 @@ Default label strings, one per role. See `docs/agents/triage-labels.md`.
 
 Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
 
+### Changelog
+
+A noteworthy, user-visible change (skills/**, docs/**, README.md, CONTRIBUTING.md) needs a
+`.changelog.d/<slug>.md` fragment — CI enforces this. See `CONTRIBUTING.md`'s "Changelog" section
+for the fragment convention and the release recipe that consolidates them into `CHANGELOG.md`.
+
 ## The continuous-refactoring suite
 
 This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking them into a target repo's `.agents/skills/` (see `README.md`):
