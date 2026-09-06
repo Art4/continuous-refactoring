@@ -30,15 +30,31 @@ Find the most recently created issue whose title starts with `Housekeeping — `
 
 No stored "last run" date anywhere — the tracker's own history is the record, same as it already is for every other kind of loop state this suite keeps on the forge rather than duplicating into a file.
 
-### 3. Read the accumulated checklist
+### 3. Reconcile, then read the accumulated checklist
 
-Read the Refactoring Notes' `housekeeping-template.md` (`skills/continuous-housekeeping/references/template-file-format.md` for its exact shape). Missing, or present but empty of contributed lines → nothing has ever been registered to check yet (no tooling-tree node has delivered its own `Housekeeping` line — see `CONTEXT.md`'s **Tooling tree** entry). Report "due, but nothing registered to check yet" and stop — don't open an empty issue.
+**New sweep only** (skip this reconciliation on a resumed issue — step 4 continues that one exactly
+as it already stands): a node's own delivering merge request is the *ordinary* way a `Housekeeping`
+line reaches `housekeeping-template.md` (`skills/continuous-housekeeping/references/template-file-format.md`),
+but it's not the only way a line can be missing — a node fulfilled before this target ever adopted
+`continuous-housekeeping` gets no second chance at a delivering MR to piggyback on, and the same is
+true the very first time this skill ever runs for a target that already has a worked-through tree.
+Before reading the checklist, reconcile: read `bookkeeping.md`'s `Fulfilled nodes` (already open from
+step 1), and for each listed slug whose own tree-doc names a `Housekeeping` field, append that line to
+`housekeeping-template.md` if it isn't already there verbatim (creating the file fresh if this is the
+first line ever). Cheap and run every cycle, not just once — `Fulfilled nodes` is itself a
+self-healing cache that can lag briefly, so checking every cycle catches a slug this reconciliation
+missed on an earlier run rather than missing it forever. Don't commit this edit yet — step 4 creates
+the branch it belongs on.
+
+Then read `housekeeping-template.md`. Missing, or present but empty of contributed lines even after
+reconciling → nothing has ever been registered to check yet. Report "due, but nothing registered to
+check yet" and stop — don't open an empty issue.
 
 ### 4. Open (or resume) this cycle's issue
 
 New sweep: file an issue titled `Housekeeping — <today's date>`, body = every line from `housekeeping-template.md` as an unchecked checkbox, in the file's own order, plus the standing item from step 5 as one more checkbox (always present, not sourced from the template file). Resuming: use the existing open issue from step 2 as-is.
 
-Branch `chore/housekeeping-<today's date>` (existing → reuse, don't reset).
+Branch `chore/housekeeping-<today's date>` (existing → reuse, don't reset) — step 3's reconciliation commit, if it changed anything, lands here as this cycle's first commit.
 
 ### 5. Work the checklist
 

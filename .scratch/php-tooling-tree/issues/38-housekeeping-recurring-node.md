@@ -125,3 +125,14 @@ Open design questions from before grilling (kept for the record; each resolved b
 > pure documentation/skill content, no new detection logic. 257/257 tests pass (unchanged, no new
 > Python logic); validator clean (same 5 pre-existing warnings, after fixing several
 > self-inflicted glossary-avoid-term violations in the new skill's own prose).
+
+> **2026-09-06 (review):** User caught a real gap before merge, live against `Art4/legacy-todo` itself:
+> the delivering-MR-only contribution path means a node fulfilled *before* a target adopts
+> `continuous-housekeeping` never reaches the template file at all — `composer`/`composer-audit`/
+> `phpstan-deprecation-rules` on that exact repo were all fulfilled long before this skill existed, so
+> none of their `Housekeeping` lines would ever have appeared. Fixed by adding a second contribution
+> path: `continuous-housekeeping` itself reconciles `housekeeping-template.md` against `bookkeeping.md`'s
+> `Fulfilled nodes` cache every cycle (not just once), appending any node's `Housekeeping` line not yet
+> present. Cheap — the field is already being read for the cadence check — and no tree-walk of its own;
+> it only reads a cache another skill already maintains. `SKILL.md`, `template-file-format.md`,
+> `CONTEXT.md`, and ADR-0037 all updated on the same branch/PR before merge.
