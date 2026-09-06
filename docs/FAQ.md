@@ -24,5 +24,4 @@ delivers one candidate at a time, but a housekeeping sweep works down a standing
 there's nothing to rank. That's why it's a standalone, peer skill with its own cadence (default
 weekly, set once via its own short setup interview) rather than a step inside the main loop or a
 node inside the tree — reachable from the same trigger as the main loop (one scheduler covers both),
-but architecturally independent of it. See [ADR-0037](adr/0037-continuous-housekeeping-skill-and-node-housekeeping-contributions.md)
-for the full reasoning.
+but architecturally independent of it.
