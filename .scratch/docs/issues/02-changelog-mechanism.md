@@ -48,3 +48,14 @@ Settled via `/grill-me` (three rounds):
 > location/format, noteworthiness bar, `CHANGELOG.md` shape, release process ownership, version-number
 > ownership, enforcement mechanism, doc placement, fragment naming, and retroactive-backfill approach.
 > User confirmed shared understanding ("passt."). Ready to implement.
+
+> **2026-09-06 (implemented):** `scripts/check_changelog_fragment.py` (TDD, 13 tests) + a new
+> `changelog-fragment` CI workflow enforce the fragment on `skills/**`/`docs/**` (outside
+> `docs/adr/**`)/`README.md`/`CONTRIBUTING.md` PRs, bypassable via the new `no-changelog` label
+> (created on the tracker). `CONTRIBUTING.md` documents the fragment convention and the manual
+> release recipe; `AGENTS.md` gets a matching pointer paragraph. `CHANGELOG.md` created with
+> retroactive `[0.1.0]`/`[0.2.0]` sections built from merged-PR history. Also backfilled
+> `.changelog.d/` fragments for every noteworthy PR merged after `0.2.0` but before this mechanism
+> existed (#48–#59) plus this change itself (#60), so the next release doesn't lose them — a small
+> scope extension beyond the two tagged versions the ticket named, done to keep the record honest
+> from `0.2.0` to today.
