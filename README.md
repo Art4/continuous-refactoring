@@ -50,7 +50,7 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 ## Quick start
 
 1. **Start the loop:** `/continuous-refactoring` — the orchestrator scaffolds `docs/refactoring/` and runs the first pass. No cadence of its own; trigger it however often fits (by hand, or your own scheduler).
-2. **Optional — recurring maintenance:** `/continuous-housekeeping` — a separate, on-its-own-cadence sweep (default weekly) for dependency currency and tooling-deprecation cleanup; unrelated to the loop pass above.
+2. **Optional — recurring maintenance:** `/continuous-housekeeping` — a separate, on-its-own-cadence sweep (default weekly) for dependency currency and tooling-deprecation fixes. Run it once to opt in (records its own cadence), and every later `/continuous-refactoring` trigger checks whether a sweep is due and runs it first, automatically — one scheduler covers both. Skip step 2 entirely and only ever run `/continuous-refactoring` if you don't want housekeeping at all.
 
 ## Loop state
 

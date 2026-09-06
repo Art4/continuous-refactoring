@@ -136,3 +136,12 @@ Open design questions from before grilling (kept for the record; each resolved b
 > present. Cheap — the field is already being read for the cadence check — and no tree-walk of its own;
 > it only reads a cache another skill already maintains. `SKILL.md`, `template-file-format.md`,
 > `CONTEXT.md`, and ADR-0037 all updated on the same branch/PR before merge.
+
+> **2026-09-06 (review, second round):** User asked whether `continuous-housekeeping` could be
+> triggered the same way an externally-labeled issue is picked up by `refactor-scan`, so one scheduler
+> covers both skills. Weighed two shapes: proposing/ranking it alongside tooling-tree nodes (rejected —
+> re-raises exactly the "doesn't fit the pipeline shape" reasoning this ADR already settled, and
+> `refactor-prioritize`'s five ranking factors don't map onto "is a checklist sweep due") versus a new
+> orchestrator step 0 that just checks due-ness and runs `continuous-housekeeping` to completion first,
+> as a fully independent action, only when the target already opted in (`Housekeeping cadence` set) —
+> chosen. `continuous-refactoring/SKILL.md`, README, and ADR-0037 updated on the same branch/PR.
