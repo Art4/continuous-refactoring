@@ -26,6 +26,12 @@ class RequiresFragmentTests(unittest.TestCase):
     def test_contributing_requires_fragment(self):
         self.assertTrue(ccf.requires_fragment(["CONTRIBUTING.md"]))
 
+    def test_context_md_requires_fragment(self):
+        # CONTRIBUTING.md's own test-running rule already treats CONTEXT.md as
+        # in-scope for docs/** even though it lives at the repo root; the
+        # changelog trigger follows that same precedent.
+        self.assertTrue(ccf.requires_fragment(["CONTEXT.md"]))
+
     def test_agents_md_does_not_require_fragment(self):
         # Settled design: AGENTS.md itself was not put on the trigger list.
         self.assertFalse(ccf.requires_fragment(["AGENTS.md"]))

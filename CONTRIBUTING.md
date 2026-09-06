@@ -42,8 +42,8 @@ your ticket or PR number when you have one, e.g. `.changelog.d/62-faq-section.md
 user-facing sentence or paragraph; no category tags. Internal-only work (ticket bookkeeping,
 `.scratch/` maintenance, CI tuning, wording fixes with no behaviour change) needs none.
 
-CI enforces this: a PR touching `skills/**`, `docs/**` (outside `docs/adr/**`), `README.md`, or
-`CONTRIBUTING.md` without a `.changelog.d/*.md` fragment fails, unless it carries the
+CI enforces this: a PR touching `skills/**`, `docs/**` (outside `docs/adr/**`), `CONTEXT.md`,
+`README.md`, or `CONTRIBUTING.md` without a `.changelog.d/*.md` fragment fails, unless it carries the
 `no-changelog` label.
 
 **Cutting a release** (maintainer-only, by hand):

@@ -20,7 +20,8 @@ Single-context — one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/ag
 
 ### Changelog
 
-A noteworthy, user-visible change (skills/**, docs/**, README.md, CONTRIBUTING.md) needs a
+A noteworthy, user-visible change (`skills/**`, `docs/**`, `CONTEXT.md`, `README.md`,
+`CONTRIBUTING.md`) needs a
 `.changelog.d/<slug>.md` fragment — CI enforces this. See `CONTRIBUTING.md`'s "Changelog" section
 for the fragment convention and the release recipe that consolidates them into `CHANGELOG.md`.
 

@@ -49,13 +49,23 @@ Settled via `/grill-me` (three rounds):
 > ownership, enforcement mechanism, doc placement, fragment naming, and retroactive-backfill approach.
 > User confirmed shared understanding ("passt."). Ready to implement.
 
-> **2026-09-06 (implemented):** `scripts/check_changelog_fragment.py` (TDD, 13 tests) + a new
+> **2026-09-06 (implemented):** `scripts/check_changelog_fragment.py` (TDD, 18 tests) + a new
 > `changelog-fragment` CI workflow enforce the fragment on `skills/**`/`docs/**` (outside
-> `docs/adr/**`)/`README.md`/`CONTRIBUTING.md` PRs, bypassable via the new `no-changelog` label
-> (created on the tracker). `CONTRIBUTING.md` documents the fragment convention and the manual
-> release recipe; `AGENTS.md` gets a matching pointer paragraph. `CHANGELOG.md` created with
-> retroactive `[0.1.0]`/`[0.2.0]` sections built from merged-PR history. Also backfilled
+> `docs/adr/**`)/`CONTEXT.md`/`README.md`/`CONTRIBUTING.md` PRs, bypassable via the new
+> `no-changelog` label (created on the tracker, documented in
+> `docs/agents/triage-labels.md`). `CONTRIBUTING.md` documents the fragment convention and the
+> manual release recipe; `AGENTS.md` gets a matching pointer paragraph. `CHANGELOG.md` created
+> with retroactive `[0.1.0]`/`[0.2.0]` sections built from merged-PR history. Also backfilled
 > `.changelog.d/` fragments for every noteworthy PR merged after `0.2.0` but before this mechanism
 > existed (#48–#59) plus this change itself (#60), so the next release doesn't lose them — a small
 > scope extension beyond the two tagged versions the ticket named, done to keep the record honest
 > from `0.2.0` to today.
+>
+> **2026-09-06 (code review):** `/code-review` (Standards + Spec axes) surfaced four real findings,
+> all fixed: `CONTEXT.md` was missing from the CI trigger set despite `CONTRIBUTING.md`'s own
+> existing test-running rule already treating it as in-scope for `docs/**`; `AGENTS.md`'s new
+> paragraph didn't backtick its path list like the rest of that file; `no-changelog` wasn't
+> actually documented in `docs/agents/triage-labels.md` as this ticket had said it would be; and
+> this file understated the test count. A fifth flagged item (PR `#9` allegedly uncited despite not
+> existing) was a false positive — `#9` merged via squash, not a merge commit, so it didn't show up
+> in `git log --merges` but is genuinely in `0.1.0`'s history and was already correctly cited.

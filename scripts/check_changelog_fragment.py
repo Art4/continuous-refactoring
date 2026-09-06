@@ -24,7 +24,7 @@ import sys
 FRAGMENT_DIR = ".changelog.d/"
 EXEMPT_PREFIXES = ("docs/adr/",)
 TRIGGER_PREFIXES = ("skills/", "docs/")
-TRIGGER_FILES = ("README.md", "CONTRIBUTING.md")
+TRIGGER_FILES = ("README.md", "CONTRIBUTING.md", "CONTEXT.md")
 NO_CHANGELOG_LABEL = "no-changelog"
 
 
@@ -54,11 +54,11 @@ def check(changed_files, labels):
     if NO_CHANGELOG_LABEL in labels:
         return None
     return (
-        "This PR touches skills/**, docs/** (outside docs/adr/**), README.md, "
-        "or CONTRIBUTING.md but adds no .changelog.d/*.md fragment. Add one "
-        "describing the user-visible change (see CONTRIBUTING.md), or apply "
-        f"the '{NO_CHANGELOG_LABEL}' label if this change has no user-visible "
-        "effect."
+        "This PR touches skills/**, docs/** (outside docs/adr/**), CONTEXT.md, "
+        "README.md, or CONTRIBUTING.md but adds no .changelog.d/*.md fragment. "
+        "Add one describing the user-visible change (see CONTRIBUTING.md), or "
+        f"apply the '{NO_CHANGELOG_LABEL}' label if this change has no "
+        "user-visible effect."
     )
 
 
