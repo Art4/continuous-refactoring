@@ -8,7 +8,8 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   tracked as a separate dependency-vulnerability-scan concern, now folded into this node).
 - **Fulfilment check:** a CI job exists that runs `composer audit` (the pipeline fails when it reports a
   known advisory).
-- **MR scope:** wire `composer audit` into CI as a gate — no production-code change.
+- **MR scope:** wire `composer audit` into CI as a gate — no production-code change. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes' `housekeeping-template.md`, creating that file fresh if it doesn't exist yet (`skills/continuous-housekeeping/references/template-file-format.md`).
+- **Housekeeping:** review `composer audit`'s current report; attempt a fix for any advisory with an available patched version. A CI gate only fails on advisories present *right now* — it never surfaces one that appears later against an already-passing, unchanged lockfile.
 - **Stop conditions / when not to propose:** both required parents (`composer`, `ci-runner`) fulfilled is
   necessary but not sufficient — this node also stays blocked until either (a) `composer.json`'s
   `require` block names at least one real package (platform pseudo-packages — `php`, `hhvm`, `ext-*`,

@@ -31,6 +31,8 @@ Each step runs the named lifecycle skill and carries its output to the next. Sto
 
 Prefer dispatching each step to a fresh subagent: hand it this pass's carried-forward input, bring back only its stated `## Output`. That keeps a skill's own reasoning inside its own context instead of leaking into the orchestrator's. No subagent mechanism available → run each step inline instead, same order.
 
+0. **Housekeeping, only if already adopted.** `bookkeeping.md`'s `Housekeeping cadence` field set (the human has run `/continuous-housekeeping` at least once before, opting in) → run its own due-check (`skills/continuous-housekeeping/SKILL.md` steps 1–2); due → run it to completion (steps 3–7) before continuing below. Field unset → skip this step entirely, no interview triggered here — `continuous-housekeeping` only ever onboards itself when invoked directly, never implicitly from this orchestrator. Either way, this step is independent of everything below it: no ranking, no shared candidate slot, no effect on `Pending candidates` or `Skip streak` — one trigger covering two genuinely separate concerns, not housekeeping folded into this pipeline's own shape (which it doesn't fit — a checklist sweep isn't a single ranked-and-designed candidate).
+
 1. **Scan.** Run `/refactor-scan` — checks preconditions (git, backlog size) and resumes `Pending candidates` before proposing anything fresh.
    - No git repository → pass ends now, nothing else runs (not even step 6).
    - Backlog full → skip to step 5 with scan's findings, no new candidate.
@@ -61,8 +63,10 @@ Wherever the pass ends, close with exactly two lines to the human — a lifecycl
 
 Every claim in **Status** must reflect state freshly confirmed this pass, not an earlier step's stated intent — if `refactor-implement` reported CI green, that means a check run *this* pass, not a memory of what an earlier round meant to fix. When state can't be freshly confirmed (no forge/remote, or CI status unreadable via API), say so explicitly rather than reporting an assumed outcome.
 
-- **Status:** one line, what happened this pass.
+- **Status:** one line, what happened this pass — mention step 0 too if it ran ("Status: housekeeping sweep delivered (MR #7); ...").
 - **Next:** one line, what the human can or should do now.
+
+**Unused housekeeping nudge.** `bookkeeping.md`'s `Housekeeping cadence` unset (step 0 never engaged, the target never opted in), and at least one `Fulfilled nodes` entry's own tree-doc names a `Housekeeping` field → append one clause to **Next** naming how many ("... also: 2 adopted tools have registered housekeeping checks nobody's using yet — run `/continuous-housekeeping` once to opt in"). Checking this reuses the same per-slug tree-doc lookup `continuous-housekeeping`'s own reconciliation step already does (`skills/continuous-housekeeping/SKILL.md` step 3) against whatever `Fulfilled nodes` this same pass's `refactor-learn` call just settled — no extra tree walk. Repeats every pass while the condition holds; stops the moment `Housekeeping cadence` is set, no tracking field needed to avoid repeating it.
 
 Examples: "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun." / "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then." / "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands." / "Status: Refactoring Config prepared on local branch `refactor/loop-config` — no forge/remote here, so nothing was pushed. Next: commit it yourself, or push it and open the merge request once you have forge access."
 
