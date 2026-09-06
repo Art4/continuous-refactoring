@@ -835,6 +835,61 @@ class PsalmMutualExclusionTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_co_presence_phpstan_authoritative_over_psalm(self):
+        # Co-presence rule (phpstan.md, psalm.md): when both analysers are
+        # genuinely adopted, PHPStan stays authoritative for the level
+        # chain -- Psalm's own equivalence must not blanket every
+        # phpstan-level-N as "not applicable". Reproduces a real gap found
+        # live on Art4/legacy-todo: adopting psalm-taint-analysis on top of
+        # an existing, already-fulfilled phpstan-level-1..5 setup made the
+        # scanner read every one of those genuinely-fulfilled levels as
+        # "not applicable: psalm fulfils p0" -- corrupting `refactor-learn`'s
+        # `Fulfilled nodes` overwrite the next time a pass had parser access.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "vimeo/psalm": "^5.0",
+                },
+            }),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 5\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psalm"]["fulfilled"])
+            self.assertTrue(d["phpstan-level-5"]["fulfilled"], d["phpstan-level-5"])
+            self.assertFalse(d["phpstan-level-6"]["fulfilled"], d["phpstan-level-6"])
+            self.assertNotEqual(d["phpstan-level-5"]["reason"], "not applicable: psalm fulfils p0")
+            self.assertFalse(d["phpstan-level-5"]["details"].get("psalm_equivalent"))
+        finally:
+            tmp.cleanup()
+
+    def test_psalm_only_still_gets_equivalence_with_phpstan_dep_but_no_level_configured(self):
+        # Adopting phpstan/phpstan as a composer dep alone, with no
+        # phpstan.neon/level configured, must not count as "genuinely
+        # adopted" -- the Psalm-equivalence path stays available, same as a
+        # target that never touched PHPStan at all.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({
+                "require-dev": {
+                    "phpstan/phpstan": "^1.0",
+                    "vimeo/psalm": "^5.0",
+                },
+            }),
+            "composer.lock": "{}",
+            "psalm.xml": "<psalm></psalm>",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+            self.assertFalse(d["phpstan-level-1"]["fulfilled"], d["phpstan-level-1"])
+            self.assertTrue(d["phpstan-level-1"]["details"].get("psalm_equivalent"))
+        finally:
+            tmp.cleanup()
+
     def test_phpstan_path_needs_no_psalm_rejection(self):
         # On the PHPStan path, php-structural-scan resolves without any
         # psalm-related out-of-scope entry at all — psalm isn't a leaf, so

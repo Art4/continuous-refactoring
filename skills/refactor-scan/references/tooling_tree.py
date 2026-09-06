@@ -923,10 +923,6 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     )
 
     # phpstan-level-0
-    # Psalm equivalence: fulfilled without phpstan whenever the `psalm` node
-    # (above) is fulfilled — reads that node's computed state instead of
-    # re-deriving the raw detection here.
-    psalm_fulfils_p0 = psalm_fulfilled
     # Self-wiring: once ci-runner is fulfilled, this node also
     # requires a CI job that actually invokes phpstan. The invocation is
     # level-independent (`vendor/bin/phpstan analyse` regardless of the
@@ -938,6 +934,20 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # just not detectable via composer.json alone.
     ephemeral_ci_dep = has_ci and _has_ephemeral_ci_dep(repo, "phpstan/phpstan", "vendor/bin/phpstan analyse")
     has_phpstan_dep_or_ephemeral = has_phpstan_dep or ephemeral_ci_dep
+    # Psalm equivalence: fulfilled without phpstan whenever the `psalm` node
+    # (above) is fulfilled — reads that node's computed state instead of
+    # re-deriving the raw detection here. Co-presence (phpstan.md, psalm.md):
+    # if PHPStan is *also* genuinely adopted (a real dependency, actually
+    # configured with a level), PHPStan is the authoritative check and this
+    # equivalence must not apply — Psalm fulfilment is superseded, not
+    # additive. Without this guard, a target that adopts both (the ordinary
+    # case once `psalm-taint-analysis` is layered onto an existing PHPStan
+    # setup) would wrongly read every phpstan-level-N as "not applicable",
+    # corrupting `refactor-learn`'s `Fulfilled nodes` overwrite the moment a
+    # pass with parser access ran (confirmed live on `Art4/legacy-todo`:
+    # already-fulfilled phpstan-level-1..5 vanished from the cache).
+    phpstan_genuinely_adopted = has_phpstan_dep_or_ephemeral and phpstan_level is not None
+    psalm_fulfils_p0 = psalm_fulfilled and not phpstan_genuinely_adopted
     # `phpstan_level == 0` here would mean this node goes right back to
     # unfulfilled the moment a project advances to level 1 — breaking the
     # level-1..10 chain's own required-parent-stays-fulfilled assumption
