@@ -1,5 +1,10 @@
 # Select mode batch-files candidates; Security/Blast-Radius signals bypass the backlog cap
 
+> Amends [ADR-0038](0038-candidate-selection-moves-to-prioritize.md): Select mode's own decision to
+> "pick the single strongest, set the rest aside" is reversed — it now files every genuine candidate
+> found. ADR-0038's other decisions (the two-dispatch mechanism, minimal filing, `refactor-design`
+> grounding/grilling/commenting afterward) are unchanged.
+
 Observed live while reviewer-loop-watching `Art4/legacy-todo`: a filed security finding (an
 unauthenticated database download, purely a byproduct of web-root layout) would have waited behind
 whatever won ranking that pass under the existing "pick the single strongest, set the rest aside"

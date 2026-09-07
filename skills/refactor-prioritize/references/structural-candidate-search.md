@@ -33,25 +33,21 @@ friction spot that wouldn't have qualified alone doesn't qualify just to round o
 Use `/codebase-design` vocabulary (module, interface, depth, seam, leverage, locality) in each
 candidate's description — not "component," "service," "API."
 
-## 3. Rank what was found, decide what to file
+## 3. Rank what was found
 
 More than one genuine friction spot found → don't discard the rest. Rank them by the same four
 factors Rank mode itself uses (heat, leverage, tooling pressure, risk), same as always for deciding
 which one is strongest — that one is this pass's recommendation, carried forward per *File it* below.
-The others still get filed (this step), just not pursued this pass.
+The others still get filed (next step), just not pursued this pass.
 
-Each found candidate sorts into one of two admission tiers by its Signal:
+## 4. Admission tier per candidate
 
-- **Priority** — Signal is **security** or **blast radius of inaction** (`signals.md`). File it
-  regardless of backlog size.
-- **Capped** — every other Signal. File it only while headroom remains: check the target's currently
-  open `refactor:candidate` issues that lack `refactor:priority` — under 5 → file it; at 5 →
-  stop filing capped candidates (queue the rest for a future exploration, same as today's single-pick
-  behaviour, just for the overflow instead of everything past the first).
-
-This mirrors `refactor-scan` step 1's own two-counter cap (`skills/refactor-scan/SKILL.md`) — Select
-mode does the filing, `refactor-scan` does the admission check on the next pass; keeping the same
-five-and-priority-exempt shape on both sides means neither can silently drift out of sync.
+Each found candidate sorts into one of two admission tiers by its Signal — **priority** (security or
+blast radius of inaction, `signals.md`) or **capped** (everything else). The actual threshold and
+admission rule live in one place, `refactor-scan/SKILL.md` step 1 (`skills/refactor-scan/SKILL.md`) —
+read it fresh here rather than restating the number, so the two never drift apart. A capped candidate
+this exploration finds but the cap has no room for queues for a future exploration, same as today's
+single-pick behaviour, just for the overflow instead of everything past the first.
 
 ## File it
 

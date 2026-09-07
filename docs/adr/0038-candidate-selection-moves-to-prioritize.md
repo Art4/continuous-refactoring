@@ -1,5 +1,10 @@
 # Candidate selection moves to `refactor-prioritize`, filed before the plan exists
 
+> Amended by [ADR-0039](0039-batch-filing-and-priority-backlog-admission.md): Select mode no longer
+> picks a single strongest candidate and sets the rest aside — it files every genuine candidate found,
+> sorted into a priority or capped admission tier. Everything else here (the two-dispatch mechanism,
+> minimal filing, `refactor-design` grounding/grilling/commenting afterward) is unchanged.
+
 Observed live while reviewer-loop-watching `Art4/legacy-todo`: `refactor-design` did candidate search
 (structural-scan's codebase walk, or a PHPStan baseline-shrink group pick), grounding, and grilling
 all inside one dispatch — the candidate's issue was filed only at the very end, together with the

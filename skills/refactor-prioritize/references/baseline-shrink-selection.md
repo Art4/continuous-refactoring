@@ -41,12 +41,12 @@ clearly names a sharper factor (a group of null-dereference findings on security
 **security**, not just tooling pressure; ordinary judgment, not a fixed rule).
 
 - **Priority** (Signal is security or blast radius of inaction) → file regardless of backlog size.
-- **Capped** (everything else, tooling pressure included) → file only while headroom remains: fewer
-  than 5 open `refactor:candidate` issues not labelled `refactor:priority` → file it; 5 already open →
-  stop filing capped groups this pass, queue the rest for a future exploration.
+- **Capped** (everything else, tooling pressure included) → file only while headroom remains. The
+  actual threshold and admission rule live in one place, `refactor-scan/SKILL.md` step 1
+  (`skills/refactor-scan/SKILL.md`) — read it fresh here rather than restating the number; a capped
+  group this exploration finds but the cap has no room for queues for a future exploration.
 
-Mirrors `refactor-scan` step 1's own two-counter cap (`skills/refactor-scan/SKILL.md`) and
-`structural-candidate-search.md`'s identical admission rule — same shape on both Select-mode paths.
+Same admission rule as `structural-candidate-search.md`'s — identical shape on both Select-mode paths.
 
 ## File it
 
