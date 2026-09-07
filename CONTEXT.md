@@ -81,7 +81,7 @@ The concrete refactoring plan produced by `refactor-design`: the deepened module
 _Avoid_: design doc
 
 **Proposals**:
-The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize` picks one (selecting a concrete instance first, for a gate) and files it; `refactor-design` adds the plan afterward.
+The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize`'s Rank mode picks one. Filing itself happens in `refactor-prioritize`'s Select mode (a concrete instance selected first, for a gate) or, for an already-concrete winner, in `refactor-design` directly — either way, `refactor-design` adds the plan afterward.
 _Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
 
 **Findings**:

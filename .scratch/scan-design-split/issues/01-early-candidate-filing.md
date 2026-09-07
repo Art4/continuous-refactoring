@@ -60,8 +60,13 @@ Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, two rounds plus 
   - Implementation detail found while closing the loop, not a separate decision: on a *non-native*
     tracker, `Pending candidates` already gets written across the old design→implement handoff too, so
     it can now point to either state. `refactor-scan` step 2, on resuming, disambiguates by checking
-    whether the issue already carries a plan comment — no plan yet → hand to the prioritize
-    second-dispatch; plan already present → hand onward to implement, as today.
+    whether the issue already carries a plan comment — no plan yet → hand **straight to
+    `refactor-design`**, bypassing `refactor-prioritize` entirely; plan already present → hand
+    straight to `refactor-implement`, same as a resume-candidate. (Corrected during implementation
+    from this bullet's original wording, which said "no plan yet → hand to the prioritize
+    second-dispatch" — re-running Select mode on an already-selected candidate risks picking a
+    *different* one, exactly what writing `Pending candidates` early exists to prevent. Caught by the
+    code-review Spec axis after implementation; the shipped mechanism is the corrected one.)
 - [x] **Glossary:** `CONTEXT.md`'s **Proposals** entry ("not yet candidates, since nothing is filed
   until `refactor-design` picks one and specs it") needs a wording update — filing and speccing are no
   longer the same step/skill. **Candidate**'s own definition ("a backlog item filed...") already holds

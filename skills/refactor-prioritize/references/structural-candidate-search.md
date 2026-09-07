@@ -44,5 +44,6 @@ friction, in the project's domain language), **Signal** (which factor above drov
 the minimal payload — the full plan (deepened module, seam, interface, surviving tests, slice
 ordering) is `refactor-design`'s job afterward, added as a comment on this same issue.
 
-Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (dedupe check, `Pending candidates`
-write).
+Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (`Pending candidates` write) — no
+dedupe check here, unlike a baseline-shrink group: a structural candidate's Where/Problem/Signal has
+no deterministic title to dedupe against the way a fresh group's does.
