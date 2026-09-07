@@ -70,7 +70,9 @@ full plan — that's `refactor-design`'s job afterward, added as a comment on th
 trackers skip, `skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — a pass
 interrupted between this filing and `refactor-design`'s follow-up comment needs `refactor-scan` to
 resume exactly this issue next pass, not treat it as a fresh externally-labeled candidate and
-potentially select a different one. No native-label tracker → unchanged, same write as always.
+potentially select a different one. No native-label tracker → unchanged, same write as always. Either
+way, via the dedicated bookkeeping branch — never a direct commit to whatever branch happens to be
+checked out, and never to the default branch.
 
 ## Output
 
