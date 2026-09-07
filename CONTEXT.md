@@ -84,6 +84,10 @@ _Avoid_: design doc
 The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize`'s Rank mode picks one. Filing itself happens in `refactor-prioritize`'s Select mode (a concrete instance selected first, for a gate) or, for an already-concrete winner, in `refactor-design` directly — either way, `refactor-design` adds the plan afterward.
 _Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
 
+**Signal**:
+The named factor (heat, leverage, security, blast radius of inaction, …) that qualified a candidate as a genuine friction spot — the third field on a candidate issue, alongside Where and Problem, that `refactor-prioritize`'s Select mode names when it files one. The full catalogue lives in `skills/refactor-prioritize/references/signals.md`; two of its factors (security, blast radius of inaction) additionally mark a candidate as **priority**, exempting it from the backlog's ordinary admission cap.
+_Avoid_: (none — use the term as-is)
+
 **Findings**:
 Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Handed to `refactor-learn` to act on. Scan only notices; it never decides the outcome itself.
 _Avoid_: events, notifications

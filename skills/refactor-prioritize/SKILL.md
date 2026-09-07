@@ -62,8 +62,11 @@ for a winner that's already concrete (an ordinary tooling-tree node, an external
 - **Winner is `structural-scan`** → run `skills/refactor-prioritize/references/structural-candidate-search.md` in full.
 - **Winner is a "PHPStan Level N — baseline shrink" proposal** → run `skills/refactor-prioritize/references/baseline-shrink-selection.md` in full.
 
-Both end the same way: a concrete candidate, filed as an issue with its minimal fields (never the
-full plan — that's `refactor-design`'s job afterward, added as a comment on this same issue).
+Both end the same way: every genuine candidate found gets filed (minimal fields, never the full
+plan — that's `refactor-design`'s job, added as a comment only on the one this pass pursues), sorted
+into a **priority** or **capped** admission tier by its Signal
+(`skills/refactor-prioritize/references/signals.md`), and the single strongest is this pass's
+recommendation, carried forward.
 
 `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → **still write**
 `Pending candidates` to this issue, unlike the ordinary design→implement handoff (which native
@@ -78,7 +81,9 @@ checked out, and never to the default branch.
 
 **Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass.
 
-**Select mode:** the newly filed candidate issue (number + its minimal fields) → `refactor-design`.
+**Select mode:** the single recommended candidate's issue (number + its minimal fields) →
+`refactor-design` — any other candidates filed this same run sit as ordinary open issues, for a
+future pass.
 
 ## Fallback
 

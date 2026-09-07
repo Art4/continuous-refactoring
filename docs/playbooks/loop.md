@@ -13,6 +13,12 @@ scan (propose nodes, detect closed MRs) → prioritise → design (grill, file t
 
 The orchestrator passes each skill's output to the next as its input (ADR-0010) — nobody re-derives context from shared state except `refactor-scan`'s own detection and whatever local state doc a skill reads directly.
 
+Structural work (the `structural-scan` gate) only opens once the tooling adoption chain is in place —
+this playbook calls that chain the **Safety Net**: deterministic checks (static analysis, a test
+suite) that catch a regression before an agent's own structural judgement has to. It's the same
+mechanism `CONTEXT.md` and the skills themselves still call the tooling tree — "Safety Net" is a
+reading aid for this playbook, not a renamed concept.
+
 ## Triggers
 
 The loop never triggers itself — it has no stored schedule (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`). You kick it off, however often that is: by hand, or via whatever recurring trigger you set up outside the suite.
@@ -43,6 +49,6 @@ The loop closes with the **learn step**:
 
 ## Common mistakes
 
-- **Ignoring tooling-tree pressure.** When fulfilled tooling flags a candidate, the loop prioritises it — unfulfilled tooling is a missing tree node, not a baseline delay.
+- **Ignoring tooling-tree (Safety Net) pressure.** When fulfilled tooling flags a candidate, the loop prioritises it — unfulfilled tooling is a missing tree node, not a baseline delay.
 - **Scanning everything at once.** Scope to hot spots or named areas; a scan that wants everything finds nothing well.
 - **Merging reviews into one score.** Standards and spec stay two separate axes — that's the only way you see a violation of one when the other is green.
