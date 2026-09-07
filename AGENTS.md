@@ -31,8 +31,8 @@ This repo IS the skill suite. The skills live under `skills/` and are consumed b
 
 - `continuous-refactoring` — the loop pass orchestrator (scan → prioritise → design → implement → learn), a thin data pipe between the lifecycle skills (ADR-0010)
 - `refactor-scan` — propose every currently-unblocked tooling-tree node, detect (never act on) closed/merged issues and MRs
-- `refactor-prioritize` — rank the proposals, recommend next
-- `refactor-design` — grill/search the chosen node into a plan, files it as an issue
+- `refactor-prioritize` — rank the proposals, recommend next; for a gate-shaped winner, also selects and minimally files the concrete candidate
+- `refactor-design` — grounds and grills a candidate into a plan, filing it (or adding the plan as a comment on an already-filed one)
 - `refactor-implement` — execute the plan test-first, review included
 - `refactor-learn` — the suite's only writer: ledger, ADR/CONTEXT.md, issue status
 

@@ -16,7 +16,7 @@ Run this on demand, or via your own recurring trigger — the loop has no schedu
 
 ## Loop state
 
-State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-design` files backlog issues and sets `Pending candidates`; `refactor-implement` sets `Create-mode` while delivering `loop-config`) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
+State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-prioritize`'s Select mode files a gate-shaped candidate's issue and sets `Pending candidates`; `refactor-design` does the same for a tooling-tree node, `loop-config`, or an externally-labeled candidate — the cases Select mode never runs for; `refactor-implement` sets `Create-mode` while delivering `loop-config`) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
 
 - **Config** — the Refactoring Notes' `bookkeeping.md`: focus areas, merge-request create-mode (decided once, during `loop-config`'s own interview — see `## Opening a merge request`), `Pending candidates`, `Fulfilled nodes` cache, `Skip streak` (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`).
 - **Remembered MRs** — every open `refactor:candidate` issue with a linked pull request (the tracker's native issue↔closing-PR cross-reference), when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab); otherwise the Refactoring Notes' `merge-requests.md`, a committed ledger with the same facts.
@@ -37,13 +37,14 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
    - No git repository → pass ends now, nothing else runs (not even step 6).
    - Backlog full → skip to step 5 with scan's findings, no new candidate.
    - Resume-candidate (an open MR with reviewer activity newer than its last commit) → skip straight to step 5 with it; steps 2–4 don't run.
+   - Pending candidate → skip straight to step 4 (no plan comment yet) or step 5 (plan comment present, same as a resume-candidate); steps in between don't run.
    - Otherwise → **findings** (possibly empty) go to step 2, **proposals** (every unblocked node's Name, never slugs) go to step 3.
 
 2. **Learn, early call — only if step 1 found something.** Run `/refactor-learn` on the findings before prioritising: step 3 reads the ledger, and a finding this pass just resolved (an MR merged or closed) must land there first. No findings → skip this call entirely.
 
-3. **Prioritise.** Run `/refactor-prioritize` on scan's proposals against the now-current ledger. Stops the pass (skip to step 5) if two suite MRs are already open, or every proposal is already in flight. Otherwise hands forward one chosen node with its rationale.
+3. **Prioritise.** Run `/refactor-prioritize` (Rank mode) on scan's proposals against the now-current ledger. Stops the pass (skip to step 5) if two suite MRs are already open, or every proposal is already in flight. Otherwise hands forward one chosen node with its rationale — a gate (`structural-scan`, a PHPStan baseline-shrink family) → run `/refactor-prioritize` again (Select mode, a fresh dispatch) to pick and minimally file the concrete candidate within it before continuing to step 4. Already concrete (tooling-tree node, externally-labeled candidate) → straight to step 4, Select mode doesn't run.
 
-4. **Design.** Run `/refactor-design` on the chosen node — files it as an issue (its first time becoming one) and writes the plan onto it. Carries the filed issue/plan to step 5.
+4. **Design.** Run `/refactor-design` on what step 3 handed forward — files (or updates) the issue itself for a tooling-tree node, `loop-config`, or an externally-labeled candidate, same as always; grounds and grills a gate-shaped candidate Select mode already filed, then adds the plan as a comment on that same issue instead. Carries the issue/plan to step 5.
 
 5. **Implement.** Run `/refactor-implement` — one candidate, one branch, created here. Reviews its own diff (standards + spec) until clean, looping back to its own earlier steps on findings, before opening the merge request. Carries the opened MR to step 6.
 
