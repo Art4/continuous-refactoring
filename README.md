@@ -29,8 +29,8 @@ The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md);
 |---|---|
 | `continuous-refactoring` | Orchestrator — runs a loop pass (cadence or on-demand), passes each skill's output to the next |
 | `refactor-scan` | Propose every currently-unblocked tooling-tree node from `bookkeeping.md`; detect (never file) closed/merged issues and MRs |
-| `refactor-prioritize` | Rank the proposals, recommend the next one |
-| `refactor-design` | Grill/search the chosen node → plan, files it as an issue |
+| `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects and files the concrete candidate |
+| `refactor-design` | Ground/grill the candidate → plan, filed or commented onto its issue |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
 | `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
 | `continuous-housekeeping` | Separate, recurring maintenance sweep (own cadence, default weekly) — dependency currency, tooling-deprecation cleanup, documentation sync; not part of the pipeline above |
