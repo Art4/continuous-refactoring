@@ -1,6 +1,6 @@
 # Tooling Tree
 
-The generic root of every language specialization's **tooling tree**. Two ordinary prerequisites (`git`, `loop-config`), one **recognition gate** per language specialization (PHP: `is-php-project`, below — a future CSS/JS specialization adds its own sibling the same way), one ordinary language-neutral first-wave node (`ci-runner`, below), and one downstream gate (`structural-scan`). A recognition gate's *role* is generic — "should this specialization's tree even be reachable on this target" is evaluated fresh every pass regardless of which specializations exist — which is why it lives here rather than in the specialization's own tree doc, even though what a given gate actually detects (PHP files/`composer.json`, for `is-php-project`) is naturally specific to that language. `ci-runner` lives here for a different reason: its content is genuinely language-neutral, but a language tree still references it externally for the language-specific edges hanging off it — the same way `editorconfig` (also below) already works. Everything past a specialization's own recognition gate — its real tooling nodes (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) — attaches beneath that gate instead of beneath `loop-config` directly, and declares its own edges into `structural-scan` itself; this document otherwise stays language-neutral. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **tooling tree**).
+The generic root of every language specialization's **tooling tree**. Two ordinary prerequisites (`git`, `loop-config`), one **recognition gate** per language specialization (PHP: `is-php-project`, below — a future CSS/JS specialization adds its own sibling the same way), two ordinary language-neutral first-wave nodes (`ci-runner`, `secret-detection`, below), and one downstream gate (`structural-scan`). A recognition gate's *role* is generic — "should this specialization's tree even be reachable on this target" is evaluated fresh every pass regardless of which specializations exist — which is why it lives here rather than in the specialization's own tree doc, even though what a given gate actually detects (PHP files/`composer.json`, for `is-php-project`) is naturally specific to that language. `ci-runner` lives here for a different reason: its content is genuinely language-neutral, but a language tree still references it externally for the language-specific edges hanging off it — the same way `editorconfig` (also below) already works. `secret-detection` is language-neutral for a simpler reason — a secret scanner reads git history and file contents directly, no language-specific tooling ecosystem involved — and deliberately carries **no** `resolved` edge into `structural-scan` at all: a Signal-producing node, not a Safety Net one (see its own entry below for why). Everything past a specialization's own recognition gate — its real tooling nodes (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) — attaches beneath that gate instead of beneath `loop-config` directly, and declares its own edges into `structural-scan` itself; this document otherwise stays language-neutral. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **tooling tree**, **signal**).
 
 ## Diagram
 
@@ -11,12 +11,14 @@ graph TD
     ipp[is-php-project]
     ci[ci-runner]
     edc[editorconfig]
+    sd[secret-detection]
     ss[structural-scan]
 
     git -->|required| lc
     lc -->|required| ipp
     lc -->|required| ci
     lc -->|required| edc
+    lc -->|required| sd
     edc -.->|resolved| ss
     ci -.->|resolved| ss
     ipp -.->|"(language tree's own aggregation node attaches here)"| ss
@@ -32,6 +34,7 @@ Three dotted edges point into `structural-scan` above. `editorconfig -.->|resolv
 | `loop-config` | `is-php-project` | required |
 | `loop-config` | `ci-runner` | required |
 | `loop-config` | `editorconfig` | required |
+| `loop-config` | `secret-detection` | required |
 | `editorconfig` | `structural-scan` | resolved |
 | `ci-runner` | `structural-scan` | resolved |
 
@@ -105,6 +108,25 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/t
   php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
 
 Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/editorconfig.md`.
+
+### `secret-detection`
+
+- **Name:** Secret Detection
+- **Tool:** any secret scanner — generic, like `test-runner-if-missing`'s own `any test runner`
+  (`skills/refactor-scan/references/php-tooling-tree/test-runner-if-missing.md`); a concrete tool
+  (gitleaks, detect-secrets, trufflehog, …) is decided at adoption time, not pinned here.
+- **Purpose:** CI-gated protection against committing secrets/credentials — a Signal-producing node
+  for `refactor-prioritize`'s Select mode, not a Safety Net one. Deliberately carries **no** `resolved`
+  edge into `structural-scan`, unlike its generic-root siblings `editorconfig`/`ci-runner` above:
+  adopting it strengthens candidate selection (the Security signal), it never gates structural work.
+  Language-neutral by nature (reads git history/file contents directly), so it lives at the generic
+  root rather than any language specialization's own tree — a future language specialization inherits
+  it automatically, no re-declaration needed.
+- **Signal:** Security — `skills/refactor-prioritize/references/signals.md`'s own entry. Once this
+  node is fulfilled, `refactor-prioritize`'s Select mode prefers a clean CI-gated scan as positive
+  evidence over the generic (reading-the-code) recognition method for this factor.
+
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/secret-detection.md`.
 
 ### `structural-scan`
 

@@ -16,8 +16,8 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   same as choosing Pest over PHPUnit.
 - **Mutual exclusion:** the first scan pass that recognizes this node fulfilled while real
   PHPStan adoption is absent should write an
-  `out-of-scope/phpstan-level-10.md` entry in the Refactoring Notes if it isn't already present — this
-  resolves `phpstan-level-10` (the PHPStan level chain's `php-structural-scan` leaf) as rejected instead of
+  `out-of-scope/phpstan-level-5.md` entry in the Refactoring Notes if it isn't already present — this
+  resolves `phpstan-level-5` (the PHPStan level chain's `php-structural-scan` leaf) as rejected instead of
   leaving it permanently neither-fulfilled-nor-rejected. Because this node has no tree-proposed MR of its
   own to attach the write to (`MR scope: none`, above), this is housekeeping the scanning agent performs as
   part of that recognition pass, not part of an MR — the same "an agent records a decision" shape the
@@ -25,7 +25,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   triggered by recognition instead of an MR landing. Template (mirrors the shape already used throughout
   the Refactoring Notes' `out-of-scope/` in this repo's own fixtures):
   ```markdown
-  # Rejection: PHPStan Level 10
+  # Rejection: PHPStan Level 5
 
   **Date:** <today>
   **Reason:** mutual exclusion — this target adopted Psalm as its static analyzer (`psalm` node

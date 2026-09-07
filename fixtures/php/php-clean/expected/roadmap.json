@@ -39,6 +39,11 @@
       "reason": "CI config present",
       "details": {}
     },
+    "secret-detection": {
+      "fulfilled": true,
+      "reason": "CI job runs a secret scanner",
+      "details": {}
+    },
     "php-minimal-version": {
       "fulfilled": true,
       "reason": "no PHP-version gap detected",
@@ -55,6 +60,14 @@
       "details": {}
     },
     "php-cs-fixer": {
+      "fulfilled": true,
+      "reason": "dep and config present",
+      "details": {
+        "has_dep": true,
+        "has_config": true
+      }
+    },
+    "phpmd": {
       "fulfilled": true,
       "reason": "dep and config present",
       "details": {

@@ -39,6 +39,11 @@
       "reason": "no CI config",
       "details": {}
     },
+    "secret-detection": {
+      "fulfilled": false,
+      "reason": "no CI job runs a secret scanner yet",
+      "details": {}
+    },
     "php-minimal-version": {
       "fulfilled": true,
       "reason": "no PHP-version gap detected",
@@ -57,6 +62,14 @@
     "php-cs-fixer": {
       "fulfilled": false,
       "reason": "missing cs-fixer (need dep + config)",
+      "details": {
+        "has_dep": false,
+        "has_config": false
+      }
+    },
+    "phpmd": {
+      "fulfilled": false,
+      "reason": "missing phpmd (need dep + config)",
       "details": {
         "has_dep": false,
         "has_config": false
@@ -237,13 +250,12 @@
     },
     "php-structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: psr-4, composer-audit, php-cs-fixer, phpstan-level-10, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
+      "reason": "waiting on: psr-4, composer-audit, phpstan-level-5, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
       "details": {
         "unresolved": [
           "psr-4",
           "composer-audit",
-          "php-cs-fixer",
-          "phpstan-level-10",
+          "phpstan-level-5",
           "phpstan-deprecation-rules",
           "rector-dead-code",
           "rector-type-coverage",
@@ -304,6 +316,17 @@
     },
     {
       "n": 4,
+      "node": "secret-detection",
+      "type": "tooling",
+      "required_parents": [
+        "loop-config"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 5,
       "node": "composer",
       "type": "tooling",
       "required_parents": [
@@ -314,7 +337,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 5,
+      "n": 6,
       "node": "psr-4",
       "type": "tooling",
       "required_parents": [
@@ -325,7 +348,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 7,
       "node": "php-cs-fixer",
       "type": "tooling",
       "required_parents": [
@@ -338,7 +361,18 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
+      "node": "phpmd",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 9,
       "node": "composer-audit",
       "type": "tooling",
       "required_parents": [
@@ -350,7 +384,7 @@
       "reason": "real require dependency present"
     },
     {
-      "n": 8,
+      "n": 10,
       "node": "rector-phpunit-set",
       "type": "tooling",
       "required_parents": [
@@ -362,26 +396,6 @@
         "php-cs-fixer"
       ],
       "reason": "required parents fulfilled | outlook: would benefit from rector-code-quality (recommended) \u2014 still proposable"
-    },
-    {
-      "n": 9,
-      "node": "rector-type-coverage",
-      "type": "tooling",
-      "required_parents": [],
-      "required_any_parents": [],
-      "recommended_parents": [
-        "rector-dead-code",
-        "rector-code-quality",
-        "php-cs-fixer",
-        "phpstan-level-3"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from rector-dead-code (recommended) \u2014 still proposable"
-    },
-    {
-      "n": 10,
-      "node": "phpstan-level-11",
-      "type": "tooling (open chain)",
-      "reason": "chain open above level 10 \u2014 appended node"
     }
   ],
   "no_mr_created": true,
