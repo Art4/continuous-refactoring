@@ -33,9 +33,13 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Names:** `phpstan-level-N` → "PHPStan Level N" for each `N` in 1–10 (e.g. `phpstan-level-4` → "PHPStan Level 4").
 - **Tool:** PHPStan
 - **Purpose:** raise the analysis level one step at a time, straight through the chain, same rules
-  throughout, no redesign at any level — `phpstan-level-10` is the chain's resolved-leaf into
-  `php-structural-scan` (see that node's own entry in `php-tooling-tree.md`); `phpstan-level-1`–`-9` are ordinary intermediate
-  nodes.
+  throughout, no redesign at any level — `phpstan-level-5` is the chain's resolved-leaf into
+  `php-structural-scan` (see that node's own entry in `php-tooling-tree.md`) — the chain's only
+  existing structural fork point (`phpstan-deprecation-rules`' own required-parent line below already
+  branches there), not an arbitrary cutoff. Levels `1`–`4` and `6`–`10` are ordinary, non-gating
+  intermediate nodes: level 6 on starts the chain's stricter array-typing rules, a bar not worth
+  clearing before ordinary structural refactoring can begin. Levels above 5 stay fully proposable —
+  the chain doesn't stop, it just stops being load-bearing for `structural-scan`.
 - **Fulfilment check:** the immediate predecessor level node is fulfilled **and** its baseline is **empty** (see *Empty baseline*). Then: bump `level` in `phpstan.neon` by exactly one (e.g., `0 → 1`, `1 → 2`, …, `9 → 10`), regenerate `phpstan-baseline.neon` via `vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon`, and `vendor/bin/phpstan analyse` is green. Levels are never skipped; one MR raises exactly one level.
 - **Empty baseline — operational definition:** `phpstan-baseline.neon` is **absent** at repo root **OR** the file exists but `parameters.ignoreErrors` is absent or an empty array (no `message:` entries). Both count as empty. A file that exists and contains one or more ignore entries is non-empty and blocks the next level raise. The scan performs this check by parsing the Neon file (or, equivalently, counting `message:` entries); an absent file is treated as zero entries. After the introduce MR the file is normally present; absence is tolerated as empty for the purpose of gating the next level, but after any successful analysis the committed state should include the file (empty list when green without baseline).
 - **MR scope:** level bump (single integer increment) + regenerated baseline (overwritten in place) + only those source fixes that strictly reduce the new baseline's `ignoreErrors` count. Shrinking findings into the regenerated baseline is part of the same MR — the MR must commit the reduced baseline alongside any fixes that produced the reduction. Unrelated refactoring or feature changes stay out. The chain stays open above level 10 — further levels are appended as new nodes with the same rules, not a redesign.
@@ -87,7 +91,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   reasoning still applies to `rector-php-set` itself: its `required-any`
   parents are `phpstan-level-0` **and** `psalm` (either fulfilled unlocks it) precisely so a
   Psalm-only target keeps reaching it without depending on `phpstan-level-0` ever being rejected.
-  Mutual exclusion instead targets `phpstan-level-10`, the level chain's own `php-structural-scan` leaf —
+  Mutual exclusion instead targets `phpstan-level-5`, the level chain's own `php-structural-scan` leaf —
   via the housekeeping write on `psalm`'s own entry (`php-tooling-tree.md`) (`psalm` itself is deliberately not a leaf; see
   that node's entry for why a dedicated leaf for it turned out to be redundant ceremony). This node's fulfilment check keeps reading "PHPStan path OR `psalm` fulfilled" exactly as it
   already does above, unchanged.

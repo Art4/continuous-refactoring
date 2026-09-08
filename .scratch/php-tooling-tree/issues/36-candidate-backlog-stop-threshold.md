@@ -8,11 +8,11 @@
 
 **Priority:** low
 
-**Status:** needs-triage
+**Status:** done (superseded)
 
-- [ ] Confirm whether `refactor:candidate` issues can legitimately pile up past one under normal operation (e.g. an interrupted pass leaving an issue filed but never delivered, across more than one such interruption) — if so, five may be a deliberately generous allowance for exactly that, not an oversight.
-- [ ] If no legitimate path produces more than one or two, lower the threshold to match and document why in `refactor-scan/SKILL.md` (or a short ADR, if the reasoning is non-obvious enough to need one).
-- [ ] If five is intentional, add a one-line note in `refactor-scan/SKILL.md` saying so, so this doesn't get re-raised as a bug later.
+- [x] Confirm whether `refactor:candidate` issues can legitimately pile up past one under normal operation (e.g. an interrupted pass leaving an issue filed but never delivered, across more than one such interruption) — if so, five may be a deliberately generous allowance for exactly that, not an oversight.
+- [x] If no legitimate path produces more than one or two, lower the threshold to match and document why in `refactor-scan/SKILL.md` (or a short ADR, if the reasoning is non-obvious enough to need one).
+- [ ] If five is intentional, add a one-line note in `refactor-scan/SKILL.md` saying so, so this doesn't get re-raised as a bug later. — n/a, superseded instead of answered as-is (see below).
 
 ## Comments
 
@@ -22,3 +22,9 @@
 > (bookkeeping-invariant backlog gate vs. tooling-tree edge-gating semantics) that happens to collide only
 > in the number "five" ticket 33 was separately lifting for a different reason (the `next_candidates()`
 > proposal cap).
+
+> **2026-09-07 (superseded):** `.scratch/signals/issues/01-batch-filing-and-priority-admission.md`
+> (ADR-0039) answers this properly instead of just picking a different flat number: the five stays,
+> but splits into two counters — an uncapped **priority** tier (security/blast-radius signals) and the
+> original capped tier for everything else. `refactor-scan` step 1 now tracks both. Closing this one
+> as done, superseded rather than separately fixed.

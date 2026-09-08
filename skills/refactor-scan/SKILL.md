@@ -12,7 +12,7 @@ description: Propose every currently-unblocked tooling-tree node from bookkeepin
 ### 1. Check preconditions
 
 - No git repository → stop the pass, report it, propose nothing.
-- Five or more open `refactor:candidate` issues → stop, propose nothing new; let existing work clear first.
+- Five or more open `refactor:candidate` issues without `refactor:priority` → stop, propose nothing new; let existing work clear first. Count separately from `refactor:priority` issues (`refactor-prioritize`'s Select mode: Security/Blast-Radius signal, `skills/refactor-prioritize/references/signals.md`) — those never count toward this cap, so priority admissions can't themselves choke off ordinary proposals.
 
 ### 2. Resume pending work first
 

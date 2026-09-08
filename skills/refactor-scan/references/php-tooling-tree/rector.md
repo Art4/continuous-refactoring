@@ -21,11 +21,17 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   lines below) — read it transitively via their required parent on this node. `rector-type-coverage`/
   `rector-phpunit-set` are *not* among them any more (a later restructuring made them wait on sibling Rector
   nodes instead — see those nodes' own entries below for why they no longer transitively depend on this gate
-  at all). No `php-cs-fixer` (`php-cs-fixer.md`) recommended parent (unlike the sibling Rector nodes below)
-  — decided directly with the user; this node is the styling-order exception in the family.
-- **Recommended parent:** `php-minimal-version` (`php-minimal-version.md`) — this node's rule set rewrites
+  at all).
+- **Recommended parents:** `php-minimal-version` (`php-minimal-version.md`) — this node's rule set rewrites
   code to target syntax for a PHP version composer.json may not even declare support for yet; closes the
-  one gap where this family previously had no dependency on the runtime floor at all.
+  one gap where this family previously had no dependency on the runtime floor at all. Also
+  `php-cs-fixer` (`php-cs-fixer.md`) — this node used to be the one exception in the family with no
+  `php-cs-fixer` recommended parent ("the styling-order exception"), decided directly with the user
+  specifically because `php-cs-fixer` still carried its own direct `resolved` edge into
+  `php-structural-scan` back then, so nothing forced it to be decided otherwise. That direct edge is
+  gone now (`php-cs-fixer.md`'s own entry) — this recommended edge is what replaces it, forcing
+  `php-cs-fixer` to be decided before this node (and transitively `rector-dead-code`/
+  `rector-code-quality`) can resolve, same as every sibling Rector node already required.
 
 ### `rector-dead-code`
 

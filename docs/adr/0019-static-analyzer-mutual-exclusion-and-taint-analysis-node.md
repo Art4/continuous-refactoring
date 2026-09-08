@@ -4,6 +4,12 @@
 > `php-structural-scan` resolved-leaf, so a Psalm-only target's `structural-scan` gate stayed permanently
 > blocked. Also introduces a new node, `psalm-taint-analysis` (itself a `php-structural-scan` resolved-leaf
 > too — see Part C), and the tree's first `required-any` edges.
+>
+> Amended by [ADR-0040](0040-signal-tool-nodes-and-tree-edge-simplification.md): this ADR's "Considered
+> Options" rejection of dropping `php-cs-fixer`'s direct `php-structural-scan` resolved edge no longer
+> holds — ADR-0040 drops it after all, but only alongside a new compensating `recommended` edge into
+> `rector-php-set` that the version rejected here lacked. `phpunit`'s own leaf, and every other decision
+> in this document, are unaffected.
 
 Ticket 37 was filed during ticket 34's grilling, `ready-for-human`, flagging that its own
 `tooling_tree.py` mechanics needed a dedicated design pass before implementation. This ADR is the record of

@@ -291,6 +291,20 @@ def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
     return _has_ci_job_invoking(repo, "composer audit")
 
 
+# secret-detection's own `Tool: any secret scanner` (tooling-tree.md) — same
+# generic-tool shape as test-runner-if-missing's `any test runner`. Checked
+# by common invocation needle rather than one fixed tool name.
+_SECRET_SCAN_NEEDLES = ("gitleaks", "detect-secrets", "trufflehog")
+
+
+def _has_secret_scan_ci_job(repo: pathlib.Path) -> bool:
+    """secret-detection's real fulfilment (tooling-tree.md): a CI job that
+    runs any recognized secret scanner, gating the pipeline against
+    committing credentials/tokens. Tool-agnostic by design — checks a small
+    set of common invocation needles rather than one fixed tool."""
+    return any(_has_ci_job_invoking(repo, needle) for needle in _SECRET_SCAN_NEEDLES)
+
+
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
     p = repo / "phpstan.neon"
     if not p.exists():
@@ -623,8 +637,8 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     only the former releases a `recommended`-gated child. Also used by
     `_resolved_gate_status()` for the same "closed for good" question one
     level down: a `resolved`-gate leaf that isn't itself rejected but sits
-    behind a rejected required parent (e.g. `phpstan-level-10` behind a
-    rejected `phpstan-level-6`) must still count as resolved, the same as a
+    behind a rejected required parent (e.g. `phpstan-level-5` behind a
+    rejected `phpstan-level-2`) must still count as resolved, the same as a
     directly-rejected leaf already does.
 
     A `required-any` parent only closes this way once *every* one of its
@@ -835,6 +849,15 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("psr-4", psr4_verified, psr4_reason, declared=has_psr4_declared)
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
+    # secret-detection: generic root, no resolved edge into structural-scan
+    # (tooling-tree.md's own node entry states why) — fulfilled once CI gates
+    # on any recognized secret scanner.
+    secret_scan_fulfilled = _has_secret_scan_ci_job(repo)
+    set_node(
+        "secret-detection",
+        secret_scan_fulfilled,
+        "CI job runs a secret scanner" if secret_scan_fulfilled else "no CI job runs a secret scanner yet",
+    )
     # php-minimal-version: composer.json's declared PHP floor vs.
     # the highest version actually required — either a leaf
     # php_floor_precheck() blocks, or a quality-tooling CI job testing a
@@ -870,6 +893,13 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # php-cs-fixer
     cs_fulfilled = has_cs_dep and has_cs_config
     set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)
+    # phpmd — same dep+config approximation as php-cs-fixer above, no
+    # resolved edge into php-structural-scan (php-tooling-tree.md's own node
+    # entry states why): a Signal-producing node, not a Safety Net one.
+    has_phpmd_dep = _has_dep(composer, "phpmd/phpmd")
+    has_phpmd_config = (repo / "phpmd.xml").exists() or (repo / "phpmd.xml.dist").exists() or (repo / ".phpmd.xml").exists()
+    phpmd_fulfilled = has_phpmd_dep and has_phpmd_config
+    set_node("phpmd", phpmd_fulfilled, "dep and config present" if phpmd_fulfilled else "missing phpmd (need dep + config)", has_dep=has_phpmd_dep, has_config=has_phpmd_config)
     # phpunit — adopted AND, once ci-runner is fulfilled, actually gated in
     # CI (self-wiring: folded into this node's own fulfilment
     # check instead of a separate CI-job node). No CI yet still fulfils the
@@ -969,8 +999,9 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     else:
         set_node("phpstan-level-0", False, "missing phpstan, no level configured, or no baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
 
-    # phpstan-level-1..10 — phpstan-level-10 is the chain's resolved-leaf
-    # into php-structural-scan, see that node
+    # phpstan-level-1..10 — phpstan-level-5 is the chain's resolved-leaf
+    # into php-structural-scan (see that node); levels 6-10 stay ordinary,
+    # non-gating, still-proposable chain nodes.
     # For fulfilled check: level >= N
     for lvl in range(1, 11):
         node = f"phpstan-level-{lvl}"
@@ -1099,7 +1130,7 @@ def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: d
     simulated). A leaf counts as resolved when fulfilled, directly rejected,
     or effectively rejected (`_is_effectively_rejected` — closed for good
     because a required ancestor of the leaf is rejected, e.g.
-    `phpstan-level-10` behind a rejected `phpstan-level-6`) — the same
+    `phpstan-level-5` behind a rejected `phpstan-level-2`) — the same
     `resolved`-gate semantics `_resolved_gate_status()` already applies to
     the same leaf set, one gate condition over."""
     if has_real_dep:

@@ -13,15 +13,7 @@ mode's own (see `refactor-prioritize/SKILL.md` step 4). Planning the actual fix
 next level; the loop proposes shrinking work... until the baseline becomes empty."* Nothing shrinks
 the baseline on its own — this is that shrinking work, made concrete.
 
-## 1. Resume an already-open group first
-
-Check open `refactor:candidate` issues titled `PHPStan Level N: baseline shrink — <group>` (same
-`N` as the proposal). One already open → read `phpstan-baseline.neon` fresh: does that group (see
-*Grouping* below — same message/identifier, ignoring path/line/count) still have entries? Yes → resume
-that issue, skip straight to "File it" below's "already open, don't refile" path. No (a prior MR already
-cleared it) → close it, then continue below as if none were open.
-
-## 2. Read the baseline and group
+## 1. Read the baseline and group
 
 Read `phpstan-baseline.neon`'s `ignoreErrors` entries for level N. Group by **root cause** — same
 `message` pattern (with the file-specific token if the message parameterizes one, e.g. `$db` vs.
@@ -30,17 +22,41 @@ group commonly spans several files, and that's the point — one fix approach us
 group at once (e.g. every `might not be defined` finding for the same global, however many files
 reference it).
 
-More than one group exists → pick one by ordinary judgment (no fixed priority rule — largest, most
-tractable, whatever makes for the most sensible next MR is fine, same reasoning Rank mode already
-applies elsewhere). One selection, one candidate, same as a structural pick.
+## 2. Resume already-open groups, rank the rest
+
+For each group: an issue titled `PHPStan Level N: baseline shrink — <group>` (same `N`) already open
+→ resume it (skip to *File it* below's "already open" path) unless the group is now empty (a prior MR
+already cleared it) — close it instead, drop it from consideration.
+
+More than one fresh (not-yet-filed) group remains → don't discard the rest, same as a structural
+search. Rank them by ordinary judgment (largest, most tractable, whatever makes for the most sensible
+next MR — same reasoning Rank mode already applies elsewhere) to decide which one is this pass's
+recommendation; the others still get filed, just not pursued this pass.
+
+## 3. Admission tier per group
+
+Each group's Signal (`skills/refactor-prioritize/references/signals.md`) is usually **tooling
+pressure** — these are static-analysis residuals by definition — unless the group's actual nature
+clearly names a sharper factor (a group of null-dereference findings on security-sensitive input is
+**security**, not just tooling pressure; ordinary judgment, not a fixed rule).
+
+- **Priority** (Signal is security or blast radius of inaction) → file regardless of backlog size.
+- **Capped** (everything else, tooling pressure included) → file only while headroom remains. The
+  actual threshold and admission rule live in one place, `refactor-scan/SKILL.md` step 1
+  (`skills/refactor-scan/SKILL.md`) — read it fresh here rather than restating the number; a capped
+  group this exploration finds but the cap has no room for queues for a future exploration.
+
+Same admission rule as `structural-candidate-search.md`'s — identical shape on both Select-mode paths.
 
 ## File it
 
 Title: `PHPStan Level N: baseline shrink — <short group description>` (e.g. `PHPStan Level 1:
-baseline shrink — $db might not be defined`), label `refactor:candidate`. Body: the group's messages
-and affected files — this is the minimal payload; the planned fix (`refactor-design`'s job
-afterward, `phpstan-baseline-shrink.md` step 3) is added as a comment on this same issue, including
-which files remain for a future pass if the group is larger than one MR covers.
+baseline shrink — $db might not be defined`), label `refactor:candidate` — plus `refactor:priority`
+too, for a priority-tier group. Body: the group's messages and affected files — this is the minimal
+payload; the planned fix (`refactor-design`'s job afterward, `phpstan-baseline-shrink.md` step 3) is
+added as a comment only on the one group this pass actually pursues, including which files remain for
+a future pass if that group is larger than one MR covers.
 
 Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (dedupe check already done above;
-`Pending candidates` handling is the same as any other candidate, no special case here).
+`Pending candidates` names only the single recommended group — the others sit as ordinary open issues
+for a future pass).

@@ -60,6 +60,27 @@ class LoadTreeTests(unittest.TestCase):
         # declared in tooling-tree.md's own edge table (both endpoints are
         # generic-root nodes), not php-tooling-tree.md's.
         self.assertIn({"from": "editorconfig", "to": "structural-scan", "type": "resolved"}, tree["edges"])
+        # signals ticket 2: php-cs-fixer's route to php-structural-scan
+        # simplified — new recommended edge into rector-php-set replaces its
+        # own direct resolved edge (still transitively decided before
+        # rector-dead-code/rector-code-quality, both still direct leaves,
+        # can resolve).
+        self.assertIn({"from": "php-cs-fixer", "to": "rector-php-set", "type": "recommended"}, tree["edges"])
+        self.assertNotIn({"from": "php-cs-fixer", "to": "php-structural-scan", "type": "resolved"}, tree["edges"])
+        # signals ticket 2: test-runner-if-missing dropped from the leaf set,
+        # no replacement.
+        self.assertNotIn({"from": "test-runner-if-missing", "to": "php-structural-scan", "type": "resolved"}, tree["edges"])
+        # signals ticket 2: the level-chain leaf moves from level 10 to level
+        # 5 — the chain's only existing structural fork point.
+        self.assertIn({"from": "phpstan-level-5", "to": "php-structural-scan", "type": "resolved"}, tree["edges"])
+        self.assertNotIn({"from": "phpstan-level-10", "to": "php-structural-scan", "type": "resolved"}, tree["edges"])
+        # signals ticket 2: phpmd and secret-detection are Signal-producing
+        # nodes, proposed and ranked normally but never gating structural
+        # work — no resolved edge into either gate.
+        self.assertIn({"from": "composer", "to": "phpmd", "type": "required"}, tree["edges"])
+        self.assertNotIn({"from": "phpmd", "to": "php-structural-scan", "type": "resolved"}, tree["edges"])
+        self.assertIn({"from": "loop-config", "to": "secret-detection", "type": "required"}, tree["edges"])
+        self.assertNotIn({"from": "secret-detection", "to": "structural-scan", "type": "resolved"}, tree["edges"])
 
     def test_order_contains_nodes(self):
         tree = load_tree()
@@ -89,14 +110,20 @@ class LoadTreeTests(unittest.TestCase):
         # (also one of these thirteen), so it gates the same way. `psalm`
         # itself is deliberately NOT one of these — ticket 37 originally gave
         # it its own leaf, found redundant on review and dropped: the actual
-        # bug (a Psalm-only target never resolving `phpstan-level-10`) is
+        # bug (a Psalm-only target never resolving the level chain's leaf) is
         # already fixed by that node's own mutual-exclusion rejection
         # housekeeping, without needing `psalm` to be a leaf too. Ticket 48
         # later dropped `rector-early-return` itself (its rule set shipped
         # permanently empty upstream, folded into `rector-code-quality`) —
         # back down to twelve. Ticket 50 added `psr-4` as a new thirteenth
         # leaf — gating on a different basis than every other leaf here (a
-        # code-organization convention, not a checking tool).
+        # code-organization convention, not a checking tool). `signals`
+        # ticket 2 dropped `test-runner-if-missing` (no replacement) and
+        # `php-cs-fixer` (rerouted through a new recommended edge into
+        # `rector-php-set` instead — still transitively decided before this
+        # node resolves, just not a direct edge any more) and lowered the
+        # level-chain leaf from `phpstan-level-10` to `phpstan-level-5` — down
+        # to eleven.
         tree = load_tree()
         self.assertEqual(
             set(tree["resolved_parents"]["php-structural-scan"]),
@@ -104,9 +131,7 @@ class LoadTreeTests(unittest.TestCase):
                 "psr-4",
                 "composer-audit",
                 "phpunit",
-                "test-runner-if-missing",
-                "php-cs-fixer",
-                "phpstan-level-10",
+                "phpstan-level-5",
                 "phpstan-deprecation-rules",
                 "rector-dead-code",
                 "rector-type-coverage",
@@ -118,6 +143,9 @@ class LoadTreeTests(unittest.TestCase):
         )
         self.assertNotIn("psalm", tree["resolved_parents"]["php-structural-scan"])
         self.assertNotIn("rector-early-return", tree["resolved_parents"]["php-structural-scan"])
+        self.assertNotIn("test-runner-if-missing", tree["resolved_parents"]["php-structural-scan"])
+        self.assertNotIn("php-cs-fixer", tree["resolved_parents"]["php-structural-scan"])
+        self.assertNotIn("phpstan-level-10", tree["resolved_parents"]["php-structural-scan"])
 
     def test_required_any_parents_of_psalm_taint_analysis(self):
         # ticket 37: a new OR-required-parent edge type — psalm-taint-analysis
@@ -477,10 +505,11 @@ class StructuralScanGateTests(unittest.TestCase):
             "composer.lock": "{}",
             "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
             ".php-cs-fixer.php": "<?php return [];",
-            # ticket 43: level chain now reaches phpstan-level-10 (was 3) —
-            # a "fully tooled" fixture must reach the new top to resolve
+            # signals ticket 2: the level-chain leaf is phpstan-level-5 now
+            # (was phpstan-level-10, ticket 43's own level-3 before that) —
+            # a "fully tooled" fixture must reach the current leaf to resolve
             # php-structural-scan by fulfilment alone.
-            "phpstan.neon": "parameters:\n    level: 10\n",
+            "phpstan.neon": "parameters:\n    level: 5\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             # ticket 43: also fulfils rector-php-set/-code-quality/-phpunit-set
             # (substring-detected, same style as DeadCode/Type).
@@ -622,8 +651,8 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
             "composer.lock": "{}",
             "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
             ".php-cs-fixer.php": "<?php return [];",
-            # ticket 43: level chain now reaches phpstan-level-10 (was 3).
-            "phpstan.neon": "parameters:\n    level: 10\n",
+            # signals ticket 2: the level-chain leaf is phpstan-level-5 now (was phpstan-level-10, ticket 43's own level-3 before that).
+            "phpstan.neon": "parameters:\n    level: 5\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             ".github/workflows/ci.yml": (
@@ -677,21 +706,22 @@ class PhpStructuralScanAggregationTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_ancestor_rejected_leaf_still_resolves_php_structural_scan(self):
-        # Ticket 53: phpstan-level-10 (the actual leaf) isn't itself
-        # rejected, but phpstan-level-6 -- a required ancestor two hops up
-        # its own chain -- is. Per the maintainer's own decision, only the
-        # directly-rejected node gets an out-of-scope entry; the chain above
-        # it (7-10) must still count as resolved via _is_effectively_rejected,
-        # not stay stuck in `unresolved` forever waiting for an entry nobody
-        # is going to write.
+        # Ticket 53 (signals ticket 2 lowered the leaf from phpstan-level-10
+        # to phpstan-level-5, same mechanism either way): phpstan-level-5
+        # (the actual leaf) isn't itself rejected, but phpstan-level-2 -- a
+        # required ancestor two hops up its own chain -- is. Per the
+        # maintainer's own decision, only the directly-rejected node gets an
+        # out-of-scope entry; the chain above it (3-5) must still count as
+        # resolved via _is_effectively_rejected, not stay stuck in
+        # `unresolved` forever waiting for an entry nobody is going to write.
         files = self._fully_tooled_php_leaves()
-        files["phpstan.neon"] = "parameters:\n    level: 3\n"  # below the rejected level-6
+        files["phpstan.neon"] = "parameters:\n    level: 1\n"  # below the rejected level-2
         tmp, root = self._make_repo(files)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-6.md").write_text("rejected: declined\n")
+            (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-2.md").write_text("rejected: declined\n")
             d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-10"]["fulfilled"], d["phpstan-level-10"])
+            self.assertFalse(d["phpstan-level-5"]["fulfilled"], d["phpstan-level-5"])
             self.assertTrue(d["php-structural-scan"]["fulfilled"], d["php-structural-scan"])
         finally:
             tmp.cleanup()
@@ -781,13 +811,14 @@ class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
 
 
 class PsalmMutualExclusionTests(unittest.TestCase):
-    """Ticket 37: phpstan-level-10 is the php-structural-scan leaf a target's
-    static-analyzer choice must resolve — the actual bug this ticket fixes (a
-    Psalm-only target previously left phpstan-level-10 neither fulfilled nor
-    rejected, permanently blocking php-structural-scan). `psalm` itself is
-    deliberately not a leaf (found redundant on review, see
-    test_resolved_parents_of_php_structural_scan) — only phpstan-level-10's
-    own resolution matters here."""
+    """Ticket 37: phpstan-level-5 (was phpstan-level-10 before signals ticket
+    2 lowered the level-chain leaf) is the php-structural-scan leaf a
+    target's static-analyzer choice must resolve — the actual bug this
+    ticket fixes (a Psalm-only target previously left the level-chain leaf
+    neither fulfilled nor rejected, permanently blocking
+    php-structural-scan). `psalm` itself is deliberately not a leaf (found
+    redundant on review, see test_resolved_parents_of_php_structural_scan) —
+    only the level-chain leaf's own resolution matters here."""
 
     def _make_repo(self, files: dict):
         tmp = tempfile.TemporaryDirectory()
@@ -806,32 +837,32 @@ class PsalmMutualExclusionTests(unittest.TestCase):
             "psalm.xml": "<psalm></psalm>",
         }
 
-    def test_psalm_leaf_fulfilled_but_phpstan_level_10_leaf_unresolved_without_housekeeping(self):
+    def test_psalm_leaf_fulfilled_but_phpstan_level_5_leaf_unresolved_without_housekeeping(self):
         # Reproduces the bug this ticket fixes: without the mutual-exclusion
-        # out-of-scope write, phpstan-level-10 sits neither fulfilled (Psalm
+        # out-of-scope write, phpstan-level-5 sits neither fulfilled (Psalm
         # path) nor rejected (nobody wrote the file) — php-structural-scan
         # stays blocked on it forever.
         tmp, root = self._make_repo(self._psalm_only_files())
         try:
             d = detect_nodes(root)
             self.assertTrue(d["psalm"]["fulfilled"])
-            self.assertFalse(d["phpstan-level-10"]["fulfilled"])
-            self.assertIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
+            self.assertFalse(d["phpstan-level-5"]["fulfilled"])
+            self.assertIn("phpstan-level-5", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()
 
-    def test_phpstan_level_10_rejection_closes_the_gap(self):
+    def test_phpstan_level_5_rejection_closes_the_gap(self):
         # The fix: the recognition-pass housekeeping described on the `psalm`
         # node's own entry (php-tooling-tree.md) writes
-        # out-of-scope/phpstan-level-10.md — phpstan-level-10 then resolves
+        # out-of-scope/phpstan-level-5.md — phpstan-level-5 then resolves
         # (rejected), and it's no longer in php-structural-scan's unresolved
         # list, exactly mirroring the real php-psalm fixture (ticket 37).
         files = self._psalm_only_files()
-        files["docs/refactoring/out-of-scope/phpstan-level-10.md"] = "rejected: mutual exclusion (ticket 37) — psalm path chosen\n"
+        files["docs/refactoring/out-of-scope/phpstan-level-5.md"] = "rejected: mutual exclusion (ticket 37) — psalm path chosen\n"
         tmp, root = self._make_repo(files)
         try:
             d = detect_nodes(root)
-            self.assertNotIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
+            self.assertNotIn("phpstan-level-5", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()
 
@@ -899,14 +930,14 @@ class PsalmMutualExclusionTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 10\n",
+            "phpstan.neon": "parameters:\n    level: 5\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
         })
         try:
             d = detect_nodes(root)
             self.assertFalse(d["psalm"]["fulfilled"])
-            self.assertTrue(d["phpstan-level-10"]["fulfilled"])
-            self.assertNotIn("phpstan-level-10", d["php-structural-scan"]["details"]["unresolved"])
+            self.assertTrue(d["phpstan-level-5"]["fulfilled"])
+            self.assertNotIn("phpstan-level-5", d["php-structural-scan"]["details"]["unresolved"])
         finally:
             tmp.cleanup()
 
@@ -1188,8 +1219,8 @@ class ComposerAuditGateTests(unittest.TestCase):
             }),
             "composer.lock": "{}",
             ".php-cs-fixer.php": "<?php return [];",
-            # ticket 43: level chain now reaches phpstan-level-10 (was 3).
-            "phpstan.neon": "parameters:\n    level: 10\n",
+            # signals ticket 2: the level-chain leaf is phpstan-level-5 now.
+            "phpstan.neon": "parameters:\n    level: 5\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             # ticket 42: editorconfig is no longer one of composer-audit's
@@ -1225,14 +1256,15 @@ class ComposerAuditGateTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_eligible_via_fallback_when_leaf_effectively_rejected_through_ancestor(self):
-        # Ticket 55: phpstan-level-10 (the actual php-structural-scan leaf)
-        # isn't itself rejected and isn't fulfilled either -- only
-        # phpstan-level-6, a required ancestor up its own chain, is (per
-        # ticket 53's own decision, only the directly-rejected node gets an
-        # out-of-scope entry). _composer_audit_extra_gate's "every other
-        # leaf resolved" fallback must count phpstan-level-10 as resolved
-        # via _is_effectively_rejected the same way _resolved_gate_status
-        # already does (ticket 53/ADR-0035) -- before this ticket's fix it
+        # Ticket 55 (signals ticket 2 lowered the leaf to phpstan-level-5):
+        # phpstan-level-5 (the actual php-structural-scan leaf) isn't itself
+        # rejected and isn't fulfilled either -- only phpstan-level-2, a
+        # required ancestor up its own chain, is (per ticket 53's own
+        # decision, only the directly-rejected node gets an out-of-scope
+        # entry). _composer_audit_extra_gate's "every other leaf resolved"
+        # fallback must count phpstan-level-5 as resolved via
+        # _is_effectively_rejected the same way _resolved_gate_status
+        # already does (ticket 53/ADR-0035) -- before ticket 55's fix it
         # used a raw `leaf in rejected` check and stayed stuck forever,
         # exactly the live gap found on Art4/legacy-todo.
         tmp, root = self._make_repo({
@@ -1246,7 +1278,7 @@ class ComposerAuditGateTests(unittest.TestCase):
             }),
             "composer.lock": "{}",
             ".php-cs-fixer.php": "<?php return [];",
-            "phpstan.neon": "parameters:\n    level: 5\n",
+            "phpstan.neon": "parameters:\n    level: 1\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             # No `composer audit` here -- deliberate, so composer-audit's own
@@ -1262,13 +1294,13 @@ class ComposerAuditGateTests(unittest.TestCase):
             ),
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
             "docs/refactoring/out-of-scope/psr-4.md": "rejected: not adopting namespacing yet\n",
-            # The rejection that matters: phpstan-level-6 only, never
-            # phpstan-level-10 itself.
-            "docs/refactoring/out-of-scope/phpstan-level-6.md": "rejected: declined\n",
+            # The rejection that matters: phpstan-level-2 only, never
+            # phpstan-level-5 itself.
+            "docs/refactoring/out-of-scope/phpstan-level-2.md": "rejected: declined\n",
         })
         try:
             d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-10"]["fulfilled"], d["phpstan-level-10"])
+            self.assertFalse(d["phpstan-level-5"]["fulfilled"], d["phpstan-level-5"])
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
             self.assertIn("composer-audit", nodes)
         finally:
@@ -2377,7 +2409,10 @@ class PhpMinimalVersionTests(unittest.TestCase):
         # Same decided-gate shape as every other recommended edge
         # (RecommendedGateTests) -- php-minimal-version undecided (a real
         # gap, not yet rejected) withholds rector-php-set; rejecting
-        # php-minimal-version releases it.
+        # php-minimal-version releases it. php-cs-fixer (a recommended
+        # parent since signals ticket 2) is decided (rejected) from the
+        # start here so it isn't also withholding rector-php-set -- this
+        # test is about php-minimal-version's own gate specifically.
         files = {
             "composer.json": json.dumps({"require": {"php": ">=5.6"}, "require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
@@ -2389,6 +2424,7 @@ class PhpMinimalVersionTests(unittest.TestCase):
             ".github/workflows/ci.yml": "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/phpstan analyse\n",
             "phpstan.neon": "parameters:\n    level: 0\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
             # No rector.php -- rector-php-set itself stays unfulfilled, so it
             # can actually appear as a candidate once its gates release.
         }
@@ -2445,7 +2481,7 @@ class RoadmapTests(unittest.TestCase):
         # case (composer never reachable at all) separately.
         tmp, root = self._make_repo({"index.php": "<?php\n"})
         try:
-            r = roadmap(root, steps=6)
+            r = roadmap(root, steps=7)
             self.assertEqual(r[0]["node"], "loop-config")
             # ADR-0022: is-php-project sits between loop-config and
             # ci-runner/editorconfig in tree["order"] but is never proposed
@@ -2453,31 +2489,35 @@ class RoadmapTests(unittest.TestCase):
             self.assertNotIn("is-php-project", [step["node"] for step in r])
             # ci-runner now sorts ahead of editorconfig — both trivial
             # generic-root nodes, tooling-tree.md's edge table lists
-            # ci-runner's row first.
+            # ci-runner's row first. secret-detection (signals ticket 2)
+            # sorts after editorconfig, same reason (its own edge table row
+            # comes last among loop-config's direct required children).
             self.assertEqual(r[1]["node"], "ci-runner")
             self.assertEqual(r[2]["node"], "editorconfig")
-            self.assertEqual(r[3]["node"], "composer")
-            self.assertIn(r[4]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
+            self.assertEqual(r[3]["node"], "secret-detection")
+            self.assertEqual(r[4]["node"], "composer")
+            self.assertIn(r[5]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
         finally:
             tmp.cleanup()
 
     def test_roadmap_with_loop_config_starts_with_composer(self):
         # With docs/refactoring/bookkeeping.md already present, loop-config is
         # fulfilled and the roadmap picks up where it used to before ADR-0008
-        # — plus ci-runner/editorconfig (ticket 01), ordered ahead of
-        # composer for the same reason as above. Needs a PHP signal too,
-        # same as above (ADR-0022).
+        # — plus ci-runner/editorconfig/secret-detection (ticket 01, signals
+        # ticket 2), ordered ahead of composer for the same reason as above.
+        # Needs a PHP signal too, same as above (ADR-0022).
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
             "index.php": "<?php\n",
         })
         try:
-            r = roadmap(root, steps=5)
+            r = roadmap(root, steps=6)
             self.assertNotIn("is-php-project", [step["node"] for step in r])
             self.assertEqual(r[0]["node"], "ci-runner")
             self.assertEqual(r[1]["node"], "editorconfig")
-            self.assertEqual(r[2]["node"], "composer")
-            self.assertIn(r[3]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
+            self.assertEqual(r[2]["node"], "secret-detection")
+            self.assertEqual(r[3]["node"], "composer")
+            self.assertIn(r[4]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
         finally:
             tmp.cleanup()
 
@@ -2581,7 +2621,7 @@ class RoadmapTests(unittest.TestCase):
             "composer.lock": "{}",
             "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
             ".php-cs-fixer.php": "<?php return [];",
-            "phpstan.neon": "parameters:\n    level: 10\n",
+            "phpstan.neon": "parameters:\n    level: 5\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
             "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
@@ -2592,6 +2632,7 @@ class RoadmapTests(unittest.TestCase):
                 "      - run: composer audit\n"
                 "      - run: vendor/bin/phpunit\n"
                 "      - run: vendor/bin/phpstan analyse\n"
+                "      - run: gitleaks detect\n"
             ),
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         })
@@ -2647,10 +2688,11 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
         return tmp, root
 
     def test_multi_child_fan_out_from_composer(self):
-        # composer alone (no phpunit/cs-fixer/CI configured yet) unblocks
-        # four siblings at once: phpunit, test-runner-if-missing, and
-        # psr-4 directly, phpstan-level-0 through the static-code-analyzer
-        # walk-through (a pure organizational node, never itself reported).
+        # composer alone (no phpunit/cs-fixer/phpmd/CI configured yet)
+        # unblocks five siblings at once: phpunit, test-runner-if-missing,
+        # phpmd, and psr-4 directly, phpstan-level-0 through the
+        # static-code-analyzer walk-through (a pure organizational node,
+        # never itself reported).
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
             "composer.lock": "{}",
@@ -2662,6 +2704,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
                 {
                     ("phpunit", "required"),
                     ("test-runner-if-missing", "required"),
+                    ("phpmd", "required"),
                     ("phpstan-level-0", "required"),
                     ("psr-4", "required"),
                 },
@@ -2673,11 +2716,15 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
     def test_required_any_child_reported_when_only_path(self):
         # Psalm-only target, no real PHPStan config: landing psalm is the
         # *only* thing that unblocks rector-php-set (required-any(
-        # phpstan-level-0, psalm)) -- must be reported.
+        # phpstan-level-0, psalm)) -- must be reported. php-cs-fixer (a
+        # recommended parent since signals ticket 2) is decided (rejected)
+        # here so it isn't also withholding rector-php-set -- this test is
+        # about the required-any path specifically, not the recommended one.
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=8.1", "vimeo/psalm": "^5.0"}}),
             "composer.lock": "{}",
             "psalm.xml": "<psalm></psalm>",
+            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
         })
         try:
             got = [(c["node"], c["type"]) for c in directly_unblocked_children(root, "psalm")]
@@ -2701,13 +2748,15 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_resolved_gate_walk_through_to_structural_scan(self):
-        # phpunit is the last of php-structural-scan's thirteen leaves to
-        # resolve (the other twelve rejected via out-of-scope, same for
-        # structural-scan's other two resolved-parents, editorconfig and
-        # ci-runner) -- landing it must report structural-scan itself, not
-        # the never-exposed php-structural-scan aggregation node in between.
+        # phpunit is the last of php-structural-scan's eleven leaves (signals
+        # ticket 2 dropped test-runner-if-missing and php-cs-fixer, lowered
+        # the level-chain leaf to phpstan-level-5) to resolve (the other ten
+        # rejected via out-of-scope, same for structural-scan's other two
+        # resolved-parents, editorconfig and ci-runner) -- landing it must
+        # report structural-scan itself, not the never-exposed
+        # php-structural-scan aggregation node in between.
         other_leaves = [
-            "psr-4", "composer-audit", "test-runner-if-missing", "php-cs-fixer", "phpstan-level-10",
+            "psr-4", "composer-audit", "phpstan-level-5",
             "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
             "rector-php-set", "rector-code-quality", "rector-phpunit-set",
             "psalm-taint-analysis", "editorconfig", "ci-runner",
