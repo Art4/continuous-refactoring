@@ -44,16 +44,6 @@
       "reason": "CI job runs a secret scanner",
       "details": {}
     },
-    "php-minimal-version": {
-      "fulfilled": true,
-      "reason": "no PHP-version gap detected",
-      "details": {
-        "floor": [
-          8,
-          1
-        ]
-      }
-    },
     "editorconfig": {
       "fulfilled": true,
       "reason": ".editorconfig present",
@@ -245,6 +235,20 @@
       "reason": "rector phpunit set present",
       "details": {
         "has_rector": true
+      }
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "floor 8.2 already matches rector-php-set's applied PHP 8.2",
+      "details": {
+        "floor": [
+          8,
+          2
+        ],
+        "rector_level": [
+          8,
+          2
+        ]
       }
     },
     "php-structural-scan": {

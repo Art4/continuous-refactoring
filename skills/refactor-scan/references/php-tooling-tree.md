@@ -41,8 +41,6 @@ graph TD
     ss[structural-scan]
 
     ipp -->|required| comp
-    ipp -->|required| pmv
-    ci -->|required| pmv
     comp -->|required| psr4
     edc -.->|recommended| cs
     comp -->|required| cs
@@ -67,10 +65,10 @@ graph TD
     p5 -->|required| dep
     p0 -.->|required-any| rps
     psalm -.->|required-any| rps
-    pmv -.->|recommended| rps
     cs -.->|recommended| rps
     rps -->|required| rdc
     rps -->|required| rcq
+    rps -->|required| pmv
     unit -->|required| rpu
     rdc -.->|recommended| rtc
     rcq -.->|recommended| rtc
@@ -101,8 +99,6 @@ graph TD
 | from (parent) | to (child) | type |
 |---|---|---|
 | `is-php-project` | `composer` | required |
-| `is-php-project` | `php-minimal-version` | required |
-| `ci-runner` | `php-minimal-version` | required |
 | `composer` | `psr-4` | required |
 | `editorconfig` | `php-cs-fixer` | recommended |
 | `composer` | `php-cs-fixer` | required |
@@ -127,10 +123,10 @@ graph TD
 | `phpstan-level-5` | `phpstan-deprecation-rules` | required |
 | `phpstan-level-0` | `rector-php-set` | required-any |
 | `psalm` | `rector-php-set` | required-any |
-| `php-minimal-version` | `rector-php-set` | recommended |
 | `php-cs-fixer` | `rector-php-set` | recommended |
 | `rector-php-set` | `rector-dead-code` | required |
 | `rector-php-set` | `rector-code-quality` | required |
+| `rector-php-set` | `php-minimal-version` | required |
 | `phpunit` | `rector-phpunit-set` | required |
 | `rector-dead-code` | `rector-type-coverage` | recommended |
 | `rector-code-quality` | `rector-type-coverage` | recommended |
@@ -189,11 +185,11 @@ surfaced this rule). Does not apply to `require` (production) dependencies — t
 
 - **Name:** PHP Minimum Version
 - **Tool:** none — the tree's own gap detection, not a third-party tool.
-- **Purpose:** detect a gap between `composer.json`'s declared PHP floor and what the tree actually needs,
-  and propose raising the floor to close it. Motivating case: a target that stayed pinned to an old PHP
-  version throughout, solving PHPStan/Rector's own version requirements by running them in a second,
-  parallel higher-PHP container instead — nothing in the tree ever raised the floor mismatch itself as a
-  candidate.
+- **Purpose:** a **Floor correction** only, never a **Floor raise** (`CONTEXT.md`) — bring
+  `composer.json`'s declared PHP floor in line with syntax the codebase already demonstrably contains
+  once `rector-php-set` has landed it, so the declared floor stops understating reality. Never proposes
+  committing the application to a newer PHP than its own code currently needs — that would be a
+  **Breaking change**, out of this node's scope entirely.
 
 Full definition (Fulfilment check, MR scope, Re-triggering): `skills/refactor-scan/references/php-tooling-tree/php-minimal-version.md`.
 

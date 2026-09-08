@@ -44,16 +44,6 @@
       "reason": "no CI job runs a secret scanner yet",
       "details": {}
     },
-    "php-minimal-version": {
-      "fulfilled": true,
-      "reason": "no PHP-version gap detected",
-      "details": {
-        "floor": [
-          8,
-          1
-        ]
-      }
-    },
     "editorconfig": {
       "fulfilled": false,
       "reason": "no .editorconfig",
@@ -246,6 +236,16 @@
       "reason": "no rector phpunit set",
       "details": {
         "has_rector": false
+      }
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "no rector-php-set level applied yet \u2014 nothing to correct",
+      "details": {
+        "floor": [
+          8,
+          1
+        ]
       }
     },
     "php-structural-scan": {

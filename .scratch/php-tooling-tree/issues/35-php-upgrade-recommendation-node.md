@@ -86,3 +86,14 @@
 > requirements, no scope creep, and confirmed all four spot-checked correctness questions (undeterminable
 > floor → fulfilled; quality-tool-job detection genuinely excludes compat-matrix-only jobs; both required
 > parents combine via strict AND; not added as a `php-structural-scan` resolved-leaf).
+
+> **2026-09-09:** Corrected by [ticket 57](57-php-minimal-version-only-corrects-never-raises.md) /
+> ADR-0041 — this node's original two fulfilment-check rules both measured what PHP a `require-dev`
+> tool needs, never what the application's own code needs, and could propose a genuine breaking change
+> under the refactor label (observed live on `Art4/legacy-todo`, PR #168, rejected). Replaced by a
+> single signal (`rector-php-set`'s own applied PHP-version level) that can only ever propose a
+> behavior-preserving correction. This ticket's own scope still shipped and is still real (the node
+> exists, closes the gap it set out to close) — the correction is to *how* it detects the gap, not
+> whether the node should exist. `_quality_tooling_ci_php_versions()` and its supporting helpers,
+> flagged as duplication-prone in the original review note above, are removed entirely rather than
+> refactored — the whole signal they served turned out to be the wrong one.

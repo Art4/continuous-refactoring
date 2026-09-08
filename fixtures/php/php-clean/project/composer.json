@@ -2,7 +2,7 @@
     "name": "example/php-clean",
     "description": "Fully-climbed deterministic PHP tooling tree fixture — every tooling-tree leaf resolved, only structural-scan remains",
     "require": {
-        "php": "^8.1",
+        "php": "^8.2",
         "monolog/monolog": "^3.4"
     },
     "require-dev": {

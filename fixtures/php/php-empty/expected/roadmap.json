@@ -44,11 +44,6 @@
       "reason": "no CI job runs a secret scanner yet",
       "details": {}
     },
-    "php-minimal-version": {
-      "fulfilled": true,
-      "reason": "PHP floor undeterminable (no composer.json) \u2014 nothing to recommend",
-      "details": {}
-    },
     "editorconfig": {
       "fulfilled": false,
       "reason": "no .editorconfig",
@@ -242,6 +237,11 @@
       "details": {
         "has_rector": false
       }
+    },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "PHP floor undeterminable (no composer.json) \u2014 nothing to correct",
+      "details": {}
     },
     "php-structural-scan": {
       "fulfilled": false,

@@ -450,111 +450,22 @@ _LEAF_MIN_PHP_VERSION = {
 }
 
 
-# Quality-tooling CI-job invocations — used to scope php-minimal-version's
-# signal (b) to jobs that actually run static analysis / style tooling, not
-# an arbitrary compatibility-matrix job that legitimately tests multiple PHP
-# versions for unrelated reasons.
-_QUALITY_TOOL_NEEDLES = (
-    "vendor/bin/phpstan analyse",
-    "vendor/bin/psalm",
-    "vendor/bin/rector",
-    "vendor/bin/php-cs-fixer",
-)
-
-# GitLab CI top-level keys that are never job names — used by _job_blocks()
-# to tell a GitLab job stanza apart from pipeline-wide configuration.
-_GITLAB_RESERVED_TOP_KEYS = {
-    "stages", "variables", "include", "default", "workflow", "image",
-    "before_script", "after_script", "cache", "pages",
-}
-
-
-def _job_blocks(path: pathlib.Path, text: str) -> list[str]:
-    """Best-effort split of a CI config file into per-job text chunks, keyed
-    on each format's top-level job stanza — not a YAML parser, the same
-    conservative substring-based approximation style as
-    `_has_ci_job_invoking`. GitHub Actions: job keys sit two spaces under a
-    top-level `jobs:` block. GitLab CI: job keys sit at zero indentation,
-    alongside a handful of reserved pipeline-wide keys this excludes.
-    Falls back to treating the whole file as one block when no job stanza is
-    found (e.g. a `.gitlab-ci.yml` that's all top-level keys) — conservative
-    in the same direction `_has_ci_job_invoking` already is."""
-    lines = text.splitlines()
-    if path.name.startswith(".gitlab-ci"):
-        starts = [
-            i for i, l in enumerate(lines)
-            if re.match(r"^[A-Za-z0-9_.\-]+:\s*$", l)
-            and l.split(":", 1)[0].strip().lstrip(".") not in _GITLAB_RESERVED_TOP_KEYS
-        ]
-    else:
-        jobs_start = next((i for i, l in enumerate(lines) if re.match(r"^jobs:\s*$", l)), None)
-        if jobs_start is None:
-            return [text]
-        starts = [
-            i for i in range(jobs_start + 1, len(lines))
-            if re.match(r"^  [A-Za-z0-9_.\-]+:\s*$", lines[i])
-        ]
-    if not starts:
-        return [text]
-    blocks = []
-    for idx, start in enumerate(starts):
-        end = starts[idx + 1] if idx + 1 < len(starts) else len(lines)
-        blocks.append("\n".join(lines[start:end]))
-    return blocks
-
-
-def _extract_php_versions(block: str) -> list[tuple[int, ...]]:
-    """Best-effort PHP-version extraction from one CI job block: GitHub
-    Actions matrix entries (`php-version: ['8.3']`, possibly several) and
-    Docker image tags (`php:8.3`, `php:8.3-cli`, GitLab CI's `image:`)."""
-    versions = []
-    for m in re.finditer(r"php-version:\s*(.+)", block):
-        for vm in re.finditer(r"(\d+\.\d+)", m.group(1)):
-            v = _parse_min_version(vm.group(1))
-            if v:
-                versions.append(v)
-    for m in re.finditer(r"\bphp:(\d+(?:\.\d+)?)", block):
-        v = _parse_min_version(m.group(1))
-        if v:
-            versions.append(v)
-    return versions
-
-
-def _quality_tooling_ci_php_versions(repo: pathlib.Path) -> list[tuple[int, ...]]:
-    """php-minimal-version's signal (b) (see php-tooling-tree.md): the
-    PHP versions tested by CI jobs that invoke a quality tool (phpstan/
-    psalm/rector/php-cs-fixer) — deliberately not any CI job, so a
-    legitimate multi-version compatibility matrix that only runs phpunit
-    doesn't itself trigger a runtime-floor recommendation."""
-    versions: list[tuple[int, ...]] = []
-    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
-        for f in glob.glob(str(repo / pat)):
-            p = pathlib.Path(f)
-            try:
-                text = p.read_text(encoding="utf-8")
-            except OSError:
-                continue
-            for block in _job_blocks(p, text):
-                if not any(needle in block for needle in _QUALITY_TOOL_NEEDLES):
-                    continue
-                versions.extend(_extract_php_versions(block))
-    return versions
-
-
-def _php_minimal_version_gap(repo: pathlib.Path) -> tuple[int, ...] | None:
-    """php-minimal-version's fulfilment check (see php-tooling-tree.md): the
-    highest PHP-version requirement composer.json's declared floor
-    is compared against — the minimum-ever version of any leaf
-    `php_floor_precheck()` currently reports blocked (signal a), plus the
-    highest PHP version any quality-tooling CI job tests (signal b). `None`
-    when neither signal fires — nothing to recommend."""
-    candidates: list[tuple[int, ...]] = []
-    for b in php_floor_precheck(repo):
-        v = _parse_min_version(_LEAF_MIN_PHP_VERSION[b["node"]])
-        if v:
-            candidates.append(v)
-    candidates.extend(_quality_tooling_ci_php_versions(repo))
-    return max(candidates) if candidates else None
+def _rector_php_set_level(rector_config_text: str) -> tuple[int, ...] | None:
+    """php-minimal-version's only signal (see php-minimal-version.md):
+    the specific PHP version `rector-php-set`'s own rule set targets — Rector's
+    `LevelSetList::UP_TO_PHP_XY` constant naming (`UP_TO_PHP_82` -> (8, 2),
+    `UP_TO_PHP_74` -> (7, 4)), read directly out of `rector.php`/`rector.neon`'s
+    text rather than a second, separate config-presence check — same shallow
+    substring-approximation style `has_rector_php_set` above already uses; a
+    genuine syntax-compatibility scan is out of scope, matching the tree's
+    every other Rector-family fulfilment check. `None` when no such constant is
+    present (caller only invokes this once `has_rector_php_set` is already
+    true, but stays defensive here since a config could plausibly enable the
+    rule set through some other syntax this substring match doesn't catch)."""
+    m = re.search(r"UP_TO_PHP_(\d)(\d+)", rector_config_text)
+    if not m:
+        return None
+    return (int(m.group(1)), int(m.group(2)))
 
 
 def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
@@ -858,35 +769,6 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         secret_scan_fulfilled,
         "CI job runs a secret scanner" if secret_scan_fulfilled else "no CI job runs a secret scanner yet",
     )
-    # php-minimal-version: composer.json's declared PHP floor vs.
-    # the highest version actually required — either a leaf
-    # php_floor_precheck() blocks, or a quality-tooling CI job testing a
-    # higher version. A moving-target comparison, not a one-time artefact
-    # check — see this node's own doc entry for the re-triggering
-    # consequence.
-    current_php_floor = _current_php_floor(composer)
-    php_minimal_version_gap = _php_minimal_version_gap(repo)
-    if current_php_floor is None:
-        set_node(
-            "php-minimal-version", True,
-            "PHP floor undeterminable (no composer.json) — nothing to recommend",
-        )
-    elif php_minimal_version_gap is None:
-        set_node("php-minimal-version", True, "no PHP-version gap detected", floor=list(current_php_floor))
-    elif current_php_floor >= php_minimal_version_gap:
-        set_node(
-            "php-minimal-version", True,
-            f"floor {'.'.join(map(str, current_php_floor))} already covers required "
-            f"PHP >= {'.'.join(map(str, php_minimal_version_gap))}",
-            floor=list(current_php_floor), gap=list(php_minimal_version_gap),
-        )
-    else:
-        set_node(
-            "php-minimal-version", False,
-            f"floor {'.'.join(map(str, current_php_floor))} below required "
-            f"PHP >= {'.'.join(map(str, php_minimal_version_gap))}",
-            floor=list(current_php_floor), gap=list(php_minimal_version_gap),
-        )
     # editorconfig
     has_editorconfig = _has_editorconfig(repo)
     set_node("editorconfig", has_editorconfig, ".editorconfig present" if has_editorconfig else "no .editorconfig")
@@ -1074,6 +956,9 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         has_rector_php_set = "LevelSetList" in txt or "php-set" in norm
         has_rector_code_quality = "CodeQuality" in txt or "code-quality" in norm
         has_rector_phpunit_set = "PHPUnitSetList" in txt or "phpunit-set" in norm
+        rector_php_set_level = _rector_php_set_level(txt) if has_rector_php_set else None
+    else:
+        rector_php_set_level = None
     set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
     set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
     # rector-php-set and its 2 children: same has_rector-gated
@@ -1081,6 +966,38 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     set_node("rector-php-set", has_rector_php_set, "rector php-version set present" if has_rector_php_set else "no rector php-version set", has_rector=has_rector)
     set_node("rector-code-quality", has_rector_code_quality, "rector code-quality set present" if has_rector_code_quality else "no rector code-quality set", has_rector=has_rector)
     set_node("rector-phpunit-set", has_rector_phpunit_set, "rector phpunit set present" if has_rector_phpunit_set else "no rector phpunit set", has_rector=has_rector)
+
+    # php-minimal-version: a Floor correction only, never a
+    # Floor raise (CONTEXT.md) — composer.json's declared PHP floor vs. the
+    # PHP-version level rector-php-set has actually applied. Required parent
+    # of this node (php-tooling-tree.md's edge table), so this must run
+    # after rector-php-set's own detection above, not before it.
+    current_php_floor = _current_php_floor(composer)
+    if current_php_floor is None:
+        set_node(
+            "php-minimal-version", True,
+            "PHP floor undeterminable (no composer.json) — nothing to correct",
+        )
+    elif rector_php_set_level is None:
+        set_node(
+            "php-minimal-version", True,
+            "no rector-php-set level applied yet — nothing to correct",
+            floor=list(current_php_floor),
+        )
+    elif current_php_floor >= rector_php_set_level:
+        set_node(
+            "php-minimal-version", True,
+            f"floor {'.'.join(map(str, current_php_floor))} already matches rector-php-set's applied "
+            f"PHP {'.'.join(map(str, rector_php_set_level))}",
+            floor=list(current_php_floor), rector_level=list(rector_php_set_level),
+        )
+    else:
+        set_node(
+            "php-minimal-version", False,
+            f"floor {'.'.join(map(str, current_php_floor))} behind rector-php-set's applied "
+            f"PHP {'.'.join(map(str, rector_php_set_level))}",
+            floor=list(current_php_floor), rector_level=list(rector_php_set_level),
+        )
 
     # Resolved-gated nodes: structural-scan, and PHP's own aggregation node
     # php-structural-scan feeding it — fulfilled once every one of a node's
