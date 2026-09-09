@@ -48,6 +48,14 @@ _Avoid_: optional required edge, either-or edge
 Two or more sibling nodes under a shared required parent where adopting one makes the others out-of-scope by design — recorded the same way any other rejection is, via an `out-of-scope/<node>.md` entry (in the **Refactoring Notes**) for the unchosen sibling(s), not a separate mechanism. The tree has no dedicated XOR primitive; a choice is just an ordinary sibling pair plus the convention that picking one means rejecting the rest.
 _Avoid_: XOR, either-or
 
+**Floor correction**:
+Bringing `composer.json`'s declared PHP floor (`require.php`) in line with what the codebase's own source already demonstrably requires — behavior-preserving, since nothing observable changes, only the metadata now tells the truth. The only node that produces this: `php-minimal-version` (`skills/refactor-scan/references/php-tooling-tree/php-minimal-version.md`), triggered once `rector-php-set` has fully applied a PHP-version rule set.
+_Avoid_: floor bump, floor raise (see **Floor raise** — a different, deliberately out-of-scope thing)
+
+**Floor raise**:
+Committing the application to a newer PHP version than its own code currently requires — a genuine **Breaking change**, a product decision, never autonomously proposed by any tooling-tree node. Distinct from **Floor correction** (above), which changes only metadata to match already-existing reality.
+_Avoid_: floor bump, upgrade (collides with `rector-php-set`'s own "PHP-upgrade rule set" wording — syntax modernization, a different concern)
+
 **Hot spot**:
 A part of the codebase that keeps appearing in change history — the primary place to look for candidates.
 _Avoid_: problem area, pain point
@@ -59,6 +67,10 @@ _Avoid_: cleanup, tidy-up
 **Deletion test**:
 The test for shallowness: would deleting this module concentrate complexity, or just move it?
 _Avoid_: (none — use the term as-is)
+
+**Breaking change** (behavior-preserving):
+Any change to a target's observable behavior — never shipped under the refactor label; routes to the normal feature/bug path instead (`docs/adr/0004-foundational-refactoring-rules.md`). The loop's refactors are always behavior-preserving by definition; a **Floor raise** (above) is the canonical example of something that looks like tooling-tree housekeeping but is actually this.
+_Avoid_: incompatible change
 
 **Seam**:
 The public boundary at which a module is tested — where tests observe behaviour without reaching inside.

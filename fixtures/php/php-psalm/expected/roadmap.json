@@ -44,16 +44,6 @@
       "reason": "no CI job runs a secret scanner yet",
       "details": {}
     },
-    "php-minimal-version": {
-      "fulfilled": true,
-      "reason": "no PHP-version gap detected",
-      "details": {
-        "floor": [
-          8,
-          1
-        ]
-      }
-    },
     "editorconfig": {
       "fulfilled": false,
       "reason": "no .editorconfig",
@@ -235,6 +225,16 @@
         "has_rector": false
       }
     },
+    "php-minimal-version": {
+      "fulfilled": true,
+      "reason": "no rector-php-set level applied yet \u2014 nothing to correct",
+      "details": {
+        "floor": [
+          8,
+          1
+        ]
+      }
+    },
     "php-structural-scan": {
       "fulfilled": false,
       "reason": "waiting on: psr-4, composer-audit, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set",
@@ -358,7 +358,6 @@
         "psalm"
       ],
       "recommended_parents": [
-        "php-minimal-version",
         "php-cs-fixer"
       ],
       "reason": "required parents fulfilled"
