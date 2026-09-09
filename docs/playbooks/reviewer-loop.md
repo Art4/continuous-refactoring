@@ -17,10 +17,13 @@ Before round 1, ask the human three questions (one `AskUserQuestion` round, all 
 1. **Target repo** — which repo to watch. No default; always ask.
 2. **Persona** — which reviewer stance to adopt this run (see *Personas* below). No default; the human
    picks, or describes a custom one if none of the four fit.
-3. **Cadence** — how long to wait between rounds. Propose 5 minutes as a starting default, but the human
+3. **Cadence** — how long to wait between rounds. Propose 120 minutes as a starting default (a lighter
+   touch than the original 5-minute guess — proved the more sustainable pace in practice), but the human
    confirms or overrides it; never assume it without asking.
 
-Only start round 1 once all three are answered.
+Answering all three **configures** the run — it does not start it. The loop never starts itself: once
+configured, say plainly that the run is set up and you're waiting for an explicit signal from the human
+to begin (e.g. "los", "start"), then wait. Only start round 1 once that separate signal arrives.
 
 ## Personas
 
@@ -57,9 +60,10 @@ mid-run without the human explicitly changing it.
 
 ## Loop mechanics
 
-- Cadence: the value confirmed at start (default proposal 5 minutes), self-paced between rounds.
-- Default stop condition: 6 consecutive quiet rounds (~30 minutes with no foreign activity) → automatic
-  stop with a closing summary in the findings log.
+- Cadence: the value confirmed at start (default proposal 120 minutes), self-paced between rounds.
+- Default stop condition: 6 consecutive quiet rounds (at the default cadence, ~12 hours with no foreign
+  activity — scales with whatever cadence was actually confirmed) → automatic stop with a closing summary
+  in the findings log.
 - The human can also stop the run manually at any point (e.g. to review findings and fix the suite
   before continuing) — a normal control option, not a failure.
 - State carried between rounds: last-seen issue/MR numbers, `mergedBy`/`updatedAt`/comment counts, which
