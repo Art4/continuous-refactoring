@@ -213,6 +213,152 @@ def _has_verified_psr4_autoload(repo: pathlib.Path, composer: dict | None) -> bo
     return False
 
 
+def _psr4_mapped_dirs(composer: dict | None) -> list[str]:
+    """Every directory declared in autoload.psr-4 (composer.json) — excluded
+    from entry-point detection below (php-tooling-tree/psr-4.md's own
+    Composition root/Entry point wiring step): a file already reachable via
+    the PSR-4 mapping is never itself an unwired entry-point candidate."""
+    if not composer:
+        return []
+    psr4 = (composer.get("autoload") or {}).get("psr-4") or {}
+    dirs: list[str] = []
+    for _, d in psr4.items():
+        dirs.extend([d] if isinstance(d, str) else d)
+    return dirs
+
+
+# require/include of a sibling file via the __DIR__-relative shape this
+# suite's own fixtures and every real target observed so far actually use
+# (`require_once __DIR__ . "/Foo.php"`, with or without `_once`, with or
+# without `../` segments) — a conservative, single-shape approximation,
+# not a full parser, matching every other filesystem-text check in this
+# module.
+_DIR_RELATIVE_REQUIRE_RE = re.compile(
+    r"\b(?:require|include)(?:_once)?\s*\(?\s*__DIR__\s*\.\s*['\"]([^'\"]+\.php)['\"]"
+)
+_AUTOLOAD_REQUIRE_RE = re.compile(r"\b(?:require|include)(?:_once)?\b[^;]*vendor[/\\]autoload\.php")
+
+# Known tooling-config scripts at the repo root that happen to carry a
+# `.php` extension but are never a request-time entry point — each is only
+# ever loaded by its own tool's CLI (Rector, php-cs-fixer), never by a
+# webserver or the app's own runtime. Reuses the exact filenames this
+# module's own rector-php-set/php-cs-fixer detection above already checks
+# for, rather than a second, independent list.
+_TOOLING_CONFIG_PHP_FILENAMES = {"rector.php", ".php-cs-fixer.php", ".php-cs-fixer.dist.php"}
+
+
+def _require_targets(php_file: pathlib.Path) -> list[pathlib.Path]:
+    """Every file `php_file` reaches via the __DIR__-relative require/include
+    shape above, resolved to an absolute path. Best-effort: a target using a
+    different loading style (autoloading already, `dirname(__FILE__)`, a
+    plain relative path with no `__DIR__` prefix, …) simply isn't reflected
+    here — the same conservative-approximation trade-off this tree's other
+    filesystem-text checks already make."""
+    try:
+        text = php_file.read_text(encoding="utf-8")
+    except OSError:
+        return []
+    targets = []
+    for m in _DIR_RELATIVE_REQUIRE_RE.finditer(text):
+        # The captured string conventionally starts with "/" (PHP's own
+        # __DIR__ . "/Foo.php" concatenation) -- pathlib's own `/` operator
+        # treats a leading-slash right-hand side as absolute and discards
+        # the left side entirely, so it must be stripped before joining.
+        candidate = (php_file.parent / m.group(1).lstrip("/")).resolve()
+        targets.append(candidate)
+    return targets
+
+
+def _entry_point_candidates(repo: pathlib.Path, psr4_dirs: list[str]) -> list[pathlib.Path]:
+    """Every `.php` file outside `vendor/`, any test directory, and the
+    PSR-4-mapped namespace directory (already-autoloaded source is never an
+    unwired entry-point candidate) — the search scope `_detect_entry_points`
+    walks its require graph over."""
+    excluded_roots = {(repo / d).resolve() for d in psr4_dirs}
+    files = []
+    for f in repo.rglob("*.php"):
+        try:
+            rel_parts = f.relative_to(repo).parts
+        except ValueError:
+            continue
+        if any(part in ("vendor", ".git") or part.lower() == "tests" for part in rel_parts):
+            continue
+        if len(rel_parts) == 1 and rel_parts[0] in _TOOLING_CONFIG_PHP_FILENAMES:
+            continue
+        resolved = f.resolve()
+        if any(root in resolved.parents or root == resolved for root in excluded_roots):
+            continue
+        files.append(f)
+    return sorted(files)
+
+
+def _detect_entry_points(repo: pathlib.Path, psr4_dirs: list[str]):
+    """php-tooling-tree/psr-4.md's own detection: **Entry point** (a file
+    nothing in the target's own source tree requires) and **Composition
+    root** (the file more than half of the entry points directly require,
+    if any — recognized even when some entry points don't converge on it;
+    see CONTEXT.md for both terms). Returns
+    `(entry_points, composition_root, individually_wired_targets)` — the
+    last is the composition root (as a one-element list) plus every entry
+    point that doesn't require it, i.e. everything the autoloader-wiring
+    check below must find `vendor/autoload.php` in, one way or another."""
+    candidates = _entry_point_candidates(repo, psr4_dirs)
+    required_by_something = set()
+    direct_targets: dict[pathlib.Path, list[pathlib.Path]] = {}
+    for f in candidates:
+        targets = _require_targets(f)
+        direct_targets[f] = targets
+        required_by_something.update(targets)
+    entry_points = [f for f in candidates if f.resolve() not in required_by_something]
+
+    target_counts: dict[pathlib.Path, int] = {}
+    for ep in entry_points:
+        for t in direct_targets[ep]:
+            # A require resolving into vendor/ (most notably
+            # vendor/autoload.php itself) is direct wiring evidence, never a
+            # composition-root candidate -- it isn't part of the target's
+            # own source tree.
+            if "vendor" in t.parts:
+                continue
+            target_counts[t] = target_counts.get(t, 0) + 1
+    composition_root = None
+    if entry_points and target_counts:
+        best_target, best_count = max(target_counts.items(), key=lambda kv: (kv[1], str(kv[0])))
+        if best_count * 2 > len(entry_points):
+            composition_root = best_target
+
+    if composition_root is not None:
+        stragglers = [ep for ep in entry_points if composition_root not in direct_targets[ep]]
+        wiring_targets = [composition_root] + stragglers
+    else:
+        wiring_targets = list(entry_points)
+    return entry_points, composition_root, wiring_targets
+
+
+def _autoloader_wired(repo: pathlib.Path, composer: dict | None) -> bool:
+    """php-tooling-tree/psr-4.md's autoloader-wiring criterion: the
+    Composition root (or every Entry point that doesn't converge on one, or
+    every entry point at all when there's no composition root) contains a
+    require/include resolving to `vendor/autoload.php`. No entry points at
+    all (e.g. a pure library) is vacuously satisfied — nothing to wire, the
+    same "nothing to recommend" convention this tree already uses elsewhere
+    (php-minimal-version's own undeterminable-floor case, php_floor_precheck's
+    unknown-floor case)."""
+    psr4_dirs = _psr4_mapped_dirs(composer)
+    _, _, wiring_targets = _detect_entry_points(repo, psr4_dirs)
+    if not wiring_targets:
+        return True
+    for target in wiring_targets:
+        try:
+            text = target.read_text(encoding="utf-8")
+        except OSError:
+            return False
+        if not _AUTOLOAD_REQUIRE_RE.search(text):
+            return False
+    return True
+    return False
+
+
 def _has_dep(composer: dict | None, name: str) -> bool:
     if not composer:
         return False
@@ -747,17 +893,25 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     )
     # composer
     set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
-    # psr-4: declared AND verifiably in use — see _has_verified_psr4_autoload's
-    # own docstring for why declaration alone isn't enough.
+    # psr-4: declared AND verifiably in use (see _has_verified_psr4_autoload's
+    # own docstring for why declaration alone isn't enough), AND the
+    # autoloader wired into the target's own Composition root/Entry points
+    # (see _autoloader_wired's own docstring) — a target can have proven the
+    # mapping mechanism works yet still never actually load its own code
+    # through it at request time.
     has_psr4_declared = _psr4_root_namespace(composer) is not None
-    psr4_verified = _has_verified_psr4_autoload(repo, composer)
+    psr4_mechanism_verified = _has_verified_psr4_autoload(repo, composer)
+    autoloader_wired = _autoloader_wired(repo, composer) if psr4_mechanism_verified else False
+    psr4_verified = psr4_mechanism_verified and autoloader_wired
     if psr4_verified:
-        psr4_reason = "autoload.psr-4 declared and in use"
+        psr4_reason = "autoload.psr-4 declared, in use, and the autoloader is wired in"
+    elif psr4_mechanism_verified:
+        psr4_reason = "autoload.psr-4 declared and in use, but the autoloader isn't wired into the entry points/composition root yet"
     elif has_psr4_declared:
         psr4_reason = "autoload.psr-4 declared but no file under it uses the namespace yet"
     else:
         psr4_reason = "no autoload.psr-4 declared"
-    set_node("psr-4", psr4_verified, psr4_reason, declared=has_psr4_declared)
+    set_node("psr-4", psr4_verified, psr4_reason, declared=has_psr4_declared, mechanism_verified=psr4_mechanism_verified, autoloader_wired=autoloader_wired)
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
     # secret-detection: generic root, no resolved edge into structural-scan
