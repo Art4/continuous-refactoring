@@ -1145,6 +1145,173 @@ class PsrFourGateTests(unittest.TestCase):
         self.assertIn("psr-4", tree["resolved_parents"]["php-structural-scan"])
 
 
+class Psr4AutoloaderWiringTests(unittest.TestCase):
+    """Ticket 58: psr-4's fulfilment gains a second criterion on top of the
+    mapping-mechanism bar above (PsrFourGateTests) -- the autoloader is
+    actually wired into the target's own Composition root, or every Entry
+    point when there's no single root (CONTEXT.md, php-tooling-tree/
+    psr-4.md's own Fulfilment check)."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    _COMPOSER_MAPPED = json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}})
+
+    def test_unfulfilled_when_entry_point_exists_but_autoloader_not_wired(self):
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "public/index.php": "<?php\necho 'hi';\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
+            self.assertTrue(d["psr-4"]["details"]["mechanism_verified"])
+            self.assertFalse(d["psr-4"]["details"]["autoloader_wired"])
+            self.assertIn("autoloader isn't wired", d["psr-4"]["reason"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_when_the_single_entry_point_requires_autoload_directly(self):
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "public/index.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'hi';\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_via_composition_root_wiring_alone(self):
+        # Two entry points both delegate to bootstrap.php -- wiring the
+        # autoloader there alone is enough, no entry point needs its own.
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "src/Bootstrap.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\n",
+            "public/a.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
+            "public/b.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+    def test_composition_root_recognized_with_a_straggler_needing_its_own_wiring(self):
+        # a.php and b.php converge on bootstrap.php (a real majority: 2 of
+        # 3) -- c.php doesn't. bootstrap.php is recognized as the
+        # composition root regardless, but c.php still needs its own direct
+        # wiring -- fulfilled only once both are satisfied.
+        base_files = {
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "src/Bootstrap.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\n",
+            "public/a.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
+            "public/b.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
+            "public/c.php": "<?php\necho 'legacy standalone page';\n",
+        }
+        tmp, root = self._make_repo(base_files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
+            (root / "public" / "c.php").write_text(
+                "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'legacy standalone page';\n"
+            )
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+    def test_exact_tie_recognizes_no_composition_root(self):
+        # 2 of 4 entry points converge on bootstrap.php -- exactly half, not
+        # a real majority (best_count * 2 > len(entry_points) must be a
+        # strict inequality). No composition root is recognized, so wiring
+        # bootstrap.php alone is not enough -- every entry point needs its
+        # own direct require, even a.php/b.php which do converge.
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "src/Bootstrap.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\n",
+            "public/a.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
+            "public/b.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
+            "public/c.php": "<?php\necho 'standalone c';\n",
+            "public/d.php": "<?php\necho 'standalone d';\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
+            # Confirm it's genuinely "no composition root", not just "c/d
+            # unwired" -- even a.php, which does converge on bootstrap.php,
+            # is unfulfilled on its own until it requires autoload.php
+            # itself, since bootstrap.php's own wiring isn't credited to it.
+            _, composition_root, wiring_targets = tooling_tree._detect_entry_points(root, ["src/"])
+            self.assertIsNone(composition_root)
+            self.assertEqual(len(wiring_targets), 4)
+        finally:
+            tmp.cleanup()
+
+    def test_vacuously_fulfilled_with_no_entry_points_at_all(self):
+        # Every .php file sits under the mapped namespace directory itself
+        # -- nothing to wire, same "nothing to recommend" convention this
+        # tree already uses for an undeterminable PHP floor.
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+            self.assertTrue(d["psr-4"]["details"]["autoloader_wired"])
+        finally:
+            tmp.cleanup()
+
+    def test_tooling_config_php_files_are_never_treated_as_entry_points(self):
+        # rector.php/.php-cs-fixer.php are real, unrequired, top-level .php
+        # files -- without the exclusion they'd wrongly need autoload.php
+        # wiring too, since nothing in the source tree requires them either.
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "rector.php": "<?php // DeadCode\n",
+            ".php-cs-fixer.php": "<?php return [];\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+    def test_entry_point_inside_tests_directory_excluded(self):
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "tests/SomeScript.php": "<?php\necho 'not an app entry point';\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+        finally:
+            tmp.cleanup()
+
+
 class ComposerAuditGateTests(unittest.TestCase):
     """php-tooling-tree.md's composer-audit stop conditions: proposable once
     ci-runner + composer are fulfilled, and (a real `require` dependency
