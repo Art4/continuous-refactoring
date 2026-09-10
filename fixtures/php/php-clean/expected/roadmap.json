@@ -75,6 +75,14 @@
         "has_pest": false
       }
     },
+    "coverage-floor": {
+      "fulfilled": true,
+      "reason": "coverage configured, floor committed, CI-gated",
+      "details": {
+        "has_coverage_config": true,
+        "floor": 82.5
+      }
+    },
     "test-runner-if-missing": {
       "fulfilled": true,
       "reason": "runner exists",

@@ -4,7 +4,7 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - run: vendor/bin/phpunit
+      - run: vendor/bin/phpunit --coverage-text
       - run: vendor/bin/phpstan analyse
       - run: composer audit
       - run: gitleaks detect

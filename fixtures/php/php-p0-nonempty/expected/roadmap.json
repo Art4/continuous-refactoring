@@ -75,6 +75,14 @@
         "has_pest": false
       }
     },
+    "coverage-floor": {
+      "fulfilled": false,
+      "reason": "no coverage report configured",
+      "details": {
+        "has_coverage_config": false,
+        "floor": null
+      }
+    },
     "test-runner-if-missing": {
       "fulfilled": true,
       "reason": "runner exists",
@@ -343,6 +351,17 @@
     },
     {
       "n": 6,
+      "node": "coverage-floor",
+      "type": "tooling",
+      "required_parents": [
+        "phpunit"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 7,
       "node": "rector-php-set",
       "type": "tooling",
       "required_parents": [],
@@ -356,7 +375,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
+      "n": 8,
       "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
@@ -369,7 +388,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 8,
+      "n": 9,
       "node": "rector-code-quality",
       "type": "tooling",
       "required_parents": [
@@ -382,7 +401,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 9,
+      "n": 10,
       "node": "rector-phpunit-set",
       "type": "tooling",
       "required_parents": [
@@ -394,20 +413,6 @@
         "php-cs-fixer"
       ],
       "reason": "required parents fulfilled"
-    },
-    {
-      "n": 10,
-      "node": "rector-type-coverage",
-      "type": "tooling",
-      "required_parents": [],
-      "required_any_parents": [],
-      "recommended_parents": [
-        "rector-dead-code",
-        "rector-code-quality",
-        "php-cs-fixer",
-        "phpstan-level-3"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
     }
   ],
   "no_mr_created": true,

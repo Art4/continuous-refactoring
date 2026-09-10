@@ -75,6 +75,14 @@
         "has_pest": false
       }
     },
+    "coverage-floor": {
+      "fulfilled": false,
+      "reason": "no coverage report configured",
+      "details": {
+        "has_coverage_config": false,
+        "floor": null
+      }
+    },
     "test-runner-if-missing": {
       "fulfilled": false,
       "reason": "no runner \u2014 would propose phpunit",
@@ -387,17 +395,14 @@
     },
     {
       "n": 10,
-      "node": "rector-phpunit-set",
+      "node": "coverage-floor",
       "type": "tooling",
       "required_parents": [
         "phpunit"
       ],
       "required_any_parents": [],
-      "recommended_parents": [
-        "rector-code-quality",
-        "php-cs-fixer"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from rector-code-quality (recommended) \u2014 still proposable"
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
     }
   ],
   "no_mr_created": true,

@@ -21,7 +21,7 @@ edge table while scoping where the new nodes should attach, not as a separate mo
 
 **Priority:** medium.
 
-**Status:** ready-for-agent
+**Status:** done
 
 Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, three rounds):
 
@@ -97,3 +97,8 @@ Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, three rounds):
 > lossless (`php-cs-fixer`), one a deliberate, justified trade-off (`phpstan-level-10` → `-5`), one a
 > straightforward drop (`test-runner-if-missing`). User confirmed shared understanding ("ja, passt.").
 > Ready to implement.
+> **2026-09-10:** Status correction — this was already fully implemented (ADR-0040, `phpmd`/
+> `secret-detection` live as real tooling-tree nodes with a `Signal` field and no `resolved` edge,
+> `php-cs-fixer`/`phpstan-level-5`/`test-runner-if-missing` edge simplifications all present in
+> `php-tooling-tree.md`) but the `Status` field here was never flipped from `ready-for-agent`.
+> Corrected to `done`; no further work needed.

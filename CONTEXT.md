@@ -24,6 +24,14 @@ _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 The directed graph of adoption steps a target repo climbs — a generic root (`skills/refactor-scan/references/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry. Each node also carries a human-facing **Name** (the tree doc's `**Name:**` field), used instead of the slug anywhere a human reads it — issue titles, merge requests, the loop's closing report; internal bookkeeping (the edges table, the **Refactoring Notes**' `out-of-scope/` filenames, ledger matching) stays keyed by the slug. A node may also carry a **Housekeeping** field — a recurring-maintenance line contributed to `housekeeping-template.md` (below), ordinarily when the node's own MR delivers, or via the separate `continuous-housekeeping` skill's own reconciliation pass for a node already fulfilled before that file existed; unrelated to the node's own one-time Fulfilment check. A node may also carry a **Signal** field, naming which `signals.md` factor its tool output feeds once the node is adopted — see the **Signal** entry below for the full picture across both usages. Deliberately not every node produces one: a node can gate `structural-scan` without producing a Signal, and vice versa — a Signal-producing node like `phpmd` or `secret-detection` carries no `resolved` edge into `structural-scan` at all (see those nodes' own entries in `php-tooling-tree.md`/`tooling-tree.md`).
 _Avoid_: baseline, floor, bootstrap, onboarding
 
+**Fulfilment check**:
+A node's own test for whether it's already adopted — the specific, node-owned criterion (a
+dependency present, a config committed, a CI job actually invoking the tool, …) that `tooling_tree.
+py`'s deterministic parser and the manual/LLM tree-walk fallback both evaluate the same way. Lives in
+the node's own tree-doc entry, alongside its **MR scope** (what an adoption's merge request actually
+delivers) — every node carries both, together they're what "a node" (above) means operationally.
+_Avoid_: adoption check, acceptance criteria
+
 **Entry point**:
 A PHP file the runtime (webserver or CLI) executes directly — never `require`d or `include`d by another file in the target's own source tree. `psr-4`'s autoloader-wiring step (`skills/refactor-scan/references/php-tooling-tree/psr-4.md`) targets every entry point directly when the target has no single **Composition root**.
 _Avoid_: front controller
@@ -101,7 +109,7 @@ The concrete refactoring plan produced by `refactor-design`: the deepened module
 _Avoid_: design doc
 
 **Proposals**:
-The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize`'s Rank mode picks one. Filing itself happens in `refactor-prioritize`'s Select mode (a concrete instance selected first, for a gate) or, for an already-concrete winner, in `refactor-design` directly — either way, `refactor-design` adds the plan afterward.
+The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize`'s Rank mode picks one. Filing itself happens in `refactor-prioritize`'s Select mode (a concrete instance selected first, for a gate) or, for an already-concrete winner, in `refactor-design` directly — either way, `refactor-design` adds the plan afterward. One narrow exception files outside this flow entirely: a secret-history-scan **finding** (above) becomes its own `refactor:priority` candidate filed directly by `refactor-learn`, no `refactor-prioritize`/`refactor-design` step at all — there's nothing to rank or design, the finding is already concrete.
 _Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
 
 **Signal**:
@@ -109,5 +117,5 @@ The named factor (heat, leverage, security, blast radius of inaction, …) that 
 _Avoid_: (none — use the term as-is)
 
 **Findings**:
-Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Handed to `refactor-learn` to act on. Scan only notices; it never decides the outcome itself.
+Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Also covers a genuinely new discovery this same pass, not a remembered item's changed state — a secret a git-history scan turns up (`refactor-scan/SKILL.md` step 4c) is a finding the same way. Handed to `refactor-learn` to act on either way. Scan only notices; it never decides the outcome itself.
 _Avoid_: events, notifications

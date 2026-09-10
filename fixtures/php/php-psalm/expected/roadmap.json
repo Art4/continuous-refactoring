@@ -75,6 +75,14 @@
         "has_pest": false
       }
     },
+    "coverage-floor": {
+      "fulfilled": false,
+      "reason": "no coverage report configured",
+      "details": {
+        "has_coverage_config": false,
+        "floor": null
+      }
+    },
     "test-runner-if-missing": {
       "fulfilled": true,
       "reason": "runner exists",
@@ -357,6 +365,17 @@
     },
     {
       "n": 8,
+      "node": "coverage-floor",
+      "type": "tooling",
+      "required_parents": [
+        "phpunit"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 9,
       "node": "rector-php-set",
       "type": "tooling",
       "required_parents": [],
@@ -370,21 +389,8 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 9,
-      "node": "rector-dead-code",
-      "type": "tooling",
-      "required_parents": [
-        "rector-php-set"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [
-        "php-cs-fixer"
-      ],
-      "reason": "required parents fulfilled"
-    },
-    {
       "n": 10,
-      "node": "rector-code-quality",
+      "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
         "rector-php-set"

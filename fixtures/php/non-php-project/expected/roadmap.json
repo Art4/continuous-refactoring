@@ -75,6 +75,14 @@
         "has_pest": false
       }
     },
+    "coverage-floor": {
+      "fulfilled": false,
+      "reason": "no coverage report configured",
+      "details": {
+        "has_coverage_config": false,
+        "floor": null
+      }
+    },
     "test-runner-if-missing": {
       "fulfilled": false,
       "reason": "no runner \u2014 would propose phpunit",

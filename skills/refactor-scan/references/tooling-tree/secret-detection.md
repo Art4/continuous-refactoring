@@ -20,5 +20,5 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
   generic (reading-the-code) recognition method for this factor.
 
 **Out of scope for this node's own adoption MR:** a retroactive scan of the target's full git
-history for secrets already committed, and filing remediation candidates for anything found — a real,
-separate piece of follow-up work, not folded in here.
+history for secrets already committed, and filing remediation candidates for anything found — handled
+separately, once this node is fulfilled, by `refactor-scan/SKILL.md` step 4c.

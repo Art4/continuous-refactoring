@@ -93,6 +93,7 @@ VOCAB_ALLOW = {
     ("refactor-scan", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
     ("refactor-scan", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("refactor-scan", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
+    ("refactor-prioritize", "floor"): "coverage-floor's own ratchet threshold — a real technical term, not a synonym for 'tooling tree'",
     ("refactor-scan", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
     ("refactor-design", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("refactor-implement", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
