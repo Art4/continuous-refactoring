@@ -15,6 +15,7 @@ graph TD
     cs[php-cs-fixer]
     phpmd[phpmd]
     unit[phpunit]
+    cov[coverage-floor]
     audit[composer-audit]
     tr[test-runner-if-missing]
     sca[static-code-analyzer]
@@ -46,6 +47,7 @@ graph TD
     comp -->|required| cs
     comp -->|required| phpmd
     comp -->|required| unit
+    unit -->|required| cov
     comp -->|required| tr
     comp -->|required| audit
     ci -->|required| audit
@@ -104,6 +106,7 @@ graph TD
 | `composer` | `php-cs-fixer` | required |
 | `composer` | `phpmd` | required |
 | `composer` | `phpunit` | required |
+| `phpunit` | `coverage-floor` | required |
 | `composer` | `test-runner-if-missing` | required |
 | `composer` | `composer-audit` | required |
 | `ci-runner` | `composer-audit` | required |
@@ -233,6 +236,15 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 - **Purpose:** the project's test runner.
 
 Full definition (Fulfilment check, security advisories, MR scope, test-directory layout convention): `skills/refactor-scan/references/php-tooling-tree/phpunit.md`.
+
+### `coverage-floor`
+
+- **Name:** Test Coverage Floor
+- **Tool:** PHPUnit's own coverage report (PCOV or Xdebug as the driver)
+- **Purpose:** a self-tightening coverage ratchet plus real per-file numbers for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere).
+- **Signal:** Untested / hard-to-test (`skills/refactor-prioritize/references/signals.md`) — once fulfilled, Select mode reads the real Clover-XML coverage report instead of the generic "read the test suite" heuristic.
+
+Full definition (Fulfilment check, MR scope, Ratchet mechanism, PCOV-vs-Xdebug): `skills/refactor-scan/references/php-tooling-tree/coverage-floor.md`.
 
 ### `test-runner-if-missing`
 

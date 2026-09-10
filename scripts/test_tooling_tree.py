@@ -2909,6 +2909,12 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
             "rector-php-set", "rector-code-quality", "rector-phpunit-set",
             "psalm-taint-analysis", "editorconfig", "ci-runner",
+            # coverage-floor (ticket 08): also a direct required child of
+            # phpunit now, same as rector-phpunit-set above -- rejected here
+            # too so landing phpunit reports only the resolved-gate
+            # walk-through this test is actually about, not an unrelated
+            # newly-unblocked Signal node.
+            "coverage-floor",
         ]
         files = {
             "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
@@ -2936,6 +2942,145 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
         tmp, root = self._make_repo({})
         try:
             self.assertEqual(directly_unblocked_children(root, "loop-config"), [])
+        finally:
+            tmp.cleanup()
+
+
+class CoverageFloorNodeTests(unittest.TestCase):
+    """Ticket 08: `coverage-floor`, a PHPUnit child, Signal-producing node
+    (no `resolved` edge anywhere). Driver-agnostic by design (PCOV vs.
+    Xdebug is a review-time MR-scope choice, never checked here) -- only
+    "coverage configured, floor committed, CI-gated once CI exists"
+    matters."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _base_files(self):
+        return {
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+        }
+
+    def test_edge_is_required_from_phpunit(self):
+        tree = load_tree()
+        self.assertIn({"from": "phpunit", "to": "coverage-floor", "type": "required"}, tree["edges"])
+
+    def test_no_resolved_edge_anywhere(self):
+        tree = load_tree()
+        self.assertNotIn(
+            {"from": "coverage-floor", "to": "php-structural-scan", "type": "resolved"},
+            tree["edges"],
+        )
+        self.assertFalse(any(e["from"] == "coverage-floor" and e["type"] == "resolved" for e in tree["edges"]))
+
+    def test_neither_coverage_config_nor_floor_unfulfilled(self):
+        tmp, root = self._make_repo(self._base_files())
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["coverage-floor"]["fulfilled"])
+            self.assertFalse(d["coverage-floor"]["details"]["has_coverage_config"])
+            self.assertIsNone(d["coverage-floor"]["details"]["floor"])
+        finally:
+            tmp.cleanup()
+
+    def test_coverage_config_without_floor_file_unfulfilled(self):
+        files = self._base_files()
+        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["coverage-floor"]["fulfilled"])
+            self.assertTrue(d["coverage-floor"]["details"]["has_coverage_config"])
+            self.assertIsNone(d["coverage-floor"]["details"]["floor"])
+        finally:
+            tmp.cleanup()
+
+    def test_floor_file_without_coverage_config_unfulfilled(self):
+        files = self._base_files()
+        files[".coverage-floor"] = "62.5\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["coverage-floor"]["fulfilled"])
+            self.assertFalse(d["coverage-floor"]["details"]["has_coverage_config"])
+            self.assertEqual(d["coverage-floor"]["details"]["floor"], 62.5)
+        finally:
+            tmp.cleanup()
+
+    def test_both_present_no_ci_fulfilled(self):
+        # No CI yet still fulfils the node on local adoption alone -- same
+        # convention every other self-wired CI-gate node already uses.
+        files = self._base_files()
+        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
+        files[".coverage-floor"] = "62.5\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["coverage-floor"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_ci_exists_but_not_coverage_gated_unfulfilled(self):
+        files = self._base_files()
+        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
+        files[".coverage-floor"] = "62.5\n"
+        files[".github/workflows/ci.yml"] = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["coverage-floor"]["fulfilled"])
+            self.assertIn("not gated in CI", d["coverage-floor"]["reason"])
+        finally:
+            tmp.cleanup()
+
+    def test_ci_coverage_gated_fulfilled(self):
+        files = self._base_files()
+        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
+        files[".coverage-floor"] = "62.5\n"
+        files[".github/workflows/ci.yml"] = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit --coverage-text\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["coverage-floor"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_unparseable_floor_file_treated_as_absent(self):
+        files = self._base_files()
+        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
+        files[".coverage-floor"] = "not-a-number\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["coverage-floor"]["fulfilled"])
+            self.assertIsNone(d["coverage-floor"]["details"]["floor"])
+        finally:
+            tmp.cleanup()
+
+    def test_driver_agnostic_xdebug_still_fulfils(self):
+        # The fulfilment check never inspects which driver actually ran --
+        # an Xdebug-based CI invocation fulfils the node exactly the same
+        # way a PCOV-based one would (php-tooling-tree/coverage-floor.md's
+        # own "PCOV is a default, not a requirement").
+        files = self._base_files()
+        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
+        files[".coverage-floor"] = "62.5\n"
+        files[".github/workflows/ci.yml"] = (
+            "jobs:\n  test:\n    steps:\n      - run: XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text\n"
+        )
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["coverage-floor"]["fulfilled"])
         finally:
             tmp.cleanup()
 

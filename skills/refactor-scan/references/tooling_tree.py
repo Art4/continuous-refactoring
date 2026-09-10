@@ -464,6 +464,43 @@ def _detected_secret_scanner(repo: pathlib.Path) -> str | None:
     return None
 
 
+# coverage-floor's own fulfilment (php-tooling-tree/coverage-floor.md):
+# driver-agnostic by design (PCOV vs. Xdebug is a review-time choice, never
+# checked here) — only "is coverage actually configured, and (once CI
+# exists) enforced" matters. Needle set mirrors _SECRET_SCAN_NEEDLES's own
+# shape — a named constant rather than an inline literal, so a future
+# invocation spelling (e.g. a bare --coverage-clover with no --coverage
+# prefix) is one line to add here, not a buried string to hunt down.
+_COVERAGE_CI_NEEDLES = ("--coverage",)
+
+
+def _has_coverage_report_config(repo: pathlib.Path) -> bool:
+    """True if phpunit.xml(.dist) declares a <coverage> report section —
+    coverage-floor's own local-adoption half."""
+    for name in ("phpunit.xml.dist", "phpunit.xml"):
+        p = repo / name
+        if p.exists():
+            try:
+                if re.search(r"<coverage\b", p.read_text(encoding="utf-8")):
+                    return True
+            except OSError:
+                continue
+    return False
+
+
+def _coverage_floor_value(repo: pathlib.Path) -> float | None:
+    """The committed `.coverage-floor` ratchet value, if the file exists and
+    parses as a number. `None` for both "missing" and "unparseable" — the
+    node treats them the same (unfulfilled), never guessing a value."""
+    p = repo / ".coverage-floor"
+    if not p.exists():
+        return None
+    try:
+        return float(p.read_text(encoding="utf-8").strip())
+    except (OSError, ValueError):
+        return None
+
+
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
     p = repo / "phpstan.neon"
     if not p.exists():
@@ -965,6 +1002,31 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     else:
         phpunit_reason = "no test runner"
     set_node("phpunit", phpunit_fulfilled, phpunit_reason, has_phpunit=has_phpunit, has_pest=has_pest)
+    # coverage-floor: local adoption (a <coverage> report configured, a
+    # committed .coverage-floor ratchet value) plus, once ci-runner is
+    # fulfilled, the same self-wiring CI-gate pattern phpunit's own check
+    # above already uses. Driver-agnostic (php-tooling-tree/coverage-floor.md
+    # states why) — never checks for "pcov"/"xdebug" by name.
+    has_coverage_config = _has_coverage_report_config(repo)
+    coverage_floor_value = _coverage_floor_value(repo)
+    has_coverage_floor = coverage_floor_value is not None
+    coverage_ci_ok = (not has_ci) or any(_has_ci_job_invoking(repo, needle) for needle in _COVERAGE_CI_NEEDLES)
+    coverage_fulfilled = has_coverage_config and has_coverage_floor and coverage_ci_ok
+    if coverage_fulfilled:
+        coverage_reason = "coverage configured, floor committed, CI-gated"
+    elif has_coverage_config and has_coverage_floor:
+        coverage_reason = "coverage and floor present but not gated in CI"
+    elif has_coverage_config:
+        coverage_reason = "coverage configured but no .coverage-floor committed"
+    else:
+        coverage_reason = "no coverage report configured"
+    set_node(
+        "coverage-floor",
+        coverage_fulfilled,
+        coverage_reason,
+        has_coverage_config=has_coverage_config,
+        floor=coverage_floor_value,
+    )
     # test-runner-if-missing: fulfilled once *any* runner is adopted, full
     # stop — independent of phpunit's CI-gating above. This node only
     # answers "does a runner exist at all", not "is it enforced in CI"

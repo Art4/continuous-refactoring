@@ -29,9 +29,11 @@
     },
     "psr-4": {
       "fulfilled": true,
-      "reason": "autoload.psr-4 declared and in use",
+      "reason": "autoload.psr-4 declared, in use, and the autoloader is wired in",
       "details": {
-        "declared": true
+        "declared": true,
+        "mechanism_verified": true,
+        "autoloader_wired": true
       }
     },
     "ci-runner": {
@@ -71,6 +73,14 @@
       "details": {
         "has_phpunit": true,
         "has_pest": false
+      }
+    },
+    "coverage-floor": {
+      "fulfilled": true,
+      "reason": "coverage configured, floor committed, CI-gated",
+      "details": {
+        "has_coverage_config": true,
+        "floor": 82.5
       }
     },
     "test-runner-if-missing": {

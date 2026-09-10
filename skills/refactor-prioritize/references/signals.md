@@ -21,7 +21,9 @@ a future language specialization would name its own).
 - **Low leverage** — a lot of interface surface buying little behaviour. *Generic* — reading the code.
 - **Tightly-coupled seams** — modules leaking across their boundaries. *Generic* — reading the code.
 - **Untested / hard-to-test** — no test reaches it, or its current interface resists testing.
-  *Generic* — the test suite itself, or its absence.
+  *Generic* — the test suite itself, or its absence. *Language-specific* for a numeric proxy — PHP:
+  `coverage-floor`'s own Clover-XML coverage report, once adopted (a file sitting meaningfully under
+  the current floor is this factor's own real evidence).
 - **Tooling pressure** — places the fulfilled tooling (PHPStan, Rector, style) keeps flagging, or a
   dependency approaching end-of-life/unsupported status. *Language-specific* — the fulfilled static
   analysis/lint tools' own output; PHP: `phpstan.neon`/`phpstan-baseline.neon` residuals, Rector

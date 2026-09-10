@@ -1,1 +1,1 @@
-<?xml version="1.0"?><phpunit></phpunit>
+<?xml version="1.0"?><phpunit><coverage><report><clover outputFile="build/clover.xml"/></report></coverage></phpunit>
