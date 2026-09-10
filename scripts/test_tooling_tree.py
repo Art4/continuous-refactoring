@@ -3085,5 +3085,93 @@ class CoverageFloorNodeTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class SecretHistoryScanDetectionTests(unittest.TestCase):
+    """Ticket 13's remaining half: `secret-detection`'s own `details.scanner`
+    names which recognized scanner the CI config actually invokes, so
+    `refactor-scan/SKILL.md` step 4c's one-time git-history scan can reuse it
+    without re-reading the CI config itself."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _loop_config_and_composer_files(self):
+        return {
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
+            "composer.lock": "{}",
+        }
+
+    def test_no_ci_job_scanner_is_none(self):
+        tmp, root = self._make_repo(self._loop_config_and_composer_files())
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["secret-detection"]["fulfilled"])
+            self.assertIsNone(d["secret-detection"]["details"]["scanner"])
+        finally:
+            tmp.cleanup()
+
+    def test_gitleaks_ci_job_names_gitleaks(self):
+        files = self._loop_config_and_composer_files()
+        files[".github/workflows/ci.yml"] = (
+            "jobs:\n  scan:\n    steps:\n      - run: gitleaks detect\n"
+        )
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["secret-detection"]["fulfilled"])
+            self.assertEqual(d["secret-detection"]["details"]["scanner"], "gitleaks")
+        finally:
+            tmp.cleanup()
+
+    def test_detect_secrets_ci_job_names_detect_secrets(self):
+        files = self._loop_config_and_composer_files()
+        files[".github/workflows/ci.yml"] = (
+            "jobs:\n  scan:\n    steps:\n      - run: detect-secrets scan\n"
+        )
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["secret-detection"]["fulfilled"])
+            self.assertEqual(d["secret-detection"]["details"]["scanner"], "detect-secrets")
+        finally:
+            tmp.cleanup()
+
+    def test_trufflehog_ci_job_names_trufflehog(self):
+        files = self._loop_config_and_composer_files()
+        files[".github/workflows/ci.yml"] = (
+            "jobs:\n  scan:\n    steps:\n      - run: trufflehog filesystem .\n"
+        )
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["secret-detection"]["fulfilled"])
+            self.assertEqual(d["secret-detection"]["details"]["scanner"], "trufflehog")
+        finally:
+            tmp.cleanup()
+
+    def test_unrecognized_scanner_not_fulfilled_scanner_none(self):
+        # A CI job exists but doesn't invoke any of the three recognized
+        # needles -- secret-detection stays unfulfilled, and there's no
+        # scanner name to report (nothing for step 4c to reuse).
+        files = self._loop_config_and_composer_files()
+        files[".github/workflows/ci.yml"] = (
+            "jobs:\n  scan:\n    steps:\n      - run: some-other-scanner scan\n"
+        )
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["secret-detection"]["fulfilled"])
+            self.assertIsNone(d["secret-detection"]["details"]["scanner"])
+        finally:
+            tmp.cleanup()
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -451,6 +451,19 @@ def _has_secret_scan_ci_job(repo: pathlib.Path) -> bool:
     return any(_has_ci_job_invoking(repo, needle) for needle in _SECRET_SCAN_NEEDLES)
 
 
+def _detected_secret_scanner(repo: pathlib.Path) -> str | None:
+    """Which of `_SECRET_SCAN_NEEDLES` the CI config actually invokes — first
+    match wins, `None` if none do. Exposed in `secret-detection`'s own
+    `details` so a later pass (`refactor-scan/SKILL.md` step 4c's own
+    history scan) doesn't have to re-derive it by re-reading the CI config
+    itself; more than one matching scanner is possible but not disambiguated
+    further — the first needle found is what step 4c reuses."""
+    for needle in _SECRET_SCAN_NEEDLES:
+        if _has_ci_job_invoking(repo, needle):
+            return needle
+    return None
+
+
 # coverage-floor's own fulfilment (php-tooling-tree/coverage-floor.md):
 # driver-agnostic by design (PCOV vs. Xdebug is a review-time choice, never
 # checked here) — only "is coverage actually configured, and (once CI
@@ -959,6 +972,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         "secret-detection",
         secret_scan_fulfilled,
         "CI job runs a secret scanner" if secret_scan_fulfilled else "no CI job runs a secret scanner yet",
+        scanner=_detected_secret_scanner(repo),
     )
     # editorconfig
     has_editorconfig = _has_editorconfig(repo)
