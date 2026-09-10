@@ -28,7 +28,7 @@
 > and a new `bookkeeping.md` field (`Secret history scan`) not yet `done`; runs at most once per
 > target. Reuses the CI-gate's own scanner (now exposed via `tooling_tree.py`'s `secret-detection`
 > node `details.scanner`) and that scanner's own baseline file for dedup, rather than a second tool or
-> a suite-invented allowlist. Findings never carry the secret's actual value. `refactor-scan` hands
+> a suite-invented allowlist. Findings carry the secret's value redacted. `refactor-scan` hands
 > findings to `refactor-learn` (no exception to "detect, never write" needed); `refactor-learn` files
 > each as a `refactor:priority` candidate directly — Select mode isn't involved, there's nothing to
 > explore. Status: done.

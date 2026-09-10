@@ -34,8 +34,8 @@ The retroactive scan is a new `refactor-scan/SKILL.md` step (4c), not a tooling-
   never write"; running a read-only scan against history fits that (it changes nothing), but filing
   the resulting candidate issues doesn't, so those findings are handed to `refactor-learn`'s early
   call exactly like every other finding type. Each finding becomes its own `refactor:priority`
-  candidate (Where: file/line; Problem: the scanner's own rule/finding id, **never the secret's
-  actual value**; Signal: Security) — filed directly rather than routed through `refactor-prioritize`'s
+  candidate (Where: file/line; Problem: the scanner's own rule/finding id, **the secret's value
+  redacted**; Signal: Security) — filed directly rather than routed through `refactor-prioritize`'s
   Select mode, since there's nothing to explore or rank among: the finding is already concrete.
   Security already triggers priority admission (`signals.md`, ADR-0039), so this reuses an existing
   rule rather than inventing a new one.

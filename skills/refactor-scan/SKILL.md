@@ -82,7 +82,7 @@ history, reusing that scanner's own baseline mechanism
 (gitleaks `--baseline-path`, detect-secrets `.secrets.baseline`, or the equivalent) so a finding
 already known — filed earlier, or explicitly accepted — never resurfaces. Every new finding becomes
 its own finding, handed to `refactor-learn` alongside step 3's: file/line and the scanner's own
-rule/finding id, **never the secret's actual value**. `secret-detection` unfulfilled, or `Secret
+rule/finding id, **the secret's value redacted**. `secret-detection` unfulfilled, or `Secret
 history scan` already `done` → nothing to detect here — this scan runs at most once per target.
 
 ## Output
