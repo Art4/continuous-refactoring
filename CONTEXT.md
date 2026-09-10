@@ -24,6 +24,14 @@ _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 The directed graph of adoption steps a target repo climbs — a generic root (`skills/refactor-scan/references/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry. Each node also carries a human-facing **Name** (the tree doc's `**Name:**` field), used instead of the slug anywhere a human reads it — issue titles, merge requests, the loop's closing report; internal bookkeeping (the edges table, the **Refactoring Notes**' `out-of-scope/` filenames, ledger matching) stays keyed by the slug. A node may also carry a **Housekeeping** field — a recurring-maintenance line contributed to `housekeeping-template.md` (below), ordinarily when the node's own MR delivers, or via the separate `continuous-housekeeping` skill's own reconciliation pass for a node already fulfilled before that file existed; unrelated to the node's own one-time Fulfilment check. A node may also carry a **Signal** field, naming which `signals.md` factor its tool output feeds once the node is adopted — see the **Signal** entry below for the full picture across both usages. Deliberately not every node produces one: a node can gate `structural-scan` without producing a Signal, and vice versa — a Signal-producing node like `phpmd` or `secret-detection` carries no `resolved` edge into `structural-scan` at all (see those nodes' own entries in `php-tooling-tree.md`/`tooling-tree.md`).
 _Avoid_: baseline, floor, bootstrap, onboarding
 
+**Fulfilment check**:
+A node's own test for whether it's already adopted — the specific, node-owned criterion (a
+dependency present, a config committed, a CI job actually invoking the tool, …) that `tooling_tree.
+py`'s deterministic parser and the manual/LLM tree-walk fallback both evaluate the same way. Lives in
+the node's own tree-doc entry, alongside its **MR scope** (what an adoption's merge request actually
+delivers) — every node carries both, together they're what "a node" (above) means operationally.
+_Avoid_: adoption check, acceptance criteria
+
 **Entry point**:
 A PHP file the runtime (webserver or CLI) executes directly — never `require`d or `include`d by another file in the target's own source tree. `psr-4`'s autoloader-wiring step (`skills/refactor-scan/references/php-tooling-tree/psr-4.md`) targets every entry point directly when the target has no single **Composition root**.
 _Avoid_: front controller

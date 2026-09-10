@@ -31,7 +31,9 @@
       "fulfilled": false,
       "reason": "no autoload.psr-4 declared",
       "details": {
-        "declared": false
+        "declared": false,
+        "mechanism_verified": false,
+        "autoloader_wired": false
       }
     },
     "ci-runner": {
@@ -71,6 +73,14 @@
       "details": {
         "has_phpunit": false,
         "has_pest": false
+      }
+    },
+    "coverage-floor": {
+      "fulfilled": false,
+      "reason": "no coverage report configured",
+      "details": {
+        "has_coverage_config": false,
+        "floor": null
       }
     },
     "test-runner-if-missing": {
