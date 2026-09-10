@@ -69,8 +69,11 @@ ever fulfilled yet, or the fulfilled one's baseline is already empty → nothing
 
 ### 4c. Detect a still-owed secret history scan
 
-PHP tree only, for now (mirrors 4b's own scoping note). Read `detected` from step 4's own
-`tooling_tree.py` run (no second invocation) — `secret-detection`'s own `fulfilled` is `true`, and the
+Language-neutral, not scoped to any one tree — `secret-detection` itself lives at the generic root and
+reads git history/file contents directly, no language-specific tooling involved
+(`skills/refactor-scan/references/tooling-tree.md`'s own `secret-detection` node). Read `detected`
+from step 4's own `tooling_tree.py` run (no second invocation) — `secret-detection`'s own `fulfilled`
+is `true`, and the
 Refactoring Notes' `bookkeeping.md`'s `Secret history scan` field is absent (never yet run, see
 `skills/continuous-refactoring/references/refactoring-bookkeeping.md`) → run a full git-history scan
 now, using whichever scanner `secret-detection`'s own `details.scanner` already names (the same
