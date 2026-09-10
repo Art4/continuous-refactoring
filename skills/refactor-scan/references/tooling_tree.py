@@ -335,7 +335,7 @@ def _detect_entry_points(repo: pathlib.Path, psr4_dirs: list[str]):
     return entry_points, composition_root, wiring_targets
 
 
-def _autoloader_wired(repo: pathlib.Path, composer: dict | None) -> bool:
+def _autoloader_wired(repo: pathlib.Path, composer: dict | None) -> tuple[bool, list[str]]:
     """php-tooling-tree/psr-4.md's autoloader-wiring criterion: the
     Composition root (or every Entry point that doesn't converge on one, or
     every entry point at all when there's no composition root) contains a
@@ -343,19 +343,41 @@ def _autoloader_wired(repo: pathlib.Path, composer: dict | None) -> bool:
     all (e.g. a pure library) is vacuously satisfied — nothing to wire, the
     same "nothing to recommend" convention this tree already uses elsewhere
     (php-minimal-version's own undeterminable-floor case, php_floor_precheck's
-    unknown-floor case)."""
+    unknown-floor case).
+
+    Returns `(wired, unwired)` — `unwired` names every candidate (repo-
+    relative path strings) that still needs its own `vendor/autoload.php`
+    require, deliberately exposed rather than collapsed into the boolean:
+    this check is a blunt, tool-agnostic "does the text contain the
+    require" match — it has no way to tell a genuine, still-unwired
+    application entry point apart from, say, a generated CI/tooling helper
+    script that structurally never needs the app's own classes at all
+    (a real false positive, caught live on Art4/legacy-todo). Sorting that
+    out is a judgement call for whoever is actually interpreting this
+    result — see php-tooling-tree/psr-4.md's own Fulfilment check for how
+    to read a non-empty `unwired` list rather than trusting `wired` at face
+    value."""
     psr4_dirs = _psr4_mapped_dirs(composer)
     _, _, wiring_targets = _detect_entry_points(repo, psr4_dirs)
-    if not wiring_targets:
-        return True
+    repo_resolved = repo.resolve()
+    unwired: list[str] = []
     for target in wiring_targets:
+        # wiring_targets mixes absolute paths (the composition root, itself
+        # resolved elsewhere) and repo-relative ones (individually-wired
+        # entry points) -- normalize both the same way before reporting.
+        resolved = (target if target.is_absolute() else (repo / target)).resolve()
         try:
-            text = target.read_text(encoding="utf-8")
+            rel = str(resolved.relative_to(repo_resolved))
+        except ValueError:
+            rel = str(resolved)
+        try:
+            text = resolved.read_text(encoding="utf-8")
         except OSError:
-            return False
+            unwired.append(rel)
+            continue
         if not _AUTOLOAD_REQUIRE_RE.search(text):
-            return False
-    return True
+            unwired.append(rel)
+    return (not unwired, unwired)
     return False
 
 
@@ -974,7 +996,10 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # through it at request time.
     has_psr4_declared = _psr4_root_namespace(composer) is not None
     psr4_mechanism_verified = _has_verified_psr4_autoload(repo, composer)
-    autoloader_wired = _autoloader_wired(repo, composer) if psr4_mechanism_verified else False
+    if psr4_mechanism_verified:
+        autoloader_wired, unwired_entry_points = _autoloader_wired(repo, composer)
+    else:
+        autoloader_wired, unwired_entry_points = False, []
     psr4_verified = psr4_mechanism_verified and autoloader_wired
     if psr4_verified:
         psr4_reason = "autoload.psr-4 declared, in use, and the autoloader is wired in"
@@ -984,7 +1009,11 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         psr4_reason = "autoload.psr-4 declared but no file under it uses the namespace yet"
     else:
         psr4_reason = "no autoload.psr-4 declared"
-    set_node("psr-4", psr4_verified, psr4_reason, declared=has_psr4_declared, mechanism_verified=psr4_mechanism_verified, autoloader_wired=autoloader_wired)
+    set_node(
+        "psr-4", psr4_verified, psr4_reason,
+        declared=has_psr4_declared, mechanism_verified=psr4_mechanism_verified,
+        autoloader_wired=autoloader_wired, unwired_entry_points=unwired_entry_points,
+    )
     # ci-runner
     set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
     # secret-detection: generic root, no resolved edge into structural-scan

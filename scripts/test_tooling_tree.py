@@ -1177,6 +1177,52 @@ class Psr4AutoloaderWiringTests(unittest.TestCase):
             self.assertTrue(d["psr-4"]["details"]["mechanism_verified"])
             self.assertFalse(d["psr-4"]["details"]["autoloader_wired"])
             self.assertIn("autoloader isn't wired", d["psr-4"]["reason"])
+            self.assertEqual(d["psr-4"]["details"]["unwired_entry_points"], ["public/index.php"])
+        finally:
+            tmp.cleanup()
+
+    def test_fulfilled_reports_empty_unwired_list(self):
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "public/index.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'hi';\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
+            self.assertEqual(d["psr-4"]["details"]["unwired_entry_points"], [])
+        finally:
+            tmp.cleanup()
+
+    def test_generated_ci_helper_script_is_still_reported_as_unwired(self):
+        # Real false positive caught live on Art4/legacy-todo (PR #229): a
+        # tooling-tree node's own generated CI-helper script (coverage-
+        # floor's scripts/check-coverage-floor.php) is a real, unrequired
+        # .php file that structurally never needs the app's own classes.
+        # Deliberately NOT special-cased away here (see ADR-0046's revised
+        # decision) -- the deterministic layer stays a simple, honest
+        # "does this candidate's text contain the autoload.php require"
+        # check and reports it plainly; sorting a genuine application entry
+        # point from a script like this one is an agentic judgement call
+        # documented in php-tooling-tree/psr-4.md's own Fulfilment check,
+        # not something this parser tries to guess at.
+        tmp, root = self._make_repo({
+            "composer.json": self._COMPOSER_MAPPED,
+            "composer.lock": "{}",
+            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
+            "public/index.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'hi';\n",
+            "scripts/check-coverage-floor.php": (
+                "#!/usr/bin/env php\n<?php\n$xml = simplexml_load_file($argv[1]);\necho 'ok';\n"
+            ),
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
+            self.assertEqual(
+                d["psr-4"]["details"]["unwired_entry_points"],
+                ["scripts/check-coverage-floor.php"],
+            )
         finally:
             tmp.cleanup()
 
