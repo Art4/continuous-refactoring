@@ -45,9 +45,10 @@ A new PHP-tree node, `semgrep`:
   (A02, A05, A09) have no data-flow shape for it to follow at all, a genuine coverage gap Semgrep's
   broader ruleset closes.
 - **A dedicated Semgrep-specific Signal factor**, distinct from the existing `secret-detection`/
-  `psalm-taint-analysis` Security factor. Rejected — same reasoning `coverage-floor` (ADR-0044) used
-  for "Untested / hard-to-test": the existing factor already names the concept generically, this node
-  just adds a second real-tool proxy alongside Psalm's, not a new concept.
+  `psalm-taint-analysis` Security factor. Rejected — the existing factor already names the concept
+  generically; this node just adds a second real-tool proxy alongside Psalm's, not a new concept (the
+  same shape a Signal-producing node reusing an existing factor already takes elsewhere in this tree,
+  e.g. `phpmd` strengthening "Understandability"/"Defect density" rather than inventing its own).
 - **Keep a manual security checklist as originally scoped in ticket 11**, alongside the tool. Rejected
   during grilling — the tool's own CI-gated findings supersede what a parallel manual document would
   check by hand, for no coverage a human reviewer wouldn't already get from the automated gate.
