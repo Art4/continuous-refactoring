@@ -38,6 +38,7 @@ graph TD
     rcq[rector-code-quality]
     rpu[rector-phpunit-set]
     pta[psalm-taint-analysis]
+    sg[semgrep]
     phpss[php-structural-scan]
     ss[structural-scan]
 
@@ -82,6 +83,7 @@ graph TD
     p3 -.->|recommended| rtc
     p4 -.->|required-any| pta
     psalm -.->|required-any| pta
+    pta -.->|recommended| sg
     psr4 -.->|resolved| phpss
     audit -.->|resolved| phpss
     unit -.->|resolved| phpss
@@ -141,6 +143,7 @@ graph TD
 | `phpstan-level-3` | `rector-type-coverage` | recommended |
 | `phpstan-level-4` | `psalm-taint-analysis` | required-any |
 | `psalm` | `psalm-taint-analysis` | required-any |
+| `psalm-taint-analysis` | `semgrep` | recommended |
 | `psr-4` | `php-structural-scan` | resolved |
 | `composer-audit` | `php-structural-scan` | resolved |
 | `phpunit` | `php-structural-scan` | resolved |
@@ -328,6 +331,15 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
   security scan on top of, regardless of whether that path is PHPStan or Psalm.
 
 Full definition (Required-any parents, Fulfilment check, MR scope, Co-presence caveat, `php-structural-scan` resolved-leaf): `skills/refactor-scan/references/php-tooling-tree/psalm.md`.
+
+### `semgrep`
+
+- **Name:** Semgrep (OWASP Top 10)
+- **Tool:** Semgrep — a standalone binary/Python/Docker tool, not a Composer dependency.
+- **Purpose:** broad OWASP Top 10 static-analysis coverage for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere). Complements `psalm-taint-analysis` rather than duplicating it.
+- **Signal:** Security (`skills/refactor-prioritize/references/signals.md`) — alongside `psalm-taint-analysis`'s own real findings for the same factor.
+
+Full definition (Recommended parent, Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/semgrep.md`.
 
 ### `rector-dead-code`
 

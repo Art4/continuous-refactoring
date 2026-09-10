@@ -3173,5 +3173,93 @@ class SecretHistoryScanDetectionTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class SemgrepNodeTests(unittest.TestCase):
+    """Ticket 11: `semgrep`, OWASP Top 10 coverage. Signal-producing (no
+    `resolved` edge anywhere), recommended parent `psalm-taint-analysis`
+    (not the flat `composer`-level required edge `phpmd` uses) so Psalm's
+    own taint baseline settles first."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def _base_files(self):
+        return {
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
+            "composer.lock": "{}",
+        }
+
+    def test_edge_is_recommended_from_psalm_taint_analysis(self):
+        tree = load_tree()
+        self.assertIn(
+            {"from": "psalm-taint-analysis", "to": "semgrep", "type": "recommended"},
+            tree["edges"],
+        )
+
+    def test_no_resolved_edge_anywhere(self):
+        tree = load_tree()
+        self.assertFalse(any(e["from"] == "semgrep" and e["type"] == "resolved" for e in tree["edges"]))
+
+    def test_no_ci_job_unfulfilled(self):
+        tmp, root = self._make_repo(self._base_files())
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["semgrep"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_semgrep_without_owasp_unfulfilled(self):
+        files = self._base_files()
+        files[".github/workflows/ci.yml"] = "jobs:\n  scan:\n    steps:\n      - run: semgrep --config=auto\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["semgrep"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_owasp_mentioned_without_semgrep_unfulfilled(self):
+        # An OWASP mention alone (e.g. a comment, a different tool) isn't
+        # this node's own evidence -- semgrep itself must actually run.
+        files = self._base_files()
+        files[".github/workflows/ci.yml"] = "jobs:\n  scan:\n    steps:\n      - run: echo owasp reminder\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertFalse(d["semgrep"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_semgrep_with_inline_owasp_config_fulfilled(self):
+        files = self._base_files()
+        files[".github/workflows/ci.yml"] = (
+            "jobs:\n  scan:\n    steps:\n      - run: semgrep --config=p/owasp-top-ten\n"
+        )
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["semgrep"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+    def test_semgrep_ci_plus_owasp_in_committed_config_fulfilled(self):
+        files = self._base_files()
+        files[".github/workflows/ci.yml"] = "jobs:\n  scan:\n    steps:\n      - run: semgrep ci\n"
+        files[".semgrep.yml"] = "rules:\n  - id: owasp-top-ten-imported\n"
+        tmp, root = self._make_repo(files)
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["semgrep"]["fulfilled"])
+        finally:
+            tmp.cleanup()
+
+
 if __name__ == "__main__":
     unittest.main()

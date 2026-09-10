@@ -33,7 +33,9 @@ a future language specialization would name its own).
 
 - **Security** — an exposed secret, an unauthenticated path to sensitive data, an injection class not
   yet closed. *Generic* usually (reading request handling, deployment/docroot config) — sometimes
-  *language-specific* (PHP: Psalm's own taint analysis, once adopted). **Triggers priority admission**
+  *language-specific* (PHP: Psalm's own taint analysis, once adopted; `semgrep`'s OWASP-Top-10 ruleset
+  once adopted, for the categories taint analysis doesn't reach — crypto misuse, misconfiguration,
+  logging gaps). **Triggers priority admission**
   (`refactor-scan`'s backlog cap, see that skill's step 1) — leaving it unfixed doesn't just carry
   risk, it actively worsens with every day it's live.
 - **Blast radius of inaction** — the cost of leaving this alone keeps rising, not just the risk of

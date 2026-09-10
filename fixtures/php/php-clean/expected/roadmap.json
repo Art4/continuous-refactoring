@@ -212,6 +212,11 @@
         "has_psalm_cfg": false
       }
     },
+    "semgrep": {
+      "fulfilled": true,
+      "reason": "semgrep + OWASP ruleset gated in CI",
+      "details": {}
+    },
     "rector-dead-code": {
       "fulfilled": true,
       "reason": "rector dead-code set present",

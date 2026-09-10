@@ -200,6 +200,11 @@
         "has_psalm_cfg": true
       }
     },
+    "semgrep": {
+      "fulfilled": false,
+      "reason": "no semgrep/OWASP CI job yet",
+      "details": {}
+    },
     "rector-dead-code": {
       "fulfilled": false,
       "reason": "no rector dead-code",
