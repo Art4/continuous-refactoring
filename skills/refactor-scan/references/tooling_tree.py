@@ -451,6 +451,29 @@ def _has_secret_scan_ci_job(repo: pathlib.Path) -> bool:
     return any(_has_ci_job_invoking(repo, needle) for needle in _SECRET_SCAN_NEEDLES)
 
 
+# semgrep's own fulfilment (php-tooling-tree/semgrep.md): a CI job invoking
+# semgrep, with an OWASP-Top-10 ruleset reference either inline in the CI
+# invocation (the common `--config=p/owasp-top-ten` registry shape) or
+# inside a committed .semgrep.yml/.semgrep.yaml. Two needles checked
+# independently (not required to co-occur in the same file) — the same
+# conservative-approximation looseness this module's other self-wired
+# CI-gate checks already accept.
+def _has_semgrep_owasp_ci_job(repo: pathlib.Path) -> bool:
+    if not _has_ci_job_invoking(repo, "semgrep"):
+        return False
+    if _has_ci_job_invoking(repo, "owasp"):
+        return True
+    for name in (".semgrep.yml", ".semgrep.yaml"):
+        p = repo / name
+        if p.exists():
+            try:
+                if "owasp" in p.read_text(encoding="utf-8").lower():
+                    return True
+            except OSError:
+                continue
+    return False
+
+
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
     p = repo / "phpstan.neon"
     if not p.exists():
@@ -1083,6 +1106,19 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         taint_reason,
         has_psalm_dep=has_psalm_dep,
         has_psalm_cfg=has_psalm_cfg,
+    )
+
+    # semgrep: OWASP Top 10 coverage, complementary to psalm-taint-analysis
+    # above rather than gated by its own dep/config -- Semgrep is a
+    # standalone tool, never a composer.json entry. Recommended-parent
+    # eligibility (whether psalm-taint-analysis is *decided* yet) is
+    # handled separately by _is_unblocked(); this only computes the node's
+    # own fulfilment.
+    semgrep_fulfilled = _has_semgrep_owasp_ci_job(repo)
+    set_node(
+        "semgrep",
+        semgrep_fulfilled,
+        "semgrep + OWASP ruleset gated in CI" if semgrep_fulfilled else "no semgrep/OWASP CI job yet",
     )
 
     # rector

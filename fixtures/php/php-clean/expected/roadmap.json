@@ -29,9 +29,11 @@
     },
     "psr-4": {
       "fulfilled": true,
-      "reason": "autoload.psr-4 declared and in use",
+      "reason": "autoload.psr-4 declared, in use, and the autoloader is wired in",
       "details": {
-        "declared": true
+        "declared": true,
+        "mechanism_verified": true,
+        "autoloader_wired": true
       }
     },
     "ci-runner": {
@@ -201,6 +203,11 @@
         "has_psalm_dep": false,
         "has_psalm_cfg": false
       }
+    },
+    "semgrep": {
+      "fulfilled": true,
+      "reason": "semgrep + OWASP ruleset gated in CI",
+      "details": {}
     },
     "rector-dead-code": {
       "fulfilled": true,

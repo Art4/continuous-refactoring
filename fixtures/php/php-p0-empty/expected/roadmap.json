@@ -31,7 +31,9 @@
       "fulfilled": false,
       "reason": "no autoload.psr-4 declared",
       "details": {
-        "declared": false
+        "declared": false,
+        "mechanism_verified": false,
+        "autoloader_wired": false
       }
     },
     "ci-runner": {
@@ -201,6 +203,11 @@
         "has_psalm_dep": false,
         "has_psalm_cfg": false
       }
+    },
+    "semgrep": {
+      "fulfilled": false,
+      "reason": "no semgrep/OWASP CI job yet",
+      "details": {}
     },
     "rector-dead-code": {
       "fulfilled": false,
