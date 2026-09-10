@@ -67,6 +67,21 @@ itself gets proposed (naming the gate, not yet a specific plan — `refactor-pri
 does the baseline read and picks a concrete group, only once this proposal actually wins ranking). No `phpstan-level-N` node
 ever fulfilled yet, or the fulfilled one's baseline is already empty → nothing to propose here.
 
+### 4c. Detect a still-owed secret history scan
+
+PHP tree only, for now (mirrors 4b's own scoping note). Read `detected` from step 4's own
+`tooling_tree.py` run (no second invocation) — `secret-detection`'s own `fulfilled` is `true`, and the
+Refactoring Notes' `bookkeeping.md`'s `Secret history scan` field is absent (never yet run, see
+`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) → run a full git-history scan
+now, using whichever scanner `secret-detection`'s own `details.scanner` already names (the same
+`tooling_tree.py` run from step 4 — no CI config re-reading needed) against the target's complete
+history, reusing that scanner's own baseline mechanism
+(gitleaks `--baseline-path`, detect-secrets `.secrets.baseline`, or the equivalent) so a finding
+already known — filed earlier, or explicitly accepted — never resurfaces. Every new finding becomes
+its own finding, handed to `refactor-learn` alongside step 3's: file/line and the scanner's own
+rule/finding id, **never the secret's actual value**. `secret-detection` unfulfilled, or `Secret
+history scan` already `done` → nothing to detect here — this scan runs at most once per target.
+
 ## Output
 
 Handed onward by the orchestrator, plainly:
