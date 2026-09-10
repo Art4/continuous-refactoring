@@ -454,7 +454,13 @@ def _has_secret_scan_ci_job(repo: pathlib.Path) -> bool:
 # coverage-floor's own fulfilment (php-tooling-tree/coverage-floor.md):
 # driver-agnostic by design (PCOV vs. Xdebug is a review-time choice, never
 # checked here) — only "is coverage actually configured, and (once CI
-# exists) enforced" matters.
+# exists) enforced" matters. Needle set mirrors _SECRET_SCAN_NEEDLES's own
+# shape — a named constant rather than an inline literal, so a future
+# invocation spelling (e.g. a bare --coverage-clover with no --coverage
+# prefix) is one line to add here, not a buried string to hunt down.
+_COVERAGE_CI_NEEDLES = ("--coverage",)
+
+
 def _has_coverage_report_config(repo: pathlib.Path) -> bool:
     """True if phpunit.xml(.dist) declares a <coverage> report section —
     coverage-floor's own local-adoption half."""
@@ -990,7 +996,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     has_coverage_config = _has_coverage_report_config(repo)
     coverage_floor_value = _coverage_floor_value(repo)
     has_coverage_floor = coverage_floor_value is not None
-    coverage_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "--coverage")
+    coverage_ci_ok = (not has_ci) or any(_has_ci_job_invoking(repo, needle) for needle in _COVERAGE_CI_NEEDLES)
     coverage_fulfilled = has_coverage_config and has_coverage_floor and coverage_ci_ok
     if coverage_fulfilled:
         coverage_reason = "coverage configured, floor committed, CI-gated"

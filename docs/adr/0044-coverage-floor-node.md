@@ -15,7 +15,10 @@ A new PHP-tree node, `coverage-floor`, required parent `phpunit`:
 - **Signal-producing, not Safety Net.** No `resolved` edge into `php-structural-scan`/`structural-
   scan` — matches the pattern Signals ticket 2 (ADR-0040) already established for `phpmd`/`secret-
   detection`. Feeds the existing **Untested / hard-to-test** cue (`signals.md`) with real per-file
-  Clover-XML numbers instead of the generic "read the test suite" heuristic — not a new factor.
+  Clover-XML numbers instead of the generic "read the test suite" heuristic — not a new factor. A file
+  counts as this cue's own real evidence once it sits more than **20 percentage points** under the
+  current `.coverage-floor` value — relative to the ratchet, not a second fixed number, so the
+  threshold keeps meaning the same thing as the floor itself climbs over time.
 - **A ratchet, not a fixed percentage.** `.coverage-floor`, a single committed number in the target
   repo, starts at whatever the first real coverage run measures and only ever rises — via an ordinary
   human-reviewed commit, never a value the node's own CI writes back by itself. A fixed floor picked in
@@ -39,6 +42,10 @@ A new PHP-tree node, `coverage-floor`, required parent `phpunit`:
 
 ## Considered Options
 
+- **A fixed absolute per-file threshold for the Signal cue** (e.g. "any file under 50%, regardless of
+  the ratchet"), instead of relative to the current floor. Rejected — a second, independently-
+  maintained number would drift out of sync with `.coverage-floor` as it climbs; relative-to-floor
+  stays meaningful without a second value to keep updated.
 - **A fixed percentage floor** (e.g. "70% or the node stays unfulfilled forever"). Rejected — see
   *ratchet, not a fixed percentage* above; the level-chain precedent already settled this shape for
   a comparable "how strict, starting from where" question.
