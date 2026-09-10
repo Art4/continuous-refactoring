@@ -101,7 +101,7 @@ The concrete refactoring plan produced by `refactor-design`: the deepened module
 _Avoid_: design doc
 
 **Proposals**:
-The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize`'s Rank mode picks one. Filing itself happens in `refactor-prioritize`'s Select mode (a concrete instance selected first, for a gate) or, for an already-concrete winner, in `refactor-design` directly — either way, `refactor-design` adds the plan afterward.
+The tooling-tree node names `refactor-scan` hands the orchestrator, every currently-unblocked one, however many that is — not yet candidates, since nothing is filed until `refactor-prioritize`'s Rank mode picks one. Filing itself happens in `refactor-prioritize`'s Select mode (a concrete instance selected first, for a gate) or, for an already-concrete winner, in `refactor-design` directly — either way, `refactor-design` adds the plan afterward. One narrow exception files outside this flow entirely: a secret-history-scan **finding** (above) becomes its own `refactor:priority` candidate filed directly by `refactor-learn`, no `refactor-prioritize`/`refactor-design` step at all — there's nothing to rank or design, the finding is already concrete.
 _Avoid_: suggestions, recommendations (that's `refactor-prioritize`'s output, one level further)
 
 **Signal**:
@@ -109,5 +109,5 @@ The named factor (heat, leverage, security, blast radius of inaction, …) that 
 _Avoid_: (none — use the term as-is)
 
 **Findings**:
-Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Handed to `refactor-learn` to act on. Scan only notices; it never decides the outcome itself.
+Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Also covers a genuinely new discovery this same pass, not a remembered item's changed state — a secret a git-history scan turns up (`refactor-scan/SKILL.md` step 4c) is a finding the same way. Handed to `refactor-learn` to act on either way. Scan only notices; it never decides the outcome itself.
 _Avoid_: events, notifications
