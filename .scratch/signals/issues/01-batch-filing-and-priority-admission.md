@@ -24,7 +24,7 @@ this ships, pointing here.
 
 **Priority:** medium.
 
-**Status:** ready-for-agent
+**Status:** done
 
 Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, three rounds):
 
@@ -93,3 +93,7 @@ Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, three rounds):
 > shape (documentation-only, single file), the Safety Net renaming's actual scope (prose-only, given
 > 127 existing "tooling tree" references), a new `CONTEXT.md` glossary entry for `Signal`, and the
 > ADR offer. User confirmed shared understanding ("passt"). Ready to implement.
+> **2026-09-10:** Status correction — this was already fully implemented (ADR-0039,
+> `skills/refactor-prioritize/references/signals.md`, `refactor:priority`/two-counter split live in
+> `refactor-scan/SKILL.md` step 1, `CONTEXT.md`'s `Signal` entry) but the `Status` field here was
+> never flipped from `ready-for-agent`. Corrected to `done`; no further work needed.
