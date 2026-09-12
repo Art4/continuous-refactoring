@@ -13,6 +13,7 @@ description: Propose every currently-unblocked tooling-tree node from bookkeepin
 
 - No git repository → stop the pass, report it, propose nothing.
 - Five or more open `refactor:candidate` issues without `refactor:priority` → stop, propose nothing new; let existing work clear first. Count separately from `refactor:priority` issues (`refactor-prioritize`'s Select mode: Security/Blast-Radius signal, `skills/refactor-prioritize/references/signals.md`) — those never count toward this cap, so priority admissions can't themselves choke off ordinary proposals.
+- No Refactoring Notes' `bookkeeping.md` yet (`loop-config` unfulfilled) → skip steps 2 through 4c entirely and hand forward `loop-config` as the pass's only proposal (the shape step 4's Output section already describes). No `tooling_tree.py` run, no tree-doc reading needed to reach this: steps 2/3/3b all read state that only exists once `loop-config`'s own interview has scaffolded it (`Pending candidates`, the remembered set, `docs/agents/issue-tracker.md`), and no other node can be unblocked either (every one requires `loop-config` as a parent) — a target's very first pass costs one conclusion, not a walk of the whole tree.
 
 ### 2. Resume pending work first
 
@@ -41,9 +42,9 @@ Also check every entry in the Refactoring Notes' `out-of-scope/<node>.md` naming
 
 Hand every finding to `refactor-learn` — this skill only notices; it never marks anything `done`/`wontfix` and never writes to the Refactoring Notes' `out-of-scope/` itself.
 
-### 3b. Detect externally-labeled candidates
+### 3b. Detect issue-backed candidates
 
-API access available (not the git-only fallback) → also query open `refactor:candidate` issues that aren't already accounted for: not step 2's `Pending candidates` entry, not step 3's remembered set (an issue with a linked pull request is already in flight). What's left is a candidate a human (or another process) labeled directly, that this loop has never designed or implemented — in normal operation the suite's own candidates are always covered by one of those two, so nothing extra is needed to tell "ours" from "someone else's." Hand each forward as a **proposal**, the same list step 4's tooling-tree proposals join — `refactor-prioritize` ranks it alongside everything else on its usual factors; it competes on its own merits, never jumps the queue just for existing. No API access (git-only fallback) → skip this step entirely, git alone can't enumerate issues by label.
+API access available (not the git-only fallback) → also query open `refactor:candidate` issues that aren't already accounted for: not step 2's `Pending candidates` entry, not step 3's remembered set (an issue with a linked pull request is already in flight). What's left is every candidate that already has an issue but no plan yet — a human (or another process) labeled one directly, or an earlier pass's own `refactor-prioritize` pre-filed a tooling-tree proposal (step 4 below) that hasn't won a ranking yet; nothing extra is needed to tell those apart, both are handled identically from here. Hand each forward as a **proposal**, the same list step 4's tooling-tree proposals join — `refactor-prioritize` ranks it alongside everything else on its usual factors; it competes on its own merits, never jumps the queue just for existing. No API access (git-only fallback) → skip this step entirely, git alone can't enumerate issues by label.
 
 ### 4. Propose tooling-tree nodes
 
@@ -51,7 +52,7 @@ Skip if step 2 already proposed a pending candidate.
 
 Run `python3 skills/refactor-scan/references/tooling_tree.py <target-repo>` and read the JSON's `next` field — the real, currently-unblocked set, rejected nodes (an existing entry in the Refactoring Notes' `out-of-scope/<node>.md`) already excluded, take as-is however many entries it holds. **Not** `roadmap` (a forward simulation, not real options today). Also read `withheld`: nodes that would otherwise be in `next` but wait on an undecided recommended parent — each entry names which parent(s). No `python3`, or not permitted → dispatch a sub-agent with `skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=all`) — it walks the same tree docs by hand (reads the Refactoring Notes' `bookkeeping.md`'s `Fulfilled nodes` first to skip re-deriving cached state, skips any node with an out-of-scope entry); no sub-agent mechanism → run its steps yourself inline.
 
-- **Ordinary tooling nodes** (`loop-config`, and language-specialization nodes, e.g. `skills/refactor-scan/references/php-tooling-tree.md`) — proposed by their **Name** (never the raw slug); each is already fully specified in its tree doc.
+- **Ordinary tooling nodes** (`loop-config`, and language-specialization nodes, e.g. `skills/refactor-scan/references/php-tooling-tree.md`) — proposed by their **Name** (never the raw slug); each is already fully specified in its tree doc. Already forwarded this pass via step 3b (a prior pass's own pre-filing, `refactor-prioritize/SKILL.md` step 2, already turned it into an issue) → don't propose it again by bare Name here, it's already in the list as that issue.
 - **`structural-scan`** — proposed once every node with a `resolved` edge into it is resolved (fulfilled, or explicitly rejected under the Refactoring Notes' `out-of-scope/`): `editorconfig` at the generic root, plus the active language specialization's own aggregation node (PHP: `php-structural-scan`), itself resolved once every one of its own resolved-parents is resolved (`skills/refactor-scan/references/tooling-tree.md`). Only `structural-scan` is ever proposed this way — `php-structural-scan` is pure plumbing, never a candidate. Proposing it is just naming it; the codebase walk happens in `refactor-prioritize`'s Select mode, only once this node actually wins ranking.
 - **No language tree recognized**: `structural-scan` still waits on `editorconfig`, the generic-root leaf — not immediately proposable just because no language-specific tree applies.
 
@@ -93,7 +94,7 @@ Handed onward by the orchestrator, plainly:
 - **Findings** (possibly empty) → `refactor-learn`.
 - **A resume-candidate**, if one was detected → straight to `refactor-implement`, bypassing `refactor-prioritize`/`refactor-design`.
 - **A pending candidate**, if one was detected (step 2) → straight to `refactor-design` (no plan comment yet) or straight to `refactor-implement` (plan comment present), bypassing `refactor-prioritize` either way.
-- **Proposals** — every currently-unblocked node's Name (never slugs, never capped) plus any externally-labeled candidate from step 3b and any baseline-shrink candidate from step 4b, or none → `refactor-prioritize`. Every node currently unblocked (required parents fulfilled, not rejected, every recommended parent already decided) — never a priority-truncated subset. Alongside it, name every `withheld` node and which parent(s) it's waiting on (e.g. "Rector: Type Coverage Set — waiting on: PHP CS Fixer").
+- **Proposals** — every currently-unblocked node, by Name (never slugs) or, once pre-filed, by its issue (step 3b), never capped, plus any other issue-backed candidate from step 3b and any baseline-shrink candidate from step 4b, or none → `refactor-prioritize`. Every node currently unblocked (required parents fulfilled, not rejected, every recommended parent already decided) — never a priority-truncated subset. Alongside it, name every `withheld` node and which parent(s) it's waiting on (e.g. "Rector: Type Coverage Set — waiting on: PHP CS Fixer").
 
 ## Completion criterion
 
