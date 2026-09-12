@@ -338,50 +338,37 @@
     },
     {
       "n": 5,
-      "node": "rector-type-coverage",
-      "type": "tooling",
-      "required_parents": [],
-      "required_any_parents": [],
-      "recommended_parents": [
-        "rector-dead-code",
-        "rector-code-quality",
-        "php-cs-fixer",
-        "phpstan-level-3"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from rector-dead-code (recommended) \u2014 still proposable"
-    },
-    {
-      "n": 6,
-      "node": "semgrep",
-      "type": "tooling",
-      "required_parents": [],
-      "required_any_parents": [],
-      "recommended_parents": [
-        "psalm-taint-analysis"
-      ],
-      "reason": "required parents fulfilled | outlook: would benefit from psalm-taint-analysis (recommended) \u2014 still proposable"
-    },
-    {
-      "n": 7,
       "node": "phpstan-level-11",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 8,
+      "n": 6,
       "node": "phpstan-level-12",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 9,
+      "n": 7,
       "node": "phpstan-level-13",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 10,
+      "n": 8,
       "node": "phpstan-level-14",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 9,
+      "node": "phpstan-level-15",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 10,
+      "node": "phpstan-level-16",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     }
