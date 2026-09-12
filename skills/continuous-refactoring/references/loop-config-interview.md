@@ -164,13 +164,14 @@ about to happen either way.)
 
 This is the one summary the human sees before `## Record` writes anything —
 `loop-config` runs exactly once per target (the resume case above aside), so
-there's no ongoing verbosity to manage afterward. `## Record`'s own writes,
-and the issue/merge request that carry them, each get one short status line
-as they happen instead of running silently ("Labels created on GitHub",
-"Creating `bookkeeping.md`", "Issue #<n> filed", "Merge request #<n>
-opened") — the only place this convention needs stating, since
-`refactor-design`'s and `refactor-implement`'s own `loop-config` exceptions
-already point back here for what to write.
+there's no ongoing verbosity to manage afterward. Every write named in the
+`Next:` line above gets its own short status line as it happens instead of
+running silently — one per bullet in `## Record` below (its tracker choice,
+its Refactoring Notes path, any labels it creates), plus one each for the
+issue filed and the merge request opened. This is the only place the
+convention needs stating: `refactor-design`'s and `refactor-implement`'s own
+`loop-config` exceptions already point back here for what to write, and now
+for announcing each write too.
 
 ## Record
 

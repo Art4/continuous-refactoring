@@ -81,7 +81,7 @@ checked out, and never to the default branch.
 
 ## Output
 
-**Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass.
+**Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass. Every tooling-tree proposal ranked this step now carries an issue (step 2's own filing, above) — the non-winning ones simply sit open, the same way Select mode's own non-winning findings already do below.
 
 **Select mode:** the single recommended candidate's issue (number + its minimal fields) →
 `refactor-design` — any other candidates filed this same run sit as ordinary open issues, for a
