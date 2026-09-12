@@ -1,11 +1,11 @@
-# Writing `Fulfilled nodes` and `Skip streak`
+# Writing `Fulfilled nodes`
 
 Part of `refactor-learn/SKILL.md`'s closing call, always last, regardless of which branch the pass's
 other writes rode.
 
 ## Read fresh, not stale
 
-**Before computing either field**: `git fetch origin`, then sync the comparison inputs from
+**Before computing it**: `git fetch origin`, then sync the comparison inputs from
 `origin/main` into the working tree — `git checkout origin/main -- docs/refactoring/out-of-scope/
 docs/refactoring/bookkeeping.md` (skip a path that doesn't exist on `origin/main` yet, e.g. no
 rejections recorded so far). This candidate branch's own already-landed changes (whatever this pass
@@ -13,13 +13,10 @@ delivered) stay exactly as they are — only these two comparison inputs get ref
 working tree; this branch's own commit history is never rewritten, merged, or rebased just for this.
 
 This matters because a candidate branch can predate a sibling change landing on `main` — most
-concretely, a maintainer rejecting a node (a new `out-of-scope/<node>.md` file) between when this
-branch was created and when this write runs. Without the fresh sync: `Skip streak` can accumulate an
-entry for a node that's actually already rejected (it still looks proposable-but-skipped from this
-branch's stale point of view), and `Fulfilled nodes`' own "overwrite the whole field" rule below can
-silently drop a different node's entry that only exists on `origin/main` because a separate sibling
-PR landed it after this branch forked — both real, observed failures during a live run, not
-hypothetical.
+concretely, a separate sibling PR fulfilling a different node between when this branch was created
+and when this write runs. Without the fresh sync: `Fulfilled nodes`' own "overwrite the whole field"
+rule below can silently drop that sibling's already-landed entry, because this branch's own stale
+checkout never saw it — a real, observed failure during a live run, not hypothetical.
 
 ## `Fulfilled nodes`
 
@@ -46,18 +43,3 @@ produce, and doesn't lose a different sibling PR's already-landed entry either:
   composer, ci-runner, php-cs-fixer}`. Correct overwrite: `- loop-config` (no annotation, predates
   the convention), `- composer (#77)`, `- ci-runner (#78)`, `- php-cs-fixer (#82)` — the two
   carried-forward annotations are never re-derived or dropped.
-
-## `Skip streak`
-
-Same write, alongside `Fulfilled nodes`: deterministic parser ran → re-run its unblocked-node check
-and, for every `required` node it names that this pass did *not* choose, increment its entry by 1
-(start at 1 if none); the node chosen or newly fulfilled → drop its entry entirely (omit zero, per
-`refactoring-bookkeeping.md`). Manual/LLM fallback ran instead → only touch entries for nodes that
-walk actually checked this round.
-
-**A node with an `out-of-scope/<node>.md` entry (freshly synced from `origin/main` above) never gets
-a skip-streak entry** — drop it if present, never add one — regardless of what the parser's raw
-unblocked-check would otherwise say. It isn't a proposable candidate being passed over; it's
-permanently closed. Belt-and-suspenders on top of the fresh-sync fix above, not a substitute for it —
-the fresh sync is what keeps the parser from naming a rejected node as "unblocked" in the first place;
-this rule guards the rare case something else still surfaces it.
