@@ -3,7 +3,7 @@
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its core discipline —
 > bookkeeping writes always go out through a review, never a direct commit to the default branch —
 > is unchanged. What narrows is *which* review: on a native-label tracker, the closing call's
-> in-flight writes (`Pending candidates` cleared, `Skip streak` refreshed) ride the candidate's own
+> in-flight writes (`Pending candidates` cleared, `Fulfilled nodes` refreshed) ride the candidate's own
 > already-open merge request when `refactor-implement` opened one this same pass, instead of a
 > second, separate bookkeeping merge request. ADR-0011's `loop-config`-in-flight exception was
 > always a special case of exactly this — narrower only because `bookkeeping.md` didn't exist
@@ -40,8 +40,8 @@ before the candidate merges at all. ADR-0026 deepened this further — the track
 issue↔PR linkage is now the durable record of what's in flight, with no label to keep in sync
 either.
 
-`bookkeeping.md`'s own in-flight fields (`Pending candidates`, and the `Skip streak` entry for the
-node just chosen) never had an independent reason to need pre-merge visibility on a native tracker
+`bookkeeping.md`'s own in-flight fields (`Pending candidates`, and `Fulfilled nodes` once this
+candidate lands) never had an independent reason to need pre-merge visibility on a native tracker
 — nothing outside this same candidate's own review depends on reading them before that review
 finishes. `refactor-scan` step 2 already stops and proposes exactly the pending candidate it finds,
 which — even mid-review — is the same candidate the open merge request already carries; step 3's
@@ -72,7 +72,7 @@ native tracker — it was solving a visibility problem that native trackers no l
 
 `refactor-learn`'s closing call: **native-label tracker** (`docs/agents/issue-tracker.md` names
 GitHub or GitLab) **and** `refactor-implement` opened a candidate merge request this same pass →
-commit the closing call's writes (`Pending candidates` cleared; `Fulfilled nodes`/`Skip streak`
+commit the closing call's writes (`Pending candidates` cleared; `Fulfilled nodes`
 refreshed) directly onto that candidate's own branch, as a follow-up commit riding its already-open
 merge request — no second branch, no second merge request. Every other case is unchanged from
 ADR-0011: no candidate merge request opened this pass (nothing to ride), or the tracker has no

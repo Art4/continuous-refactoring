@@ -65,7 +65,7 @@ fallback) → no finding, as before.
 `refactor-learn`'s early call gets a new case for this finding: check out the candidate's own branch
 (the fold-in exception, not the dedicated bookkeeping branch — the branch already exists, still
 open, from the interrupted pass), perform the exact same fold-in writes the closing call would
-(`Fulfilled nodes`/`Skip streak`/ADR/`CONTEXT.md`), then mark the merge request ready for review.
+(`Fulfilled nodes`/ADR/`CONTEXT.md`), then mark the merge request ready for review.
 The closing call's own write list gains the matching "mark ready" step, last of all, covering both
 origins (opened as draft this same pass, or resumed via this new finding) with one instruction.
 
