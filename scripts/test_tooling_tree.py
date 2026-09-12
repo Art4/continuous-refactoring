@@ -809,6 +809,61 @@ class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
         rejected = {"phpstan-level-0", "psalm"}
         self.assertTrue(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
 
+    def test_shared_ancestor_diamond_rejection_still_closes(self):
+        """Ticket 60: `phpstan-level-0` and `psalm` (rector-php-set's
+        required-any options) don't carry the rejection themselves here --
+        both instead require `static-code-analyzer`, which requires the
+        rejected `composer`. This is a diamond (two siblings re-converging
+        on a shared ancestor), not a cycle -- a shared, mutable `_seen` set
+        across the required-any siblings previously made the second
+        sibling's honest revisit of `static-code-analyzer` look like a
+        cycle, short-circuiting to `False` and leaving `rector-php-set` (and
+        everything beneath it) stuck as neither fulfilled nor rejected."""
+        tree = load_tree()
+        rejected = {"composer"}
+        self.assertTrue(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
+        self.assertTrue(tooling_tree._is_effectively_rejected("rector-dead-code", tree, rejected))
+        self.assertTrue(tooling_tree._is_effectively_rejected("psalm-taint-analysis", tree, rejected))
+
+    def test_shared_ancestor_diamond_does_not_pollute_caller_seen(self):
+        """A caller re-using one `_seen` set across sibling top-level calls
+        (as `_resolved_gate_status` and `_composer_audit_extra_gate` do, one
+        leaf at a time -- not the bug itself, but worth pinning down) must
+        get the same answer for each sibling regardless of call order, since
+        each call now receives its own copy rather than sharing the caller's
+        set across recursion."""
+        tree = load_tree()
+        rejected = {"composer"}
+        seen = set()
+        first = tooling_tree._is_effectively_rejected("phpstan-level-0", tree, rejected, seen)
+        second = tooling_tree._is_effectively_rejected("psalm", tree, rejected, seen)
+        self.assertTrue(first)
+        self.assertTrue(second)
+
+
+class PermanentlyGatedDiamondTests(unittest.TestCase):
+    """Ticket 60: `_is_permanently_gated` shares `_is_effectively_rejected`'s
+    exact `_seen`-threading pattern and is exposed to the identical bug --
+    on the real php-tooling-tree it happens not to manifest today only
+    because both nodes on the diamond's shared path (`static-code-analyzer`,
+    `psalm`) are themselves `_NEVER_PROPOSED` and self-gate before the
+    polluted `_seen` would ever matter. A synthetic tree forces the real
+    traversal, independent of that coincidence."""
+
+    def test_shared_ancestor_diamond_still_gates(self):
+        original_never_proposed = tooling_tree._NEVER_PROPOSED
+        tooling_tree._NEVER_PROPOSED = original_never_proposed | {"gate-root"}
+        try:
+            tree = {
+                "required_parents": {"left-mid": ["gate-root"], "right-mid": ["gate-root"]},
+                "recommended_parents": {},
+                "resolved_parents": {},
+                "required_any_parents": {"child": ["left-mid", "right-mid"]},
+            }
+            self.assertTrue(tooling_tree._is_permanently_gated("child", tree, {}))
+        finally:
+            tooling_tree._NEVER_PROPOSED = original_never_proposed
+
 
 class PsalmMutualExclusionTests(unittest.TestCase):
     """Ticket 37: phpstan-level-5 (was phpstan-level-10 before signals ticket
