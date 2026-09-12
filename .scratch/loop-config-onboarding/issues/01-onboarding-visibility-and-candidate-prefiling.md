@@ -40,15 +40,16 @@ Warranted: hard to reverse (every future pass behaves differently once candidate
 - `CONTEXT.md` — **Proposals** entry rewrite (see Vocabulary impact).
 - A new ADR under `docs/adr/`.
 
-**Status:** ready-for-agent
+**Status:** done — PR #76
 
-- [ ] Cold-start fast path in `refactor-scan`
-- [ ] `loop-config` interview: pre-execution summary + per-action status lines
-- [ ] `refactor-prioritize` Rank mode: pre-file a minimal candidate issue per proposal without one
-- [ ] Closing report: stacking-visibility clause for a pass that continues on a still-open suite branch
-- [ ] `CONTEXT.md` **Proposals** entry rewritten
-- [ ] New ADR recording the trade-offs above
+- [x] Cold-start fast path in `refactor-scan`
+- [x] `loop-config` interview: pre-execution summary + per-action status lines
+- [x] `refactor-prioritize` Rank mode: pre-file a minimal candidate issue per proposal without one
+- [x] Closing report: stacking-visibility clause for a pass that continues on a still-open suite branch
+- [x] `CONTEXT.md` **Proposals** entry rewritten
+- [x] New ADR recording the trade-offs above
 
 ## Comments
 
 > **2026-09-12:** Grilled jointly (`/grill-with-docs`) against live observations from manually running the orchestrator on `continuous-refactoring.de` (GitLab target). All decisions above confirmed by the maintainer, including the vocabulary rewrite.
+> **2026-09-12:** Implemented (`/implement`) on this same branch, reviewed against `/writing-for-agents` via `/code-review`'s two-axis process (three findings addressed: clearer cold-start wording, status-line convention anchored to every `## Record` write instead of four fixed examples, `refactor-prioritize`'s Output noting non-winning proposals now carry an issue too). `python3 -m unittest discover -s scripts -p 'test_*.py'` (307 tests) and `python3 scripts/validate_skills.py` (same 5 pre-existing advisories as `main`, no new ones) both green. PR #76.
