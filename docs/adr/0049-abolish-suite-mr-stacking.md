@@ -100,9 +100,9 @@ it.
 - ADR-0023 and ADR-0028 both updated with a note distinguishing what they said *at the time* (when
   stacking existed) from what still holds now — neither ADR's own core mechanism required stacking to
   exist, so neither needed a substantive reversal, only a wording correction.
-- A future pass, human, or reviewer must not stack a second suite branch on a first for any reason,
-  including "it's the same candidate's own next step" — that specific case was tempting to carve out
-  as an exception and was explicitly considered and rejected above.
+- A future pass, human, or reviewer always branches a second suite branch off the default branch,
+  the same as a first — including "it's the same candidate's own next step," the one case tempting
+  enough to carve out as an exception that this ADR explicitly considered and rejected above.
 - The throughput cost ADR-0015 itself accepted (no two genuinely unrelated candidates in parallel) is
   lifted — two independent candidates may now both be in flight against the default branch at once,
   up to the existing two-MR cap, each merging independently without waiting on the other's merge

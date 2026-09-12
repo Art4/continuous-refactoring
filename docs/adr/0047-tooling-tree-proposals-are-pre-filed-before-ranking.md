@@ -34,6 +34,6 @@ Starts applying the pass right after `loop-config`'s own **local** fulfilment �
 - `skills/refactor-prioritize/SKILL.md`: Rank mode's step 2 files the minimal issue, described above.
 - `skills/refactor-design/SKILL.md`: step 5's tooling-tree dedup check gains the minimal-vs-fully-written distinction.
 - `skills/continuous-refactoring/references/loop-config-interview.md`: a fourth summary line (upcoming actions) and a status-line convention for `## Record`'s own writes — the DX half of the same grilling session, not this ADR's own subject, but what makes pre-filing safe before `loop-config`'s merge lands.
-- `skills/continuous-refactoring/SKILL.md`: the closing report's Status line gains a stacked-branch clause, for the case a pass's own write lands on a still-open suite branch rather than a fresh one.
+- `skills/continuous-refactoring/SKILL.md`: the closing report's Status line gained a stacked-branch clause for a pass whose write landed on a still-open suite branch rather than a fresh one — since removed along with stacking itself ([ADR-0049](0049-abolish-suite-mr-stacking.md)), the case it covered no longer arises.
 - `CONTEXT.md`'s **Proposals** entry rewritten — it previously stated the exact rule this ADR reverses ("not yet candidates, since nothing is filed until Rank mode picks one").
 - A future scan/design pass must not re-treat a minimally-filed tooling-tree issue as a fresh candidate needing its own new filing, and must not re-propose `loop-config`'s own children by bare Name once they already carry an issue.

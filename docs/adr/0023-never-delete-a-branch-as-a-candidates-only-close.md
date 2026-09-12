@@ -28,7 +28,7 @@ left dangling on the forge, unreferenced by anything in the repository going for
 
 Before deleting or abandoning any branch that carries a bookkeeping write not yet on the default branch —
 the candidate's own branch, or (on a target still running under the now-superseded ADR-0015, or wherever a
-human stacked one by hand) a bookkeeping branch riding on it — land the record of the abandonment first,
+human stacked one by hand) a bookkeeping branch stacked on it — land the record of the abandonment first,
 through an ordinary bookkeeping branch/MR opened off the default branch, **never one stacked on the branch
 about to be deleted**. At minimum: a
 `docs/refactoring/out-of-scope/<node>.md` entry for a tooling-tree candidate, or a closing note on the issue
