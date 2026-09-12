@@ -41,19 +41,19 @@ own new tests, indirectly — see Comments).
 rejected node now has no documented way to trust `next`/`withheld` for anything downstream, and will
 keep declining to act "since the shared script looks regressed," exactly the failure just observed.
 
-**Status:** open
+**Status:** done — PR pending
 
-- [ ] `CONTEXT.md`'s `Recommended edge` entry states the transitive-rejection clause inline, in the same
+- [x] `CONTEXT.md`'s `Recommended edge` entry states the transitive-rejection clause inline, in the same
   words/spirit as ADR-0016's own Decision section — a recommended parent counts as decided-rejected
   either directly (its own `out-of-scope/` entry) or transitively (one of its own required ancestors is
   itself rejected, the same closure a required edge already causes for proposability).
-- [ ] `php-tooling-tree.md`'s `Nodes` preamble (the "a rejection of a required parent closes every node
+- [x] `php-tooling-tree.md`'s `Nodes` preamble (the "a rejection of a required parent closes every node
   beneath it" sentence) gets one added clause connecting the two ideas explicitly: a node closed this
   way also counts as *decided* (rejected) wherever another node reads it as a `recommended` parent —
   pointing at `CONTEXT.md`'s `Recommended edge` entry rather than restating it.
-- [ ] No code change — confirm via a fresh read that `_is_decided()`/`_undecided_recommended_parents()`
+- [x] No code change — confirm via a fresh read that `_is_decided()`/`_undecided_recommended_parents()`
   already implement exactly the rule being documented (they do, per ticket 60's investigation).
-- [ ] `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py`
+- [x] `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py`
   stay green (pure prose change, no behavior to test beyond the existing suite).
 
 ## Comments
@@ -62,3 +62,12 @@ keep declining to act "since the shared script looks regressed," exactly the fai
 > closing report on `continuous-refactoring.de` that flagged the (correct) post-ticket-60 script output
 > as a suspected regression, based on a documented `decided` definition that has been incomplete since
 > ADR-0016 itself, predating both ticket 53 and ticket 60.
+
+> **2026-09-12 (later):** Implemented on branch `tickets/61-decided-glossary-transitive-rejection`,
+> branched off `main` (not stacked on ticket 60's still-open PR, per ADR-0049). Two one-sentence
+> additions (`CONTEXT.md`, `php-tooling-tree.md`'s `Nodes` preamble), no code change. 307/307 tests
+> green, validator unchanged (same 5 pre-existing advisories). Confirmed the underlying code needed no
+> change: `_is_decided()` already treats a transitively-rejected recommended parent as decided,
+> independent of ticket 60's diamond fix (verified directly on `main`, pre-ticket-60, using a linear
+> chain — `phpstan-level-3` behind rejected `composer` already resolved correctly there; only the
+> *diamond*-shaped parents ticket 60 touches were ever wrong).

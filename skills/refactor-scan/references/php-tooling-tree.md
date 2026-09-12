@@ -165,7 +165,7 @@ Two edge types beyond `required`/`recommended`/`resolved` appear above: `psalm-t
 
 ## Nodes
 
-A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
+A node may span several merge requests; a rejection of a required parent closes every node beneath it, a rejected recommended parent never blocks (the merge request outlook states where it would have helped). A node closed this way also counts as *decided* — rejected — wherever some other node reads it as a `recommended` parent (`CONTEXT.md`'s **Recommended edge** entry), not merely as "closed" for its own proposability; a recommended parent needn't carry its own `out-of-scope/` entry to satisfy this. Reopening a rejected node is a recorded reversal of its out-of-scope entry; dependents unlock at fulfilment.
 
 A node's full definition may live in its own file under `php-tooling-tree/` (sibling to this document) once extracted — see `composer` below for the first example. Every node also carries a **Name** — the human-readable label issue titles, merge requests, and chat status use instead of the node's slug (e.g. `phpstan-level-0` → "PHPStan Level 0"). The stub left behind here keeps Name, Tool, and Purpose inline so that label is available without opening the extracted file; Fulfilment check and MR scope move to the extracted file. Nodes not yet extracted stay inline in full.
 

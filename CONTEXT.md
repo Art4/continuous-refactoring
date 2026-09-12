@@ -53,7 +53,7 @@ The gating edge between nodes: a node is proposed only once every parent linked 
 _Avoid_: hard edge, blocking edge
 
 **Recommended edge**:
-The counterpart that gates on a decision rather than on fulfilment (ADR-0016): a node is proposed only once every parent linked by a recommended edge is _decided_ — fulfilled, or rejected. A rejected recommended parent still releases the child instead of closing it, unlike a required parent; the rejected parent is never re-proposed. A recommended parent that hasn't been reached yet at all counts as undecided too, withholding the child just the same as one that's merely sitting proposed-but-unactioned.
+The counterpart that gates on a decision rather than on fulfilment (ADR-0016): a node is proposed only once every parent linked by a recommended edge is _decided_ — fulfilled, or rejected. A parent counts as rejected either directly (its own `out-of-scope/` entry) or transitively, when one of *its own* required ancestors is itself rejected — the same closure a required edge already causes for proposability (see **Required edge** above), just extended here to answer "decided" too, not only "still proposable." A rejected recommended parent (either way) still releases the child instead of closing it, unlike a required parent; the rejected parent is never re-proposed. A recommended parent that hasn't been reached yet at all counts as undecided too, withholding the child just the same as one that's merely sitting proposed-but-unactioned.
 _Avoid_: soft edge, nice-to-have edge, non-blocking edge
 
 **Required-any edge**:
