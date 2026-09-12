@@ -28,14 +28,14 @@ Investigated (this same conversation, no code changes) before this ticket: the t
 - `docs/playbooks/reviewer-loop.md` — new rule: check for a PR based on a branch before deleting it.
 - `CONTEXT.md` — check whether any glossary entry describing "stacking" as current suite behavior needs correction (a quick check, not expected to be substantial).
 
-**Status:** ready-for-agent
+**Status:** done — PR #78
 
-- [ ] `opening-a-merge-request.md`'s stacking rule inverted: always parallel off the default branch
-- [ ] New ADR supersedes ADR-0015 outright, references both real incidents
-- [ ] ADR-0015 marked superseded, pointing at the new ADR
-- [ ] ADR-0023/ADR-0028 checked for wording that assumed stacking still exists; corrected if found
-- [ ] `docs/playbooks/reviewer-loop.md` gains the pre-delete stacked-PR check
-- [ ] `CONTEXT.md` checked for stale "stacking" claims
+- [x] `opening-a-merge-request.md`'s stacking rule inverted: always parallel off the default branch
+- [x] New ADR supersedes ADR-0015 outright, references both real incidents
+- [x] ADR-0015 marked superseded, pointing at the new ADR
+- [x] ADR-0023/ADR-0028 checked for wording that assumed stacking still exists; corrected
+- [x] `docs/playbooks/reviewer-loop.md` gains the pre-delete stacked-PR check
+- [x] `CONTEXT.md` checked for stale "stacking" claims — none found, no edit needed
 
 ## Comments
 
@@ -45,3 +45,9 @@ Investigated (this same conversation, no code changes) before this ticket: the t
 > incidents' actual structural causes (sequential same-candidate vs. genuine parallel-candidate
 > stacking) was done before grilling, confirmed with the maintainer, and found not to matter for the
 > final decision — abolish uniformly either way. All decisions above confirmed by the maintainer.
+> **2026-09-12:** Implemented (`/implement`) on this same branch, reviewed against
+> `/writing-for-agents` via `/code-review`'s two-axis process (one real gap addressed: ADR-0047's own
+> Consequences list still described the closing-report clause this change removes as current;
+> corrected, plus two minor prose fixes). `python3 -m unittest discover -s scripts -p 'test_*.py'`
+> (307 tests) and `python3 scripts/validate_skills.py` (same 5 pre-existing advisories as `main`, no
+> new ones) both green. PR #78.
