@@ -179,7 +179,10 @@ class LoadTreeTests(unittest.TestCase):
         self.assertEqual(tree["required_parents"]["rector-dead-code"], ["rector-php-set"])
         self.assertEqual(tree["required_parents"]["rector-code-quality"], ["rector-php-set"])
         self.assertNotIn("rector-early-return", tree["required_parents"])
-        self.assertEqual(tree["required_parents"]["rector-type-coverage"], [])
+        # No tie to rector-php-set specifically (still true) -- but it does
+        # carry a bare `composer` required parent since ticket 62, the
+        # tree-wide floor every other node in this family already had.
+        self.assertEqual(tree["required_parents"]["rector-type-coverage"], ["composer"])
         self.assertEqual(tree["required_parents"]["rector-phpunit-set"], ["phpunit"])
         # Exactly these two nodes use required-any today.
         self.assertEqual(
@@ -808,6 +811,142 @@ class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
         tree = load_tree()
         rejected = {"phpstan-level-0", "psalm"}
         self.assertTrue(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
+
+    def test_shared_ancestor_diamond_rejection_still_closes(self):
+        """Ticket 60: `phpstan-level-0` and `psalm` (rector-php-set's
+        required-any options) don't carry the rejection themselves here --
+        both instead require `static-code-analyzer`, which requires the
+        rejected `composer`. This is a diamond (two siblings re-converging
+        on a shared ancestor), not a cycle -- a shared, mutable `_seen` set
+        across the required-any siblings previously made the second
+        sibling's honest revisit of `static-code-analyzer` look like a
+        cycle, short-circuiting to `False` and leaving `rector-php-set` (and
+        everything beneath it) stuck as neither fulfilled nor rejected."""
+        tree = load_tree()
+        rejected = {"composer"}
+        self.assertTrue(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
+        self.assertTrue(tooling_tree._is_effectively_rejected("rector-dead-code", tree, rejected))
+        self.assertTrue(tooling_tree._is_effectively_rejected("psalm-taint-analysis", tree, rejected))
+
+    def test_shared_ancestor_diamond_does_not_pollute_caller_seen(self):
+        """A caller re-using one `_seen` set across sibling top-level calls
+        (as `_resolved_gate_status` and `_composer_audit_extra_gate` do, one
+        leaf at a time -- not the bug itself, but worth pinning down) must
+        get the same answer for each sibling regardless of call order, since
+        each call now receives its own copy rather than sharing the caller's
+        set across recursion."""
+        tree = load_tree()
+        rejected = {"composer"}
+        seen = set()
+        first = tooling_tree._is_effectively_rejected("phpstan-level-0", tree, rejected, seen)
+        second = tooling_tree._is_effectively_rejected("psalm", tree, rejected, seen)
+        self.assertTrue(first)
+        self.assertTrue(second)
+
+
+class PermanentlyGatedDiamondTests(unittest.TestCase):
+    """Ticket 60: `_is_permanently_gated` shares `_is_effectively_rejected`'s
+    exact `_seen`-threading pattern and is exposed to the identical bug --
+    on the real php-tooling-tree it happens not to manifest today only
+    because both nodes on the diamond's shared path (`static-code-analyzer`,
+    `psalm`) are themselves `_NEVER_PROPOSED` and self-gate before the
+    polluted `_seen` would ever matter. A synthetic tree forces the real
+    traversal, independent of that coincidence."""
+
+    def test_shared_ancestor_diamond_still_gates(self):
+        original_never_proposed = tooling_tree._NEVER_PROPOSED
+        tooling_tree._NEVER_PROPOSED = original_never_proposed | {"gate-root"}
+        try:
+            tree = {
+                "required_parents": {"left-mid": ["gate-root"], "right-mid": ["gate-root"]},
+                "recommended_parents": {},
+                "resolved_parents": {},
+                "required_any_parents": {"child": ["left-mid", "right-mid"]},
+            }
+            self.assertTrue(tooling_tree._is_permanently_gated("child", tree, {}))
+        finally:
+            tooling_tree._NEVER_PROPOSED = original_never_proposed
+
+
+class RequiredChainReachesComposerInvariantTests(unittest.TestCase):
+    """Ticket 62: every PHP-tree node gated by at least one `required`/
+    `required-any`/`recommended` edge inside `php-tooling-tree.md` must have
+    a `required`/`required-any` chain of its own that transitively reaches
+    `composer` -- otherwise `_is_effectively_rejected()` (ticket 60) can
+    never automatically recognize it as closed once `composer` is rejected,
+    since that function only cascades through `required`/`required-any`
+    edges, never `recommended` ones. A node failing this invariant can only
+    ever resolve via being fulfilled or via its own, manually-written
+    `out-of-scope/` entry -- exactly the live churn observed on
+    `continuous-refactoring.de` (issue #4, MR !19) for `rector-type-coverage`,
+    the one such node that also happens to be a `php-structural-scan` leaf.
+
+    Resolved-gated aggregation nodes (`php-structural-scan`, `structural-
+    scan`) are exempt by construction: they carry no non-`resolved` incoming
+    edge at all inside this file, so they're never in the checked set --
+    they use `_resolved_gate_status()`'s own per-leaf mechanism instead, not
+    this required-chain one."""
+
+    def _reaches_composer(self, node, tree, _seen=None):
+        if _seen is None:
+            _seen = set()
+        if node in _seen:
+            return False
+        _seen.add(node)
+        if node == "composer":
+            return True
+        parents = tree["required_parents"].get(node, []) + tree["required_any_parents"].get(node, [])
+        return any(self._reaches_composer(p, tree, set(_seen)) for p in parents)
+
+    def test_every_gated_php_tree_node_reaches_composer(self):
+        php_tree = load_tree(tooling_tree.TREE_MD)
+        full_tree = load_tree()
+        gated_nodes = {e["to"] for e in php_tree["edges"] if e["type"] != "resolved"}
+
+        offenders = sorted(n for n in gated_nodes if not self._reaches_composer(n, full_tree))
+
+        self.assertEqual(
+            [],
+            offenders,
+            "these php-tooling-tree.md nodes have no required/required-any chain back "
+            "to composer, so a rejected composer can never automatically close them: "
+            f"{offenders}",
+        )
+
+
+class ComposerTieBackClosesOrphanedNodesTests(unittest.TestCase):
+    """Ticket 62: `rector-type-coverage`/`semgrep` now carry a bare `composer`
+    required parent (added alongside their existing recommended parent(s),
+    not replacing them). Confirms both directions: a rejected `composer`
+    now auto-closes both with no manual out-of-scope entry needed (the live
+    `continuous-refactoring.de` incident this ticket fixes), while a
+    genuinely adopted `composer` with individually-rejected Rector siblings
+    still leaves `rector-type-coverage` reachable exactly as ADR-0019's own
+    deliberate loosening intended -- the new edge must not re-tighten that."""
+
+    def test_rejected_composer_closes_rector_type_coverage_and_semgrep(self):
+        tree = load_tree()
+        rejected = {"composer"}
+        self.assertTrue(tooling_tree._is_effectively_rejected("rector-type-coverage", tree, rejected))
+        self.assertTrue(tooling_tree._is_effectively_rejected("semgrep", tree, rejected))
+
+    def test_fulfilled_composer_with_rejected_rector_siblings_still_releases_type_coverage(self):
+        tree = load_tree()
+        # composer itself is NOT rejected -- only its two Rector siblings are,
+        # the exact scenario ADR-0019 confirmed should stay open regardless
+        # of rector-php-set's own fulfilment.
+        rejected = {"rector-dead-code", "rector-code-quality"}
+        self.assertFalse(tooling_tree._is_effectively_rejected("rector-type-coverage", tree, rejected))
+        detected = {
+            "rector-dead-code": {"fulfilled": False},
+            "rector-code-quality": {"fulfilled": False},
+            "php-cs-fixer": {"fulfilled": True},
+            "phpstan-level-3": {"fulfilled": True},
+        }
+        self.assertEqual(
+            tooling_tree._undecided_recommended_parents("rector-type-coverage", tree, detected, rejected),
+            [],
+        )
 
 
 class PsalmMutualExclusionTests(unittest.TestCase):

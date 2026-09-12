@@ -81,9 +81,11 @@ graph TD
     cs -.->|recommended| rcq
     cs -.->|recommended| rpu
     p3 -.->|recommended| rtc
+    comp -->|required| rtc
     p4 -.->|required-any| pta
     psalm -.->|required-any| pta
     pta -.->|recommended| sg
+    comp -->|required| sg
     psr4 -.->|resolved| phpss
     audit -.->|resolved| phpss
     unit -.->|resolved| phpss
@@ -141,9 +143,11 @@ graph TD
 | `php-cs-fixer` | `rector-code-quality` | recommended |
 | `php-cs-fixer` | `rector-phpunit-set` | recommended |
 | `phpstan-level-3` | `rector-type-coverage` | recommended |
+| `composer` | `rector-type-coverage` | required |
 | `phpstan-level-4` | `psalm-taint-analysis` | required-any |
 | `psalm` | `psalm-taint-analysis` | required-any |
 | `psalm-taint-analysis` | `semgrep` | recommended |
+| `composer` | `semgrep` | required |
 | `psr-4` | `php-structural-scan` | resolved |
 | `composer-audit` | `php-structural-scan` | resolved |
 | `phpunit` | `php-structural-scan` | resolved |

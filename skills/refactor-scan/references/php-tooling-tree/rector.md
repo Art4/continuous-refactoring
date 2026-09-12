@@ -53,15 +53,26 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Purpose:** raise declared type coverage progressively.
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.
 - **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `rector-dead-code` **and** `rector-code-quality` have both been decided **and** both `php-cs-fixer` and `phpstan-level-3` (`phpstan.md`) have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, without dead code removed or control flow flattened first its type-coverage rewrites touch messier code, so this node waits on all three pairs. Any one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit. The `phpstan-level-3` threshold stays put here even though the level chain itself now reaches `phpstan-level-10` — level 3 was already judged "strict enough" for reviewable Rector rewrites. (`rector-code-quality` replaced `rector-early-return` in this gate when that node was retired — see `rector-code-quality`'s own entry below for why it's the one now carrying the "control flow flattened first" prerequisite.)
-- **No required parent** (as of the `rector-dead-code`/`rector-code-quality` restructuring above) — unlike
-  every other node in this family, nothing here directly or transitively requires `rector-php-set` (or,
-  through it, that a static analyzer was chosen) to be *fulfilled*; only decided recommended parents gate
-  it, and a rejected recommended parent still releases its child same as any other recommended edge in
-  this tree (`php-tooling-tree.md`'s *Nodes* preamble). In
-  principle this node could become proposable with `rector-dead-code`/`rector-code-quality` both rejected
-  and `rector-php-set` never touched at all — an edge case, not a new category of gap (nothing in this tree
-  validates that a rejected node was ever reachable first), but worth naming plainly rather than implying a
-  guarantee that no longer holds.
+- **Required parent:** `composer` — the tree-wide floor every other node in this family already
+  carries directly or transitively; this node was the sole exception, the only `php-structural-scan`
+  leaf without any `required`/`required-any` chain to `composer` at all. A rejected `composer` could
+  never automatically close it that way (the gate-cascade check only follows `required`/`required-any`
+  edges, never `recommended` ones), so a target with no PHP application code at all needed it manually
+  filed and rejected by hand before `php-structural-scan`/`structural-scan` could ever open (observed
+  live on a static site with a single stray `.php` deployment script). Inert in the ordinary case: by
+  the time any of the four `recommended` parents below is *decided*, `composer` must already be
+  fulfilled anyway, since each of them already has its own real chain back to it — the edge only ever
+  binds when `composer` itself is rejected.
+- **Unlike every other node in this family, still no tie to `rector-php-set` specifically** (as of the
+  `rector-dead-code`/`rector-code-quality` restructuring above) — nothing here directly or transitively
+  requires `rector-php-set` (or, through it, that a static analyzer was chosen) to be *fulfilled*; only
+  `composer` plus decided recommended parents gate it, and a rejected recommended parent still releases
+  its child same as any other recommended edge in this tree (`php-tooling-tree.md`'s *Nodes* preamble).
+  In principle this node could become proposable with `rector-dead-code`/`rector-code-quality` both
+  rejected and `rector-php-set` never touched at all, `composer` still fulfilled — a deliberate
+  loosening, unaffected by the `composer` edge above: that edge only ever closes this node
+  when `composer` itself is gone, never when a human selectively rejects its Rector siblings while
+  keeping `composer`.
 
 ### `rector-code-quality`
 

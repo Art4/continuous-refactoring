@@ -797,7 +797,15 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     options is effectively rejected — rejecting just one of several
     required-any options must not close the child, since any of the others
     fulfilling it still would (mirrors `_is_permanently_gated`'s identical
-    required-any handling for its own, unrelated gate condition)."""
+    required-any handling for its own, unrelated gate condition).
+
+    Each sibling call below gets its own *copy* of `_seen`, not the same
+    mutable set — two required(-any) siblings can legitimately re-converge
+    on a shared ancestor further up (a diamond, not a cycle), and sharing
+    one set across them would make the second sibling's honest re-visit
+    look like a cycle and short-circuit to `False`, even when continuing
+    would find the real rejection (e.g. `rector-php-set`'s `phpstan-level-0`
+    and `psalm`, both requiring `static-code-analyzer`)."""
     if _seen is None:
         _seen = set()
     if node in _seen:
@@ -806,12 +814,12 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     if node in rejected:
         return True
     if any(
-        _is_effectively_rejected(p, tree, rejected, _seen)
+        _is_effectively_rejected(p, tree, rejected, set(_seen))
         for p in tree["required_parents"].get(node, [])
     ):
         return True
     req_any = tree["required_any_parents"].get(node, [])
-    if req_any and all(_is_effectively_rejected(p, tree, rejected, _seen) for p in req_any):
+    if req_any and all(_is_effectively_rejected(p, tree, rejected, set(_seen)) for p in req_any):
         return True
     return False
 
@@ -838,7 +846,12 @@ def _is_permanently_gated(node: str, tree: dict, detected: dict, _seen: set[str]
     `psalm`) somewhere in its required-parent closure: a real, currently-
     false signal about the target itself (wrong language, no static
     analyzer adopted) that no pass or human ever decides on — unlike
-    `_is_effectively_rejected`, nobody rejected anything here."""
+    `_is_effectively_rejected`, nobody rejected anything here.
+
+    Each sibling call below gets its own *copy* of `_seen` — see
+    `_is_effectively_rejected`'s identical note; the same diamond shape
+    (two required(-any) siblings re-converging on a shared ancestor) would
+    otherwise make the second sibling's honest re-visit look like a cycle."""
     if _seen is None:
         _seen = set()
     if node in _seen:
@@ -846,10 +859,10 @@ def _is_permanently_gated(node: str, tree: dict, detected: dict, _seen: set[str]
     _seen.add(node)
     if node in _NEVER_PROPOSED and not detected.get(node, {}).get("fulfilled", False):
         return True
-    if any(_is_permanently_gated(p, tree, detected, _seen) for p in tree["required_parents"].get(node, [])):
+    if any(_is_permanently_gated(p, tree, detected, set(_seen)) for p in tree["required_parents"].get(node, [])):
         return True
     req_any = tree["required_any_parents"].get(node, [])
-    if req_any and all(_is_permanently_gated(p, tree, detected, _seen) for p in req_any):
+    if req_any and all(_is_permanently_gated(p, tree, detected, set(_seen)) for p in req_any):
         return True
     return False
 
