@@ -4,9 +4,13 @@
 > branch/MR discipline decided there stays exactly as decided — this ADR adds a rule for what must happen
 > *before* any branch carrying an unmerged bookkeeping write gets deleted or abandoned.
 >
-> Interacts with [ADR-0015](0015-suite-merge-requests-always-stack.md): the always-stack rule is what let a
-> bookkeeping branch end up stacked *on* a candidate branch in the first place — the incident below happened
-> because deleting the candidate branch took its stacked bookkeeping child down with it.
+> Interacted with [ADR-0015](0015-suite-merge-requests-always-stack.md) at the time: the always-stack rule
+> in force then is what let a bookkeeping branch end up stacked *on* a candidate branch in the first place —
+> the incident below happened because deleting the candidate branch took its stacked bookkeeping child down
+> with it. ADR-0015 was later superseded by [ADR-0049](0049-abolish-suite-mr-stacking.md); this ADR's own
+> rule (below) stays in force regardless — it still protects the simpler, still-possible case of a single
+> candidate branch carrying its own unmerged bookkeeping write, the stacked-bookkeeping-child case just
+> being the one that happened to surface it originally.
 
 A real run against `continuous-refactoring.de` (no `gh`/`glab`/API token configured, so merge requests can be
 pushed for real but never formally closed via the API) surfaced a genuine data-loss incident. A candidate
@@ -23,9 +27,10 @@ left dangling on the forge, unreferenced by anything in the repository going for
 ## Decision
 
 Before deleting or abandoning any branch that carries a bookkeeping write not yet on the default branch —
-the candidate's own branch, or a bookkeeping branch stacked on it per ADR-0015's always-stack rule — land
-the record of the abandonment first, through an ordinary bookkeeping branch/MR opened off the default
-branch, **never one stacked on the branch about to be deleted**. At minimum: a
+the candidate's own branch, or (on a target still running under the now-superseded ADR-0015, or wherever a
+human stacked one by hand) a bookkeeping branch riding on it — land the record of the abandonment first,
+through an ordinary bookkeeping branch/MR opened off the default branch, **never one stacked on the branch
+about to be deleted**. At minimum: a
 `docs/refactoring/out-of-scope/<node>.md` entry for a tooling-tree candidate, or a closing note on the issue
 for a structural one, stating what was abandoned and why. If a bookkeeping write already sits stacked on the
 doomed branch, cherry-pick that commit onto the fresh branch before deleting anything beneath it. Only

@@ -1,8 +1,11 @@
 # `Skip streak` replaced by issue age and a `refactor:priority` hard override
 
-> Amends [ADR-0015](0015-suite-merge-requests-always-stack.md) only incidentally: that ADR's own
-> decision (suite MRs always stack) is unaffected and stays exactly as decided — `Fulfilled nodes`
-> alone still needs it, independent of `Skip streak`'s fate. Builds on
+> At the time this ADR was written, amended [ADR-0015](0015-suite-merge-requests-always-stack.md)
+> only incidentally: `Skip streak`'s removal changed nothing about whether suite branches stack,
+> since `Fulfilled nodes` alone already needed that protection, independent of `Skip streak`'s fate.
+> ADR-0015 itself was later superseded outright by
+> [ADR-0049](0049-abolish-suite-mr-stacking.md), for unrelated reasons — see that ADR, not this one,
+> for the current branching rule. Builds on
 > [ADR-0047](0047-tooling-tree-proposals-are-pre-filed-before-ranking.md), which is what makes this
 > decision possible in the first place.
 

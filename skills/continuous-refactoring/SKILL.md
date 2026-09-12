@@ -52,7 +52,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 ## Opening a merge request
 
-Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), stacking, description, outlook — in `skills/continuous-refactoring/references/opening-a-merge-request.md`.
+Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), basing, description, outlook — in `skills/continuous-refactoring/references/opening-a-merge-request.md`.
 
 ## Fallback
 
@@ -66,8 +66,6 @@ Every claim in **Status** must reflect state freshly confirmed this pass, not an
 
 - **Status:** one line, what happened this pass — mention step 0 too if it ran ("Status: housekeeping sweep delivered (MR #7); ...").
 - **Next:** one line, what the human can or should do now.
-
-**Stacked-branch note.** Any write this pass made (a bookkeeping commit, a candidate branch) landed on a suite branch/merge request already open from an earlier pass, rather than a fresh one off the default branch (`opening-a-merge-request.md`'s always-stack rule) → name it in **Status** ("... — bookkeeping folded into the still-open `refactor/loop-config` merge request, not yet merged"). Not a problem to flag, just a fact the human would otherwise have to notice by reading the diff themselves.
 
 **Unused housekeeping nudge.** `bookkeeping.md`'s `Housekeeping cadence` unset (step 0 never engaged, the target never opted in), and at least one `Fulfilled nodes` entry's own tree-doc names a `Housekeeping` field → append one clause to **Next** naming how many ("... also: 2 adopted tools have registered housekeeping checks nobody's using yet — run `/continuous-housekeeping` once to opt in"). Checking this reuses the same per-slug tree-doc lookup `continuous-housekeeping`'s own reconciliation step already does (`skills/continuous-housekeeping/SKILL.md` step 3) against whatever `Fulfilled nodes` this same pass's `refactor-learn` call just settled — no extra tree walk. Repeats every pass while the condition holds; stops the moment `Housekeeping cadence` is set, no tracking field needed to avoid repeating it.
 

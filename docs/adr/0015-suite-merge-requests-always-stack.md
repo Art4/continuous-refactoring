@@ -1,5 +1,11 @@
 # Suite merge requests always stack; never branch parallel off the default branch
 
+> **Superseded by [ADR-0049](0049-abolish-suite-mr-stacking.md).** This ADR's own decision (stack a
+> second suite branch on whatever's currently open) is fully reversed there, after two real
+> auto-close-on-branch-deletion incidents showed the cost this ADR accepted was paid repeatedly for a
+> conflict risk that never once materialized. Kept below as the historical record of the problem it
+> solved and the reasoning at the time — the current branching rule lives in ADR-0049, not here.
+
 > Does not amend or supersede [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): that ADR's decision — `refactor-learn`'s bookkeeping writes go through their own dedicated merge request, based off the default branch, independent of the candidate's own review cycle — is unaffected and stays exactly as decided there. This ADR only changes how *candidate* merge requests (`refactor-implement`'s output) are based when a second one can be opened while one is already in flight (`continuous-refactoring/SKILL.md`'s "Opening a merge request" guidance, "While fewer than two suite merge requests are open, a pass may deliver one more").
 
 A real reviewer-loop observation run surfaced repeated merge-conflict churn on `docs/refactoring/config.md`, traced to the previous stacking rule: "stack (base = the open branch) only when the new candidate is a tooling-tree child of what is in flight or the design depends on it; otherwise branch parallel off the default branch." Two unrelated candidates branching in parallel off the default branch both edit `config.md` bookkeeping fields (originally `Pending candidates`; the same risk now applies to ticket 32's new `Skip streak` field) independently, and the second one to merge conflicts with whatever the first one already changed there.
