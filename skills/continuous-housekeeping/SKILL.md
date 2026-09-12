@@ -72,7 +72,7 @@ Whatever this target repo's own full quality-check command is (composer/npm/etc.
 
 ### 7. Deliver
 
-**Any code change made:** open the merge request per `skills/continuous-refactoring/references/opening-a-merge-request.md` (same create-mode, stacking, and description rules every other suite MR already follows) — referencing this cycle's issue so it closes on merge, per that document's own conventions. Do not close the issue directly.
+**Any code change made:** open the merge request per `skills/continuous-refactoring/references/opening-a-merge-request.md` (same create-mode, basing, and description rules every other suite MR already follows) — referencing this cycle's issue so it closes on merge, per that document's own conventions. Do not close the issue directly.
 
 **Zero code changes** (every item this cycle turned out to be already current) — no MR to gate a close behind; close the issue directly, with a comment saying so, and stop.
 

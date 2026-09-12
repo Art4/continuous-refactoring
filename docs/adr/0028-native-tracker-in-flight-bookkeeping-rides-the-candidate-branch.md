@@ -10,10 +10,12 @@
 > anywhere else yet. This ADR generalizes the mechanism ADR-0011 already proved out, to every
 > candidate, not just `loop-config` alone.
 >
-> Does not amend [ADR-0015](0015-suite-merge-requests-always-stack.md): still true that at most one
-> candidate branch is open against the default branch at a time. What changes is only whether a
-> *second*, bookkeeping-specific branch is still needed alongside it — not the one-candidate-branch
-> rule itself.
+> Independent of [ADR-0015](0015-suite-merge-requests-always-stack.md) (later superseded by
+> [ADR-0049](0049-abolish-suite-mr-stacking.md)) either way: the "fewer than two suite MRs open"
+> cap that keeps at most one candidate branch open against the default branch at a time is its own,
+> unrelated rule, unaffected by whichever way suite branches are based. What this ADR changes is only
+> whether a *second*, bookkeeping-specific branch is still needed alongside the candidate's own — not
+> that cap, and not (before or after ADR-0049) how a second branch would base if one were opened.
 >
 > Builds on [ADR-0012](0012-remembered-merge-requests-follow-the-tracker.md) and
 > [ADR-0026](0026-drop-delivered-label-use-native-pr-linkage.md): both already established that a

@@ -89,6 +89,15 @@ mid-run without the human explicitly changing it.
    - **Good/defensible** (per the persona's bar) → merge (adapt the merge method to the repo's actual
      settings). Minor concerns don't block the merge but still get logged, unless the persona is
      Nur-Beobachter, which never merges regardless.
+   - **Before deleting the merged branch, check for a stacked child.** A forge auto-closes any other
+     open PR whose base is the branch just deleted, silently, no warning — query for one
+     (`gh pr list --json baseRefName` filtered to the branch name about to go away, or the
+     equivalent) before passing `--delete-branch`/deleting it yourself. One exists → retarget it onto
+     the branch actually being merged into first (or simply skip deleting the merged branch this
+     round), *then* merge/delete. None exists → delete normally. Cheap, unconditional, every merge,
+     regardless of whether the suite driving the target repo currently stacks branches itself —
+     a human can stack one by hand, and this is the only thing standing between that and a silent
+     auto-close either way.
    - **After merging, verify the merge actually landed the branch's content** — `gh pr merge`
      reporting success is not proof the base branch now matches the branch's tip; a real conflict
      can be silently resolved in favor of the wrong side with no error surfaced. Diff the touched
