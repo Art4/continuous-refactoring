@@ -48,18 +48,18 @@ live.
 reach `structural-scan` at all; the loop has zero proposable candidates with no way out short of a
 code fix.
 
-**Status:** open
+**Status:** done — PR pending
 
-- [ ] `_is_effectively_rejected()`: pass `set(_seen)` (not `_seen`) into each sibling's recursive call
+- [x] `_is_effectively_rejected()`: pass `set(_seen)` (not `_seen`) into each sibling's recursive call
   in both the `required_parents` `any(...)` and `required_any_parents` `all(...)` checks.
-- [ ] `_is_permanently_gated()`: same fix, same two call sites.
-- [ ] Regression test: `rector-php-set`'s real `required-any(phpstan-level-0, psalm)` diamond against
+- [x] `_is_permanently_gated()`: same fix, same two call sites.
+- [x] Regression test: `rector-php-set`'s real `required-any(phpstan-level-0, psalm)` diamond against
   a rejected `composer` — was `False`, must become `True`.
-- [ ] Regression test: same diamond shape for `_is_permanently_gated()` (synthetic tree is fine, since
+- [x] Regression test: same diamond shape for `_is_permanently_gated()` (synthetic tree is fine, since
   the real tree doesn't currently expose it live).
-- [ ] Full suite (`python3 -m unittest discover -s scripts -p 'test_*.py'`) and
+- [x] Full suite (`python3 -m unittest discover -s scripts -p 'test_*.py'`) and
   `python3 scripts/validate_skills.py` stay green.
-- [ ] Live sanity check: re-run `tooling_tree.py` against `/home/artur/projects/continuous-refactoring.de`
+- [x] Live sanity check: re-run `tooling_tree.py` against `/home/artur/projects/continuous-refactoring.de`
   and confirm `next_candidates()` is no longer empty.
 
 ## Comments
@@ -67,3 +67,18 @@ code fix.
 > **2026-09-12:** Root-caused via an analysis-only request ("bitte analysieren", no code changes) on
 > the live `continuous-refactoring.de` stuck-loop report. Filed for `/implement` once the user
 > confirmed proceeding with the fix.
+
+> **2026-09-12 (later):** Implemented on branch `tickets/60-diamond-seen-false-negative`: both
+> functions fixed at both call sites, 3 new regression tests (confirmed red against the pre-fix code,
+> green after — real-tree diamond, synthetic gated diamond, and a caller-reuse non-pollution check),
+> 310/310 tests green, validator unchanged (same 5 pre-existing advisories). Live sanity check against
+> `continuous-refactoring.de`: `next_candidates()` now returns `[rector-type-coverage]` instead of
+> `[]`. `fixtures/harness/run.sh tier2` re-checked on 7 fixtures against `main` — identical
+> pass/fail counts before and after, all pre-existing failures unrelated to this change (require a
+> full opencode/Docker agent-loop run, not the deterministic parser this fix touches).
+>
+> `/code-review` (Standards + Spec axes): Spec axis clean, no findings. Standards axis found one hard
+> violation (missing `.changelog.d/*.md` fragment, CI-enforced per `CONTRIBUTING.md`) — fixed. One
+> judgement call noted (the two gate functions already shared an identical traversal shape before this
+> fix, perpetuated rather than introduced by the mechanical `set(_seen)` edit at all four sites) — left
+> as-is; a shared closure-walk helper is a plausible future refactor, not blocking this bugfix.
