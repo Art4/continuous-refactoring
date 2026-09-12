@@ -6,6 +6,8 @@
 [![skills-validation](https://github.com/Art4/continuous-refactoring/actions/workflows/skills-validation.yml/badge.svg)](https://github.com/Art4/continuous-refactoring/actions/workflows/skills-validation.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
+🌐 [continuous-refactoring.de](https://continuous-refactoring.de/)
+
 A portable agent-skill suite for [Claude Code](https://claude.com/claude-code) that keeps a
 software project under **continuous refactoring**: scan, prioritise, design, implement, learn —
 on repeat, as a stateful, repeatable loop instead of a one-shot action.
