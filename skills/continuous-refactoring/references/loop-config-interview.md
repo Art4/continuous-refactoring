@@ -155,10 +155,22 @@ Before recording anything, recap in plain prose:
 > Tracker: <GitHub | GitLab | Local Markdown | other, as named>.
 > Create-mode: <autonomous | ask-each-time | human-opens>.
 > Refactoring Notes: `<path>`, to be recorded in `AGENTS.md`/`CLAUDE.md`.
+> Next: creating `<path>/bookkeeping.md` and `docs/agents/issue-tracker.md`[, the `refactor:candidate`/`refactor:priority` labels on <tracker>], filing this candidate's issue, and opening its merge request.
 
 (When `## Explore`'s resume case skipped questions, name those as "already
 recorded" rather than "just decided" — same three lines, sourced from
-existing files instead of fresh answers.)
+existing files instead of fresh answers. The fourth line still names what's
+about to happen either way.)
+
+This is the one summary the human sees before `## Record` writes anything —
+`loop-config` runs exactly once per target (the resume case above aside), so
+there's no ongoing verbosity to manage afterward. `## Record`'s own writes,
+and the issue/merge request that carry them, each get one short status line
+as they happen instead of running silently ("Labels created on GitHub",
+"Creating `bookkeeping.md`", "Issue #<n> filed", "Merge request #<n>
+opened") — the only place this convention needs stating, since
+`refactor-design`'s and `refactor-implement`'s own `loop-config` exceptions
+already point back here for what to write.
 
 ## Record
 

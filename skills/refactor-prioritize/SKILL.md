@@ -43,6 +43,8 @@ For each surviving proposal, assess:
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 
+**File as you read.** A tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → file its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-design` step 5 already looks for before filing one itself, so whichever proposal later wins a ranking is recognized as already filed, updated in place rather than duplicated. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already files every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. Doesn't apply to a proposal that arrives already issue-backed (`refactor-scan` step 3b: an earlier pass's own filing, or a human-labeled issue) — nothing to file, rank it as-is — or to a gate name (`structural-scan`, a baseline-shrink family) — those stay names until Select mode's own exploration makes one concrete, exactly as today. `loop-config` itself never reaches this: its own interview is the only path that ever files it.
+
 Present the ranking as a short ordered list of Names only (never slugs) — save the rationale for the winner for step 3.
 
 ### 3. Recommend
