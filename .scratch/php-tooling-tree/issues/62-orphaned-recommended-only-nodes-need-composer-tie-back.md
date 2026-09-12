@@ -71,38 +71,38 @@ resolved itself, at the one-time cost of issue #4/MR !19), but a real, silent ga
 every future Composer-rejected PHP target and has no test coverage guarding against a third
 recurrence via some other future edge change.
 
-**Status:** open
+**Status:** done — PR pending
 
-- [ ] `php-tooling-tree.md`'s edge table: add `composer → rector-type-coverage (required)` and
+- [x] `php-tooling-tree.md`'s edge table: add `composer → rector-type-coverage (required)` and
   `composer → semgrep (required)` rows; update the diagram; update both nodes' own doc entries
   (`rector.md`, `semgrep.md`) to state the new required parent alongside their existing recommended
   one(s), and correct `rector-type-coverage`'s own entry's "No required parent" framing (it now has
   one — `composer` — the "no tie to `rector-php-set` specifically" nuance ADR-0019 established stays,
   worded to survive this addition).
-- [ ] `tooling_tree.py`: confirm no code change needed — `required_parents` is parsed generically from
+- [x] `tooling_tree.py`: confirm no code change needed — `required_parents` is parsed generically from
   the edge table; `_is_unblocked()`/`_is_effectively_rejected()`/`_resolved_gate_status()` all already
   handle multiple required parents on one node (e.g. `composer-audit`'s existing `[composer,
   ci-runner]`).
-- [ ] New invariant test (`scripts/test_tooling_tree.py`): every PHP-tree node except the genuine roots
+- [x] New invariant test (`scripts/test_tooling_tree.py`): every PHP-tree node except the genuine roots
   has a `required`/`required-any` chain that transitively reaches `composer`. Written generically
   (walks `tree['order']`/`required_parents`/`required_any_parents`), not hardcoded to today's two
   fixed exceptions, so it actually catches a *future* regression, not just re-asserts this one.
-- [ ] Regression test: on `continuous-refactoring.de`'s exact scenario (or an equivalent fixture with
+- [x] Regression test: on `continuous-refactoring.de`'s exact scenario (or an equivalent fixture with
   `composer` rejected), `rector-type-coverage` and `semgrep` both now read as effectively rejected
   automatically (no issue/out-of-scope entry needed) — extends ticket 60's own
   `EffectivelyRejectedRequiredAnyTests`-style coverage.
-- [ ] Regression test: on a target where `composer` **is** fulfilled and `rector-dead-code`/
+- [x] Regression test: on a target where `composer` **is** fulfilled and `rector-dead-code`/
   `rector-code-quality` are explicitly, individually rejected by a human (composer otherwise fine),
   `rector-type-coverage` still becomes proposable exactly as ADR-0019 intended — confirms the new edge
   is inert in that case, not a re-tightening.
-- [ ] Fixture fallout check: re-run `fixtures/harness/run.sh roadmap` (or `tier2`) across the existing
+- [x] Fixture fallout check: re-run `fixtures/harness/run.sh roadmap` (or `tier2`) across the existing
   PHP fixtures — the new required edge could shift `rector-type-coverage`'s/`semgrep`'s own position
   in a 10-step roadmap simulation the same way ADR-0019's/ADR-0045's edge changes each already did;
   regenerate `expected/roadmap.json` snapshots only where the new edge genuinely changes reachability
   timing (it shouldn't, per the redundancy argument above, but confirm rather than assume).
-- [ ] `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py`
+- [x] `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py`
   stay green.
-- [ ] Live sanity re-check against `/home/artur/projects/continuous-refactoring.de`: `next_candidates()`
+- [x] Live sanity re-check against `/home/artur/projects/continuous-refactoring.de`: `next_candidates()`
   no longer needs a manual `rector-type-coverage` decision at all — `structural-scan` should already
   read as open once the fresh edges are loaded, entirely from the existing `composer` rejection.
 
@@ -115,3 +115,20 @@ recurrence via some other future edge change.
 > `semgrep`), both traced to ADR-0019/ADR-0045 respectively, both fixable the same way, plus a new
 > invariant test as the requested guardrail. Branched directly on `tickets/60-diamond-seen-false-
 > negative` (#79) per the user's explicit instruction, not off `main`.
+
+> **2026-09-12 (later):** Implemented on branch `tickets/62-composer-required-edge-orphaned-nodes`.
+> Both edges added alongside existing recommended parents (not replacing), both node docs updated
+> preserving each ADR's own nuance, generic invariant test written (walks the tree, not hardcoded to
+> these two names), both regression directions covered. 313/313 tests green, `non-php-project`'s
+> `expected/roadmap.json` regenerated (the only fixture affected — `rector-type-coverage`/`semgrep`
+> correctly drop out of its 10-step simulation), all 7 other fixtures re-checked unaffected. Live
+> sanity against `continuous-refactoring.de`: `next_candidates()` now returns `[structural-scan]`
+> directly, no further manual decision needed.
+>
+> `/code-review` (Standards + Spec axes): Spec axis clean, no findings. Standards axis found one hard
+> violation (missing `.changelog.d/*.md` fragment, CI-enforced) — fixed. Two judgement calls noted and
+> left as-is: the new test's `_reaches_composer` helper mirrors `_is_effectively_rejected()`'s
+> traversal shape (a deliberate, independent structural check on raw edges, not runtime rejection
+> state — extracting a shared helper would couple a test-only invariant to the rejection engine for no
+> real benefit); a near-verbatim closing sentence in both `rector.md`/`semgrep.md` was already checked
+> against `validate_skills.py`'s own duplication advisory and didn't trip it.
