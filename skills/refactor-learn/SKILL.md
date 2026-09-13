@@ -9,6 +9,11 @@ The only skill that writes suite bookkeeping: the Refactoring Notes' `merge-requ
 
 The orchestrator calls this skill up to **twice** a pass: an **early call**, right after `refactor-scan`, only when it produced findings; and a **closing call**, always, at the end. The split exists because `refactor-prioritize` reads the ledger to decide whether two MRs are already open — a finding this pass just resolved has to be written back before that check runs.
 
+The closing call also consumes a second kind of input, in place of a freshly opened MR: a design-time
+breaking-change finding from `refactor-design`'s own decision gate
+(`skills/refactor-design/references/decision-gate.md`), when this pass's design discovered the
+candidate can't be done without changing behavior.
+
 **Land every write below via a dedicated bookkeeping branch/MR off the default branch — never a direct commit.** Before writing, in either call: confirm you aren't still on the candidate branch `refactor-implement` left checked out — these writes aren't part of that review. Pull the default branch's latest, then create (or reuse, if one from an earlier interrupted pass is still open) a small bookkeeping branch off it, commit the writes there, and open (or update) that MR, using the create-mode policy at `skills/continuous-refactoring/references/opening-a-merge-request.md`.
 
 **Exception — native-tracker in-flight fold-in**: `docs/agents/issue-tracker.md` names a native-label tracker, and `refactor-implement` opened a candidate MR this same pass → the closing call's writes ride that branch as a follow-up commit, no separate bookkeeping MR — stay checked out on it. `loop-config` is this exception's narrowest case (the file exists nowhere else yet). The same applies to the early call's own **fold-in still owed** finding below — that candidate's branch already exists from an earlier pass, so its writes ride there too, never the dedicated bookkeeping branch. Doesn't otherwise apply to the early call (no candidate branch exists yet for any other finding type), a pass with no candidate MR, or a non-native tracker — those keep using the dedicated bookkeeping branch below.
@@ -38,7 +43,16 @@ A pass that only makes this call (no fresh candidate this run) is still a comple
 
 ### Closing call — always, at the end of the pass
 
-Given a freshly opened MR (from `refactor-implement`, if the pass got that far):
+**A design-time breaking-change finding from `refactor-design`** (this pass's design discovered the
+candidate can't be done without changing behavior, so `refactor-implement` never ran) → mark
+`wontfix`, close the issue, file a learned rejection stating what was found and why: the Refactoring
+Notes' `out-of-scope/<node>.md` for a tooling-tree candidate, a closing note on the issue itself for a
+structural/externally-labeled/baseline-shrink candidate — the same split the early call's own
+rejection handling above already uses. Clear `Pending candidates` if it named this candidate. No MR
+to remember, no `Create-mode` bookkeeping to touch — land this via the dedicated bookkeeping branch,
+then skip straight to *Then, regardless of which branch...* below.
+
+Otherwise, given a freshly opened MR (from `refactor-implement`, if the pass got that far):
 
 - `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → nothing to remember here — `refactor-implement` step 5's `Closes #<n>` on the MR is already the durable record, the tracker's own native issue↔PR cross-reference (`docs/adr/0026-drop-delivered-label-use-native-pr-linkage.md`); no label to apply. Otherwise remember it in the Refactoring Notes' `merge-requests.md`: URL, candidate issue, tooling-tree node name (blank for structural), base branch.
 - Clear the Refactoring Notes' `bookkeeping.md`'s `Pending candidates` — this candidate now has an MR, so the resume marker no longer applies.
@@ -61,4 +75,4 @@ Then, regardless of which branch the writes above rode:
 
 **Early call:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's file removed, a fold-in-still-owed candidate's MR marked ready for review, every secret-history-scan finding filed as a `refactor:priority` candidate with `Secret history scan` written `done`, or an explicit "asked the human, waiting"), the remembered set reflects it before `refactor-prioritize` runs, and every write went out through a branch — the dedicated bookkeeping branch (opened as an MR, or — no forge/remote available — handed to the human per `opening-a-merge-request.md`) for every finding type except fold-in-still-owed, which rides the candidate's own already-open branch instead (the exception above).
 
-**Closing call:** a freshly delivered candidate (if any) is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with `Pending candidates` cleared, `Fulfilled nodes` is written (full re-derivation when the parser ran, additive/narrow otherwise), a candidate MR left in draft by this pass is marked ready for review, and every write went out through a branch — the candidate's own already-open branch (native tracker, MR opened this pass), the dedicated bookkeeping one, or the `loop-config` candidate's own as that exception's narrowest case — never a direct commit to the default branch (opened as an MR where forge access exists).
+**Closing call:** a freshly delivered candidate (if any) is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with `Pending candidates` cleared — or, a design-time breaking-change finding (if any) is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and `Pending candidates` cleared the same way — `Fulfilled nodes` is written (full re-derivation when the parser ran, additive/narrow otherwise), a candidate MR left in draft by this pass is marked ready for review, and every write went out through a branch — the candidate's own already-open branch (native tracker, MR opened this pass), the dedicated bookkeeping one, or the `loop-config` candidate's own as that exception's narrowest case — never a direct commit to the default branch (opened as an MR where forge access exists).
