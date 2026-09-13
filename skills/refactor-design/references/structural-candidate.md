@@ -29,4 +29,8 @@ Run `/grilling` on the candidate, along these branches:
   other branch but drifts away from (or simply ignores) a stated goal is worth reconsidering. No
   goal set → skip this branch, same as today.
 
+While grilling any of these branches: a decision meeting the ADR bar, or the seam turning out to
+require an actual behavior change → `skills/refactor-design/references/decision-gate.md`, before
+continuing to step 5.
+
 Side effects happen inline as decisions crystallise (per `/domain-modeling`): naming a module after a concept not in `CONTEXT.md` → add the term. User rejects a design with a load-bearing reason a future scan shouldn't re-suggest → offer an ADR.

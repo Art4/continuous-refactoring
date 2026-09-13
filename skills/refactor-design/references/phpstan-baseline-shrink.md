@@ -15,6 +15,10 @@ same principle applies here, one level earlier in the chain). Note in the plan w
 pass's MR will actually touch if the group is large enough that not all of it fits comfortably in one
 bounded MR.
 
+The fix can't be made without changing behavior → don't plan it here at all;
+`skills/refactor-design/references/decision-gate.md`'s breaking-change case applies instead, and
+step 5 below doesn't run this pass for this candidate.
+
 Continue at `refactor-design/SKILL.md` step 5: the plan above goes on as a **comment** on the issue
 `refactor-prioritize` already filed — not a fresh issue (dedupe doesn't apply here, `refactor-prioritize`
 already handled it).

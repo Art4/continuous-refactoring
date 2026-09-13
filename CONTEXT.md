@@ -117,5 +117,16 @@ The named factor (heat, leverage, security, blast radius of inaction, …) that 
 _Avoid_: (none — use the term as-is)
 
 **Findings**:
-Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Also covers a genuinely new discovery this same pass, not a remembered item's changed state — a secret a git-history scan turns up (`refactor-scan/SKILL.md` step 4c) is a finding the same way. Handed to `refactor-learn` to act on either way. Scan only notices; it never decides the outcome itself.
+Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Also covers a genuinely new discovery this same pass, not a remembered item's changed state — a secret a git-history scan turns up (`refactor-scan/SKILL.md` step 4c) is a finding the same way. `refactor-design` is the other origin: discovering, while grounding/grilling or planning a fix, that a candidate can't be done without changing behavior is a finding too (`skills/refactor-design/references/decision-gate.md`), handed straight to the closing call in the same pass instead of a plan. Handed to `refactor-learn` to act on either way — neither origin decides the outcome itself, only `refactor-learn` does.
 _Avoid_: events, notifications
+
+**Flagged candidate**:
+A candidate whose plan `refactor-design` already wrote, but which also surfaced a decision meeting
+the ADR bar (hard to reverse, surprising without context, a real trade-off) while staying
+behavior-preserving — distinct from a **Finding**'s breaking-change case, which never gets a plan at
+all. The plan carries a proposed default plus an explicit open question on the issue
+(`skills/refactor-design/references/decision-gate.md`); `ready-for-agent`
+(`docs/agents/triage-labels.md`) is deliberately withheld until a human confirms or overrides it.
+`refactor-scan` treats a still-waiting one as not resumable — it doesn't block the rest of the
+backlog — and picks it back up the moment `ready-for-agent` appears.
+_Avoid_: blocked candidate, paused candidate
