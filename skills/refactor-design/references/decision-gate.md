@@ -17,6 +17,8 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
 - Also write, in the same (or an additional) issue comment, the specific question this decision
   raises and the default chosen — plain enough that a human can confirm it as written, or override
   it, by commenting and then adding `ready-for-agent` (`docs/agents/triage-labels.md`) once satisfied.
+  This lands on the target repo's own issue —
+  `skills/continuous-refactoring/references/forge-facing-writing.md`.
 - Deliberately don't add `ready-for-agent` yourself. This is what makes the candidate a **flagged
   candidate**: designed, but not yet cleared to implement.
 
