@@ -79,3 +79,10 @@ each default below by not overriding it, except jargon leakage, which was explic
 > ticket states the plan directly with defaults the user can still override, rather than running a
 > multi-round grilling tree. User expanded scope once, from file-citations only to also covering
 > suite-internal jargon leakage, before confirming.
+
+> **2026-09-13 (implement):** Added `skills/continuous-refactoring/references/forge-facing-writing.md`
+> and wired a pointer from all four sites named above. Validator initially flagged the new file's own
+> `skills/…`/`docs/adr/…` illustrations as broken local references (it treats backtick-wrapped paths as
+> real); reworded to prose ("a path under this repo's own skill or ADR directories") to fix. 313/313
+> tests green, validator clean (pre-existing size/duplication advisories only, none from this change).
+> Changelog fragment filed (`83-audience-aware-forge-text.md`). Ready for review.
