@@ -21,7 +21,9 @@ Read the Refactoring Notes' `bookkeeping.md`'s `Pending candidates` field (`skil
 
 - **No plan comment yet** → straight to `refactor-design`, bypassing `refactor-prioritize` (re-running Select mode risks picking a different candidate — exactly what this field prevents).
 - **Plan comment present, and either unflagged or already carrying `ready-for-agent`** → straight to `refactor-implement`, bypassing `refactor-prioritize`/`refactor-design` both, same as a resume-candidate below.
-- **Plan comment present, but flagged and still waiting** (an open question on the issue, `ready-for-agent` not yet added — `skills/refactor-design/references/decision-gate.md`) → not resumable this pass. Leave `Pending candidates` as-is and continue below exactly as if it named nothing — a human hasn't cleared it yet, and it must not block the rest of the backlog from being worked.
+- **Plan comment present, but flagged and still waiting** (an open question on the issue, `ready-for-agent` not yet added — `skills/refactor-design/references/decision-gate.md`) → not resumable this pass.
+  - API access available (native-label tracker) → step 3b below can rediscover this same issue on any future pass regardless of `Pending candidates`. Leave the field as-is and continue below exactly as if it named nothing — a human hasn't cleared it yet, and it must not block the rest of the backlog from being worked.
+  - Git-only fallback → `Pending candidates` is the *only* record this candidate exists at all; nothing can rediscover it otherwise. Don't let anything overwrite that field this pass — stop the pass here instead, reporting that the issue is still waiting on `ready-for-agent`.
 
 ### 3. Detect closed/merged remembered state
 
@@ -107,4 +109,4 @@ Handed onward by the orchestrator, plainly:
 
 ## Completion criterion
 
-Findings (if any) handed to `refactor-learn`, a resume-candidate or a pending candidate (if any) handed straight to `refactor-implement`/`refactor-design` per above, proposals (if any) handed to `refactor-prioritize` — or a precondition stopped the pass and the report says which. Never a node together with entries past `structural-scan` in the same list. A flagged candidate still waiting on `ready-for-agent` is neither a finding nor a proposal nor handed anywhere this pass — silently skipped, same as an untouched open MR.
+Findings (if any) handed to `refactor-learn`, a resume-candidate or a pending candidate (if any) handed straight to `refactor-implement`/`refactor-design` per above, proposals (if any) handed to `refactor-prioritize` — or a precondition stopped the pass and the report says which. Never a node together with entries past `structural-scan` in the same list. A flagged candidate still waiting on `ready-for-agent`, found via step 3b on a native tracker, is neither a finding nor a proposal nor handed anywhere this pass — silently skipped, same as an untouched open MR. Found instead as step 2's own `Pending candidates` entry on a git-only tracker → the pass stops here, same as any other precondition failure — nothing can rediscover this candidate later if something else overwrites that field.

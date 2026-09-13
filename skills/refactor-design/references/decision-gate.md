@@ -23,8 +23,10 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
 Nothing else about the issue changes — it stays open, `refactor:candidate` unchanged; only whether
 `refactor-implement` may run against it this pass. The orchestrator
 (`skills/continuous-refactoring/SKILL.md` step 5) skips implementation for a flagged candidate still
-missing `ready-for-agent`; `refactor-scan` (`SKILL.md` steps 2 and 3b) treats it as not resumable yet
-and looks for other work instead, picking it back up the moment `ready-for-agent` appears.
+missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
+(`refactor-scan/SKILL.md` steps 2 and 3b): a native-label tracker can always rediscover it later, so
+scan looks for other work instead of waiting on it; a git-only tracker has no such rediscovery, so the
+pass stops there rather than risk losing track of it.
 
 ## A genuine breaking change
 

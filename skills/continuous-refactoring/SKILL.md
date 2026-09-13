@@ -37,7 +37,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
    - No git repository → pass ends now, nothing else runs (not even step 6).
    - Backlog full → skip to step 5 with scan's findings, no new candidate.
    - Resume-candidate (an open MR with reviewer activity newer than its last commit) → skip straight to step 5 with it; steps 2–4 don't run.
-   - Pending candidate, resumable → skip straight to step 4 (no plan comment yet) or step 5 (plan comment present, and either unflagged or now carrying `ready-for-agent`); steps in between don't run. Pending candidate found but still flagged and waiting (`skills/refactor-design/references/decision-gate.md`) → treated as though none was found; continue below.
+   - Pending candidate, resumable → skip straight to step 4 (no plan comment yet) or step 5 (plan comment present, and either unflagged or now carrying `ready-for-agent`); steps in between don't run. Pending candidate found but still flagged and waiting (`skills/refactor-design/references/decision-gate.md`) → native tracker → treated as though none was found, continue below; git-only fallback → the pass ends here instead (`refactor-scan/SKILL.md` step 2) — `Pending candidates` is the only record of it, so nothing else may file over that field this pass.
    - A flagged candidate found already carrying `ready-for-agent` (`refactor-scan` step 3b) → skip straight to step 5, same as a resume-candidate; steps 2–4 don't run.
    - Otherwise → **findings** (possibly empty) go to step 2, **proposals** (every unblocked node's Name, never slugs) go to step 3.
 
