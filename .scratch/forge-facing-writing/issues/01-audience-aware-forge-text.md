@@ -46,7 +46,7 @@ can use.
 
 **Priority:** low.
 
-**Status:** ready-for-agent
+**Status:** done — PR #83
 
 Settled without a full `/grilling` session (narrow scope, no deep decision tree) — the user confirmed
 each default below by not overriding it, except jargon leakage, which was explicitly added to scope:
