@@ -31,7 +31,7 @@ Runs only when scan produced findings; the closing call still happens regardless
 For each finding:
 
 - Merged → mark the candidate `done`, close the issue.
-- Closed without merge → closing comments support a structural rejection (a maintainer gave a load-bearing reason) → mark `wontfix`, close the issue, file a learned rejection under the Refactoring Notes' `out-of-scope/`; otherwise ask the human before deciding. Load-bearing reason is a minimum PHP version the target doesn't meet → also record it machine-parseably (`**Blocked by:** PHP >= X.Y`) so a later pass detects the reversal automatically (`tooling_tree.py`'s `detect_nodes()`).
+- Closed without merge → closing comments support a structural rejection (a maintainer gave a load-bearing reason) → mark `wontfix`, close the issue, file a learned rejection under the Refactoring Notes' `out-of-scope/` — a human-readable entry, written per `skills/continuous-refactoring/references/forge-facing-writing.md`; otherwise ask the human before deciding. Load-bearing reason is a minimum PHP version the target doesn't meet → also record it machine-parseably (`**Blocked by:** PHP >= X.Y`) so a later pass detects the reversal automatically (`tooling_tree.py`'s `detect_nodes()`).
 - Tracked in the Refactoring Notes' `merge-requests.md` (`docs/agents/issue-tracker.md` names no native-label tracker) → drop the entry once resolved, either way. `docs/agents/issue-tracker.md` names a native-label tracker → nothing to remove there; closing the issue (above) already takes it out of the open-`refactor:candidate` remembered set `refactor-scan` reads.
 - **PHP-version reversal** (scan step 3 also reports these) → an existing entry in the Refactoring Notes' `out-of-scope/<node>.md` names a `Blocked by` condition the target now satisfies. Remove that file — the rejection is reversed, the node is proposable again on its own merits (not thereby fulfilled). Never for a rejection with no `Blocked by` field, or one scan didn't report as satisfied — those stay rejected until a human (or agent with a stated reason) removes them by hand.
 - **Fold-in still owed** (scan step 3's new finding — a still-open, still-draft candidate MR from an earlier interrupted pass) → check out that candidate's own branch (the exception above, not the dedicated bookkeeping branch), perform the same fold-in writes the closing call would (*Then, regardless of which branch...* below), then mark it ready for review as that list's last step — completing what the interrupted pass never finished. The candidate issue itself isn't closed by this — that still waits for the MR to actually merge, an ordinary "Merged" finding on some future pass.
@@ -48,9 +48,10 @@ candidate can't be done without changing behavior, so `refactor-implement` never
 `wontfix`, close the issue, file a learned rejection stating what was found and why: the Refactoring
 Notes' `out-of-scope/<node>.md` for a tooling-tree candidate, a closing note on the issue itself for a
 structural/externally-labeled/baseline-shrink candidate — the same split the early call's own
-rejection handling above already uses. Clear `Pending candidates` if it named this candidate. No MR
-to remember, no `Create-mode` bookkeeping to touch — land this via the dedicated bookkeeping branch,
-then skip straight to *Then, regardless of which branch...* below.
+rejection handling above already uses. Either one lands on the target repo's own forge —
+`skills/continuous-refactoring/references/forge-facing-writing.md`. Clear `Pending candidates` if it
+named this candidate. No MR to remember, no `Create-mode` bookkeeping to touch — land this via the
+dedicated bookkeeping branch, then skip straight to *Then, regardless of which branch...* below.
 
 Otherwise, given a freshly opened MR (from `refactor-implement`, if the pass got that far):
 
