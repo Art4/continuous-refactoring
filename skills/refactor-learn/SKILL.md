@@ -24,6 +24,19 @@ candidate can't be done without changing behavior.
 
 ## Process
 
+**Precondition, both calls: a genuine event, or stop.** Neither call writes anything — no branch
+opens, no ledger, ADR, `CONTEXT.md`, `Fulfilled nodes`, issue-label, or `out-of-scope` write happens —
+unless it has something real to act on. Early call: at least one finding from `refactor-scan`. Closing call: a
+freshly opened MR from `refactor-implement`, or a design-time breaking-change finding from
+`refactor-design`. Neither present → stop immediately, report "nothing to do". In the ordinary
+orchestrated pass this mostly guards the closing call — the orchestrator already skips calling the
+early call when scan found nothing (`continuous-refactoring/SKILL.md` step 2), but still calls the
+closing call unconditionally every pass, including one where nothing above it produced anything. This
+same check is also what makes a human's direct, standalone `/refactor-learn` invocation — bypassing
+the orchestrator entirely — safe: with nothing handed to it, it stops instead of inventing work.
+`Fulfilled nodes` in particular is never, by itself, a reason to open a branch — see its own note
+below.
+
 ### Early call — findings only (from `refactor-scan`, if any)
 
 Runs only when scan produced findings; the closing call still happens regardless, at the end. These are bookkeeping writes too — land via the dedicated bookkeeping branch/MR, except **fold-in still owed** below, which rides the candidate's own branch (the exception above).
@@ -35,13 +48,13 @@ For each finding:
 - Tracked in the Refactoring Notes' `merge-requests.md` (`docs/agents/issue-tracker.md` names no native-label tracker) → drop the entry once resolved, either way. `docs/agents/issue-tracker.md` names a native-label tracker → nothing to remove there; closing the issue (above) already takes it out of the open-`refactor:candidate` remembered set `refactor-scan` reads.
 - **PHP-version reversal** (scan step 3 also reports these) → an existing entry in the Refactoring Notes' `out-of-scope/<node>.md` names a `Blocked by` condition the target now satisfies. Remove that file — the rejection is reversed, the node is proposable again on its own merits (not thereby fulfilled). Never for a rejection with no `Blocked by` field, or one scan didn't report as satisfied — those stay rejected until a human (or agent with a stated reason) removes them by hand.
 - **Fold-in still owed** (scan step 3's new finding — a still-open, still-draft candidate MR from an earlier interrupted pass) → check out that candidate's own branch (the exception above, not the dedicated bookkeeping branch), perform the same fold-in writes the closing call would (*Then, regardless of which branch...* below), then mark it ready for review as that list's last step — completing what the interrupted pass never finished. The candidate issue itself isn't closed by this — that still waits for the MR to actually merge, an ordinary "Merged" finding on some future pass.
-- **Secret history scan finding** (scan step 4c) → file a `refactor:priority` candidate issue per finding, same three-field shape (Where/Problem/Signal) any other candidate issue uses: Where is the file/line, Problem is the scanner's own rule/finding id and a short description — **the secret's value redacted** — Signal is Security (`skills/refactor-prioritize/references/signals.md`). Filed directly rather than surfaced through `refactor-prioritize`'s Select mode — nothing to explore, the finding is already concrete. Once every finding from this pass's scan is filed (zero findings counts as "every finding filed" too), write the Refactoring Notes' `bookkeeping.md`'s `Secret history scan` field to `done` — this scan runs at most once per target (`refactor-scan/SKILL.md` step 4c), so this write never repeats.
+- **Secret history scan finding** (scan step 4c) → file a `refactor:priority` candidate issue per finding, same three-field shape (Where/Problem/Signal) any other candidate issue uses: Where is the file/line, Problem is the scanner's own rule/finding id and a short description — **the secret's value redacted** — Signal is Security (`skills/refactor-prioritize/references/signals.md`). Filed directly rather than surfaced through `refactor-prioritize`'s Select mode — nothing to explore, the finding is already concrete. Once every finding from this pass's scan is filed (zero findings counts as "every finding filed" too), write the Refactoring Notes' `bookkeeping.md`'s `Secret history scan` field to `done (<today's date>)` — e.g. `done (2026-09-14)`, the date this write happens, purely for human-readable audit trail (nothing in the suite ever reads or compares it) — this scan runs at most once per target (`refactor-scan/SKILL.md` step 4c), so this write never repeats.
 
 `done`/`wontfix` are the shared triage-role labels (`docs/agents/triage-labels.md`), not suite-specific — closing the issue is what takes it out of the backlog.
 
 A pass that only makes this call (no fresh candidate this run) is still a complete pass.
 
-### Closing call — always, at the end of the pass
+### Closing call — always invoked, but only writes when it has something real (see precondition above)
 
 **A design-time breaking-change finding from `refactor-design`** (this pass's design discovered the
 candidate can't be done without changing behavior, so `refactor-implement` never ran) → mark
@@ -65,7 +78,7 @@ Then, regardless of which branch the writes above rode:
 
 - Record an ADR (`docs/adr/`) for any decision a future scan must not re-litigate (see `/domain-modeling`).
 - Update `CONTEXT.md` with terms that crystallised this pass.
-- Write the Refactoring Notes' `bookkeeping.md`'s `Fulfilled nodes` — unconditionally, last. Algorithm, including the parser-vs-fallback overwrite rules and a worked example: `skills/refactor-learn/references/fulfilled-nodes-write.md`.
+- Write the Refactoring Notes' `bookkeeping.md`'s `Fulfilled nodes` — last, every time this call reaches this point (which the precondition above already guarantees means a genuine delivery or rejection this pass, never a standalone cache refresh). Algorithm, including the parser-vs-fallback overwrite rules and a worked example: `skills/refactor-learn/references/fulfilled-nodes-write.md`.
 - **Last of all**: the branch these writes just landed on carries a candidate MR still marked draft (`opening-a-merge-request.md`'s *Draft candidate MRs* — opened as one this same pass, or resumed via the early call's **fold-in still owed** finding above) → mark it ready for review now that every fold-in write above is actually pushed (`gh pr ready` / `glab mr update <n> --ready`). Not draft (the ordinary non-native-tracker/dedicated-branch case) → nothing to do here.
 
 ## Fallback
@@ -74,6 +87,8 @@ Then, regardless of which branch the writes above rode:
 
 ## Completion criterion
 
-**Early call:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's file removed, a fold-in-still-owed candidate's MR marked ready for review, every secret-history-scan finding filed as a `refactor:priority` candidate with `Secret history scan` written `done`, or an explicit "asked the human, waiting"), the remembered set reflects it before `refactor-prioritize` runs, and every write went out through a branch — the dedicated bookkeeping branch (opened as an MR, or — no forge/remote available — handed to the human per `opening-a-merge-request.md`) for every finding type except fold-in-still-owed, which rides the candidate's own already-open branch instead (the exception above).
+**Both calls, precondition not met:** the call stopped immediately and reported "nothing to do" — no branch opened, nothing written. This is a complete, valid outcome, not a failure — see the precondition above.
 
-**Closing call:** a freshly delivered candidate (if any) is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with `Pending candidates` cleared — or, a design-time breaking-change finding (if any) is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and `Pending candidates` cleared the same way — `Fulfilled nodes` is written (full re-derivation when the parser ran, additive/narrow otherwise), a candidate MR left in draft by this pass is marked ready for review, and every write went out through a branch — the candidate's own already-open branch (native tracker, MR opened this pass), the dedicated bookkeeping one, or the `loop-config` candidate's own as that exception's narrowest case — never a direct commit to the default branch (opened as an MR where forge access exists).
+**Early call, precondition met:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's file removed, a fold-in-still-owed candidate's MR marked ready for review, every secret-history-scan finding filed as a `refactor:priority` candidate with `Secret history scan` written `done (<date>)`, or an explicit "asked the human, waiting"), the remembered set reflects it before `refactor-prioritize` runs, and every write went out through a branch — the dedicated bookkeeping branch (opened as an MR, or — no forge/remote available — handed to the human per `opening-a-merge-request.md`) for every finding type except fold-in-still-owed, which rides the candidate's own already-open branch instead (the exception above).
+
+**Closing call, precondition met:** a freshly delivered candidate is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with `Pending candidates` cleared — or, a design-time breaking-change finding is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and `Pending candidates` cleared the same way — `Fulfilled nodes` is written (full re-derivation when the parser ran, additive/narrow otherwise), a candidate MR left in draft by this pass is marked ready for review, and every write went out through a branch — the candidate's own already-open branch (native tracker, MR opened this pass), the dedicated bookkeeping one, or the `loop-config` candidate's own as that exception's narrowest case — never a direct commit to the default branch (opened as an MR where forge access exists).

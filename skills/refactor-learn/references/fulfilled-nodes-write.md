@@ -1,7 +1,9 @@
 # Writing `Fulfilled nodes`
 
-Part of `refactor-learn/SKILL.md`'s closing call, always last, regardless of which branch the pass's
-other writes rode.
+Part of `refactor-learn/SKILL.md`'s closing call, last, regardless of which branch the pass's other
+writes rode — but only ever reached once that call's own precondition already held (a genuine
+delivery or rejection this pass), never a standalone reason to open a branch on its own
+(`docs/adr/0051-refactor-learn-requires-a-genuine-event.md`).
 
 ## Read fresh, not stale
 
