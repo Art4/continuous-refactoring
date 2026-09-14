@@ -24,18 +24,24 @@ candidate can't be done without changing behavior.
 
 ## Process
 
-**Precondition, both calls: a genuine event, or stop.** Neither call writes anything — no branch
-opens, no ledger, ADR, `CONTEXT.md`, `Fulfilled nodes`, issue-label, or `out-of-scope` write happens —
-unless it has something real to act on. Early call: at least one finding from `refactor-scan`. Closing call: a
-freshly opened MR from `refactor-implement`, or a design-time breaking-change finding from
-`refactor-design`. Neither present → stop immediately, report "nothing to do". In the ordinary
-orchestrated pass this mostly guards the closing call — the orchestrator already skips calling the
-early call when scan found nothing (`continuous-refactoring/SKILL.md` step 2), but still calls the
-closing call unconditionally every pass, including one where nothing above it produced anything. This
-same check is also what makes a human's direct, standalone `/refactor-learn` invocation — bypassing
-the orchestrator entirely — safe: with nothing handed to it, it stops instead of inventing work.
-`Fulfilled nodes` in particular is never, by itself, a reason to open a branch — see its own note
-below.
+**Precondition, both calls: a genuine event that was actually handed to this call, or stop — never go
+looking for one.** Neither call writes anything — no branch opens, no ledger, ADR, `CONTEXT.md`,
+`Fulfilled nodes`, issue-label, or `out-of-scope` write happens — unless it has something real to act
+on. Early call: at least one finding, named by whoever invoked this call (ordinarily `refactor-scan`,
+in its own `## Output`). Closing call: a freshly opened MR, named by `refactor-implement`, or a
+design-time breaking-change finding, named by `refactor-design`. This is step zero, before any other
+read — querying the tracker for open MRs, re-reading `bookkeeping.md`, scanning `merge-requests.md` to
+see whether a precondition might be satisfiable is exactly the detection work `refactor-scan`/
+`refactor-implement` already own; this skill only ever acts on what the pass that produced it named,
+the same "detect, never write" discipline `refactor-scan` already holds itself to. Neither named →
+stop immediately, report "nothing to do", before reading anything else. In the ordinary orchestrated pass this mostly
+guards the closing call — the orchestrator already skips calling the early call when scan found
+nothing (`continuous-refactoring/SKILL.md` step 2), but still calls the closing call unconditionally
+every pass, including one where nothing above it produced anything. This same check is also what
+makes a human's direct, standalone `/refactor-learn` invocation — bypassing the orchestrator
+entirely — safe: named nothing, it stops before touching any state, instead of inventing work by
+going to check for itself. `Fulfilled nodes` in particular is never, by itself, a reason to open a
+branch — see its own note below.
 
 ### Early call — findings only (from `refactor-scan`, if any)
 

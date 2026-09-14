@@ -107,3 +107,12 @@ this same review, rejected: too many call sites to touch for the naming clarity 
 > `refactor-learn/SKILL.md`'s ADR-0026) — cleaned those up too, all three already stated their rule
 > inline. 315/315 tests green throughout, validator clean (only the same pre-existing size/duplication
 > advisories as on `main`). Ready for review.
+
+> **2026-09-14 (live test finding):** User ran `/refactor-learn` standalone with no input and reported
+> it stopped correctly, but still read open MRs and analyzed `bookkeeping.md` *before* stopping — the
+> precondition text said "stop immediately" but never said the check itself must rely only on what was
+> actually handed to the call. Fixed: the precondition paragraph now explicitly forbids investigating
+> to find a satisfying event (querying the tracker, re-reading `bookkeeping.md`/`merge-requests.md`) —
+> that's `refactor-scan`'s/`refactor-implement`'s own detection job, never this skill's; a direct
+> invocation naming nothing already means "neither present," checked before any other read. 315/315
+> tests still green, validator clean.
