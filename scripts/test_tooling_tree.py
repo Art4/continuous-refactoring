@@ -3007,7 +3007,7 @@ class PortabilityTests(unittest.TestCase):
 
 
 class DirectlyUnblockedChildrenTests(unittest.TestCase):
-    """The MR outlook's fan-out diagram data (opening-a-merge-request.md,
+    """The outlook comment's fan-out diagram data (refactor-implement/references/outlook-comment.md,
     ticket 47/ADR-0027): every node landed_node's fulfilment newly makes
     proposable, not next_candidates()'s full current set."""
 

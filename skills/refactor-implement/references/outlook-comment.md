@@ -1,10 +1,6 @@
 # Posting the Outlook comment
 
-`refactor-implement` step 5's own instruction, run once the MR is open, tooling-tree candidate only —
-moved off the MR description and onto the candidate's own issue
-(`docs/adr/0051-refactor-learn-requires-a-genuine-event.md`'s sibling decision,
-`docs/adr/0052-grilling-decision-trail-separate-from-decision-gate.md`; see also
-`skills/continuous-refactoring/references/opening-a-merge-request.md`'s own note).
+`refactor-implement` step 5's own instruction, run once the MR is open, tooling-tree candidate only.
 
 Post one plain-sentence comment on the *candidate issue* (never the MR description) naming the next
 node's **Name** and working its Purpose into the same sentence (e.g. "next up: Composer — dependency

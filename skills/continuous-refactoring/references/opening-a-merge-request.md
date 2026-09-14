@@ -14,12 +14,6 @@ Rules for any suite skill opening or basing a merge request (MR): `refactor-impl
 
 **Housekeeping mention.** This MR's own tooling-tree node names a `Housekeeping` field, contributed to `docs/refactoring/housekeeping-template.md` per that node's own entry → say so, one line, in the same plain-facts block: what got registered, and that `/continuous-housekeeping` is how to start using it. If this MR is the first thing to ever create that file on this target, say that too — the first housekeeping check on this repo is worth a human noticing, not just a diff they might skim past.
 
-**No outlook in the description.** A tooling-tree candidate's MR description carries no "what this
-unlocks next" section — that now lands on the candidate's own **issue** instead, as a comment
-`refactor-implement` posts at MR-opening time (`refactor-implement/SKILL.md` step 5's own Outlook
-instruction), not on the MR itself. A structural candidate never had one either way — there's no
-single next child a deepening unlocks the way a tree node does.
-
 **No forge/remote available.** `git remote -v` (or equivalent) shows nothing, or the configured remote can't be reached — there is nowhere to push to, in any create-mode. This is not the same situation `git-only-reconciliation.md` covers (that's "a remote exists, only the API is unavailable") — here there's no remote at all. Don't invent a substitute: no local-only "merge request," no direct commit to the default branch. Stop at this step and hand the branch to the human with both options named:
 
 - **They commit it themselves** — merge or cherry-pick the branch into the default branch by hand, skipping review. Reasonable for a low-stakes, first-ever change (`loop-config` itself is the common case).

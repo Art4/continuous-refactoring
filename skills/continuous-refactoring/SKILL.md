@@ -53,7 +53,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 ## Opening a merge request
 
-Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), basing, description, outlook — in `skills/continuous-refactoring/references/opening-a-merge-request.md`.
+Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), basing, description — in `skills/continuous-refactoring/references/opening-a-merge-request.md`. The tooling-tree candidate's own outlook comment (what it unlocks next) lives on the issue instead — `skills/refactor-implement/references/outlook-comment.md`.
 
 ## Fallback
 
