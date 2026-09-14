@@ -68,7 +68,7 @@ dedicated bookkeeping branch, then skip straight to *Then, regardless of which b
 
 Otherwise, given a freshly opened MR (from `refactor-implement`, if the pass got that far):
 
-- `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → nothing to remember here — `refactor-implement` step 5's `Closes #<n>` on the MR is already the durable record, the tracker's own native issue↔PR cross-reference (`docs/adr/0026-drop-delivered-label-use-native-pr-linkage.md`); no label to apply. Otherwise remember it in the Refactoring Notes' `merge-requests.md`: URL, candidate issue, tooling-tree node name (blank for structural), base branch.
+- `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → nothing to remember here — `refactor-implement` step 5's `Closes #<n>` on the MR is already the durable record, the tracker's own native issue↔PR cross-reference; no label to apply. Otherwise remember it in the Refactoring Notes' `merge-requests.md`: URL, candidate issue, tooling-tree node name (blank for structural), base branch.
 - Clear the Refactoring Notes' `bookkeeping.md`'s `Pending candidates` — this candidate now has an MR, so the resume marker no longer applies.
 - `Create-mode` is normally already set — decided once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`), and written by `refactor-implement` when it created `bookkeeping.md`. Narrow fallback only: `bookkeeping.md` predates this convention and `Create-mode` is genuinely unset → record what `refactor-implement` used this pass and treat it as decided from here on, don't re-derive it every pass.
 
