@@ -37,7 +37,7 @@ tests).
 
 **Priority:** low — internal suite-quality work, no user-facing bug.
 
-**Status:** in progress.
+**Status:** done — PR #84.
 
 Settled via `/grill-with-docs` (11 questions across 2 rounds, all resolved without disagreement):
 
@@ -88,4 +88,22 @@ this same review, rejected: too many call sites to touch for the naming clarity 
 > erstmal so, weil die umbenennung zu viele Eingriffe bedeutet"). The remaining six points were then
 > run through `/grill-with-docs` and are captured above.
 
-> **2026-09-14 (implement):** [to be filled in once implementation lands]
+> **2026-09-14 (implement):** Landed on `scratch/refactor-learn-precondition-ticket` (PR #84) across
+> four commits. First: the six points themselves — the precondition guard plus the
+> `Fulfilled nodes`-bundling rule in `refactor-learn/SKILL.md` (ADR-0051), comment-reading added to
+> all three `refactor-design` grounding paths, the Decision trail mechanism in
+> `structural-candidate.md` (ADR-0052), the Outlook move to a new
+> `refactor-implement/references/outlook-comment.md` (kept `refactor-implement/SKILL.md` from
+> tipping the validator's word-count advisory), and the dated `Secret history scan` field — new ADRs,
+> `CONTEXT.md`'s **Decision trail** entry, and a changelog fragment included. Two review rounds
+> followed: first, dropped a leftover "No outlook in the description" negative-framing bullet from
+> `opening-a-merge-request.md` plus three now-stale citations to the old outlook location
+> (`continuous-refactoring/SKILL.md`, `tooling_tree.py`'s `--unblocked-by` help string, a test
+> docstring, and `outlook-comment.md`'s own header, which also cited the wrong ADRs). Second: noticed
+> the four `docs/adr/0051-...` citations added to `skills/`/`references/` content had slipped past
+> the validator's `adr_issues()` check, which only regexed the bare `ADR-NNNN` form — removed those,
+> then widened the check to also catch backtick-quoted `docs/adr/NNNN-slug.md` paths (two new tests),
+> which in turn caught two pre-existing violations (`loop-config-interview.md`'s ADR-0025/0026,
+> `refactor-learn/SKILL.md`'s ADR-0026) — cleaned those up too, all three already stated their rule
+> inline. 315/315 tests green throughout, validator clean (only the same pre-existing size/duplication
+> advisories as on `main`). Ready for review.
