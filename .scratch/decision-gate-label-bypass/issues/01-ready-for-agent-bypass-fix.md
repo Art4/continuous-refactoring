@@ -75,3 +75,15 @@ Settled via `/grill-with-docs` (4 questions, one round each plus a follow-up fro
 > same three-way routing), `CONTEXT.md`'s **Flagged candidate** entry. 315/315 tests green, validator
 > clean (only pre-existing size/duplication advisories, `refactor-scan/SKILL.md`'s word count grew
 > further with the expanded routing logic). Ready for review.
+
+> **2026-09-15 (regression test):** Manually verified live against `opencode/muse-spark-1.2-contributor-free`
+> in a throwaway sandbox — both the `refactor-design` label correction and `refactor-scan`'s hold-back
+> behaved exactly as designed. Turned that into a permanent regression fixture,
+> `fixtures/php/php-decision-gate-bypass` (`project`/`expected` shape, `expected/behavior.md`
+> describing what a pass should do), plus a new `fixtures/harness/run.sh decision-gate-bypass`
+> subcommand: runs `refactor-design` via opencode against the seeded issue, then a real (non-advisory)
+> grep check that `ready-for-agent` was actively cleared and `needs-info` added, then a second
+> `refactor-scan` pass checked (advisory) for the correct hold-back. Ran it twice end-to-end —
+> caught and fixed one false-negative in the check itself (too-greedy `grep` also matched a
+> `**Labels:**`-looking line inside the model's own explanatory comment; fixed with `-m 1`), both
+> runs after that passed clean. Local-only, advisory, non-CI — not wired into the CI roadmap matrix.
