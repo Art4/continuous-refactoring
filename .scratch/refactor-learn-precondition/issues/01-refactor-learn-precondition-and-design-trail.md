@@ -133,3 +133,6 @@ this same review, rejected: too many call sites to touch for the naming clarity 
 > were left as-is — lower risk, and a fuller audit of every suite-root-relative citation is really the
 > same question the parked "skill suite deploy without dev clutter" idea already raises, not something
 > to fold into this ticket. 315/315 tests still green, validator clean.
+
+> **2026-09-15 (confirmed):** User re-ran the loop against `continuous-refactoring.de` — noticeably
+> faster, no more sub-agent dispatched to locate `tooling_tree.py`. Fix confirmed live.
