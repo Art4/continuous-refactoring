@@ -116,3 +116,20 @@ this same review, rejected: too many call sites to touch for the naming clarity 
 > that's `refactor-scan`'s/`refactor-implement`'s own detection job, never this skill's; a direct
 > invocation naming nothing already means "neither present," checked before any other read. 315/315
 > tests still green, validator clean.
+
+> **2026-09-15 (live test finding):** User ran the full loop against `continuous-refactoring.de`
+> (skills installed by symlink under `.claude/skills/refactor-scan` and `.agents/skills/refactor-scan`)
+> and observed a sub-agent dispatched every pass just to locate the skill files and
+> `tooling_tree.py`. Root cause: `refactor-scan` step 4's literal instruction ran
+> `python3 skills/refactor-scan/references/tooling_tree.py <target-repo>` — a suite-repo-root-relative
+> path that only resolves when the current working directory happens to be the suite's own repo.
+> ADR-0014 already made the script itself resolve its sibling tree docs self-relatively
+> (`Path(__file__).resolve().parent`) for exactly this symlink/copy-install case, but the invocation
+> instruction in the surrounding prose was never brought in line with it — and `outlook-comment.md`
+> (this same ticket, point 4) inherited the same broken pattern verbatim from the MR-description text
+> it replaced. Fixed both to resolve relative to wherever `refactor-scan`'s own files are actually
+> installed, never the suite repo as cwd. Not audited further: other, non-executed citations of
+> `tooling_tree.py` elsewhere in the suite (used purely as an identifying name, not a run command)
+> were left as-is — lower risk, and a fuller audit of every suite-root-relative citation is really the
+> same question the parked "skill suite deploy without dev clutter" idea already raises, not something
+> to fold into this ticket. 315/315 tests still green, validator clean.
