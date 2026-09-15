@@ -24,6 +24,7 @@ Tiers:
     agent-loop  Prepare an isolated sandbox + prompt for a full-pass, Agent-tool-subagent-observed run (local-only, see fixtures/README.md)
     judge       LLM-judge rubric grading against fixtures/harness/rubric.md (local-only, advisory — ticket 27)
     lift        With-skill vs without-skill lift measurement (local-only, advisory — ticket 27)
+    decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
@@ -42,6 +43,7 @@ Examples:
     $(basename "$0") agent-loop php-partial                   # prepare sandbox + prompt, then spawn a subagent yourself
     $(basename "$0") judge php-project-with-candidates --opencode
     $(basename "$0") lift php-partial --opencode
+    $(basename "$0") decision-gate-bypass php-decision-gate-bypass --opencode
 EOF
     exit 1
 }
@@ -627,6 +629,69 @@ run_lift() {
     log_info "  $(basename "$0") judge $FIXTURE --opencode"
 }
 
+# Tier 5 — decision-gate ready-for-agent bypass regression (ADR-0053).
+# Local-only, advisory, non-CI. Reproduces the bug: an externally-labeled
+# candidate issue pre-tagged ready-for-agent (fixture:
+# php-decision-gate-bypass) should have that label actively corrected once
+# refactor-design finds a decision meeting the ADR bar, and refactor-scan's
+# resume check should then hold the candidate back instead of routing it to
+# refactor-implement. The LLM run itself isn't deterministic, but the
+# post-run label check is a real, non-advisory grep against the fixture's
+# own committed expectation, not a judgment call.
+#
+# Uses opencode directly with --auto (unlike run_opencode_advisory, which
+# doesn't pass it) — this scenario's own broader, unattended-mode prompt was
+# observed to make the model explore outside its working directory, which
+# --auto is what avoids the resulting permission wall (see
+# fixtures/README.md's troubleshooting section).
+run_decision_gate_bypass() {
+    log_info "=== Decision-gate ready-for-agent bypass regression — fixture: $FIXTURE ==="
+    local opencode_bin
+    opencode_bin="$(resolve_opencode_bin)" || return 0
+
+    local issue="$FIXTURE_DST/.scratch/refactor/issues/01-unify-retry-logic.md"
+    if [[ ! -f "$issue" ]]; then
+        log_fail "Missing seeded issue: $issue (fixture: $FIXTURE)"
+        return 1
+    fi
+
+    log_info "Before: $(grep -m 1 '^\*\*Labels:\*\*' "$issue")"
+
+    mkdir -p "$FIXTURE_DST/.agents"
+    ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
+
+    local design_out="/tmp/decision-gate-bypass-$FIXTURE-design.log"
+    local design_prompt="Run /refactor-design against issue .scratch/refactor/issues/01-unify-retry-logic.md in this repo. Follow skills/refactor-design/SKILL.md literally, step by step, including its decision gate (skills/refactor-design/references/decision-gate.md). This is an unattended pass — no human is present to answer questions live, follow the skill's own unattended-mode instructions. Report what you wrote to the issue file and which labels you changed, if any."
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$design_prompt" > "$design_out" 2>&1; then
+        log_info "Opencode design run failed or timed out — see $design_out (advisory, not failing test)"
+        rm -rf "$FIXTURE_DST/.agents"
+        return 0
+    fi
+
+    local labels_line
+    labels_line="$(grep -m 1 '^\*\*Labels:\*\*' "$issue" 2>/dev/null || echo '')"
+    log_info "After:  $labels_line"
+    if [[ "$labels_line" == *"needs-info"* && "$labels_line" != *"ready-for-agent"* ]]; then
+        log_pass "refactor-design actively cleared the pre-existing ready-for-agent and added needs-info"
+    else
+        log_fail "refactor-design did not correct the label as expected (ADR-0053) — see $design_out"
+    fi
+
+    local scan_out="/tmp/decision-gate-bypass-$FIXTURE-scan.log"
+    local scan_prompt="Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, step by step, starting with its Pending candidates resume check. Report explicitly: did it route the pending candidate to refactor-implement, or hold it back? Why?"
+    if timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$scan_prompt" > "$scan_out" 2>&1; then
+        if grep -qiE "held back|not routed|does not route|not resumable" "$scan_out"; then
+            log_pass "refactor-scan (advisory) reports holding the candidate back — see $scan_out"
+        else
+            log_info "refactor-scan output doesn't clearly confirm hold-back — check $scan_out by hand (advisory, non-blocking)"
+        fi
+    else
+        log_info "Opencode scan run failed or timed out — see $scan_out (advisory, not failing test)"
+    fi
+
+    rm -rf "$FIXTURE_DST/.agents"
+}
+
 # Main
 main() {
     reset_counters
@@ -653,6 +718,9 @@ main() {
             ;;
         lift)
             run_lift
+            ;;
+        decision-gate-bypass)
+            run_decision_gate_bypass
             ;;
         *)
             log_fail "Unknown tier: $TIER"

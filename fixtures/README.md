@@ -65,6 +65,15 @@ into the same pre-existing "open PHPStan chain" filler `php-clean` already docum
 `roadmap()`'s simulation loop once no real candidate remains, tracked separately) — not specific to this
 fixture, `next` is the fixture's real signal for the gate.
 
+### php-decision-gate-bypass
+
+Not a tooling-tree fixture — no `expected/roadmap.json`, deliberately excluded from the CI roadmap
+matrix. Two independent retry-with-backoff implementations with genuinely different observable
+contracts, plus a pre-seeded `.scratch/refactor/issues/01-unify-retry-logic.md` (Local Markdown
+tracker) already carrying `refactor:candidate, ready-for-agent` and claiming to be fully specified.
+Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053) — see
+`expected/behavior.md` for what a `refactor-design`/`refactor-scan` pass should do with it.
+
 ### Tier 4 — Trigger & Discoverability tests (ticket 27)
 
 Ticket 27's three negative controls split across two layers:
@@ -254,6 +263,14 @@ assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2
 ```
 
 Both commands share the same degrade-gracefully behavior as `roadmap --opencode`: no `opencode` binary found → one info line, exit clean, nothing fails.
+
+**Decision-gate `ready-for-agent` bypass regression** (local-only, advisory, non-CI; fixture: `php-decision-gate-bypass`, ADR-0053): reproduces the bug ADR-0053 fixes — an externally-labeled candidate issue pre-tagged `ready-for-agent`, describing a change that isn't actually fully specified (two retry implementations with genuinely different backoff contracts). Runs `refactor-design` against the seeded issue (`.scratch/refactor/issues/01-unify-retry-logic.md`), then checks — a real grep against the committed fixture, not a judgment call — whether the pre-existing `ready-for-agent` got actively cleared and `needs-info` added, per `skills/refactor-design/references/decision-gate.md`. A second pass then runs `refactor-scan` and looks (advisory, LLM output isn't deterministic) for it correctly holding the candidate back instead of routing it to `refactor-implement`. Full expected behavior: `fixtures/php/php-decision-gate-bypass/expected/behavior.md`.
+
+```bash
+./fixtures/harness/run.sh decision-gate-bypass php-decision-gate-bypass --opencode
+```
+
+Unlike the other `--opencode` checks above, this one passes `opencode run` the `--auto` flag directly (this scenario's broader, unattended-mode prompt was observed to make the model explore outside its working directory, tripping the permission wall `--auto` avoids — see Troubleshooting below) — same degrade-gracefully behavior otherwise.
 
 ## Expected Issues
 
