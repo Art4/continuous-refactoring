@@ -115,6 +115,12 @@ subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries a
   `refactor-scan` also now resolves `tooling_tree.py` relative to wherever the suite's skills are
   actually installed rather than assuming the suite's own repo is the current working directory —
   no more sub-agent dispatch just to locate it when running from a target repo. (#84)
+- Fixed a bug that could silently bypass the pre-implementation decision gate: a pre-existing
+  `ready-for-agent` label on an externally-filed issue was never cleared when `refactor-design`
+  flagged a decision meeting the ADR bar, so `refactor-scan`'s resume checks read it as already
+  confirmed and routed straight to `refactor-implement` without a human ever seeing the flagged
+  question. `refactor-design` now actively manages both `ready-for-agent` and `needs-info` in both
+  directions for every candidate it plans, not only the three decision-gate-eligible types. (#86)
 
 ## [0.3.0] - 2026-09-06
 
