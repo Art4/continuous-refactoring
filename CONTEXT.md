@@ -130,3 +130,11 @@ all. The plan carries a proposed default plus an explicit open question on the i
 `refactor-scan` treats a still-waiting one as not resumable — it doesn't block the rest of the
 backlog — and picks it back up the moment `ready-for-agent` appears.
 _Avoid_: blocked candidate, paused candidate
+
+**Decision trail**:
+A bundled issue comment `refactor-design` posts once grilling settles (structural and
+externally-labeled candidates only), naming every question that met the ADR bar and the answer
+reached live with the human — distinct from a **Flagged candidate**'s open question, which is
+unresolved and blocks `ready-for-agent`. Purely a record; unlike the decision gate, it never blocks
+anything. No qualifying question that pass → no comment.
+_Avoid_: grilling log, design notes

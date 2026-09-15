@@ -53,7 +53,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 ## Opening a merge request
 
-Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), basing, description, outlook — in `skills/continuous-refactoring/references/opening-a-merge-request.md`.
+Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `loop-config`'s own interview), basing, description — in `skills/continuous-refactoring/references/opening-a-merge-request.md`. The tooling-tree candidate's own outlook comment (what it unlocks next) lives on the issue instead — `skills/refactor-implement/references/outlook-comment.md`.
 
 ## Fallback
 
@@ -74,4 +74,4 @@ Examples: "Status: design flagged issue #12 for confirmation before implementing
 
 ## Completion criterion
 
-One full pass completed and loop state updated: `refactor-learn` ran at least once, `Fulfilled nodes` is written, and the pass's outcome is recorded — a delivered candidate's MR carries `Closes #<n>`, discoverable via the tracker's native linkage (or remembered in the ledger, on a local tracker), the issue closed once merged, nothing was actionable and that's reported, or (no forge/remote available) the candidate sits prepared on its own branch, handed to the human, per `opening-a-merge-request.md`.
+One full pass completed and loop state updated: `refactor-learn` ran at least once, and the pass's outcome is recorded — a delivered candidate's MR carries `Closes #<n>`, discoverable via the tracker's native linkage (or remembered in the ledger, on a local tracker), the issue closed once merged, nothing was actionable and that's reported, or (no forge/remote available) the candidate sits prepared on its own branch, handed to the human, per `opening-a-merge-request.md`. `Fulfilled nodes` is written whenever `refactor-learn`'s closing call had a genuine delivery or rejection this pass to record — not on a pass where nothing above it produced anything, where the call instead stops immediately with "nothing to do".

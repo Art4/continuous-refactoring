@@ -181,9 +181,8 @@ What `refactor-design` files as this candidate's plan
 (`skills/refactor-implement/SKILL.md` step 1's `loop-config` exception):
 
 - **Create-mode** → the Refactoring Notes' `bookkeeping.md`'s `Create-mode`
-  field — the sole write-authority (`docs/adr/0025-agents-md-gets-a-create-mode-pointer-not-the-value.md`).
-  `AGENTS.md`/`CLAUDE.md` (below) gets only a read-only pointer to it, never
-  the value itself.
+  field — the sole write-authority. `AGENTS.md`/`CLAUDE.md` (below) gets only
+  a read-only pointer to it, never the value itself.
 - **Tracker choice** → `docs/agents/issue-tracker.md`, created fresh:
   - **GitHub or GitLab:** title names which (`# Issue tracker: GitHub` /
     `GitLab`) — the one signal every lifecycle skill now reads instead of
@@ -191,8 +190,7 @@ What `refactor-design` files as this candidate's plan
     that labels are native (`refactor:candidate`, and the triage roles
     from `docs/agents/triage-labels.md` apply directly, no local mirror —
     no `refactor:delivered` or other in-flight label; a candidate's
-    linked pull request, native to the tracker, is what's in flight —
-    `docs/adr/0026-drop-delivered-label-use-native-pr-linkage.md`), and
+    linked pull request, native to the tracker, is what's in flight), and
     the two operations every skill needs ("file an issue": `gh`/`glab
     issue create` or the forge UI on `origin`; "check the external
     tracker": query the forge directly).

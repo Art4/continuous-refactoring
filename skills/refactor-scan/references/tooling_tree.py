@@ -1823,7 +1823,7 @@ if __name__ == "__main__":
     ap.add_argument("--steps", type=int, default=10, help="depth of the simulated `roadmap` lookahead — does not bound `next`, which is always every currently-unblocked node")
     ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree). Only scopes edges/gating (next, roadmap, tree.edges) -- detect_nodes' per-tool filesystem checks are hardcoded and always run regardless of --tree, so 'detected' in the JSON output may list nodes your override tree doesn't even define")
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
-    ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (opening-a-merge-request.md's outlook diagram) -- additive, does not change next/roadmap/detected")
+    ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (refactor-implement/references/outlook-comment.md's outlook diagram) -- additive, does not change next/roadmap/detected")
     args = ap.parse_args()
     repo = pathlib.Path(args.repo)
     tree_md = pathlib.Path(args.tree) if args.tree else None

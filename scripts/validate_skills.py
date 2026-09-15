@@ -16,10 +16,12 @@ Tier 1 — structural:
 - local file references (``docs/...``, ``CONTEXT.md``, ``*.md``) resolve to real
   files; target-repo artifacts (``CODING_STANDARDS.md``, ``CONTRIBUTING.md``)
   and target-repo suite state (``docs/refactoring/**``, ADR-0005) are exempt
-- ADR references (``ADR-NNNN``) are forbidden in skill prose and in
+- ADR references — the bare ``ADR-NNNN`` shorthand, or a backtick-quoted
+  ``docs/adr/NNNN-slug.md`` path — are forbidden in skill prose and in
   ``references/*.md`` — the suite's own ADRs are internal maintainer docs that
   never ship with a skill; a skill states the rule inline instead of citing
-  the decision that produced it
+  the decision that produced it (the bare ``docs/adr/`` directory mention, an
+  instruction to write a new ADR, is unaffected)
 - ``.scratch/`` file references and ``ticket N`` / ``PR #N`` citations are
   forbidden the same way — this suite's own internal issue tracker and forge
   history, never shipped with a skill; state the fact inline instead
@@ -267,13 +269,30 @@ def local_ref_issues(text, repo_root, skill=""):
     return issues
 
 
+_ADR_PATH_RE = re.compile(r"`(docs/adr/(\d{4})-[^`]+)`")
+
+
 def adr_issues(text, skill=""):
+    """Forbid citing a specific suite ADR from skill prose, in either spelling:
+    the bare ``ADR-NNNN`` shorthand, or a backtick-quoted
+    ``docs/adr/NNNN-slug.md`` path — same category, same reason (internal
+    maintainer doc, never shipped with the skill). The bare `` `docs/adr/` ``
+    directory mention (an instruction to *write* a new ADR there, not a
+    citation of one) is deliberately unaffected — only a path naming a
+    specific numbered ADR file is flagged."""
     issues = []
     for m in re.finditer(r"ADR-(\d{4})", text):
         num = m.group(1)
         issues.append(Issue(
             skill or f"ADR-{num}",
             f"skill prose references ADR-{num} — suite ADRs are internal maintainer docs, "
+            "never shipped with the skill; state the rule inline instead",
+        ))
+    for m in _ADR_PATH_RE.finditer(text):
+        ref = m.group(1)
+        issues.append(Issue(
+            skill or ref,
+            f"skill prose references '{ref}' — suite ADRs are internal maintainer docs, "
             "never shipped with the skill; state the rule inline instead",
         ))
     return issues

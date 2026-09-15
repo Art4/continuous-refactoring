@@ -11,9 +11,10 @@ resolves too.
 
 ## 3. Ground in the candidate
 
-Read the code the candidate names (and the issue `refactor-prioritize` filed — Where/Problem/Signal).
-Read `CONTEXT.md` and the ADRs in the area. Understand *why* it's a candidate before proposing
-anything.
+Read the code the candidate names (and the issue `refactor-prioritize` filed — Where/Problem/Signal,
+**and any comments already on it** — a human may have added context, a constraint, or a correction
+since it was filed). Read `CONTEXT.md` and the ADRs in the area. Understand *why* it's a candidate
+before proposing anything.
 
 ## 4. Grill toward the seam
 
@@ -34,3 +35,12 @@ require an actual behavior change → `skills/refactor-design/references/decisio
 continuing to step 5.
 
 Side effects happen inline as decisions crystallise (per `/domain-modeling`): naming a module after a concept not in `CONTEXT.md` → add the term. User rejects a design with a load-bearing reason a future scan shouldn't re-suggest → offer an ADR.
+
+**Decision trail.** Once the grilling frontier above is empty, before continuing to step 5: for every
+question raised while grilling that met the same three-factor ADR bar the decision gate uses (hard to
+reverse, surprising without context, a real trade-off) — regardless of whether it was answered live
+here or deferred to the decision gate above — post one bundled comment on the issue naming the
+question and the answer reached (`CONTEXT.md`'s **Decision trail**). This is separate from the
+decision gate: the gate blocks progress on an unresolved, unattended decision; this only records one
+already resolved, and never blocks anything. No qualifying question this pass → no comment. Follow
+`skills/continuous-refactoring/references/forge-facing-writing.md` like any other forge-facing text.

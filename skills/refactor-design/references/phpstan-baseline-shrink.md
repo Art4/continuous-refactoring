@@ -7,7 +7,8 @@ resuming/reading/grouping no longer lives here). Run this before step 5.
 
 ## 3. Plan the fix
 
-Read every file the chosen group touches (named on the issue `refactor-prioritize` filed). Design a
+Read every file the chosen group touches (named on the issue `refactor-prioritize` filed — and any
+comments already on it, which may narrow the scope or flag a file to leave alone). Design a
 fix that removes the finding without changing behavior — same "provably behavior-preserving" bar any
 other mechanical fix on this tree holds to. Reducing the group is enough; it doesn't have to empty in
 one MR (`phpstan.neon`'s own "strictly reduce" wording already allows this for a level-bump MR — the

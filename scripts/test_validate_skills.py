@@ -250,6 +250,14 @@ class AdrTests(unittest.TestCase):
     def test_no_adr_refs_ok(self):
         self.assertEqual(vs.adr_issues("No decisions here."), [])
 
+    def test_adr_path_ref_flagged(self):
+        issues = vs.adr_issues("See `docs/adr/0026-drop-delivered-label-use-native-pr-linkage.md`.")
+        self.assertTrue(any("0026-drop-delivered-label-use-native-pr-linkage.md" in i.message for i in issues))
+
+    def test_bare_adr_directory_mention_ok(self):
+        # An instruction to *write* a new ADR there, not a citation of one.
+        self.assertEqual(vs.adr_issues("Record an ADR (`docs/adr/`) for any decision."), [])
+
 
 class ScratchRefTests(unittest.TestCase):
     def test_scratch_ref_flagged(self):
