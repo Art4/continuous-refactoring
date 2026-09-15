@@ -6,14 +6,16 @@ Post one plain-sentence comment on the *candidate issue* (never the MR descripti
 node's **Name** and working its Purpose into the same sentence (e.g. "next up: Composer — dependency
 management for the Composer-stack track") — a later reader of the (by-then-closed) issue sees what
 this unlocked without digging through scan output. Nothing about how that was determined belongs in
-it — no shell command, no file path, no `Purpose:`-labelled field. To find it: re-run `python3
-skills/refactor-scan/references/tooling_tree.py <target-repo> --steps 1 --unblocked-by
-<landed-node-slug>` against the now-changed working tree and look up the returned `roadmap` entry's
-slug's Name in the tree doc. No `python3`, or not permitted → dispatch a sub-agent with
-`skills/refactor-scan/references/tree-walk-prompt.md`'s prompt (`{N}=1`) instead; no sub-agent
-mechanism → run that prompt's steps yourself inline. The sub-agent/inline fallback covers the sentence
-only — it has no equivalent for the diagram below, so a comment posted that way carries the sentence
-alone.
+it — no shell command, no file path, no `Purpose:`-labelled field. To find it: re-run
+`tooling_tree.py --steps 1 --unblocked-by <landed-node-slug>` against the now-changed working tree
+and look up the returned `roadmap` entry's slug's Name in the tree doc — the same script
+`refactor-scan` step 4 already runs, wherever `refactor-scan`'s own files are actually installed
+(its own `references/tooling_tree.py`, alongside its `SKILL.md`), never assumed relative to the
+suite's own repo as the current working directory. No `python3`, or not permitted → dispatch a
+sub-agent with `refactor-scan`'s own `references/tree-walk-prompt.md` prompt (`{N}=1`, same
+resolution rule) instead; no sub-agent mechanism → run that prompt's steps yourself inline. The
+sub-agent/inline fallback covers the sentence only — it has no equivalent for the diagram below, so a
+comment posted that way carries the sentence alone.
 
 When the same call's `unblocked_by` key holds **two or more** entries, append a Mermaid `flowchart`
 below the sentence in the same comment, fanning out from the landed node: one node per
