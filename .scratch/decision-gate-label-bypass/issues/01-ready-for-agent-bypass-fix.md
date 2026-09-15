@@ -21,7 +21,7 @@ gate ever ran.
 
 **Priority:** high — silently defeats a documented safety guarantee (ADR-0050).
 
-**Status:** done — PR TBD.
+**Status:** done — PR #86.
 
 Settled via `/grill-with-docs` (4 questions, one round each plus a follow-up from live discussion):
 
