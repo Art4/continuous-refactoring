@@ -126,9 +126,11 @@ the ADR bar (hard to reverse, surprising without context, a real trade-off) whil
 behavior-preserving — distinct from a **Finding**'s breaking-change case, which never gets a plan at
 all. The plan carries a proposed default plus an explicit open question on the issue
 (`skills/refactor-design/references/decision-gate.md`); `ready-for-agent`
-(`docs/agents/triage-labels.md`) is deliberately withheld until a human confirms or overrides it.
-`refactor-scan` treats a still-waiting one as not resumable — it doesn't block the rest of the
-backlog — and picks it back up the moment `ready-for-agent` appears.
+(`docs/agents/triage-labels.md`) is actively removed if the issue already carried one, and
+`needs-info` is added in its place — the visible "waiting on you" signal — until a human confirms or
+overrides it by commenting, removing `needs-info`, and adding `ready-for-agent` back.
+`refactor-scan` treats a still-waiting one (`needs-info` present) as not resumable — it doesn't block
+the rest of the backlog — and picks it back up the moment `ready-for-agent` appears.
 _Avoid_: blocked candidate, paused candidate
 
 **Decision trail**:

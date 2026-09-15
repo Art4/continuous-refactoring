@@ -28,8 +28,9 @@ An ordinary **tooling tree** node (`skills/refactor-scan/references/tooling-tree
 breaking change — `skills/refactor-design/references/decision-gate.md`. A breaking change → stop
 here entirely; nothing below applies to this candidate this pass (`refactor-learn`'s closing call
 handles it instead). A flagged decision → continue below exactly as usual, writing the plan and the
-open question together — the only difference from an ordinary candidate is that `ready-for-agent`
-is deliberately left off.
+open question together — the difference from an ordinary candidate is the labels: `decision-gate.md`
+handles those itself (`needs-info` added, `ready-for-agent` removed if present), so skip this step's
+own "Set `ready-for-agent`, last" below for this candidate this pass.
 
 **Tooling-tree node:** check first whether an issue titled exactly `Tooling tree: <Name>` (never the slug) is already open. Open but still minimal (Purpose line only, no Fulfilment check/MR scope — `refactor-prioritize`'s own pre-filing, step 2, hasn't won a ranking until now) → that's the issue, update its body now rather than filing a second one. Open and already carrying the full content (a prior pass got this far and was interrupted) → that's the issue, nothing to write here either. Neither found → file one fresh, titled that way, label **`refactor:candidate`**. Writing the body either way: the tree doc's content directly (Purpose, Fulfilment check, MR scope carried over precisely — they're load-bearing, that scope *is* the plan) — never introduced as a quotation or naming the tree doc's file path; it reads as its own plan. Skip `Name:` (already the title); skip `Tool` when `none`.
 
@@ -43,6 +44,17 @@ is deliberately left off.
 
 The plan follows the foundational refactoring rules: `skills/continuous-refactoring/references/foundational-refactoring-rules.md`.
 
+**Set `ready-for-agent`, last, unconditionally.** Reaching this point at all already means the
+decision gate above (where it applies) found neither a flagged decision nor a breaking change this
+pass — for a tooling-tree node or `loop-config`, the gate never runs at all, so this step is the only
+label handling they ever get. Once the writes above are done — freshly written, updated, or already
+complete from an earlier interrupted pass — add `ready-for-agent` (`docs/agents/triage-labels.md`) if
+the issue doesn't already carry it; leave it if it does. This is design's own explicit confirmation
+that the candidate is ready to implement, not merely its silence — and it's what lets a later pass
+(`refactor-scan/SKILL.md` steps 2 and 3b), or a human running these skills by hand, recognize a
+fully-designed issue on sight, whether its plan lives in the body (tooling-tree node, `loop-config`)
+or a comment (everything else). A flagged candidate never reaches this step this pass — `decision-gate.md` already handled its labels instead.
+
 ## Output
 
 The candidate issue, now carrying the plan (freshly filed here, or already filed by `refactor-prioritize`'s Select mode and now commented) → `refactor-implement`.
@@ -54,4 +66,4 @@ The candidate issue, now carrying the plan (freshly filed here, or already filed
 
 ## Completion criterion
 
-The candidate has an issue (newly filed, or already filed by `refactor-prioritize` and now commented) with a written plan. For a fresh filing (tooling-tree node, `loop-config`, externally-labeled candidate) — no native-label tracker only — `bookkeeping.md`'s `Pending candidates` names it (a native-label tracker deliberately skips this write; see step 5); for a structural/baseline-shrink candidate, `Pending candidates` was already set by `refactor-prioritize`'s Select mode, nothing new to check here. Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception). PHPStan baseline-shrink: a fix planned for this MR's slice of the group `refactor-prioritize` already picked — see `phpstan-baseline-shrink.md`.
+The candidate has an issue (newly filed, or already filed by `refactor-prioritize` and now commented) with a written plan — and, unless the decision gate flagged it (`needs-info` instead) or found a breaking change (no plan at all), `ready-for-agent` set. For a fresh filing (tooling-tree node, `loop-config`, externally-labeled candidate) — no native-label tracker only — `bookkeeping.md`'s `Pending candidates` names it (a native-label tracker deliberately skips this write; see step 5); for a structural/baseline-shrink candidate, `Pending candidates` was already set by `refactor-prioritize`'s Select mode, nothing new to check here. Structural: module, seam, interface, surviving tests, slice order — design survives grilling (no open frontier). Tooling tree node: the tree doc's Purpose/Fulfilment check/MR scope, carried onto the issue as its own plan (`loop-config`: the interview's recorded decisions instead — see step 5's exception). PHPStan baseline-shrink: a fix planned for this MR's slice of the group `refactor-prioritize` already picked — see `phpstan-baseline-shrink.md`.

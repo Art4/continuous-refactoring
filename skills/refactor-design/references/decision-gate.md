@@ -16,13 +16,20 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
   made.
 - Also write, in the same (or an additional) issue comment, the specific question this decision
   raises and the default chosen — plain enough that a human can confirm it as written, or override
-  it, by commenting and then adding `ready-for-agent` (`docs/agents/triage-labels.md`) once satisfied.
-  This lands on the target repo's own issue —
+  it, by commenting, removing `needs-info`, and adding `ready-for-agent`
+  (`docs/agents/triage-labels.md`) once satisfied. This lands on the target repo's own issue —
   `skills/continuous-refactoring/references/forge-facing-writing.md`.
-- Deliberately don't add `ready-for-agent` yourself. This is what makes the candidate a **flagged
-  candidate**: designed, but not yet cleared to implement.
+- **Actively manage both labels — don't just withhold one.** Add `needs-info`: the visible signal
+  that this issue is waiting on a human, not merely unprocessed. This is what makes the candidate a
+  **flagged candidate**: designed, but not yet cleared to implement. And remove `ready-for-agent` if
+  the issue already carries one — an externally-labeled candidate can arrive pre-labeled by whoever
+  filed it, believing it was already fully specified; that earlier assessment predates this question
+  and is now stale. When removing a pre-existing label, say so plainly in the same comment (e.g.
+  "this issue already carried `ready-for-agent`; removed pending the question above") — a label
+  disappearing without explanation is exactly the kind of silent, surprising action this suite avoids
+  elsewhere (`forge-facing-writing.md`).
 
-Nothing else about the issue changes — it stays open, `refactor:candidate` unchanged; only whether
+The issue stays open, `refactor:candidate` unchanged — only its triage labels, and whether
 `refactor-implement` may run against it this pass. The orchestrator
 (`skills/continuous-refactoring/SKILL.md` step 5) skips implementation for a flagged candidate still
 missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
