@@ -17,7 +17,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Mutual exclusion:** the first scan pass that recognizes this node fulfilled while real
   PHPStan adoption is absent should write an
   `out-of-scope/phpstan-level-5.md` entry in the Refactoring Notes if it isn't already present — this
-  resolves `phpstan-level-5` (the PHPStan level chain's `php-structural-scan` leaf) as rejected instead of
+  resolves `phpstan-level-5` (the PHPStan level chain's `php-safety-net` leaf) as rejected instead of
   leaving it permanently neither-fulfilled-nor-rejected. Because this node has no tree-proposed MR of its
   own to attach the write to (`MR scope: none`, above), this is housekeeping the scanning agent performs as
   part of that recognition pass, not part of an MR — the same "an agent records a decision" shape the
@@ -40,7 +40,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   (`rector.md`) `required-any` gate (already satisfied via `phpstan-level-0` on that path regardless, so
   this is never load-bearing there either). A target that adopts `psalm-taint-analysis` (below) on the
   PHPStan path also installs `vimeo/psalm` and a `psalm.xml`, which makes this node's own fulfilment check
-  incidentally read `true` too — harmless: `psalm` isn't a `php-structural-scan` leaf, so there's no
+  incidentally read `true` too — harmless: `psalm` isn't a `php-safety-net` leaf, so there's no
   resolved-leaf state this could disturb. See `psalm-taint-analysis`'s own entry below for the full
   reasoning.
 
@@ -66,14 +66,14 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   competing general analyzer) alongside the CI wiring.
 - **Co-presence caveat:** adopting this node on the PHPStan path installs `vimeo/psalm` + `psalm.xml`
   purely for taint scanning, which incidentally makes the `psalm` node's own live-detected `fulfilled` flag
-  read `true` too. This is harmless: `psalm` isn't a `php-structural-scan` leaf (see that node's entry
+  read `true` too. This is harmless: `psalm` isn't a `php-safety-net` leaf (see that node's entry
   above), so there's no resolved-leaf state to disturb; `rector-php-set`'s (`rector.md`)
   `required-any(phpstan-level-0, psalm)` gate stays satisfied regardless either way on the PHPStan
   path (already unlocked via `phpstan-level-0`); and the PHPStan/Psalm choice itself was never
   encoded as a written rejection to begin with (see `phpstan-level-0`'s own MR-scope entry in
   `phpstan.md`) — only the tree structure and each node's own detection record it. Nothing reads
   `psalm.fulfilled` in a way this incidental flip could break.
-- **`php-structural-scan` resolved-leaf:** yes — one of the thirteen. The gate's purpose is "deterministic
+- **`php-safety-net` resolved-leaf:** yes — one of the nine. The gate's purpose is "deterministic
   tooling has had its say before agent-driven structural work begins" (`skills/refactor-scan/references/tooling-tree.md`'s
   `structural-scan` node), not "structural-quality tools only" — `composer-audit` (`composer-audit.md`) is
   already one of these thirteen leaves and is itself a pure security scan (dependency vulnerabilities), so

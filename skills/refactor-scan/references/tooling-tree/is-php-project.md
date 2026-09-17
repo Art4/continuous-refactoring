@@ -22,11 +22,16 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
   `skills/refactor-scan/references/tooling-tree/structural-scan.md`), so there is nothing to gain from a human ever filing an
   `out-of-scope/is-php-project.md` entry in the Refactoring Notes: leaving it unfulfilled already does
   everything a rejection could.
-- **Known gap, not fixed by this node:** `php-structural-scan`'s own `resolved` gate
-  (`skills/refactor-scan/references/php-tooling-tree.md`) checks each of its thirteen leaves for "fulfilled,
+- **Known gap, not fixed by this node:** `php-safety-net`'s own `resolved` gate
+  (`skills/refactor-scan/references/php-tooling-tree.md`) checks each of its nine leaves for "fulfilled,
   or explicitly rejected under `out-of-scope/`" — it does not understand a leaf permanently closed by an
   unfulfilled `required` ancestor as a form of resolution. A leaf gated shut by this node (e.g.
-  `composer-audit`) therefore counts as neither fulfilled nor rejected there; `structural-scan` still cannot
-  open via the PHP path on a non-PHP target without a human filing all thirteen leaf-level rejections by
+  `phpunit`) therefore counts as neither fulfilled nor rejected there; `structural-scan` still cannot
+  open via the PHP path on a non-PHP target without a human filing all nine leaf-level rejections by
   hand. This predates `is-php-project` (a target where a human rejected `composer` itself already hit the
   same wall, since `composer`'s own children never even got proposed to reject) and isn't worsened by it.
+  The same gap is exactly what lets `php-safety-net` gate the PHP-specific **Signal wave** nodes
+  (`phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`, `composer-audit`,
+  `phpstan-deprecation-rules`, `semgrep`) for free: `php-safety-net` can only ever resolve via this
+  node's own recognition path, so a non-PHP target never opens the PHP Signal wave either, no new
+  mechanism needed.

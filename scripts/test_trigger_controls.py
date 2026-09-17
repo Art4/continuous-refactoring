@@ -75,7 +75,7 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
         # under this target's level-0 ceiling). Ticket 44 follow-up:
         # `psalm-taint-analysis` is rejected too — this target never adopted
         # taint analysis either. `psalm` is deliberately not in this list —
-        # it's not a php-structural-scan leaf (a dedicated leaf for it was
+        # it's not a php-safety-net leaf (a dedicated leaf for it was
         # tried in ticket 37 and dropped as redundant ceremony; see that
         # node's own entry in php-tooling-tree.md).
         self.assertEqual(

@@ -1,6 +1,6 @@
 # `php-minimal-version`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Floor correction**, **Floor raise**, **Breaking change**).
+Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Floor correction**, **Floor raise**, **Breaking change**, **Signal wave**).
 
 - **Name:** PHP Minimum Version
 - **Tool:** none — the tree's own gap detection, not a third-party tool.
@@ -21,12 +21,14 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   neither `require.php` nor `config.platform.php` parses) — both count as fulfilled: nothing to
   correct in either case, same "unknown floor blocks nothing" convention `php_floor_precheck()` itself
   uses.
-- **Required parent:** `rector-php-set` (`rector.md`) — this node is only proposable once
+- **Required parents:** `rector-php-set` (`rector.md`) — this node is only proposable once
   `rector-php-set` is genuinely *fulfilled* (a level truly landed), not merely decided; a rejected
   `rector-php-set` leaves this node permanently unproposable, matching the tree's ordinary
   required-parent-rejection-closes-everything-beneath-it convention, no special-casing needed. Nothing
   else the tree could raise as `require.php` short of the application's own code needing it —
-  `rector-php-set`'s own landed syntax is the only legitimate signal.
+  `rector-php-set`'s own landed syntax is the only legitimate signal. Additionally, `php-safety-net` — a
+  **Signal wave** node: proposed only once the Safety Net has closed, kept alongside `rector-php-set`
+  rather than replacing it, for the same rejection-must-permanently-close reasoning.
 - **MR scope:** narrow — a `composer.json` `require.php` edit, plus the CI job that tests the app
   itself if a single unified job exists. No added verification step beyond the loop's own ordinary CI
   gate — `rector-php-set`'s own fulfilment check already means "fully applied, no remaining findings".

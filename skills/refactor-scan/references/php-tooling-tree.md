@@ -39,7 +39,7 @@ graph TD
     rpu[rector-phpunit-set]
     pta[psalm-taint-analysis]
     sg[semgrep]
-    phpss[php-structural-scan]
+    psn[php-safety-net]
     ss[structural-scan]
 
     ipp -->|required| comp
@@ -47,11 +47,14 @@ graph TD
     edc -.->|recommended| cs
     comp -->|required| cs
     comp -->|required| phpmd
+    psn -->|required| phpmd
     comp -->|required| unit
     unit -->|required| cov
+    psn -->|required| cov
     comp -->|required| tr
     comp -->|required| audit
-    ci -->|required| audit
+    psn -->|required| audit
+    ci -.->|recommended| audit
     comp -->|required| sca
     sca -->|required| p0
     sca -->|required| psalm
@@ -61,17 +64,20 @@ graph TD
     p3 -->|required| p4
     p4 -->|required| p5
     p5 -->|required| p6
+    psn -->|required| p6
     p6 -->|required| p7
     p7 -->|required| p8
     p8 -->|required| p9
     p9 -->|required| p10
     p5 -->|required| dep
+    psn -->|required| dep
     p0 -.->|required-any| rps
     psalm -.->|required-any| rps
     cs -.->|recommended| rps
     rps -->|required| rdc
     rps -->|required| rcq
     rps -->|required| pmv
+    psn -->|required| pmv
     unit -->|required| rpu
     rdc -.->|recommended| rtc
     rcq -.->|recommended| rtc
@@ -84,20 +90,18 @@ graph TD
     comp -->|required| rtc
     p4 -.->|required-any| pta
     psalm -.->|required-any| pta
-    pta -.->|recommended| sg
-    comp -->|required| sg
-    psr4 -.->|resolved| phpss
-    audit -.->|resolved| phpss
-    unit -.->|resolved| phpss
-    p5 -.->|resolved| phpss
-    dep -.->|resolved| phpss
-    rdc -.->|resolved| phpss
-    rtc -.->|resolved| phpss
-    rps -.->|resolved| phpss
-    rcq -.->|resolved| phpss
-    rpu -.->|resolved| phpss
-    pta -.->|resolved| phpss
-    phpss -.->|resolved| ss
+    psn -->|required| sg
+    ci -.->|recommended| sg
+    psr4 -.->|resolved| psn
+    unit -.->|resolved| psn
+    p5 -.->|resolved| psn
+    rdc -.->|resolved| psn
+    rtc -.->|resolved| psn
+    rps -.->|resolved| psn
+    rcq -.->|resolved| psn
+    rpu -.->|resolved| psn
+    pta -.->|resolved| psn
+    psn -.->|resolved| ss
 ```
 
 ## Edges
@@ -109,11 +113,14 @@ graph TD
 | `editorconfig` | `php-cs-fixer` | recommended |
 | `composer` | `php-cs-fixer` | required |
 | `composer` | `phpmd` | required |
+| `php-safety-net` | `phpmd` | required |
 | `composer` | `phpunit` | required |
 | `phpunit` | `coverage-floor` | required |
+| `php-safety-net` | `coverage-floor` | required |
 | `composer` | `test-runner-if-missing` | required |
 | `composer` | `composer-audit` | required |
-| `ci-runner` | `composer-audit` | required |
+| `php-safety-net` | `composer-audit` | required |
+| `ci-runner` | `composer-audit` | recommended |
 | `composer` | `static-code-analyzer` | required |
 | `static-code-analyzer` | `phpstan-level-0` | required |
 | `static-code-analyzer` | `psalm` | required |
@@ -123,17 +130,20 @@ graph TD
 | `phpstan-level-3` | `phpstan-level-4` | required |
 | `phpstan-level-4` | `phpstan-level-5` | required |
 | `phpstan-level-5` | `phpstan-level-6` | required |
+| `php-safety-net` | `phpstan-level-6` | required |
 | `phpstan-level-6` | `phpstan-level-7` | required |
 | `phpstan-level-7` | `phpstan-level-8` | required |
 | `phpstan-level-8` | `phpstan-level-9` | required |
 | `phpstan-level-9` | `phpstan-level-10` | required |
 | `phpstan-level-5` | `phpstan-deprecation-rules` | required |
+| `php-safety-net` | `phpstan-deprecation-rules` | required |
 | `phpstan-level-0` | `rector-php-set` | required-any |
 | `psalm` | `rector-php-set` | required-any |
 | `php-cs-fixer` | `rector-php-set` | recommended |
 | `rector-php-set` | `rector-dead-code` | required |
 | `rector-php-set` | `rector-code-quality` | required |
 | `rector-php-set` | `php-minimal-version` | required |
+| `php-safety-net` | `php-minimal-version` | required |
 | `phpunit` | `rector-phpunit-set` | required |
 | `rector-dead-code` | `rector-type-coverage` | recommended |
 | `rector-code-quality` | `rector-type-coverage` | recommended |
@@ -146,24 +156,22 @@ graph TD
 | `composer` | `rector-type-coverage` | required |
 | `phpstan-level-4` | `psalm-taint-analysis` | required-any |
 | `psalm` | `psalm-taint-analysis` | required-any |
-| `psalm-taint-analysis` | `semgrep` | recommended |
-| `composer` | `semgrep` | required |
-| `psr-4` | `php-structural-scan` | resolved |
-| `composer-audit` | `php-structural-scan` | resolved |
-| `phpunit` | `php-structural-scan` | resolved |
-| `phpstan-level-5` | `php-structural-scan` | resolved |
-| `phpstan-deprecation-rules` | `php-structural-scan` | resolved |
-| `rector-dead-code` | `php-structural-scan` | resolved |
-| `rector-type-coverage` | `php-structural-scan` | resolved |
-| `rector-php-set` | `php-structural-scan` | resolved |
-| `rector-code-quality` | `php-structural-scan` | resolved |
-| `rector-phpunit-set` | `php-structural-scan` | resolved |
-| `psalm-taint-analysis` | `php-structural-scan` | resolved |
-| `php-structural-scan` | `structural-scan` | resolved |
+| `php-safety-net` | `semgrep` | required |
+| `ci-runner` | `semgrep` | recommended |
+| `psr-4` | `php-safety-net` | resolved |
+| `phpunit` | `php-safety-net` | resolved |
+| `phpstan-level-5` | `php-safety-net` | resolved |
+| `rector-dead-code` | `php-safety-net` | resolved |
+| `rector-type-coverage` | `php-safety-net` | resolved |
+| `rector-php-set` | `php-safety-net` | resolved |
+| `rector-code-quality` | `php-safety-net` | resolved |
+| `rector-phpunit-set` | `php-safety-net` | resolved |
+| `psalm-taint-analysis` | `php-safety-net` | resolved |
+| `php-safety-net` | `structural-scan` | resolved |
 
 The table is the machine-readable source; the diagram is its rendering. Extending the tree means adding a row here and the matching line in the diagram.
 
-The eleven `resolved` rows above feed `php-structural-scan`, this tree's own aggregation node — not `structural-scan` directly. `php-structural-scan` is resolved once every one of those eleven is itself resolved (fulfilled, or rejected under the Refactoring Notes' `out-of-scope/`), the same `resolved` semantics as `structural-scan`'s own gate (see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means and why it exists), just one hop down. `phpstan-level-3` is no longer one of these leaves — `phpstan-level-5` is the chain's own leaf now (see `phpstan.md`'s own entry for why level 5, not the chain's top): levels 6–10 stay ordinary, still-proposable chain nodes, just no longer load-bearing for this gate. A Psalm-only target never fulfils `phpstan-level-5` — see `psalm`'s own node entry (`skills/refactor-scan/references/php-tooling-tree/psalm.md`) for the mutual-exclusion housekeeping that resolves it as rejected instead; `psalm` itself is deliberately **not** its own leaf here — a dedicated resolved-leaf for it was tried and dropped as redundant ceremony: the level-chain rejection above is sufficient on its own, and giving `psalm` its own leaf only ever added an extra rejection write on the PHPStan path that resolved nothing not already resolved. `psalm-taint-analysis` is a deterministic security-scan tool exactly like `composer-audit`, so it gates `structural-scan` the same way every other deterministic-tooling leaf here does; not "structural vs. security", but "does this tool produce findings that could collide with agent-driven structural work" (`tooling-tree.md`'s `structural-scan` node states the actual criterion). `rector-early-return` was a leaf until its rule set turned out to ship empty upstream and its scope folded into `rector-code-quality` instead (`rector.md`); `psr-4` later joined as a new leaf, gating on a different basis than every other leaf here (see its own node entry) — the code-organization convention structural work depends on, not a checking tool. `test-runner-if-missing` and `php-cs-fixer` were both direct leaves once too — both dropped since: `test-runner-if-missing` with no replacement (its own Purpose — "guarantees *some* runner exists" — isn't safety-critical enough to keep gating structural work, `phpunit`'s own Fulfilment check already requiring a green local run); `php-cs-fixer` not dropped, just rerouted — it now has a `recommended` edge into `rector-php-set` instead (`rector.md`'s own entry), which transitively still forces it to be *decided* before `rector-dead-code`/`rector-code-quality` (both still direct leaves here) can ever be reached, so the same guarantee holds through one more hop rather than a direct edge. The final row above, `php-structural-scan → structural-scan`, is this tree's sole direct contribution to `structural-scan`'s own gate — `structural-scan` has two further direct `resolved` parents, `editorconfig` and `ci-runner`, declared in `tooling-tree.md`'s own edge table instead (both endpoints generic-root nodes); see that document's `structural-scan` node for the full picture. `phpmd` and `secret-detection` (the latter in `tooling-tree.md`, the generic root) are new nodes with **no** `resolved` edge into either gate at all — Signal-producing tools, not Safety Net ones; see their own node entries for why.
+The nine `resolved` rows above feed `php-safety-net`, this tree's own aggregation node (renamed from `php-structural-scan` — same node, same mechanism, new name that says what it actually means now that other nodes read its resolved-ness too, not just `structural-scan`) — not `structural-scan` directly. `php-safety-net` is resolved once every one of those nine is itself resolved (fulfilled, or rejected under the Refactoring Notes' `out-of-scope/`), the same `resolved` semantics as `structural-scan`'s own gate (see `skills/refactor-scan/references/tooling-tree.md`'s `structural-scan` node for what `resolved` means and why it exists), just one hop down. `phpstan-level-3` is no longer one of these leaves — `phpstan-level-5` is the chain's own leaf now (see `phpstan.md`'s own entry for why level 5, not the chain's top): levels 6–10 stay ordinary, still-proposable chain nodes, just no longer load-bearing for this gate. A Psalm-only target never fulfils `phpstan-level-5` — see `psalm`'s own node entry (`skills/refactor-scan/references/php-tooling-tree/psalm.md`) for the mutual-exclusion housekeeping that resolves it as rejected instead; `psalm` itself is deliberately **not** its own leaf here — a dedicated resolved-leaf for it was tried and dropped as redundant ceremony: the level-chain rejection above is sufficient on its own, and giving `psalm` its own leaf only ever added an extra rejection write on the PHPStan path that resolved nothing not already resolved. `psalm-taint-analysis` stays a leaf because its findings are the kind a structural refactor could itself introduce or collide with — the actual criterion this gate runs on (`tooling-tree.md`'s `structural-scan` node states it), not "structural vs. security" in general: `composer-audit` and `phpstan-deprecation-rules` were both leaves once too, dropped precisely because their findings (third-party CVEs; deprecated-API calls) don't have that collision property, even though `composer-audit` is a Security-signal node exactly like `psalm-taint-analysis` — Security-as-signal and Safety-Net-as-wave are orthogonal axes, not the same thing. Both moved to the **Signal wave** instead (`CONTEXT.md`): each keeps its own existing required parent (`composer`, `phpstan-level-5` respectively) and additionally requires `php-safety-net` — additive, not a replacement, because a *rejected* `composer`/`phpstan-level-5` must still permanently close the dependent the ordinary required-edge way, which a bare `php-safety-net` edge alone wouldn't do (a rejected *resolved* parent still counts as resolved). `phpmd`, `coverage-floor`, `php-minimal-version`, and `phpstan-level-6` join the Signal wave the same additive way, each keeping its own pre-existing required parent alongside the new `php-safety-net` one. `semgrep` is the one full-replacement case instead (its own doc already states Semgrep needs no Composer at all, so nothing was lost by dropping that edge outright) — see its own node entry. `rector-early-return` was a leaf until its rule set turned out to ship empty upstream and its scope folded into `rector-code-quality` instead (`rector.md`); `psr-4` later joined as a new leaf, gating on a different basis than every other leaf here (see its own node entry) — the code-organization convention structural work depends on, not a checking tool. `test-runner-if-missing` and `php-cs-fixer` were both direct leaves once too — both dropped since: `test-runner-if-missing` with no replacement (its own Purpose — "guarantees *some* runner exists" — isn't safety-critical enough to keep gating structural work, `phpunit`'s own Fulfilment check already requiring a green local run); `php-cs-fixer` not dropped, just rerouted — it now has a `recommended` edge into `rector-php-set` instead (`rector.md`'s own entry), which transitively still forces it to be *decided* before `rector-dead-code`/`rector-code-quality` (both still direct leaves here) can ever be reached, so the same guarantee holds through one more hop rather than a direct edge. The final row above, `php-safety-net → structural-scan`, is this tree's sole direct contribution to `structural-scan`'s own gate — `structural-scan` has two further direct `resolved` parents, `editorconfig` and `ci-runner`, declared in `tooling-tree.md`'s own edge table instead (both endpoints generic-root nodes); see that document's `structural-scan` node for the full picture. `secret-detection` (in `tooling-tree.md`, the generic root) carries **no** `resolved` edge into either gate at all — a Signal-producing tool, not a Safety Net one; language-neutral, so it's required-gated on `structural-scan` itself rather than `php-safety-net` (see its own node entry for why).
 
 Two edge types beyond `required`/`recommended`/`resolved` appear above: `psalm-taint-analysis`'s two `required-any` rows from `phpstan-level-4`/`psalm`, and `rector-php-set`'s two `required-any` rows from `phpstan-level-0`/`psalm`. Unlike a `required` edge (every parent must be fulfilled), a `required-any` group only needs **at least one** parent fulfilled. `rector-php-set` reading this directly (rather than relying on it being implicit inside `phpstan-level-0`'s own Psalm-equivalence fulfilment check — see `phpstan.md`'s *`phpstan` equivalents* section) makes it the gate on which static-analysis path was chosen for `rector-dead-code`/`rector-code-quality`, which no longer carry their own direct edge to `phpstan-level-0` (removed, not replaced) — both already have `rector-php-set` as a required parent, which now carries the same gate transitively. `rector-type-coverage`/`rector-phpunit-set` are gated by their sibling Rector nodes instead (`recommended` edges — see `rector.md`), not by this gate at all any more. See `rector-php-set`'s and `psalm-taint-analysis`'s own node entries in `rector.md`/`psalm.md` respectively.
 
@@ -177,7 +185,7 @@ A node's full definition may live in its own file under `php-tooling-tree/` (sib
 
 The five deterministic PHP tooling leaves (`php-cs-fixer`, `phpunit`, `test-runner-if-missing`, `composer-audit`, `phpstan-level-0`) are each checked once per pass against a known minimum-ever PHP version — the oldest PHP release any published version of that leaf's tool has ever run on — instead of being proposed individually and rejected as `wontfix` once each hits the same underlying PHP-version wall. `tooling_tree.py`'s `_LEAF_MIN_PHP_VERSION` table and `php_floor_precheck()` are the mechanical building blocks; `next_candidates()` and `roadmap()` skip a leaf below its minimum.
 
-**Design decision: skip silently, no `out-of-scope/` entry written in the Refactoring Notes for a floor-blocked leaf.** The check is cheap and re-derived in full from `composer.json` every pass, so nothing is lost by not persisting it — and that directory otherwise records a genuine human/agent rejection decision (the mechanical-reversal shape below), not a mechanical fact already on disk. Once the target's PHP floor rises, a previously-blocked leaf is simply unblocked next pass; there is nothing to reverse. Consequence worth naming: two of the five leaves above (`phpunit`, `composer-audit`) are themselves `php-structural-scan` leaves (the `resolved` edges above) — while floor-blocked, they count as neither fulfilled nor rejected, so `structural-scan` stays genuinely closed until the floor rises. `php-cs-fixer` and `test-runner-if-missing` no longer are (see the `resolved`-rows prose above) — a floor block on either still delays their own adoption, just no longer `structural-scan` itself. A human who wants it open anyway can still file the out-of-scope entries by hand; this precheck doesn't do it for them.
+**Design decision: skip silently, no `out-of-scope/` entry written in the Refactoring Notes for a floor-blocked leaf.** The check is cheap and re-derived in full from `composer.json` every pass, so nothing is lost by not persisting it — and that directory otherwise records a genuine human/agent rejection decision (the mechanical-reversal shape below), not a mechanical fact already on disk. Once the target's PHP floor rises, a previously-blocked leaf is simply unblocked next pass; there is nothing to reverse. Consequence worth naming: `phpunit` is the only one of these five nodes that's still a `php-safety-net` leaf (the `resolved` edges above) — while floor-blocked, it counts as neither fulfilled nor rejected, so `structural-scan` stays genuinely closed until the floor rises. `composer-audit` is no longer a `php-safety-net` leaf either (moved to the **Signal wave** instead) — like `php-cs-fixer` and `test-runner-if-missing` (see the `resolved`-rows prose above), a floor block on it now only delays its own adoption, it no longer holds `structural-scan` itself closed. A human who wants it open anyway can still file the out-of-scope entries by hand; this precheck doesn't do it for them.
 
 ### `require-dev` security advisories
 
@@ -199,9 +207,11 @@ surfaced this rule). Does not apply to `require` (production) dependencies — t
   `composer.json`'s declared PHP floor in line with syntax the codebase already demonstrably contains
   once `rector-php-set` has landed it, so the declared floor stops understating reality. Never proposes
   committing the application to a newer PHP than its own code currently needs — that would be a
-  **Breaking change**, out of this node's scope entirely.
+  **Breaking change**, out of this node's scope entirely. A **Signal wave** node (`CONTEXT.md`): keeps
+  `rector-php-set` as a required parent and additionally requires `php-safety-net`, so it's never
+  proposed ahead of the Safety Net closing.
 
-Full definition (Fulfilment check, MR scope, Re-triggering): `skills/refactor-scan/references/php-tooling-tree/php-minimal-version.md`.
+Full definition (Fulfilment check, MR scope, Re-triggering, Required parent): `skills/refactor-scan/references/php-tooling-tree/php-minimal-version.md`.
 
 ### `composer`
 
@@ -231,10 +241,10 @@ Full definition (Fulfilment check, MR scope, Recommended parent, Recommended chi
 
 - **Name:** PHPMD
 - **Tool:** PHPMD
-- **Purpose:** cyclomatic-complexity and code-quality signal for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere).
+- **Purpose:** cyclomatic-complexity and code-quality signal for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere). Also a **Signal wave** node (`CONTEXT.md`, orthogonal to the **Signal** field above): keeps `composer` as a required parent and additionally requires `php-safety-net`, so it's never proposed ahead of the Safety Net closing.
 - **Signal:** Understandability (the complexity measurement itself) and Defect density (complexity's empirical correlation with bugs) — both `skills/refactor-prioritize/references/signals.md` factors, once this node is fulfilled its real output supersedes the generic git-log heuristic for them.
 
-Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/phpmd.md`.
+Full definition (Fulfilment check, MR scope, Required parent): `skills/refactor-scan/references/php-tooling-tree/phpmd.md`.
 
 ### `phpunit`
 
@@ -248,7 +258,7 @@ Full definition (Fulfilment check, security advisories, MR scope, test-directory
 
 - **Name:** Test Coverage Floor
 - **Tool:** PHPUnit's own coverage report (PCOV or Xdebug as the driver)
-- **Purpose:** a self-tightening coverage ratchet plus real per-file numbers for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere).
+- **Purpose:** a self-tightening coverage ratchet plus real per-file numbers for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere). Also a **Signal wave** node (`CONTEXT.md`, orthogonal to the **Signal** field below): keeps `phpunit` as a required parent and additionally requires `php-safety-net`, so it's never proposed ahead of the Safety Net closing.
 - **Signal:** Untested / hard-to-test (`skills/refactor-prioritize/references/signals.md`) — once fulfilled, Select mode reads the real Clover-XML coverage report instead of the generic "read the test suite" heuristic.
 
 Full definition (Fulfilment check, MR scope, Ratchet mechanism, PCOV-vs-Xdebug): `skills/refactor-scan/references/php-tooling-tree/coverage-floor.md`.
@@ -266,9 +276,13 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
 - **Name:** Composer Audit
 - **Tool:** composer audit
 - **Purpose:** dependency vulnerability visibility, enforced as a CI gate (absorbs what was originally
-  tracked as a separate dependency-vulnerability-scan concern, now folded into this node).
+  tracked as a separate dependency-vulnerability-scan concern, now folded into this node). A **Signal
+  wave** node (`CONTEXT.md`): audits
+  third-party CVEs a target's own structural refactoring neither creates nor fixes, unlike
+  `psalm-taint-analysis`, so it no longer gates `structural-scan` — keeps `composer` as a required
+  parent and additionally requires `php-safety-net`.
 
-Full definition (Fulfilment check, MR scope, Stop conditions): `skills/refactor-scan/references/php-tooling-tree/composer-audit.md`.
+Full definition (Fulfilment check, MR scope, Required parent, Stop conditions): `skills/refactor-scan/references/php-tooling-tree/composer-audit.md`.
 
 ### `static-code-analyzer`
 
@@ -306,9 +320,14 @@ equivalents* section — Psalm's equivalence to this node, co-presence, mutual e
 - **Tool:** PHPStan
 - **Purpose:** raise the analysis level one step at a time, straight through the chain, same rules
   throughout, no redesign at any level — `phpstan-level-5` is the chain's resolved-leaf into
-  `php-structural-scan` (see that node's own entry and `phpstan-deprecation-rules`' required-parent
-  line above for why level 5); every other level (`1`–`4`, `6`–`10`) is an ordinary, non-gating
+  `php-safety-net` (see that node's own entry and `phpstan-deprecation-rules`' required-parent
+  line above for why level 5); every other level (`1`–`4`, `7`–`10`) is an ordinary, non-gating
   intermediate node — levels above 5 stay proposable, they just no longer hold up structural work.
+  `phpstan-level-6` is the one exception among them: a **Signal wave** node (`CONTEXT.md`) —
+  keeps `phpstan-level-5` as its ordinary
+  chain predecessor and additionally requires `php-safety-net`, so it's never proposed ahead of the
+  Safety Net closing; levels 7–10 need no edge of their own, inheriting the wait transitively through
+  level 6.
 
 Full definition (Fulfilment check, Empty baseline, MR scope, Stop conditions, Verification):
 `skills/refactor-scan/references/php-tooling-tree/phpstan.md`.
@@ -319,9 +338,13 @@ Full definition (Fulfilment check, Empty baseline, MR scope, Stop conditions, Ve
 - **Tool:** PHPStan (deprecation rule set — bundled rules PHPStan reports independently of `level`)
 - **Purpose:** flag calls to deprecated APIs/functions, orthogonal to the level chain's strictness ladder —
   adopted once the codebase is far enough along the chain that deprecation noise isn't drowned out by
-  lower-level findings.
-- **Required parent:** `phpstan-level-5` — proposed once the chain has reached level 5, a threshold decided
-  directly with the user rather than tied to level 10's top.
+  lower-level findings. A **Signal wave** node (`CONTEXT.md`) —
+  no longer a `php-safety-net` leaf (flagging
+  deprecated calls doesn't collide with agent-driven structural work the way this gate's remaining
+  leaves do).
+- **Required parents:** `phpstan-level-5` — proposed once the chain has reached level 5, a threshold decided
+  directly with the user rather than tied to level 10's top — and, additionally, `php-safety-net`, so
+  it's never proposed ahead of the Safety Net closing.
 
 Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/phpstan.md`.
 
@@ -334,16 +357,16 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
   target chose. Available once either general-analysis path has matured enough to be worth layering a
   security scan on top of, regardless of whether that path is PHPStan or Psalm.
 
-Full definition (Required-any parents, Fulfilment check, MR scope, Co-presence caveat, `php-structural-scan` resolved-leaf): `skills/refactor-scan/references/php-tooling-tree/psalm.md`.
+Full definition (Required-any parents, Fulfilment check, MR scope, Co-presence caveat, `php-safety-net` resolved-leaf): `skills/refactor-scan/references/php-tooling-tree/psalm.md`.
 
 ### `semgrep`
 
 - **Name:** Semgrep (OWASP Top 10)
 - **Tool:** Semgrep — a standalone binary/Python/Docker tool, not a Composer dependency.
-- **Purpose:** broad OWASP Top 10 static-analysis coverage for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere). Complements `psalm-taint-analysis` rather than duplicating it.
+- **Purpose:** broad OWASP Top 10 static-analysis coverage for `refactor-prioritize`'s Select mode — a Signal-producing node, not a Safety Net one (no `resolved` edge anywhere). Complements `psalm-taint-analysis` rather than duplicating it. Also a **Signal wave** node (`CONTEXT.md`): required parent is `php-safety-net` alone (fully replacing the old `composer` edge — this node was the one clean full-replacement case, see its own entry for why).
 - **Signal:** Security (`skills/refactor-prioritize/references/signals.md`) — alongside `psalm-taint-analysis`'s own real findings for the same factor.
 
-Full definition (Recommended parent, Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/semgrep.md`.
+Full definition (Required parent, Recommended parent, Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/semgrep.md`.
 
 ### `rector-dead-code`
 
@@ -389,10 +412,10 @@ Full definition (Fulfilment check, MR scope, Required parent, Recommended parent
 
 Full definition (Fulfilment check, MR scope, Required parent, Recommended parents): `skills/refactor-scan/references/php-tooling-tree/rector.md`.
 
-### `php-structural-scan`
+### `php-safety-net`
 
-- **Name:** PHP Structural Scan (internal — never proposed; see the MR scope in the extracted file below)
+- **Name:** PHP Safety Net (internal — never proposed; see the MR scope in the extracted file below)
 - **Tool:** none — pure aggregation node, no fulfilment check or MR scope of its own.
-- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of thirteen direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way).
+- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of nine direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way). Renamed from `php-structural-scan` — same node, same mechanism, new name because other nodes now read its resolved-ness too (the **Signal wave**, `CONTEXT.md`), not just `structural-scan`.
 
-Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/php-structural-scan.md`.
+Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/php-tooling-tree/php-safety-net.md`.

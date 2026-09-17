@@ -9,5 +9,5 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   it living only inside `phpstan-level-0`'s own fulfilment check, the way it used to.
 - **Fulfilment check:** always fulfilled once `composer` (its own required parent) is fulfilled — no
   independent state, no tool run. Adds no additional waiting beyond `composer`'s real fulfilment.
-- **MR scope:** none — never proposed, never an MR. Same pattern as `php-structural-scan` (`php-structural-scan.md`): pure plumbing,
+- **MR scope:** none — never proposed, never an MR. Same pattern as `php-safety-net` (`php-safety-net.md`): pure plumbing,
   the real work happens in its two children.
