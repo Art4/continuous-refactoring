@@ -484,6 +484,26 @@ def _has_housekeeping_line_for(repo: pathlib.Path, node_name: str) -> bool:
     return node_name.replace("-", " ").lower() in txt
 
 
+def _ci_or_housekeeping_status(
+    repo: pathlib.Path, node_name: str, ci_ok: bool, ci_reason: str, no_ci_reason: str
+) -> tuple[bool, str]:
+    """Shared fulfilment shape for `composer-audit`/`semgrep`, this tree's
+    two audit-style nodes: a real CI job (`ci_ok`, already computed by the
+    caller — the CI-job check itself is tool-specific, only the
+    OR-with-housekeeping-line combination is common) OR a committed
+    `housekeeping-template.md` line naming `node_name`
+    (`_has_housekeeping_line_for`, above). Returns `(fulfilled, reason)` —
+    `ci_reason`/`no_ci_reason` are this node's own wording for "CI job
+    present" and "neither present" respectively, so the two callers keep
+    their own tool-specific phrasing without duplicating the OR-combination
+    logic itself."""
+    housekeeping_line = _has_housekeeping_line_for(repo, node_name)
+    fulfilled = ci_ok or housekeeping_line
+    if not fulfilled:
+        return False, no_ci_reason
+    return True, ci_reason if ci_ok else "housekeeping-template.md already names this node"
+
+
 # secret-detection's own `Tool: any secret scanner` (tooling-tree.md) — same
 # generic-tool shape as test-runner-if-missing's `any test runner`. Checked
 # by common invocation needle rather than one fixed tool name.
@@ -1137,13 +1157,13 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # the phpstan-level-N stop-conditions pattern rather than living in this
     # fulfilment check.
     has_real_dep = _has_real_require_dep(composer)
-    audit_ci_job = _has_composer_audit_ci_job(repo)
-    audit_housekeeping_line = _has_housekeeping_line_for(repo, "composer-audit")
-    audit_fulfilled = audit_ci_job or audit_housekeeping_line
-    if audit_fulfilled:
-        audit_reason = "CI job runs composer audit" if audit_ci_job else "housekeeping-template.md already names this node"
-    else:
-        audit_reason = "no CI job runs composer audit yet, and no housekeeping-template.md line for it"
+    audit_fulfilled, audit_reason = _ci_or_housekeeping_status(
+        repo,
+        "composer-audit",
+        ci_ok=_has_composer_audit_ci_job(repo),
+        ci_reason="CI job runs composer audit",
+        no_ci_reason="no CI job runs composer audit yet, and no housekeeping-template.md line for it",
+    )
     set_node(
         "composer-audit",
         audit_fulfilled,
@@ -1275,13 +1295,13 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # ever added) and required-parent eligibility (php-safety-net) are
     # handled separately by _is_unblocked(); this only computes the node's
     # own fulfilment.
-    semgrep_ci_job = _has_semgrep_owasp_ci_job(repo)
-    semgrep_housekeeping_line = _has_housekeeping_line_for(repo, "semgrep")
-    semgrep_fulfilled = semgrep_ci_job or semgrep_housekeeping_line
-    if semgrep_fulfilled:
-        semgrep_reason = "semgrep + OWASP ruleset gated in CI" if semgrep_ci_job else "housekeeping-template.md already names this node"
-    else:
-        semgrep_reason = "no semgrep/OWASP CI job yet, and no housekeeping-template.md line for it"
+    semgrep_fulfilled, semgrep_reason = _ci_or_housekeeping_status(
+        repo,
+        "semgrep",
+        ci_ok=_has_semgrep_owasp_ci_job(repo),
+        ci_reason="semgrep + OWASP ruleset gated in CI",
+        no_ci_reason="no semgrep/OWASP CI job yet, and no housekeeping-template.md line for it",
+    )
     set_node(
         "semgrep",
         semgrep_fulfilled,
