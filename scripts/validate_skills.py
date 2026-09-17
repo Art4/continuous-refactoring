@@ -322,12 +322,17 @@ def scratch_ref_issues(text, skill=""):
     ADR-NNNN citation (adr_issues above): a real file today, but never
     shipped with the skill and not guaranteed to exist or mean the same
     thing to a target repo reading it. Backtick-quoted only, same as
-    local_ref_issues — a plain-prose mention of "scratch work" isn't a link."""
+    local_ref_issues — a plain-prose mention of "scratch work" isn't a link.
+    Exempts `.scratch/refactor/` specifically — the reserved path name a
+    *target* repo's own local issue tracker uses when there's no external
+    forge (`local-issue-tracker-template.md`), a legitimate documented
+    convention this suite deliberately sets up, not a leak of this suite's
+    own backlog (which never uses that name for any of its own topics)."""
     issues = []
     text = _FENCE_RE.sub("", text)
     for m in re.finditer(r"`([^`]+)`", text):
         ref = m.group(1)
-        if ref.startswith(".scratch/"):
+        if ref.startswith(".scratch/") and not ref.startswith(".scratch/refactor/"):
             issues.append(Issue(
                 skill or ref,
                 f"skill prose references '{ref}' — .scratch/ is the suite's internal issue "
@@ -880,6 +885,23 @@ def validate_repo(repo_root):
         skills_text_full[d.name] = "\n".join(full_parts)
 
     issues += vocab_issues(glossary.terms, glossary.avoid, skills_text_full, set(VOCAB_ALLOW))
+
+    # --- fixture project self-containment ---
+    # fixtures/<lang>/<name>/project/** simulates a real target repo's own
+    # file tree — it's what a real skill run would write into a real target,
+    # so it must read exactly the way real output would: the same
+    # ticket/PR/ADR/.scratch ban that keeps skills/** self-contained applies
+    # doubly here, since this content stands in for the thing being shipped,
+    # not the shipping mechanism itself.
+    for project_dir in sorted(repo_root.glob("fixtures/*/*/project")):
+        for f in sorted(project_dir.rglob("*")):
+            if not f.is_file():
+                continue
+            rel = f.relative_to(repo_root).as_posix()
+            text = f.read_text()
+            issues += ticket_ref_issues(text, skill=rel)
+            issues += adr_issues(text, skill=rel)
+            issues += scratch_ref_issues(text, skill=rel)
 
     # --- Tier 2: semantic checks ---
     adr_dir = repo_root / "docs" / "adr"
