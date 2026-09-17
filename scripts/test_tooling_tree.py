@@ -910,8 +910,9 @@ class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
 
     def test_shared_ancestor_diamond_does_not_pollute_caller_seen(self):
         """A caller re-using one `_seen` set across sibling top-level calls
-        (as `_resolved_gate_status` and `_composer_audit_extra_gate` do, one
-        leaf at a time -- not the bug itself, but worth pinning down) must
+        (as `_resolved_gate_status` does, one leaf at a time -- not the bug
+        itself, but worth pinning down; `_composer_audit_extra_gate`, ticket
+        63, no longer exists) must
         get the same answer for each sibling regardless of call order, since
         each call now receives its own copy rather than sharing the caller's
         set across recursion."""
