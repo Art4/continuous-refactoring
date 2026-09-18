@@ -25,18 +25,23 @@ changes (below), and how its Fulfilment check gets evaluated (Judging fulfilment
 
 ## Is the Track due this pass?
 
-Read the Refactoring Notes' `bookkeeping.md`'s `## Safety Net` section
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`).
+Decided once, before `refactor-scan` even starts — the orchestrator's own Track-selection step
+(`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
+step 0b) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Safety Net` section
+(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner to
+`refactor-scan` as an explicit input. This section covers only what this Track does with that decision —
+it never re-derives due-ness itself:
 
-- **`Open` non-empty** → the Track is never rescanned this pass. Hand its entries forward the same way
-  `Pending candidates` already hands forward a resumable node — resuming at whichever step is next for
-  each (no plan yet → `refactor-design`; plan present, `ready-for-agent` set → `refactor-implement`).
-  Skip straight to `refactor-scan/SKILL.md`'s `## Output`; the rest of this file doesn't run.
-- **Section absent** (never run), or present with `Last scan` more than `Cadence` days before today
-  (default 90) → due. Continue below.
-- **Present, `Open` empty, not due** → nothing for this Track this pass; `refactor-scan` continues with
-  everything else it already does (structural-scan's own perpetual invitation, and — once other Tracks
-  are wired up — any of their own proposals; this Track is the only one wired up so far).
+- **This Track wasn't the one step 0b selected** → nothing in this file runs this pass; `refactor-scan`
+  continues with whichever Track was actually selected instead (or with everything else it already does,
+  if none was due).
+- **Selected, and `Open` is non-empty** — only reachable via a manual override naming this Track
+  directly (`track-scheduler.md`'s own ratio selection never picks a Track with non-empty `Open` in the
+  first place) → the Track is still never rescanned. Hand its entries forward the same way `Pending
+  candidates` already hands forward a resumable node — resuming at whichever step is next for each (no
+  plan yet → `refactor-design`; plan present, `ready-for-agent` set → `refactor-implement`). Skip
+  straight to `refactor-scan/SKILL.md`'s `## Output`; the rest of this file doesn't run.
+- **Selected, `Open` empty** → continue below; this is a genuine scan.
 
 ## Judging fulfilment
 

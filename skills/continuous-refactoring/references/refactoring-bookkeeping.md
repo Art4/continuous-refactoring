@@ -81,7 +81,10 @@ works through — every tooling-tree node reachable before `structural-scan` ope
 language specialization's own recognition gate excepted (those stay outside every Track — `loop-config`
 remains its own mandatory human interview, `CONTEXT.md`'s **Onboarding** entry). Full read/write mechanics:
 `skills/refactor-scan/references/safety-net-track.md` (`refactor-scan`'s own scan step),
-`skills/refactor-learn/references/safety-net-write.md` (`refactor-learn`'s own write step).
+`skills/refactor-learn/references/safety-net-write.md` (`refactor-learn`'s own write step),
+`skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
+step — reads this section's `Cadence`/`Last scan`/`Open` to decide whether this Track even runs this
+pass, competing against every other currently-wired Track).
 
 ```markdown
 ## Safety Net
@@ -111,7 +114,9 @@ the Safety Net has closed (PHP: `composer-audit`, `phpmd`, `coverage-floor`, `ph
 `phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep`). Same shape as `## Safety Net`
 above, independent of it — a slug lives in at most one Track's section, never both. Full read/write
 mechanics: `skills/refactor-scan/references/guardrails-track.md` (`refactor-scan`'s own scan step),
-`skills/refactor-learn/references/guardrails-write.md` (`refactor-learn`'s own write step).
+`skills/refactor-learn/references/guardrails-write.md` (`refactor-learn`'s own write step),
+`skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
+step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads `## Safety Net`'s own).
 
 ```markdown
 ## Guardrails
