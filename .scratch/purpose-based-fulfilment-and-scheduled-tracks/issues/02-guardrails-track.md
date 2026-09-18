@@ -62,4 +62,4 @@ Implemented on branch `tickets/02-guardrails-track`, stacked on `tickets/01-safe
   model's own correct reasoning prose (fixed to a line-anchored match), and the `first-run` check now
   also looks across local git branches, since a correct run in a no-remote sandbox leaves its
   bookkeeping write on a dedicated branch rather than the working tree.
-- PR: (link recorded below once opened).
+- PR: https://github.com/Art4/continuous-refactoring/pull/92
