@@ -74,6 +74,50 @@ tracker) already carrying `refactor:candidate, ready-for-agent` and claiming to 
 Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053) — see
 `expected/behavior.md` for what a `refactor-design`/`refactor-scan` pass should do with it.
 
+### php-safety-net-* (Safety Net Track, ADR-0055)
+
+Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the CI roadmap
+matrix: the whole point under test is that `tooling_tree.py`'s own dependency-name match stops being
+authoritative for a Safety Net Track node, so there's no fixed deterministic ground truth to assert
+`roadmap`/`tier2`/`tier3` against here. Each fixture exercises one checklist item from
+`skills/refactor-scan/references/safety-net-track.md` / `skills/refactor-learn/references/
+safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full expected behavior.
+
+- **php-safety-net-purpose-recognition** — `laravel/pint` installed and configured, no
+  `friendsofphp/php-cs-fixer` anywhere. Expects `php-cs-fixer` judged fulfilled via its own Purpose
+  statement (Pint genuinely serves it) rather than `tooling_tree.py`'s raw dependency-name match, and
+  never proposed as a candidate.
+- **php-safety-net-open-blocks-rescan** — `docs/refactoring/bookkeeping.md`'s `## Safety Net` section
+  holds a non-empty `Open` (`php-cs-fixer (#5)`, already `ready-for-agent` with a plan) and a `Last
+  scan` far past the default 90-day `Cadence`. Expects the existing `Open` entry resumed straight to
+  `refactor-implement`, not a fresh Track walk proposing the project's other genuinely-missing nodes.
+- **php-safety-net-first-run** — every Safety Net Track node already resolved (fulfilled or rejected
+  under `out-of-scope/`), no `## Safety Net` section yet (never run). Expects the section created with
+  `Last scan` written even though nothing was missing, so the target isn't rescanned every pass.
+- **php-safety-net-rejection-symmetry** — `## Safety Net`'s `Open` names `php-cs-fixer (#5)`; the
+  candidate's own issue is already closed `wontfix` with a maintainer's load-bearing structural reason.
+  Expects it removed from `Open`, `out-of-scope/php-cs-fixer.md` written, and a pointer added under
+  `Out-of-scope` — the same merge/rejection symmetry every other rejection in the suite already
+  follows.
+- **php-safety-net-old-schema** — `docs/refactoring/bookkeeping.md` still in the pre-ADR-0055 shape
+  (`Fulfilled nodes`, global `Pending candidates`, no `## Safety Net` section at all), with real
+  Safety-Net-Track work still open (`psr-4`, `static-code-analyzer`/`phpstan-level-0` genuinely
+  missing). Expects a normal pass — no error on, or migration of, the pre-existing old-shape fields.
+
+```bash
+./fixtures/harness/run.sh safety-net-track php-safety-net-purpose-recognition --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-open-blocks-rescan --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-first-run --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-rejection-symmetry --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-old-schema --opencode
+```
+
+Same non-CI, local-only, advisory posture as `decision-gate-bypass`/`judge`/`lift` — a real, file-level
+grep against the fixture's own post-run `docs/refactoring/bookkeeping.md`/`out-of-scope/` where the
+check can be made deterministic that way (mirroring `decision-gate-bypass`'s own label check), an
+advisory transcript grep otherwise (LLM output isn't deterministic). Uses `opencode run --auto` for the
+same reason `decision-gate-bypass` does — see its own note below.
+
 ### Tier 4 — Trigger & Discoverability tests (ticket 27)
 
 Ticket 27's three negative controls split across two layers:

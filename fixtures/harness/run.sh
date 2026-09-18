@@ -25,6 +25,7 @@ Tiers:
     judge       LLM-judge rubric grading against fixtures/harness/rubric.md (local-only, advisory — ticket 27)
     lift        With-skill vs without-skill lift measurement (local-only, advisory — ticket 27)
     decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
+    safety-net-track       Safety Net Track behavior regressions (fixtures: php-safety-net-*; local-only, advisory)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
@@ -44,6 +45,7 @@ Examples:
     $(basename "$0") judge php-project-with-candidates --opencode
     $(basename "$0") lift php-partial --opencode
     $(basename "$0") decision-gate-bypass php-decision-gate-bypass --opencode
+    $(basename "$0") safety-net-track php-safety-net-purpose-recognition --opencode
 EOF
     exit 1
 }
@@ -692,6 +694,120 @@ run_decision_gate_bypass() {
     rm -rf "$FIXTURE_DST/.agents"
 }
 
+# Tier 5 — Safety Net Track behavior regressions (ticket 01,
+# skills/refactor-scan/references/safety-net-track.md /
+# skills/refactor-learn/references/safety-net-write.md). Local-only,
+# advisory, non-CI — the deliberate replacement for `tooling_tree.py`
+# ground-truth on a Safety Net Track node: the whole point under test is
+# that the deterministic parser's own dependency-name match isn't
+# authoritative here any more (fixtures/README.md's "safety-net-track"
+# section). Each `php-safety-net-*` fixture exercises one distinct
+# checklist item; dispatches by fixture name to the matching check below.
+# Real, deterministic greps against the fixture's own post-run files where
+# possible (same discipline `decision-gate-bypass` already uses) — LLM
+# transcript wording only where no file-level signal exists.
+run_safety_net_track() {
+    log_info "=== Safety Net Track behavior — fixture: $FIXTURE ==="
+    local opencode_bin
+    opencode_bin="$(resolve_opencode_bin)" || return 0
+
+    mkdir -p "$FIXTURE_DST/.agents"
+    ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
+
+    case "$FIXTURE" in
+        php-safety-net-purpose-recognition)
+            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md for step 4. Report, as your final line: FULFILLED (php-cs-fixer's Purpose is already served, not proposed) or PROPOSED (php-cs-fixer should be proposed as a fresh candidate)."
+            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+            if grep -qi "pint" "$out" 2>/dev/null; then
+                log_pass "Scan output mentions Laravel Pint — advisory sign the Purpose judgement ran (see $out)"
+            else
+                log_info "Scan output doesn't mention Pint — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qi "^PROPOSED" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports PROPOSED — php-cs-fixer wrongly proposed despite Pint — see $out"
+            elif grep -qi "^FULFILLED" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports FULFILLED — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report FULFILLED/PROPOSED — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        php-safety-net-open-blocks-rescan)
+            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including its step 2 resume check and skills/refactor-scan/references/safety-net-track.md. Report explicitly, as your final line: RESUMED (worked the existing php-cs-fixer #5 Open entry only) or RESCANNED (walked the tree fresh and proposed other nodes too)."
+            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+            if grep -qi "RESCANNED" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports RESCANNED — Open may have been rescanned instead of resumed — see $out"
+            elif grep -qi "RESUMED" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports RESUMED — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report RESUMED/RESCANNED — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        php-safety-net-first-run)
+            _safety_net_scan_prompt "Run one full pass: /refactor-scan, then /refactor-learn's closing call, against this repo. Follow skills/refactor-scan/SKILL.md and skills/refactor-learn/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md and skills/refactor-learn/references/safety-net-write.md. This target's Safety Net Track nodes are already fully resolved — report explicitly what (if anything) got written to docs/refactoring/bookkeeping.md."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            if grep -q "## Safety Net" "$bookkeeping" 2>/dev/null && grep -q "Last scan:" "$bookkeeping" 2>/dev/null; then
+                log_pass "bookkeeping.md now carries a ## Safety Net section with Last scan written"
+            else
+                log_fail "bookkeeping.md missing ## Safety Net / Last scan after the pass — see $bookkeeping"
+            fi
+            ;;
+        php-safety-net-rejection-symmetry)
+            _safety_net_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for php-cs-fixer (issue .scratch/refactor/issues/05-php-cs-fixer.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/safety-net-write.md. Report what you wrote."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local oos="$FIXTURE_DST/docs/refactoring/out-of-scope/php-cs-fixer.md"
+            if [[ -f "$oos" ]]; then
+                log_pass "out-of-scope/php-cs-fixer.md written"
+            else
+                log_fail "out-of-scope/php-cs-fixer.md missing after the run — see $bookkeeping and $FIXTURE_DST/docs/refactoring/out-of-scope/"
+            fi
+            if grep -qE "Out-of-scope:" "$bookkeeping" 2>/dev/null && grep -qE "^- php-cs-fixer" <(sed -n '/Out-of-scope:/,/^$/p' "$bookkeeping" 2>/dev/null); then
+                log_pass "## Safety Net's Out-of-scope list names php-cs-fixer"
+            else
+                log_info "## Safety Net's Out-of-scope list doesn't clearly name php-cs-fixer — check $bookkeeping by hand (advisory, non-blocking)"
+            fi
+            if grep -qE "^- php-cs-fixer" <(sed -n '/Open:/,/^$/p' "$bookkeeping" 2>/dev/null); then
+                log_fail "## Safety Net's Open list still names php-cs-fixer — should have been removed"
+            else
+                log_pass "## Safety Net's Open list no longer names php-cs-fixer"
+            fi
+            ;;
+        php-safety-net-old-schema)
+            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md. This repo's docs/refactoring/bookkeeping.md is still in the pre-existing shape (Fulfilled nodes, global Pending candidates, no Safety Net section). Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            if grep -q "loop-config" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing Fulfilled nodes content (loop-config) still present, untouched"
+            else
+                log_fail "Pre-existing Fulfilled nodes content is gone — see $bookkeeping"
+            fi
+            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+            if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
+                log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
+            else
+                log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
+            fi
+            ;;
+        *)
+            log_fail "No safety-net-track check wired for fixture: $FIXTURE"
+            ;;
+    esac
+
+    rm -rf "$FIXTURE_DST/.agents"
+}
+
+# Shared helper for run_safety_net_track's cases above: run one opencode
+# prompt with --auto (this scenario's broader, unattended-mode prompts were
+# observed elsewhere in this file to need it — decision-gate-bypass's own
+# troubleshooting note) against $FIXTURE_DST, logging to
+# /tmp/safety-net-track-$FIXTURE-scan.log. Advisory only — never fails the
+# caller.
+_safety_net_scan_prompt() {
+    local prompt="$1"
+    local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
+        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    fi
+}
+
 # Main
 main() {
     reset_counters
@@ -721,6 +837,9 @@ main() {
             ;;
         decision-gate-bypass)
             run_decision_gate_bypass
+            ;;
+        safety-net-track)
+            run_safety_net_track
             ;;
         *)
             log_fail "Unknown tier: $TIER"
