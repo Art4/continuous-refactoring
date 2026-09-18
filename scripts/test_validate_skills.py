@@ -278,6 +278,15 @@ class ScratchRefTests(unittest.TestCase):
         # non-code mention isn't a link.
         self.assertEqual(vs.scratch_ref_issues("Some scratch work happened here."), [])
 
+    def test_target_local_tracker_prefix_exempted(self):
+        # `.scratch/refactor/` is the reserved path name a *target* repo's
+        # own local issue tracker uses when there's no external forge
+        # (local-issue-tracker-template.md) — a documented, intentional
+        # convention this suite sets up, not a leak of this suite's own
+        # backlog (which never names a topic "refactor").
+        issues = vs.scratch_ref_issues("Issues live in `.scratch/refactor/issues/`.")
+        self.assertEqual(issues, [])
+
 
 class TicketRefTests(unittest.TestCase):
     def test_ticket_ref_flagged(self):
@@ -663,6 +672,110 @@ class ReferencesDirTests(unittest.TestCase):
         try:
             issues = vs.validate_repo(root)
             self.assertFalse(any("references/tree.md" in i.skill for i in issues))
+        finally:
+            tmp.cleanup()
+
+
+class FixtureProjectSelfContainmentTests(unittest.TestCase):
+    """fixtures/<lang>/<name>/project/** simulates a real target repo's own
+    file tree — validate_repo scans it with the same ticket/PR/ADR/.scratch
+    self-containment bans skills/** gets, since this content stands in for
+    what a real skill run would actually write into a real target.
+    """
+
+    def _repo(self, project_files):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, {
+            "CONTEXT.md": "# glossary",
+            "docs/agents/skill-references.md": "# ledger\n",
+            "skills/refactor-scan/SKILL.md": (
+                "---\nname: refactor-scan\ndescription: test\n---\n\n"
+                "## Process\n\n## Completion criterion\n"
+            ),
+            **{
+                f"fixtures/php/some-fixture/project/{rel}": content
+                for rel, content in project_files.items()
+            },
+        })
+        return tmp, root
+
+    def test_ticket_ref_in_fixture_project_flagged(self):
+        tmp, root = self._repo({"docs/refactoring/out-of-scope/foo.md": "Rejected (ticket 63)."})
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "fixtures/php/some-fixture/project/docs/refactoring/out-of-scope/foo.md" in i.skill
+                and "ticket 63" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_adr_ref_in_fixture_project_flagged(self):
+        tmp, root = self._repo({"README.md": "Per ADR-0022."})
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "fixtures/php/some-fixture/project/README.md" in i.skill and "ADR-0022" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_scratch_ref_in_fixture_project_flagged(self):
+        tmp, root = self._repo({"docs/agents/notes.md": "See `.scratch/tooling-tree/issues/1-foo.md`."})
+        try:
+            issues = vs.validate_repo(root)
+            self.assertTrue(any(
+                "fixtures/php/some-fixture/project/docs/agents/notes.md" in i.skill and ".scratch/" in i.message
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_target_local_tracker_convention_not_flagged(self):
+        # `.scratch/refactor/issues/` is the target's own local-tracker
+        # convention this suite deliberately sets up (local-issue-tracker-
+        # template.md) — not a leak of this suite's own backlog.
+        tmp, root = self._repo({
+            "docs/agents/issue-tracker.md": "Issues live in `.scratch/refactor/issues/`.",
+        })
+        try:
+            issues = vs.validate_repo(root)
+            self.assertFalse(any(
+                "fixtures/php/some-fixture/project/docs/agents/issue-tracker.md" in i.skill
+                for i in issues
+            ))
+        finally:
+            tmp.cleanup()
+
+    def test_clean_fixture_project_ok(self):
+        tmp, root = self._repo({"composer.json": "{}"})
+        try:
+            issues = vs.validate_repo(root)
+            self.assertFalse(any("fixtures/php/some-fixture/project" in i.skill for i in issues))
+        finally:
+            tmp.cleanup()
+
+    def test_non_project_fixture_file_not_scanned(self):
+        # Only the project/ subtree simulates target-repo content — a
+        # sibling expected/ fixture file (test-harness output, not target
+        # content) is out of scope for this scan.
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, {
+            "CONTEXT.md": "# glossary",
+            "docs/agents/skill-references.md": "# ledger\n",
+            "skills/refactor-scan/SKILL.md": (
+                "---\nname: refactor-scan\ndescription: test\n---\n\n"
+                "## Process\n\n## Completion criterion\n"
+            ),
+            "fixtures/php/some-fixture/expected/roadmap.json": "Per ticket 63, nothing here matters.",
+        })
+        try:
+            issues = vs.validate_repo(root)
+            self.assertFalse(any("expected/roadmap.json" in i.skill for i in issues))
         finally:
             tmp.cleanup()
 

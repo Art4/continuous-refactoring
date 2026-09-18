@@ -33,7 +33,8 @@
       "details": {
         "declared": false,
         "mechanism_verified": false,
-        "autoloader_wired": false
+        "autoloader_wired": false,
+        "unwired_entry_points": []
       }
     },
     "ci-runner": {
@@ -44,7 +45,9 @@
     "secret-detection": {
       "fulfilled": false,
       "reason": "no CI job runs a secret scanner yet",
-      "details": {}
+      "details": {
+        "scanner": null
+      }
     },
     "editorconfig": {
       "fulfilled": false,
@@ -92,7 +95,7 @@
     },
     "composer-audit": {
       "fulfilled": false,
-      "reason": "no CI job runs composer audit yet",
+      "reason": "no CI job runs composer audit yet, and no housekeeping-template.md line for it",
       "details": {
         "has_real_dep": false
       }
@@ -202,7 +205,7 @@
     },
     "semgrep": {
       "fulfilled": false,
-      "reason": "no semgrep/OWASP CI job yet",
+      "reason": "no semgrep/OWASP CI job yet, and no housekeeping-template.md line for it",
       "details": {}
     },
     "rector-dead-code": {
@@ -250,13 +253,12 @@
         ]
       }
     },
-    "php-structural-scan": {
+    "php-safety-net": {
       "fulfilled": false,
-      "reason": "waiting on: psr-4, composer-audit, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set",
+      "reason": "waiting on: psr-4, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set",
       "details": {
         "unresolved": [
           "psr-4",
-          "composer-audit",
           "rector-dead-code",
           "rector-type-coverage",
           "rector-php-set",
@@ -270,12 +272,12 @@
     },
     "structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: editorconfig, ci-runner, php-structural-scan",
+      "reason": "waiting on: editorconfig, ci-runner, php-safety-net",
       "details": {
         "unresolved": [
           "editorconfig",
           "ci-runner",
-          "php-structural-scan"
+          "php-safety-net"
         ],
         "rejected": [
           "phpstan-level-5"
@@ -319,17 +321,6 @@
     },
     {
       "n": 4,
-      "node": "secret-detection",
-      "type": "tooling",
-      "required_parents": [
-        "loop-config"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 5,
       "node": "psr-4",
       "type": "tooling",
       "required_parents": [
@@ -340,7 +331,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 6,
+      "n": 5,
       "node": "php-cs-fixer",
       "type": "tooling",
       "required_parents": [
@@ -353,29 +344,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 7,
-      "node": "phpmd",
-      "type": "tooling",
-      "required_parents": [
-        "composer"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 8,
-      "node": "coverage-floor",
-      "type": "tooling",
-      "required_parents": [
-        "phpunit"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 9,
+      "n": 6,
       "node": "rector-php-set",
       "type": "tooling",
       "required_parents": [],
@@ -389,7 +358,7 @@
       "reason": "required parents fulfilled"
     },
     {
-      "n": 10,
+      "n": 7,
       "node": "rector-dead-code",
       "type": "tooling",
       "required_parents": [
@@ -400,6 +369,49 @@
         "php-cs-fixer"
       ],
       "reason": "required parents fulfilled"
+    },
+    {
+      "n": 8,
+      "node": "rector-code-quality",
+      "type": "tooling",
+      "required_parents": [
+        "rector-php-set"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 9,
+      "node": "rector-phpunit-set",
+      "type": "tooling",
+      "required_parents": [
+        "phpunit"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [
+        "rector-code-quality",
+        "php-cs-fixer"
+      ],
+      "reason": "required parents fulfilled"
+    },
+    {
+      "n": 10,
+      "node": "rector-type-coverage",
+      "type": "tooling",
+      "required_parents": [
+        "composer"
+      ],
+      "required_any_parents": [],
+      "recommended_parents": [
+        "rector-dead-code",
+        "rector-code-quality",
+        "php-cs-fixer",
+        "phpstan-level-3"
+      ],
+      "reason": "required parents fulfilled | outlook: would benefit from phpstan-level-3 (recommended) \u2014 still proposable"
     }
   ],
   "no_mr_created": true,

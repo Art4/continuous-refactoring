@@ -14,7 +14,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
 - **Recommended child:** `rector-php-set` (`rector.md`) — waits until this node is decided before it
   becomes proposable, on top of its own required-any static-analyzer parents, so Rector's rewrites
   land on already-styled code. This node no longer carries its own direct `resolved` edge into
-  `php-structural-scan` (`php-tooling-tree.md`'s own prose above states why) — this recommended edge
+  `php-safety-net` (`php-tooling-tree.md`'s own prose above states why) — this recommended edge
   is what still forces it to be decided before structural work opens, one hop through `rector-php-set`
   → `rector-dead-code`/`rector-code-quality` instead of directly. Reverses an earlier, deliberate
   design choice (`rector-php-set` used to be the one Rector-family node with no `php-cs-fixer`

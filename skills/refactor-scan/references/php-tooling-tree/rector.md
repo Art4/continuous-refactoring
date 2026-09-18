@@ -25,7 +25,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Recommended parents:** `php-cs-fixer` (`php-cs-fixer.md`) — this node used to be the one exception
   in the family with no `php-cs-fixer` recommended parent ("the styling-order exception"), decided
   directly with the user specifically because `php-cs-fixer` still carried its own direct `resolved`
-  edge into `php-structural-scan` back then, so nothing forced it to be decided otherwise. That direct
+  edge into `php-safety-net` back then, so nothing forced it to be decided otherwise. That direct
   edge is gone now (`php-cs-fixer.md`'s own entry) — this recommended edge is what replaces it, forcing
   `php-cs-fixer` to be decided before this node (and transitively `rector-dead-code`/
   `rector-code-quality`) can resolve, same as every sibling Rector node already required.
@@ -54,11 +54,11 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Fulfilment check:** typing suites enabled and fully applied at the agreed coverage degree.
 - **MR scope:** adopted in levels, one MR per level; keeps PHPStan green via baseline shrinking. Proposed once `rector-dead-code` **and** `rector-code-quality` have both been decided **and** both `php-cs-fixer` and `phpstan-level-3` (`phpstan.md`) have been decided (fulfilled or rejected) — without strict analysis its rewrites are hard to review, without `php-cs-fixer` its output cannot be styled, without dead code removed or control flow flattened first its type-coverage rewrites touch messier code, so this node waits on all three pairs. Any one being rejected instead of fulfilled still releases this node, it just goes in without that particular benefit. The `phpstan-level-3` threshold stays put here even though the level chain itself now reaches `phpstan-level-10` — level 3 was already judged "strict enough" for reviewable Rector rewrites. (`rector-code-quality` replaced `rector-early-return` in this gate when that node was retired — see `rector-code-quality`'s own entry below for why it's the one now carrying the "control flow flattened first" prerequisite.)
 - **Required parent:** `composer` — the tree-wide floor every other node in this family already
-  carries directly or transitively; this node was the sole exception, the only `php-structural-scan`
+  carries directly or transitively; this node was the sole exception, the only `php-safety-net`
   leaf without any `required`/`required-any` chain to `composer` at all. A rejected `composer` could
   never automatically close it that way (the gate-cascade check only follows `required`/`required-any`
   edges, never `recommended` ones), so a target with no PHP application code at all needed it manually
-  filed and rejected by hand before `php-structural-scan`/`structural-scan` could ever open (observed
+  filed and rejected by hand before `php-safety-net`/`structural-scan` could ever open (observed
   live on a static site with a single stray `.php` deployment script). Inert in the ordinary case: by
   the time any of the four `recommended` parents below is *decided*, `composer` must already be
   fulfilled anyway, since each of them already has its own real chain back to it — the edge only ever

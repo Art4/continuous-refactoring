@@ -1,19 +1,22 @@
 # `coverage-floor`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**).
+Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
 
 - **Name:** Test Coverage Floor
 - **Tool:** PHPUnit's own coverage report — PCOV or Xdebug as the underlying driver, either works; a
   concrete tool choice at adoption time, not pinned here, the same shape `secret-detection.md`'s `any
   secret scanner` already uses.
 - **Purpose:** a Signal-producing node for `refactor-prioritize`'s Select mode, not a Safety Net one
-  (no `resolved` edge into `php-structural-scan`/`structural-scan`). Turns test coverage from an
+  (no `resolved` edge into `php-safety-net`/`structural-scan`). Turns test coverage from an
   assumption into measured evidence: a self-tightening floor (a ratchet — never a fixed percentage,
   see *Ratchet, not a fixed floor* below) that only ever climbs, plus real per-file numbers that
   strengthen the existing generic "Untested / hard-to-test" recognition cue instead of relying on
   reading the test suite by eye.
-- **Required parent:** `phpunit` — coverage is a report over an existing test suite, not a standalone
-  concern; nothing to measure before a runner exists.
+- **Required parents:** `phpunit` — coverage is a report over an existing test suite, not a standalone
+  concern; nothing to measure before a runner exists — and, additionally, `php-safety-net` — a
+  **Signal wave** node: proposed only once the Safety Net has closed. Additive rather than replacing
+  `phpunit`: a rejected `phpunit` must still permanently close this node the ordinary required-edge way,
+  which a bare `php-safety-net` edge alone wouldn't do.
 - **Fulfilment check:** `phpunit.xml.dist` (or `phpunit.xml`) declares a `<coverage>` report section,
   and a coverage-floor value is committed to the target (`.coverage-floor`, a single percentage, e.g.
   `62.5`). Once `ci-runner` is fulfilled, additionally requires a CI job that actually invokes the

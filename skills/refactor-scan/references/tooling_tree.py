@@ -36,7 +36,7 @@ _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 # required parent never unblocks its children, so a human filing an
 # out-of-scope entry for it would never accomplish anything leaving it
 # unfulfilled doesn't already). Resolved-gated aggregation nodes
-# (`php-structural-scan`) are excluded separately via
+# (`php-safety-net`) are excluded separately via
 # `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
 # required-gated nodes instead.
 _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project"}
@@ -93,7 +93,7 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
     recommended_parents: dict[str, list[str]] = {n: [] for n in nodes}
     # `resolved` parents: unlike a required parent, a *rejected* resolved
     # parent still counts as resolved. Used by structural-scan and, one hop
-    # down, by php-structural-scan (the PHP tree's own aggregation node
+    # down, by php-safety-net (the PHP tree's own aggregation node
     # feeding it) — see tooling-tree.md's structural-scan node.
     resolved_parents: dict[str, list[str]] = {n: [] for n in nodes}
     # `required-any` parents: unlike `required` (every parent
@@ -115,7 +115,7 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
             resolved_parents[e["to"]].append(e["from"])
     # A resolved-gated node whose own resolved-ness only feeds *another*
     # resolved-gated node's resolved_parents (an aggregation node — today:
-    # php-structural-scan, feeding structural-scan) is never itself
+    # php-safety-net, feeding structural-scan) is never itself
     # proposed. Derived from the edge table rather than a hardcoded name, so
     # a future second aggregation node (e.g. js-structural-scan) needs no
     # code change here.
@@ -459,6 +459,51 @@ def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
     return _has_ci_job_invoking(repo, "composer audit")
 
 
+def _has_housekeeping_line_for(repo: pathlib.Path, node_name: str) -> bool:
+    """The Housekeeping-line fulfilment fallback `composer-audit` and
+    `semgrep` share (php-tooling-tree/composer-audit.md,
+    php-tooling-tree/semgrep.md): True if the Refactoring Notes' `housekeeping-
+    template.md` (`skills/continuous-housekeeping/references/template-
+    file-format.md`) already carries a contributed line naming `node_name`
+    — no proof of a completed run required, matching every other CI-gated
+    check in this tree (presence/invocation is sufficient, never proof of a
+    passing run history). Matches `node_name` case-insensitively with
+    hyphens read as spaces (`"composer-audit"` -> `"composer audit"`, the
+    shape the node's own contributed line actually uses — see
+    template-file-format.md's own Structure example) against the template's
+    full text; plain substring matching, not a second copy of that file's
+    own bullet-parsing machinery (it treats every line as opaque prose, and
+    so does this)."""
+    p = _resolve_refactoring_notes_dir(repo) / "housekeeping-template.md"
+    if not p.exists():
+        return False
+    try:
+        txt = p.read_text(encoding="utf-8").lower()
+    except OSError:
+        return False
+    return node_name.replace("-", " ").lower() in txt
+
+
+def _ci_or_housekeeping_status(
+    repo: pathlib.Path, node_name: str, ci_ok: bool, ci_reason: str, no_ci_reason: str
+) -> tuple[bool, str]:
+    """Shared fulfilment shape for `composer-audit`/`semgrep`, this tree's
+    two audit-style nodes: a real CI job (`ci_ok`, already computed by the
+    caller — the CI-job check itself is tool-specific, only the
+    OR-with-housekeeping-line combination is common) OR a committed
+    `housekeeping-template.md` line naming `node_name`
+    (`_has_housekeeping_line_for`, above). Returns `(fulfilled, reason)` —
+    `ci_reason`/`no_ci_reason` are this node's own wording for "CI job
+    present" and "neither present" respectively, so the two callers keep
+    their own tool-specific phrasing without duplicating the OR-combination
+    logic itself."""
+    housekeeping_line = _has_housekeeping_line_for(repo, node_name)
+    fulfilled = ci_ok or housekeeping_line
+    if not fulfilled:
+        return False, no_ci_reason
+    return True, ci_reason if ci_ok else "housekeeping-template.md already names this node"
+
+
 # secret-detection's own `Tool: any secret scanner` (tooling-tree.md) — same
 # generic-tool shape as test-runner-if-missing's `any test runner`. Checked
 # by common invocation needle rather than one fixed tool name.
@@ -725,15 +770,18 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     agent rejection decision (a mechanical-reversal design), not a
     mechanical fact already on disk. Once the target's PHP floor rises, a
     previously-blocked leaf is simply unblocked next pass; there is nothing
-    to reverse. The one consequence worth naming: four of these five leaves
-    (`php-cs-fixer`, `phpunit`, `test-runner-if-missing`, `composer-audit`)
-    are themselves `structural-scan` leaves (php-tooling-tree.md's `resolved`
-    edges) — while blocked here, they count as neither fulfilled nor
-    rejected, so `structural-scan` stays genuinely closed until the floor
-    rises (matching how a target that truly cannot run these tools yet
-    shouldn't be treated as tooling-ready). A human who wants
-    `structural-scan` to open anyway despite the floor can still file the
-    out-of-scope entries by hand — this precheck doesn't do it for them.
+    to reverse. The one consequence worth naming: `phpunit` is the only one
+    of these five nodes that's still a `php-safety-net` leaf (php-tooling-
+    tree.md's `resolved` edges) — while blocked here, it counts as neither
+    fulfilled nor rejected, so `structural-scan` stays genuinely closed
+    until the floor rises (matching how a target that truly cannot run
+    these tools yet shouldn't be treated as tooling-ready). `composer-audit`
+    is no longer a `php-safety-net` leaf either (moved to the Signal wave
+    instead) — like
+    `php-cs-fixer`/`test-runner-if-missing`, a floor block on it now only
+    delays its own adoption. A human who wants `structural-scan` to open
+    anyway despite the floor can still file the out-of-scope entries by
+    hand — this precheck doesn't do it for them.
 
     Returns `[]` when the target's PHP floor can't be determined (no
     `composer.json`, or neither `require.php` nor `config.platform.php`
@@ -914,7 +962,7 @@ def _resolved_gate_status(
     Computed in dependency order so an aggregation node (whose own
     resolved-parents are ordinary leaves) is resolved *before* a node that
     reads its resolved-ness as one of its own resolved-parents (e.g.
-    structural-scan reading php-structural-scan) — independent of where
+    structural-scan reading php-safety-net) — independent of where
     either node happens to sit in ``tree["order"]``.
 
     ``fulfilled_lookup(name) -> bool`` supplies each ordinary leaf's
@@ -1046,7 +1094,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     cs_fulfilled = has_cs_dep and has_cs_config
     set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)
     # phpmd — same dep+config approximation as php-cs-fixer above, no
-    # resolved edge into php-structural-scan (php-tooling-tree.md's own node
+    # resolved edge into php-safety-net (php-tooling-tree.md's own node
     # entry states why): a Signal-producing node, not a Safety Net one.
     has_phpmd_dep = _has_dep(composer, "phpmd/phpmd")
     has_phpmd_config = (repo / "phpmd.xml").exists() or (repo / "phpmd.xml.dist").exists() or (repo / ".phpmd.xml").exists()
@@ -1098,17 +1146,28 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
     # (php-tooling-tree.md).
     tr_fulfilled = phpunit_adopted
     set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
-    # composer-audit: fulfilled once CI actually gates on `composer audit` (php-tooling-tree.md).
-    # Eligibility (whether it's *proposable* at all, beyond its required edges) is a separate,
-    # extra gate handled in next_candidates()/roadmap() — a real dependency exists, or every
-    # other structural-scan leaf is already resolved — mirroring the phpstan-level-N
-    # stop-conditions pattern rather than living in this fulfilment check.
+    # composer-audit: fulfilled once CI actually gates on `composer audit`,
+    # OR a Housekeeping line for this node is already committed to
+    # housekeeping-template.md (php-tooling-tree/composer-audit.md) — no
+    # proof of a completed run required, same as every other CI-gated check
+    # here.
+    # Eligibility (whether it's *proposable* at all, beyond its required
+    # edges) is a separate stop condition handled in
+    # next_candidates()/roadmap() — a real dependency must exist — mirroring
+    # the phpstan-level-N stop-conditions pattern rather than living in this
+    # fulfilment check.
     has_real_dep = _has_real_require_dep(composer)
-    audit_fulfilled = _has_composer_audit_ci_job(repo)
+    audit_fulfilled, audit_reason = _ci_or_housekeeping_status(
+        repo,
+        "composer-audit",
+        ci_ok=_has_composer_audit_ci_job(repo),
+        ci_reason="CI job runs composer audit",
+        no_ci_reason="no CI job runs composer audit yet, and no housekeeping-template.md line for it",
+    )
     set_node(
         "composer-audit",
         audit_fulfilled,
-        "CI job runs composer audit" if audit_fulfilled else "no CI job runs composer audit yet",
+        audit_reason,
         has_real_dep=has_real_dep,
     )
     # static-code-analyzer: pure organizational/plumbing node,
@@ -1177,7 +1236,7 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         set_node("phpstan-level-0", False, "missing phpstan, no level configured, or no baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
 
     # phpstan-level-1..10 — phpstan-level-5 is the chain's resolved-leaf
-    # into php-structural-scan (see that node); levels 6-10 stay ordinary,
+    # into php-safety-net (see that node); levels 6-10 stay ordinary,
     # non-gating, still-proposable chain nodes.
     # For fulfilled check: level >= N
     for lvl in range(1, 11):
@@ -1228,15 +1287,25 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
 
     # semgrep: OWASP Top 10 coverage, complementary to psalm-taint-analysis
     # above rather than gated by its own dep/config -- Semgrep is a
-    # standalone tool, never a composer.json entry. Recommended-parent
-    # eligibility (whether psalm-taint-analysis is *decided* yet) is
+    # standalone tool, never a composer.json entry. Fulfilled once CI gates
+    # on it, OR a Housekeeping line for this node is already committed to
+    # housekeeping-template.md — the same fallback composer-audit's own
+    # fulfilment check above uses (php-tooling-tree/semgrep.md).
+    # Recommended-parent eligibility (whether ci-runner is *decided* yet, if
+    # ever added) and required-parent eligibility (php-safety-net) are
     # handled separately by _is_unblocked(); this only computes the node's
     # own fulfilment.
-    semgrep_fulfilled = _has_semgrep_owasp_ci_job(repo)
+    semgrep_fulfilled, semgrep_reason = _ci_or_housekeeping_status(
+        repo,
+        "semgrep",
+        ci_ok=_has_semgrep_owasp_ci_job(repo),
+        ci_reason="semgrep + OWASP ruleset gated in CI",
+        no_ci_reason="no semgrep/OWASP CI job yet, and no housekeeping-template.md line for it",
+    )
     set_node(
         "semgrep",
         semgrep_fulfilled,
-        "semgrep + OWASP ruleset gated in CI" if semgrep_fulfilled else "no semgrep/OWASP CI job yet",
+        semgrep_reason,
     )
 
     # rector
@@ -1308,11 +1377,11 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         )
 
     # Resolved-gated nodes: structural-scan, and PHP's own aggregation node
-    # php-structural-scan feeding it — fulfilled once every one of a node's
+    # php-safety-net feeding it — fulfilled once every one of a node's
     # `resolved` parents is fulfilled OR recorded as rejected. Unlike a
     # required parent, a rejected resolved parent still counts as resolved.
     # Generic over every such node (see _resolved_gate_status), computed in
-    # dependency order so php-structural-scan's status is already known by
+    # dependency order so php-safety-net's status is already known by
     # the time structural-scan's own check reads it.
     rejected = _rejected_nodes(repo)
     gate = _resolved_gate_status(tree, lambda n: out.get(n, {}).get("fulfilled", False), rejected)
@@ -1342,33 +1411,6 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     if req_any and not any(fulfilled.get(p, {}).get("fulfilled", False) for p in req_any):
         return False, f"blocked — none of required-any parents fulfilled: {', '.join(req_any)}"
     return True, "required parents fulfilled"
-
-
-def _composer_audit_extra_gate(has_real_dep: bool, tree: dict, resolved_check: dict, rejected: set[str]) -> tuple[bool, str]:
-    """composer-audit's stop condition beyond required-edge fulfilment
-    (php-tooling-tree.md): proposable once a real `require` dependency
-    exists, or every *other* leaf feeding php-structural-scan (its true
-    siblings under the aggregation node, not structural-scan's own
-    resolved-parents, which is just {editorconfig, php-structural-scan}) is
-    already resolved — independent alternatives, not ordered.
-    `resolved_check` maps node name to a bool: already fulfilled (real or
-    simulated). A leaf counts as resolved when fulfilled, directly rejected,
-    or effectively rejected (`_is_effectively_rejected` — closed for good
-    because a required ancestor of the leaf is rejected, e.g.
-    `phpstan-level-5` behind a rejected `phpstan-level-2`) — the same
-    `resolved`-gate semantics `_resolved_gate_status()` already applies to
-    the same leaf set, one gate condition over."""
-    if has_real_dep:
-        return True, "real require dependency present"
-    leaves = tree["resolved_parents"].get("php-structural-scan", [])
-    other_leaves = [leaf for leaf in leaves if leaf != "composer-audit"]
-    unresolved = [
-        leaf for leaf in other_leaves
-        if not (resolved_check.get(leaf, False) or _is_effectively_rejected(leaf, tree, rejected))
-    ]
-    if not unresolved:
-        return True, "no real dependency yet, but every other leaf feeding php-structural-scan is resolved"
-    return False, f"no real dependency yet, waiting on: {', '.join(unresolved)}"
 
 
 def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | None = None) -> list[dict]:
@@ -1404,7 +1446,7 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
             continue
         if tree["resolved_parents"].get(node):
             # Resolved-gated node (structural-scan, and any aggregation node
-            # feeding it, e.g. php-structural-scan). Checked on its own
+            # feeding it, e.g. php-safety-net). Checked on its own
             # terms, *before* the generic fulfilled-skip below: detect_nodes()
             # marks such a node "fulfilled" the instant its resolved-parent
             # leaves resolve, but for an *exposed* one that's the gate
@@ -1437,10 +1479,14 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
             if _undecided_recommended_parents(node, tree, detected, rejected):
                 continue  # withheld — see withheld_candidates()
             if node == "composer-audit":
-                has_real_dep = detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False)
-                resolved_check = {n: d.get("fulfilled", False) for n, d in detected.items()}
-                ok, why = _composer_audit_extra_gate(has_real_dep, tree, resolved_check, rejected)
-                if not ok:
+                # Stop condition (a), php-tooling-tree/composer-audit.md: a
+                # real `require` dependency must exist — composer-audit has
+                # nothing to check without one. No longer paired with a
+                # fallback for a dependency-free target (removed alongside
+                # php-safety-net's own extra-gate helper) — this node isn't a
+                # php-safety-net leaf any more, so staying blocked here no
+                # longer risks leaving structural-scan blocked with it.
+                if not detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False):
                     continue
             if node in _PHPSTAN_LEVEL_NODES:
                 # Empty-baseline stop condition (php-tooling-tree/phpstan.md's
@@ -1473,7 +1519,7 @@ def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict
     that's never itself a real candidate — ``_NEVER_PROPOSED`` for
     structural/plumbing reasons (``static-code-analyzer``), or a
     resolved-gated aggregation node that isn't itself exposed
-    (``php-structural-scan``) — is walked *through* to its own children
+    (``php-safety-net``) — is walked *through* to its own children
     instead of being reported, the same "not proposed itself, but its
     resolved-ness matters" treatment ``next_candidates()`` gives these
     nodes. The walk only continues past such a node while it's actually
@@ -1486,9 +1532,9 @@ def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict
     another already-fulfilled sibling parent answers yes — excluded, it
     was reachable before this candidate too, not newly opened by it.
     Every other gate ``next_candidates()`` applies (rejected, PHP floor,
-    undecided recommended parents, `composer-audit`'s extra condition, the
-    PHPStan baseline stop-condition) is independent of ``landed_node``'s
-    own flag, so a node's current membership in ``next_candidates()``
+    undecided recommended parents, `composer-audit`'s real-dependency stop
+    condition, the PHPStan baseline stop-condition) is independent of
+    ``landed_node``'s own flag, so a node's current membership in ``next_candidates()``
     already answers those for both the "now" and "before" snapshots alike
     — only the required/required-any check itself needs re-evaluating
     under the counterfactual, not a second full tree scan.
@@ -1585,7 +1631,7 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
     for node in tree["order"]:
         if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
             # Resolved-gated nodes (structural-scan, and any aggregation
-            # node feeding it, e.g. php-structural-scan) are never withheld
+            # node feeding it, e.g. php-safety-net) are never withheld
             # by recommended-edge gating — they're gated by `resolved`
             # edges entirely, handled in next_candidates() instead.
             continue
@@ -1662,9 +1708,9 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
         sim_fulfilled = {**fulfilled, **{r["node"]: True for r in result}}
         # Fresh per-iteration resolved-gate status for every resolved-gated
         # node (structural-scan, and PHP's own aggregation node
-        # php-structural-scan feeding it), computed from this iteration's
+        # php-safety-net feeding it), computed from this iteration's
         # sim_fulfilled snapshot — independent of tree["order"] position, so
-        # structural-scan's own check below reads php-structural-scan's
+        # structural-scan's own check below reads php-safety-net's
         # already-resolved status correctly even though the generic root's
         # structural-scan node sorts earlier in tree["order"] than the PHP
         # tree's aggregation node.
@@ -1695,7 +1741,7 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
                 # not the standard required-parent check, which would
                 # instead close this node forever on any rejection. Applies
                 # to any resolved-gated node (structural-scan, and any
-                # aggregation node feeding it, e.g. php-structural-scan) —
+                # aggregation node feeding it, e.g. php-safety-net) —
                 # `gate` (computed fresh this iteration, above) already
                 # resolves an aggregation node's own status first, so
                 # structural-scan's check reads it correctly regardless of
@@ -1728,9 +1774,9 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             if not sim_ok:
                 continue
             if node == "composer-audit":
-                has_real_dep = detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False)
-                sim_ok, sim_why = _composer_audit_extra_gate(has_real_dep, tree, sim_fulfilled, rejected)
-                if not sim_ok:
+                # Stop condition (a) — see next_candidates()'s identical
+                # comment above.
+                if not detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False):
                     continue
             # For phpstan levels, the level chain's own empty-baseline gate
             # (phpstan.md's Stop conditions): predecessor level fulfilled AND

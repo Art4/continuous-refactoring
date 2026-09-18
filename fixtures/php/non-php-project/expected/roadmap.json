@@ -33,7 +33,8 @@
       "details": {
         "declared": false,
         "mechanism_verified": false,
-        "autoloader_wired": false
+        "autoloader_wired": false,
+        "unwired_entry_points": []
       }
     },
     "ci-runner": {
@@ -44,7 +45,9 @@
     "secret-detection": {
       "fulfilled": false,
       "reason": "no CI job runs a secret scanner yet",
-      "details": {}
+      "details": {
+        "scanner": null
+      }
     },
     "editorconfig": {
       "fulfilled": false,
@@ -92,7 +95,7 @@
     },
     "composer-audit": {
       "fulfilled": false,
-      "reason": "no CI job runs composer audit yet",
+      "reason": "no CI job runs composer audit yet, and no housekeeping-template.md line for it",
       "details": {
         "has_real_dep": false
       }
@@ -215,7 +218,7 @@
     },
     "semgrep": {
       "fulfilled": false,
-      "reason": "no semgrep/OWASP CI job yet",
+      "reason": "no semgrep/OWASP CI job yet, and no housekeeping-template.md line for it",
       "details": {}
     },
     "rector-dead-code": {
@@ -258,16 +261,14 @@
       "reason": "PHP floor undeterminable (no composer.json) \u2014 nothing to correct",
       "details": {}
     },
-    "php-structural-scan": {
+    "php-safety-net": {
       "fulfilled": false,
-      "reason": "waiting on: psr-4, composer-audit, phpunit, phpstan-level-5, phpstan-deprecation-rules, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
+      "reason": "waiting on: psr-4, phpunit, phpstan-level-5, rector-dead-code, rector-type-coverage, rector-php-set, rector-code-quality, rector-phpunit-set, psalm-taint-analysis",
       "details": {
         "unresolved": [
           "psr-4",
-          "composer-audit",
           "phpunit",
           "phpstan-level-5",
-          "phpstan-deprecation-rules",
           "rector-dead-code",
           "rector-type-coverage",
           "rector-php-set",
@@ -280,12 +281,12 @@
     },
     "structural-scan": {
       "fulfilled": false,
-      "reason": "waiting on: editorconfig, ci-runner, php-structural-scan",
+      "reason": "waiting on: editorconfig, ci-runner, php-safety-net",
       "details": {
         "unresolved": [
           "editorconfig",
           "ci-runner",
-          "php-structural-scan"
+          "php-safety-net"
         ],
         "rejected": []
       }
@@ -327,48 +328,43 @@
     },
     {
       "n": 4,
-      "node": "secret-detection",
-      "type": "tooling",
-      "required_parents": [
-        "loop-config"
-      ],
-      "required_any_parents": [],
-      "recommended_parents": [],
-      "reason": "required parents fulfilled"
-    },
-    {
-      "n": 5,
       "node": "phpstan-level-11",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 6,
+      "n": 5,
       "node": "phpstan-level-12",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 7,
+      "n": 6,
       "node": "phpstan-level-13",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 8,
+      "n": 7,
       "node": "phpstan-level-14",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 9,
+      "n": 8,
       "node": "phpstan-level-15",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     },
     {
-      "n": 10,
+      "n": 9,
       "node": "phpstan-level-16",
+      "type": "tooling (open chain)",
+      "reason": "chain open above level 10 \u2014 appended node"
+    },
+    {
+      "n": 10,
+      "node": "phpstan-level-17",
       "type": "tooling (open chain)",
       "reason": "chain open above level 10 \u2014 appended node"
     }
