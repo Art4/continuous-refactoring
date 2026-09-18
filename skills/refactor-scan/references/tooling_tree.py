@@ -592,9 +592,15 @@ def _has_semgrep_owasp_ci_job(repo: pathlib.Path) -> bool:
 
 
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
+    # PHPStan itself auto-loads phpstan.neon.dist when phpstan.neon is
+    # absent (same "committed default, locally overridable" convention this
+    # tree already honors for phpunit.xml.dist/psalm.xml.dist/phpmd.xml.dist)
+    # -- phpstan.neon takes precedence when both exist, matching PHPStan's
+    # own resolution order.
     p = repo / "phpstan.neon"
     if not p.exists():
-        # also check phpstan.neon.dist? canonical is phpstan.neon per spec
+        p = repo / "phpstan.neon.dist"
+    if not p.exists():
         return None
     txt = p.read_text(encoding="utf-8")
     m = re.search(r"^\s*level\s*:\s*(\d+)", txt, re.M)

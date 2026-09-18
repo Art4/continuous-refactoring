@@ -454,6 +454,41 @@ class DetectNodesTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_p0_fulfilled_via_phpstan_neon_dist_only(self):
+        # PHPStan itself auto-loads phpstan.neon.dist when phpstan.neon is
+        # absent -- a real, common convention (mirrors phpunit.xml.dist/
+        # psalm.xml.dist/phpmd.xml.dist, all already accepted elsewhere in
+        # this tree). Caught live: a target using only the .dist file was
+        # wrongly reported as "no level configured".
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon.dist": "parameters:\n    level: 3\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
+            self.assertTrue(d["phpstan-level-3"]["fulfilled"], d["phpstan-level-3"])
+        finally:
+            tmp.cleanup()
+
+    def test_p0_phpstan_neon_takes_precedence_over_dist(self):
+        # Both committed: phpstan.neon wins, matching PHPStan's own
+        # resolution order.
+        tmp, root = self._make_repo({
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 5\n",
+            "phpstan.neon.dist": "parameters:\n    level: 1\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            d = detect_nodes(root)
+            self.assertEqual(d["phpstan-level-0"]["details"]["level"], 5)
+        finally:
+            tmp.cleanup()
+
     def test_p0_nonempty_blocks_p1(self):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
