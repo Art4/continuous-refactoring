@@ -24,8 +24,8 @@ contracts) are unaffected and keep gating CI as before.
 
 ## Comments
 
-PR: (branch `tickets/03-tier3-roadmap-local-only`, stacked on `tickets/02-guardrails-track` — link
-recorded in a follow-up commit once opened, matching tickets 01/02's own convention).
+PR: https://github.com/Art4/continuous-refactoring/pull/93 (`tickets/03-tier3-roadmap-local-only`,
+stacked on `tickets/02-guardrails-track`).
 
 Turned out to be a plain job-list edit, no split needed: `tier3` and `roadmap` were already their own
 separate jobs in `test-harness.yml` (not sharing a job with `tier1`/`tier2`), each only `needs: tier1`,
