@@ -35,7 +35,7 @@ lands in ticket 04).
 
 ## Comments
 
-**PR:** (fill in after opening)
+**PR:** https://github.com/Art4/continuous-refactoring/pull/91
 
 Implementation notes for whoever reviews this:
 
