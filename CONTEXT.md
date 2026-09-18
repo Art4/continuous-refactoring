@@ -24,24 +24,30 @@ _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 The directed graph of adoption steps a target repo climbs — a generic root (`skills/refactor-scan/references/tooling-tree.md`: `git`, `loop-config`) that every language specialization's tree (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree — a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry. Each node also carries a human-facing **Name** (the tree doc's `**Name:**` field), used instead of the slug anywhere a human reads it — issue titles, merge requests, the loop's closing report; internal bookkeeping (the edges table, the **Refactoring Notes**' `out-of-scope/` filenames, ledger matching) stays keyed by the slug. A node may also carry a **Housekeeping** field — a recurring-maintenance line contributed to `housekeeping-template.md` (below), ordinarily when the node's own MR delivers, or via the separate `continuous-housekeeping` skill's own reconciliation pass for a node already fulfilled before that file existed; unrelated to the node's own one-time Fulfilment check. A node may also carry a **Signal** field, naming which `signals.md` factor its tool output feeds once the node is adopted — see the **Signal** entry below for the full picture across both usages. Deliberately not every node produces one: a node can gate `structural-scan` without producing a Signal, and vice versa — a Signal-producing node like `phpmd` or `secret-detection` carries no `resolved` edge into `structural-scan` at all (see those nodes' own entries in `php-tooling-tree.md`/`tooling-tree.md`).
 _Avoid_: baseline, floor, bootstrap, onboarding (as a name for the tree itself — it never stops being walked; see the dedicated **Onboarding** entry below for the bounded phase within it, which is a real term)
 
+**Track**:
+One of four scheduled work modes a loop pass can spend itself on: **Safety Net**, **Guardrails**, **Investigation**, **Housekeeping** (all below). Each carries its own `Cadence` and `Last scan` in `bookkeeping.md`; a pass runs whichever due Track is most overdue relative to its own cadence — ties, and effort allocation when several Tracks hold open work simultaneously, fall back to the fixed order Safety Net > Guardrails > Housekeeping > Investigation. One deliberate exception, per target, one time only: the pass right after the Safety Net Track's `Open` list first empties runs Investigation, then Guardrails, then Housekeeping, one turn each in that order, before the ordinary priority order takes over — a target sees one real piece of delivered refactoring value before being asked to adopt more tooling or sit through maintenance. A Track's `bookkeeping.md` section doesn't exist until its first run — absence means "never run," not "nothing found"; the first run always records at least `Last scan`, even when it finds nothing, so a fully-compliant Track still gets its cadence honored afterward.
+_Avoid_: wave (this concept's earlier name; retired once it started colliding with **Guardrails**' own former name, "Signal wave" — see that entry)
+
 **Onboarding**:
-The phase of a target's own tree walk from a bare repo through `git`, `loop-config`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever.
+The phase of a target's own tree walk from a bare repo through `git`, `loop-config`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Only `git`/`loop-config` are their own, separately engineered step — a mandatory human interview, since `bookkeeping.md` doesn't exist yet and Create-mode/Focus areas/Refactoring goal are genuine preferences no scan can derive. Everything from the recognition gate onward is simply what the Safety Net **Track**'s very first run finds — the same mechanism as any later run, just with more to discover the first time.
 _Avoid_: baseline, bootstrap (see **Tooling tree**'s own `_Avoid_` list — those describe the never-ending tree; this term names only the bounded early phase within it)
 
 **Safety Net**:
-The tooling-tree nodes carrying a `resolved` edge into `structural-scan` (generic root: `editorconfig`, `ci-runner`) or into a language specialization's own aggregation node (PHP: `php-safety-net`) — deterministic tooling whose findings could collide with agent-driven structural work, settled before that work starts. Narrower than **Onboarding** (above): every Safety Net node lives inside Onboarding, but `git`/`loop-config`/the recognition gate aren't Safety Net nodes themselves.
+The tooling-tree nodes carrying a `resolved` edge into `structural-scan` (generic root: `editorconfig`, `ci-runner`) or into a language specialization's own aggregation node (PHP: `php-safety-net`) — deterministic tooling whose findings could collide with agent-driven structural work, settled before that work starts. Narrower than **Onboarding** (above): every Safety Net node lives inside Onboarding, but `git`/`loop-config`/the recognition gate aren't Safety Net nodes themselves. Also names the **Track** (above) that works through these nodes.
 _Avoid_: baseline, tooling gate
 
-**Signal wave**:
-The tooling-tree nodes proposed only once the **Safety Net** (above) has closed — required-gated on `structural-scan`/`php-safety-net` itself instead of (or alongside) a domain-specific parent. Orthogonal to a node's own **Signal** field (below): a Signal wave node always carries one, but a Safety Net node can too (`psalm-taint-analysis`) — one names *when* a node is proposed, the other names *which factor* it feeds once adopted.
-_Avoid_: security wave (not every Signal wave node is security-flavored — `phpmd`/`coverage-floor` feed Understandability/Testability, not Security)
+**Guardrails**:
+The tooling-tree nodes proposed only once the **Safety Net** (above) has closed — required-gated on `structural-scan`/`php-safety-net` itself instead of (or alongside) a domain-specific parent. Also names the **Track** (above) that works through these nodes. Orthogonal to a node's own **Signal** field (below): a Guardrails node always carries one, but a Safety Net node can too (`psalm-taint-analysis`) — one names *when* a node is proposed, the other names *which factor* it feeds once adopted.
+_Avoid_: signal wave (this concept's former name — renamed for symmetry once both it and **Safety Net** became **Track** names, and to stop reading as an alternate spelling of the unrelated **Signal** field below), security wave (not every Guardrails node is security-flavored — `phpmd`/`coverage-floor` feed Understandability/Testability, not Security)
 
 **Fulfilment check**:
-A node's own test for whether it's already adopted — the specific, node-owned criterion (a
-dependency present, a config committed, a CI job actually invoking the tool, …) that `tooling_tree.
-py`'s deterministic parser and the manual/LLM tree-walk fallback both evaluate the same way. Lives in
-the node's own tree-doc entry, alongside its **MR scope** (what an adoption's merge request actually
-delivers) — every node carries both, together they're what "a node" (above) means operationally.
+A node's own test for whether it's already adopted — evaluated against the node's own Purpose
+statement by an agent walking the tree during its **Track**'s (above) scan, recognizing any real,
+working tool that serves that Purpose rather than matching a fixed list of names (a
+Laravel-Pint-configured target satisfies `php-cs-fixer`'s Fulfilment check the same as a
+directly-configured one). Lives in the node's own tree-doc entry, alongside its **MR scope** (what an
+adoption's merge request actually delivers) — every node carries both, together they're what "a node"
+(above) means operationally.
 _Avoid_: adoption check, acceptance criteria
 
 **Entry point**:
@@ -57,7 +63,7 @@ The target repo's own folder holding the loop's state — `bookkeeping.md`, `mer
 _Avoid_: suite folder, config folder, state folder
 
 **Housekeeping** (recurring maintenance):
-A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync — run by the separate `continuous-housekeeping` skill on its own configurable cadence (default weekly), independent of the continuous-refactoring loop's own scan/design/implement/learn pipeline. Never a tooling-tree node: nothing about it is a one-time adoption with a stable Fulfilment check, and the tree's own parser has no forge access to derive a cadence from tracker history the way this skill does.
+A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync. Also names the **Track** (above) that runs it, on its own configurable cadence (default weekly), scheduled alongside the other three Tracks rather than by a separate skill. Never a tooling-tree node: nothing about it is a one-time adoption with a stable Fulfilment check.
 _Avoid_: maintenance loop, chore loop, cleanup pass
 
 **Required edge**:
