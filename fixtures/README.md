@@ -67,8 +67,8 @@ fixture, `next` is the fixture's real signal for the gate.
 
 ### php-decision-gate-bypass
 
-Not a tooling-tree fixture — no `expected/roadmap.json`, deliberately excluded from the CI roadmap
-matrix. Two independent retry-with-backoff implementations with genuinely different observable
+Not a tooling-tree fixture — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
+matrix (local-only now, see "Roadmap" below). Two independent retry-with-backoff implementations with genuinely different observable
 contracts, plus a pre-seeded `.scratch/refactor/issues/01-unify-retry-logic.md` (Local Markdown
 tracker) already carrying `refactor:candidate, ready-for-agent` and claiming to be fully specified.
 Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053) — see
@@ -76,8 +76,8 @@ Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053
 
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
-Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the CI roadmap
-matrix: the whole point under test is that `tooling_tree.py`'s own dependency-name match stops being
+Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
+matrix (local-only now, see "Roadmap" below): the whole point under test is that `tooling_tree.py`'s own dependency-name match stops being
 authoritative for a Safety Net Track node, so there's no fixed deterministic ground truth to assert
 `roadmap`/`tier2`/`tier3` against here. Each fixture exercises one checklist item from
 `skills/refactor-scan/references/safety-net-track.md` / `skills/refactor-learn/references/
@@ -120,8 +120,8 @@ same reason `decision-gate-bypass` does — see its own note below.
 
 ### php-guardrails-* (Guardrails Track, ADR-0055, ticket 02)
 
-Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the CI roadmap
-matrix, same reasoning as `php-safety-net-*` above. The Guardrails Track's own counterpart, reusing the
+Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
+matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*` above. The Guardrails Track's own counterpart, reusing the
 exact same mechanism (`skills/refactor-scan/references/guardrails-track.md` /
 `skills/refactor-learn/references/guardrails-write.md`) against a second node set — the nodes required
 on `structural-scan`/`php-safety-net` themselves (PHP: `composer-audit`, `phpmd`, `coverage-floor`,
@@ -173,6 +173,28 @@ own `expected/behavior.md` for the full expected behavior.
 
 Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-bypass`/`judge`/`lift`.
 
+### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
+
+Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI, alongside `tier1`/`tier2`, in a
+dedicated `tier3` job). `tier3` measures precision/recall — planted candidates
+(`expected/issues/*.md`) vs. what a run actually filed under `.scratch/**/issues/` — and, per
+ticket 27's Tier 5, checks that recall against a committed baseline (`fixtures/baselines/`,
+gitignored). Both the count and the baseline it's checked against are downstream of
+`tooling_tree.py`'s own deterministic, hardcoded-dependency-name detection for every node —
+including the Safety Net/Guardrails nodes ADR-0055 (tickets 01/02) moved to agent judgement
+against each node's own Purpose statement instead. For those nodes, `tooling_tree.py`'s match is
+no longer the operative fulfilment path, so `tier3`'s ground truth is stale for exactly the nodes
+that matter most here, the same reasoning that already put `tier4`'s behavioral checks and the
+`roadmap` fixture matrix (below) local-only. CI has no model credentials to run the agent-judged
+check that would actually be accurate instead, so `tier3` runs local-only/advisory now too — same
+posture as `tier4`'s non-deterministic parts, `judge`, `lift`, `agent-loop`, and
+`decision-gate-bypass`. `tier1` (static validation) and `tier2` (artifact contracts) are unaffected
+and still gate CI.
+
+```bash
+./fixtures/harness/run.sh tier3 php-project-with-candidates
+```
+
 ### Tier 4 — Trigger & Discoverability tests (ticket 27)
 
 Ticket 27's three negative controls split across two layers:
@@ -186,14 +208,22 @@ Ticket 27's three negative controls split across two layers:
 
 Without `--opencode` it just points at the deterministic test module and exits — same degrade-gracefully shape as `roadmap --opencode` when the binary is missing.
 
-### Roadmap (dry-run, no MR)
+### Roadmap (dry-run, no MR) — local-only, advisory (ADR-0055, ticket 03)
 
-Each fixture above has `expected/roadmap.json` — the next 10 MRs the deterministic parser `skills/refactor-scan/references/tooling_tree.py` predicts (tool → fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). Verified by:
+Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI as its own matrix job, one run per
+fixture, alongside `tier1`/`tier2`). Each fixture above has `expected/roadmap.json` — the next 10
+MRs the deterministic parser `skills/refactor-scan/references/tooling_tree.py` predicts (tool →
+fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). That prediction is
+downstream of the same hardcoded-dependency-name matching `tier3` (above) relies on, and is
+similarly stale for the Safety Net/Guardrails nodes ADR-0055 (tickets 01/02) moved to agent
+judgement against each node's own Purpose — CI has no model credentials to check the accurate,
+agent-judged version instead, so this moved local-only/advisory too, same posture as `tier3`/
+`tier4`'s non-deterministic parts/`judge`/`lift`/`agent-loop`/`decision-gate-bypass`. Verified by:
 
 ```bash
 ./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture (deterministic, no LLM)
 ./fixtures/harness/run.sh roadmap php-p0-nonempty
-# all fixtures (also in CI: roadmap matrix)
+# all fixtures (used to also run in CI as the roadmap matrix; now local-only)
 for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean php-project-with-candidates non-php-project; do
   ./fixtures/harness/run.sh roadmap $f
 done
@@ -202,7 +232,7 @@ Checks: which tools are recognized (`detected` fulfilled), whether decisions fol
 
 **Local with opencode (isolated, advisory):**
 
-The roadmap tier runs in CI **without LLM** (only Python, `pip install pyyaml`). Locally you can additionally start `opencode` as an isolated subprocess — without global skills, only `skills/` from this repo, as a comparison (non-blocking):
+The deterministic roadmap check itself needs no LLM (only Python, `pip install pyyaml`) — that part just no longer gates CI (above). Locally you can additionally start `opencode` as an isolated subprocess — without global skills, only `skills/` from this repo, as a comparison (non-blocking):
 
 ```bash
 # deterministic + opencode comparison (needs `opencode` binary via npm i -g opencode or npx)
@@ -210,7 +240,7 @@ The roadmap tier runs in CI **without LLM** (only Python, `pip install pyyaml`).
 ./fixtures/harness/run.sh roadmap php-p0-nonempty --opencode
 ```
 
-*What `--opencode` does:* `run.sh:roadmap` creates a `.agents/skills → skills/` symlink in the fixture, runs `timeout 60 opencode run "List the next 10 MRs without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md."` inside the fixture directory (subprocess, only `skills/` from this repo, no `~/.config/opencode/skills`), logs the first 80 lines to `/tmp/opencode-$FIXTURE.log` and advisory-checks whether the first expected node is mentioned. If the binary is missing, it only logs `opencode binary not found — skipping` (no fail). In CI `--opencode` stays **off** — deterministic is the gate, opencode is only local to observe whether the skill interprets the tree the same way.
+*What `--opencode` does:* `run.sh:roadmap` creates a `.agents/skills → skills/` symlink in the fixture, runs `timeout 60 opencode run "List the next 10 MRs without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md."` inside the fixture directory (subprocess, only `skills/` from this repo, no `~/.config/opencode/skills`), logs the first 80 lines to `/tmp/opencode-$FIXTURE.log` and advisory-checks whether the first expected node is mentioned. If the binary is missing, it only logs `opencode binary not found — skipping` (no fail). Neither the deterministic check nor `--opencode` runs in CI any more (ADR-0055, ticket 03) — both are local-only now, `--opencode` still opt-in on top of the deterministic pass.
 
 ### Reproducible local opencode test (for humans and agents)
 
@@ -232,12 +262,12 @@ opencode models | grep -i "muse-spark"   # should list muse-spark-1.2-contributo
 opencode run -m opencode/muse-spark-1.2-contributor-free --help | head -n 5
 ```
 
-Run deterministic gate (always, no LLM, fast):
+Run deterministic check (no LLM, fast — local-only, no longer CI-gated, ADR-0055 ticket 03):
 
 ```bash
 # single fixture
 ./fixtures/harness/run.sh roadmap php-empty --verbose
-# all 8 fixtures (same as CI roadmap matrix)
+# all 8 fixtures (the same set the CI roadmap matrix used to run)
 for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean php-project-with-candidates non-php-project; do
   ./fixtures/harness/run.sh roadmap $f
 done
@@ -345,9 +375,13 @@ assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2
 - monolog/monolog ^3.4
 - phpunit/phpunit ^10.2 (dev)
 
-### Tier 5 — CI gate, rubric grading, lift measurement (ticket 27)
+### Tier 5 — regression baseline, rubric grading, lift measurement (ticket 27)
 
-**Regression-baseline CI gate:** Tier 3's precision/recall baselines live at `fixtures/baselines/` — gitignored ("generated, not committed"), so the CI `tier3` job restores/saves them via `actions/cache` (`.github/workflows/test-harness.yml`) instead. `run_tier3` now compares the freshly-computed recall against whatever baseline the cache restored (`assert_baseline_not_regressed`, `fixtures/harness/lib/assertions.sh`) *before* overwriting it, and fails the job if recall regressed. Caveat worth knowing before you touch this: CI never runs an LLM (see "Roadmap" above), so `found` is always `0` there — the gate is real and will catch a genuine regression the moment a baseline records an actual recall from a local `agent-loop`/`--opencode` run, but inside CI itself today it's comparing `0` against `0` every time. The already-existing `roadmap` matrix (`expected/roadmap.json`, exact match, hard fail on drift) is this harness's other, already-meaningful regression gate — extended to 7 fixtures by `php-clean`, then to 8 by `non-php-project` (ADR-0022's `is-php-project` gate).
+**Regression-baseline gate (local-only, advisory — ADR-0055, ticket 03):** Tier 3's precision/recall baselines live at `fixtures/baselines/` — gitignored ("generated, not committed"). Before ticket 03, a dedicated CI `tier3` job restored/saved them via `actions/cache` (`.github/workflows/test-harness.yml`) and failed the build on regression; that job is gone along with `tier3`'s own CI gating (see "Tier 3" above) — run it locally instead:
+```bash
+./fixtures/harness/run.sh tier3 php-project-with-candidates
+```
+`run_tier3` compares the freshly-computed recall against whatever baseline is on disk (`assert_baseline_not_regressed`, `fixtures/harness/lib/assertions.sh`) *before* overwriting it, and reports a regression if recall dropped. Caveat worth knowing before you touch this: without a real `agent-loop`/`--opencode` run first, `found` is always `0` (nothing files under `.scratch/**/issues/` from a dry deterministic pass alone), so the check is comparing `0` against `0` until a baseline records an actual recall from one of those runs. The `roadmap` fixture matrix (`expected/roadmap.json`, exact match) is this harness's other regression check — extended to 7 fixtures by `php-clean`, then to 8 by `non-php-project` (ADR-0022's `is-php-project` gate) — also local-only now, per "Roadmap" above.
 
 **LLM-judge rubric grading** (local-only, advisory, non-CI): grades one fixture's post-pass artifacts against `fixtures/harness/rubric.md`'s five dimensions (process fidelity, candidate selection, artifact quality, state hygiene, honesty about ambiguity).
 
