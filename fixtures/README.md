@@ -241,6 +241,39 @@ Same non-CI, local-only, advisory posture as the fixture above.
 
 Same non-CI, local-only, advisory posture as the two fixtures above.
 
+- **php-scheduler-bootstrap-investigation** / **php-scheduler-bootstrap-guardrails** /
+  **php-scheduler-bootstrap-housekeeping** / **php-scheduler-bootstrap-resumes** (ticket 07, the one-time
+  exception that overrides ordinary ratio/tie-break selection for exactly three turns right after Safety
+  Net's own `Open` first empties). Each exercises one turn of the sequence Investigation → Guardrails →
+  Housekeeping, plus the "retired permanently afterward" case — see each fixture's own
+  `expected/behavior.md` for the full seeded state and reasoning.
+  - **php-scheduler-bootstrap-investigation** — `## Safety Net` just closed (`Open: none`, `Last scan`
+    one day old); `## Guardrails`/`## Housekeeping`/`## Investigation` all absent (never run). Under
+    *ordinary* selection alone this would tie all three as "never run" and the fixed tie-break order
+    would pick Guardrails; the one-time exception must instead pick **Investigation** — this ticket's own
+    adversarial case, a more-overdue-by-the-ordinary-rules Track losing to the exception's own order.
+  - **php-scheduler-bootstrap-guardrails** — same Safety Net state; `## Investigation` now present with
+    `Pending candidates: none` (its own turn already fully delivered, not just proposed); `##
+    Guardrails`/`## Housekeeping` still absent. Expects **Guardrails** selected, confirming the sequence
+    advances instead of re-selecting Investigation — otherwise the scheduler's permanent fallback.
+  - **php-scheduler-bootstrap-housekeeping** — `## Investigation` and `## Guardrails` both present (their
+    own turns done); `## Housekeeping` still absent. Expects **Housekeeping** selected, the sequence's
+    third and final turn.
+  - **php-scheduler-bootstrap-resumes** — all four sections present (every one-time-exception turn long
+    finished); `## Guardrails` genuinely overdue (`overdue_ratio ≈ 1.33`), `## Safety Net`/`##
+    Housekeeping` not due. Expects **Guardrails** selected via ordinary ratio comparison, confirming the
+    exception is permanently retired — not re-triggered by Investigation being technically due "by
+    elimination," and not re-triggered by Safety Net's `Open` still reading empty.
+
+```bash
+./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-investigation --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-guardrails --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-housekeeping --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-resumes --opencode
+```
+
+Same non-CI, local-only, advisory posture as the three fixtures above.
+
 ### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
 
 Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI, alongside `tier1`/`tier2`, in a
