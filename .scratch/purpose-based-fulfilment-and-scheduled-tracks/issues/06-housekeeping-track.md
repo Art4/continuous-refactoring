@@ -20,6 +20,9 @@ Track-name-as-argument pattern the other three Tracks use.
 
 ## Comments
 
+PR: https://github.com/Art4/continuous-refactoring/pull/96 (branch `tickets/06-housekeeping-track`,
+based on `tickets/05-investigation-track`).
+
 Judgement calls:
 
 - **`skills/continuous-housekeeping/` deleted outright, not stubbed.** No precedent in this repo's
