@@ -173,7 +173,7 @@ own `expected/behavior.md` for the full expected behavior.
 
 Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-bypass`/`judge`/`lift`.
 
-### php-scheduler-* (Track scheduler, ADR-0055, ticket 04)
+### php-scheduler-* (Track scheduler, ADR-0055, tickets 04/05)
 
 Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
 matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*`/`php-guardrails-*`
@@ -201,6 +201,22 @@ Same non-CI, local-only, advisory posture as `safety-net-track`/`guardrails-trac
 checklist item 2) is unchanged and already covered by `php-safety-net-open-blocks-rescan`/
 `php-guardrails-open-blocks-rescan` above — this tier only adds the cross-Track ratio-competition case
 those single-Track fixtures couldn't exercise on their own.
+
+- **php-scheduler-investigation-fallback** (ticket 05, Investigation Track wired into the scheduler).
+  Same deterministic node inventory as `php-clean` — Safety Net **and** Guardrails both fully resolved —
+  but `## Safety Net` (`Cadence: 90`, `Last scan: 2026-09-01`, `overdue_ratio ≈ 0.2`) and `## Guardrails`
+  (`Cadence: 60`, `Last scan: 2026-09-10`, `overdue_ratio ≈ 0.15`) are both **not due**; `## Investigation`
+  (`Cadence: continuous`) carries no numeric Cadence at all, so it's always due and always eligible.
+  Expects **Investigation** selected — the only due-and-eligible Track this pass, winning purely as the
+  scheduler's own fallback rather than by out-ranking a real ratio — and `structural-scan` proposed by
+  `refactor-scan`'s own `investigation-track.md`, confirming the Track gate this ticket adds (before it,
+  `structural-scan` was proposed unconditionally, with no Track selection involved at all).
+
+```bash
+./fixtures/harness/run.sh scheduler php-scheduler-investigation-fallback --opencode
+```
+
+Same non-CI, local-only, advisory posture as the fixture above.
 
 ### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
 
