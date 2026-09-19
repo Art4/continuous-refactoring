@@ -1,6 +1,6 @@
 """Deterministic graph-logic parser for the tooling tree.
 
-Provides load_tree, detect_nodes, next_candidates, and graph-logic-only
+Provides load_tree, next_candidates, and graph-logic-only
 outputs (ordered backlog, workable nodes, withheld with reasons, closed by
 rejection, merge-request outlook) without invoking LLM or mutating repo.
 
@@ -12,7 +12,6 @@ machine-readable (edges table), CONTEXT.md vocabulary.
 
 from __future__ import annotations
 
-import glob
 import json
 import pathlib
 import re
@@ -37,11 +36,6 @@ _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 # `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
 # required-gated nodes instead.
 _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "has-real-dependency", "phpstan-baseline-empty", "phpstan-not-psalm"}
-
-# The PHPStan level chain (1..10) — used by roadmap()'s per-level
-# empty-baseline gate and its open-chain filler.
-_PHPSTAN_LEVEL_NODES = [f"phpstan-level-{i}" for i in range(1, 11)]
-
 
 # ---------------------------------------------------------------------------
 # Seed input: fulfilled-set file (agent-judged fulfilment)
@@ -127,7 +121,9 @@ def _resolve_fulfilled(
     """Resolve the fulfilled set from the highest-priority source.
 
     Priority: explicit ``fulfilled`` parameter > seed file >
-    bookkeeping derivation > detection (``detect_nodes()``).
+    bookkeeping derivation.  When none is available, returns ``{}``
+    (no detection fallback — scan passes require the seed; other passes
+    derive state from bookkeeping).
     """
     if fulfilled is not None:
         return fulfilled
@@ -140,9 +136,7 @@ def _resolve_fulfilled(
     derived = _derive_fulfilled_from_bookkeeping(repo, tree)
     if derived is not None:
         return derived
-    # Fall back to detection
-    detected = detect_nodes(repo, tree)
-    return {node: info.get("fulfilled", False) for node, info in detected.items()}
+    return {}
 
 
 def closed_by_rejection(tree: dict, rejected: set[str]) -> list[str]:
@@ -328,444 +322,6 @@ def _read_composer(repo: pathlib.Path) -> dict | None:
     return None
 
 
-def _has_composer_json(repo: pathlib.Path) -> bool:
-    return (repo / "composer.json").exists() or (repo / "composer" / "composer.json").exists()
-
-
-def _has_php_files(repo: pathlib.Path) -> bool:
-    """True if the target repo contains at least one *.php file anywhere in
-    the tree, `vendor/` excluded (Composer's own dependency directory, never
-    project code) — used alongside `_has_composer_json` by `is-php-project`'s
-    fulfilment check (a PHP project without Composer yet should still open
-    the tree)."""
-    for f in repo.rglob("*.php"):
-        if "vendor" not in f.relative_to(repo).parts:
-            return True
-    return False
-
-
-def _psr4_root_namespace(composer: dict | None) -> str | None:
-    """The declared PSR-4 root namespace for the app's own source, if any —
-    the first entry in `autoload.psr-4` (composer.json), trailing backslash
-    stripped. `None` when no `autoload.psr-4` section exists at all, or it's
-    empty. `phpunit.md`'s `tests/Unit/` namespace derivation reads this once
-    `psr-4` is fulfilled, instead of independently re-deriving from
-    `composer.json`'s `name` field."""
-    if not composer:
-        return None
-    psr4 = (composer.get("autoload") or {}).get("psr-4") or {}
-    for prefix in psr4:
-        return prefix.rstrip("\\")
-    return None
-
-
-def _has_verified_psr4_autoload(repo: pathlib.Path, composer: dict | None) -> bool:
-    """True only once `autoload.psr-4` is both declared AND actually used —
-    at least one real `.php` file under one of its mapped directories
-    carries a `namespace` declaration matching the mapped prefix.
-    Declaration alone (an autoload section nothing yet uses) is deliberately
-    not enough — a claim, not evidence the mechanism works
-    (`php-tooling-tree/psr-4.md`)."""
-    if not composer:
-        return False
-    psr4 = (composer.get("autoload") or {}).get("psr-4") or {}
-    for prefix, dirs in psr4.items():
-        prefix_stripped = prefix.rstrip("\\")
-        if not prefix_stripped:
-            continue
-        for d in ([dirs] if isinstance(dirs, str) else dirs):
-            base = repo / d
-            if not base.is_dir():
-                continue
-            for f in base.rglob("*.php"):
-                try:
-                    txt = f.read_text(encoding="utf-8")
-                except OSError:
-                    continue
-                if re.search(rf"^\s*namespace\s+{re.escape(prefix_stripped)}\b", txt, re.MULTILINE):
-                    return True
-    return False
-
-
-def _psr4_mapped_dirs(composer: dict | None) -> list[str]:
-    """Every directory declared in autoload.psr-4 (composer.json) — excluded
-    from entry-point detection below (php-tooling-tree/psr-4.md's own
-    Composition root/Entry point wiring step): a file already reachable via
-    the PSR-4 mapping is never itself an unwired entry-point candidate."""
-    if not composer:
-        return []
-    psr4 = (composer.get("autoload") or {}).get("psr-4") or {}
-    dirs: list[str] = []
-    for _, d in psr4.items():
-        dirs.extend([d] if isinstance(d, str) else d)
-    return dirs
-
-
-# require/include of a sibling file via the __DIR__-relative shape this
-# suite's own fixtures and every real target observed so far actually use
-# (`require_once __DIR__ . "/Foo.php"`, with or without `_once`, with or
-# without `../` segments) — a conservative, single-shape approximation,
-# not a full parser, matching every other filesystem-text check in this
-# module.
-_DIR_RELATIVE_REQUIRE_RE = re.compile(
-    r"\b(?:require|include)(?:_once)?\s*\(?\s*__DIR__\s*\.\s*['\"]([^'\"]+\.php)['\"]"
-)
-_AUTOLOAD_REQUIRE_RE = re.compile(r"\b(?:require|include)(?:_once)?\b[^;]*vendor[/\\]autoload\.php")
-
-# Known tooling-config scripts at the repo root that happen to carry a
-# `.php` extension but are never a request-time entry point — each is only
-# ever loaded by its own tool's CLI (Rector, php-cs-fixer), never by a
-# webserver or the app's own runtime. Reuses the exact filenames this
-# module's own rector-php-set/php-cs-fixer detection above already checks
-# for, rather than a second, independent list.
-_TOOLING_CONFIG_PHP_FILENAMES = {"rector.php", ".php-cs-fixer.php", ".php-cs-fixer.dist.php"}
-
-
-def _require_targets(php_file: pathlib.Path) -> list[pathlib.Path]:
-    """Every file `php_file` reaches via the __DIR__-relative require/include
-    shape above, resolved to an absolute path. Best-effort: a target using a
-    different loading style (autoloading already, `dirname(__FILE__)`, a
-    plain relative path with no `__DIR__` prefix, …) simply isn't reflected
-    here — the same conservative-approximation trade-off this tree's other
-    filesystem-text checks already make."""
-    try:
-        text = php_file.read_text(encoding="utf-8")
-    except OSError:
-        return []
-    targets = []
-    for m in _DIR_RELATIVE_REQUIRE_RE.finditer(text):
-        # The captured string conventionally starts with "/" (PHP's own
-        # __DIR__ . "/Foo.php" concatenation) -- pathlib's own `/` operator
-        # treats a leading-slash right-hand side as absolute and discards
-        # the left side entirely, so it must be stripped before joining.
-        candidate = (php_file.parent / m.group(1).lstrip("/")).resolve()
-        targets.append(candidate)
-    return targets
-
-
-def _entry_point_candidates(repo: pathlib.Path, psr4_dirs: list[str]) -> list[pathlib.Path]:
-    """Every `.php` file outside `vendor/`, any test directory, and the
-    PSR-4-mapped namespace directory (already-autoloaded source is never an
-    unwired entry-point candidate) — the search scope `_detect_entry_points`
-    walks its require graph over."""
-    excluded_roots = {(repo / d).resolve() for d in psr4_dirs}
-    files = []
-    for f in repo.rglob("*.php"):
-        try:
-            rel_parts = f.relative_to(repo).parts
-        except ValueError:
-            continue
-        if any(part in ("vendor", ".git") or part.lower() == "tests" for part in rel_parts):
-            continue
-        if len(rel_parts) == 1 and rel_parts[0] in _TOOLING_CONFIG_PHP_FILENAMES:
-            continue
-        resolved = f.resolve()
-        if any(root in resolved.parents or root == resolved for root in excluded_roots):
-            continue
-        files.append(f)
-    return sorted(files)
-
-
-def _detect_entry_points(repo: pathlib.Path, psr4_dirs: list[str]):
-    """php-tooling-tree/psr-4.md's own detection: **Entry point** (a file
-    nothing in the target's own source tree requires) and **Composition
-    root** (the file more than half of the entry points directly require,
-    if any — recognized even when some entry points don't converge on it;
-    see CONTEXT.md for both terms). Returns
-    `(entry_points, composition_root, individually_wired_targets)` — the
-    last is the composition root (as a one-element list) plus every entry
-    point that doesn't require it, i.e. everything the autoloader-wiring
-    check below must find `vendor/autoload.php` in, one way or another."""
-    candidates = _entry_point_candidates(repo, psr4_dirs)
-    required_by_something = set()
-    direct_targets: dict[pathlib.Path, list[pathlib.Path]] = {}
-    for f in candidates:
-        targets = _require_targets(f)
-        direct_targets[f] = targets
-        required_by_something.update(targets)
-    entry_points = [f for f in candidates if f.resolve() not in required_by_something]
-
-    target_counts: dict[pathlib.Path, int] = {}
-    for ep in entry_points:
-        for t in direct_targets[ep]:
-            # A require resolving into vendor/ (most notably
-            # vendor/autoload.php itself) is direct wiring evidence, never a
-            # composition-root candidate -- it isn't part of the target's
-            # own source tree.
-            if "vendor" in t.parts:
-                continue
-            target_counts[t] = target_counts.get(t, 0) + 1
-    composition_root = None
-    if entry_points and target_counts:
-        best_target, best_count = max(target_counts.items(), key=lambda kv: (kv[1], str(kv[0])))
-        if best_count * 2 > len(entry_points):
-            composition_root = best_target
-
-    if composition_root is not None:
-        stragglers = [ep for ep in entry_points if composition_root not in direct_targets[ep]]
-        wiring_targets = [composition_root] + stragglers
-    else:
-        wiring_targets = list(entry_points)
-    return entry_points, composition_root, wiring_targets
-
-
-def _autoloader_wired(repo: pathlib.Path, composer: dict | None) -> tuple[bool, list[str]]:
-    """php-tooling-tree/psr-4.md's autoloader-wiring criterion: the
-    Composition root (or every Entry point that doesn't converge on one, or
-    every entry point at all when there's no composition root) contains a
-    require/include resolving to `vendor/autoload.php`. No entry points at
-    all (e.g. a pure library) is vacuously satisfied — nothing to wire, the
-    same "nothing to recommend" convention this tree already uses elsewhere
-    (php-minimal-version's own undeterminable-floor case, php_floor_precheck's
-    unknown-floor case).
-
-    Returns `(wired, unwired)` — `unwired` names every candidate (repo-
-    relative path strings) that still needs its own `vendor/autoload.php`
-    require, deliberately exposed rather than collapsed into the boolean:
-    this check is a blunt, tool-agnostic "does the text contain the
-    require" match — it has no way to tell a genuine, still-unwired
-    application entry point apart from, say, a generated CI/tooling helper
-    script that structurally never needs the app's own classes at all
-    (a real false positive, caught live on Art4/legacy-todo). Sorting that
-    out is a judgement call for whoever is actually interpreting this
-    result — see php-tooling-tree/psr-4.md's own Fulfilment check for how
-    to read a non-empty `unwired` list rather than trusting `wired` at face
-    value."""
-    psr4_dirs = _psr4_mapped_dirs(composer)
-    _, _, wiring_targets = _detect_entry_points(repo, psr4_dirs)
-    repo_resolved = repo.resolve()
-    unwired: list[str] = []
-    for target in wiring_targets:
-        # wiring_targets mixes absolute paths (the composition root, itself
-        # resolved elsewhere) and repo-relative ones (individually-wired
-        # entry points) -- normalize both the same way before reporting.
-        resolved = (target if target.is_absolute() else (repo / target)).resolve()
-        try:
-            rel = str(resolved.relative_to(repo_resolved))
-        except ValueError:
-            rel = str(resolved)
-        try:
-            text = resolved.read_text(encoding="utf-8")
-        except OSError:
-            unwired.append(rel)
-            continue
-        if not _AUTOLOAD_REQUIRE_RE.search(text):
-            unwired.append(rel)
-    return (not unwired, unwired)
-    return False
-
-
-def _has_dep(composer: dict | None, name: str) -> bool:
-    if not composer:
-        return False
-    for k in ("require", "require-dev"):
-        deps = composer.get(k, {})
-        if name in deps:
-            return True
-    return False
-
-
-# Composer platform pseudo-packages: never real dependencies `composer audit`
-# could report anything about (php-tooling-tree.md's composer-audit stop
-# conditions).
-_PLATFORM_PACKAGE_NAMES = {"php", "hhvm", "composer-plugin-api", "composer-runtime-api"}
-
-
-def _has_real_require_dep(composer: dict | None) -> bool:
-    """True if composer.json's `require` names at least one real package —
-    excludes platform pseudo-packages (php, hhvm, ext-*, lib-*,
-    composer-plugin-api, composer-runtime-api)."""
-    if not composer:
-        return False
-    for name in composer.get("require", {}):
-        if name in _PLATFORM_PACKAGE_NAMES:
-            continue
-        if name.startswith("ext-") or name.startswith("lib-"):
-            continue
-        return True
-    return False
-
-
-def _has_ci_job_invoking(repo: pathlib.Path, needle: str) -> bool:
-    """True if any CI workflow file (GitHub Actions or GitLab CI) contains
-    `needle` as a literal substring. The conservative approximation shared by
-    every self-wired CI-gate check in this module (`composer-audit`,
-    `phpunit`/`phpstan-level-0`): presence of the
-    invocation, not proof the job actually fails the pipeline on a red
-    result."""
-    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
-        for f in glob.glob(str(repo / pat)):
-            try:
-                if needle in pathlib.Path(f).read_text(encoding="utf-8"):
-                    return True
-            except OSError:
-                continue
-    return False
-
-
-def _has_ephemeral_ci_dep(repo: pathlib.Path, package_name: str, invocation_needle: str) -> bool:
-    """True if a CI workflow file both installs `package_name` at runtime
-    (a `composer require[--dev] <package_name>` invocation, tolerant of
-    flag order/spacing) and invokes it (`invocation_needle`) in the same
-    job body — an ephemeral, not-committed-to-composer.json dependency
-    that's still a real, wired CI gate (a target may deliberately keep
-    its own dependency manifest free of pure-analysis tooling). Requires
-    both signals in the *same file*, the same approximation every other
-    self-wired CI-gate check in this module already makes (see
-    `_has_ci_job_invoking`)."""
-    require_pattern = re.compile(
-        r"composer\s+require(?:\s+--dev|\s+-{1,2}dev)?\s+" + re.escape(package_name) + r"\b"
-    )
-    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
-        for f in glob.glob(str(repo / pat)):
-            try:
-                text = pathlib.Path(f).read_text(encoding="utf-8")
-            except OSError:
-                continue
-            if require_pattern.search(text) and invocation_needle in text:
-                return True
-    return False
-
-
-def _has_composer_audit_ci_job(repo: pathlib.Path) -> bool:
-    """composer-audit's real fulfilment (php-tooling-tree.md): a CI job that
-    runs `composer audit`, gating the pipeline on known advisories."""
-    return _has_ci_job_invoking(repo, "composer audit")
-
-
-def _has_housekeeping_line_for(repo: pathlib.Path, node_name: str) -> bool:
-    """The Housekeeping-line fulfilment fallback `composer-audit` and
-    `semgrep` share (php-tooling-tree/composer-audit.md,
-    php-tooling-tree/semgrep.md): True if the Refactoring Notes' `housekeeping-
-    template.md` (`skills/continuous-refactoring/references/housekeeping-
-    template-file-format.md`) already carries a contributed line naming
-    `node_name` — no proof of a completed run required, matching every
-    other CI-gated check in this tree (presence/invocation is sufficient,
-    never proof of a passing run history). Matches `node_name`
-    case-insensitively with hyphens read as spaces (`"composer-audit"` ->
-    `"composer audit"`, the shape the node's own contributed line actually
-    uses — see housekeeping-template-file-format.md's own Structure
-    example) against the template's
-    full text; plain substring matching, not a second copy of that file's
-    own bullet-parsing machinery (it treats every line as opaque prose, and
-    so does this)."""
-    p = _resolve_refactoring_notes_dir(repo) / "housekeeping-template.md"
-    if not p.exists():
-        return False
-    try:
-        txt = p.read_text(encoding="utf-8").lower()
-    except OSError:
-        return False
-    return node_name.replace("-", " ").lower() in txt
-
-
-def _ci_or_housekeeping_status(
-    repo: pathlib.Path, node_name: str, ci_ok: bool, ci_reason: str, no_ci_reason: str
-) -> tuple[bool, str]:
-    """Shared fulfilment shape for `composer-audit`/`semgrep`, this tree's
-    two audit-style nodes: a real CI job (`ci_ok`, already computed by the
-    caller — the CI-job check itself is tool-specific, only the
-    OR-with-housekeeping-line combination is common) OR a committed
-    `housekeeping-template.md` line naming `node_name`
-    (`_has_housekeeping_line_for`, above). Returns `(fulfilled, reason)` —
-    `ci_reason`/`no_ci_reason` are this node's own wording for "CI job
-    present" and "neither present" respectively, so the two callers keep
-    their own tool-specific phrasing without duplicating the OR-combination
-    logic itself."""
-    housekeeping_line = _has_housekeeping_line_for(repo, node_name)
-    fulfilled = ci_ok or housekeeping_line
-    if not fulfilled:
-        return False, no_ci_reason
-    return True, ci_reason if ci_ok else "housekeeping-template.md already names this node"
-
-
-# secret-detection's own `Tool: any secret scanner` (tooling-tree.md) — same
-# generic-tool shape as test-runner-if-missing's `any test runner`. Checked
-# by common invocation needle rather than one fixed tool name.
-_SECRET_SCAN_NEEDLES = ("gitleaks", "detect-secrets", "trufflehog")
-
-
-def _has_secret_scan_ci_job(repo: pathlib.Path) -> bool:
-    """secret-detection's real fulfilment (tooling-tree.md): a CI job that
-    runs any recognized secret scanner, gating the pipeline against
-    committing credentials/tokens. Tool-agnostic by design — checks a small
-    set of common invocation needles rather than one fixed tool."""
-    return any(_has_ci_job_invoking(repo, needle) for needle in _SECRET_SCAN_NEEDLES)
-
-
-def _detected_secret_scanner(repo: pathlib.Path) -> str | None:
-    """Which of `_SECRET_SCAN_NEEDLES` the CI config actually invokes — first
-    match wins, `None` if none do. Exposed in `secret-detection`'s own
-    `details` so a later pass (`refactor-scan/SKILL.md` step 4c's own
-    history scan) doesn't have to re-derive it by re-reading the CI config
-    itself; more than one matching scanner is possible but not disambiguated
-    further — the first needle found is what step 4c reuses."""
-    for needle in _SECRET_SCAN_NEEDLES:
-        if _has_ci_job_invoking(repo, needle):
-            return needle
-    return None
-
-
-# coverage-floor's own fulfilment (php-tooling-tree/coverage-floor.md):
-# driver-agnostic by design (PCOV vs. Xdebug is a review-time choice, never
-# checked here) — only "is coverage actually configured, and (once CI
-# exists) enforced" matters. Needle set mirrors _SECRET_SCAN_NEEDLES's own
-# shape — a named constant rather than an inline literal, so a future
-# invocation spelling (e.g. a bare --coverage-clover with no --coverage
-# prefix) is one line to add here, not a buried string to hunt down.
-_COVERAGE_CI_NEEDLES = ("--coverage",)
-
-
-def _has_coverage_report_config(repo: pathlib.Path) -> bool:
-    """True if phpunit.xml(.dist) declares a <coverage> report section —
-    coverage-floor's own local-adoption half."""
-    for name in ("phpunit.xml.dist", "phpunit.xml"):
-        p = repo / name
-        if p.exists():
-            try:
-                if re.search(r"<coverage\b", p.read_text(encoding="utf-8")):
-                    return True
-            except OSError:
-                continue
-    return False
-
-
-def _coverage_floor_value(repo: pathlib.Path) -> float | None:
-    """The committed `.coverage-floor` ratchet value, if the file exists and
-    parses as a number. `None` for both "missing" and "unparseable" — the
-    node treats them the same (unfulfilled), never guessing a value."""
-    p = repo / ".coverage-floor"
-    if not p.exists():
-        return None
-    try:
-        return float(p.read_text(encoding="utf-8").strip())
-    except (OSError, ValueError):
-        return None
-
-
-# semgrep's own fulfilment (php-tooling-tree/semgrep.md): a CI job invoking
-# semgrep, with an OWASP-Top-10 ruleset reference either inline in the CI
-# invocation (the common `--config=p/owasp-top-ten` registry shape) or
-# inside a committed .semgrep.yml/.semgrep.yaml. Two needles checked
-# independently (not required to co-occur in the same file) — the same
-# conservative-approximation looseness this module's other self-wired
-# CI-gate checks already accept.
-def _has_semgrep_owasp_ci_job(repo: pathlib.Path) -> bool:
-    if not _has_ci_job_invoking(repo, "semgrep"):
-        return False
-    if _has_ci_job_invoking(repo, "owasp"):
-        return True
-    for name in (".semgrep.yml", ".semgrep.yaml"):
-        p = repo / name
-        if p.exists():
-            try:
-                if "owasp" in p.read_text(encoding="utf-8").lower():
-                    return True
-            except OSError:
-                continue
-    return False
-
-
 def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
     # PHPStan itself auto-loads phpstan.neon.dist when phpstan.neon is
     # absent (same "committed default, locally overridable" convention this
@@ -833,18 +389,6 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
         if m:
             return repo / m.group(1).strip().strip("/")
     return default
-
-
-def _has_loop_config(repo: pathlib.Path) -> bool:
-    """loop-config's fulfilment check: the Refactoring Notes' bookkeeping.md exists
-    (default docs/refactoring/bookkeeping.md; see _resolve_refactoring_notes_dir)."""
-    return (_resolve_refactoring_notes_dir(repo) / "bookkeeping.md").exists()
-
-
-def _has_editorconfig(repo: pathlib.Path) -> bool:
-    """editorconfig's fulfilment check: .editorconfig exists at
-    the repo root. Pure presence check, no equivalent-detection nuance."""
-    return (repo / ".editorconfig").exists()
 
 
 def _parse_min_version(constraint: str) -> tuple[int, ...] | None:
@@ -917,30 +461,12 @@ _LEAF_MIN_PHP_VERSION = {
 }
 
 
-def _rector_php_set_level(rector_config_text: str) -> tuple[int, ...] | None:
-    """php-minimal-version's only signal (see php-minimal-version.md):
-    the specific PHP version `rector-php-set`'s own rule set targets — Rector's
-    `LevelSetList::UP_TO_PHP_XY` constant naming (`UP_TO_PHP_82` -> (8, 2),
-    `UP_TO_PHP_74` -> (7, 4)), read directly out of `rector.php`/`rector.neon`'s
-    text rather than a second, separate config-presence check — same shallow
-    substring-approximation style `has_rector_php_set` above already uses; a
-    genuine syntax-compatibility scan is out of scope, matching the tree's
-    every other Rector-family fulfilment check. `None` when no such constant is
-    present (caller only invokes this once `has_rector_php_set` is already
-    true, but stays defensive here since a config could plausibly enable the
-    rule set through some other syntax this substring match doesn't catch)."""
-    m = re.search(r"UP_TO_PHP_(\d)(\d+)", rector_config_text)
-    if not m:
-        return None
-    return (int(m.group(1)), int(m.group(2)))
-
-
 def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     """Check the target's current PHP floor once against each of
     `_LEAF_MIN_PHP_VERSION`'s five leaves, instead of proposing (and
     eventually rejecting) each one individually five separate times.
     Returns the leaves whose minimum isn't met yet, each with a
-    human-readable reason — `next_candidates()` and `roadmap()` skip these,
+    human-readable reason — `next_candidates()` skips these,
     and `detect_and_roadmap()` surfaces the list so a caller can report the
     fact in one pass instead of it silently vanishing.
 
@@ -1147,8 +673,8 @@ def _resolved_gate_status(
     either node happens to sit in ``tree["order"]``.
 
     ``fulfilled_lookup(name) -> bool`` supplies each ordinary leaf's
-    fulfilled state — either the real ``detect_nodes()`` output, or
-    ``roadmap()``'s per-iteration simulated snapshot.
+    fulfilled state — either the real fulfilled-set output, or
+    a per-iteration simulated snapshot.
     """
     resolved_gated = [n for n in tree["resolved_parents"] if tree["resolved_parents"][n]]
     computed: dict[str, tuple[bool, list[str]]] = {}
@@ -1172,439 +698,6 @@ def _resolved_gate_status(
         if not progressed:
             break  # cycle among resolved-gated nodes -- a well-formed tree never has one
     return computed
-
-
-def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
-    """Return {node: {fulfilled: bool, reason: str, details: dict}} for each node."""
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    composer = _read_composer(repo)
-    has_composer_json = _has_composer_json(repo)
-    # lock may be at root or composer/composer.lock
-    has_lock = (repo / "composer.lock").exists() or (repo / "composer" / "composer.lock").exists()
-    has_git = (repo / ".git").exists()
-    # CI runner
-    has_ci = False
-    for pat in [".github/workflows/*.yml", ".github/workflows/*.yaml", ".gitlab-ci.yml"]:
-        if glob.glob(str(repo / pat)):
-            has_ci = True
-            break
-    # php-cs-fixer — spec (php-tooling-tree.md) requires dep + config + runnable (zero diffs)
-    # For file-based dry-run we approximate runnable as present when both dep and config exist
-    has_cs_config = (repo / ".php-cs-fixer.php").exists() or (repo / ".php-cs-fixer.dist.php").exists()
-    has_cs_dep = _has_dep(composer, "friendsofphp/php-cs-fixer") or _has_dep(composer, "php-cs-fixer/php-cs-fixer")
-    # phpunit / pest
-    has_phpunit = _has_dep(composer, "phpunit/phpunit")
-    has_pest = _has_dep(composer, "pestphp/pest")
-    has_phpunit_xml = (repo / "phpunit.xml").exists() or (repo / "phpunit.xml.dist").exists()
-    # psalm
-    has_psalm_dep = _has_dep(composer, "vimeo/psalm")
-    has_psalm_cfg = (repo / "psalm.xml").exists() or (repo / "psalm.xml.dist").exists()
-    # phpstan
-    has_phpstan_dep = _has_dep(composer, "phpstan/phpstan")
-    phpstan_level = _parse_phpstan_level(repo)
-    baseline_empty = _is_baseline_empty(repo)
-    baseline_exists = _baseline_exists(repo)
-
-    out: dict = {}
-
-    def set_node(node, fulfilled, reason, **details):
-        out[node] = {"fulfilled": fulfilled, "reason": reason, "details": details}
-
-    # git
-    set_node("git", has_git, "found .git" if has_git else "no .git")
-    # loop-config
-    notes_rel = _resolve_refactoring_notes_dir(repo).relative_to(repo).as_posix()
-    has_loop_config = _has_loop_config(repo)
-    set_node("loop-config", has_loop_config, f"{notes_rel}/bookkeeping.md present" if has_loop_config else f"no {notes_rel}/bookkeeping.md")
-    # is-php-project: composer.json (recognized location) or at least one
-    # *.php file outside vendor/ — see tooling-tree.md's own node entry for
-    # the "why not composer.json-only" rationale.
-    has_php_files = _has_php_files(repo)
-    is_php_project = has_composer_json or has_php_files
-    set_node(
-        "is-php-project", is_php_project,
-        "composer.json or *.php files present" if is_php_project else "no composer.json and no *.php files found",
-        has_composer_json=has_composer_json, has_php_files=has_php_files,
-    )
-    # composer
-    set_node("composer", has_composer_json and has_lock, "composer.json+lock present" if has_composer_json and has_lock else "missing composer.json or lock", has_json=has_composer_json, has_lock=has_lock)
-    # psr-4: declared AND verifiably in use (see _has_verified_psr4_autoload's
-    # own docstring for why declaration alone isn't enough), AND the
-    # autoloader wired into the target's own Composition root/Entry points
-    # (see _autoloader_wired's own docstring) — a target can have proven the
-    # mapping mechanism works yet still never actually load its own code
-    # through it at request time.
-    has_psr4_declared = _psr4_root_namespace(composer) is not None
-    psr4_mechanism_verified = _has_verified_psr4_autoload(repo, composer)
-    if psr4_mechanism_verified:
-        autoloader_wired, unwired_entry_points = _autoloader_wired(repo, composer)
-    else:
-        autoloader_wired, unwired_entry_points = False, []
-    psr4_verified = psr4_mechanism_verified and autoloader_wired
-    if psr4_verified:
-        psr4_reason = "autoload.psr-4 declared, in use, and the autoloader is wired in"
-    elif psr4_mechanism_verified:
-        psr4_reason = "autoload.psr-4 declared and in use, but the autoloader isn't wired into the entry points/composition root yet"
-    elif has_psr4_declared:
-        psr4_reason = "autoload.psr-4 declared but no file under it uses the namespace yet"
-    else:
-        psr4_reason = "no autoload.psr-4 declared"
-    set_node(
-        "psr-4", psr4_verified, psr4_reason,
-        declared=has_psr4_declared, mechanism_verified=psr4_mechanism_verified,
-        autoloader_wired=autoloader_wired, unwired_entry_points=unwired_entry_points,
-    )
-    # ci-runner
-    set_node("ci-runner", has_ci, "CI config present" if has_ci else "no CI config")
-    # secret-detection: generic root, no resolved edge into structural-scan
-    # (tooling-tree.md's own node entry states why) — fulfilled once CI gates
-    # on any recognized secret scanner.
-    secret_scan_fulfilled = _has_secret_scan_ci_job(repo)
-    set_node(
-        "secret-detection",
-        secret_scan_fulfilled,
-        "CI job runs a secret scanner" if secret_scan_fulfilled else "no CI job runs a secret scanner yet",
-        scanner=_detected_secret_scanner(repo),
-    )
-    # editorconfig
-    has_editorconfig = _has_editorconfig(repo)
-    set_node("editorconfig", has_editorconfig, ".editorconfig present" if has_editorconfig else "no .editorconfig")
-    # php-cs-fixer
-    cs_fulfilled = has_cs_dep and has_cs_config
-    set_node("php-cs-fixer", cs_fulfilled, "dep and config present" if cs_fulfilled else "missing cs-fixer (need dep + config)", has_dep=has_cs_dep, has_config=has_cs_config)
-    # phpmd — same dep+config approximation as php-cs-fixer above, no
-    # resolved edge into php-safety-net (php-tooling-tree.md's own node
-    # entry states why): a Signal-producing node, not a Safety Net one.
-    has_phpmd_dep = _has_dep(composer, "phpmd/phpmd")
-    has_phpmd_config = (repo / "phpmd.xml").exists() or (repo / "phpmd.xml.dist").exists() or (repo / ".phpmd.xml").exists()
-    phpmd_fulfilled = has_phpmd_dep and has_phpmd_config
-    set_node("phpmd", phpmd_fulfilled, "dep and config present" if phpmd_fulfilled else "missing phpmd (need dep + config)", has_dep=has_phpmd_dep, has_config=has_phpmd_config)
-    # phpunit — adopted AND, once ci-runner is fulfilled, actually gated in
-    # CI (self-wiring: folded into this node's own fulfilment
-    # check instead of a separate CI-job node). No CI yet still fulfils the
-    # node on adoption alone — nothing to wire in until CI exists.
-    phpunit_adopted = has_phpunit or has_pest or has_phpunit_xml
-    phpunit_ci_needle = "vendor/bin/pest" if has_pest else "vendor/bin/phpunit"
-    phpunit_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, phpunit_ci_needle)
-    phpunit_fulfilled = phpunit_adopted and phpunit_ci_ok
-    if phpunit_fulfilled:
-        phpunit_reason = "phpunit/pest present"
-    elif phpunit_adopted:
-        phpunit_reason = "adopted locally but not gated in CI"
-    else:
-        phpunit_reason = "no test runner"
-    set_node("phpunit", phpunit_fulfilled, phpunit_reason, has_phpunit=has_phpunit, has_pest=has_pest)
-    # coverage-floor: local adoption (a <coverage> report configured, a
-    # committed .coverage-floor ratchet value) plus, once ci-runner is
-    # fulfilled, the same self-wiring CI-gate pattern phpunit's own check
-    # above already uses. Driver-agnostic (php-tooling-tree/coverage-floor.md
-    # states why) — never checks for "pcov"/"xdebug" by name.
-    has_coverage_config = _has_coverage_report_config(repo)
-    coverage_floor_value = _coverage_floor_value(repo)
-    has_coverage_floor = coverage_floor_value is not None
-    coverage_ci_ok = (not has_ci) or any(_has_ci_job_invoking(repo, needle) for needle in _COVERAGE_CI_NEEDLES)
-    coverage_fulfilled = has_coverage_config and has_coverage_floor and coverage_ci_ok
-    if coverage_fulfilled:
-        coverage_reason = "coverage configured, floor committed, CI-gated"
-    elif has_coverage_config and has_coverage_floor:
-        coverage_reason = "coverage and floor present but not gated in CI"
-    elif has_coverage_config:
-        coverage_reason = "coverage configured but no .coverage-floor committed"
-    else:
-        coverage_reason = "no coverage report configured"
-    set_node(
-        "coverage-floor",
-        coverage_fulfilled,
-        coverage_reason,
-        has_coverage_config=has_coverage_config,
-        floor=coverage_floor_value,
-    )
-    # test-runner-if-missing: fulfilled once *any* runner is adopted, full
-    # stop — independent of phpunit's CI-gating above. This node only
-    # answers "does a runner exist at all", not "is it enforced in CI"
-    # (php-tooling-tree.md).
-    tr_fulfilled = phpunit_adopted
-    set_node("test-runner-if-missing", tr_fulfilled, "runner exists" if tr_fulfilled else "no runner — would propose phpunit", depends_composer=has_composer_json)
-    # composer-audit: fulfilled once CI actually gates on `composer audit`,
-    # OR a Housekeeping line for this node is already committed to
-    # housekeeping-template.md (php-tooling-tree/composer-audit.md) — no
-    # proof of a completed run required, same as every other CI-gated check
-    # here.
-    # Eligibility (whether it's *proposable* at all, beyond its required
-    # edges) is a separate stop condition handled in
-    # next_candidates()/roadmap() — a real dependency must exist — mirroring
-    # the phpstan-level-N stop-conditions pattern rather than living in this
-    # fulfilment check.
-    has_real_dep = _has_real_require_dep(composer)
-    audit_fulfilled, audit_reason = _ci_or_housekeeping_status(
-        repo,
-        "composer-audit",
-        ci_ok=_has_composer_audit_ci_job(repo),
-        ci_reason="CI job runs composer audit",
-        no_ci_reason="no CI job runs composer audit yet, and no housekeeping-template.md line for it",
-    )
-    set_node(
-        "composer-audit",
-        audit_fulfilled,
-        audit_reason,
-        has_real_dep=has_real_dep,
-    )
-    # has-real-dependency: recognition-only gate (php-tooling-tree.md) —
-    # hold composer-audit closed until there's something to audit.
-    set_node(
-        "has-real-dependency",
-        has_real_dep,
-        "composer.json require names a real package" if has_real_dep else "no real require dependency",
-        has_real_dep=has_real_dep,
-    )
-    # static-code-analyzer: pure organizational/plumbing node,
-    # always fulfilled once composer is — no independent state of its own.
-    set_node(
-        "static-code-analyzer",
-        out["composer"]["fulfilled"],
-        "composer fulfilled" if out["composer"]["fulfilled"] else "waiting on composer",
-    )
-    # psalm: recognition-only, never proposed (see _NEVER_PROPOSED below). No
-    # CI-gating requirement.
-    psalm_fulfilled = has_psalm_dep and has_psalm_cfg
-    set_node(
-        "psalm",
-        psalm_fulfilled,
-        "vimeo/psalm + psalm.xml present" if psalm_fulfilled else "no psalm dep/config",
-        has_psalm_dep=has_psalm_dep,
-        has_psalm_cfg=has_psalm_cfg,
-    )
-
-    # phpstan-level-0
-    # Self-wiring: once ci-runner is fulfilled, this node also
-    # requires a CI job that actually invokes phpstan. The invocation is
-    # level-independent (`vendor/bin/phpstan analyse` regardless of the
-    # configured level), so gating it once here covers the whole
-    # phpstan-level-1..3 chain — those nodes stay CI-agnostic on purpose.
-    phpstan_p0_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "vendor/bin/phpstan analyse")
-    # A target may deliberately keep phpstan out of its own composer.json,
-    # installing it at CI-runtime only instead — still a real, wired gate,
-    # just not detectable via composer.json alone.
-    ephemeral_ci_dep = has_ci and _has_ephemeral_ci_dep(repo, "phpstan/phpstan", "vendor/bin/phpstan analyse")
-    has_phpstan_dep_or_ephemeral = has_phpstan_dep or ephemeral_ci_dep
-    # Psalm equivalence: fulfilled without phpstan whenever the `psalm` node
-    # (above) is fulfilled — reads that node's computed state instead of
-    # re-deriving the raw detection here. Co-presence (phpstan.md, psalm.md):
-    # if PHPStan is *also* genuinely adopted (a real dependency, actually
-    # configured with a level), PHPStan is the authoritative check and this
-    # equivalence must not apply — Psalm fulfilment is superseded, not
-    # additive. Without this guard, a target that adopts both (the ordinary
-    # case once `psalm-taint-analysis` is layered onto an existing PHPStan
-    # setup) would wrongly read every phpstan-level-N as "not applicable",
-    # corrupting `refactor-learn`'s `Fulfilled nodes` overwrite the moment a
-    # pass with parser access ran (confirmed live on `Art4/legacy-todo`:
-    # already-fulfilled phpstan-level-1..5 vanished from the cache).
-    phpstan_genuinely_adopted = has_phpstan_dep_or_ephemeral and phpstan_level is not None
-    psalm_fulfils_p0 = psalm_fulfilled and not phpstan_genuinely_adopted
-    # `phpstan_level == 0` here would mean this node goes right back to
-    # unfulfilled the moment a project advances to level 1 — breaking the
-    # level-1..10 chain's own required-parent-stays-fulfilled assumption
-    # (a level-N node requires its predecessor fulfilled, forever, not just
-    # at the moment it was first reached). Level 0's own checks (dep +
-    # baseline + CI gate) are satisfied by any parsed level, so this reads
-    # "some level is configured", not "level is still exactly 0".
-    if psalm_fulfils_p0:
-        set_node("phpstan-level-0", True, "psalm fulfils p0 (vimeo/psalm + psalm.xml)", has_psalm=True)
-    elif has_phpstan_dep_or_ephemeral and phpstan_level is not None and baseline_exists and phpstan_p0_ci_ok:
-        set_node("phpstan-level-0", True, "phpstan level 0 + baseline present", level=phpstan_level, baseline_empty=baseline_empty, ephemeral_ci_dep=ephemeral_ci_dep)
-    elif has_phpstan_dep_or_ephemeral and phpstan_level is not None and baseline_exists and not phpstan_p0_ci_ok:
-        # locally green, but CI exists and doesn't gate on it yet — the
-        # baseline this level sets is only durable once CI enforces it.
-        set_node("phpstan-level-0", False, "level 0 baseline green locally but not gated in CI", level=phpstan_level, baseline_empty=baseline_empty, ephemeral_ci_dep=ephemeral_ci_dep)
-    elif has_phpstan_dep_or_ephemeral and phpstan_level is not None and not baseline_exists:
-        # some level configured but no baseline yet -> not green, not fulfilled
-        set_node("phpstan-level-0", False, "phpstan level configured but baseline missing", level=phpstan_level, ephemeral_ci_dep=ephemeral_ci_dep)
-    else:
-        set_node("phpstan-level-0", False, "missing phpstan, no level configured, or no baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
-
-    # phpstan-baseline-empty: recognition-only gate (php-tooling-tree.md) —
-    # hold the level chain closed while the baseline has unaddressed
-    # findings. Recurring state (not one-way): re-derived fresh every pass.
-    set_node(
-        "phpstan-baseline-empty",
-        baseline_empty,
-        "phpstan-baseline.neon absent or empty" if baseline_empty else "phpstan-baseline.neon has unaddressed findings",
-        baseline_empty=baseline_empty,
-    )
-    # phpstan-not-psalm: recognition-only gate (php-tooling-tree.md) —
-    # prevent PHPStan level proposals when Psalm is the analyzer.
-    phpstan_not_psalm = not psalm_fulfilled or phpstan_genuinely_adopted
-    set_node(
-        "phpstan-not-psalm",
-        phpstan_not_psalm,
-        "psalm not the analyzer" if phpstan_not_psalm else "psalm is the analyzer — PHPStan levels not applicable",
-        psalm_fulfilled=psalm_fulfilled,
-        phpstan_genuinely_adopted=phpstan_genuinely_adopted,
-    )
-
-    # phpstan-level-1..10 — phpstan-level-5 is the chain's resolved-leaf
-    # into php-safety-net (see that node); levels 6-10 stay ordinary,
-    # non-gating, still-proposable chain nodes.
-    # For fulfilled check: level >= N
-    for lvl in range(1, 11):
-        node = f"phpstan-level-{lvl}"
-        if psalm_fulfils_p0:
-            # Psalm path: level nodes not applicable -> treat as not unblocked (blocked by equivalence)
-            set_node(node, False, "not applicable: psalm fulfils p0", psalm_equivalent=True)
-            continue
-        fulfilled = (phpstan_level is not None and phpstan_level >= lvl)
-        # For roadmap gate, predecessor must be fulfilled with empty baseline
-        # We expose details
-        set_node(node, fulfilled, f"level {phpstan_level} >= {lvl}" if fulfilled else f"level {phpstan_level} < {lvl} or no phpstan", level=phpstan_level, baseline_empty=baseline_empty)
-
-    # phpstan-deprecation-rules: dependency-presence approximation,
-    # same simplification style as php-cs-fixer's dep+config check — no real
-    # `vendor/bin/phpstan analyse` invocation in this dry-run parser.
-    has_deprecation_rules_dep = _has_dep(composer, "phpstan/phpstan-deprecation-rules")
-    set_node(
-        "phpstan-deprecation-rules",
-        has_deprecation_rules_dep,
-        "phpstan-deprecation-rules present" if has_deprecation_rules_dep else "no phpstan-deprecation-rules dep",
-    )
-
-    # psalm-taint-analysis: security-focused taint analysis,
-    # orthogonal to which general analyzer was chosen — required-any parent
-    # (phpstan-level-4 OR psalm) is checked separately by _is_unblocked(),
-    # this only computes the node's own fulfilment. Deliberately reuses
-    # has_psalm_dep/has_psalm_cfg (already computed above for the `psalm`
-    # node) rather than re-deriving them — same dep+config signal, disjoint
-    # concern (taint mode is a CI-invocation flag, not a config difference),
-    # so the CI check below is what actually disambiguates this node from a
-    # target that merely adopted Psalm as its general analyzer.
-    taint_ci_ok = (not has_ci) or _has_ci_job_invoking(repo, "vendor/bin/psalm --taint-analysis")
-    taint_fulfilled = has_psalm_dep and has_psalm_cfg and taint_ci_ok
-    if taint_fulfilled:
-        taint_reason = "vimeo/psalm + psalm.xml present, --taint-analysis gated in CI"
-    elif has_psalm_dep and has_psalm_cfg:
-        taint_reason = "psalm present but --taint-analysis not gated in CI"
-    else:
-        taint_reason = "no psalm dep/config"
-    set_node(
-        "psalm-taint-analysis",
-        taint_fulfilled,
-        taint_reason,
-        has_psalm_dep=has_psalm_dep,
-        has_psalm_cfg=has_psalm_cfg,
-    )
-
-    # semgrep: OWASP Top 10 coverage, complementary to psalm-taint-analysis
-    # above rather than gated by its own dep/config -- Semgrep is a
-    # standalone tool, never a composer.json entry. Fulfilled once CI gates
-    # on it, OR a Housekeeping line for this node is already committed to
-    # housekeeping-template.md — the same fallback composer-audit's own
-    # fulfilment check above uses (php-tooling-tree/semgrep.md).
-    # Recommended-parent eligibility (whether ci-runner is *decided* yet, if
-    # ever added) and required-parent eligibility (php-safety-net) are
-    # handled separately by _is_unblocked(); this only computes the node's
-    # own fulfilment.
-    semgrep_fulfilled, semgrep_reason = _ci_or_housekeeping_status(
-        repo,
-        "semgrep",
-        ci_ok=_has_semgrep_owasp_ci_job(repo),
-        ci_reason="semgrep + OWASP ruleset gated in CI",
-        no_ci_reason="no semgrep/OWASP CI job yet, and no housekeeping-template.md line for it",
-    )
-    set_node(
-        "semgrep",
-        semgrep_fulfilled,
-        semgrep_reason,
-    )
-
-    # rector
-    # Fulfilment: dead-code suite enabled and fully applied — we approximate as False unless rector.php contains dead-code set
-    has_rector = (repo / "rector.php").exists() or (repo / "rector.neon").exists()
-    has_rector_dead = False
-    has_rector_types = False
-    has_rector_php_set = False
-    has_rector_code_quality = False
-    has_rector_phpunit_set = False
-    if has_rector:
-        txt = ""
-        for p in [repo / "rector.php", repo / "rector.neon"]:
-            if p.exists():
-                txt += p.read_text(encoding="utf-8")
-        # Substring detection has to tolerate both Rector SetList naming
-        # styles actually seen in the wild: older/prose-ish "DeadCode" and
-        # the current SetList::DEAD_CODE-style ALL_CAPS-with-underscores
-        # constants. Lowercasing alone doesn't bridge the two — "DEAD_CODE"
-        # lowercases to "dead_code", not "dead-code" — so each check
-        # normalizes underscores to hyphens before comparing.
-        norm = txt.lower().replace("_", "-")
-        has_rector_dead = "DeadCode" in txt or "dead-code" in norm
-        has_rector_types = "Type" in txt or "type" in txt.lower()
-        has_rector_php_set = "LevelSetList" in txt or "php-set" in norm
-        has_rector_code_quality = "CodeQuality" in txt or "code-quality" in norm
-        has_rector_phpunit_set = "PHPUnitSetList" in txt or "phpunit-set" in norm
-        rector_php_set_level = _rector_php_set_level(txt) if has_rector_php_set else None
-    else:
-        rector_php_set_level = None
-    set_node("rector-dead-code", has_rector_dead, "rector dead-code set present" if has_rector_dead else "no rector dead-code", has_rector=has_rector)
-    set_node("rector-type-coverage", has_rector_types, "rector type coverage present" if has_rector_types else "no rector type coverage", has_rector=has_rector)
-    # rector-php-set and its 2 children: same has_rector-gated
-    # substring-detection style as dead-code/type-coverage above.
-    set_node("rector-php-set", has_rector_php_set, "rector php-version set present" if has_rector_php_set else "no rector php-version set", has_rector=has_rector)
-    set_node("rector-code-quality", has_rector_code_quality, "rector code-quality set present" if has_rector_code_quality else "no rector code-quality set", has_rector=has_rector)
-    set_node("rector-phpunit-set", has_rector_phpunit_set, "rector phpunit set present" if has_rector_phpunit_set else "no rector phpunit set", has_rector=has_rector)
-
-    # php-minimal-version: a Floor correction only, never a
-    # Floor raise (CONTEXT.md) — composer.json's declared PHP floor vs. the
-    # PHP-version level rector-php-set has actually applied. Required parent
-    # of this node (php-tooling-tree.md's edge table), so this must run
-    # after rector-php-set's own detection above, not before it.
-    current_php_floor = _current_php_floor(composer)
-    if current_php_floor is None:
-        set_node(
-            "php-minimal-version", True,
-            "PHP floor undeterminable (no composer.json) — nothing to correct",
-        )
-    elif rector_php_set_level is None:
-        set_node(
-            "php-minimal-version", True,
-            "no rector-php-set level applied yet — nothing to correct",
-            floor=list(current_php_floor),
-        )
-    elif current_php_floor >= rector_php_set_level:
-        set_node(
-            "php-minimal-version", True,
-            f"floor {'.'.join(map(str, current_php_floor))} already matches rector-php-set's applied "
-            f"PHP {'.'.join(map(str, rector_php_set_level))}",
-            floor=list(current_php_floor), rector_level=list(rector_php_set_level),
-        )
-    else:
-        set_node(
-            "php-minimal-version", False,
-            f"floor {'.'.join(map(str, current_php_floor))} behind rector-php-set's applied "
-            f"PHP {'.'.join(map(str, rector_php_set_level))}",
-            floor=list(current_php_floor), rector_level=list(rector_php_set_level),
-        )
-
-    # Resolved-gated nodes: structural-scan, and PHP's own aggregation node
-    # php-safety-net feeding it — fulfilled once every one of a node's
-    # `resolved` parents is fulfilled OR recorded as rejected. Unlike a
-    # required parent, a rejected resolved parent still counts as resolved.
-    # Generic over every such node (see _resolved_gate_status), computed in
-    # dependency order so php-safety-net's status is already known by
-    # the time structural-scan's own check reads it.
-    rejected = _rejected_nodes(repo)
-    gate = _resolved_gate_status(tree, lambda n: out.get(n, {}).get("fulfilled", False), rejected)
-    for node, (resolved, unresolved) in gate.items():
-        set_node(
-            node,
-            resolved,
-            "all resolved-parent leaves resolved (fulfilled or rejected)" if resolved else f"waiting on: {', '.join(unresolved)}",
-            unresolved=unresolved,
-            rejected=sorted(rejected),
-        )
-
-    # Also include git/composer etc. already
-    return out
 
 
 def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
@@ -1643,7 +736,7 @@ def next_candidates(
     for the matching "waiting on" list.
 
     When *fulfilled* is provided (a ``{node: bool}`` mapping), it is used
-    instead of calling ``detect_nodes()`` — the seed-input contract that
+    instead of deriving from seed/bookkeeping — the seed-input contract that
     lets the script run graph-logic-only.
     """
     repo = pathlib.Path(repo)
@@ -1696,8 +789,8 @@ def directly_unblocked_children(
     the fan-out an MR's outlook diagram draws
     (``opening-a-merge-request.md``).
 
-    When *fulfilled* is provided, it is used instead of calling
-    ``detect_nodes()`` — the seed-input contract.
+    When *fulfilled* is provided, it is used instead of deriving from
+    seed/bookkeeping — the seed-input contract.
     """
     repo = pathlib.Path(repo)
     if tree is None:
@@ -1712,9 +805,11 @@ def directly_unblocked_children(
 
     # Counterfactual snapshot: landed_node never happened.
     # static-code-analyzer's own fulfilled flag is hardcoded to mirror
-    # composer's (detect_nodes, above) rather than being independently
-    # detected — keep that same derivation consistent here, or the
+    # composer's (fulfilled state, above) rather than being independently
+    # derived — keep that same derivation consistent here, or the
     # counterfactual would misreport composer's own downstream plumbing.
+    if landed_node not in detected:
+        return []
     detected_without = {k: dict(v) for k, v in detected.items()}
     detected_without[landed_node]["fulfilled"] = False
     if "static-code-analyzer" in detected_without:
@@ -1788,8 +883,8 @@ def withheld_candidates(
     because one or more ``recommended`` parents haven't reached a decided
     state yet.
 
-    When *fulfilled* is provided, it is used instead of calling
-    ``detect_nodes()`` — the seed-input contract.
+    When *fulfilled* is provided, it is used instead of deriving from
+    seed/bookkeeping — the seed-input contract.
     """
     repo = pathlib.Path(repo)
     if tree is None:
@@ -1829,12 +924,11 @@ def detect_and_roadmap(
     """Main entry point: compute graph outputs from fulfilled state.
 
     When *seed_path* is provided, it takes priority over *fulfilled*.
-    When neither is given, the script derives state from bookkeeping or
-    falls back to ``detect_nodes()``.
+    When neither is given, the script derives state from bookkeeping.
     """
     tree = load_tree(tree_md=tree_md)
     repo = pathlib.Path(repo)
-    # Resolve fulfilled state: seed_path > fulfilled param > auto-detect
+    # Resolve fulfilled state: seed_path > fulfilled param > bookkeeping
     if seed_path is not None and seed_path.exists():
         resolved_fulfilled = _load_fulfilled_seed(seed_path)
     else:

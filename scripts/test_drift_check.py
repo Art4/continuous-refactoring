@@ -27,7 +27,6 @@ next_candidates = tooling_tree.next_candidates
 withheld_candidates = tooling_tree.withheld_candidates
 ordered_backlog = tooling_tree.ordered_backlog
 closed_by_rejection = tooling_tree.closed_by_rejection
-_detect_nodes = tooling_tree.detect_nodes
 _NEVER_PROPOSED = tooling_tree._NEVER_PROPOSED
 
 

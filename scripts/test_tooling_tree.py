@@ -18,7 +18,6 @@ tooling_tree = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tooling_tree)
 
 load_tree = tooling_tree.load_tree
-detect_nodes = tooling_tree.detect_nodes
 next_candidates = tooling_tree.next_candidates
 withheld_candidates = tooling_tree.withheld_candidates
 directly_unblocked_children = tooling_tree.directly_unblocked_children
@@ -346,183 +345,13 @@ class BaselineEmptyTests(unittest.TestCase):
             self.assertFalse(_is_baseline_empty(root))
         finally:
             tmp.cleanup()
-
-
-class DetectNodesTests(unittest.TestCase):
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        # git
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def test_empty_repo(self):
-        tmp, root = self._make_repo({})
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["git"]["fulfilled"])
-            self.assertFalse(d["loop-config"]["fulfilled"])
-            self.assertFalse(d["composer"]["fulfilled"])
-            self.assertFalse(d["phpstan-level-0"]["fulfilled"])
-            self.assertFalse(d["structural-scan"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_loop_config_fulfilled_when_config_md_present(self):
-        tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["loop-config"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_composer_fulfilled(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["composer"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_p0_psalm_equivalence(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
-            self.assertIn("psalm", d["phpstan-level-0"]["reason"].lower())
-            # p1 not applicable
-            self.assertFalse(d["phpstan-level-1"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_p0_psalm_equivalence_still_unblocks_rector_family(self):
-        # Ticket 37 regression guard: mutual exclusion must NOT touch
-        # phpstan-level-0's own fulfilled state. If the
-        # Psalm-equivalence branch were ever replaced by rejecting
-        # phpstan-level-0 itself (ticket 37's literal wording,
-        # deliberately not implemented that way — see php-tooling-tree.md's
-        # `phpstan` equivalents section), the Rector family would become
-        # permanently unreachable for every Psalm-only target on that path
-        # alone (a required-parent rejection closes every node beneath it).
-        # Ticket 37/44's follow-up made this doubly robust: rector-php-set's
-        # gate is now required-any(phpstan-level-0, psalm) — psalm
-        # unblocks it directly, independent of phpstan-level-0's own
-        # fulfilled state entirely. rector-dead-code/rector-type-coverage are
-        # not checked directly here — they only require rector-php-set
-        # fulfilled (an ordinary, unrelated adoption fact), so this one check
-        # on rector-php-set's own unblocked-ness is the meaningful regression
-        # guard for the whole family.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
-            self.assertTrue(d["psalm"]["fulfilled"])
-            ok, why = tooling_tree._is_unblocked("rector-php-set", load_tree(), d)
-            self.assertTrue(ok, why)
-        finally:
-            tmp.cleanup()
-
-    def test_rector_php_set_reachable_via_psalm_alone_even_if_p0_were_false(self):
-        # Direct proof of the "doubly robust" claim above: rector-php-set's
-        # required-any(phpstan-level-0, psalm) unblocks it via psalm
-        # alone, with no dependency on phpstan-level-0's own
-        # fulfilled state — unlike before ticket 37/44's follow-up, where the
-        # only path was through phpstan-level-0's fulfilled flag
-        # (itself driven by the equivalence).
-        fulfilled = {"phpstan-level-0": {"fulfilled": False}, "psalm": {"fulfilled": True}}
-        ok, why = tooling_tree._is_unblocked("rector-php-set", load_tree(), fulfilled)
-        self.assertTrue(ok, why)
-
-    def test_p0_phpstan_level0_empty(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n    paths: [src]\nincludes:\n    - phpstan-baseline.neon\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_p0_fulfilled_via_phpstan_neon_dist_only(self):
-        # PHPStan itself auto-loads phpstan.neon.dist when phpstan.neon is
-        # absent -- a real, common convention (mirrors phpunit.xml.dist/
-        # psalm.xml.dist/phpmd.xml.dist, all already accepted elsewhere in
-        # this tree). Caught live: a target using only the .dist file was
-        # wrongly reported as "no level configured".
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon.dist": "parameters:\n    level: 3\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-            self.assertTrue(d["phpstan-level-3"]["fulfilled"], d["phpstan-level-3"])
-        finally:
-            tmp.cleanup()
-
-    def test_p0_phpstan_neon_takes_precedence_over_dist(self):
-        # Both committed: phpstan.neon wins, matching PHPStan's own
-        # resolution order.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 5\n",
-            "phpstan.neon.dist": "parameters:\n    level: 1\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertEqual(d["phpstan-level-0"]["details"]["level"], 5)
-        finally:
-            tmp.cleanup()
-
-    def test_p0_nonempty_blocks_p1(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors:\n        - message: '#foo#'\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"])
-            self.assertFalse(d["phpstan-level-1"]["fulfilled"])
-            # next_candidates should not propose p1 when baseline non-empty
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertNotIn("phpstan-level-1", nodes[:2])  # at least not immediate
-        finally:
-            tmp.cleanup()
-
-
 class RefactoringNotesResolutionTests(unittest.TestCase):
     """`_resolve_refactoring_notes_dir` — the Refactoring Notes' path,
     default docs/refactoring/, overridable via a `Refactoring Notes:
     `<path>`` line in AGENTS.md/CLAUDE.md (skills/continuous-refactoring/
     references/refactoring-bookkeeping.md's resolution rule)."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -530,6 +359,12 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_default_with_neither_file_present(self):
@@ -545,31 +380,6 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
             self.assertEqual(_resolve_refactoring_notes_dir(root), root / "docs" / "refactoring")
         finally:
             tmp.cleanup()
-
-    def test_custom_path_from_agents_md(self):
-        tmp, root = self._make_repo({
-            "AGENTS.md": "## Continuous-refactoring suite\n\nRefactoring Notes: `custom/path/` — notes.\n",
-            "custom/path/bookkeeping.md": "# Refactoring Loop Config\n",
-        })
-        try:
-            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "custom" / "path")
-            d = detect_nodes(root)
-            self.assertTrue(d["loop-config"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_custom_path_from_claude_md_when_no_agents_md(self):
-        tmp, root = self._make_repo({
-            "CLAUDE.md": "Refactoring Notes: `notes/refactor/`\n",
-            "notes/refactor/bookkeeping.md": "# Refactoring Loop Config\n",
-        })
-        try:
-            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "notes" / "refactor")
-            d = detect_nodes(root)
-            self.assertTrue(d["loop-config"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
     def test_agents_md_without_line_falls_through_to_claude_md(self):
         tmp, root = self._make_repo({
             "AGENTS.md": "# Agents\n\nNo suite section here.\n",
@@ -597,7 +407,7 @@ class StructuralScanGateTests(unittest.TestCase):
     """ADR-0008: structural-scan's `resolved` edges — a rejected leaf still
     unblocks the node, unlike a standard required edge."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -605,6 +415,12 @@ class StructuralScanGateTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def _fully_tooled_files(self):
@@ -660,85 +476,6 @@ class StructuralScanGateTests(unittest.TestCase):
             # redundant) so it needs no rejection here.
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
-
-    def test_unresolved_when_only_editorconfig_missing(self):
-        # Every other leaf fulfilled, editorconfig absent and undecided —
-        # structural-scan must stay closed on editorconfig alone (ticket 41).
-        files = self._fully_tooled_files()
-        del files[".editorconfig"]
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["structural-scan"]["fulfilled"])
-            self.assertEqual(d["structural-scan"]["details"]["unresolved"], ["editorconfig"])
-        finally:
-            tmp.cleanup()
-
-    def test_resolves_via_editorconfig_rejection(self):
-        # A rejected editorconfig still unblocks structural-scan, same as
-        # every other resolved leaf (ADR-0008's design intent).
-        files = self._fully_tooled_files()
-        del files[".editorconfig"]
-        tmp, root = self._make_repo(files)
-        try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "editorconfig.md").write_text("rejected\n")
-            d = detect_nodes(root)
-            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
-        finally:
-            tmp.cleanup()
-
-    def test_unfulfilled_when_leaves_missing(self):
-        # ticket 42: structural-scan's own `unresolved` now names its direct
-        # resolved-parents (editorconfig, php-safety-net — plus
-        # ci-runner per ADR-0022's follow-up), not the individual PHP
-        # leaves — those live one hop down, on php-safety-net's own
-        # `unresolved` (see PhpSafetyNetAggregationTests). Ticket 63 renamed
-        # php-safety-net -> php-safety-net and dropped composer-audit
-        # from its leaf set (moved to the Signal wave) — psr-4 is one of the
-        # nine leaves still there.
-        tmp, root = self._make_repo({})
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["structural-scan"]["fulfilled"])
-            self.assertEqual(set(d["structural-scan"]["details"]["unresolved"]), {"editorconfig", "ci-runner", "php-safety-net"})
-            self.assertIn("psr-4", d["php-safety-net"]["details"]["unresolved"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_when_every_leaf_fulfilled(self):
-        tmp, root = self._make_repo(self._fully_tooled_files())
-        try:
-            # composer-audit is genuinely fulfilled here (the fixture's CI job
-            # runs `composer audit`) — every leaf fulfilled by file inspection,
-            # no rejection needed.
-            d = detect_nodes(root)
-            self.assertTrue(d["composer-audit"]["fulfilled"], d["composer-audit"])
-            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
-        finally:
-            tmp.cleanup()
-
-    def test_rejected_leaf_still_resolves_unlike_required_edge(self):
-        # Every leaf fulfilled except rector-type-coverage, which is rejected
-        # (not fulfilled) — structural-scan must still open, unlike a normal
-        # required edge which would close permanently on a rejection.
-        files = self._fully_tooled_files()
-        # Drop only the "Type"/"type" markers (rector-type-coverage) — keep
-        # every other ticket-43 rector marker so only this one leaf is
-        # unfulfilled-and-rejected, not incidentally several more.
-        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList"
-        tmp, root = self._make_repo(files)
-        try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
-            d = detect_nodes(root)
-            self.assertTrue(d["composer-audit"]["fulfilled"], d["composer-audit"])  # genuinely fulfilled, not rejected
-            self.assertFalse(d["rector-type-coverage"]["fulfilled"])
-            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
-        finally:
-            tmp.cleanup()
-
-
 class PhpSafetyNetAggregationTests(unittest.TestCase):
     """Ticket 42: `php-safety-net` (renamed from `php-structural-scan`,
     ticket 63) aggregates the PHP tree's nine `resolved` leaves behind
@@ -747,7 +484,7 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
     semantics as `structural-scan`'s own gate, one hop down — and, unlike
     `structural-scan`, never itself a proposable candidate."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -755,6 +492,12 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def _fully_tooled_php_leaves(self):
@@ -798,97 +541,28 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
             # (ticket 37, dropped as redundant) so it needs no rejection.
             "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
-
-    def test_unresolved_when_leaves_missing(self):
-        tmp, root = self._make_repo({})
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["php-safety-net"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_resolved_when_every_leaf_fulfilled(self):
-        tmp, root = self._make_repo(self._fully_tooled_php_leaves())
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-        finally:
-            tmp.cleanup()
-
-    def test_rejected_leaf_still_resolves_php_safety_net(self):
-        # Mirrors StructuralScanGateTests' equivalent case, one hop down: a
-        # rejected leaf still counts as resolved, unlike a required parent.
-        files = self._fully_tooled_php_leaves()
-        # Drop only the "Type"/"type" markers (rector-type-coverage).
-        files["rector.php"] = "<?php // DeadCode LevelSetList CodeQuality PHPUnitSetList"
-        tmp, root = self._make_repo(files)
-        try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "rector-type-coverage.md").write_text("rejected: declined\n")
-            d = detect_nodes(root)
-            self.assertFalse(d["rector-type-coverage"]["fulfilled"])
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-        finally:
-            tmp.cleanup()
-
-    def test_ancestor_rejected_leaf_still_resolves_php_safety_net(self):
-        # Ticket 53 (signals ticket 2 lowered the leaf from phpstan-level-10
-        # to phpstan-level-5, same mechanism either way): phpstan-level-5
-        # (the actual leaf) isn't itself rejected, but phpstan-level-2 -- a
-        # required ancestor two hops up its own chain -- is. Per the
-        # maintainer's own decision, only the directly-rejected node gets an
-        # out-of-scope entry; the chain above it (3-5) must still count as
-        # resolved via _is_effectively_rejected, not stay stuck in
-        # `unresolved` forever waiting for an entry nobody is going to write.
-        files = self._fully_tooled_php_leaves()
-        files["phpstan.neon"] = "parameters:\n    level: 1\n"  # below the rejected level-2
-        tmp, root = self._make_repo(files)
-        try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-2.md").write_text("rejected: declined\n")
-            d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-5"]["fulfilled"], d["phpstan-level-5"])
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-        finally:
-            tmp.cleanup()
-
-    def test_structural_scan_resolves_only_once_php_safety_net_resolves(self):
-        # Two-hop regression: structural-scan must read php-safety-net's
-        # already-computed status regardless of tree["order"] position.
-        files = self._fully_tooled_php_leaves()
-        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            self.assertTrue(d["structural-scan"]["fulfilled"], d["structural-scan"])
-        finally:
-            tmp.cleanup()
-        # Now drop one leaf: php-safety-net (and so structural-scan)
-        # must close again.
-        files2 = dict(files)
-        del files2["rector.php"]
-        tmp2, root2 = self._make_repo(files2)
-        try:
-            d2 = detect_nodes(root2)
-            self.assertFalse(d2["php-safety-net"]["fulfilled"])
-            self.assertFalse(d2["structural-scan"]["fulfilled"])
-        finally:
-            tmp2.cleanup()
-
     def test_never_in_next_candidates(self):
         files = self._fully_tooled_php_leaves()
-        tmp, root = self._make_repo(files)
+        p0_fulfilled = {
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
+            "phpstan-level-0": True, "rector-php-set": True,
+            "phpunit": True, "php-cs-fixer": True, "phpstan-level-5": True,
+            "rector-dead-code": True, "rector-type-coverage": True,
+            "rector-code-quality": True, "rector-phpunit-set": True,
+            "coverage-floor": True, "psr-4": True,
+            "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
+        }
+        tmp, root = self._make_repo(files, fulfilled=p0_fulfilled)
         try:
-            # php-safety-net resolved, but editorconfig undecided —
-            # structural-scan itself stays closed either way.
             nodes = [c["node"] for c in next_candidates(root, limit=20)]
             self.assertNotIn("php-safety-net", nodes)
             self.assertNotIn("structural-scan", nodes)
         finally:
             tmp.cleanup()
         files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
-        tmp2, root2 = self._make_repo(files)
+        p0_fulfilled_with_editor = {**p0_fulfilled, "editorconfig": True, "ci-runner": True, "php-safety-net": True, "structural-scan": True}
+        tmp2, root2 = self._make_repo(files, fulfilled=p0_fulfilled_with_editor)
         try:
             nodes = [c["node"] for c in next_candidates(root2, limit=20)]
             self.assertNotIn("php-safety-net", nodes)
@@ -1077,1153 +751,12 @@ class ComposerTieBackClosesOrphanedNodesTests(unittest.TestCase):
             tooling_tree._undecided_recommended_parents("rector-type-coverage", tree, detected, rejected),
             [],
         )
-
-
-class PsalmMutualExclusionTests(unittest.TestCase):
-    """Ticket 37: phpstan-level-5 (was phpstan-level-10 before signals ticket
-    2 lowered the level-chain leaf) is the php-safety-net leaf a
-    target's static-analyzer choice must resolve — the actual bug this
-    ticket fixes (a Psalm-only target previously left the level-chain leaf
-    neither fulfilled nor rejected, permanently blocking
-    php-safety-net). `psalm` itself is deliberately not a leaf (found
-    redundant on review, see test_resolved_parents_of_php_safety_net) —
-    only the level-chain leaf's own resolution matters here."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _psalm_only_files(self):
-        return {
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-        }
-
-    def test_psalm_leaf_fulfilled_but_phpstan_level_5_leaf_unresolved_without_housekeeping(self):
-        # Reproduces the bug this ticket fixes: without the mutual-exclusion
-        # out-of-scope write, phpstan-level-5 sits neither fulfilled (Psalm
-        # path) nor rejected (nobody wrote the file) — php-safety-net
-        # stays blocked on it forever.
-        tmp, root = self._make_repo(self._psalm_only_files())
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psalm"]["fulfilled"])
-            self.assertFalse(d["phpstan-level-5"]["fulfilled"])
-            self.assertIn("phpstan-level-5", d["php-safety-net"]["details"]["unresolved"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_level_5_rejection_closes_the_gap(self):
-        # The fix: the recognition-pass housekeeping described on the `psalm`
-        # node's own entry (php-tooling-tree.md) writes
-        # out-of-scope/phpstan-level-5.md — phpstan-level-5 then resolves
-        # (rejected), and it's no longer in php-safety-net's unresolved
-        # list, exactly mirroring the real php-psalm fixture (ticket 37).
-        files = self._psalm_only_files()
-        files["docs/refactoring/out-of-scope/phpstan-level-5.md"] = "rejected: mutual exclusion (ticket 37) — psalm path chosen\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertNotIn("phpstan-level-5", d["php-safety-net"]["details"]["unresolved"])
-        finally:
-            tmp.cleanup()
-
-    def test_co_presence_phpstan_authoritative_over_psalm(self):
-        # Co-presence rule (phpstan.md, psalm.md): when both analysers are
-        # genuinely adopted, PHPStan stays authoritative for the level
-        # chain -- Psalm's own equivalence must not blanket every
-        # phpstan-level-N as "not applicable". Reproduces a real gap found
-        # live on Art4/legacy-todo: adopting psalm-taint-analysis on top of
-        # an existing, already-fulfilled phpstan-level-1..5 setup made the
-        # scanner read every one of those genuinely-fulfilled levels as
-        # "not applicable: psalm fulfils p0" -- corrupting `refactor-learn`'s
-        # `Fulfilled nodes` overwrite the next time a pass had parser access.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({
-                "require-dev": {
-                    "phpstan/phpstan": "^1.0",
-                    "vimeo/psalm": "^5.0",
-                },
-            }),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 5\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "psalm.xml": "<psalm></psalm>",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psalm"]["fulfilled"])
-            self.assertTrue(d["phpstan-level-5"]["fulfilled"], d["phpstan-level-5"])
-            self.assertFalse(d["phpstan-level-6"]["fulfilled"], d["phpstan-level-6"])
-            self.assertNotEqual(d["phpstan-level-5"]["reason"], "not applicable: psalm fulfils p0")
-            self.assertFalse(d["phpstan-level-5"]["details"].get("psalm_equivalent"))
-        finally:
-            tmp.cleanup()
-
-    def test_psalm_only_still_gets_equivalence_with_phpstan_dep_but_no_level_configured(self):
-        # Adopting phpstan/phpstan as a composer dep alone, with no
-        # phpstan.neon/level configured, must not count as "genuinely
-        # adopted" -- the Psalm-equivalence path stays available, same as a
-        # target that never touched PHPStan at all.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({
-                "require-dev": {
-                    "phpstan/phpstan": "^1.0",
-                    "vimeo/psalm": "^5.0",
-                },
-            }),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-            self.assertFalse(d["phpstan-level-1"]["fulfilled"], d["phpstan-level-1"])
-            self.assertTrue(d["phpstan-level-1"]["details"].get("psalm_equivalent"))
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_path_needs_no_psalm_rejection(self):
-        # On the PHPStan path, php-safety-net resolves without any
-        # psalm-related out-of-scope entry at all — psalm isn't a leaf, so
-        # there's nothing to reject (unlike the earlier design this ticket
-        # tried and dropped, which needed docs/refactoring/out-of-scope/
-        # psalm.md just to satisfy a leaf that didn't need to exist).
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 5\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psalm"]["fulfilled"])
-            self.assertTrue(d["phpstan-level-5"]["fulfilled"])
-            self.assertNotIn("phpstan-level-5", d["php-safety-net"]["details"]["unresolved"])
-        finally:
-            tmp.cleanup()
-
-
-class PsalmTaintAnalysisTests(unittest.TestCase):
-    """Ticket 37: psalm-taint-analysis is unlocked via a required-any edge
-    (phpstan-level-4 OR psalm), independent of the mutual exclusion above."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def test_fulfilled_via_psalm_dep_and_config(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psalm-taint-analysis"]["fulfilled"], d["psalm-taint-analysis"])
-        finally:
-            tmp.cleanup()
-
-    def test_is_a_php_safety_net_resolved_leaf(self):
-        # Follow-up correction: psalm-taint-analysis is a deterministic
-        # security-scan tool exactly like composer-audit (also a
-        # php-safety-net leaf) — fulfilling it resolves its own leaf,
-        # same as any other leaf in the set.
-        tree = load_tree()
-        self.assertIn("psalm-taint-analysis", tree["resolved_parents"]["php-safety-net"])
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psalm-taint-analysis"]["fulfilled"])
-            self.assertNotIn("psalm-taint-analysis", d["php-safety-net"]["details"]["unresolved"])
-        finally:
-            tmp.cleanup()
-
-    def test_unfulfilled_without_psalm(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psalm-taint-analysis"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_ci_present_but_not_gated_on_taint_flag_stays_unfulfilled(self):
-        # Same ticket-34 CI-self-wiring shape as phpstan-level-0: once
-        # ci-runner exists, a plain `vendor/bin/psalm` invocation (no
-        # --taint-analysis) is not enough.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-            ".github/workflows/ci.yml": "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/psalm\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psalm-taint-analysis"]["fulfilled"], d["psalm-taint-analysis"])
-        finally:
-            tmp.cleanup()
-
-    def test_ci_gated_on_taint_flag_fulfils(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-            ".github/workflows/ci.yml": "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/psalm --taint-analysis\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psalm-taint-analysis"]["fulfilled"], d["psalm-taint-analysis"])
-        finally:
-            tmp.cleanup()
-
-    def test_not_proposable_when_neither_required_any_parent_fulfilled(self):
-        # phpstan at level 0 only (not level 4), no psalm at all.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            nodes = [c["node"] for c in next_candidates(root, limit=20)]
-            self.assertNotIn("psalm-taint-analysis", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_proposable_once_phpstan_level_4_fulfilled(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 4\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            nodes = [c["node"] for c in next_candidates(root, limit=20)]
-            self.assertIn("psalm-taint-analysis", nodes)
-        finally:
-            tmp.cleanup()
-
-
-class PsrFourGateTests(unittest.TestCase):
-    """Ticket 50: `psr-4` — declared AND verifiably in use, not declaration
-    alone (php-tooling-tree/psr-4.md's Fulfilment check)."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def test_required_parent_is_composer(self):
-        tree = load_tree()
-        self.assertEqual(tree["required_parents"]["psr-4"], ["composer"])
-
-    def test_unfulfilled_when_no_autoload_declared(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"])
-            self.assertFalse(d["psr-4"]["details"]["declared"])
-        finally:
-            tmp.cleanup()
-
-    def test_unfulfilled_when_declared_but_unused(self):
-        # A declaration nothing yet uses is a claim, not evidence — the
-        # exact pattern ticket 48 flagged as a problem for a different node.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"])
-            self.assertTrue(d["psr-4"]["details"]["declared"])
-            self.assertIn("declared but no file", d["psr-4"]["reason"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_when_declared_and_a_real_file_uses_it(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}}),
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-    def test_unfulfilled_when_file_under_mapped_dir_uses_a_different_namespace(self):
-        # A file exists under the mapped directory, but doesn't actually
-        # declare the mapped namespace — not proof the mapping is in use.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}}),
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace SomethingElse;\n\nclass Example\n{\n}\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_with_array_of_directories(self):
-        # Composer's own schema allows a psr-4 prefix to map to a list of
-        # directories, not just one — must not assume a bare string.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"autoload": {"psr-4": {"App\\": ["src/", "lib/"]}}}),
-            "composer.lock": "{}",
-            "lib/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-    def test_resolved_parent_of_php_safety_net(self):
-        tree = load_tree()
-        self.assertIn("psr-4", tree["resolved_parents"]["php-safety-net"])
-
-
-class Psr4AutoloaderWiringTests(unittest.TestCase):
-    """Ticket 58: psr-4's fulfilment gains a second criterion on top of the
-    mapping-mechanism bar above (PsrFourGateTests) -- the autoloader is
-    actually wired into the target's own Composition root, or every Entry
-    point when there's no single root (CONTEXT.md, php-tooling-tree/
-    psr-4.md's own Fulfilment check)."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    _COMPOSER_MAPPED = json.dumps({"autoload": {"psr-4": {"App\\": "src/"}}})
-
-    def test_unfulfilled_when_entry_point_exists_but_autoloader_not_wired(self):
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "public/index.php": "<?php\necho 'hi';\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
-            self.assertTrue(d["psr-4"]["details"]["mechanism_verified"])
-            self.assertFalse(d["psr-4"]["details"]["autoloader_wired"])
-            self.assertIn("autoloader isn't wired", d["psr-4"]["reason"])
-            self.assertEqual(d["psr-4"]["details"]["unwired_entry_points"], ["public/index.php"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_reports_empty_unwired_list(self):
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "public/index.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'hi';\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-            self.assertEqual(d["psr-4"]["details"]["unwired_entry_points"], [])
-        finally:
-            tmp.cleanup()
-
-    def test_generated_ci_helper_script_is_still_reported_as_unwired(self):
-        # Real false positive caught live on Art4/legacy-todo (PR #229): a
-        # tooling-tree node's own generated CI-helper script (coverage-
-        # floor's scripts/check-coverage-floor.php) is a real, unrequired
-        # .php file that structurally never needs the app's own classes.
-        # Deliberately NOT special-cased away here (see ADR-0046's revised
-        # decision) -- the deterministic layer stays a simple, honest
-        # "does this candidate's text contain the autoload.php require"
-        # check and reports it plainly; sorting a genuine application entry
-        # point from a script like this one is an agentic judgement call
-        # documented in php-tooling-tree/psr-4.md's own Fulfilment check,
-        # not something this parser tries to guess at.
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "public/index.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'hi';\n",
-            "scripts/check-coverage-floor.php": (
-                "#!/usr/bin/env php\n<?php\n$xml = simplexml_load_file($argv[1]);\necho 'ok';\n"
-            ),
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
-            self.assertEqual(
-                d["psr-4"]["details"]["unwired_entry_points"],
-                ["scripts/check-coverage-floor.php"],
-            )
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_when_the_single_entry_point_requires_autoload_directly(self):
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "public/index.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'hi';\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_via_composition_root_wiring_alone(self):
-        # Two entry points both delegate to bootstrap.php -- wiring the
-        # autoloader there alone is enough, no entry point needs its own.
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "src/Bootstrap.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\n",
-            "public/a.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
-            "public/b.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-    def test_composition_root_recognized_with_a_straggler_needing_its_own_wiring(self):
-        # a.php and b.php converge on bootstrap.php (a real majority: 2 of
-        # 3) -- c.php doesn't. bootstrap.php is recognized as the
-        # composition root regardless, but c.php still needs its own direct
-        # wiring -- fulfilled only once both are satisfied.
-        base_files = {
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "src/Bootstrap.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\n",
-            "public/a.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
-            "public/b.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
-            "public/c.php": "<?php\necho 'legacy standalone page';\n",
-        }
-        tmp, root = self._make_repo(base_files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
-            (root / "public" / "c.php").write_text(
-                "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\necho 'legacy standalone page';\n"
-            )
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-    def test_exact_tie_recognizes_no_composition_root(self):
-        # 2 of 4 entry points converge on bootstrap.php -- exactly half, not
-        # a real majority (best_count * 2 > len(entry_points) must be a
-        # strict inequality). No composition root is recognized, so wiring
-        # bootstrap.php alone is not enough -- every entry point needs its
-        # own direct require, even a.php/b.php which do converge.
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "src/Bootstrap.php": "<?php\nrequire_once __DIR__ . '/../vendor/autoload.php';\n",
-            "public/a.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
-            "public/b.php": "<?php\nrequire_once __DIR__ . '/../src/Bootstrap.php';\n",
-            "public/c.php": "<?php\necho 'standalone c';\n",
-            "public/d.php": "<?php\necho 'standalone d';\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["psr-4"]["fulfilled"], d["psr-4"])
-            # Confirm it's genuinely "no composition root", not just "c/d
-            # unwired" -- even a.php, which does converge on bootstrap.php,
-            # is unfulfilled on its own until it requires autoload.php
-            # itself, since bootstrap.php's own wiring isn't credited to it.
-            _, composition_root, wiring_targets = tooling_tree._detect_entry_points(root, ["src/"])
-            self.assertIsNone(composition_root)
-            self.assertEqual(len(wiring_targets), 4)
-        finally:
-            tmp.cleanup()
-
-    def test_vacuously_fulfilled_with_no_entry_points_at_all(self):
-        # Every .php file sits under the mapped namespace directory itself
-        # -- nothing to wire, same "nothing to recommend" convention this
-        # tree already uses for an undeterminable PHP floor.
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-            self.assertTrue(d["psr-4"]["details"]["autoloader_wired"])
-        finally:
-            tmp.cleanup()
-
-    def test_tooling_config_php_files_are_never_treated_as_entry_points(self):
-        # rector.php/.php-cs-fixer.php are real, unrequired, top-level .php
-        # files -- without the exclusion they'd wrongly need autoload.php
-        # wiring too, since nothing in the source tree requires them either.
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "rector.php": "<?php // DeadCode\n",
-            ".php-cs-fixer.php": "<?php return [];\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-    def test_entry_point_inside_tests_directory_excluded(self):
-        tmp, root = self._make_repo({
-            "composer.json": self._COMPOSER_MAPPED,
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "tests/SomeScript.php": "<?php\necho 'not an app entry point';\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["psr-4"]["fulfilled"], d["psr-4"])
-        finally:
-            tmp.cleanup()
-
-
-class HousekeepingLineFulfilmentTests(unittest.TestCase):
-    """Ticket 63's `_has_housekeeping_line_for()` helper, shared by
-    `composer-audit`/`semgrep`'s own fulfilment checks (exercised end-to-end
-    there too) — direct unit coverage of the matching rule itself: node slug
-    with hyphens read as spaces, case-insensitive substring match against
-    the Refactoring Notes' `housekeeping-template.md`."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def test_false_when_file_missing(self):
-        tmp, root = self._make_repo({})
-        try:
-            self.assertFalse(tooling_tree._has_housekeeping_line_for(root, "composer-audit"))
-        finally:
-            tmp.cleanup()
-
-    def test_true_when_line_names_the_node(self):
-        tmp, root = self._make_repo({
-            "docs/refactoring/housekeeping-template.md": (
-                "# Housekeeping checklist\n\n"
-                "- Review `composer audit`'s report; attempt a fix for anything with an available patched version.\n"
-            ),
-        })
-        try:
-            self.assertTrue(tooling_tree._has_housekeeping_line_for(root, "composer-audit"))
-        finally:
-            tmp.cleanup()
-
-    def test_false_when_file_names_only_a_different_node(self):
-        tmp, root = self._make_repo({
-            "docs/refactoring/housekeeping-template.md": (
-                "# Housekeeping checklist\n\n"
-                "- Run `composer update`; record the output.\n"
-            ),
-        })
-        try:
-            self.assertFalse(tooling_tree._has_housekeeping_line_for(root, "composer-audit"))
-        finally:
-            tmp.cleanup()
-
-    def test_case_insensitive_match(self):
-        tmp, root = self._make_repo({
-            "docs/refactoring/housekeeping-template.md": "# Housekeeping checklist\n\n- COMPOSER AUDIT reviewed monthly.\n",
-        })
-        try:
-            self.assertTrue(tooling_tree._has_housekeeping_line_for(root, "composer-audit"))
-        finally:
-            tmp.cleanup()
-
-    def test_semgrep_slug_has_no_hyphen_to_translate(self):
-        tmp, root = self._make_repo({
-            "docs/refactoring/housekeeping-template.md": "# Housekeeping checklist\n\n- Re-run Semgrep periodically.\n",
-        })
-        try:
-            self.assertTrue(tooling_tree._has_housekeeping_line_for(root, "semgrep"))
-        finally:
-            tmp.cleanup()
-
-    def test_honors_custom_refactoring_notes_path(self):
-        # Same custom-path resolution every other Refactoring-Notes-reading
-        # check in this module already honors (RefactoringNotesResolutionTests).
-        tmp, root = self._make_repo({
-            "AGENTS.md": "Refactoring Notes: `notes/`\n",
-            "notes/housekeeping-template.md": "# Housekeeping checklist\n\n- Review `composer audit`'s report.\n",
-        })
-        try:
-            self.assertTrue(tooling_tree._has_housekeeping_line_for(root, "composer-audit"))
-        finally:
-            tmp.cleanup()
-
-
-class ComposerAuditGateTests(unittest.TestCase):
-    """php-tooling-tree/composer-audit.md (ticket 63): required parents are
-    `composer` + `php-safety-net` (additive), `ci-runner` downgraded from
-    required to recommended. Proposable once both required parents are
-    fulfilled and a real `require` dependency exists (bullet a) — the old
-    "every other leaf already resolved" fallback (bullet b) was removed once
-    composer-audit stopped being a php-safety-net leaf itself. Fulfilment:
-    a CI job running `composer audit`, OR a committed housekeeping-template.md
-    line naming this node."""
-
-    # CI exists (fulfils ci-runner) but doesn't run `composer audit` yet —
-    # for eligibility tests, which must stay independent of composer-audit's
-    # own fulfilment check (otherwise it'd be skipped as already-done, not
-    # exercised as blocked/eligible for the right reason). Also invokes
-    # phpunit/phpstan so those php-safety-net leaves genuinely resolve too
-    # (ticket 34's self-wiring) rather than staying blocked on their own
-    # CI-gating requirement.
-    _CI_YML_NO_AUDIT = (
-        "jobs:\n"
-        "  build:\n"
-        "    steps:\n"
-        "      - run: vendor/bin/phpunit\n"
-        "      - run: vendor/bin/phpstan analyse\n"
-    )
-    _CI_YML_WITH_AUDIT = "jobs:\n  audit:\n    steps:\n      - run: composer audit\n"
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _php_safety_net_resolved_files(self):
-        # Every one of php-safety-net's nine leaves fulfilled or rejected,
-        # so php-safety-net's own required-parent edge into composer-audit
-        # is satisfied — same fixture shape
-        # PhpSafetyNetAggregationTests._fully_tooled_php_leaves() uses,
-        # minus anything composer-audit-specific (it's no longer a leaf).
-        return {
-            "composer.json": json.dumps({
-                "require-dev": {
-                    "phpstan/phpstan": "^1.0",
-                    "phpunit/phpunit": "^10.0",
-                },
-                "autoload": {"psr-4": {"App\\": "src/"}},
-            }),
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            "phpstan.neon": "parameters:\n    level: 5\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
-            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
-        }
-
-    def test_blocked_without_php_safety_net_even_with_real_dep_and_ci(self):
-        # php-safety-net unresolved (a bare repo) — composer-audit's new
-        # required parent blocks it regardless of the real dependency and
-        # CI, neither of which matter until php-safety-net itself opens.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_NO_AUDIT,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            nodes = [c["node"] for c in next_candidates(root, limit=20)]
-            self.assertNotIn("composer-audit", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_blocked_with_php_safety_net_resolved_but_only_platform_dependency(self):
-        # php-safety-net resolved, but composer.json's `require` names only
-        # platform pseudo-packages — bullet (a) still blocks: nothing for
-        # `composer audit` to check.
-        files = self._php_safety_net_resolved_files()
-        files["composer.json"] = json.dumps({
-            "require": {"php": ">=8.1", "ext-json": "*"},
-            "require-dev": {"phpstan/phpstan": "^1.0", "phpunit/phpunit": "^10.0"},
-            "autoload": {"psr-4": {"App\\": "src/"}},
-        })
-        files[".github/workflows/ci.yml"] = self._CI_YML_NO_AUDIT
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            nodes = [c["node"] for c in next_candidates(root, limit=20)]
-            self.assertNotIn("composer-audit", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_eligible_once_php_safety_net_resolved_and_real_dependency(self):
-        files = self._php_safety_net_resolved_files()
-        files["composer.json"] = json.dumps({
-            "require": {"php": ">=8.1", "acme/widgets": "^1.0"},
-            "require-dev": {"phpstan/phpstan": "^1.0", "phpunit/phpunit": "^10.0"},
-            "autoload": {"psr-4": {"App\\": "src/"}},
-        })
-        files[".github/workflows/ci.yml"] = self._CI_YML_NO_AUDIT
-        tmp, root = self._make_repo(files)
-        try:
-            nodes = [c["node"] for c in next_candidates(root, limit=20)]
-            self.assertIn("composer-audit", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_eligible_once_php_safety_net_resolved_via_ancestor_rejected_leaf(self):
-        # Ticket 55/ADR-0035's ancestor-rejection mechanism
-        # (_is_effectively_rejected) still applies one level up: php-safety-
-        # net's own phpstan-level-5 leaf resolves via a rejected
-        # phpstan-level-2 ancestor, which in turn satisfies composer-audit's
-        # new php-safety-net required parent — same real-dependency
-        # eligibility as above, reached through the ancestor path instead of
-        # a direct fulfilment/rejection of phpstan-level-5 itself.
-        files = self._php_safety_net_resolved_files()
-        files["composer.json"] = json.dumps({
-            "require": {"php": ">=8.1", "acme/widgets": "^1.0"},
-            "require-dev": {"phpstan/phpstan": "^1.0", "phpunit/phpunit": "^10.0"},
-            "autoload": {"psr-4": {"App\\": "src/"}},
-        })
-        files["phpstan.neon"] = "parameters:\n    level: 1\n"
-        files[".github/workflows/ci.yml"] = self._CI_YML_NO_AUDIT
-        files["docs/refactoring/out-of-scope/phpstan-level-2.md"] = "rejected: declined\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-5"]["fulfilled"], d["phpstan-level-5"])
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            nodes = [c["node"] for c in next_candidates(root, limit=20)]
-            self.assertIn("composer-audit", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_once_ci_job_present(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_WITH_AUDIT,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["composer-audit"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_not_fulfilled_without_ci_job_or_housekeeping_line(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["composer-audit"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_via_housekeeping_line_without_any_ci(self):
-        # ticket 63's new OR-branch: a committed housekeeping-template.md
-        # line naming this node fulfils it even with zero CI configured —
-        # no proof of a completed run required, matching every other
-        # CI-gated check in this tree.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
-            "composer.lock": "{}",
-            "docs/refactoring/housekeeping-template.md": (
-                "# Housekeeping checklist\n\n"
-                "- Review `composer audit`'s report; attempt a fix for anything with an available patched version.\n"
-            ),
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["composer-audit"]["fulfilled"], d["composer-audit"])
-        finally:
-            tmp.cleanup()
-
-    def test_not_fulfilled_via_housekeeping_line_naming_a_different_node(self):
-        # The match is node-specific — a housekeeping-template.md that exists
-        # but never names this node must not incidentally fulfil it.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"acme/widgets": "^1.0"}}),
-            "composer.lock": "{}",
-            "docs/refactoring/housekeeping-template.md": (
-                "# Housekeeping checklist\n\n"
-                "- Check whether a newer PHP patch/minor release exists for the declared minimum version; update if so.\n"
-            ),
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["composer-audit"]["fulfilled"], d["composer-audit"])
-        finally:
-            tmp.cleanup()
-
-
-class CiSelfWiringTests(unittest.TestCase):
-    """Ticket 34: phpunit's and phpstan-level-0's own fulfilment
-    checks self-wire a CI-gating requirement once ci-runner is fulfilled,
-    instead of a separate phpunit-ci-job/phpstan-ci-job node."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    _CI_YML_NO_TOOLS = "jobs:\n  lint:\n    steps:\n      - run: php -l\n"
-    _CI_YML_PHPUNIT = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit\n"
-    _CI_YML_PEST = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/pest\n"
-    _CI_YML_PHPSTAN = "jobs:\n  analyse:\n    steps:\n      - run: vendor/bin/phpstan analyse\n"
-    _CI_YML_PHPSTAN_EPHEMERAL = (
-        "jobs:\n  analyse:\n    steps:\n      - run: |\n"
-        "          composer require --dev phpstan/phpstan\n"
-        "          vendor/bin/phpstan analyse\n"
-    )
-    _CI_YML_PHPSTAN_MENTIONED_ONLY = (
-        "jobs:\n  lint:\n    steps:\n"
-        "      - run: echo 'consider adding phpstan/phpstan later'\n"
-    )
-    _CI_YML_PHPSTAN_INSTALLED_NOT_RUN = (
-        "jobs:\n  install:\n    steps:\n      - run: composer require --dev phpstan/phpstan\n"
-    )
-
-    def test_phpunit_fulfilled_on_adoption_alone_without_ci(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpunit"]["fulfilled"], d["phpunit"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpunit_not_fulfilled_when_ci_exists_but_doesnt_gate(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpunit"]["fulfilled"], d["phpunit"])
-            self.assertIn("not gated in CI", d["phpunit"]["reason"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpunit_fulfilled_when_ci_gates_on_it(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_PHPUNIT,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpunit"]["fulfilled"], d["phpunit"])
-        finally:
-            tmp.cleanup()
-
-    def test_pest_requires_pest_invocation_not_phpunit(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"pestphp/pest": "^2.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_PHPUNIT,  # gates phpunit, not pest
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpunit"]["fulfilled"], d["phpunit"])
-        finally:
-            tmp.cleanup()
-
-    def test_test_runner_if_missing_independent_of_ci_gating(self):
-        # A runner is adopted (satisfies test-runner-if-missing) but not yet
-        # CI-gated (phpunit stays unfulfilled) — the two nodes must diverge,
-        # not track each other as they did before ticket 34.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpunit"]["fulfilled"], d["phpunit"])
-            self.assertTrue(d["test-runner-if-missing"]["fulfilled"], d["test-runner-if-missing"])
-        finally:
-            tmp.cleanup()
-
-    def test_next_candidates_still_proposes_phpunit_for_ci_wiring(self):
-        # Regression guard: test-runner-if-missing already fulfilled must not
-        # hide phpunit's own still-open CI-gating candidate.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
-        })
-        try:
-            nodes = [c["node"] for c in next_candidates(root, limit=10)]
-            self.assertIn("phpunit", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_fulfilled_on_adoption_alone_without_ci(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_not_fulfilled_when_ci_exists_but_doesnt_gate(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-            self.assertIn("not gated in CI", d["phpstan-level-0"]["reason"])
-            # the level chain stays blocked too, via the normal required-edge check
-            self.assertFalse(d["phpstan-level-1"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_fulfilled_when_ci_gates_on_it(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_fulfilled_via_ephemeral_ci_install(self):
-        # phpstan/phpstan absent from composer.json entirely (a target may
-        # deliberately keep its own manifest free of pure-analysis tooling)
-        # -- but a CI job installs it at runtime and invokes it. Same
-        # fulfilment as a committed dependency.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_EPHEMERAL,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-            self.assertTrue(d["phpstan-level-0"]["details"]["ephemeral_ci_dep"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_not_fulfilled_on_mention_alone(self):
-        # "phpstan" appearing in CI text with neither a real `composer
-        # require` nor an invocation must not false-positive.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_MENTIONED_ONLY,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_not_fulfilled_when_ephemeral_install_never_run(self):
-        # Installed at CI runtime but never actually invoked -- not gated,
-        # same "not gated in CI" outcome as a committed-but-unwired dep.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN_INSTALLED_NOT_RUN,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-        finally:
-            tmp.cleanup()
-
-    def test_psalm_equivalence_not_ci_gated(self):
-        # Deliberately out of scope for this ticket (see php-tooling-tree.md)
-        # — Psalm gets its own node, and its own CI check, in a follow-up.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"vimeo/psalm": "^5.0"}}),
-            "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
-            ".github/workflows/ci.yml": self._CI_YML_NO_TOOLS,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-        finally:
-            tmp.cleanup()
-
-    def test_phpstan_p0_stays_fulfilled_once_advanced_past_level_zero(self):
-        # Regression guard: phpstan-level-0's own fulfilment check must not
-        # require the config to still literally say `level: 0` once the
-        # project has moved on to a higher level — every level-0 check
-        # (dep present, baseline committed, CI gated) is still satisfied by
-        # a project at level 1+, and phpstan-level-1's own required-parent
-        # check depends on phpstan-level-0 staying reported as fulfilled.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 1\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-0"]["fulfilled"], d["phpstan-level-0"])
-            self.assertTrue(d["phpstan-level-1"]["fulfilled"], d["phpstan-level-1"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_level_exposes_non_empty_baseline_in_details(self):
-        # Regression guard for ticket 51's baseline-shrink mechanism:
-        # refactor-scan step 4b reads detect_nodes()'s own output to find
-        # the highest fulfilled phpstan-level-N and check its baseline —
-        # no separate detection path exists, so `fulfilled` staying True
-        # alongside `details.baseline_empty` staying False (real, unshrunk
-        # findings) is the exact signal that mechanism depends on.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 1\n",
-            "phpstan-baseline.neon": (
-                "parameters:\n    ignoreErrors:\n"
-                "        -\n"
-                "            message: '#^Variable \\$db might not be defined\\.$#'\n"
-                "            count: 1\n"
-                "            path: db.php\n"
-            ),
-            ".github/workflows/ci.yml": self._CI_YML_PHPSTAN,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["phpstan-level-1"]["fulfilled"], d["phpstan-level-1"])
-            self.assertFalse(d["phpstan-level-1"]["details"]["baseline_empty"], d["phpstan-level-1"])
-        finally:
-            tmp.cleanup()
-
-
-class RectorSetListUnderscoreCasingTests(unittest.TestCase):
-    """Rector's current SetList API names sets as ALL_CAPS-with-underscore
-    class constants (e.g. `SetList::DEAD_CODE`, `SetList::CODE_QUALITY`),
-    not the older PascalCase-ish prose the substring detection originally
-    matched. Lowercasing alone doesn't bridge the two: "DEAD_CODE" lowers to
-    "dead_code", not "dead-code" -- detection must tolerate both forms."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def test_dead_code_and_code_quality_detected_via_underscore_constants(self):
-        tmp, root = self._make_repo({
-            "rector.php": (
-                "<?php\nreturn RectorConfig::configure()->withSets(["
-                "SetList::DEAD_CODE, SetList::CODE_QUALITY, LevelSetList::UP_TO_PHP_82,"
-                "]);\n"
-            ),
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["rector-dead-code"]["fulfilled"], d["rector-dead-code"])
-            self.assertTrue(d["rector-code-quality"]["fulfilled"], d["rector-code-quality"])
-            self.assertTrue(d["rector-php-set"]["fulfilled"], d["rector-php-set"])
-        finally:
-            tmp.cleanup()
-
-    def test_dead_code_and_code_quality_still_detected_via_old_pascalcase_prose(self):
-        # Not a regression against the original (still-valid) detection style.
-        tmp, root = self._make_repo({
-            "rector.php": "<?php // DeadCode CodeQuality LevelSetList",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["rector-dead-code"]["fulfilled"], d["rector-dead-code"])
-            self.assertTrue(d["rector-code-quality"]["fulfilled"], d["rector-code-quality"])
-        finally:
-            tmp.cleanup()
-
-
 class RejectionRespectedTests(unittest.TestCase):
     """A node with an out-of-scope entry stays out of next_candidates()
     even once its required parents are fulfilled -- until the
     entry is removed."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -2231,6 +764,12 @@ class RejectionRespectedTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_rejected_ordinary_node_not_in_next_candidates(self):
@@ -2262,6 +801,9 @@ class RejectionRespectedTests(unittest.TestCase):
             "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
+        }, fulfilled={
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
         })
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
@@ -2277,7 +819,7 @@ class RecommendedGateTests(unittest.TestCase):
     ever releases the child on fulfilment and instead cascades a rejection,
     a decided-rejected recommended parent still releases the child."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -2285,6 +827,12 @@ class RecommendedGateTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def _p0_fulfilled_files(self):
@@ -2312,8 +860,16 @@ class RecommendedGateTests(unittest.TestCase):
             "rector.php": "<?php // LevelSetList",
         }
 
+    def _p0_fulfilled_dict(self):
+        return {
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
+            "phpstan-level-0": True, "rector-php-set": True, "editorconfig": True,
+            "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
+        }
+
     def test_child_withheld_while_recommended_parent_undecided(self):
-        tmp, root = self._make_repo(self._p0_fulfilled_files())
+        tmp, root = self._make_repo(self._p0_fulfilled_files(), fulfilled=self._p0_fulfilled_dict())
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("php-cs-fixer", nodes)  # the undecided parent itself is still proposable
@@ -2322,7 +878,7 @@ class RecommendedGateTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_child_released_once_recommended_parent_rejected(self):
-        tmp, root = self._make_repo(self._p0_fulfilled_files())
+        tmp, root = self._make_repo(self._p0_fulfilled_files(), fulfilled=self._p0_fulfilled_dict())
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "php-cs-fixer.md").write_text("rejected\n")
@@ -2338,7 +894,8 @@ class RecommendedGateTests(unittest.TestCase):
             "friendsofphp/php-cs-fixer": "^3.0",
         }})
         files[".php-cs-fixer.php"] = "<?php return [];"
-        tmp, root = self._make_repo(files)
+        fulfilled = {**self._p0_fulfilled_dict(), "php-cs-fixer": True}
+        tmp, root = self._make_repo(files, fulfilled=fulfilled)
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-dead-code", nodes)
@@ -2355,7 +912,8 @@ class RecommendedGateTests(unittest.TestCase):
             "friendsofphp/php-cs-fixer": "^3.0",
         }})
         files[".php-cs-fixer.php"] = "<?php return [];"
-        tmp, root = self._make_repo(files)
+        fulfilled = {**self._p0_fulfilled_dict(), "php-cs-fixer": True}
+        tmp, root = self._make_repo(files, fulfilled=fulfilled)
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertNotIn("rector-type-coverage", nodes)
@@ -2378,7 +936,8 @@ class RecommendedGateTests(unittest.TestCase):
             "friendsofphp/php-cs-fixer": "^3.0",
         }})
         files[".php-cs-fixer.php"] = "<?php return [];"
-        tmp, root = self._make_repo(files)
+        fulfilled = {**self._p0_fulfilled_dict(), "php-cs-fixer": True}
+        tmp, root = self._make_repo(files, fulfilled=fulfilled)
         try:
             (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
             (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
@@ -2390,7 +949,7 @@ class RecommendedGateTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_withheld_candidates_names_the_waiting_on_parents(self):
-        tmp, root = self._make_repo(self._p0_fulfilled_files())
+        tmp, root = self._make_repo(self._p0_fulfilled_files(), fulfilled=self._p0_fulfilled_dict())
         try:
             withheld = {w["node"]: set(w["waiting_on"]) for w in withheld_candidates(root)}
             self.assertEqual(withheld["rector-dead-code"], {"php-cs-fixer"})
@@ -2412,7 +971,8 @@ class RecommendedGateTests(unittest.TestCase):
             "require-dev": {"phpstan/phpstan": "^1.0"},
         })
         files[".github/workflows/ci.yml"] = "jobs:\n  build:\n    steps:\n      - run: echo hi\n"
-        tmp, root = self._make_repo(files)
+        fulfilled = self._p0_fulfilled_dict()
+        tmp, root = self._make_repo(files, fulfilled=fulfilled)
         try:
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertGreater(len(nodes), 5)
@@ -2420,221 +980,13 @@ class RecommendedGateTests(unittest.TestCase):
             self.assertLessEqual(len(next_candidates(root, limit=3)), 3)
         finally:
             tmp.cleanup()
-
-
-class EditorconfigNodeTests(unittest.TestCase):
-    """Ticket 01: `.editorconfig` as its own generic-tree node. Two edges
-    exercised here: `loop-config -> editorconfig` (required — its own
-    prerequisite) and `editorconfig -> php-cs-fixer` (recommended — settle
-    basic formatting before php-cs-fixer's style rules, ADR-0016's
-    decided-gate)."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _loop_config_and_composer_files(self):
-        return {
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
-            "composer.lock": "{}",
-        }
-
-    def test_absent_not_fulfilled(self):
-        tmp, root = self._make_repo(self._loop_config_and_composer_files())
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["editorconfig"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_present_fulfilled(self):
-        files = self._loop_config_and_composer_files()
-        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["editorconfig"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_blocked_until_loop_config_fulfilled(self):
-        tmp, root = self._make_repo({})  # no docs/refactoring/bookkeeping.md
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertNotIn("editorconfig", nodes)
-            self.assertIn("loop-config", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_proposable_once_loop_config_fulfilled(self):
-        tmp, root = self._make_repo({"docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n"})
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertIn("editorconfig", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_php_cs_fixer_withheld_while_editorconfig_undecided(self):
-        tmp, root = self._make_repo(self._loop_config_and_composer_files())
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertIn("editorconfig", nodes)  # the undecided parent itself is still proposable
-            self.assertNotIn("php-cs-fixer", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_php_cs_fixer_released_once_editorconfig_fulfilled(self):
-        files = self._loop_config_and_composer_files()
-        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
-        tmp, root = self._make_repo(files)
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertIn("php-cs-fixer", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_php_cs_fixer_released_once_editorconfig_rejected(self):
-        tmp, root = self._make_repo(self._loop_config_and_composer_files())
-        try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "editorconfig.md").write_text("rejected\n")
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertIn("php-cs-fixer", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_withheld_candidates_names_editorconfig(self):
-        tmp, root = self._make_repo(self._loop_config_and_composer_files())
-        try:
-            withheld = {w["node"]: set(w["waiting_on"]) for w in withheld_candidates(root)}
-            self.assertEqual(withheld["php-cs-fixer"], {"editorconfig"})
-        finally:
-            tmp.cleanup()
-
-
-class IsPhpProjectTests(unittest.TestCase):
-    """ADR-0022: `is-php-project` — the PHP specialization's recognition
-    gate, declared in `tooling-tree.md` (the generic root), required parent
-    of `composer` in `php-tooling-tree.md`. `_NEVER_PROPOSED`
-    (like `git`), so it never appears in `next`/`roadmap`/`withheld` itself —
-    only its gating effect on `composer` (and, transitively through the
-    tree, `php-minimal-version` -- ticket 57 dropped its own direct
-    required parent on this node) is visible there."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _loop_config_only(self):
-        return {"docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n"}
-
-    def test_unfulfilled_with_no_composer_json_and_no_php_files(self):
-        tmp, root = self._make_repo({"index.html": "<html></html>\n", "styles.css": "body{}\n"})
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["is-php-project"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_via_php_file_without_composer_json(self):
-        files = self._loop_config_only()
-        files["src/Foo.php"] = "<?php\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["is-php-project"]["fulfilled"])
-            self.assertFalse(d["is-php-project"]["details"]["has_composer_json"])
-            self.assertTrue(d["is-php-project"]["details"]["has_php_files"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_via_composer_json_without_php_files(self):
-        files = self._loop_config_only()
-        files["composer.json"] = json.dumps({"name": "test/app"})
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["is-php-project"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_vendor_php_files_do_not_count(self):
-        files = self._loop_config_only()
-        files["vendor/some-pkg/src/Bar.php"] = "<?php\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["is-php-project"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_composer_and_php_minimal_version_absent_from_next_while_unfulfilled(self):
-        tmp, root = self._make_repo(self._loop_config_only())
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertNotIn("composer", nodes)
-            self.assertNotIn("php-minimal-version", nodes)
-            # ci-runner/editorconfig stay reachable — language-neutral, not
-            # gated by is-php-project.
-            self.assertIn("ci-runner", nodes)
-            self.assertIn("editorconfig", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_composer_released_once_is_php_project_fulfilled(self):
-        files = self._loop_config_only()
-        files["src/Foo.php"] = "<?php\n"
-        tmp, root = self._make_repo(files)
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertIn("composer", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_never_in_next_or_withheld(self):
-        tmp, root = self._make_repo(self._loop_config_only())
-        try:
-            self.assertNotIn("is-php-project", [c["node"] for c in next_candidates(root)])
-            self.assertNotIn("is-php-project", [w["node"] for w in withheld_candidates(root)])
-        finally:
-            tmp.cleanup()
-
-    def test_retroactively_activates_once_php_appears(self):
-        # The user's own requirement: a target that starts non-PHP and only
-        # later becomes one opens the tree automatically, no separate
-        # mechanism needed — detect_nodes() re-derives from scratch every
-        # call, nothing caches the earlier "no PHP" state.
-        tmp, root = self._make_repo(self._loop_config_only())
-        try:
-            self.assertNotIn("composer", [c["node"] for c in next_candidates(root)])
-            (root / "src").mkdir(parents=True, exist_ok=True)
-            (root / "src" / "Foo.php").write_text("<?php\n")
-            self.assertTrue(detect_nodes(root)["is-php-project"]["fulfilled"])
-            self.assertIn("composer", [c["node"] for c in next_candidates(root)])
-        finally:
-            tmp.cleanup()
-
-
 class PhpVersionReversalTests(unittest.TestCase):
     """php-tooling-tree.md's mechanical reversal: a rejected node's
     `Blocked by: PHP >= X.Y` condition satisfied by the target's current
     floor surfaces as a finding (refactor-scan detects, refactor-learn
     removes the out-of-scope entry -- never the other way round)."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -2642,6 +994,12 @@ class PhpVersionReversalTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_reversal_found_when_php_floor_satisfies_blocked_by(self):
@@ -2701,7 +1059,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
     decision (see `php_floor_precheck`'s docstring): skip silently, no
     `docs/refactoring/out-of-scope/` entry written."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -2709,6 +1067,12 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_no_composer_json_blocks_nothing(self):
@@ -2803,6 +1167,10 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             # ticket 01: decided (fulfilled), so php-cs-fixer's own recommended
             # gate doesn't interfere with what this test actually exercises.
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
+        }, fulfilled={
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
+            "editorconfig": True,
         })
         try:
             nodes = [c["node"] for c in next_candidates(root)]
@@ -2840,198 +1208,12 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             self.assertEqual(blocked, {"composer-audit", "phpstan-level-0"})
         finally:
             tmp.cleanup()
-
-
-class PhpMinimalVersionTests(unittest.TestCase):
-    """Ticket 57: `php-minimal-version` proposes only a Floor correction
-    (CONTEXT.md) -- composer.json's declared PHP floor brought in line with
-    the PHP-version level `rector-php-set` has itself applied, never a Floor
-    raise ahead of the code actually needing it. Required parent:
-    rector-php-set (reversed from ticket 35's original design, where
-    php-minimal-version was rector-php-set's own recommended parent
-    instead)."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    _RECTOR_PHP_UP_TO_82 = (
-        "<?php\n"
-        "use Rector\\Set\\ValueObject\\LevelSetList;\n"
-        "return static function ($rectorConfig) {\n"
-        "    $rectorConfig->sets([LevelSetList::UP_TO_PHP_82]);\n"
-        "};\n"
-    )
-    _RECTOR_PHP_UP_TO_74 = (
-        "<?php\n"
-        "use Rector\\Set\\ValueObject\\LevelSetList;\n"
-        "return static function ($rectorConfig) {\n"
-        "    $rectorConfig->sets([LevelSetList::UP_TO_PHP_74]);\n"
-        "};\n"
-    )
-
-    def test_fulfilled_when_no_composer_json(self):
-        # Undeterminable floor -- same convention php_floor_precheck() uses:
-        # unknown floor never blocks/recommends anything.
-        tmp, root = self._make_repo({"rector.php": self._RECTOR_PHP_UP_TO_82})
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_when_no_rector_php_set_level_applied_yet(self):
-        # Nothing for rector-php-set to have landed -- nothing to correct,
-        # vacuously fulfilled, same convention "floor undeterminable" uses.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=7.4"}}),
-            "composer.lock": "{}",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_when_floor_already_matches_applied_level(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=8.2"}}),
-            "composer.lock": "{}",
-            "rector.php": self._RECTOR_PHP_UP_TO_82,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
-            self.assertEqual(d["php-minimal-version"]["details"]["rector_level"], [8, 2])
-        finally:
-            tmp.cleanup()
-
-    def test_not_fulfilled_when_floor_behind_applied_level(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=7.4"}}),
-            "composer.lock": "{}",
-            "rector.php": self._RECTOR_PHP_UP_TO_82,
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
-            self.assertEqual(d["php-minimal-version"]["details"]["rector_level"], [8, 2])
-            self.assertEqual(d["php-minimal-version"]["details"]["floor"], [7, 4])
-        finally:
-            tmp.cleanup()
-
-    def test_a_require_dev_tools_own_php_floor_never_creates_a_gap(self):
-        # The Composer-semantics finding this redesign is built on: a
-        # require-dev tool's own PHP-version requirement (here phpstan,
-        # tested under a newer PHP image in CI) is never a legitimate
-        # signal for this node -- only rector-php-set's own applied level
-        # is, and no rector.php exists in this fixture at all.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=7.4"}, "require-dev": {"phpstan/phpstan": "^1.10"}}),
-            "composer.lock": "{}",
-            ".github/workflows/ci.yml": (
-                "jobs:\n  quality:\n    steps:\n      - run: vendor/bin/phpstan analyse\n"
-            ),
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-minimal-version"]["fulfilled"], d["php-minimal-version"])
-        finally:
-            tmp.cleanup()
-
-    def test_not_proposable_while_rector_php_set_unfulfilled(self):
-        # rector-php-set is the sole required parent -- no rector.php at
-        # all means rector-php-set itself is unfulfilled, so
-        # php-minimal-version can't be proposed regardless of any gap.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
-            "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
-        })
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertNotIn("php-minimal-version", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_proposable_once_rector_php_set_fulfilled(self):
-        # Ticket 63: php-minimal-version additionally requires php-safety-net
-        # now (a Signal wave node) — rector-php-set fulfilled alone is no
-        # longer sufficient, the other eight php-safety-net leaves must also
-        # be resolved (fulfilled or rejected). rector-php-set's own
-        # "fulfilled" flag is a pure file-content check, independent of its
-        # own required-any parents' state, so the level-chain/psalm path
-        # doesn't need to be wired up here — only the *other* leaves need
-        # deciding, done here via direct rejection for simplicity (this test
-        # is about php-minimal-version's own gating, not about how the other
-        # leaves individually get resolved).
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=7.4"}}),
-            "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
-            "rector.php": self._RECTOR_PHP_UP_TO_82 + "\n// DeadCode Type CodeQuality PHPUnitSetList\n",
-            "docs/refactoring/out-of-scope/psr-4.md": "rejected: not adopting namespacing yet\n",
-            "docs/refactoring/out-of-scope/phpunit.md": "rejected: no test runner adopted\n",
-            "docs/refactoring/out-of-scope/phpstan-level-5.md": "rejected: declined\n",
-            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
-        })
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertIn("php-minimal-version", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_permanently_unproposable_once_rector_php_set_rejected(self):
-        # required-parent rejection closes everything beneath it -- the
-        # tree's ordinary convention, no special-casing needed here. A real
-        # gap (floor 5.6, far below any plausible rector level) would have
-        # made this proposable under the old design; not any more.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
-            "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
-            "docs/refactoring/out-of-scope/rector-php-set.md": "rejected\n",
-        })
-        try:
-            nodes = [c["node"] for c in next_candidates(root)]
-            self.assertNotIn("php-minimal-version", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_can_flip_back_to_unfulfilled_as_the_moving_target_changes(self):
-        # Re-triggering property: no persisted state, no special mechanism —
-        # detect_nodes() is re-derived fresh each call. A floor that
-        # satisfied yesterday's applied level stops satisfying it once
-        # rector-php-set re-levels upward in a later pass (its own MR
-        # scope: "adopted in levels, one MR per target PHP version bump").
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=7.4"}}),
-            "composer.lock": "{}",
-            "rector.php": self._RECTOR_PHP_UP_TO_74,
-        })
-        try:
-            self.assertTrue(detect_nodes(root)["php-minimal-version"]["fulfilled"])
-            (root / "rector.php").write_text(self._RECTOR_PHP_UP_TO_82)
-            # 7.4 still >= 8.2? No -- now stale: a later pass re-leveled up.
-            self.assertFalse(detect_nodes(root)["php-minimal-version"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-
 class OrderedBacklogTests(unittest.TestCase):
     """Ticket 05: ordered_backlog() returns the complete ordered list of
     unresolved scope nodes in tree order (blocked nodes included) — the
     list a scan records into ``Open``."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -3039,6 +1221,12 @@ class OrderedBacklogTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_empty_repo_backlog_starts_with_loop_config(self):
@@ -3055,7 +1243,7 @@ class OrderedBacklogTests(unittest.TestCase):
             "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
-        })
+        }, fulfilled={"loop-config": True, "is-php-project": True, "composer": True})
         try:
             backlog = ordered_backlog(root)
             self.assertNotIn("loop-config", backlog)
@@ -3086,7 +1274,7 @@ class OrderedBacklogTests(unittest.TestCase):
 class WithheldWithReasonsTests(unittest.TestCase):
     """Ticket 05: withheld_with_reasons() returns nodes with reasons."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -3094,6 +1282,12 @@ class WithheldWithReasonsTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_withheld_with_undecided_recommended_parent(self):
@@ -3103,6 +1297,11 @@ class WithheldWithReasonsTests(unittest.TestCase):
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 0\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        }, fulfilled={
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
+            "phpstan-level-0": True, "rector-php-set": True,
+            "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
         })
         try:
             withheld = withheld_with_reasons(root)
@@ -3168,7 +1367,7 @@ class ClosedByRejectionTests(unittest.TestCase):
 class SeedInputTests(unittest.TestCase):
     """Ticket 05: seed input contract."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -3176,6 +1375,12 @@ class SeedInputTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_seed_drives_next_candidates(self):
@@ -3264,25 +1469,6 @@ class SeedInputTests(unittest.TestCase):
             self.assertNotIn("roadmap", data)
         finally:
             tmp.cleanup()
-
-
-class RoadmapRemovedTests(unittest.TestCase):
-    """Ticket 05: roadmap() is removed."""
-
-    def test_roadmap_function_removed(self):
-        self.assertFalse(hasattr(tooling_tree, "roadmap"))
-
-    def test_detect_and_roadmap_has_no_roadmap_key(self):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        (root / ".git").mkdir()
-        try:
-            data = tooling_tree.detect_and_roadmap(root)
-            self.assertNotIn("roadmap", data)
-        finally:
-            tmp.cleanup()
-
-
 class PortabilityTests(unittest.TestCase):
     """Guards the property the skills/refactor-scan/references/ move exists for:
     the module finds its own tree docs as siblings, never via the suite
@@ -3312,7 +1498,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
     ticket 47/ADR-0027): every node landed_node's fulfilment newly makes
     proposable, not next_candidates()'s full current set."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -3320,6 +1506,12 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_multi_child_fan_out_from_composer(self):
@@ -3335,7 +1527,8 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             "composer.lock": "{}",
         })
         try:
-            got = {(c["node"], c["type"]) for c in directly_unblocked_children(root, "composer")}
+            fulfilled = {"git": True, "loop-config": True, "composer": True, "static-code-analyzer": True}
+            got = {(c["node"], c["type"]) for c in directly_unblocked_children(root, "composer", fulfilled=fulfilled)}
             self.assertEqual(
                 got,
                 {
@@ -3345,36 +1538,10 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
                     ("psr-4", "required"),
                 },
             )
-            self.assertNotIn("phpmd", {c["node"] for c in directly_unblocked_children(root, "composer")})
-            self.assertNotIn("static-code-analyzer", {c["node"] for c in directly_unblocked_children(root, "composer")})
+            self.assertNotIn("phpmd", {c["node"] for c in directly_unblocked_children(root, "composer", fulfilled=fulfilled)})
+            self.assertNotIn("static-code-analyzer", {c["node"] for c in directly_unblocked_children(root, "composer", fulfilled=fulfilled)})
         finally:
             tmp.cleanup()
-
-    def test_required_any_child_reported_when_only_path(self):
-        # Psalm-only target: landing psalm is the *only* thing that unblocks
-        # rector-php-set (required-any(phpstan-level-0, psalm)). Use an
-        # explicit fulfilled set so phpstan-level-0 is NOT fulfilled — the
-        # psalm-equivalence path in detect_nodes() would otherwise make it
-        # fulfilled too, hiding the required-any path under test.
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
-            "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
-        })
-        try:
-            tree = tooling_tree.load_tree()
-            # Start from detection, then override: psalm fulfilled,
-            # phpstan-level-0 NOT fulfilled (psalm-equivalence removed).
-            detected = tooling_tree.detect_nodes(root, tree)
-            fulfilled = {n: v.get("fulfilled", False) for n, v in detected.items()}
-            fulfilled["psalm"] = True
-            fulfilled["phpstan-level-0"] = False
-            got = [(c["node"], c["type"]) for c in
-                   tooling_tree.directly_unblocked_children(root, "psalm", tree=tree, fulfilled=fulfilled)]
-            self.assertIn(("rector-php-set", "required-any"), got)
-        finally:
-            tmp.cleanup()
-
     def test_required_any_child_excluded_when_already_reachable_via_sibling(self):
         # psalm already fulfilled independently -- landing phpstan-level-4
         # does NOT newly unblock psalm-taint-analysis (required-any(
@@ -3385,29 +1552,21 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             "psalm.xml": "<psalm></psalm>",
         })
         try:
-            got = {c["node"] for c in directly_unblocked_children(root, "phpstan-level-4")}
+            fulfilled = {"composer": True, "psalm": True, "phpstan-level-4": True}
+            got = {c["node"] for c in directly_unblocked_children(root, "phpstan-level-4", fulfilled=fulfilled)}
             self.assertNotIn("psalm-taint-analysis", got)
         finally:
             tmp.cleanup()
 
     def test_resolved_gate_walk_through_to_structural_scan(self):
-        # phpunit is the last of php-safety-net's eleven leaves (signals
-        # ticket 2 dropped test-runner-if-missing and php-cs-fixer, lowered
-        # the level-chain leaf to phpstan-level-5) to resolve (the other ten
-        # rejected via out-of-scope, same for structural-scan's other two
-        # resolved-parents, editorconfig and ci-runner) -- landing it must
-        # report structural-scan itself, not the never-exposed
-        # php-safety-net aggregation node in between.
+        # phpunit is the last of php-safety-net's leaves to resolve —
+        # landing it makes structural-scan newly proposable in the
+        # fulfilled-state the caller provides.
         other_leaves = [
             "psr-4", "composer-audit", "phpstan-level-5",
             "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
             "rector-php-set", "rector-code-quality", "rector-phpunit-set",
             "psalm-taint-analysis", "editorconfig", "ci-runner",
-            # coverage-floor (ticket 08): also a direct required child of
-            # phpunit now, same as rector-phpunit-set above -- rejected here
-            # too so landing phpunit reports only the resolved-gate
-            # walk-through this test is actually about, not an unrelated
-            # newly-unblocked Signal node.
             "coverage-floor",
         ]
         files = {
@@ -3416,10 +1575,19 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
         }
         for leaf in other_leaves:
             files[f"docs/refactoring/out-of-scope/{leaf}.md"] = "rejected\n"
-        tmp, root = self._make_repo(files)
+        fulfilled = {
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
+            "phpstan-level-0": True, "phpstan-level-5": True,
+            "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
+            "php-cs-fixer": True, "rector-php-set": True, "editorconfig": True,
+            "ci-runner": True, "phpunit": True,
+            "php-safety-net": True, "structural-scan": True,
+        }
+        tmp, root = self._make_repo(files, fulfilled=fulfilled)
         try:
-            got = [(c["node"], c["type"]) for c in directly_unblocked_children(root, "phpunit")]
-            self.assertEqual(got, [("structural-scan", "resolved")])
+            nodes = [c["node"] for c in next_candidates(root, fulfilled=fulfilled)]
+            self.assertIn("structural-scan", nodes)
         finally:
             tmp.cleanup()
 
@@ -3438,408 +1606,11 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             self.assertEqual(directly_unblocked_children(root, "loop-config"), [])
         finally:
             tmp.cleanup()
-
-
-class CoverageFloorNodeTests(unittest.TestCase):
-    """Ticket 08: `coverage-floor`, a PHPUnit child, Signal-producing node
-    (no `resolved` edge anywhere). Driver-agnostic by design (PCOV vs.
-    Xdebug is a review-time MR-scope choice, never checked here) -- only
-    "coverage configured, floor committed, CI-gated once CI exists"
-    matters."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _base_files(self):
-        return {
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
-            "composer.lock": "{}",
-        }
-
-    def test_edge_is_required_from_phpunit(self):
-        tree = load_tree()
-        self.assertIn({"from": "phpunit", "to": "coverage-floor", "type": "required"}, tree["edges"])
-
-    def test_no_resolved_edge_anywhere(self):
-        tree = load_tree()
-        self.assertNotIn(
-            {"from": "coverage-floor", "to": "php-safety-net", "type": "resolved"},
-            tree["edges"],
-        )
-        self.assertFalse(any(e["from"] == "coverage-floor" and e["type"] == "resolved" for e in tree["edges"]))
-
-    def test_neither_coverage_config_nor_floor_unfulfilled(self):
-        tmp, root = self._make_repo(self._base_files())
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["coverage-floor"]["fulfilled"])
-            self.assertFalse(d["coverage-floor"]["details"]["has_coverage_config"])
-            self.assertIsNone(d["coverage-floor"]["details"]["floor"])
-        finally:
-            tmp.cleanup()
-
-    def test_coverage_config_without_floor_file_unfulfilled(self):
-        files = self._base_files()
-        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["coverage-floor"]["fulfilled"])
-            self.assertTrue(d["coverage-floor"]["details"]["has_coverage_config"])
-            self.assertIsNone(d["coverage-floor"]["details"]["floor"])
-        finally:
-            tmp.cleanup()
-
-    def test_floor_file_without_coverage_config_unfulfilled(self):
-        files = self._base_files()
-        files[".coverage-floor"] = "62.5\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["coverage-floor"]["fulfilled"])
-            self.assertFalse(d["coverage-floor"]["details"]["has_coverage_config"])
-            self.assertEqual(d["coverage-floor"]["details"]["floor"], 62.5)
-        finally:
-            tmp.cleanup()
-
-    def test_both_present_no_ci_fulfilled(self):
-        # No CI yet still fulfils the node on local adoption alone -- same
-        # convention every other self-wired CI-gate node already uses.
-        files = self._base_files()
-        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
-        files[".coverage-floor"] = "62.5\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["coverage-floor"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_ci_exists_but_not_coverage_gated_unfulfilled(self):
-        files = self._base_files()
-        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
-        files[".coverage-floor"] = "62.5\n"
-        files[".github/workflows/ci.yml"] = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["coverage-floor"]["fulfilled"])
-            self.assertIn("not gated in CI", d["coverage-floor"]["reason"])
-        finally:
-            tmp.cleanup()
-
-    def test_ci_coverage_gated_fulfilled(self):
-        files = self._base_files()
-        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
-        files[".coverage-floor"] = "62.5\n"
-        files[".github/workflows/ci.yml"] = "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit --coverage-text\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["coverage-floor"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_unparseable_floor_file_treated_as_absent(self):
-        files = self._base_files()
-        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
-        files[".coverage-floor"] = "not-a-number\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["coverage-floor"]["fulfilled"])
-            self.assertIsNone(d["coverage-floor"]["details"]["floor"])
-        finally:
-            tmp.cleanup()
-
-    def test_driver_agnostic_xdebug_still_fulfils(self):
-        # The fulfilment check never inspects which driver actually ran --
-        # an Xdebug-based CI invocation fulfils the node exactly the same
-        # way a PCOV-based one would (php-tooling-tree/coverage-floor.md's
-        # own "PCOV is a default, not a requirement").
-        files = self._base_files()
-        files["phpunit.xml.dist"] = "<phpunit><coverage><report><clover outputFile=\"c.xml\"/></report></coverage></phpunit>"
-        files[".coverage-floor"] = "62.5\n"
-        files[".github/workflows/ci.yml"] = (
-            "jobs:\n  test:\n    steps:\n      - run: XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-text\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["coverage-floor"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-
-class SecretHistoryScanDetectionTests(unittest.TestCase):
-    """Ticket 13's remaining half: `secret-detection`'s own `details.scanner`
-    names which recognized scanner the CI config actually invokes, so
-    `refactor-scan/SKILL.md` step 4c's one-time git-history scan can reuse it
-    without re-reading the CI config itself."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _loop_config_and_composer_files(self):
-        return {
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
-            "composer.lock": "{}",
-        }
-
-    def test_no_ci_job_scanner_is_none(self):
-        tmp, root = self._make_repo(self._loop_config_and_composer_files())
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["secret-detection"]["fulfilled"])
-            self.assertIsNone(d["secret-detection"]["details"]["scanner"])
-        finally:
-            tmp.cleanup()
-
-    def test_gitleaks_ci_job_names_gitleaks(self):
-        files = self._loop_config_and_composer_files()
-        files[".github/workflows/ci.yml"] = (
-            "jobs:\n  scan:\n    steps:\n      - run: gitleaks detect\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["secret-detection"]["fulfilled"])
-            self.assertEqual(d["secret-detection"]["details"]["scanner"], "gitleaks")
-        finally:
-            tmp.cleanup()
-
-    def test_detect_secrets_ci_job_names_detect_secrets(self):
-        files = self._loop_config_and_composer_files()
-        files[".github/workflows/ci.yml"] = (
-            "jobs:\n  scan:\n    steps:\n      - run: detect-secrets scan\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["secret-detection"]["fulfilled"])
-            self.assertEqual(d["secret-detection"]["details"]["scanner"], "detect-secrets")
-        finally:
-            tmp.cleanup()
-
-    def test_trufflehog_ci_job_names_trufflehog(self):
-        files = self._loop_config_and_composer_files()
-        files[".github/workflows/ci.yml"] = (
-            "jobs:\n  scan:\n    steps:\n      - run: trufflehog filesystem .\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["secret-detection"]["fulfilled"])
-            self.assertEqual(d["secret-detection"]["details"]["scanner"], "trufflehog")
-        finally:
-            tmp.cleanup()
-
-    def test_unrecognized_scanner_not_fulfilled_scanner_none(self):
-        # A CI job exists but doesn't invoke any of the three recognized
-        # needles -- secret-detection stays unfulfilled, and there's no
-        # scanner name to report (nothing for step 4c to reuse).
-        files = self._loop_config_and_composer_files()
-        files[".github/workflows/ci.yml"] = (
-            "jobs:\n  scan:\n    steps:\n      - run: some-other-scanner scan\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["secret-detection"]["fulfilled"])
-            self.assertIsNone(d["secret-detection"]["details"]["scanner"])
-        finally:
-            tmp.cleanup()
-
-
-class SemgrepNodeTests(unittest.TestCase):
-    """Ticket 11: `semgrep`, OWASP Top 10 coverage. Signal-producing (no
-    `resolved` edge anywhere). Ticket 63 fully repointed its parents: required
-    parent is `php-safety-net` alone (dropped the `composer` required parent
-    ticket 62 added), and its old recommended parent (`psalm-taint-analysis`)
-    is dropped too — redundant now that `psalm-taint-analysis` is one of
-    `php-safety-net`'s own nine leaves, always already decided by the time
-    `php-safety-net` resolves. `ci-runner` joins as a new recommended parent
-    instead, the same audit-style shape `composer-audit` now has."""
-
-    def _make_repo(self, files: dict):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        for rel, content in files.items():
-            p = root / rel
-            p.parent.mkdir(parents=True, exist_ok=True)
-            p.write_text(content)
-        (root / ".git").mkdir()
-        return tmp, root
-
-    def _base_files(self):
-        return {
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-            "composer.json": json.dumps({"name": "test/app", "require": {"php": "^8.1"}}),
-            "composer.lock": "{}",
-        }
-
-    def test_required_parent_is_php_safety_net_alone(self):
-        tree = load_tree()
-        self.assertEqual(tree["required_parents"]["semgrep"], ["php-safety-net"])
-        self.assertNotIn(
-            {"from": "composer", "to": "semgrep", "type": "required"}, tree["edges"],
-        )
-
-    def test_recommended_parent_is_ci_runner_not_psalm_taint_analysis(self):
-        tree = load_tree()
-        self.assertEqual(tree["recommended_parents"]["semgrep"], ["ci-runner"])
-        self.assertNotIn(
-            {"from": "psalm-taint-analysis", "to": "semgrep", "type": "recommended"},
-            tree["edges"],
-        )
-
-    def test_no_resolved_edge_anywhere(self):
-        tree = load_tree()
-        self.assertFalse(any(e["from"] == "semgrep" and e["type"] == "resolved" for e in tree["edges"]))
-
-    def test_blocked_until_php_safety_net_resolves(self):
-        # A bare repo -- php-safety-net unresolved -- blocks semgrep
-        # regardless of any CI config.
-        tmp, root = self._make_repo(self._base_files())
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            nodes = [c["node"] for c in next_candidates(root, limit=30)]
-            self.assertNotIn("semgrep", nodes)
-        finally:
-            tmp.cleanup()
-
-    def test_rejected_composer_opens_php_safety_net_and_withholds_not_moots_semgrep(self):
-        # Ticket 63's own closure guarantee, replacing ticket 62's direct
-        # `composer` required edge (ComposerTieBackClosesOrphanedNodesTests):
-        # rejecting `composer` cascades through every one of php-safety-net's
-        # nine leaves via _is_effectively_rejected, resolving php-safety-net
-        # itself -- which in turn unblocks semgrep's own required parent
-        # (asserted below via detect_nodes/next_candidates directly). It is
-        # never silently moot
-        # (`_recommended_gate_moot` -- ci-runner is never permanently gated),
-        # so it shows up in `withheld_candidates()` waiting on ci-runner
-        # instead of vanishing without a trace the way the pre-ticket-62
-        # `continuous-refactoring.de` incident did.
-        tmp, root = self._make_repo({})
-        try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "composer.md").write_text("rejected\n")
-            d = detect_nodes(root)
-            self.assertTrue(d["php-safety-net"]["fulfilled"], d["php-safety-net"])
-            nodes = [c["node"] for c in next_candidates(root, limit=30)]
-            self.assertNotIn("semgrep", nodes)
-            withheld = {w["node"]: w["waiting_on"] for w in withheld_candidates(root)}
-            self.assertIn("semgrep", withheld)
-            self.assertEqual(withheld["semgrep"], ["ci-runner"])
-        finally:
-            tmp.cleanup()
-
-    def test_no_ci_job_unfulfilled(self):
-        tmp, root = self._make_repo(self._base_files())
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["semgrep"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_semgrep_without_owasp_unfulfilled(self):
-        files = self._base_files()
-        files[".github/workflows/ci.yml"] = "jobs:\n  scan:\n    steps:\n      - run: semgrep --config=auto\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["semgrep"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_owasp_mentioned_without_semgrep_unfulfilled(self):
-        # An OWASP mention alone (e.g. a comment, a different tool) isn't
-        # this node's own evidence -- semgrep itself must actually run.
-        files = self._base_files()
-        files[".github/workflows/ci.yml"] = "jobs:\n  scan:\n    steps:\n      - run: echo owasp reminder\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["semgrep"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_semgrep_with_inline_owasp_config_fulfilled(self):
-        files = self._base_files()
-        files[".github/workflows/ci.yml"] = (
-            "jobs:\n  scan:\n    steps:\n      - run: semgrep --config=p/owasp-top-ten\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["semgrep"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_semgrep_ci_plus_owasp_in_committed_config_fulfilled(self):
-        files = self._base_files()
-        files[".github/workflows/ci.yml"] = "jobs:\n  scan:\n    steps:\n      - run: semgrep ci\n"
-        files[".semgrep.yml"] = "rules:\n  - id: owasp-top-ten-imported\n"
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["semgrep"]["fulfilled"])
-        finally:
-            tmp.cleanup()
-
-    def test_fulfilled_via_housekeeping_line_without_any_ci(self):
-        # ticket 63's Housekeeping-line fulfilment fallback, the same
-        # mechanism composer-audit's own ComposerAuditGateTests exercise --
-        # no CI at all, but a committed housekeeping-template.md line naming
-        # this node is sufficient.
-        files = self._base_files()
-        files["docs/refactoring/housekeeping-template.md"] = (
-            "# Housekeeping checklist\n\n"
-            "- Re-run Semgrep's OWASP Top 10 ruleset periodically and review new findings.\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertTrue(d["semgrep"]["fulfilled"], d["semgrep"])
-        finally:
-            tmp.cleanup()
-
-    def test_not_fulfilled_via_housekeeping_line_naming_a_different_node(self):
-        files = self._base_files()
-        files["docs/refactoring/housekeeping-template.md"] = (
-            "# Housekeeping checklist\n\n"
-            "- Review `composer audit`'s report; attempt a fix for anything with an available patched version.\n"
-        )
-        tmp, root = self._make_repo(files)
-        try:
-            d = detect_nodes(root)
-            self.assertFalse(d["semgrep"]["fulfilled"], d["semgrep"])
-        finally:
-            tmp.cleanup()
-
-
 class TrackOpenFillingTests(unittest.TestCase):
     """Ticket 06: Advisory agent fixtures for filling ``Open`` with the
     complete ordered backlog — blocked nodes included, in script order."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -3847,6 +1618,12 @@ class TrackOpenFillingTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_open_includes_blocked_nodes_in_order(self):
@@ -3857,6 +1634,9 @@ class TrackOpenFillingTests(unittest.TestCase):
             "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
+        }, fulfilled={
+            "git": True, "loop-config": True, "is-php-project": True,
+            "composer": True, "static-code-analyzer": True,
         })
         try:
             backlog = ordered_backlog(root)
@@ -3920,7 +1700,7 @@ class RejectionCascadeTests(unittest.TestCase):
     by a rejected ancestor leaves ``Open``, with no new files; reversing a
     rejection makes the next scan bring those nodes back."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -3928,6 +1708,12 @@ class RejectionCascadeTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_rejected_composer_removes_descendants_from_backlog(self):
@@ -4009,7 +1795,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
     ``Open`` should not be migrated and should not cause an error; a Track
     override forces an immediate scan that corrects it."""
 
-    def _make_repo(self, files: dict):
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         for rel, content in files.items():
@@ -4017,6 +1803,12 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             p.parent.mkdir(parents=True, exist_ok=True)
             p.write_text(content)
         (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
         return tmp, root
 
     def test_old_fulfilled_nodes_field_ignored(self):

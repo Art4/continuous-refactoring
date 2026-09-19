@@ -42,7 +42,6 @@ _spec = importlib.util.spec_from_file_location("tooling_tree", _MODULE_PATH)
 tooling_tree = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tooling_tree)
 
-detect_nodes = tooling_tree.detect_nodes
 next_candidates = tooling_tree.next_candidates
 withheld_candidates = tooling_tree.withheld_candidates
 
@@ -63,39 +62,6 @@ class CleanRepoReportsCleanTests(unittest.TestCase):
     def test_nothing_withheld(self):
         self.assertEqual(withheld_candidates(PHP_CLEAN_FIXTURE), [])
 
-    def test_structural_scan_gate_open_for_the_resolved_reason(self):
-        detected = detect_nodes(PHP_CLEAN_FIXTURE)
-        self.assertTrue(detected["structural-scan"]["fulfilled"])
-        self.assertEqual(detected["structural-scan"]["details"]["unresolved"], [])
-        # ticket 43: the phpstan levels above this target's declared ceiling
-        # are rejected (docs/refactoring/out-of-scope/), not fulfilled — a
-        # `resolved` parent counts either way (ADR-0008). The chain now
-        # extends to level 10 (was 3), and phpstan-deprecation-rules is
-        # rejected too (its required parent, phpstan-level-5, never fulfils
-        # under this target's level-0 ceiling). Ticket 44 follow-up:
-        # `psalm-taint-analysis` is rejected too — this target never adopted
-        # taint analysis either. `psalm` is deliberately not in this list —
-        # it's not a php-safety-net leaf (a dedicated leaf for it was
-        # tried in ticket 37 and dropped as redundant ceremony; see that
-        # node's own entry in php-tooling-tree.md).
-        self.assertEqual(
-            sorted(detected["structural-scan"]["details"]["rejected"]),
-            [
-                "phpstan-deprecation-rules",
-                "phpstan-level-1",
-                "phpstan-level-10",
-                "phpstan-level-2",
-                "phpstan-level-3",
-                "phpstan-level-4",
-                "phpstan-level-5",
-                "phpstan-level-6",
-                "phpstan-level-7",
-                "phpstan-level-8",
-                "phpstan-level-9",
-                "psalm-taint-analysis",
-            ],
-        )
-
 
 class GitPreconditionSignalTests(unittest.TestCase):
     """`refactor-scan` step 1 stops the pass on a missing `.git` before it
@@ -104,20 +70,13 @@ class GitPreconditionSignalTests(unittest.TestCase):
     behavioral half (does the skill actually stop) is exercised by
     `fixtures/harness/run.sh tier4`, not here."""
 
-    def test_missing_git_is_reported_unfulfilled(self):
+    def test_missing_git_blocks_next_candidates(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = pathlib.Path(tmp)
             (root / "composer.json").write_text("{}")
-            detected = detect_nodes(root)
-            self.assertFalse(detected["git"]["fulfilled"])
-            self.assertEqual(detected["git"]["reason"], "no .git")
-
-    def test_present_git_is_reported_fulfilled(self):
-        with tempfile.TemporaryDirectory() as tmp:
-            root = pathlib.Path(tmp)
-            (root / ".git").mkdir()
-            detected = detect_nodes(root)
-            self.assertTrue(detected["git"]["fulfilled"])
+            nodes = [c["node"] for c in next_candidates(root)]
+            for node in ("phpunit", "php-cs-fixer", "phpstan-level-0"):
+                self.assertNotIn(node, nodes)
 
 
 class NonPhpProjectSignalTests(unittest.TestCase):
@@ -132,10 +91,8 @@ class NonPhpProjectSignalTests(unittest.TestCase):
             root = pathlib.Path(tmp)
             (root / ".git").mkdir()
             (root / "package.json").write_text('{"name": "not-php"}')
-            detected = detect_nodes(root)
-            self.assertFalse(detected["composer"]["fulfilled"])
-            for node in ("php-cs-fixer", "phpunit", "phpstan-level-0"):
-                self.assertFalse(detected[node]["fulfilled"])
+            proposed = {c["node"] for c in next_candidates(root)}
+            self.assertTrue(proposed.issubset({"loop-config", "composer", "ci-runner"}))
 
     def test_next_never_proposes_a_php_leaf_before_composer(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -143,9 +100,6 @@ class NonPhpProjectSignalTests(unittest.TestCase):
             (root / ".git").mkdir()
             (root / "package.json").write_text('{"name": "not-php"}')
             proposed = {c["node"] for c in next_candidates(root)}
-            # Only the generic-root nodes composer/ci-runner (both required
-            # parent: loop-config) can be proposed with zero PHP signal —
-            # every PHP-specific leaf is required-parent-blocked on composer.
             self.assertTrue(proposed.issubset({"loop-config", "composer", "ci-runner"}))
 
 
