@@ -9,7 +9,9 @@ guardrails-track.md`, each file's own "Is the Track due this pass?" section; and
 now-retired standalone `continuous-housekeeping` skill's own tracker-history due-check, replaced by
 `skills/continuous-refactoring/references/housekeeping-track.md`'s own same-named section) — that check
 answered the question alone because, when it was written, no other Track existed yet to compete with.
-This file is the real competition those sections deferred.
+This file is the real competition those sections deferred — plus the one-time exception (below) that
+overrides that competition's outcome for exactly three turns per repo, right after Safety Net's
+foundation is first fully in place.
 
 ## Which Tracks compete
 
@@ -27,9 +29,68 @@ A Track with **no bookkeeping section at all yet** (never run) is treated as max
 always wins its own ratio comparison, the same "absence means never run, not nothing found" rule
 `refactoring-bookkeeping.md` already documents for each Track section.
 
+## One-time exception
+
+Checked first, every pass, **before** Eligibility/Selection below ever run — a target that just finished
+its Safety Net foundation gets one dedicated turn each for Investigation, then Guardrails, then
+Housekeeping, in that order, before ordinary ratio/tie-break selection gets a vote at all (`CONTEXT.md`'s
+**Track** entry: "one deliberate exception, per target, one time only"). Only a manual override (below)
+outranks this check; nothing else does.
+
+**Precondition, all three turns:** `## Safety Net` exists and its `Open` is currently empty. Absent
+either half of that — the section doesn't exist yet, or `Open` is still non-empty — this whole section
+is skipped this pass and Eligibility/Selection runs unmodified (a non-empty Safety Net `Open` already
+forces Safety Net's own selection anyway, via the ordinary Eligibility rule below — there is no case
+where skipping this check here loses ground to Safety Net's own in-flight work).
+
+With that precondition met, check the following three, in order, and stop at the first match:
+
+1. **`## Investigation` section absent, or present with `Pending candidates` currently naming an
+   issue (not `none`)** → select **Investigation**, this pass, overriding ratio/tie-break entirely. The
+   `Pending candidates` half of this check is load-bearing, not redundant with "section absent": per
+   `skills/refactor-learn/references/investigation-write.md`, `## Investigation`'s `Last scan` is written
+   the moment the Track's *scan* step runs — the very first pass of this turn — long before its one
+   candidate is actually delivered (design → implement → learn can each take a further pass).
+   Investigation carries no `Open` list of its own to lean on the way Guardrails/Safety Net do for this
+   same "stay selected until done" job, so this check reads `Pending candidates` instead — the existing
+   field that already tracks exactly this one in-flight candidate
+   (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`'s own `Pending candidates`
+   row) — keeping Investigation force-selected on every pass until it clears, matching "one candidate,
+   fully delivered," not just proposed.
+2. Else, **`## Guardrails` section absent** → select **Guardrails**, this pass, overriding ratio/
+   tie-break. No `Pending candidates`-style follow-up check is needed here: the instant this turn's scan
+   populates `## Guardrails`' own `Open`, the ordinary Eligibility rule below (non-empty `Open` ⇒ that
+   Track's entries get worked, not rescanned) already keeps Guardrails selected on its own, every
+   subsequent pass, for as long as it takes to clear — the same mechanism already built for ordinary
+   scheduling, reused here rather than duplicated.
+3. Else, **`## Housekeeping` section absent** → select **Housekeeping**, this pass, overriding ratio/
+   tie-break. Housekeeping's entire cycle — reconcile, open this cycle's issue, work the checklist,
+   quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 0c performs
+   (`skills/continuous-refactoring/references/housekeeping-track.md`), so — unlike Investigation's own
+   turn above — there is no multi-pass in-flight state to keep re-selecting across; the section exists
+   with `Last scan` written by the time that same pass's closing call finishes.
+4. Else (all three sections present, and `## Investigation` carries no in-flight `Pending candidates`)
+   → this exception is permanently done for this repo. Every later pass — including a later, ordinary
+   Safety Net rescan (`Cadence: 90`) whose own `Open` goes non-empty then empty again — runs
+   Eligibility/Selection below unmodified, forever. This is what makes the exception fire **exactly
+   once**: the trigger above never reads Safety Net's `Open` transition itself (this file has no history
+   to diff against, only the current `bookkeeping.md` snapshot — see the note below), only each of
+   Investigation's/Guardrails'/Housekeeping's own permanent, one-way "have I ever run" state, which the
+   suite already keeps as ordinary staleness bookkeeping and never clears. Reusing it here needs no new
+   stored flag, and each of the three conditions above can only ever be true once per Track, per repo.
+
+**What this can't distinguish, by construction:** with no per-pass history file to diff against — only
+`bookkeeping.md`'s current snapshot — this check cannot tell "Safety Net's `Open` just emptied for the
+first time" apart from "Safety Net's `Open` has simply always been empty" (a trivial tree with nothing to
+propose on its very first scan). Both look identical in a snapshot, and both are treated the same way:
+if Investigation/Guardrails/Housekeeping have never run yet, this exception still fires. This matches its
+own spirit either way — a repo with no residual Safety Net work in flight is exactly the state it exists
+to react to, regardless of how it got there.
+
 ## Eligibility
 
-A Track only enters ratio comparison when it is both **due** and **eligible** this pass:
+Reached only once the one-time exception (above) didn't apply this pass. A Track only enters
+ratio comparison when it is both **due** and **eligible** this pass:
 
 - **Due** — the section is absent (never run, see above); or
   `overdue_ratio(track) = (today − Last scan) / Cadence >= 1`; or the Track's own `Cadence` carries no
@@ -88,7 +149,9 @@ added that, unlike Investigation, genuinely can go both not-due and not-eligible
 ## Manual override
 
 The human invoking this pass may name a specific Track directly instead of letting the ratio/tie-break
-computation above run at all — this pass runs that named Track's own process unconditionally. The
+computation above run at all — this pass runs that named Track's own process unconditionally, bypassing
+the one-time exception (above) exactly the same way it bypasses ordinary Eligibility/Selection; naming a
+Track is the one thing that outranks the one-time exception. The
 `Open`-non-empty eligibility rule still applies to a manually-named Track exactly as it would to one the
 scheduler picked itself: naming Safety Net while its `Open` is non-empty still means working that `Open`
 entry, never a fresh rescan. One shared invocation surface across all four Track names — naming Safety

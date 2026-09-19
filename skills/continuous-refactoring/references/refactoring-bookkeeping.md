@@ -93,7 +93,9 @@ remains its own mandatory human interview, `CONTEXT.md`'s **Onboarding** entry).
 `skills/refactor-learn/references/safety-net-write.md` (`refactor-learn`'s own write step),
 `skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan`/`Open` to decide whether this Track even runs this
-pass, competing against every other currently-wired Track).
+pass, competing against every other currently-wired Track; this section's `Open` field is also what that
+file's own "One-time exception" reads to decide whether Investigation/Guardrails/Housekeeping each still
+owe their one turn — `Open` currently empty is that check's entire precondition).
 
 ```markdown
 ## Safety Net
@@ -215,7 +217,11 @@ already did before this section existed). Full read/write mechanics:
 `skills/refactor-learn/references/investigation-write.md` (`refactor-learn`'s own write step),
 `skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan` the same way it reads `## Safety Net`'s/`##
-Guardrails`'s own, with one difference, next).
+Guardrails`'s own, with one difference, next; that file's own "One-time exception" also reads whether
+this section exists at all, and, once it does, whether the top-level `Pending candidates` field still
+names an issue — the load-bearing signal for "Investigation's one candidate from that exception hasn't
+been fully delivered yet," since this section's own `Last scan` gets written on that turn's very first
+pass, well before design/implement/learn actually finish it).
 
 ```markdown
 ## Investigation
