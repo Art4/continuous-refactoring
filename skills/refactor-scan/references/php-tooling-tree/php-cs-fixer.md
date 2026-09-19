@@ -5,7 +5,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
 - **Name:** PHP CS Fixer
 - **Tool:** php-cs-fixer
 - **Purpose:** automated code style so later Rector output lands styled.
-- **Fulfilment check:** dev dependency installed, config committed, runnable locally with zero reported diffs.
+- **Fulfilment check:** dev dependency installed (`friendsofphp/php-cs-fixer` or `php-cs-fixer/php-cs-fixer`), config committed (`.php-cs-fixer.php` or `.php-cs-fixer.dist.php`), runnable locally with zero reported diffs.
 - **MR scope:** dependency + config + one formatting pass.
 - **Recommended parent:** `editorconfig` — settle the target's most basic formatting conventions
   (indentation, charset, line endings) before this node introduces language-specific style rules. This

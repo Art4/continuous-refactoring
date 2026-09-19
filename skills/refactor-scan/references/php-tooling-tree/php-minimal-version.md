@@ -17,7 +17,9 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   image" is ever a legitimate signal here, independent of the breaking-change question.
 - **Fulfilment check:** `composer.json`'s declared PHP floor (`_current_php_floor` — `config.platform.php`
   if pinned, else `require.php`'s lower bound) is at least the PHP-version level `rector-php-set`
-  (`rector.md`) has itself applied. No level applied yet, or floor unknown (no `composer.json`, or
+  (`rector.md`) has itself applied. The applied level is read from Rector's config at the repo root
+  (`rector.php` or `rector.neon`); the specific constant is `LevelSetList::UP_TO_PHP_XY` (e.g.
+  `UP_TO_PHP_82` → PHP 8.2). No level applied yet, or floor unknown (no `composer.json`, or
   neither `require.php` nor `config.platform.php` parses) — both count as fulfilled: nothing to
   correct in either case, same "unknown floor blocks nothing" convention `php_floor_precheck()` itself
   uses.
