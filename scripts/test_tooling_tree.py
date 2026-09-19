@@ -275,11 +275,16 @@ class LoadTreeTests(unittest.TestCase):
         )
         self.assertEqual(
             set(tree["required_parents"]["phpstan-level-6"]),
-            {"phpstan-level-5", "php-safety-net"},
+            {"phpstan-level-5", "php-safety-net", "phpstan-baseline-empty"},
         )
         # Levels 7-10 need no edge of their own -- they inherit the wait
         # transitively through level 6's own required-parent chain.
-        self.assertEqual(tree["required_parents"]["phpstan-level-7"], ["phpstan-level-6"])
+        # They do carry phpstan-baseline-empty as a direct required parent
+        # (the baseline gate applies to every level independently).
+        self.assertEqual(
+            set(tree["required_parents"]["phpstan-level-7"]),
+            {"phpstan-level-6", "phpstan-baseline-empty"},
+        )
         self.assertNotIn("php-safety-net", tree["required_parents"]["phpstan-level-7"])
 
     def test_ticket_63_phpstan_deprecation_rules_additive_signal_wave(self):

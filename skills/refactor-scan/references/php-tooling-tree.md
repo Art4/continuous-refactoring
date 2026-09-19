@@ -17,10 +17,13 @@ graph TD
     unit[phpunit]
     cov[coverage-floor]
     audit[composer-audit]
+    grd[has-real-dependency]
     tr[test-runner-if-missing]
     sca[static-code-analyzer]
     psalm[psalm]
     p0[phpstan-level-0]
+    pnp[phpstan-not-psalm]
+    pbe[phpstan-baseline-empty]
     p1[phpstan-level-1]
     p2[phpstan-level-2]
     p3[phpstan-level-3]
@@ -55,10 +58,25 @@ graph TD
     comp -->|required| audit
     psn -->|required| audit
     ci -.->|recommended| audit
+    grd -->|required| audit
+    comp -->|required| grd
     comp -->|required| sca
     sca -->|required| p0
     sca -->|required| psalm
+    sca -->|required| pnp
+    sca -->|required| pbe
     p0 -->|required| p1
+    pnp -->|required| p1
+    pbe -->|required| p1
+    pbe -->|required| p2
+    pbe -->|required| p3
+    pbe -->|required| p4
+    pbe -->|required| p5
+    pbe -->|required| p6
+    pbe -->|required| p7
+    pbe -->|required| p8
+    pbe -->|required| p9
+    pbe -->|required| p10
     p1 -->|required| p2
     p2 -->|required| p3
     p3 -->|required| p4
@@ -121,20 +139,35 @@ graph TD
 | `composer` | `composer-audit` | required |
 | `php-safety-net` | `composer-audit` | required |
 | `ci-runner` | `composer-audit` | recommended |
+| `has-real-dependency` | `composer-audit` | required |
+| `composer` | `has-real-dependency` | required |
 | `composer` | `static-code-analyzer` | required |
 | `static-code-analyzer` | `phpstan-level-0` | required |
 | `static-code-analyzer` | `psalm` | required |
+| `static-code-analyzer` | `phpstan-not-psalm` | required |
+| `static-code-analyzer` | `phpstan-baseline-empty` | required |
 | `phpstan-level-0` | `phpstan-level-1` | required |
+| `phpstan-not-psalm` | `phpstan-level-1` | required |
+| `phpstan-baseline-empty` | `phpstan-level-1` | required |
 | `phpstan-level-1` | `phpstan-level-2` | required |
+| `phpstan-baseline-empty` | `phpstan-level-2` | required |
 | `phpstan-level-2` | `phpstan-level-3` | required |
+| `phpstan-baseline-empty` | `phpstan-level-3` | required |
 | `phpstan-level-3` | `phpstan-level-4` | required |
+| `phpstan-baseline-empty` | `phpstan-level-4` | required |
 | `phpstan-level-4` | `phpstan-level-5` | required |
+| `phpstan-baseline-empty` | `phpstan-level-5` | required |
 | `phpstan-level-5` | `phpstan-level-6` | required |
+| `phpstan-baseline-empty` | `phpstan-level-6` | required |
 | `php-safety-net` | `phpstan-level-6` | required |
 | `phpstan-level-6` | `phpstan-level-7` | required |
+| `phpstan-baseline-empty` | `phpstan-level-7` | required |
 | `phpstan-level-7` | `phpstan-level-8` | required |
+| `phpstan-baseline-empty` | `phpstan-level-8` | required |
 | `phpstan-level-8` | `phpstan-level-9` | required |
+| `phpstan-baseline-empty` | `phpstan-level-9` | required |
 | `phpstan-level-9` | `phpstan-level-10` | required |
+| `phpstan-baseline-empty` | `phpstan-level-10` | required |
 | `phpstan-level-5` | `phpstan-deprecation-rules` | required |
 | `php-safety-net` | `phpstan-deprecation-rules` | required |
 | `phpstan-level-0` | `rector-php-set` | required-any |
@@ -303,6 +336,42 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/p
   recognition Pest gets for `phpunit`).
 
 Full definition (Fulfilment check, MR scope, Mutual exclusion, Co-presence): `skills/refactor-scan/references/php-tooling-tree/psalm.md`.
+
+### `has-real-dependency`
+
+- **Name:** Has Real Dependency
+- **Tool:** none — recognition-only gate, the tree's own structure, not a third-party tool.
+- **Purpose:** hold `composer-audit` closed until there's something to audit — `composer audit` has
+  nothing to check without a real (non-platform) dependency.
+- **Fulfilment check:** `composer.json`'s `require` block names at least one real package (platform
+  pseudo-packages — `php`, `hhvm`, `ext-*`, `lib-*`, `composer-plugin-api`, `composer-runtime-api` —
+  don't count). Re-derived fresh every pass. Never proposed as a candidate (`tooling_tree.py`'s
+  `_NEVER_PROPOSED`); the same MR-scope and rejection semantics as `is-php-project` apply.
+
+### `phpstan-baseline-empty`
+
+- **Name:** PHPStan Baseline Empty
+- **Tool:** none — recognition-only gate, the tree's own structure, not a third-party tool.
+- **Purpose:** hold the PHPStan level chain closed while the baseline has unaddressed findings — a
+  non-empty baseline means there are still findings to shrink before the next level raise is useful.
+  A **recurring state**, not one-way delivery: the gate closes again whenever the baseline fills up,
+  and re-opens once it's emptied.
+- **Fulfilment check:** `phpstan-baseline.neon` is absent at repo root **OR** the file exists but
+  `parameters.ignoreErrors` is absent or an empty array (no `message:` entries). Both count as empty.
+  Re-derived fresh every pass. Never proposed as a candidate (`tooling_tree.py`'s `_NEVER_PROPOSED`);
+  the same MR-scope and rejection semantics as `is-php-project` apply.
+
+### `phpstan-not-psalm`
+
+- **Name:** PHPStan, Not Psalm
+- **Tool:** none — recognition-only gate, the tree's own structure, not a third-party tool.
+- **Purpose:** prevent PHPStan level proposals when Psalm is the project's analyzer — proposing a
+  PHPStan level on top of a Psalm-only codebase would reintroduce a second analyser as a new,
+  out-of-scope decision.
+- **Fulfilment check:** `vimeo/psalm` is NOT a dependency, **OR** `phpstan/phpstan` IS a dependency
+  (co-presence means PHPStan wins — see `phpstan.md`'s *Equivalents* section). Re-derived fresh every
+  pass. Never proposed as a candidate (`tooling_tree.py`'s `_NEVER_PROPOSED`); the same MR-scope and
+  rejection semantics as `is-php-project` apply.
 
 ### `phpstan-level-0`
 
