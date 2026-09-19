@@ -26,6 +26,7 @@ Tiers:
     lift        With-skill vs without-skill lift measurement (local-only, advisory — ticket 27)
     decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
     safety-net-track       Safety Net Track behavior regressions (fixtures: php-safety-net-*; local-only, advisory)
+    guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*; local-only, advisory)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
@@ -46,6 +47,7 @@ Examples:
     $(basename "$0") lift php-partial --opencode
     $(basename "$0") decision-gate-bypass php-decision-gate-bypass --opencode
     $(basename "$0") safety-net-track php-safety-net-purpose-recognition --opencode
+    $(basename "$0") guardrails-track php-guardrails-purpose-recognition --opencode
 EOF
     exit 1
 }
@@ -808,6 +810,144 @@ _safety_net_scan_prompt() {
     fi
 }
 
+# Tier 5 — Guardrails Track behavior regressions (ticket 02,
+# skills/refactor-scan/references/guardrails-track.md /
+# skills/refactor-learn/references/guardrails-write.md). Local-only,
+# advisory, non-CI — the Guardrails Track's own counterpart to
+# run_safety_net_track above, reusing the exact same mechanism against a
+# second node set (fixtures/README.md's "guardrails-track" section). Each
+# `php-guardrails-*` fixture exercises one distinct checklist item;
+# dispatches by fixture name to the matching check below. Real, deterministic
+# greps against the fixture's own post-run files where possible, an advisory
+# transcript grep otherwise — same discipline `run_safety_net_track` already
+# uses.
+run_guardrails_track() {
+    log_info "=== Guardrails Track behavior — fixture: $FIXTURE ==="
+    local opencode_bin
+    opencode_bin="$(resolve_opencode_bin)" || return 0
+
+    mkdir -p "$FIXTURE_DST/.agents"
+    ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
+
+    case "$FIXTURE" in
+        php-guardrails-purpose-recognition)
+            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md for step 4. Report, as your final line: FULFILLED (composer-audit's Purpose is already served, not proposed) or PROPOSED (composer-audit should be proposed as a fresh candidate)."
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            if grep -qi "security-check" "$out" 2>/dev/null; then
+                log_pass "Scan output mentions the security-check script — advisory sign the Purpose judgement ran (see $out)"
+            else
+                log_info "Scan output doesn't mention the security-check script — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qiE "^PROPOSED" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports PROPOSED — composer-audit wrongly proposed despite the indirect CI gate — see $out"
+            elif grep -qiE "^FULFILLED" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports FULFILLED — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report FULFILLED/PROPOSED — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        php-guardrails-open-blocks-rescan)
+            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including its step 2 resume check and skills/refactor-scan/references/guardrails-track.md. Report explicitly, as your final line: RESUMED (worked the existing phpmd #5 Open entry only) or RESCANNED (walked the tree fresh and proposed other nodes too)."
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            # Line-anchored, not a bare substring grep: the model's own
+            # reasoning prose legitimately uses the word "rescanned" in a
+            # negative sense elsewhere in the transcript (e.g. "nodes not
+            # rescanned per guardrails-track.md") even on a correct RESUMED
+            # run — only the actual final self-report line counts.
+            if grep -qiE "^RESCANNED" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports RESCANNED — Open may have been rescanned instead of resumed — see $out"
+            elif grep -qiE "^RESUMED" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports RESUMED — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report RESUMED/RESCANNED — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        php-guardrails-first-run)
+            _guardrails_scan_prompt "Run one full pass: /refactor-scan, then /refactor-learn's closing call, against this repo. Follow skills/refactor-scan/SKILL.md and skills/refactor-learn/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md and skills/refactor-learn/references/guardrails-write.md. This target's Guardrails Track nodes are already fully resolved — report explicitly what (if anything) got written to docs/refactoring/bookkeeping.md."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            # refactor-learn/SKILL.md mandates a dedicated bookkeeping
+            # branch, never a direct commit to the checked-out default
+            # branch — this sandbox has no remote, so a correct run leaves
+            # that branch unmerged (opening-a-merge-request.md's "no
+            # forge/remote available" hand-off) rather than folding it back
+            # into the working tree itself. Check the working tree first,
+            # then every local branch, before concluding nothing was
+            # written.
+            local found=""
+            if grep -q "## Guardrails" "$bookkeeping" 2>/dev/null && grep -q "Last scan:" "$bookkeeping" 2>/dev/null; then
+                found="working tree"
+            else
+                local br
+                for br in $(git -C "$FIXTURE_DST" branch --list --format='%(refname:short)' 2>/dev/null); do
+                    if git -C "$FIXTURE_DST" show "$br:docs/refactoring/bookkeeping.md" 2>/dev/null | grep -q "## Guardrails" \
+                        && git -C "$FIXTURE_DST" show "$br:docs/refactoring/bookkeeping.md" 2>/dev/null | grep -q "Last scan:"; then
+                        found="branch $br"
+                        break
+                    fi
+                done
+            fi
+            if [[ -n "$found" ]]; then
+                log_pass "bookkeeping.md carries a ## Guardrails section with Last scan written ($found)"
+            else
+                log_fail "bookkeeping.md missing ## Guardrails / Last scan after the pass, on the working tree or any local branch — see $bookkeeping"
+            fi
+            ;;
+        php-guardrails-rejection-symmetry)
+            _guardrails_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for phpmd (issue .scratch/refactor/issues/05-phpmd.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/guardrails-write.md. Report what you wrote."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local oos="$FIXTURE_DST/docs/refactoring/out-of-scope/phpmd.md"
+            if [[ -f "$oos" ]]; then
+                log_pass "out-of-scope/phpmd.md written"
+            else
+                log_fail "out-of-scope/phpmd.md missing after the run — see $bookkeeping and $FIXTURE_DST/docs/refactoring/out-of-scope/"
+            fi
+            if grep -qE "Out-of-scope:" "$bookkeeping" 2>/dev/null && grep -qE "^- phpmd" <(sed -n '/## Guardrails/,$p' "$bookkeeping" 2>/dev/null | sed -n '/Out-of-scope:/,/^$/p'); then
+                log_pass "## Guardrails's Out-of-scope list names phpmd"
+            else
+                log_info "## Guardrails's Out-of-scope list doesn't clearly name phpmd — check $bookkeeping by hand (advisory, non-blocking)"
+            fi
+            if grep -qE "^- phpmd" <(sed -n '/## Guardrails/,$p' "$bookkeeping" 2>/dev/null | sed -n '/Open:/,/^$/p'); then
+                log_fail "## Guardrails's Open list still names phpmd — should have been removed"
+            else
+                log_pass "## Guardrails's Open list no longer names phpmd"
+            fi
+            ;;
+        php-guardrails-old-schema)
+            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md. This repo's docs/refactoring/bookkeeping.md already has a closed ## Safety Net section but still carries old-style Fulfilled nodes residue and no ## Guardrails section. Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            if grep -q "## Safety Net" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing ## Safety Net section still present, untouched"
+            else
+                log_fail "Pre-existing ## Safety Net section is gone — see $bookkeeping"
+            fi
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
+                log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
+            else
+                log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
+            fi
+            ;;
+        *)
+            log_fail "No guardrails-track check wired for fixture: $FIXTURE"
+            ;;
+    esac
+
+    rm -rf "$FIXTURE_DST/.agents"
+}
+
+# Shared helper for run_guardrails_track's cases above: run one opencode
+# prompt with --auto against $FIXTURE_DST, logging to
+# /tmp/guardrails-track-$FIXTURE-scan.log. Advisory only — never fails the
+# caller. Mirrors _safety_net_scan_prompt exactly, own log prefix so the two
+# Tracks' runs never clobber each other's transcript.
+_guardrails_scan_prompt() {
+    local prompt="$1"
+    local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
+        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    fi
+}
+
 # Main
 main() {
     reset_counters
@@ -840,6 +980,9 @@ main() {
             ;;
         safety-net-track)
             run_safety_net_track
+            ;;
+        guardrails-track)
+            run_guardrails_track
             ;;
         *)
             log_fail "Unknown tier: $TIER"

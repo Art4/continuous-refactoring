@@ -1,0 +1,68 @@
+# Writing the `## Guardrails` section
+
+Part of `refactor-learn/SKILL.md`'s early call (a Guardrails Track candidate's finding) and closing
+call (a Guardrails Track candidate's fresh MR, or the scan itself completing with nothing to propose)
+— reached only once the call's own precondition already holds (a genuine event this pass). Applies
+only to a node in the Guardrails Track's own scope
+(`skills/refactor-scan/references/guardrails-track.md`); every other node keeps writing whichever
+section already governs it (`## Safety Net`, `Fulfilled nodes`/`Pending candidates`/`out-of-scope/`).
+
+The write mechanics below are identical to `skills/refactor-learn/references/safety-net-write.md`'s
+own — this file states the same rules, scoped to `## Guardrails` instead of `## Safety Net`, so both
+sections stay independently readable without cross-referencing each other for the actual mechanics.
+
+## Merge → remove from `Open`
+
+The early call's "Merged" finding, for a slug listed in `## Guardrails`'s `Open`
+(`skills/refactor-scan/references/guardrails-track.md` handed it forward as a resumable candidate) →
+remove that entry from `Open`. Nothing else about the early call's merge handling changes.
+
+## Rejection → remove from `Open`, write `out-of-scope/`, add the `Out-of-scope` pointer
+
+The early call's "Closed without merge" finding (closing comments support a structural rejection) or
+the closing call's design-time breaking-change finding, either one naming a Guardrails Track slug →
+the existing rejection handling already writes `out-of-scope/<slug>.md` (format unchanged,
+`skills/continuous-refactoring/references/forge-facing-writing.md`) — additionally:
+
+- Remove the slug from `## Guardrails`'s `Open`.
+- Add it to `## Guardrails`'s `Out-of-scope`: `- <slug> — out-of-scope/<slug>.md`.
+
+Same symmetry every other rejection in the suite already follows. A **PHP-version reversal** (an
+existing `out-of-scope/<slug>.md` naming a now-satisfied `Blocked by: PHP >= X.Y`) removes the file as
+today, and also removes that slug's `Out-of-scope` pointer line here — the node goes back to being
+proposable (not thereby fulfilled), so nothing about it belongs in either list until a future scan
+resolves it again.
+
+## Fresh MR → remove from `Open` (redundant with merge, kept for symmetry)
+
+The closing call's freshly-opened-MR handling doesn't itself remove anything from `Open` — a node only
+leaves `Open` once its delivering MR actually **merges** (the early call's own finding, above).
+
+**Never touches `Pending candidates`.** A Guardrails Track candidate's in-flight state lives entirely
+in `## Guardrails`'s own `Open` list
+(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — it's never also written to
+the global `Pending candidates` field, and `refactor-learn` never clears that field on account of a
+Guardrails Track candidate resolving. Also never touches `## Safety Net`'s own `Open`/`Out-of-scope` —
+the two Tracks' sections are independent, each written only by its own Track's own candidates.
+
+## `Last scan` — written every time the Track's scan actually ran this pass
+
+Whenever `guardrails-track.md`'s own process ran this pass — whether it found nothing to propose
+(every node in scope already resolved) or proposed something that `Open` now tracks — write `##
+Guardrails`'s `Last scan` to today's date (`YYYY-MM-DD`), last, alongside `## Safety Net`'s own write
+(if that Track also ran this pass) and `Fulfilled nodes` in the closing call's own step ordering.
+**Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 60`, `Last scan: <today>`,
+`Open`/`Out-of-scope` either freshly populated (something was proposed/rejected this scan) or both `-
+none` (a fully-compliant target's first scan). **The scan didn't run this pass** (`Open` was already
+non-empty, so `guardrails-track.md` skipped straight to working an existing entry) → don't touch `Last
+scan` — only a completed scan earns that write, not merely resolving one of its `Open` entries.
+
+## Old-schema repos
+
+A `bookkeeping.md` with no `## Guardrails` heading yet is simply a target whose Track has never run —
+this write creates the section fresh, exactly as the first-ever-scan case above already describes.
+This applies whether the rest of the file is on the current schema (e.g. an already-migrated `##
+Safety Net` section sitting alongside no `## Guardrails` one yet — a target whose Safety Net Track has
+already run at least once but hasn't yet reached its first Guardrails Track pass) or still carries the
+older `Fulfilled nodes`/`Pending candidates` shape untouched — either way, nothing about those other
+fields blocks or needs understanding for this section's own first write to proceed normally.

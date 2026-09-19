@@ -40,13 +40,25 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 **Out-of-scope:**
 - phpmd — out-of-scope/phpmd.md
 
+## Guardrails
+
+**Cadence:** 60
+
+**Last scan:** 2026-09-01
+
+**Open:**
+- composer-audit (#90)
+
+**Out-of-scope:**
+- none
+
 **Fulfilled nodes:**
 - loop-config
 - composer (#77)
 - ci-runner (#78)
 ```
 
-`Fulfilled nodes` sorts last, not alphabetically or by write-frequency — it's the field most likely to grow long as the tree gets worked through, and the only-ever-growing one; keeping it below every other top-level field means `Create-mode`, `Focus areas`, `Refactoring goal`, `Housekeeping cadence`, and `Pending candidates` stay visible together without scrolling past it. The `## Safety Net` section (below) sits between `Pending candidates` and `Fulfilled nodes` — it's its own heading, not a top-level field, so it doesn't compete with that ordering rule.
+`Fulfilled nodes` sorts last, not alphabetically or by write-frequency — it's the field most likely to grow long as the tree gets worked through, and the only-ever-growing one; keeping it below every other top-level field means `Create-mode`, `Focus areas`, `Refactoring goal`, `Housekeeping cadence`, and `Pending candidates` stay visible together without scrolling past it. The `## Safety Net` and `## Guardrails` sections (below) sit between `Pending candidates` and `Fulfilled nodes`, in that order (the same Safety Net > Guardrails priority the scheduling algorithm uses elsewhere, `CONTEXT.md`'s **Track** entry) — each is its own heading, not a top-level field, so neither competes with that ordering rule.
 
 ## Fields
 
@@ -58,9 +70,9 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 | `Housekeeping cadence` | How often the separate `continuous-housekeeping` skill's own recurring sweep is due — `weekly` by default, or another interval decided during that skill's own one-time setup interview (`skills/continuous-housekeeping/references/cadence-interview.md`). Belongs to `continuous-housekeeping` alone; the continuous-refactoring loop itself still has no cadence of its own (see below) and never reads this field. | `continuous-housekeeping`, once, during its own setup interview — hand-editable after that |
 | `Secret history scan` | Whether the one-time full git-history secret scan (`refactor-scan/SKILL.md` step 4c) has already run — absent until it has, `done (YYYY-MM-DD)` (the date the scan ran, purely for human-readable audit trail — nothing reads or compares it) once every finding from that run is filed. Read only by that step, to decide whether to run at all; gated on the `secret-detection` node itself being fulfilled first, so it's meaningless (and never written) on a target that hasn't adopted that node yet. | `refactor-learn`, early call, once, the pass the scan actually runs — never hand-edited (a target that genuinely wants the scan to run again removes the field by hand instead, the same escape hatch an `out-of-scope/` rejection uses) |
 | `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue most recently filed for this candidate, not yet delivered as a merge request. Written as a list purely for formatting consistency with `Fulfilled nodes` and easier diffing — it still holds at most one entry; the suite tracks exactly one thing in flight at a time (`refactor-scan`/`refactor-prioritize`), this is not a multi-pending queue. **No native-label tracker only** — on a native tracker, filing a tooling-tree node/`loop-config`/externally-labeled candidate skips this write entirely (stays `none` there in the ordinary case); a structural/baseline-shrink candidate's early filing (`refactor-prioritize`'s Select mode) writes it *even on a native tracker* — a narrow, deliberate exception, see below. | `refactor-design` sets it when it files a tooling-tree node/`loop-config`/externally-labeled candidate (non-native tracker only); `refactor-prioritize`'s Select mode sets it when it files a structural/baseline-shrink candidate (always, native tracker included); `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the candidate is resolved another way |
-| `Fulfilled nodes` | Tooling-tree node **slugs** (never Names — internal bookkeeping stays keyed by the slug) already confirmed fulfilled, one per bulleted line, each carrying the delivering issue # (`- <slug> (#<issue>)`) when known — see *Fulfilled nodes* below. Sorts last — see the note above the table. **Never written for a Safety Net Track node** (below) — those live in the `## Safety Net` section instead. | `refactor-learn`, closing call, only when that call has a genuine delivery or rejection to record this pass — never written by itself as the sole reason for a bookkeeping branch — see *Fulfilled nodes* below |
+| `Fulfilled nodes` | Tooling-tree node **slugs** (never Names — internal bookkeeping stays keyed by the slug) already confirmed fulfilled, one per bulleted line, each carrying the delivering issue # (`- <slug> (#<issue>)`) when known — see *Fulfilled nodes* below. Sorts last — see the note above the table. **Never written for a Safety Net or Guardrails Track node** (below) — those live in the `## Safety Net`/`## Guardrails` sections instead. | `refactor-learn`, closing call, only when that call has a genuine delivery or rejection to record this pass — never written by itself as the sole reason for a bookkeeping branch — see *Fulfilled nodes* below |
 
-`Pending candidates` exists so a pass interrupted mid-candidate doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass, resuming at whichever step is actually next (no plan comment on the issue yet → `refactor-design`; plan comment present → `refactor-implement` — `refactor-scan/SKILL.md` step 2). The native-tracker exception for a structural/baseline-shrink candidate's early filing exists for the same reason one level earlier: without it, a future pass's `refactor-scan` step 3b would rediscover the minimally-filed issue as an *externally-labeled* candidate and re-run candidate search on it from scratch — possibly picking a different one, exactly what this field prevents at the design→implement handoff already. **Never written for a Safety Net Track candidate** (below) — that candidate's in-flight issue lives in the `## Safety Net` section's own `Open` list instead, which can hold more than the one entry this field is limited to.
+`Pending candidates` exists so a pass interrupted mid-candidate doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass, resuming at whichever step is actually next (no plan comment on the issue yet → `refactor-design`; plan comment present → `refactor-implement` — `refactor-scan/SKILL.md` step 2). The native-tracker exception for a structural/baseline-shrink candidate's early filing exists for the same reason one level earlier: without it, a future pass's `refactor-scan` step 3b would rediscover the minimally-filed issue as an *externally-labeled* candidate and re-run candidate search on it from scratch — possibly picking a different one, exactly what this field prevents at the design→implement handoff already. **Never written for a Safety Net or Guardrails Track candidate** (below) — that candidate's in-flight issue lives in the relevant Track's own `Open` list instead, which can hold more than the one entry this field is limited to.
 
 ## `Safety Net` section
 
@@ -91,6 +103,48 @@ remains its own mandatory human interview, `CONTEXT.md`'s **Onboarding** entry).
 - **`Out-of-scope`** — every Safety Net node rejected via this Track, one per bulleted line, `- <slug> — out-of-scope/<slug>.md` (the pointer, not a restatement — the entry's own reasoning lives in that file, format unchanged from every other `out-of-scope/` entry). Never removed except by the ordinary reversal path (the `out-of-scope/<slug>.md` file deleted by hand or by a PHP-version-reversal finding, `refactor-scan/SKILL.md` step 3) — this bulleted pointer and the file are added/removed together.
 - A slug **never appears in both `Open` and `Out-of-scope` at once**, and never in `Fulfilled nodes` either — the same mutual-exclusion invariant `Fulfilled nodes`/`out-of-scope/` already hold for every other node, just enforced within this section for a Safety Net Track node instead.
 
+## `Guardrails` section
+
+Replaces `Fulfilled nodes`/`Pending candidates` for every node the **Guardrails Track** (`CONTEXT.md`)
+works through — the nodes required on `structural-scan`/`php-safety-net` themselves, proposed only once
+the Safety Net has closed (PHP: `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`,
+`phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep`). Same shape as `## Safety Net`
+above, independent of it — a slug lives in at most one Track's section, never both. Full read/write
+mechanics: `skills/refactor-scan/references/guardrails-track.md` (`refactor-scan`'s own scan step),
+`skills/refactor-learn/references/guardrails-write.md` (`refactor-learn`'s own write step).
+
+```markdown
+## Guardrails
+
+**Cadence:** 60
+
+**Last scan:** 2026-09-14
+
+**Open:**
+- composer-audit (#90)
+
+**Out-of-scope:**
+- none
+```
+
+- **`Cadence`** — days between scans, `60` unless hand-edited (shorter than Safety Net's default 90 —
+  Guardrails nodes are mostly point-in-time audits whose value is in repetition, `php-tooling-tree/
+  composer-audit.md`'s own Housekeeping entry). Never read to decide whether to scan when `Open` is
+  non-empty (below).
+- **`Last scan`** — same meaning as `## Safety Net`'s own field: the date the Track's scan last
+  completed, written even when it found nothing to do. **The whole section is absent until the Track's
+  first scan completes** — absence means "never run," never "nothing found."
+- **`Open`** — every Guardrails node currently proposed but not yet delivered or rejected, one per
+  bulleted line, `- <slug> (#<issue>)`. `- none` when empty. **Non-empty `Open` means the Track is
+  never rescanned this pass** — same resume-before-propose discipline `## Safety Net`'s own `Open`
+  already follows.
+- **`Out-of-scope`** — every Guardrails node rejected via this Track, one per bulleted line, `-
+  <slug> — out-of-scope/<slug>.md`. Same reversal path, same pointer-and-file-together discipline as
+  `## Safety Net`'s own `Out-of-scope`.
+- A slug **never appears in both `Open` and `Out-of-scope` at once**, never in `Fulfilled nodes`, and
+  never in `## Safety Net`'s own `Open`/`Out-of-scope` either — the two Tracks' node sets are disjoint
+  by construction (Scope, `skills/refactor-scan/references/guardrails-track.md`).
+
 ## `Fulfilled nodes`
 
 A cache, not a second source of truth — it exists purely to let a pass skip re-deriving what earlier
@@ -99,7 +153,8 @@ passes already established, and only matters to the **manual/LLM tree-walk fallb
 Fulfilment check by hand, in tree order, on every single pass. The deterministic parser
 (`skills/refactor-scan/references/tooling_tree.py`) never reads this field — plain filesystem detection
 is already cheap and always correct there, so there's nothing to gain and a staleness risk to avoid.
-**Never covers a Safety Net Track node** — see `## Safety Net section` above.
+**Never covers a Safety Net or Guardrails Track node** — see `## Safety Net section`/`## Guardrails
+section` above.
 
 - **Read:** only by the tree-walk-fallback prompt — a listed slug is skipped without re-checking its
   Fulfilment check.
@@ -133,7 +188,7 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
 
 ## Rules
 
-- **`Pending candidates` and `Fulfilled nodes` are `refactor-learn`-written — never by hand.** `Create-mode`, `Focus areas`, `Refactoring goal`, and `Housekeeping cadence` you can edit by hand any time — that's what they're for. Nobody is expected to hand-edit `Fulfilled nodes`; if it drifts wrong, the next pass with parser access re-derives it. `Secret history scan` is `refactor-learn`-written too (to `done (YYYY-MM-DD)`, once) — the one exception you *can* hand-edit, but only to remove it outright, on the rare target that genuinely wants the one-time scan to run again. The `## Safety Net` section is the same: `refactor-learn`-written, never by hand, except `Cadence` — hand-editable like `Housekeeping cadence` above.
-- The file travels with the repo. Loop state does not live in the agent's own conversation but here (create-mode, focus areas, refactoring goal, housekeeping cadence, pending candidates, fulfilled nodes, the Safety Net section), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections).
+- **`Pending candidates` and `Fulfilled nodes` are `refactor-learn`-written — never by hand.** `Create-mode`, `Focus areas`, `Refactoring goal`, and `Housekeeping cadence` you can edit by hand any time — that's what they're for. Nobody is expected to hand-edit `Fulfilled nodes`; if it drifts wrong, the next pass with parser access re-derives it. `Secret history scan` is `refactor-learn`-written too (to `done (YYYY-MM-DD)`, once) — the one exception you *can* hand-edit, but only to remove it outright, on the rare target that genuinely wants the one-time scan to run again. The `## Safety Net` and `## Guardrails` sections are the same: `refactor-learn`-written, never by hand, except each section's own `Cadence` — hand-editable like `Housekeeping cadence` above.
+- The file travels with the repo. Loop state does not live in the agent's own conversation but here (create-mode, focus areas, refactoring goal, housekeeping cadence, pending candidates, fulfilled nodes, the Safety Net and Guardrails sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections).
 - If the file is missing, that's the `loop-config` tooling-tree node — see above. Ordinary in every way except who writes which field and which branch it lands on for that one candidate — see the `loop-config` exception above.
-- **Old-schema repos need no migration.** A `bookkeeping.md` predating this section (no `## Safety Net` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old `Fulfilled nodes`/`Pending candidates` fields already on the file blocks this, and neither field needs to be understood, migrated, or removed for the Safety Net Track's own first scan to proceed normally (`skills/refactor-scan/references/safety-net-track.md`).
+- **Old-schema repos need no migration.** A `bookkeeping.md` predating either section (no `## Safety Net`/`## Guardrails` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old `Fulfilled nodes`/`Pending candidates` fields already on the file blocks this, and neither field needs to be understood, migrated, or removed for either Track's own first scan to proceed normally (`skills/refactor-scan/references/safety-net-track.md`, `skills/refactor-scan/references/guardrails-track.md`). The two sections migrate independently, too — a target that's already run its first Safety Net Track scan (so `## Safety Net` exists) but never its first Guardrails Track scan (so `## Guardrails` doesn't yet) is an entirely ordinary, expected state, not a partial or inconsistent one.

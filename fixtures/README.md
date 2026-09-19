@@ -118,6 +118,61 @@ check can be made deterministic that way (mirroring `decision-gate-bypass`'s own
 advisory transcript grep otherwise (LLM output isn't deterministic). Uses `opencode run --auto` for the
 same reason `decision-gate-bypass` does — see its own note below.
 
+### php-guardrails-* (Guardrails Track, ADR-0055, ticket 02)
+
+Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the CI roadmap
+matrix, same reasoning as `php-safety-net-*` above. The Guardrails Track's own counterpart, reusing the
+exact same mechanism (`skills/refactor-scan/references/guardrails-track.md` /
+`skills/refactor-learn/references/guardrails-write.md`) against a second node set — the nodes required
+on `structural-scan`/`php-safety-net` themselves (PHP: `composer-audit`, `phpmd`, `coverage-floor`,
+`php-minimal-version`, `phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep`), reachable
+only once the Safety Net has closed. Every fixture below seeds the Safety Net already fully closed
+(`php-safety-net` resolved), so its own Guardrails nodes are genuinely reachable; see each fixture's
+own `expected/behavior.md` for the full expected behavior.
+
+- **php-guardrails-purpose-recognition** — `composer.json` defines a `scripts.security-check` entry
+  whose command is literally `composer audit`, invoked from CI as `composer run security-check` — the
+  literal substring `composer audit` never appears in any CI workflow file, only inside `composer.json`
+  itself, so `tooling_tree.py`'s own CI-gate check misses it. Expects `composer-audit` judged fulfilled
+  via its own Purpose statement (the CI gate is real, just invoked through one level of indirection)
+  rather than the raw literal-text match, and never proposed as a candidate.
+- **php-guardrails-open-blocks-rescan** — `docs/refactoring/bookkeeping.md`'s `## Guardrails` section
+  holds a non-empty `Open` (`phpmd (#5)`, already `ready-for-agent` with a plan) and a `Last scan` far
+  past the default 60-day `Cadence`. Expects the existing `Open` entry resumed straight to
+  `refactor-implement`, not a fresh Track walk proposing the project's other genuinely-missing
+  Guardrails nodes (`composer-audit`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`,
+  `phpstan-deprecation-rules`, `semgrep`).
+- **php-guardrails-first-run** — every Guardrails Track node already resolved (fulfilled, or
+  effectively rejected via `phpstan-level-1`'s own cascading closure), no `## Guardrails` section yet
+  (never run) — the Safety Net is closed the same "declared ceiling level 0" way `php-clean` already
+  uses. Expects the section created with `Last scan` written even though nothing was missing, so the
+  target isn't rescanned every pass.
+- **php-guardrails-rejection-symmetry** — `## Guardrails`'s `Open` names `phpmd (#5)`; the candidate's
+  own issue is already closed `wontfix` with a maintainer's load-bearing structural reason (complexity
+  enforced purely by PR review, no tool). Expects it removed from `Open`,
+  `out-of-scope/phpmd.md` written, and a pointer added under `Out-of-scope` — the same merge/rejection
+  symmetry every other rejection in the suite already follows.
+- **php-guardrails-old-schema** — deliberately a different scenario from `php-safety-net-old-schema`
+  (a target still fully on the pre-ADR-0055 shape never reaches the Guardrails Track in the same pass —
+  the Safety Net Track outranks it and is more overdue). This fixture instead seeds a target
+  mid-migration: `## Safety Net` already present and closed (ticket 01 has already run on it), but
+  `Fulfilled nodes` still carries pre-ADR-0055 residue for nodes the Safety Net Track has since taken
+  over (`composer`, `php-cs-fixer`, `phpunit`, `psr-4`, `phpstan-level-0`, the `rector-*` family), and
+  no `## Guardrails` section yet. Expects a normal pass — no error on the coexistence, and real,
+  still-open Guardrails work (`composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`,
+  `phpstan-level-6`, `phpstan-deprecation-rules`, `semgrep` are all genuinely missing) proposed as
+  usual.
+
+```bash
+./fixtures/harness/run.sh guardrails-track php-guardrails-purpose-recognition --opencode
+./fixtures/harness/run.sh guardrails-track php-guardrails-open-blocks-rescan --opencode
+./fixtures/harness/run.sh guardrails-track php-guardrails-first-run --opencode
+./fixtures/harness/run.sh guardrails-track php-guardrails-rejection-symmetry --opencode
+./fixtures/harness/run.sh guardrails-track php-guardrails-old-schema --opencode
+```
+
+Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-bypass`/`judge`/`lift`.
+
 ### Tier 4 — Trigger & Discoverability tests (ticket 27)
 
 Ticket 27's three negative controls split across two layers:

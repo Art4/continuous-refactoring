@@ -102,6 +102,7 @@ VOCAB_ALLOW = {
     ("refactor-prioritize", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("continuous-refactoring", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("refactor-learn", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
+    ("continuous-refactoring", "floor"): "the `coverage-floor` tooling-tree node's own slug — a real node name, not a synonym for 'tooling tree'",
 }
 
 # duplication_issues() false positives: a shared sentence between two paths
