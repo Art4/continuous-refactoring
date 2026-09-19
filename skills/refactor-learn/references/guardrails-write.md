@@ -26,12 +26,18 @@ the existing rejection handling already writes `out-of-scope/<slug>.md` (format 
 
 - Remove the slug from `## Guardrails`'s `Open`.
 - Add it to `## Guardrails`'s `Out-of-scope`: `- <slug> — out-of-scope/<slug>.md`.
+- Every node closed by that rejection (as reported by the script's `closed_by_rejection()` — nodes
+  whose required or required-any ancestor is effectively rejected) also leaves `Open`, with no new
+  files written for those downstream closures. The next scan will re-add them to `Open` only if the
+  rejection is reversed (below).
 
 Same symmetry every other rejection in the suite already follows. A **PHP-version reversal** (an
 existing `out-of-scope/<slug>.md` naming a now-satisfied `Blocked by: PHP >= X.Y`) removes the file as
 today, and also removes that slug's `Out-of-scope` pointer line here — the node goes back to being
 proposable (not thereby fulfilled), so nothing about it belongs in either list until a future scan
-resolves it again.
+resolves it again. Reversing a rejection makes the next scan bring those nodes back into `Open` — the
+next scan's own `ordered_backlog()` re-evaluates the fulfilled set (now without the rejected ancestor)
+and records the reopened nodes.
 
 ## Fresh MR → remove from `Open` (redundant with merge, kept for symmetry)
 
@@ -53,9 +59,10 @@ Guardrails`'s `Last scan` to today's date (`YYYY-MM-DD`), last, alongside `## Sa
 (if that Track also ran this pass) and `Fulfilled nodes` in the closing call's own step ordering.
 **Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 60`, `Last scan: <today>`,
 `Open`/`Out-of-scope` either freshly populated (something was proposed/rejected this scan) or both `-
-none` (a fully-compliant target's first scan). **The scan didn't run this pass** (`Open` was already
-non-empty, so `guardrails-track.md` skipped straight to working an existing entry) → don't touch `Last
-scan` — only a completed scan earns that write, not merely resolving one of its `Open` entries.
+none` (a fully-compliant target's first scan — `Open` is empty because every node is resolved). **The
+scan didn't run this pass** (`Open` was already non-empty, so `guardrails-track.md` skipped straight to
+working an existing entry) → don't touch `Last scan` — only a completed scan earns that write, not
+merely resolving one of its `Open` entries.
 
 ## Old-schema repos
 

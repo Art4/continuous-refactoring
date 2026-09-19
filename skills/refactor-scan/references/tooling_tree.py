@@ -205,6 +205,7 @@ def ordered_backlog(
         tree = load_tree()
     resolved = _resolve_fulfilled(repo, tree, fulfilled)
     rejected = _rejected_nodes(repo)
+    closed = set(closed_by_rejection(tree, rejected))
     backlog = []
     for node in tree["order"]:
         if node in _NEVER_PROPOSED:
@@ -212,6 +213,8 @@ def ordered_backlog(
         if resolved.get(node, False):
             continue
         if node in rejected:
+            continue
+        if node in closed:
             continue
         backlog.append(node)
     return backlog
