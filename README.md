@@ -35,7 +35,11 @@ The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md);
 | `refactor-design` | Ground/grill the candidate → plan, filed or commented onto its issue |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
 | `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
-| `continuous-housekeeping` | Separate, recurring maintenance sweep (own cadence, default weekly) — dependency currency, tooling-deprecation cleanup, documentation sync; not part of the pipeline above |
+
+The orchestrator also runs a recurring maintenance sweep — dependency currency, tooling-deprecation
+cleanup, documentation sync — as its own **Housekeeping Track**, scheduled alongside three other Tracks
+(Safety Net, Guardrails, Investigation) rather than as a separate skill you have to remember to invoke.
+See [Quick start](#quick-start), below.
 
 ## Installing in a target project
 
@@ -51,8 +55,8 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 
 ## Quick start
 
-1. **Start the loop:** `/continuous-refactoring` — the orchestrator scaffolds `docs/refactoring/` and runs the first pass. No cadence of its own; trigger it however often fits (by hand, or your own scheduler).
-2. **Optional — recurring maintenance:** `/continuous-housekeeping` — a separate, on-its-own-cadence sweep (default weekly) for dependency currency and tooling-deprecation fixes. Run it once to opt in (records its own cadence), and every later `/continuous-refactoring` trigger checks whether a sweep is due and runs it first, automatically — one scheduler covers both. Skip step 2 entirely and only ever run `/continuous-refactoring` if you don't want housekeeping at all.
+1. **Start the loop:** `/continuous-refactoring` — the orchestrator scaffolds `docs/refactoring/` and runs the first pass. No cadence of its own; trigger it however often fits (by hand, or your own scheduler). Each pass picks whichever of the four Tracks — Safety Net, Guardrails, Housekeeping, Investigation — is most overdue and works that one; Housekeeping's own recurring maintenance sweep (dependency currency, tooling-deprecation fixes) is scheduled the same way, weekly by default, with no separate opt-in step.
+2. **Optional — force a specific Track:** name one directly when invoking `/continuous-refactoring` (e.g. "run the Housekeeping Track") to bypass the scheduler's own staleness comparison for this pass.
 
 ## Loop state
 
@@ -61,7 +65,7 @@ The target project needs the engineering-skills setup (`setup-matt-pocock-skills
 - **Backlog:** `refactor:*` issues on the issue tracker
 - **Learned rejections:** `docs/refactoring/out-of-scope/`
 - **Domain language:** `CONTEXT.md` · decisions: `docs/adr/`
-- **Housekeeping checklist** (only once some node has contributed to it): `docs/refactoring/housekeeping-template.md` — see `continuous-housekeeping`
+- **Housekeeping checklist** (only once some node has contributed to it): `docs/refactoring/housekeeping-template.md` — see the [housekeeping playbook](docs/playbooks/housekeeping.md)
 
 See [Playbooks](docs/playbooks/loop.md) for steering the loop as a human ([housekeeping](docs/playbooks/housekeeping.md) has its own) and [skills/continuous-refactoring/references/refactoring-bookkeeping.md](skills/continuous-refactoring/references/refactoring-bookkeeping.md) for the config file.
 

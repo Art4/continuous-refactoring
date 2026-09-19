@@ -29,16 +29,19 @@ looking for one.** Neither call writes anything — no branch opens, no ledger, 
 `Fulfilled nodes`, issue-label, or `out-of-scope` write happens — unless it has something real to act
 on. Early call: at least one finding, named by whoever invoked this call (ordinarily `refactor-scan`,
 in its own `## Output`). Closing call: a freshly opened MR, named by `refactor-implement`; a
-design-time breaking-change finding, named by `refactor-design`; **or** a Safety Net, Guardrails, or
-Investigation Track's own scan having actually run this pass
+design-time breaking-change finding, named by `refactor-design`; **or** a Safety Net, Guardrails,
+Housekeeping, or Investigation Track's own scan/process having actually run this pass
 (`skills/refactor-scan/references/safety-net-track.md` /
 `skills/refactor-scan/references/guardrails-track.md` /
-`skills/refactor-scan/references/investigation-track.md`), even when it found nothing to propose — the
-event this pass's `refactor-scan` step 4 itself reports, not something this call goes looking for on
-its own; this third case exists solely so `## Safety Net`'s/`## Guardrails`'s/`## Investigation`'s own
-`Last scan` write (`safety-net-write.md`/`guardrails-write.md`/`investigation-write.md`) can actually
-happen on an all-clear scan, per those files' own "write `Last scan` regardless" rule — it authorizes
-only that one write, never `Fulfilled nodes` or any other bookkeeping on its own. This is step zero, before any other
+`skills/continuous-refactoring/references/housekeeping-track.md` /
+`skills/refactor-scan/references/investigation-track.md`), even when it found nothing to propose or
+nothing registered to check — the event this pass's `refactor-scan` step 4 itself reports (or, for
+Housekeeping, the orchestrator's own step 0c, which runs this Track directly rather than through
+`refactor-scan`), not something this call goes looking for on its own; this third case exists solely so
+`## Safety Net`'s/`## Guardrails`'s/`## Housekeeping`'s/`## Investigation`'s own `Last scan` write
+(`safety-net-write.md`/`guardrails-write.md`/`housekeeping-write.md`/`investigation-write.md`) can
+actually happen on an all-clear scan, per those files' own "write `Last scan` regardless" rule — it
+authorizes only that one write, never `Fulfilled nodes` or any other bookkeeping on its own. This is step zero, before any other
 read — querying the tracker for open MRs, re-reading `bookkeeping.md`, scanning `merge-requests.md` to
 see whether a precondition might be satisfiable is exactly the detection work `refactor-scan`/
 `refactor-implement` already own; this skill only ever acts on what the pass that produced it named,
@@ -99,6 +102,7 @@ Then, regardless of which branch the writes above rode:
 - This pass's scan ran the Safety Net Track (`skills/refactor-scan/references/safety-net-track.md` — an `Open` entry just resolved above, or the Track's own scan ran this pass with nothing to propose) → write `## Safety Net`'s `Last scan`, and `Open`/`Out-of-scope` if this pass's resolution changed either: `skills/refactor-learn/references/safety-net-write.md`. The Track's `Open` was already non-empty and this pass only worked through an existing entry without the scan itself running → don't touch `Last scan` (that file's own final section).
 - Same for the Guardrails Track (`skills/refactor-scan/references/guardrails-track.md`) → write `## Guardrails`'s `Last scan`, and `Open`/`Out-of-scope` if changed: `skills/refactor-learn/references/guardrails-write.md`. Independent of the Safety Net write above — a pass can resolve a Guardrails candidate, a Safety Net candidate, neither, or (once both Tracks are eventually due the same pass) both; each Track's own section is written only when that Track's own scan actually ran or one of its own `Open` entries actually resolved this pass.
 - This pass's scan ran the Investigation Track (`skills/refactor-scan/references/investigation-track.md` — its own *Proposing* step was reached, whether or not `structural-scan` itself was actually proposable) → write `## Investigation`'s `Last scan` only: `skills/refactor-learn/references/investigation-write.md`. No `Open`/`Out-of-scope` to write here at all — this section never carries either. A structural candidate resumed via `Pending candidates` at `refactor-scan/SKILL.md` step 2, without Investigation's own scan step ever being reached this pass, doesn't trigger this write — same "resuming isn't scanning" distinction the two bullets above already draw.
+- The orchestrator's own step 0c ran the Housekeeping Track this pass (`skills/continuous-refactoring/references/housekeeping-track.md` — its own process was reached, whether it resumed an in-progress cycle, delivered a fresh one, or found nothing registered to check) → write `## Housekeeping`'s `Last scan` only, via the ordinary dedicated bookkeeping branch (never folded onto the Housekeeping cycle's own branch): `skills/refactor-learn/references/housekeeping-write.md`. No `Open`/`Out-of-scope` to write here at all — this section never carries either, the same shape `## Investigation`'s own write already follows, but with a real numeric `Cadence` (`7` unless hand-edited) instead of the literal `continuous`. Housekeeping wasn't the Track step 0b/0c selected this pass → don't touch `## Housekeeping` at all.
 - **Last of all**: the branch these writes just landed on carries a candidate MR still marked draft (`opening-a-merge-request.md`'s *Draft candidate MRs* — opened as one this same pass, or resumed via the early call's **fold-in still owed** finding above) → mark it ready for review now that every fold-in write above is actually pushed (`gh pr ready` / `glab mr update <n> --ready`). Not draft (the ordinary non-native-tracker/dedicated-branch case) → nothing to do here.
 
 ## Fallback
