@@ -50,6 +50,7 @@ Examples:
     $(basename "$0") safety-net-track php-safety-net-purpose-recognition --opencode
     $(basename "$0") guardrails-track php-guardrails-purpose-recognition --opencode
     $(basename "$0") scheduler php-scheduler-staleness-selection --opencode
+    $(basename "$0") scheduler php-scheduler-investigation-fallback --opencode
 EOF
     exit 1
 }
@@ -983,6 +984,22 @@ run_scheduler() {
                 log_pass "Scan output shows the ratio reasoning (Guardrails' higher overdue_ratio) — advisory sign the staleness comparison actually ran (see $out)"
             else
                 log_info "Scan output doesn't clearly show the ratio comparison — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        php-scheduler-investigation-fallback)
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 0b literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, and ## Investigation sections. Compute (or, for Investigation, note the absence of) each Track's overdue_ratio, then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including skills/refactor-scan/references/investigation-track.md if Investigation wins) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            local out="/tmp/scheduler-$FIXTURE-scan.log"
+            if grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
+                log_pass "Scheduler self-reports SELECTED: Investigation — see $out"
+            elif grep -qiE "^SELECTED: *Safety Net|^SELECTED: *Guardrails" "$out" 2>/dev/null; then
+                log_fail "Scheduler self-reports a Safety Net/Guardrails selection — neither is due this pass (overdue_ratio ~0.2/~0.15), Investigation (always due, no fixed Cadence) should have been the only due-and-eligible Track — see $out"
+            else
+                log_info "Scheduler output doesn't clearly self-report SELECTED: Safety Net/Guardrails/Investigation — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qiE "structural-scan" "$out" 2>/dev/null; then
+                log_pass "Scan output mentions structural-scan — advisory sign refactor-scan actually reached investigation-track.md's own proposal step (see $out)"
+            else
+                log_info "Scan output doesn't clearly mention structural-scan — check $out by hand (advisory, non-blocking)"
             fi
             ;;
         *)
