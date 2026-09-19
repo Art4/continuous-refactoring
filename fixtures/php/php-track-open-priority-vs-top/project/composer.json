@@ -1,0 +1,12 @@
+{
+    "name": "example/php-track-open-priority-vs-top",
+    "description": "Priority-labeled issue exists but Safety Net blockade means Open walk still runs first",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
