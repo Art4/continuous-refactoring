@@ -37,7 +37,8 @@ once Housekeeping's first turn completes.
 
 ## Comments
 
-**PR:** (fill in after opening)
+**PR:** [#97](https://github.com/Art4/continuous-refactoring/pull/97) — stacked on `tickets/06-housekeeping-track`
+(#96), the seventh and final link in the stack (#90 → #91 → #92 → #93 → #94 → #95 → #96 → #97).
 
 **Implicit state used to detect and sequence the three turns (no new stored flag):**
 
