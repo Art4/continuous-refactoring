@@ -274,6 +274,39 @@ Same non-CI, local-only, advisory posture as the two fixtures above.
 
 Same non-CI, local-only, advisory posture as the three fixtures above.
 
+- **php-scheduler-safety-net-blockade** (ticket 08, Safety Net blockade with nothing workable). `##
+  Safety Net` `Open` is non-empty (`phpstan-level-6`, `coverage-floor`) but both entries are non-workable
+  (blocked by prerequisite, flagged `needs-info`). Expects **Safety Net** selected — the blockade is
+  unconditional: while Safety Net `Open` is non-empty, it is selected and nothing else runs, even if no
+  node is currently workable; what it waits on is reported. Guardrails (due at `overdue_ratio ≈ 1.33`),
+  Housekeeping, and Investigation are all blocked by the blockade despite being otherwise eligible.
+
+- **php-scheduler-guardrails-stalled** (ticket 08, Guardrails yields when nothing workable). `##
+  Guardrails` `Open` is non-empty (`phpstan-level-6`, `coverage-floor`) but both entries are
+  non-workable (blocked or `needs-info`). Per the Eligibility rule, Guardrails with `Open` non-empty but
+  nothing workable yields — it drops out of ratio comparison. Expects **Housekeeping** selected (ratio
+  ≈4.29, the highest among remaining due Tracks). Guardrails' `Open` stays as it is; no node is removed.
+
+- **php-scheduler-housekeeping-preempts-guardrails** (ticket 08, Housekeeping preempts Guardrails
+  backlog). `## Guardrails` `Open` is non-empty with workable entries (`composer-audit`, `phpmd`); `##
+  Housekeeping` is due at `overdue_ratio ≈ 4.29`. Expects **Housekeeping** selected — the preemption
+  rule fires: Housekeeping preempts Guardrails for one pass when due (`overdue_ratio >= 1`), even though
+  Guardrails has higher tie-break priority. Guardrails resumes afterwards.
+
+- **php-scheduler-bootstrap-guardrails-open** (ticket 08, bootstrap exception advances past Guardrails'
+  non-empty `Open`). `## Guardrails` is present with non-empty `Open` (`phpstan-level-6`,
+  `coverage-floor`) from its own bootstrap scan; `## Housekeeping` is absent. The one-time exception's
+  condition 3 fires (Housekeeping absent) — it reads only section *existence*, not `Open` *emptiness*.
+  Expects **Housekeeping** selected, confirming the bootstrap sequence advances regardless of Guardrails'
+  `Open` state.
+
+```bash
+./fixtures/harness/run.sh scheduler php-scheduler-safety-net-blockade --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-guardrails-stalled --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-housekeeping-preempts-guardrails --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-guardrails-open --opencode
+```
+
 ### php-track-open-* (Track Open walk, ticket 07)
 
 Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
