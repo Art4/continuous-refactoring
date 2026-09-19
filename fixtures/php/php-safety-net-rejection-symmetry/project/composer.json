@@ -1,0 +1,12 @@
+{
+    "name": "example/php-safety-net-rejection-symmetry",
+    "description": "A Safety Net Track candidate closed without merge, wontfix, structural reason stated",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
