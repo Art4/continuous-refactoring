@@ -463,14 +463,15 @@ def _has_housekeeping_line_for(repo: pathlib.Path, node_name: str) -> bool:
     """The Housekeeping-line fulfilment fallback `composer-audit` and
     `semgrep` share (php-tooling-tree/composer-audit.md,
     php-tooling-tree/semgrep.md): True if the Refactoring Notes' `housekeeping-
-    template.md` (`skills/continuous-housekeeping/references/template-
-    file-format.md`) already carries a contributed line naming `node_name`
-    — no proof of a completed run required, matching every other CI-gated
-    check in this tree (presence/invocation is sufficient, never proof of a
-    passing run history). Matches `node_name` case-insensitively with
-    hyphens read as spaces (`"composer-audit"` -> `"composer audit"`, the
-    shape the node's own contributed line actually uses — see
-    template-file-format.md's own Structure example) against the template's
+    template.md` (`skills/continuous-refactoring/references/housekeeping-
+    template-file-format.md`) already carries a contributed line naming
+    `node_name` — no proof of a completed run required, matching every
+    other CI-gated check in this tree (presence/invocation is sufficient,
+    never proof of a passing run history). Matches `node_name`
+    case-insensitively with hyphens read as spaces (`"composer-audit"` ->
+    `"composer audit"`, the shape the node's own contributed line actually
+    uses — see housekeeping-template-file-format.md's own Structure
+    example) against the template's
     full text; plain substring matching, not a second copy of that file's
     own bullet-parsing machinery (it treats every line as opaque prose, and
     so does this)."""

@@ -69,7 +69,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **MR scope:** dependency/config addition enabling the ruleset, no production-code change beyond fixing
   surfaced deprecations. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
   `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`skills/continuous-housekeeping/references/template-file-format.md`).
+  (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`).
 - **Housekeeping:** after any dependency update, re-run PHPStan and check for newly-surfaced deprecation
   warnings (a dependency bump can start calling a now-deprecated API this ruleset didn't flag before);
   fix in scope.

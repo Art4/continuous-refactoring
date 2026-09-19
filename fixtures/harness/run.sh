@@ -51,6 +51,7 @@ Examples:
     $(basename "$0") guardrails-track php-guardrails-purpose-recognition --opencode
     $(basename "$0") scheduler php-scheduler-staleness-selection --opencode
     $(basename "$0") scheduler php-scheduler-investigation-fallback --opencode
+    $(basename "$0") scheduler php-scheduler-housekeeping-competes --opencode
 EOF
     exit 1
 }
@@ -1000,6 +1001,27 @@ run_scheduler() {
                 log_pass "Scan output mentions structural-scan — advisory sign refactor-scan actually reached investigation-track.md's own proposal step (see $out)"
             else
                 log_info "Scan output doesn't clearly mention structural-scan — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        php-scheduler-housekeeping-competes)
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 0b literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Compute (or, for Investigation, note the absence of) each Track's overdue_ratio. Report, as your final line before continuing: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 0c: follow skills/continuous-refactoring/references/housekeeping-track.md's own process (it is not handed to refactor-scan) — reconcile, open this cycle's issue per docs/agents/issue-tracker.md, work the checklist from docs/refactoring/housekeeping-template.md plus the standing AGENTS.md/skills check, run the quality gate, then reach the Deliver step. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch — do not attempt to push or open a real merge request."
+            local out="/tmp/scheduler-$FIXTURE-scan.log"
+            if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
+                log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"
+            elif grep -qiE "^SELECTED: *Safety Net|^SELECTED: *Guardrails|^SELECTED: *Investigation" "$out" 2>/dev/null; then
+                log_fail "Scheduler self-reports a Track other than Housekeeping — Housekeeping's ratio (~4.29) is the highest due Track this pass, above Guardrails (~1.33) despite the fixed tie-break order ranking Guardrails higher — see $out"
+            else
+                log_info "Scheduler output doesn't clearly self-report SELECTED: Safety Net/Guardrails/Housekeeping/Investigation — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qiE "4\.29|30 */ *7|higher (ratio|than Guardrails)|Guardrails.*outrank|ratio.*higher than Guardrails" "$out" 2>/dev/null; then
+                log_pass "Scan output shows the ratio reasoning (Housekeeping's higher overdue_ratio over Guardrails) — advisory sign the staleness comparison actually ran (see $out)"
+            else
+                log_info "Scan output doesn't clearly show the ratio comparison — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qiE "Housekeeping — 20|housekeeping-template|chore/housekeeping" "$out" 2>/dev/null; then
+                log_pass "Scan output mentions the Housekeeping cycle's own issue/branch — advisory sign housekeeping-track.md's own process actually ran (see $out)"
+            else
+                log_info "Scan output doesn't clearly mention a Housekeeping cycle issue/branch — check $out by hand (advisory, non-blocking; only expected when Housekeeping was selected)"
             fi
             ;;
         *)

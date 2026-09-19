@@ -218,6 +218,29 @@ those single-Track fixtures couldn't exercise on their own.
 
 Same non-CI, local-only, advisory posture as the fixture above.
 
+- **php-scheduler-housekeeping-competes** (ticket 06, Housekeeping Track wired into the scheduler). Same
+  deterministic node inventory as `php-clean`/`php-scheduler-investigation-fallback` — Safety Net **and**
+  Guardrails both fully resolved. `## Safety Net` (`Cadence: 90`, `Last scan: 2026-09-01`,
+  `overdue_ratio ≈ 0.2`) is **not due**; `## Guardrails` (`Cadence: 60`, `Last scan: 2026-07-01`,
+  `overdue_ratio ≈ 1.33`) **is due**; `## Housekeeping` (`Cadence: 7`, `Last scan: 2026-08-20`,
+  `overdue_ratio ≈ 4.29`) **is due at a materially higher ratio**. Expects **Housekeeping** selected —
+  proving its real, hand-editable day-count `Cadence` wins the genuine ratio comparison even though the
+  fixed tie-break order (Safety Net > Guardrails > Housekeeping > Investigation) ranks Guardrails above
+  it — the same point `php-scheduler-staleness-selection` already established one level up the order.
+  Unlike the other `php-scheduler-*` fixtures, selecting Housekeeping doesn't hand off to `refactor-scan`
+  at all: the run continues into `housekeeping-track.md`'s own process (reconcile,
+  open this cycle's issue from the one contributed `housekeeping-template.md` line, work the checklist,
+  quality gate), stopping at `opening-a-merge-request.md`'s "no forge/remote available" branch (this
+  sandbox has no git remote) — confirming the pre-existing `continuous-housekeeping` process content
+  still runs correctly once triggered via the new scheduler-driven path instead of its own retired
+  standalone due-check.
+
+```bash
+./fixtures/harness/run.sh scheduler php-scheduler-housekeeping-competes --opencode
+```
+
+Same non-CI, local-only, advisory posture as the two fixtures above.
+
 ### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
 
 Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI, alongside `tier1`/`tier2`, in a

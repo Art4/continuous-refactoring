@@ -33,7 +33,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   `.semgrep.yml`/`.semgrep.yaml`) — presence of the invocation, not proof it actually fails the
   pipeline on a finding, the same conservative approximation `composer-audit`'s own CI-gate check
   already uses — **or** a line naming this node is already committed to the Refactoring Notes'
-  `housekeeping-template.md` (`skills/continuous-housekeeping/references/template-file-format.md`), no
+  `housekeeping-template.md` (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`), no
   proof of a completed run required, the same fallback `composer-audit.md` documents in full.
 - **MR scope:** Semgrep wired into CI (however it installs — pip, Docker, or a marketplace CI action;
   never a `composer.json` entry) with the OWASP Top 10 registry ruleset, plus one initial scan pass
@@ -43,7 +43,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   checklist covering the same ground would be duplicate upkeep for no real additional coverage. Also
   contribute this node's `Housekeeping` line (below) to the Refactoring Notes' `housekeeping-template.md`,
   creating that file fresh if it doesn't exist yet
-  (`skills/continuous-housekeeping/references/template-file-format.md`).
+  (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`).
 - **Housekeeping:** re-run Semgrep's OWASP Top 10 ruleset periodically and review new findings — a
   point-in-time scan whose value is in repetition, the same reasoning `composer-audit`'s own
   Housekeeping entry already states for CVE advisories.
