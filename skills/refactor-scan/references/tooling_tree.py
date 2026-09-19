@@ -1,12 +1,13 @@
-"""Deterministic parser for the PHP tooling tree (php-tooling-tree.md, alongside this file).
+"""Deterministic graph-logic parser for the tooling tree.
 
-Provides load_tree, detect_nodes, roadmap without invoking LLM or mutating repo.
+Provides load_tree, detect_nodes, next_candidates, and graph-logic-only
+outputs (ordered backlog, workable nodes, withheld with reasons, closed by
+rejection, merge-request outlook) without invoking LLM or mutating repo.
 
-Seam: skills/refactor-scan/references/tooling_tree.py — used by refactor-scan
-and the roadmap dry-run harness.
+Seam: skills/refactor-scan/references/tooling_tree.py — used by refactor-scan.
 
-Docs: php-tooling-tree.md (sibling to this file) is machine-readable (edges
-table), CONTEXT.md vocabulary.
+Docs: tooling-tree.md and php-tooling-tree.md (siblings to this file) are
+machine-readable (edges table), CONTEXT.md vocabulary.
 """
 
 from __future__ import annotations
@@ -21,10 +22,6 @@ TREE_MD = _HERE / "php-tooling-tree.md"
 # Generic root: git -> loop-config, and the structural-scan node that PHP's
 # tree leaves point into via `resolved` edges.
 GENERIC_TREE_MD = _HERE / "tooling-tree.md"
-# Suite repo root — used only by roadmap()'s dev/test-only fixtures fallback
-# below. A shipped install has no fixtures/ directory, so this is never
-# reached outside the suite's own test harness.
-REPO_ROOT = _HERE.parents[2]  # references -> refactor-scan -> skills -> repo root
 
 _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 
@@ -44,6 +41,180 @@ _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "ha
 # The PHPStan level chain (1..10) — used by roadmap()'s per-level
 # empty-baseline gate and its open-chain filler.
 _PHPSTAN_LEVEL_NODES = [f"phpstan-level-{i}" for i in range(1, 11)]
+
+
+# ---------------------------------------------------------------------------
+# Seed input: fulfilled-set file (agent-judged fulfilment)
+# ---------------------------------------------------------------------------
+
+
+def _load_fulfilled_seed(seed_path: pathlib.Path) -> dict[str, bool]:
+    """Load a fulfilled-set file: JSON ``{node_slug: true/false}``.
+
+    Nodes missing from the file are treated as not fulfilled.
+    Returns ``{node: bool}`` — simple, no reason/details metadata needed
+    for graph-logic-only computation.
+    """
+    try:
+        data = json.loads(seed_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError):
+        return {}
+    return {k: bool(v) for k, v in data.items() if isinstance(v, bool)}
+
+
+def _derive_fulfilled_from_bookkeeping(
+    repo: pathlib.Path, tree: dict
+) -> dict[str, bool] | None:
+    """Derive node fulfilled state from bookkeeping.md's Track sections.
+
+    A scope node that is neither in ``Open`` nor in ``Out-of-scope`` is
+    fulfilled.  Returns ``None`` when no bookkeeping file or no Track
+    sections exist (caller falls back to detection).
+    """
+    bookkeeping = _resolve_refactoring_notes_dir(repo) / "bookkeeping.md"
+    if not bookkeeping.exists():
+        return None
+    try:
+        text = bookkeeping.read_text(encoding="utf-8")
+    except OSError:
+        return None
+
+    open_nodes: set[str] = set()
+    out_of_scope_nodes: set[str] = set()
+    in_open_section = False
+    in_scope_section = False
+
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("## Open"):
+            in_open_section = True
+            in_scope_section = False
+            continue
+        if stripped.startswith("## Out-of-scope"):
+            in_open_section = False
+            in_scope_section = True
+            continue
+        if stripped.startswith("## "):
+            in_open_section = False
+            in_scope_section = False
+            continue
+        if in_open_section and stripped.startswith("- "):
+            slug = stripped[2:].split()[0].strip("`").strip()
+            if slug:
+                open_nodes.add(slug)
+        elif in_scope_section and stripped.startswith("- "):
+            slug = stripped[2:].split()[0].strip("`").strip()
+            if slug:
+                out_of_scope_nodes.add(slug)
+
+    if not open_nodes and not out_of_scope_nodes:
+        return None
+
+    result: dict[str, bool] = {}
+    for node in tree["nodes"]:
+        if node in open_nodes or node in out_of_scope_nodes:
+            result[node] = False
+        else:
+            result[node] = True
+    return result
+
+
+def _resolve_fulfilled(
+    repo: pathlib.Path,
+    tree: dict,
+    fulfilled: dict[str, bool] | None = None,
+) -> dict[str, bool]:
+    """Resolve the fulfilled set from the highest-priority source.
+
+    Priority: explicit ``fulfilled`` parameter > seed file >
+    bookkeeping derivation > detection (``detect_nodes()``).
+    """
+    if fulfilled is not None:
+        return fulfilled
+    # Check for seed file in Refactoring Notes
+    notes_dir = _resolve_refactoring_notes_dir(repo)
+    seed_path = notes_dir / "fulfilled-set.json"
+    if seed_path.exists():
+        return _load_fulfilled_seed(seed_path)
+    # Try bookkeeping derivation
+    derived = _derive_fulfilled_from_bookkeeping(repo, tree)
+    if derived is not None:
+        return derived
+    # Fall back to detection
+    detected = detect_nodes(repo, tree)
+    return {node: info.get("fulfilled", False) for node, info in detected.items()}
+
+
+def closed_by_rejection(tree: dict, rejected: set[str]) -> list[str]:
+    """Nodes whose required (or required-any) ancestor is rejected —
+    permanently closed for good, unlike merely unfulfilled nodes."""
+    result = []
+    for node in tree["order"]:
+        if node in rejected:
+            continue
+        if _is_effectively_rejected(node, tree, rejected):
+            result.append(node)
+    return result
+
+
+def withheld_with_reasons(
+    repo: pathlib.Path,
+    tree: dict | None = None,
+    fulfilled: dict[str, bool] | None = None,
+) -> list[dict]:
+    """Withheld nodes with reasons: rejected required ancestors or
+    undecided recommended parents."""
+    repo = pathlib.Path(repo)
+    if tree is None:
+        tree = load_tree()
+    resolved = _resolve_fulfilled(repo, tree, fulfilled)
+    resolved["git"] = True
+    rejected = _rejected_nodes(repo)
+    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
+    result: list[dict] = []
+    for node in tree["order"]:
+        if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
+            continue
+        if resolved.get(node, False) or node in rejected:
+            continue
+        if node in php_floor_blocked:
+            continue
+        if _recommended_gate_moot(node, tree, {n: {"fulfilled": v} for n, v in resolved.items()}):
+            continue
+        ok, why = _is_unblocked(node, tree, {n: {"fulfilled": v} for n, v in resolved.items()})
+        if ok:
+            undecided = _undecided_recommended_parents(
+                node, tree, {n: {"fulfilled": v} for n, v in resolved.items()}, rejected
+            )
+            if undecided:
+                result.append({"node": node, "reason": f"waiting on: {', '.join(undecided)}"})
+        else:
+            result.append({"node": node, "reason": why})
+    return result
+
+
+def ordered_backlog(
+    repo: pathlib.Path,
+    tree: dict | None = None,
+    fulfilled: dict[str, bool] | None = None,
+) -> list[str]:
+    """Complete ordered list of unresolved scope nodes in tree order,
+    blocked nodes included — the list a scan records into ``Open``."""
+    repo = pathlib.Path(repo)
+    if tree is None:
+        tree = load_tree()
+    resolved = _resolve_fulfilled(repo, tree, fulfilled)
+    rejected = _rejected_nodes(repo)
+    backlog = []
+    for node in tree["order"]:
+        if node in _NEVER_PROPOSED:
+            continue
+        if resolved.get(node, False):
+            continue
+        if node in rejected:
+            continue
+        backlog.append(node)
+    return backlog
 
 
 def _parse_edges(path: pathlib.Path) -> list[dict]:
@@ -1448,30 +1619,37 @@ def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
     return True, "required parents fulfilled"
 
 
-def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | None = None) -> list[dict]:
+def next_candidates(
+    repo: pathlib.Path,
+    tree: dict | None = None,
+    limit: int | None = None,
+    fulfilled: dict[str, bool] | None = None,
+) -> list[dict]:
     """Return every node that is *really* unblocked and unfulfilled right now
     (or, with an explicit `limit`, at most that many — `refactor-scan` itself
     never passes one: more than five nodes can be genuinely unblocked at
     once, so this is never capped by default).
 
-    Unlike ``roadmap()``, this does not simulate — it does not assume a
-    returned node is already fulfilled to compute what comes after it. Only
-    ``git``'s real ``.git`` check and each node's real required/resolved
-    parents decide what's in this list, so entries here can be true siblings
-    (e.g. ``composer`` and ``ci-runner`` once ``loop-config`` is really
-    fulfilled), not a serial lookahead — ``refactor-scan`` needs "what's
-    proposable now", not a forward roadmap.
+    Does not simulate — does not assume a returned node is already fulfilled
+    to compute what comes after it.  Only ``git``'s real ``.git`` check and
+    each node's real required/resolved parents decide what's in this list,
+    so entries here can be true siblings, not a serial lookahead.
 
     A node with an undecided `recommended` parent is withheld from this list
     entirely rather than merely ranked lower — see ``withheld_candidates()``
-    for the matching "waiting on" list ``refactor-scan`` surfaces alongside
-    this one.
+    for the matching "waiting on" list.
+
+    When *fulfilled* is provided (a ``{node: bool}`` mapping), it is used
+    instead of calling ``detect_nodes()`` — the seed-input contract that
+    lets the script run graph-logic-only.
     """
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    detected = detect_nodes(repo, tree)
-    detected["git"]["fulfilled"] = True  # never proposed
+    resolved = _resolve_fulfilled(repo, tree, fulfilled)
+    resolved["git"] = True  # never proposed
+    # Build the detected-like dict expected by graph helpers
+    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
     rejected = _rejected_nodes(repo)
     php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
 
@@ -1480,74 +1658,43 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
         if node in _NEVER_PROPOSED:
             continue
         if tree["resolved_parents"].get(node):
-            # Resolved-gated node (structural-scan, and any aggregation node
-            # feeding it, e.g. php-safety-net). Checked on its own
-            # terms, *before* the generic fulfilled-skip below: detect_nodes()
-            # marks such a node "fulfilled" the instant its resolved-parent
-            # leaves resolve, but for an *exposed* one that's the gate
-            # *opening*, not the node being delivered and done (unlike every
-            # other tooling node, where fulfilled really does mean "don't
-            # propose again"). Gating on the generic skip here made this
-            # branch permanently unreachable dead code — an exposed
-            # resolved-gated node must stay proposable every pass once open:
-            # it's an ongoing candidate for refactor-design to keep drawing
-            # on, not a one-time node. An aggregation node that isn't itself
-            # exposed (its resolved-ness only feeds another resolved-gated
-            # node) is never proposed at all, whatever its resolved state.
             if node not in tree["exposed_resolved_gate_nodes"]:
                 continue
             if not detected.get(node, {}).get("fulfilled", False):
                 continue
-            result.append({"node": node, "reason": detected[node]["reason"]})
+            result.append({"node": node, "reason": f"resolved gate open for {node}"})
         else:
             if detected.get(node, {}).get("fulfilled", False):
                 continue
             if node in rejected:
-                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
+                continue
             if node in php_floor_blocked:
-                continue  # target's PHP floor doesn't meet this leaf's known minimum yet
+                continue
             if _recommended_gate_moot(node, tree, detected):
-                continue  # every recommended parent permanently gated (e.g. whole PHP tree closed by is-php-project) — not actionable, not even withheld
+                continue
             ok, why = _is_unblocked(node, tree, detected)
             if not ok:
                 continue
             if _undecided_recommended_parents(node, tree, detected, rejected):
-                continue  # withheld — see withheld_candidates()
+                continue
             result.append({"node": node, "reason": why})
         if limit is not None and len(result) >= limit:
             break
     return result
 
 
-def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict | None = None) -> list[dict]:
+def directly_unblocked_children(
+    repo: pathlib.Path,
+    landed_node: str,
+    tree: dict | None = None,
+    fulfilled: dict[str, bool] | None = None,
+) -> list[dict]:
     """Every node this one candidate's fulfilment newly makes proposable —
     the fan-out an MR's outlook diagram draws
-    (``opening-a-merge-request.md``), distinct from ``roadmap(steps=1)``'s
-    single top-priority pick.
+    (``opening-a-merge-request.md``).
 
-    Walks ``landed_node``'s direct children in the edge table. A child
-    that's never itself a real candidate — ``_NEVER_PROPOSED`` for
-    structural/plumbing reasons (``static-code-analyzer``), or a
-    resolved-gated aggregation node that isn't itself exposed
-    (``php-safety-net``) — is walked *through* to its own children
-    instead of being reported, the same "not proposed itself, but its
-    resolved-ness matters" treatment ``next_candidates()`` gives these
-    nodes. The walk only continues past such a node while it's actually
-    fulfilled/resolved right now; otherwise that branch contributes
-    nothing and stops there.
-
-    "Newly" unblocked is decided by a counterfactual: would this same node
-    already have been proposable with ``landed_node``'s own fulfilled flag
-    forced back to `False`? A `required-any` child also reachable via
-    another already-fulfilled sibling parent answers yes — excluded, it
-    was reachable before this candidate too, not newly opened by it.
-    Every other gate ``next_candidates()`` applies (rejected, PHP floor,
-    undecided recommended parents, `composer-audit`'s real-dependency stop
-    condition, the PHPStan baseline stop-condition) is independent of
-    ``landed_node``'s own flag, so a node's current membership in ``next_candidates()``
-    already answers those for both the "now" and "before" snapshots alike
-    — only the required/required-any check itself needs re-evaluating
-    under the counterfactual, not a second full tree scan.
+    When *fulfilled* is provided, it is used instead of calling
+    ``detect_nodes()`` — the seed-input contract.
     """
     repo = pathlib.Path(repo)
     if tree is None:
@@ -1555,8 +1702,9 @@ def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict
     if landed_node not in tree["nodes"]:
         return []
 
-    detected = detect_nodes(repo, tree)
-    detected["git"]["fulfilled"] = True  # never proposed
+    resolved = _resolve_fulfilled(repo, tree, fulfilled)
+    resolved["git"] = True
+    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
     rejected = _rejected_nodes(repo)
 
     # Counterfactual snapshot: landed_node never happened.
@@ -1581,7 +1729,11 @@ def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict
 
     gate_now = _resolved_gate_status(tree, lambda n: detected.get(n, {}).get("fulfilled", False), rejected)
     gate_without = _resolved_gate_status(tree, lambda n: detected_without.get(n, {}).get("fulfilled", False), rejected)
-    next_now = {c["node"] for c in next_candidates(repo, tree=tree)}
+    # Build fulfilled dicts for next_candidates calls
+    fulfilled_now = {n: v.get("fulfilled", False) for n, v in detected.items()}
+    fulfilled_without = {n: v.get("fulfilled", False) for n, v in detected_without.items()}
+    next_now = {c["node"] for c in next_candidates(repo, tree=tree, fulfilled=fulfilled_now)}
+    next_without = {c["node"] for c in next_candidates(repo, tree=tree, fulfilled=fulfilled_without)}
 
     children_of: dict[str, list[dict]] = {}
     for e in tree["edges"]:
@@ -1601,20 +1753,21 @@ def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict
         )
         if pass_through:
             if tree["resolved_parents"].get(child):
-                fulfilled_now = gate_now.get(child, (False, []))[0]
+                fulfilled_now_gate = gate_now.get(child, (False, []))[0]
             else:
-                fulfilled_now = detected.get(child, {}).get("fulfilled", False)
-            if fulfilled_now:
+                fulfilled_now_gate = detected.get(child, {}).get("fulfilled", False)
+            if fulfilled_now_gate:
                 frontier.extend((e["to"], e["type"]) for e in children_of.get(child, []))
             continue
 
         if child not in next_now:
             continue  # not a real candidate right now — blocked by something else too
 
+        # Was this node already reachable before the landed node?
         if tree["resolved_parents"].get(child):
             already_before = gate_without.get(child, (False, []))[0]
         else:
-            already_before, _why = _is_unblocked(child, tree, detected_without)
+            already_before = child in next_without
         if already_before:
             continue  # reachable via some other already-fulfilled parent too — not new
 
@@ -1622,35 +1775,38 @@ def directly_unblocked_children(repo: pathlib.Path, landed_node: str, tree: dict
     return result
 
 
-def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[dict]:
+def withheld_candidates(
+    repo: pathlib.Path,
+    tree: dict | None = None,
+    fulfilled: dict[str, bool] | None = None,
+) -> list[dict]:
     """Nodes that would otherwise be in ``next_candidates()`` (required
     parents fulfilled, not rejected, not yet fulfilled) but stay withheld
     because one or more ``recommended`` parents haven't reached a decided
-    state yet — surfaced separately so ``refactor-scan`` can name them and
-    say what they're waiting on, instead of them silently vanishing from the
-    proposal set."""
+    state yet.
+
+    When *fulfilled* is provided, it is used instead of calling
+    ``detect_nodes()`` — the seed-input contract.
+    """
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    detected = detect_nodes(repo, tree)
-    detected["git"]["fulfilled"] = True
+    resolved = _resolve_fulfilled(repo, tree, fulfilled)
+    resolved["git"] = True
+    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
     rejected = _rejected_nodes(repo)
     php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
 
     result: list[dict] = []
     for node in tree["order"]:
         if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
-            # Resolved-gated nodes (structural-scan, and any aggregation
-            # node feeding it, e.g. php-safety-net) are never withheld
-            # by recommended-edge gating — they're gated by `resolved`
-            # edges entirely, handled in next_candidates() instead.
             continue
         if detected.get(node, {}).get("fulfilled", False) or node in rejected:
             continue
         if node in php_floor_blocked:
-            continue  # no recommended edge targets these leaves today, but stays consistent if one ever does
+            continue
         if _recommended_gate_moot(node, tree, detected):
-            continue  # every recommended parent permanently gated — see next_candidates()
+            continue
         ok, _why = _is_unblocked(node, tree, detected)
         if not ok:
             continue
@@ -1660,189 +1816,45 @@ def withheld_candidates(repo: pathlib.Path, tree: dict | None = None) -> list[di
     return result
 
 
-def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> list[dict]:
-    """Generate next `steps` MRs deterministically from current repo state.
+def detect_and_roadmap(
+    repo: pathlib.Path,
+    steps: int = 10,
+    tree_md: pathlib.Path | None = None,
+    fulfilled: dict[str, bool] | None = None,
+    seed_path: pathlib.Path | None = None,
+) -> dict:
+    """Main entry point: compute graph outputs from fulfilled state.
 
-    Does not mutate repo; simulates fulfilling nodes in priority order.
-    After tooling nodes exhausted or blocked, fills with structural candidates from expected/issues if present.
+    When *seed_path* is provided, it takes priority over *fulfilled*.
+    When neither is given, the script derives state from bookkeeping or
+    falls back to ``detect_nodes()``.
     """
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    # Priority order: as appear in edges table order (tree["order"])
-    # But ensure stable priority: git, ci-runner, composer, then composer children in table order, then p-chain, rector
-    priority = tree["order"]
-    # Also include nodes not in order? fallback
-    all_nodes = priority[:]
-
-    detected = detect_nodes(repo, tree)
-    # Copy fulfilled status to simulate
-    fulfilled = {k: v["fulfilled"] for k, v in detected.items()}
-    # git is never an MR; treat as implicitly fulfilled for roadmap (harness does git init)
-    fulfilled["git"] = True
-    detected["git"]["fulfilled"] = True
-    # out-of-scope rejections, used by structural-scan's `resolved` gate
-    rejected = _rejected_nodes(repo)
-    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
-
-    # For roadmap simulation, we need to handle that composer-audit is special: we marked fulfilled False always, so it will be proposed.
-    # But test-runner-if-missing is fulfilled if phpunit present — skip proposing it separately.
-    # We'll generate steps by iteratively picking highest-priority unblocked not-yet-fulfilled node.
-
-    result: list[dict] = []
-
-    # Helper to get candidate structural issues for filling — supports new layout project/ + expected (sibling)
-    structural_candidates: list[dict] = []
-    # 1) Direct expected under repo (old layout: repo/expected, or DST with project copy but expected still at repo/expected for original fixture)
-    for cand_dir in [repo / "expected" / "issues", repo / "project" / "expected" / "issues", repo / "composer" / "expected" / "issues"]:
-        if cand_dir.exists():
-            for f in sorted(cand_dir.glob("*.md")):
-                structural_candidates.append({"file": f.name, "path": str(f)})
-    # 2) If repo is a DST (/tmp/.../php-empty), look at original fixture's expected (sibling to project, not mounted)
-    if not structural_candidates:
-        # Dev/test-only: REPO_ROOT resolves to the suite checkout, which has
-        # a fixtures/ tree; never reached at skill runtime (see REPO_ROOT above).
-        fixtures_expected = REPO_ROOT / "fixtures" / "php" / repo.name / "expected" / "issues"
-        if fixtures_expected.exists():
-            for f in sorted(fixtures_expected.glob("*.md")):
-                structural_candidates.append({"file": f.name, "path": str(f)})
-    # 3) Fallback recursive
-    if not structural_candidates:
-        for p in repo.rglob("expected/issues/*.md"):
-            structural_candidates.append({"file": p.name, "path": str(p)})
-            if len(structural_candidates) >= 10:
-                break
-
-    # Simulate
-    for _ in range(steps):
-        sim_fulfilled = {**fulfilled, **{r["node"]: True for r in result}}
-        # Fresh per-iteration resolved-gate status for every resolved-gated
-        # node (structural-scan, and PHP's own aggregation node
-        # php-safety-net feeding it), computed from this iteration's
-        # sim_fulfilled snapshot — independent of tree["order"] position, so
-        # structural-scan's own check below reads php-safety-net's
-        # already-resolved status correctly even though the generic root's
-        # structural-scan node sorts earlier in tree["order"] than the PHP
-        # tree's aggregation node.
-        gate = _resolved_gate_status(tree, lambda n: sim_fulfilled.get(n, False), rejected)
-        # Find best unblocked candidate among tooling nodes
-        best = None
-        best_reason = ""
-        for node in priority:
-            if node in _NEVER_PROPOSED:
-                continue  # never an MR / never a candidate
-            if tree["resolved_parents"].get(node):
-                # `resolved` gate: checked on its own terms, *before* the
-                # generic sim_fulfilled-skip below — mirrors
-                # next_candidates()'s ordering. sim_fulfilled marks a
-                # resolved-gated node "fulfilled" the instant its gate opens,
-                # but for an *exposed* one that's the gate *opening*, not the
-                # node being delivered and done: it must stay proposable
-                # every iteration once open (e.g. structural-scan keeps
-                # accepting planted structural candidates), not just the one
-                # iteration it first resolves in. Gating this behind the
-                # generic skip made it unreachable once already simulated
-                # fulfilled: once every PHP-tree leaf is resolved, the loop
-                # would skip structural-scan every iteration and fall
-                # through to the phantom phpstan-level-N "open chain" filler
-                # forever instead of ever proposing structural-scan again.
-                #
-                # Every resolved-parent leaf must be fulfilled OR rejected —
-                # not the standard required-parent check, which would
-                # instead close this node forever on any rejection. Applies
-                # to any resolved-gated node (structural-scan, and any
-                # aggregation node feeding it, e.g. php-safety-net) —
-                # `gate` (computed fresh this iteration, above) already
-                # resolves an aggregation node's own status first, so
-                # structural-scan's check reads it correctly regardless of
-                # tree["order"] position. An aggregation node that isn't
-                # itself exposed is never a candidate, whatever its resolved
-                # state.
-                if node not in tree["exposed_resolved_gate_nodes"]:
-                    continue
-                resolved, _unresolved = gate[node]
-                if not resolved:
-                    continue
-                best = node
-                best_reason = "all resolved-parent leaves resolved (fulfilled or rejected)"
-                break
-            if sim_fulfilled.get(node, False):
-                continue  # already fulfilled (real or simulated), skip
-            if node in rejected:
-                continue  # explicitly rejected — stays out until its out-of-scope entry is reversed
-            if node in php_floor_blocked:
-                continue  # target's PHP floor doesn't meet this leaf's known minimum yet
-            # test-runner-if-missing is fulfilled if phpunit/pest already fulfilled (simulated) —
-            # phpunit fulfilled implies a runner is adopted, so proposing this one too is redundant.
-            if node == "test-runner-if-missing" and sim_fulfilled.get("phpunit"):
-                continue
-            # No symmetric skip the other way: test-runner-if-missing fulfilled no
-            # longer implies phpunit fulfilled — a runner can be adopted (satisfying
-            # test-runner-if-missing) while phpunit's own CI-gating requirement is still open, and
-            # that's a genuinely different, still-proposable candidate (wire it into CI).
-            sim_ok, sim_why = _is_unblocked(node, tree, {k: {"fulfilled": v} for k, v in sim_fulfilled.items()})
-            if not sim_ok:
-                continue
-            # For rector nodes: require p0 fulfilled (already checked), recommended parents are advisory not blocking
-            # Choose best by priority order (first found)
-            best = node
-            best_reason = sim_why
-            break
-        if best:
-            req = tree["required_parents"].get(best, [])
-            req_any = tree["required_any_parents"].get(best, [])
-            rec = tree["recommended_parents"].get(best, [])
-            # Outlook note for recommended parents missing
-            outlook = ""
-            for rp in rec:
-                # check if recommended parent not fulfilled
-                if not fulfilled.get(rp, False) and rp not in [r["node"] for r in result]:
-                    outlook = f" | outlook: would benefit from {rp} (recommended) — still proposable"
-                    break
-            result.append({"n": len(result) + 1, "node": best, "type": "tooling", "required_parents": req, "required_any_parents": req_any, "recommended_parents": rec, "reason": best_reason + outlook})
-            # Do not actually mutate repo; just mark fulfilled for simulation
-            continue
-        # No tooling node unblocked -> fill with structural candidates, but
-        # only once the structural-scan gate has actually opened: every
-        # PHP-tree leaf resolved. Otherwise structural work is exactly
-        # what's still blocked — falling back to it here would silently
-        # bypass the gate whenever the tooling chain stalls (e.g. a
-        # non-empty PHPStan baseline blocking the next level).
-        if structural_candidates and sim_fulfilled.get("structural-scan", False):
-            # pop next structural
-            idx = len([r for r in result if r["type"] == "structural"])
-            if idx < len(structural_candidates):
-                cand = structural_candidates[idx]
-                result.append({"n": len(result) + 1, "node": f"structural:{cand['file']}", "type": "structural", "reason": "planted candidate"})
-                continue
-        # Fill remaining with open chain note
-        if len(result) < steps:
-            nxt = 11 + len([r for r in result if "phpstan-level" in r["node"]])
-            result.append({"n": len(result) + 1, "node": f"phpstan-level-{nxt}", "type": "tooling (open chain)", "reason": "chain open above level 10 — appended node"})
-            continue
-        break
-
-    # Ensure 10 steps by truncating/expanding
-    return result[:steps]
-
-
-def detect_and_roadmap(repo: pathlib.Path, steps: int = 10, tree_md: pathlib.Path | None = None) -> dict:
     tree = load_tree(tree_md=tree_md)
-    detected = detect_nodes(repo, tree)
-    road = roadmap(repo, steps=steps, tree=tree)
-    # `next` is uncapped — `--steps` only bounds `roadmap`'s forward
-    # simulation depth, a separate concept.
-    nxt = next_candidates(repo, tree=tree)
-    withheld = withheld_candidates(repo, tree=tree)
+    repo = pathlib.Path(repo)
+    # Resolve fulfilled state: seed_path > fulfilled param > auto-detect
+    if seed_path is not None and seed_path.exists():
+        resolved_fulfilled = _load_fulfilled_seed(seed_path)
+    else:
+        resolved_fulfilled = fulfilled
+    resolved = _resolve_fulfilled(repo, tree, resolved_fulfilled)
+    detected = {n: {"fulfilled": v, "reason": "", "details": {}} for n, v in resolved.items()}
+    nxt = next_candidates(repo, tree=tree, fulfilled=resolved_fulfilled)
+    withheld = withheld_candidates(repo, tree=tree, fulfilled=resolved_fulfilled)
     reversals = php_version_reversal_findings(repo)
     php_floor_blocked = php_floor_precheck(repo)
+    rejected = _rejected_nodes(repo)
+    backlog = ordered_backlog(repo, tree=tree, fulfilled=resolved_fulfilled)
+    closed = closed_by_rejection(tree, rejected)
+    withheld_reasons = withheld_with_reasons(repo, tree=tree, fulfilled=resolved_fulfilled)
     return {
         "detected": detected,
-        "roadmap": road,
         "next": nxt,
         "withheld": withheld,
+        "withheld_with_reasons": withheld_reasons,
         "reversals": reversals,
         "php_floor_blocked": php_floor_blocked,
+        "backlog": backlog,
+        "closed_by_rejection": closed,
         "tree": {"edges": tree["edges"]},
     }
 
@@ -1852,17 +1864,16 @@ if __name__ == "__main__":
 
     ap = argparse.ArgumentParser(description="Detect tooling tree and propose next MRs (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to fixture/repo (default: .)")
-    ap.add_argument("--steps", type=int, default=10, help="depth of the simulated `roadmap` lookahead — does not bound `next`, which is always every currently-unblocked node")
-    ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree). Only scopes edges/gating (next, roadmap, tree.edges) -- detect_nodes' per-tool filesystem checks are hardcoded and always run regardless of --tree, so 'detected' in the JSON output may list nodes your override tree doesn't even define")
+    ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree)")
+    ap.add_argument("--seed", type=str, default=None, help="path to a fulfilled-set JSON file (node_slug: true/false) — when provided, graph outputs are computed from it instead of detection")
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
-    ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (refactor-implement/references/outlook-comment.md's outlook diagram) -- additive, does not change next/roadmap/detected")
+    ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (outlook diagram)")
     args = ap.parse_args()
     repo = pathlib.Path(args.repo)
     tree_md = pathlib.Path(args.tree) if args.tree else None
-    data = detect_and_roadmap(repo, steps=args.steps, tree_md=tree_md)
+    seed_path = pathlib.Path(args.seed) if args.seed else None
+    data = detect_and_roadmap(repo, tree_md=tree_md, seed_path=seed_path)
     if args.unblocked_by:
         tree = load_tree(tree_md=tree_md)
         data["unblocked_by"] = directly_unblocked_children(repo, args.unblocked_by, tree=tree)
-    # also add branch check: ensure no extra branches created
-    # include git status
     print(json.dumps(data, indent=2))

@@ -19,7 +19,6 @@ _spec.loader.exec_module(tooling_tree)
 
 load_tree = tooling_tree.load_tree
 detect_nodes = tooling_tree.detect_nodes
-roadmap = tooling_tree.roadmap
 next_candidates = tooling_tree.next_candidates
 withheld_candidates = tooling_tree.withheld_candidates
 directly_unblocked_children = tooling_tree.directly_unblocked_children
@@ -28,6 +27,11 @@ php_floor_precheck = tooling_tree.php_floor_precheck
 _is_baseline_empty = tooling_tree._is_baseline_empty
 _resolve_refactoring_notes_dir = tooling_tree._resolve_refactoring_notes_dir
 _rejected_nodes = tooling_tree._rejected_nodes
+closed_by_rejection = tooling_tree.closed_by_rejection
+withheld_with_reasons = tooling_tree.withheld_with_reasons
+ordered_backlog = tooling_tree.ordered_backlog
+_load_fulfilled_seed = tooling_tree._load_fulfilled_seed
+_derive_fulfilled_from_bookkeeping = tooling_tree._derive_fulfilled_from_bookkeeping
 
 
 class LoadTreeTests(unittest.TestCase):
@@ -505,9 +509,8 @@ class DetectNodesTests(unittest.TestCase):
             d = detect_nodes(root)
             self.assertTrue(d["phpstan-level-0"]["fulfilled"])
             self.assertFalse(d["phpstan-level-1"]["fulfilled"])
-            # roadmap should not propose p1 when baseline non-empty
-            r = roadmap(root, steps=5)
-            nodes = [x["node"] for x in r]
+            # next_candidates should not propose p1 when baseline non-empty
+            nodes = [c["node"] for c in next_candidates(root)]
             self.assertNotIn("phpstan-level-1", nodes[:2])  # at least not immediate
         finally:
             tmp.cleanup()
@@ -892,16 +895,6 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
             self.assertIn("structural-scan", nodes)
         finally:
             tmp2.cleanup()
-
-    def test_never_in_roadmap(self):
-        files = self._fully_tooled_php_leaves()
-        files[".editorconfig"] = "root = true\n\n[*]\ncharset = utf-8\n"
-        tmp, root = self._make_repo(files)
-        try:
-            r = roadmap(root, steps=10)
-            self.assertNotIn("php-safety-net", [x["node"] for x in r])
-        finally:
-            tmp.cleanup()
 
     def test_never_in_withheld_candidates(self):
         tmp, root = self._make_repo({})
@@ -2006,10 +1999,9 @@ class CiSelfWiringTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_roadmap_still_proposes_phpunit_for_ci_wiring(self):
-        # Regression guard for the stale roadmap() skip this ticket removes:
-        # test-runner-if-missing already fulfilled must not hide phpunit's
-        # own still-open CI-gating candidate.
+    def test_next_candidates_still_proposes_phpunit_for_ci_wiring(self):
+        # Regression guard: test-runner-if-missing already fulfilled must not
+        # hide phpunit's own still-open CI-gating candidate.
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
             "composer.lock": "{}",
@@ -2227,10 +2219,9 @@ class RectorSetListUnderscoreCasingTests(unittest.TestCase):
 
 
 class RejectionRespectedTests(unittest.TestCase):
-    """A node with an out-of-scope entry stays out of next_candidates()/
-    roadmap() even once its required parents are fulfilled -- until the
-    entry is removed (the composer-audit/phpunit reversal gap: rejected
-    ordinary nodes were never checked, only structural-scan's own gate)."""
+    """A node with an out-of-scope entry stays out of next_candidates()
+    even once its required parents are fulfilled -- until the
+    entry is removed."""
 
     def _make_repo(self, files: dict):
         tmp = tempfile.TemporaryDirectory()
@@ -2254,14 +2245,14 @@ class RejectionRespectedTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_rejected_ordinary_node_not_in_roadmap(self):
+    def test_rejected_ordinary_node_not_in_next_candidates_even_with_fulfilled_parents(self):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
         })
         try:
-            nodes = [x["node"] for x in roadmap(root, steps=10)]
+            nodes = [c["node"] for c in next_candidates(root, limit=10)]
             self.assertNotIn("phpunit", nodes)
         finally:
             tmp.cleanup()
@@ -2613,11 +2604,10 @@ class IsPhpProjectTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_never_in_next_roadmap_or_withheld(self):
+    def test_never_in_next_or_withheld(self):
         tmp, root = self._make_repo(self._loop_config_only())
         try:
             self.assertNotIn("is-php-project", [c["node"] for c in next_candidates(root)])
-            self.assertNotIn("is-php-project", [r["node"] for r in roadmap(root, steps=10)])
             self.assertNotIn("is-php-project", [w["node"] for w in withheld_candidates(root)])
         finally:
             tmp.cleanup()
@@ -2825,7 +2815,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_roadmap_never_proposes_blocked_leaves(self):
+    def test_next_candidates_never_proposes_blocked_leaves(self):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
@@ -2833,8 +2823,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
         })
         try:
-            r = roadmap(root, steps=10)
-            nodes = [x["node"] for x in r]
+            nodes = [c["node"] for c in next_candidates(root)]
             self.assertNotIn("composer-audit", nodes)
             self.assertNotIn("phpstan-level-0", nodes)
         finally:
@@ -3037,7 +3026,11 @@ class PhpMinimalVersionTests(unittest.TestCase):
             tmp.cleanup()
 
 
-class RoadmapTests(unittest.TestCase):
+class OrderedBacklogTests(unittest.TestCase):
+    """Ticket 05: ordered_backlog() returns the complete ordered list of
+    unresolved scope nodes in tree order (blocked nodes included) — the
+    list a scan records into ``Open``."""
+
     def _make_repo(self, files: dict):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
@@ -3048,183 +3041,244 @@ class RoadmapTests(unittest.TestCase):
         (root / ".git").mkdir()
         return tmp, root
 
-    def test_empty_roadmap_starts_with_loop_config(self):
-        # ADR-0008: with no docs/refactoring/bookkeeping.md, loop-config is the
-        # first proposable node — required parent of ci-runner/editorconfig,
-        # and (via is-php-project, ADR-0022) composer.
-        # ADR-0022: composer now requires is-php-project as well as
-        # loop-config — a bare `.git` repo with no PHP signal never fulfils
-        # it, so a minimal `index.php` is added here to keep testing the
-        # composer cascade; IsPhpProjectTests covers the genuinely-no-PHP
-        # case (composer never reachable at all) separately.
-        tmp, root = self._make_repo({"index.php": "<?php\n"})
+    def test_empty_repo_backlog_starts_with_loop_config(self):
+        tmp, root = self._make_repo({})
         try:
-            r = roadmap(root, steps=7)
-            self.assertEqual(r[0]["node"], "loop-config")
-            # ADR-0022: is-php-project sits between loop-config and
-            # ci-runner/editorconfig in tree["order"] but is never proposed
-            # (_NEVER_PROPOSED) — it never appears in roadmap output itself.
-            self.assertNotIn("is-php-project", [step["node"] for step in r])
-            # ci-runner now sorts ahead of editorconfig — both trivial
-            # generic-root nodes, tooling-tree.md's edge table lists
-            # ci-runner's row first. ticket 63: secret-detection no longer
-            # sorts here at all — its required parent is repointed from
-            # loop-config to structural-scan itself (a Signal wave node now),
-            # so it never appears this early in the roadmap; it only becomes
-            # a candidate once the whole PHP tree's Safety Net has resolved.
-            self.assertEqual(r[1]["node"], "ci-runner")
-            self.assertEqual(r[2]["node"], "editorconfig")
-            self.assertEqual(r[3]["node"], "composer")
-            self.assertIn(r[4]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
-            self.assertNotIn("secret-detection", [step["node"] for step in r])
+            backlog = ordered_backlog(root)
+            self.assertIn("loop-config", backlog)
+            self.assertNotIn("git", backlog)
         finally:
             tmp.cleanup()
 
-    def test_roadmap_with_loop_config_starts_with_composer(self):
-        # With docs/refactoring/bookkeeping.md already present, loop-config is
-        # fulfilled and the roadmap picks up where it used to before ADR-0008
-        # — plus ci-runner/editorconfig (ticket 01), ordered ahead of
-        # composer for the same reason as above. Ticket 63: secret-detection
-        # no longer sorts here — see test_empty_roadmap_starts_with_loop_config's
-        # comment. Needs a PHP signal too, same as above (ADR-0022).
+    def test_backlog_excludes_fulfilled_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-            "index.php": "<?php\n",
-        })
-        try:
-            r = roadmap(root, steps=6)
-            self.assertNotIn("is-php-project", [step["node"] for step in r])
-            self.assertEqual(r[0]["node"], "ci-runner")
-            self.assertEqual(r[1]["node"], "editorconfig")
-            self.assertEqual(r[2]["node"], "composer")
-            self.assertIn(r[3]["node"], ["composer-audit", "php-cs-fixer", "phpunit", "psr-4"])
-            self.assertNotIn("secret-detection", [step["node"] for step in r])
-        finally:
-            tmp.cleanup()
-
-    def test_partial_composer_then_unblocked(self):
-        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         })
         try:
-            r = roadmap(root, steps=10)
-            nodes = [x["node"] for x in r]
-            # after composer fulfilled, unblocked should include these
-            self.assertIn("php-cs-fixer", nodes)
+            backlog = ordered_backlog(root)
+            self.assertNotIn("loop-config", backlog)
+            self.assertNotIn("composer", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_backlog_excludes_rejected_nodes(self):
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
+        })
+        try:
+            backlog = ordered_backlog(root)
+            self.assertNotIn("phpunit", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_backlog_includes_blocked_nodes(self):
+        tmp, root = self._make_repo({})
+        try:
+            backlog = ordered_backlog(root)
+            self.assertIn("composer", backlog)
+        finally:
+            tmp.cleanup()
+
+
+class WithheldWithReasonsTests(unittest.TestCase):
+    """Ticket 05: withheld_with_reasons() returns nodes with reasons."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_withheld_with_undecided_recommended_parent(self):
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            withheld = withheld_with_reasons(root)
+            withheld_nodes = {w["node"]: w["reason"] for w in withheld}
+            self.assertIn("rector-dead-code", withheld_nodes)
+            self.assertIn("php-cs-fixer", withheld_nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_withheld_empty_when_all_decided(self):
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
+            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
+            "docs/refactoring/out-of-scope/rector-dead-code.md": "rejected\n",
+            "docs/refactoring/out-of-scope/rector-type-coverage.md": "rejected\n",
+            "docs/refactoring/out-of-scope/rector-php-set.md": "rejected\n",
+            "docs/refactoring/out-of-scope/rector-code-quality.md": "rejected\n",
+            "docs/refactoring/out-of-scope/rector-phpunit-set.md": "rejected\n",
+            "docs/refactoring/out-of-scope/psr-4.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-level-0.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-level-1.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-level-2.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-level-3.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-level-4.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-level-5.md": "rejected\n",
+            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected\n",
+            "docs/refactoring/out-of-scope/coverage-floor.md": "rejected\n",
+            "docs/refactoring/out-of-scope/composer-audit.md": "rejected\n",
+            "docs/refactoring/out-of-scope/semgrep.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpmd.md": "rejected\n",
+            "docs/refactoring/out-of-scope/phpstan-deprecation-rules.md": "rejected\n",
+            "docs/refactoring/out-of-scope/php-minimal-version.md": "rejected\n",
+        })
+        try:
+            withheld = withheld_with_reasons(root)
+            withheld_nodes = {w["node"] for w in withheld}
+            self.assertNotIn("rector-dead-code", withheld_nodes)
+        finally:
+            tmp.cleanup()
+
+
+class ClosedByRejectionTests(unittest.TestCase):
+    """Ticket 05: closed_by_rejection() returns nodes whose required
+    ancestor is rejected."""
+
+    def test_rejected_composer_closes_php_tree(self):
+        tree = load_tree()
+        rejected = {"composer"}
+        closed = closed_by_rejection(tree, rejected)
+        self.assertIn("php-cs-fixer", closed)
+        self.assertIn("phpunit", closed)
+        self.assertIn("rector-dead-code", closed)
+
+    def test_no_rejection_means_no_closure(self):
+        tree = load_tree()
+        closed = closed_by_rejection(tree, set())
+        self.assertEqual(closed, [])
+
+
+class SeedInputTests(unittest.TestCase):
+    """Ticket 05: seed input contract."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_seed_drives_next_candidates(self):
+        tmp, root = self._make_repo({})
+        try:
+            seed = {
+                "git": True, "loop-config": True, "is-php-project": True,
+                "composer": True, "editorconfig": True,
+            }
+            nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
+            # composer fulfilled -> phpunit, psr-4 should be proposable
             self.assertIn("phpunit", nodes)
-            self.assertIn("phpstan-level-0", nodes)
-            # composer-audit stays blocked here: no ci-runner (required parent)
-            # and no real `require` dependency (only the `php` platform
-            # pseudo-package) — see ComposerAuditGateTests for its own gating.
-            self.assertNotIn("composer-audit", nodes)
-            # p0 within 10 (needs composer)
-            self.assertIn("phpstan-level-0", nodes)
+            self.assertIn("psr-4", nodes)
+            # loop-config fulfilled -> not in candidates
+            self.assertNotIn("loop-config", nodes)
         finally:
             tmp.cleanup()
 
-    def test_p0_empty_then_p1_next(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            ".php-cs-fixer.php": "<?php // config",
-        })
+    def test_seed_takes_priority_over_detection(self):
+        tmp, root = self._make_repo({})
         try:
-            r = roadmap(root, steps=10)
-            nodes = [x["node"] for x in r]
-            # Since composer and cs etc. fulfilled via our minimal setup, p1 should appear within 10
-            self.assertIn("phpstan-level-1", nodes)
+            seed = {
+                "git": True, "loop-config": True, "is-php-project": True,
+                "composer": True, "editorconfig": True,
+            }
+            nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
+            # Detection would say loop-config is not fulfilled
+            # Seed says it is — seed wins
+            self.assertNotIn("loop-config", nodes)
         finally:
             tmp.cleanup()
 
-    def test_recommended_outlook(self):
-        # p0 fulfilled but cs-fixer missing -> rector still proposable (recommended edge)
-        # cs-fixer will be picked before rector due to priority, so we just check rector is proposable
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
-            "composer.lock": "{}",
-            "phpstan.neon": "parameters:\n    level: 0\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-        })
+    def test_seed_file_loading(self):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        seed_path = root / "fulfilled-set.json"
+        seed_path.write_text(json.dumps({"git": True, "composer": False, "loop-config": True}))
         try:
-            # ticket 43: the level chain alone (1..10) now spans 10 nodes, so
-            # a 10-step lookahead no longer reaches rector-dead-code at all —
-            # widen the lookahead rather than shrink what's under test.
-            r = roadmap(root, steps=25)
-            rector = [x for x in r if x["node"] == "rector-dead-code"]
-            self.assertTrue(rector)
-            # rector should be present; outlook may be absent if cs-fixer already picked earlier — accept either
-            self.assertTrue(rector[0]["node"] == "rector-dead-code")
+            loaded = _load_fulfilled_seed(seed_path)
+            self.assertEqual(loaded, {"git": True, "composer": False, "loop-config": True})
         finally:
             tmp.cleanup()
 
-    def test_10_steps_always(self):
-        tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": "^8.1"}}),
-            "composer.lock": "{}",
-        })
+    def test_seed_missing_nodes_treated_as_not_fulfilled(self):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        seed_path = root / "fulfilled-set.json"
+        seed_path.write_text(json.dumps({"git": True}))
         try:
-            r = roadmap(root, steps=10)
-            self.assertEqual(len(r), 10)
-            self.assertEqual(r[0]["n"], 1)
-            self.assertEqual(r[-1]["n"], 10)
+            loaded = _load_fulfilled_seed(seed_path)
+            self.assertTrue(loaded["git"])
+            self.assertFalse(loaded.get("composer", False))
         finally:
             tmp.cleanup()
 
-    def test_structural_scan_proposed_once_gate_open_ticket_39(self):
-        # Ticket 39: once every php-safety-net leaf is resolved
-        # (fulfilled or rejected), roadmap()'s simulation loop used to skip
-        # structural-scan forever (its resolved-gate branch sat *after* the
-        # generic sim_fulfilled skip, so a node marked "fulfilled" the
-        # instant its gate opened was never reached again) and fell through
-        # to a meaningless phpstan-level-N "open chain" filler instead, every
-        # step, for the whole lookahead. Reusing
-        # StructuralScanGateTests._fully_tooled_files's fixture shape (every
-        # leaf fulfilled by file inspection, no rejections needed) — same
-        # fixture that already proves detect_nodes() marks structural-scan
-        # fulfilled; roadmap() must now agree it stays proposable.
+    def test_bookkeeping_derivation(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
-            "composer.json": json.dumps({
-                "require-dev": {
-                    "phpstan/phpstan": "^1.0",
-                    "phpstan/phpstan-deprecation-rules": "^1.0",
-                    "phpunit/phpunit": "^10.0",
-                    "friendsofphp/php-cs-fixer": "^3.0",
-                },
-                "require": {
-                    "some/real-dep": "^1.0",
-                },
-                "autoload": {"psr-4": {"App\\": "src/"}},
-            }),
-            "composer.lock": "{}",
-            "src/Example.php": "<?php\n\nnamespace App;\n\nclass Example\n{\n}\n",
-            ".php-cs-fixer.php": "<?php return [];",
-            "phpstan.neon": "parameters:\n    level: 5\n",
-            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "rector.php": "<?php // DeadCode Type LevelSetList CodeQuality PHPUnitSetList",
-            ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
-            ".github/workflows/ci.yml": (
-                "jobs:\n"
-                "  audit:\n"
-                "    steps:\n"
-                "      - run: composer audit\n"
-                "      - run: vendor/bin/phpunit\n"
-                "      - run: vendor/bin/phpstan analyse\n"
-                "      - run: gitleaks detect\n"
+            "docs/refactoring/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "## Open\n\n"
+                "- `phpunit`\n"
+                "- `php-cs-fixer`\n\n"
+                "## Out-of-scope\n\n"
+                "- `psalm`\n"
             ),
-            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         })
         try:
-            r = roadmap(root, steps=1)
-            self.assertEqual(r[0]["node"], "structural-scan")
-            # And it stays the answer every step, not just the first —
-            # exactly the "ongoing candidate" shape next_candidates() already
-            # gives an exposed resolved-gate node.
-            r10 = roadmap(root, steps=10)
-            self.assertTrue(all(x["node"] == "structural-scan" for x in r10))
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertIsNotNone(derived)
+            self.assertTrue(derived["git"])
+            self.assertTrue(derived["composer"])
+            self.assertFalse(derived["phpunit"])
+            self.assertFalse(derived["php-cs-fixer"])
+            self.assertFalse(derived["psalm"])
+        finally:
+            tmp.cleanup()
+
+    def test_detect_and_roadmap_returns_backlog(self):
+        tmp, root = self._make_repo({})
+        try:
+            data = tooling_tree.detect_and_roadmap(root)
+            self.assertIn("backlog", data)
+            self.assertIn("closed_by_rejection", data)
+            self.assertIn("withheld_with_reasons", data)
+            self.assertNotIn("roadmap", data)
+        finally:
+            tmp.cleanup()
+
+
+class RoadmapRemovedTests(unittest.TestCase):
+    """Ticket 05: roadmap() is removed."""
+
+    def test_roadmap_function_removed(self):
+        self.assertFalse(hasattr(tooling_tree, "roadmap"))
+
+    def test_detect_and_roadmap_has_no_roadmap_key(self):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        (root / ".git").mkdir()
+        try:
+            data = tooling_tree.detect_and_roadmap(root)
+            self.assertNotIn("roadmap", data)
         finally:
             tmp.cleanup()
 
@@ -3297,20 +3351,26 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_required_any_child_reported_when_only_path(self):
-        # Psalm-only target, no real PHPStan config: landing psalm is the
-        # *only* thing that unblocks rector-php-set (required-any(
-        # phpstan-level-0, psalm)) -- must be reported. php-cs-fixer (a
-        # recommended parent since signals ticket 2) is decided (rejected)
-        # here so it isn't also withholding rector-php-set -- this test is
-        # about the required-any path specifically, not the recommended one.
+        # Psalm-only target: landing psalm is the *only* thing that unblocks
+        # rector-php-set (required-any(phpstan-level-0, psalm)). Use an
+        # explicit fulfilled set so phpstan-level-0 is NOT fulfilled — the
+        # psalm-equivalence path in detect_nodes() would otherwise make it
+        # fulfilled too, hiding the required-any path under test.
         tmp, root = self._make_repo({
-            "composer.json": json.dumps({"require": {"php": ">=8.1", "vimeo/psalm": "^5.0"}}),
+            "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
             "composer.lock": "{}",
-            "psalm.xml": "<psalm></psalm>",
             "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
         })
         try:
-            got = [(c["node"], c["type"]) for c in directly_unblocked_children(root, "psalm")]
+            tree = tooling_tree.load_tree()
+            # Start from detection, then override: psalm fulfilled,
+            # phpstan-level-0 NOT fulfilled (psalm-equivalence removed).
+            detected = tooling_tree.detect_nodes(root, tree)
+            fulfilled = {n: v.get("fulfilled", False) for n, v in detected.items()}
+            fulfilled["psalm"] = True
+            fulfilled["phpstan-level-0"] = False
+            got = [(c["node"], c["type"]) for c in
+                   tooling_tree.directly_unblocked_children(root, "psalm", tree=tree, fulfilled=fulfilled)]
             self.assertIn(("rector-php-set", "required-any"), got)
         finally:
             tmp.cleanup()
