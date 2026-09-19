@@ -23,17 +23,14 @@ evaluated (Judging fulfilment, below).
 
 ## Is the Track due this pass?
 
-Read the Refactoring Notes' `bookkeeping.md`'s `## Guardrails` section
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`).
-
-- **`Open` non-empty** → the Track is never rescanned this pass. Hand its entries forward the same way
-  `## Safety Net`'s own `Open` already does (resuming at whichever step is next for each — no plan yet
-  → `refactor-design`; plan present, `ready-for-agent` set → `refactor-implement`). Skip straight to
-  `refactor-scan/SKILL.md`'s `## Output`; the rest of this file doesn't run.
-- **Section absent** (never run), or present with `Last scan` more than `Cadence` days before today
-  (default 60) → due. Continue below.
-- **Present, `Open` empty, not due** → nothing for this Track this pass; `refactor-scan` continues with
-  everything else it already does.
+The exact same mechanism `safety-net-track.md`'s own section of this name already documents, read
+against `bookkeeping.md`'s `## Guardrails` section instead of `## Safety Net` — due-ness is decided once,
+before `refactor-scan` starts, by the orchestrator's own Track-selection step
+(`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
+step 0b); this file never re-derives it. Not selected this pass → nothing here runs. Selected with `Open`
+non-empty (only reachable via a manual override naming this Track directly) → still never rescanned,
+`Open` worked instead, skipping straight to `refactor-scan/SKILL.md`'s `## Output`. Selected with `Open`
+empty → continue below, a genuine scan.
 
 Independent of the above, and unchanged from today: a Guardrails node is never actually unblocked in
 the tree until `php-safety-net` itself is resolved (the Scope section's own required-parent edges) —

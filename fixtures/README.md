@@ -173,6 +173,35 @@ own `expected/behavior.md` for the full expected behavior.
 
 Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-bypass`/`judge`/`lift`.
 
+### php-scheduler-* (Track scheduler, ADR-0055, ticket 04)
+
+Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
+matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*`/`php-guardrails-*`
+above. Exercises the orchestrator's own new Track-selection step
+(`skills/continuous-refactoring/SKILL.md` step 0b, algorithm in
+`skills/continuous-refactoring/references/track-scheduler.md`) — real competition between every
+currently-wired Track, replacing each Track's own earlier standalone "is my Track due?" check. See each
+fixture's own `expected/behavior.md` for the full expected behavior.
+
+- **php-scheduler-staleness-selection** — spec Testing Decision #2 ("Track selection under simple
+  staleness"). Safety Net closed (`php-safety-net` resolved), both `## Safety Net`
+  (`Cadence: 90`, `Last scan: 2026-06-16`, `overdue_ratio ≈ 1.056`) and `## Guardrails`
+  (`Cadence: 60`, `Last scan: 2026-04-22`, `overdue_ratio = 2.5`) due, neither holding `Open` work.
+  Expects **Guardrails** selected — its ratio is the higher one, even though Safety Net outranks it in
+  the fixed tie-break order (Safety Net > Guardrails > Housekeeping > Investigation). The fixed order
+  only ever breaks a tie or resolves two "never run" Tracks with no ratio to compare; it must not
+  override a genuine, non-tied staleness difference.
+
+```bash
+./fixtures/harness/run.sh scheduler php-scheduler-staleness-selection --opencode
+```
+
+Same non-CI, local-only, advisory posture as `safety-net-track`/`guardrails-track`. Each Track's own
+`Open`-empty eligibility precondition and `Open`-non-empty-blocks-rescan behavior (ticket 04's own
+checklist item 2) is unchanged and already covered by `php-safety-net-open-blocks-rescan`/
+`php-guardrails-open-blocks-rescan` above — this tier only adds the cross-Track ratio-competition case
+those single-Track fixtures couldn't exercise on their own.
+
 ### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
 
 Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI, alongside `tier1`/`tier2`, in a

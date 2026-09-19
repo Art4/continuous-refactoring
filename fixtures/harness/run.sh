@@ -27,6 +27,7 @@ Tiers:
     decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
     safety-net-track       Safety Net Track behavior regressions (fixtures: php-safety-net-*; local-only, advisory)
     guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*; local-only, advisory)
+    scheduler              Orchestrator Track-selection regressions (fixtures: php-scheduler-*; local-only, advisory — ADR-0055, ticket 04)
 
 Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
@@ -48,6 +49,7 @@ Examples:
     $(basename "$0") decision-gate-bypass php-decision-gate-bypass --opencode
     $(basename "$0") safety-net-track php-safety-net-purpose-recognition --opencode
     $(basename "$0") guardrails-track php-guardrails-purpose-recognition --opencode
+    $(basename "$0") scheduler php-scheduler-staleness-selection --opencode
 EOF
     exit 1
 }
@@ -948,6 +950,62 @@ _guardrails_scan_prompt() {
     fi
 }
 
+# Ticket 04 — Orchestrator Track-selection regressions
+# (skills/continuous-refactoring/references/track-scheduler.md,
+# skills/continuous-refactoring/SKILL.md step 0b). Local-only, advisory,
+# non-CI — same posture as `safety-net-track`/`guardrails-track`: the
+# scheduler is a behavioral property of the orchestrator's own prose, no
+# deterministic ground truth to assert against. Each `php-scheduler-*`
+# fixture exercises one distinct checklist item from ticket 04; dispatches by
+# fixture name to the matching check below. Reuses `_guardrails_scan_prompt`'s
+# and `_safety_net_scan_prompt`'s own shared-helper shape (own log prefix, so
+# no transcript ever collides with either Track's own tier).
+run_scheduler() {
+    log_info "=== Track scheduler behavior — fixture: $FIXTURE ==="
+    local opencode_bin
+    opencode_bin="$(resolve_opencode_bin)" || return 0
+
+    mkdir -p "$FIXTURE_DST/.agents"
+    ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
+
+    case "$FIXTURE" in
+        php-scheduler-staleness-selection)
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 0b literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading docs/refactoring/bookkeeping.md's ## Safety Net and ## Guardrails sections. Compute each Track's overdue_ratio, then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including guardrails-track.md or safety-net-track.md as appropriate) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails, naming whichever Track the scheduler actually selected."
+            local out="/tmp/scheduler-$FIXTURE-scan.log"
+            if grep -qiE "^SELECTED: *Safety Net" "$out" 2>/dev/null; then
+                log_fail "Scheduler self-reports SELECTED: Safety Net — Guardrails (ratio 2.5) should have outranked Safety Net (ratio ~1.056) despite the fixed tie-break order — see $out"
+            elif grep -qiE "^SELECTED: *Guardrails" "$out" 2>/dev/null; then
+                log_pass "Scheduler self-reports SELECTED: Guardrails — see $out"
+            else
+                log_info "Scheduler output doesn't clearly self-report SELECTED: Safety Net/Guardrails — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qiE "2\.5|150 */ *60|far more overdue|more overdue than Safety Net" "$out" 2>/dev/null; then
+                log_pass "Scan output shows the ratio reasoning (Guardrails' higher overdue_ratio) — advisory sign the staleness comparison actually ran (see $out)"
+            else
+                log_info "Scan output doesn't clearly show the ratio comparison — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
+        *)
+            log_fail "No scheduler check wired for fixture: $FIXTURE"
+            ;;
+    esac
+
+    rm -rf "$FIXTURE_DST/.agents"
+}
+
+# Shared helper for run_scheduler's cases above: run one opencode prompt with
+# --auto against $FIXTURE_DST, logging to /tmp/scheduler-$FIXTURE-scan.log.
+# Advisory only — never fails the caller. Mirrors _safety_net_scan_prompt /
+# _guardrails_scan_prompt exactly, own log prefix so no tier's transcript
+# ever clobbers another's.
+_scheduler_scan_prompt() {
+    local prompt="$1"
+    local out="/tmp/scheduler-$FIXTURE-scan.log"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
+        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    fi
+}
+
 # Main
 main() {
     reset_counters
@@ -983,6 +1041,9 @@ main() {
             ;;
         guardrails-track)
             run_guardrails_track
+            ;;
+        scheduler)
+            run_scheduler
             ;;
         *)
             log_fail "Unknown tier: $TIER"
