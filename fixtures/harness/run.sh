@@ -27,6 +27,7 @@ Tiers:
     decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
     safety-net-track       Safety Net Track behavior regressions (fixtures: php-safety-net-*; local-only, advisory)
     guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*; local-only, advisory)
+    housekeeping-track     Housekeeping Track behavior regressions (fixtures: php-housekeeping-*; local-only, advisory)
     scheduler              Orchestrator Track-selection regressions (fixtures: php-scheduler-*; local-only, advisory — ADR-0055, ticket 04)
 
 Options:
@@ -49,6 +50,8 @@ Examples:
     $(basename "$0") decision-gate-bypass php-decision-gate-bypass --opencode
     $(basename "$0") safety-net-track php-safety-net-purpose-recognition --opencode
     $(basename "$0") guardrails-track php-guardrails-purpose-recognition --opencode
+    $(basename "$0") housekeeping-track php-housekeeping-hand-adopted-guardrails --opencode
+    $(basename "$0") housekeeping-track php-housekeeping-old-schema --opencode
     $(basename "$0") scheduler php-scheduler-staleness-selection --opencode
     $(basename "$0") scheduler php-scheduler-investigation-fallback --opencode
     $(basename "$0") scheduler php-scheduler-housekeeping-competes --opencode
@@ -960,6 +963,87 @@ _guardrails_scan_prompt() {
     fi
 }
 
+# Ticket 09 — Housekeeping Track reconciliation regressions
+# (skills/continuous-refactoring/references/housekeeping-track.md).
+# Local-only, advisory, non-CI — same posture as
+# `safety-net-track`/`guardrails-track`: the reconciliation is a behavioral
+# property of the orchestrator's own prose, no deterministic ground truth to
+# assert against. Each `php-housekeeping-*` fixture exercises one checklist
+# item from ticket 09; dispatches by fixture name to the matching check
+# below. Reuses `_guardrails_scan_prompt`'s and `_safety_net_scan_prompt`'s
+# own shared-helper shape (own log prefix, so no transcript ever collides
+# with either Track's own tier).
+run_housekeeping_track() {
+    log_info "=== Housekeeping Track behavior — fixture: $FIXTURE ==="
+    local opencode_bin
+    opencode_bin="$(resolve_opencode_bin)" || return 0
+
+    mkdir -p "$FIXTURE_DST/.agents"
+    ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
+
+    case "$FIXTURE" in
+        php-housekeeping-hand-adopted-guardrails)
+            _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-refactoring/references/housekeeping-track.md literally — this target has a ## Housekeeping section (Cadence: 7, Last scan: 2026-09-01) and ## Guardrails already closed. The reconciliation step should walk the tooling tree and judge each node's Fulfilment check itself (agent judgement), NOT read Fulfilled nodes. Report explicitly: (1) which nodes were judged fulfilled and got their Housekeeping lines added, (2) whether Fulfilled nodes was read or not, and (3) whether housekeeping-template.md was created."
+            local template="$FIXTURE_DST/docs/refactoring/housekeeping-template.md"
+            if [[ -f "$template" ]]; then
+                log_pass "housekeeping-template.md was created"
+                if grep -qi "Fulfilled nodes" "$template" 2>/dev/null; then
+                    log_fail "housekeeping-template.md mentions Fulfilled nodes — should not depend on it"
+                else
+                    log_pass "housekeeping-template.md doesn't reference Fulfilled nodes"
+                fi
+            else
+                log_fail "housekeeping-template.md was not created — reconciliation may have failed"
+            fi
+            local out="/tmp/housekeeping-track-$FIXTURE-scan.log"
+            if grep -qi "Fulfilled nodes" "$out" 2>/dev/null; then
+                log_info "Scan output mentions Fulfilled nodes — check $out by hand (advisory, non-blocking)"
+            else
+                log_pass "Scan output doesn't reference Fulfilled nodes — agent judgement used instead"
+            fi
+            ;;
+        php-housekeeping-old-schema)
+            _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-refactoring/references/housekeeping-track.md literally. This target's bookkeeping.md is still in the old shape (Fulfilled nodes present, no ## Housekeeping section). The reconciliation should walk the tooling tree and judge fulfilment via agent judgement, NOT by reading Fulfilled nodes. Report explicitly: (1) did the pass run normally without erroring on the old Fulfilled nodes field, (2) which nodes got their Housekeeping lines, and (3) was ## Housekeeping created."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            if grep -q "loop-config" "$bookkeeping" 2>/dev/null && grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing Fulfilled nodes content still present, untouched"
+            else
+                log_fail "Pre-existing Fulfilled nodes content is gone — see $bookkeeping"
+            fi
+            local template="$FIXTURE_DST/docs/refactoring/housekeeping-template.md"
+            if [[ -f "$template" ]]; then
+                log_pass "housekeeping-template.md was created"
+            else
+                log_fail "housekeeping-template.md was not created — reconciliation may have failed"
+            fi
+            local out="/tmp/housekeeping-track-$FIXTURE-scan.log"
+            if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
+                log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
+            else
+                log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
+            fi
+            ;;
+        *)
+            log_fail "No housekeeping-track check wired for fixture: $FIXTURE"
+            ;;
+    esac
+
+    rm -rf "$FIXTURE_DST/.agents"
+}
+
+# Shared helper for run_housekeeping_track's cases above: run one opencode
+# prompt with --auto against $FIXTURE_DST, logging to
+# /tmp/housekeeping-track-$FIXTURE-scan.log. Advisory only — never fails the
+# caller. Mirrors _safety_net_scan_prompt / _guardrails_scan_prompt exactly,
+# own log prefix so no tier's transcript ever clobbers another's.
+_housekeeping_scan_prompt() {
+    local prompt="$1"
+    local out="/tmp/housekeeping-track-$FIXTURE-scan.log"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
+        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    fi
+}
+
 # Ticket 04 — Orchestrator Track-selection regressions
 # (skills/continuous-refactoring/references/track-scheduler.md,
 # skills/continuous-refactoring/SKILL.md step 0b). Local-only, advisory,
@@ -1250,6 +1334,9 @@ main() {
             ;;
         guardrails-track)
             run_guardrails_track
+            ;;
+        housekeeping-track)
+            run_housekeeping_track
             ;;
         scheduler)
             run_scheduler

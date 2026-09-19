@@ -52,7 +52,7 @@ Status: Safety Net Track walked — 2 skipped (phpstan-level-6: blocked by phpst
 coverage-floor: needs-info), php-cs-fixer worked (MR #12 open). Next: review and merge #12.
 ```
 
-Fulfilled nodes removed from `Open` during the walk (step 4, "now fulfilled") do not appear in
+Nodes found fulfilled during the walk (step 4, "now fulfilled") are removed from `Open` and do not appear in
 the pass report — they left silently, same as a hand-adopted node leaving without a merge request.
 
 ## Relationship to `refactor-scan` and `refactor-prioritize`

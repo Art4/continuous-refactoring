@@ -26,7 +26,7 @@ candidate can't be done without changing behavior.
 
 **Precondition, both calls: a genuine event that was actually handed to this call, or stop — never go
 looking for one.** Neither call writes anything — no branch opens, no ledger, ADR, `CONTEXT.md`,
-`Fulfilled nodes`, issue-label, or `out-of-scope` write happens — unless it has something real to act
+issue-label, or `out-of-scope` write happens — unless it has something real to act
 on. Early call: at least one finding, named by whoever invoked this call (ordinarily `refactor-scan`,
 in its own `## Output`). Closing call: a freshly opened MR, named by `refactor-implement`; a
 design-time breaking-change finding, named by `refactor-design`; **or** a Safety Net, Guardrails,
@@ -41,7 +41,7 @@ Housekeeping, the orchestrator's own step 0c, which runs this Track directly rat
 `## Safety Net`'s/`## Guardrails`'s/`## Housekeeping`'s/`## Investigation`'s own `Last scan` write
 (`safety-net-write.md`/`guardrails-write.md`/`housekeeping-write.md`/`investigation-write.md`) can
 actually happen on an all-clear scan, per those files' own "write `Last scan` regardless" rule — it
-authorizes only that one write, never `Fulfilled nodes` or any other bookkeeping on its own. This is step zero, before any other
+authorizes only that one write. This is step zero, before any other
 read — querying the tracker for open MRs, re-reading `bookkeeping.md`, scanning `merge-requests.md` to
 see whether a precondition might be satisfiable is exactly the detection work `refactor-scan`/
 `refactor-implement` already own; this skill only ever acts on what the pass that produced it named,
@@ -52,8 +52,7 @@ nothing (`continuous-refactoring/SKILL.md` step 2), but still calls the closing 
 every pass, including one where nothing above it produced anything. This same check is also what
 makes a human's direct, standalone `/refactor-learn` invocation — bypassing the orchestrator
 entirely — safe: named nothing, it stops before touching any state, instead of inventing work by
-going to check for itself. `Fulfilled nodes` in particular is never, by itself, a reason to open a
-branch — see its own note below.
+going to check for itself.
 
 ### Early call — findings only (from `refactor-scan`, if any)
 
@@ -100,7 +99,7 @@ Then, regardless of which branch the writes above rode:
 
 - Record an ADR (`docs/adr/`) for any decision a future scan must not re-litigate (see `/domain-modeling`).
 - Update `CONTEXT.md` with terms that crystallised this pass.
-- Write the Refactoring Notes' `bookkeeping.md`'s `Fulfilled nodes` — last, every time this call reaches this point (which the precondition above already guarantees means a genuine delivery or rejection this pass, never a standalone cache refresh). Algorithm, including the parser-vs-fallback overwrite rules and a worked example: `skills/refactor-learn/references/fulfilled-nodes-write.md`. **Never for a Safety Net or Guardrails Track node** — see the next two bullets instead.
+- ~~`Fulfilled nodes`~~ — retired. No write needed; old files retain entries for historical record, ignored by all lifecycle skills (see `skills/continuous-refactoring/references/refactoring-bookkeeping.md`'s *`Fulfilled nodes`* section).
 - This pass's scan ran the Safety Net Track (`skills/refactor-scan/references/safety-net-track.md` — an `Open` entry just resolved above, or the Track's own scan ran this pass with nothing to propose) → write `## Safety Net`'s `Last scan`, and `Open`/`Out-of-scope` if this pass's resolution changed either: `skills/refactor-learn/references/safety-net-write.md`. The Track's `Open` was already non-empty and this pass only worked through an existing entry without the scan itself running → don't touch `Last scan` (that file's own final section).
 - Same for the Guardrails Track (`skills/refactor-scan/references/guardrails-track.md`) → write `## Guardrails`'s `Last scan`, and `Open`/`Out-of-scope` if changed: `skills/refactor-learn/references/guardrails-write.md`. Independent of the Safety Net write above — a pass can resolve a Guardrails candidate, a Safety Net candidate, neither, or (once both Tracks are eventually due the same pass) both; each Track's own section is written only when that Track's own scan actually ran or one of its own `Open` entries actually resolved this pass.
 - This pass's scan ran the Investigation Track (`skills/refactor-scan/references/investigation-track.md` — its own *Proposing* step was reached, whether or not `structural-scan` itself was actually proposable) → write `## Investigation`'s `Last scan` only: `skills/refactor-learn/references/investigation-write.md`. No `Open`/`Out-of-scope` to write here at all — this section never carries either. A structural candidate resumed via `Pending candidates` at `refactor-scan/SKILL.md` step 2, without Investigation's own scan step ever being reached this pass, doesn't trigger this write — same "resuming isn't scanning" distinction the two bullets above already draw.
@@ -117,4 +116,4 @@ Then, regardless of which branch the writes above rode:
 
 **Early call, precondition met:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a PHP-version reversal's file removed, a fold-in-still-owed candidate's MR marked ready for review, every secret-history-scan finding filed as a `refactor:priority` candidate with `Secret history scan` written `done (<date>)`, or an explicit "asked the human, waiting"), the remembered set reflects it before `refactor-prioritize` runs, and every write went out through a branch — the dedicated bookkeeping branch (opened as an MR, or — no forge/remote available — handed to the human per `opening-a-merge-request.md`) for every finding type except fold-in-still-owed, which rides the candidate's own already-open branch instead (the exception above).
 
-**Closing call, precondition met:** a freshly delivered candidate is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with `Pending candidates` cleared — or, a design-time breaking-change finding is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and `Pending candidates` cleared the same way — `Fulfilled nodes` is written (full re-derivation when the parser ran, additive/narrow otherwise), a candidate MR left in draft by this pass is marked ready for review, and every write went out through a branch — the candidate's own already-open branch (native tracker, MR opened this pass), the dedicated bookkeeping one, or the `loop-config` candidate's own as that exception's narrowest case — never a direct commit to the default branch (opened as an MR where forge access exists).
+**Closing call, precondition met:** a freshly delivered candidate is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with `Pending candidates` cleared — or, a design-time breaking-change finding is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and `Pending candidates` cleared the same way — a candidate MR left in draft by this pass is marked ready for review, and every write went out through a branch — the candidate's own already-open branch (native tracker, MR opened this pass), the dedicated bookkeeping one, or the `loop-config` candidate's own as that exception's narrowest case — never a direct commit to the default branch (opened as an MR where forge access exists).

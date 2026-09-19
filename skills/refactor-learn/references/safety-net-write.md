@@ -2,10 +2,10 @@
 
 Part of `refactor-learn/SKILL.md`'s early call (a Safety Net Track candidate's finding) and closing
 call (a Safety Net Track candidate's fresh MR, or the scan itself completing with nothing to propose) —
-reached only once the call's own precondition already holds (a genuine event this pass), same as
-`fulfilled-nodes-write.md`. Applies only to a node in the Safety Net Track's own scope
-(`skills/refactor-scan/references/safety-net-track.md`); every other node keeps writing `Fulfilled
-nodes`/`Pending candidates`/`out-of-scope/` exactly as `fulfilled-nodes-write.md` already documents.
+reached only once the call's own precondition already holds (a genuine event this pass). Applies only to
+a node in the Safety Net Track's own scope
+(`skills/refactor-scan/references/safety-net-track.md`); every other node keeps writing
+`Pending candidates`/`out-of-scope/` exactly as `refactor-learn/SKILL.md` already documents.
 
 ## Merge → remove from `Open`
 
@@ -56,7 +56,7 @@ that field on account of a Safety Net Track candidate resolving.
 
 Whenever `safety-net-track.md`'s own process ran this pass — whether it found nothing to propose (every
 node in scope already resolved) or proposed something that `Open` now tracks — write `## Safety Net`'s
-`Last scan` to today's date (`YYYY-MM-DD`), last, alongside `Fulfilled nodes` in the closing call's own
+`Last scan` to today's date (`YYYY-MM-DD`), last, in the closing call's own
 step ordering. **Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 90`, `Last
 scan: <today>`, `Open`/`Out-of-scope` either freshly populated (something was proposed/rejected this
 scan) or both `- none` (a fully-compliant target's first scan — `Open` is empty because every node is
@@ -68,6 +68,6 @@ that write, not merely resolving one of its `Open` entries.
 
 A `bookkeeping.md` with no `## Safety Net` heading yet is simply a target whose Track has never run —
 this write creates the section fresh, exactly as the first-ever-scan case above already describes. The
-file's pre-existing `Fulfilled nodes`/`Pending candidates` content (old schema or otherwise) is untouched
+file's pre-existing `Pending candidates` content (old schema or otherwise) is untouched
 by this write — those fields keep meaning whatever they already mean for every node outside this Track's
 scope.

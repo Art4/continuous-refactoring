@@ -15,8 +15,8 @@ rejected; only *the underlying concrete candidate* a pass produced from it could
 `skills/refactor-scan/references/investigation-track.md` ran this pass (Investigation was the Track step
 0b selected, and its own *Proposing* step was reached — whether it proposed `structural-scan`, found it
 still gate-blocked, or found the Investigation Track's own precondition-free scope simply had nothing new
-to say) → write `## Investigation`'s `Last scan` to today's date (`YYYY-MM-DD`), last, alongside
-`Fulfilled nodes` in the closing call's own step ordering, same position `## Safety Net`'s/`##
+to say) → write `## Investigation`'s `Last scan` to today's date (`YYYY-MM-DD`), last, in the
+closing call's own step ordering, same position `## Safety Net`'s/`##
 Guardrails`' own `Last scan` write already occupies. **Section didn't exist yet** (first-ever scan) →
 create it here: `Cadence: continuous`, `Last scan: <today>` — no `Open`/`Out-of-scope` to populate, this
 section never carries either (`refactoring-bookkeeping.md`'s own `## Investigation` section).
@@ -35,16 +35,12 @@ either — `## Investigation`'s `Cadence` is the fixed literal `continuous`, wri
 above and never changed again by anything, hand or otherwise. There is nothing to tune: Investigation
 carries no interval by design (`CONTEXT.md`'s **Track** entry).
 
-## Never writes `Open`, `Out-of-scope`, or `Fulfilled nodes` on this section's account
+## Never writes `Open`, `Out-of-scope`, or anything else on this section's account
 
 A structural candidate's own state was never tracked in `## Investigation` to begin with — it stays on
 the issue tracker / `merge-requests.md`, exactly as it did before this section existed
 (`skills/refactor-scan/references/investigation-track.md`'s own *Proposing* section). This write never
-adds, removes, or reads a slug from `Open`/`Out-of-scope` (this section has neither) and never writes
-`structural-scan` itself into `Fulfilled nodes` on this section's account — `structural-scan` is a
-perpetual gate node, not a one-time adoption; whatever `Fulfilled nodes` already does with it (if
-anything, via the ordinary tooling-tree cache path, `fulfilled-nodes-write.md`) is unrelated to and
-unchanged by this file.
+adds, removes, or reads a slug from `Open`/`Out-of-scope` (this section has neither).
 
 ## Old-schema repos
 
