@@ -79,7 +79,22 @@ as `refactor-scan/SKILL.md` step 4 already does for any other node. Once
 Guardrails`'s `Open` list — `refactor-learn`'s own side of this,
 `skills/refactor-learn/references/guardrails-write.md`.
 
+## Filling `Open`
+
+A scan that runs this Track evaluates every node of the scope by agent judgement (all Fulfilment checks,
+including gate nodes), hands that fulfilled set to the script as a seed file (the `--seed` argument or
+the Refactoring Notes' `fulfilled-set.json`), and records every unresolved node of the scope into
+`## Guardrails`'s `Open` in the script's order, blocked nodes included. The seed file ensures the
+script's graph logic (dependency edges, rejection cascades) computes the same backlog the agent's
+judgement already decided — the agent judges, the script orders.
+
+The `Open` list is the complete, ordered backlog for this Track: every node of the Track's scope that
+is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per
+bulleted line, `- <slug> (#<issue>)`. `- none` when empty. Non-empty `Open` means the Track is never
+rescanned this pass — same resume-before-propose discipline `## Safety Net`'s own `Open` already
+follows.
+
 **Every node in scope resolved, nothing to propose** → still a completed scan: `refactor-learn`'s
-closing call writes `Last scan` regardless (`guardrails-write.md`), so a fully-compliant target gets
-this Track's `Cadence` honored afterward instead of being rescanned every pass. `Open` and
-`Out-of-scope` both stay however they already were.
+closing call writes `Last scan` and an empty `Open` regardless (`guardrails-write.md`), so a
+fully-compliant target gets this Track's `Cadence` honored afterward instead of being rescanned every
+pass. `Out-of-scope` stays however it already was (typically empty, on a target with nothing rejected).

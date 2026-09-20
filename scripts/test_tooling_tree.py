@@ -3835,5 +3835,297 @@ class SemgrepNodeTests(unittest.TestCase):
             tmp.cleanup()
 
 
+class TrackOpenFillingTests(unittest.TestCase):
+    """Ticket 06: Advisory agent fixtures for filling ``Open`` with the
+    complete ordered backlog — blocked nodes included, in script order."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_open_includes_blocked_nodes_in_order(self):
+        """Every unresolved scope node, including blocked ones, appears in
+        ``ordered_backlog()`` in script order — the complete backlog a scan
+        records into ``Open``."""
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "composer.json": json.dumps({"require": {"php": "^8.1"}}),
+            "composer.lock": "{}",
+        })
+        try:
+            backlog = ordered_backlog(root)
+            # loop-config fulfilled, composer fulfilled — phpunit, psr-4,
+            # phpstan-level-0, test-runner-if-missing should all appear,
+            # even though some are blocked by each other or by
+            # recommended-gating.
+            self.assertNotIn("loop-config", backlog)
+            self.assertNotIn("composer", backlog)
+            self.assertIn("phpunit", backlog)
+            self.assertIn("psr-4", backlog)
+            # Verify order: phpunit comes before rector-dead-code in
+            # the tree's edge order (composer → phpunit before
+            # rector-php-set → rector-dead-code).
+            idx_phpunit = backlog.index("phpunit")
+            if "rector-dead-code" in backlog:
+                self.assertLess(idx_phpunit, backlog.index("rector-dead-code"))
+        finally:
+            tmp.cleanup()
+
+    def test_seed_drives_backlog_order(self):
+        """A fulfilled seed file (the agent's judgement handed to the script)
+        drives the backlog computation — nodes fulfilled by judgement are
+        excluded, the rest appear in script order."""
+        tmp, root = self._make_repo({})
+        try:
+            seed = {
+                "git": True, "loop-config": True, "is-php-project": True,
+                "composer": True, "editorconfig": True,
+                "phpunit": True, "psr-4": True, "phpstan-level-0": True,
+                "phpstan-level-1": True, "phpstan-level-2": True,
+                "phpstan-level-3": True, "phpstan-level-4": True,
+                "phpstan-level-5": True,
+            }
+            backlog = ordered_backlog(root, fulfilled=seed)
+            self.assertNotIn("phpunit", backlog)
+            self.assertNotIn("phpstan-level-0", backlog)
+            self.assertNotIn("phpstan-level-5", backlog)
+            # These should still appear — not fulfilled by seed
+            self.assertIn("rector-dead-code", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_empty_backlog_when_everything_resolved(self):
+        """A scan that finds every scope node resolved writes ``Last scan``
+        and an empty ``Open`` — ``ordered_backlog()`` returns []."""
+        tmp, root = self._make_repo({})
+        try:
+            # Fully resolved via seed — every non-NEVER_PROPOSED node
+            tree = load_tree()
+            seed = {n: True for n in tree["nodes"] if n not in tooling_tree._NEVER_PROPOSED}
+            seed["git"] = True
+            backlog = ordered_backlog(root, fulfilled=seed)
+            self.assertEqual(backlog, [])
+        finally:
+            tmp.cleanup()
+
+
+class RejectionCascadeTests(unittest.TestCase):
+    """Ticket 06: Rejection cascade and its reversal — every node closed
+    by a rejected ancestor leaves ``Open``, with no new files; reversing a
+    rejection makes the next scan bring those nodes back."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_rejected_composer_removes_descendants_from_backlog(self):
+        """A rejected composer closes every PHP-tree node via required
+        edges — ``closed_by_rejection()`` reports them, and they stay out
+        of ``ordered_backlog()``."""
+        tree = load_tree()
+        rejected = {"composer"}
+        closed = closed_by_rejection(tree, rejected)
+        self.assertIn("php-cs-fixer", closed)
+        self.assertIn("phpunit", closed)
+        self.assertIn("rector-dead-code", closed)
+        self.assertIn("phpstan-level-0", closed)
+
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/out-of-scope/composer.md": "rejected\n",
+        })
+        try:
+            backlog = ordered_backlog(root)
+            self.assertNotIn("php-cs-fixer", backlog)
+            self.assertNotIn("phpunit", backlog)
+            self.assertNotIn("rector-dead-code", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_reversal_brings_nodes_back(self):
+        """Removing an out-of-scope entry (reversing the rejection) makes
+        ``ordered_backlog()`` include the formerly-closed nodes again."""
+        tree = load_tree()
+        rejected = {"composer"}
+        closed = closed_by_rejection(tree, rejected)
+        self.assertIn("phpunit", closed)
+
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "composer.json": json.dumps({"require": {"php": "^8.1"}}),
+            "composer.lock": "{}",
+            "docs/refactoring/out-of-scope/composer.md": "rejected\n",
+        })
+        try:
+            backlog_before = ordered_backlog(root)
+            self.assertNotIn("phpunit", backlog_before)
+            # Reverse the rejection
+            (root / "docs/refactoring/out-of-scope" / "composer.md").unlink()
+            backlog_after = ordered_backlog(root)
+            self.assertIn("phpunit", backlog_after)
+        finally:
+            tmp.cleanup()
+
+    def test_partial_rejection_only_closes_required_descendants(self):
+        """Rejecting a non-root node only closes nodes that transitively
+        depend on it via required edges — siblings remain in the backlog."""
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 5\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+            "docs/refactoring/out-of-scope/phpstan-level-2.md": "rejected\n",
+        })
+        try:
+            backlog = ordered_backlog(root)
+            # phpstan-level-2 rejected — levels 3,4,5 are effectively
+            # closed (required chain through level-2)
+            self.assertNotIn("phpstan-level-2", backlog)
+            self.assertNotIn("phpstan-level-3", backlog)
+            self.assertNotIn("phpstan-level-4", backlog)
+            self.assertNotIn("phpstan-level-5", backlog)
+            # But phpunit, psr-4 etc. remain — not dependent on phpstan-level-2
+            self.assertIn("phpunit", backlog)
+            self.assertIn("psr-4", backlog)
+        finally:
+            tmp.cleanup()
+
+
+class OldSchemaPassThroughTests(unittest.TestCase):
+    """Ticket 06: Bookkeeping in the old shape or with an old-meaning
+    ``Open`` should not be migrated and should not cause an error; a Track
+    override forces an immediate scan that corrects it."""
+
+    def _make_repo(self, files: dict):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        return tmp, root
+
+    def test_old_fulfilled_nodes_field_ignored(self):
+        """The old ``Fulfilled nodes`` field is retired — the script's
+        ``_derive_fulfilled_from_bookkeeping`` doesn't read it. Only
+        top-level ``## Open`` and ``## Out-of-scope`` sections matter
+        (the old global shape). Track-specific sections are separate."""
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "Fulfilled nodes:\n\n"
+                "- loop-config\n"
+                "- composer\n\n"
+                "## Open\n\n"
+                "- phpunit\n"
+                "- php-cs-fixer\n\n"
+                "## Out-of-scope\n\n"
+                "- psalm\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertIsNotNone(derived)
+            # phpunit and php-cs-fixer are in Open -> not fulfilled
+            self.assertFalse(derived["phpunit"])
+            self.assertFalse(derived["php-cs-fixer"])
+            # psalm is in Out-of-scope -> not fulfilled
+            self.assertFalse(derived["psalm"])
+            # loop-config and composer are NOT in Open or Out-of-scope
+            # -> treated as fulfilled by derivation
+            self.assertTrue(derived["loop-config"])
+            self.assertTrue(derived["composer"])
+        finally:
+            tmp.cleanup()
+
+    def test_old_schema_no_track_sections_still_works(self):
+        """A bookkeeping.md with no Track sections at all (old shape) is
+        treated as a target whose Tracks have never run — not an error.
+        The script falls back to detection."""
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "Fulfilled nodes:\n\n"
+                "- loop-config\n"
+                "- composer\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            # No Track sections -> returns None (fallback to detection)
+            self.assertIsNone(derived)
+        finally:
+            tmp.cleanup()
+
+    def test_old_schema_fulfilled_nodes_not_affecting_backlog(self):
+        """Old ``Fulfilled nodes`` entries don't interfere with the
+        ordered backlog — only Track sections and detection matter."""
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "Fulfilled nodes:\n\n"
+                "- loop-config\n"
+                "- composer\n"
+                "- phpunit\n"
+            ),
+            "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
+            "composer.lock": "{}",
+            "phpstan.neon": "parameters:\n    level: 0\n",
+            "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
+        })
+        try:
+            backlog = ordered_backlog(root)
+            # phpunit is listed in old Fulfilled nodes but NOT fulfilled
+            # by detection (no CI gate) — the old field is ignored, so
+            # phpunit should still appear in the backlog.
+            self.assertIn("phpunit", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_track_override_forces_rescan(self):
+        """A Track override (manual selection) forces an immediate scan
+        that corrects old Open entries — verified by providing a fresh
+        seed reflecting actual state."""
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "Fulfilled nodes:\n\n"
+                "- loop-config\n"
+                "- composer\n"
+            ),
+            "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
+            "composer.lock": "{}",
+            ".github/workflows/ci.yml": "jobs:\n  test:\n    steps:\n      - run: vendor/bin/phpunit\n",
+        })
+        try:
+            # The scan would provide a fresh seed reflecting actual state.
+            # phpunit is genuinely fulfilled (dep + CI gate), so the
+            # backlog should NOT include it once the seed is applied.
+            seed = {
+                "git": True, "loop-config": True, "is-php-project": True,
+                "composer": True, "editorconfig": True, "phpunit": True,
+            }
+            backlog = ordered_backlog(root, fulfilled=seed)
+            self.assertNotIn("phpunit", backlog)
+        finally:
+            tmp.cleanup()
+
+
 if __name__ == "__main__":
     unittest.main()

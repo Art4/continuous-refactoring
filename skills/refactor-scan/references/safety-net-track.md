@@ -88,7 +88,24 @@ already does for any other node. Once `refactor-prioritize`/`refactor-design` fi
 issue # once known) is added to `## Safety Net`'s `Open` list — `refactor-learn`'s own side of this,
 `skills/refactor-learn/references/safety-net-write.md`.
 
+## Filling `Open`
+
+A scan that runs this Track evaluates every node of the scope by agent judgement (all Fulfilment checks,
+including gate nodes), hands that fulfilled set to the script as a seed file (the `--seed` argument or
+the Refactoring Notes' `fulfilled-set.json`), and records every unresolved node of the scope into
+`## Safety Net`'s `Open` in the script's order, blocked nodes included. The seed file ensures the
+script's graph logic (dependency edges, rejection cascades) computes the same backlog the agent's
+judgement already decided — the agent judges, the script orders.
+
+The `Open` list is the complete, ordered backlog for this Track: every node of the Track's scope that
+is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per
+bulleted line, `- <slug> (#<issue>)` (issue # only while the node is being worked, omitted otherwise).
+`- none` when empty. Non-empty `Open` means the Track is never rescanned this pass — its existing
+entries are worked through the ordinary propose → design → implement → learn pipeline first, the same
+"resume before propose fresh" discipline `Pending candidates` already applies, just scoped to this Track
+and able to hold more than one entry at a time.
+
 **Every node in scope resolved, nothing to propose** → still a completed scan: `refactor-learn`'s closing
-call writes `Last scan` regardless (`safety-net-write.md`), so a fully-compliant target gets this Track's
-`Cadence` honored afterward instead of being rescanned every pass. `Open` and `Out-of-scope` both stay
-however they already were (typically both empty, on a target with nothing rejected).
+call writes `Last scan` and an empty `Open` regardless (`safety-net-write.md`), so a fully-compliant
+target gets this Track's `Cadence` honored afterward instead of being rescanned every pass.
+`Out-of-scope` stays however it already was (typically empty, on a target with nothing rejected).
