@@ -23,7 +23,6 @@ withheld_candidates = tooling_tree.withheld_candidates
 directly_unblocked_children = tooling_tree.directly_unblocked_children
 php_version_reversal_findings = tooling_tree.php_version_reversal_findings
 php_floor_precheck = tooling_tree.php_floor_precheck
-_is_baseline_empty = tooling_tree._is_baseline_empty
 _resolve_refactoring_notes_dir = tooling_tree._resolve_refactoring_notes_dir
 _rejected_nodes = tooling_tree._rejected_nodes
 closed_by_rejection = tooling_tree.closed_by_rejection
@@ -317,34 +316,6 @@ class LoadTreeTests(unittest.TestCase):
         self.assertNotIn("psalm-taint-analysis", tree["recommended_parents"]["semgrep"])
 
 
-class BaselineEmptyTests(unittest.TestCase):
-    def _repo_with(self, content: str | None):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        if content is not None:
-            (root / "phpstan-baseline.neon").write_text(content)
-        return tmp, root
-
-    def test_absent_is_empty(self):
-        tmp, root = self._repo_with(None)
-        try:
-            self.assertTrue(_is_baseline_empty(root))
-        finally:
-            tmp.cleanup()
-
-    def test_empty_ignore_is_empty(self):
-        tmp, root = self._repo_with("parameters:\n    ignoreErrors: []\n")
-        try:
-            self.assertTrue(_is_baseline_empty(root))
-        finally:
-            tmp.cleanup()
-
-    def test_nonempty_not_empty(self):
-        tmp, root = self._repo_with("parameters:\n    ignoreErrors:\n        - message: '#foo#'\n          path: src/Foo.php\n")
-        try:
-            self.assertFalse(_is_baseline_empty(root))
-        finally:
-            tmp.cleanup()
 class RefactoringNotesResolutionTests(unittest.TestCase):
     """`_resolve_refactoring_notes_dir` — the Refactoring Notes' path,
     default docs/refactoring/, overridable via a `Refactoring Notes:
@@ -980,6 +951,83 @@ class RecommendedGateTests(unittest.TestCase):
             self.assertLessEqual(len(next_candidates(root, limit=3)), 3)
         finally:
             tmp.cleanup()
+
+
+class GateNodeContractTests(unittest.TestCase):
+    """The three recognition-gate nodes (`_NEVER_PROPOSED` — never proposed
+    themselves) must keep their gated nodes out of ``next_candidates()``
+    while seeded False, and release them once seeded True — the contract
+    php-tooling-tree.md's `grd`/`pnp`/`pbe` gate rows exist for."""
+
+    def _make_repo(self, files: dict, fulfilled: dict | None = None):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        for rel, content in files.items():
+            p = root / rel
+            p.parent.mkdir(parents=True, exist_ok=True)
+            p.write_text(content)
+        (root / ".git").mkdir()
+        if fulfilled is not None:
+            seed_dir = root / "docs" / "refactoring"
+            seed_dir.mkdir(parents=True, exist_ok=True)
+            (seed_dir / "fulfilled-set.json").write_text(
+                json.dumps(fulfilled) + "\n"
+            )
+        return tmp, root
+
+    def test_baseline_empty_gate_false_keeps_phpstan_level_1_out(self):
+        # phpstan-level-1's required parents: phpstan-level-0,
+        # phpstan-not-psalm, phpstan-baseline-empty. The other two
+        # fulfilled, the baseline gate seeded False is the sole thing
+        # holding the node back; seeded True, it appears.
+        seed = {
+            "phpstan-level-0": True, "phpstan-not-psalm": True,
+            "phpstan-baseline-empty": False,
+        }
+        tmp, root = self._make_repo({})
+        try:
+            nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
+            self.assertNotIn("phpstan-level-1", nodes)
+            nodes = [c["node"] for c in next_candidates(root, fulfilled={**seed, "phpstan-baseline-empty": True})]
+            self.assertIn("phpstan-level-1", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_not_psalm_gate_false_keeps_phpstan_level_1_out(self):
+        # Symmetric: with the level-0 and baseline gates fulfilled, the
+        # Psalm-mutual-exclusion gate seeded False is the sole blocker.
+        seed = {
+            "phpstan-level-0": True, "phpstan-baseline-empty": True,
+            "phpstan-not-psalm": False,
+        }
+        tmp, root = self._make_repo({})
+        try:
+            nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
+            self.assertNotIn("phpstan-level-1", nodes)
+            nodes = [c["node"] for c in next_candidates(root, fulfilled={**seed, "phpstan-not-psalm": True})]
+            self.assertIn("phpstan-level-1", nodes)
+        finally:
+            tmp.cleanup()
+
+    def test_has_real_dependency_gate_false_keeps_composer_audit_out(self):
+        # composer-audit's required parents: composer, php-safety-net,
+        # has-real-dependency (ci-runner is its recommended parent, seeded
+        # decided so it isn't the thing under test). With the first two
+        # fulfilled, the dependency gate seeded False is the sole blocker.
+        seed = {
+            "composer": True, "php-safety-net": True, "ci-runner": True,
+            "has-real-dependency": False,
+        }
+        tmp, root = self._make_repo({})
+        try:
+            nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
+            self.assertNotIn("composer-audit", nodes)
+            nodes = [c["node"] for c in next_candidates(root, fulfilled={**seed, "has-real-dependency": True})]
+            self.assertIn("composer-audit", nodes)
+        finally:
+            tmp.cleanup()
+
+
 class PhpVersionReversalTests(unittest.TestCase):
     """php-tooling-tree.md's mechanical reversal: a rejected node's
     `Blocked by: PHP >= X.Y` condition satisfied by the target's current
@@ -1440,10 +1488,12 @@ class SeedInputTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
-                "## Open\n\n"
+                "## Safety Net\n\n"
+                "**Last scan:** 2026-09-14\n\n"
+                "**Open:**\n"
                 "- `phpunit`\n"
                 "- `php-cs-fixer`\n\n"
-                "## Out-of-scope\n\n"
+                "**Out-of-scope:**\n"
                 "- `psalm`\n"
             ),
         })
@@ -1456,6 +1506,66 @@ class SeedInputTests(unittest.TestCase):
             self.assertFalse(derived["phpunit"])
             self.assertFalse(derived["php-cs-fixer"])
             self.assertFalse(derived["psalm"])
+        finally:
+            tmp.cleanup()
+
+    def test_bookkeeping_derivation_guardrails_section_and_pointers(self):
+        # The documented shape's other half: a `## Guardrails` section,
+        # whose Out-of-scope bullets carry the `— out-of-scope/<slug>.md`
+        # pointer (only the slug itself counts), and `#82` issue refs on
+        # Open bullets (first token is the slug).
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "## Safety Net\n\n"
+                "**Open:**\n"
+                "- none\n\n"
+                "**Out-of-scope:**\n"
+                "- none\n\n"
+                "## Guardrails\n\n"
+                "**Open:**\n"
+                "- composer-audit (#90)\n\n"
+                "**Out-of-scope:**\n"
+                "- phpmd — out-of-scope/phpmd.md\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertIsNotNone(derived)
+            self.assertFalse(derived["composer-audit"])
+            self.assertFalse(derived["phpmd"])
+            # `- none` markers are empty lists, not slugs; a Safety Net
+            # section whose Open/Out-of-scope are both empty leaves every
+            # other node fulfilled.
+            self.assertTrue(derived["phpunit"])
+            self.assertTrue(derived["composer"])
+        finally:
+            tmp.cleanup()
+
+    def test_bookkeeping_derivation_against_real_fixture(self):
+        # Regression: the parser must read the schema as refactor-learn
+        # actually writes it (skills/refactor-learn/references/
+        # safety-net-write.md) — the synthetic inputs above once drifted
+        # from it and the parser returned None on every real file.
+        fixture_bookkeeping = (
+            pathlib.Path(__file__).resolve().parents[1]
+            / "fixtures" / "php" / "php-safety-net-open-blocks-rescan"
+            / "project" / "docs" / "refactoring" / "bookkeeping.md"
+        )
+        tmp, root = self._make_repo({
+            "docs/refactoring/bookkeeping.md": fixture_bookkeeping.read_text(encoding="utf-8"),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertIsNotNone(derived)
+            # The fixture's `## Safety Net` Open holds php-cs-fixer (#5);
+            # its Out-of-scope is `- none`, its `**Fulfilled nodes:**`
+            # field (old schema, retained) is ignored.
+            self.assertFalse(derived["php-cs-fixer"])
+            self.assertTrue(derived["composer"])
+            self.assertTrue(derived["phpunit"])
         finally:
             tmp.cleanup()
 
@@ -1813,20 +1923,25 @@ class OldSchemaPassThroughTests(unittest.TestCase):
 
     def test_old_fulfilled_nodes_field_ignored(self):
         """The old ``Fulfilled nodes`` field is retired — the script's
-        ``_derive_fulfilled_from_bookkeeping`` doesn't read it. Only
-        top-level ``## Open`` and ``## Out-of-scope`` sections matter
-        (the old global shape). Track-specific sections are separate."""
+        ``_derive_fulfilled_from_bookkeeping`` doesn't read it. Only the
+        ``## Safety Net``/``## Guardrails`` sections' ``**Open:**`` and
+        ``**Out-of-scope:**`` fields matter, wherever the retired field
+        sits."""
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "Fulfilled nodes:\n\n"
                 "- loop-config\n"
                 "- composer\n\n"
-                "## Open\n\n"
+                "## Safety Net\n\n"
+                "**Last scan:** 2026-09-14\n\n"
+                "**Open:**\n"
                 "- phpunit\n"
                 "- php-cs-fixer\n\n"
-                "## Out-of-scope\n\n"
-                "- psalm\n"
+                "**Out-of-scope:**\n"
+                "- psalm\n\n"
+                "**Fulfilled nodes:**\n"
+                "- editorconfig\n"
             ),
         })
         try:
@@ -1842,13 +1957,17 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             # -> treated as fulfilled by derivation
             self.assertTrue(derived["loop-config"])
             self.assertTrue(derived["composer"])
+            # the retired field's entries (top-level or inside a Track
+            # section) are ignored, not migrated — editorconfig is
+            # fulfilled by the absence rule, not by its listing
+            self.assertTrue(derived["editorconfig"])
         finally:
             tmp.cleanup()
 
     def test_old_schema_no_track_sections_still_works(self):
         """A bookkeeping.md with no Track sections at all (old shape) is
         treated as a target whose Tracks have never run — not an error.
-        The script falls back to detection."""
+        The caller returns {} — no detection fallback."""
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
@@ -1860,7 +1979,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         try:
             tree = load_tree()
             derived = _derive_fulfilled_from_bookkeeping(root, tree)
-            # No Track sections -> returns None (fallback to detection)
+            # No Track sections -> returns None (caller returns {})
             self.assertIsNone(derived)
         finally:
             tmp.cleanup()

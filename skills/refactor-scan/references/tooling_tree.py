@@ -56,14 +56,29 @@ def _load_fulfilled_seed(seed_path: pathlib.Path) -> dict[str, bool]:
     return {k: bool(v) for k, v in data.items() if isinstance(v, bool)}
 
 
+# The Track sections whose ``**Open:**``/``**Out-of-scope:**`` fields
+# carry node state (skills/continuous-refactoring/references/
+# refactoring-bookkeeping.md). `## Housekeeping`/`## Investigation` carry
+# only Cadence/Last scan — no node state — so they are not section states
+# here; any heading still ends the collecting state like every other one.
+_TRACK_SECTION_HEADINGS = ("## Safety Net", "## Guardrails")
+
+
 def _derive_fulfilled_from_bookkeeping(
     repo: pathlib.Path, tree: dict
 ) -> dict[str, bool] | None:
     """Derive node fulfilled state from bookkeeping.md's Track sections.
 
-    A scope node that is neither in ``Open`` nor in ``Out-of-scope`` is
-    fulfilled.  Returns ``None`` when no bookkeeping file or no Track
-    sections exist (caller falls back to detection).
+    Collects the bullets under the ``**Open:**``/``**Out-of-scope:**``
+    field lines inside the ``## Safety Net``/``## Guardrails`` sections
+    (the documented schema, written by
+    skills/refactor-learn/references/safety-net-write.md and
+    guardrails-write.md).  A scope node that is neither in ``Open`` nor
+    in ``Out-of-scope`` is fulfilled.  Other fields (e.g. ``Last scan``,
+    the retired ``Fulfilled nodes``) are ignored, not migrated.  Returns
+    ``None`` when no bookkeeping file or no Track-section state exists
+    (the caller returns ``{}`` — there is no detection fallback; scan
+    passes require a seed).
     """
     bookkeeping = _resolve_refactoring_notes_dir(repo) / "bookkeeping.md"
     if not bookkeeping.exists():
@@ -75,33 +90,37 @@ def _derive_fulfilled_from_bookkeeping(
 
     open_nodes: set[str] = set()
     out_of_scope_nodes: set[str] = set()
-    in_open_section = False
-    in_scope_section = False
+    in_track_section = False
+    collecting: str | None = None
+    saw_track_state = False
 
     for line in text.splitlines():
         stripped = line.strip()
-        if stripped.startswith("## Open"):
-            in_open_section = True
-            in_scope_section = False
+        if stripped.startswith("#"):
+            in_track_section = stripped.startswith(_TRACK_SECTION_HEADINGS)
+            collecting = None
             continue
-        if stripped.startswith("## Out-of-scope"):
-            in_open_section = False
-            in_scope_section = True
+        if in_track_section and stripped.startswith("**Open:**"):
+            collecting = "open"
+            saw_track_state = True
             continue
-        if stripped.startswith("## "):
-            in_open_section = False
-            in_scope_section = False
+        if in_track_section and stripped.startswith("**Out-of-scope:**"):
+            collecting = "out-of-scope"
+            saw_track_state = True
             continue
-        if in_open_section and stripped.startswith("- "):
+        if stripped.startswith("**"):
+            collecting = None  # any other field (Last scan, retired Fulfilled nodes) ends the list
+            continue
+        if collecting == "open" and stripped.startswith("- "):
             slug = stripped[2:].split()[0].strip("`").strip()
-            if slug:
+            if slug and slug != "none":
                 open_nodes.add(slug)
-        elif in_scope_section and stripped.startswith("- "):
+        elif collecting == "out-of-scope" and stripped.startswith("- "):
             slug = stripped[2:].split()[0].strip("`").strip()
-            if slug:
+            if slug and slug != "none":
                 out_of_scope_nodes.add(slug)
 
-    if not open_nodes and not out_of_scope_nodes:
+    if not saw_track_state:
         return None
 
     result: dict[str, bool] = {}
@@ -151,6 +170,46 @@ def closed_by_rejection(tree: dict, rejected: set[str]) -> list[str]:
     return result
 
 
+def _withheld_guard_cascade(
+    repo: pathlib.Path,
+    tree: dict | None = None,
+    fulfilled: dict[str, bool] | None = None,
+):
+    """The guard cascade withheld_with_reasons() and withheld_candidates()
+    share: resolves fulfilled state, then yields ``(node, blocked_reason,
+    undecided_parents)`` for every node that survives the common guards
+    (not never-proposed, not resolved-gated, not fulfilled, not rejected,
+    not PHP-floor-blocked, recommended gate not moot) and is either
+    blocked on a required parent (``blocked_reason`` set,
+    ``undecided_parents`` None — never computed, the node never gets that
+    far) or waiting on undecided recommended parents (``blocked_reason``
+    None)."""
+    repo = pathlib.Path(repo)
+    if tree is None:
+        tree = load_tree()
+    resolved = _resolve_fulfilled(repo, tree, fulfilled)
+    resolved["git"] = True
+    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
+    rejected = _rejected_nodes(repo)
+    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
+    for node in tree["order"]:
+        if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
+            continue
+        if detected.get(node, {}).get("fulfilled", False) or node in rejected:
+            continue
+        if node in php_floor_blocked:
+            continue
+        if _recommended_gate_moot(node, tree, detected):
+            continue
+        ok, why = _is_unblocked(node, tree, detected)
+        if not ok:
+            yield node, why, None
+            continue
+        undecided = _undecided_recommended_parents(node, tree, detected, rejected)
+        if undecided:
+            yield node, None, undecided
+
+
 def withheld_with_reasons(
     repo: pathlib.Path,
     tree: dict | None = None,
@@ -158,32 +217,12 @@ def withheld_with_reasons(
 ) -> list[dict]:
     """Withheld nodes with reasons: rejected required ancestors or
     undecided recommended parents."""
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    resolved = _resolve_fulfilled(repo, tree, fulfilled)
-    resolved["git"] = True
-    rejected = _rejected_nodes(repo)
-    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
     result: list[dict] = []
-    for node in tree["order"]:
-        if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
-            continue
-        if resolved.get(node, False) or node in rejected:
-            continue
-        if node in php_floor_blocked:
-            continue
-        if _recommended_gate_moot(node, tree, {n: {"fulfilled": v} for n, v in resolved.items()}):
-            continue
-        ok, why = _is_unblocked(node, tree, {n: {"fulfilled": v} for n, v in resolved.items()})
-        if ok:
-            undecided = _undecided_recommended_parents(
-                node, tree, {n: {"fulfilled": v} for n, v in resolved.items()}, rejected
-            )
-            if undecided:
-                result.append({"node": node, "reason": f"waiting on: {', '.join(undecided)}"})
-        else:
+    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled):
+        if why is not None:
             result.append({"node": node, "reason": why})
+        else:
+            result.append({"node": node, "reason": f"waiting on: {', '.join(undecided)}"})
     return result
 
 
@@ -320,52 +359,6 @@ def _read_composer(repo: pathlib.Path) -> dict | None:
             except Exception:
                 return None
     return None
-
-
-def _parse_phpstan_level(repo: pathlib.Path) -> int | None:
-    # PHPStan itself auto-loads phpstan.neon.dist when phpstan.neon is
-    # absent (same "committed default, locally overridable" convention this
-    # tree already honors for phpunit.xml.dist/psalm.xml.dist/phpmd.xml.dist)
-    # -- phpstan.neon takes precedence when both exist, matching PHPStan's
-    # own resolution order.
-    p = repo / "phpstan.neon"
-    if not p.exists():
-        p = repo / "phpstan.neon.dist"
-    if not p.exists():
-        return None
-    txt = p.read_text(encoding="utf-8")
-    m = re.search(r"^\s*level\s*:\s*(\d+)", txt, re.M)
-    if m:
-        try:
-            return int(m.group(1))
-        except ValueError:
-            return None
-    return None
-
-
-def _is_baseline_empty(repo: pathlib.Path) -> bool:
-    """Empty baseline: absent OR no message entries / empty ignoreErrors."""
-    p = repo / "phpstan-baseline.neon"
-    if not p.exists():
-        return True
-    txt = p.read_text(encoding="utf-8")
-    # Count ignoreErrors entries via 'message:' or 'path:'
-    # If file contains 'ignoreErrors' and no 'message:' -> empty
-    if "ignoreErrors" not in txt:
-        return True
-    # Common pattern: '- message: #...'
-    if re.search(r"message\s*:", txt):
-        return False
-    # If ignoreErrors: [] or empty array
-    if re.search(r"ignoreErrors\s*:\s*\[\]", txt):
-        return True
-    # If file only header like parameters: ignoreErrors: [] or just parameters:
-    # fallback: if we found ignoreErrors but no message, treat as empty
-    return True
-
-
-def _baseline_exists(repo: pathlib.Path) -> bool:
-    return (repo / "phpstan-baseline.neon").exists()
 
 
 def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
@@ -814,16 +807,6 @@ def directly_unblocked_children(
     detected_without[landed_node]["fulfilled"] = False
     if "static-code-analyzer" in detected_without:
         detected_without["static-code-analyzer"]["fulfilled"] = detected_without.get("composer", {}).get("fulfilled", False)
-    if landed_node == "psalm" and detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
-        # phpstan-level-0's own fulfilled flag came from the Psalm-equivalence
-        # branch above (`psalm_fulfils_p0`) -- that branch's if/elif shortcut
-        # means we can't tell whether the real, independent PHPStan check
-        # would also have passed once psalm's flag is hidden. Counting it as
-        # unfulfilled too is the safe direction to be wrong in: it risks one
-        # extra diagram entry (rector-php-set attributed to psalm even if
-        # phpstan-level-0 would have covered it too), never a silently
-        # missing one for a genuinely psalm-only target.
-        detected_without["phpstan-level-0"]["fulfilled"] = False
 
     gate_now = _resolved_gate_status(tree, lambda n: detected.get(n, {}).get("fulfilled", False), rejected)
     gate_without = _resolved_gate_status(tree, lambda n: detected_without.get(n, {}).get("fulfilled", False), rejected)
@@ -886,31 +869,11 @@ def withheld_candidates(
     When *fulfilled* is provided, it is used instead of deriving from
     seed/bookkeeping — the seed-input contract.
     """
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    resolved = _resolve_fulfilled(repo, tree, fulfilled)
-    resolved["git"] = True
-    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
-    rejected = _rejected_nodes(repo)
-    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
-
     result: list[dict] = []
-    for node in tree["order"]:
-        if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
-            continue
-        if detected.get(node, {}).get("fulfilled", False) or node in rejected:
-            continue
-        if node in php_floor_blocked:
-            continue
-        if _recommended_gate_moot(node, tree, detected):
-            continue
-        ok, _why = _is_unblocked(node, tree, detected)
-        if not ok:
-            continue
-        undecided = _undecided_recommended_parents(node, tree, detected, rejected)
-        if undecided:
-            result.append({"node": node, "waiting_on": undecided})
+    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled):
+        if why is not None:
+            continue  # blocked on a required parent — not the recommended-gate withholding this list reports
+        result.append({"node": node, "waiting_on": undecided})
     return result
 
 
