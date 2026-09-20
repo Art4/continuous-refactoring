@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, one-time exception (turn 1: Investigation)
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) picking **Investigation** the pass
 right after Safety Net's `Open` first empties — this ticket's own core case: the one-time exception
 (`track-scheduler.md`'s own "One-time exception" section) must override ordinary ratio/tie-break
@@ -36,7 +36,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — check the one-time exception *first*, before any
+Run the orchestrator's Track-selection step (step 1) — check the one-time exception *first*, before any
 ratio/tie-break computation — then hand off to `refactor-scan` for that Track only; stop there, don't
 continue through design/implement. It should:
 

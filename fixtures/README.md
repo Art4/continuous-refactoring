@@ -194,7 +194,7 @@ Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-b
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
 `php-safety-net-*`/`php-guardrails-*` above. Exercises the orchestrator's own new Track-selection step
-(`skills/continuous-refactoring/SKILL.md` step 0b, algorithm in
+(`skills/continuous-refactoring/SKILL.md` step 1, algorithm in
 `skills/continuous-refactoring/references/track-scheduler.md`) — real competition between every
 currently-wired Track, replacing each Track's own earlier standalone "is my Track due?" check. See each
 fixture's own `expected/behavior.md` for the full expected behavior.
@@ -369,7 +369,7 @@ Same non-CI, local-only, advisory posture as the scheduler fixtures above.
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
 `php-safety-net-*`/`php-guardrails-*` above. Exercises the Housekeeping Track's reconciliation sweep
-(`skills/continuous-refactoring/references/housekeeping-track.md`): each cycle it checks only the
+(`skills/continuous-housekeeping/references/housekeeping-track.md`): each cycle it checks only the
 nodes that carry a `Housekeeping` field and judges their Fulfilment check itself (agent judgement) —
 it no longer reads the retired `Fulfilled nodes` cache (ADR-0056). See each fixture's own
 `expected/behavior.md` for the full expected behavior.
@@ -509,7 +509,7 @@ Troubleshooting:
 
 ### Agent loop test (full pass, subagent-observed)
 
-Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010](../docs/adr/0010-orchestrator-explicit-data-flow.md) `## Validation`) so it can be repeated against this repo's own fixtures instead of an ad-hoc scratch copy of some other project. Where the `--opencode` tiers above drive single skills or single checks via an isolated `opencode` subprocess, this drives the **full 6-step orchestrator pass** (`skills/continuous-refactoring/SKILL.md`: scan → learn → prioritise → design → implement → learn) via a Claude Code **Agent-tool subagent** — the tool a Claude Code session itself has, not a subprocess this script can launch. So `run.sh agent-loop` only prepares; running the subagent is a manual step, same as `--opencode` staying local-only and out of CI.
+Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010](../docs/adr/0010-orchestrator-explicit-data-flow.md) `## Validation`) so it can be repeated against this repo's own fixtures instead of an ad-hoc scratch copy of some other project. Where the `--opencode` tiers above drive single skills or single checks via an isolated `opencode` subprocess, this drives the **full 6-step pass** (`skills/refactor-loop/SKILL.md`, reached from `skills/continuous-refactoring/SKILL.md` via the selected Track's own skill: scan → learn → prioritise → design → implement → learn) via a Claude Code **Agent-tool subagent** — the tool a Claude Code session itself has, not a subprocess this script can launch. So `run.sh agent-loop` only prepares; running the subagent is a manual step, same as `--opencode` staying local-only and out of CI.
 
 ```bash
 ./fixtures/harness/run.sh agent-loop php-partial

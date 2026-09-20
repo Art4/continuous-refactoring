@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, staleness-ratio selection
 
-The orchestrator's own new Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b,
+The orchestrator's own new Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1,
 algorithm in `skills/continuous-refactoring/references/track-scheduler.md`) computing real competition
 between two wired Tracks, spec Testing Decision #2 ("Track selection under simple staleness"): a
 `bookkeeping.md` with Safety Net and Guardrails at different staleness ratios, neither holding `Open`
@@ -36,7 +36,7 @@ not a tie: Guardrails' ratio (2.5) is more than double Safety Net's (≈1.056). 
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b), then hand off to `refactor-scan` for that Track
+Run the orchestrator's Track-selection step (step 1), then hand off to `refactor-scan` for that Track
 only — stop there, don't continue through design/implement. It should:
 
 1. Read both `## Safety Net` and `## Guardrails`, compute each `overdue_ratio`.

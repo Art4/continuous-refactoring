@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, Guardrails stalled (nothing workable yields)
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) handling a Guardrails Track whose
 `Open` is non-empty but nothing in it is currently workable — Guardrails yields, its `Open` stays as it
 is, and the pass report lists every stalled node with its reason. The ordinary ratio and tie-break rules
@@ -38,7 +38,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — it should:
+Run the orchestrator's Track-selection step (step 1) — it should:
 
 1. Read `## Safety Net`; its `Open` is empty — the Safety Net blockade does not fire.
 2. Check the one-time exception: all four sections present, Investigation has no in-flight `Pending

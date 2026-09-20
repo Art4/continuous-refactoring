@@ -13,7 +13,7 @@ rejected; only *the underlying concrete candidate* a pass produced from it could
 ## `Last scan` — written whenever `investigation-track.md`'s own process actually ran this pass
 
 `skills/refactor-scan/references/investigation-track.md` ran this pass (Investigation was the Track step
-0b selected, and its own *Proposing* step was reached — whether it proposed `structural-scan`, found it
+1 selected, and its own *Proposing* step was reached — whether it proposed `structural-scan`, found it
 still gate-blocked, or found the Investigation Track's own precondition-free scope simply had nothing new
 to say) → write `## Investigation`'s `Last scan` to today's date (`YYYY-MM-DD`), last, in the
 closing call's own step ordering, same position `## Safety Net`'s/`##
@@ -21,7 +21,7 @@ Guardrails`' own `Last scan` write already occupies. **Section didn't exist yet*
 create it here: `Cadence: continuous`, `Last scan: <today>` — no `Open`/`Out-of-scope` to populate, this
 section never carries either (`refactoring-bookkeeping.md`'s own `## Investigation` section).
 
-**The scan didn't run this pass** — Investigation wasn't the Track step 0b selected, or a structural
+**The scan didn't run this pass** — Investigation wasn't the Track step 1 selected, or a structural
 candidate already pending was resumed via `Pending candidates` at `refactor-scan/SKILL.md` step 2 before
 step 4 (and `investigation-track.md`) was ever reached — don't touch `Last scan`. Resuming existing work
 isn't scanning, the same distinction `## Safety Net`'s/`## Guardrails`' own writes already draw for their

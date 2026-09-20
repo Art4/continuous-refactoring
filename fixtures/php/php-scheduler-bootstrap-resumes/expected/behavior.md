@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, one-time exception retired, ordinary scheduling resumes
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) picking **Guardrails** via genuine
 `overdue_ratio` comparison, *not* the one-time exception — confirming the exception is permanently done
 once all three of Investigation/Guardrails/Housekeeping have each had their own turn, even on a pass
@@ -39,7 +39,7 @@ applies, and ordinary Eligibility/Selection runs unmodified.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — check the one-time exception first, confirm it
+Run the orchestrator's Track-selection step (step 1) — check the one-time exception first, confirm it
 does **not** apply, then run ordinary ratio/tie-break selection. It should:
 
 1. Read `## Safety Net`; its `Open` is empty, so check the exception's three conditions — all false (see

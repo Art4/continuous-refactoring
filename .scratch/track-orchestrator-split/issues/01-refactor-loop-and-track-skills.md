@@ -11,47 +11,47 @@ works exactly as documented in README today.
 
 **Status:** ready-for-agent
 
-- [ ] New skill `refactor-loop`: runs one pass (today's steps 1–6 — scan, learn-early, prioritize,
+- [x] New skill `refactor-loop`: runs one pass (today's steps 1–6 — scan, learn-early, prioritize,
       design, implement, learn-closing) for a Track given as a **mandatory** input. Aborts with a clear
       error instead of guessing when no valid Track is given — never infers or defaults one.
-- [ ] `refactor-loop` does no Track-name branching itself — it passes the Track straight through to
+- [x] `refactor-loop` does no Track-name branching itself — it passes the Track straight through to
       `refactor-scan`/`refactor-learn`, which already branch internally per Track today (unchanged).
-- [ ] `refactor-loop` also owns the pass-describing sections currently inline in
+- [x] `refactor-loop` also owns the pass-describing sections currently inline in
       `continuous-refactoring/SKILL.md`: the "Opening a merge request" pointer, "Fallback", "Closing
       report", "Completion criterion".
-- [ ] New skill `continuous-safety-net`: Track = Safety Net, delegates to `refactor-loop`.
-- [ ] New skill `continuous-guardrails`: Track = Guardrails, delegates to `refactor-loop`.
-- [ ] New skill `continuous-investigation`: Track = Investigation, delegates to `refactor-loop`.
-- [ ] New skill `continuous-housekeeping`: owns Housekeeping's existing standalone process unchanged
+- [x] New skill `continuous-safety-net`: Track = Safety Net, delegates to `refactor-loop`.
+- [x] New skill `continuous-guardrails`: Track = Guardrails, delegates to `refactor-loop`.
+- [x] New skill `continuous-investigation`: Track = Investigation, delegates to `refactor-loop`.
+- [x] New skill `continuous-housekeeping`: owns Housekeeping's existing standalone process unchanged
       (does not use `refactor-loop` at all — it never did). Receives `housekeeping-track.md`,
       `housekeeping-cadence-interview.md`, `housekeeping-template-file-format.md`, moved out of
       `continuous-refactoring/references/` into its own `references/`.
-- [ ] `continuous-refactoring/SKILL.md` shrinks to: the track-scheduler algorithm
+- [x] `continuous-refactoring/SKILL.md` shrinks to: the track-scheduler algorithm
       (`track-scheduler.md`, unchanged content, stays under `continuous-refactoring/references/`) plus
       dispatch to the selected Track's skill. No inline pass-pipeline description left, no Housekeeping
       step-skip special case.
-- [ ] The six Track-independent reference files — `loop-config-interview.md`,
+- [x] The six Track-independent reference files — `loop-config-interview.md`,
       `refactoring-bookkeeping.md`, `opening-a-merge-request.md`, `local-issue-tracker-template.md`,
       `forge-facing-writing.md`, `foundational-refactoring-rules.md` — stay under
       `continuous-refactoring/references/` unchanged. They predate the Track concept and aren't
       Track-selection logic; nothing about this split touches them.
-- [ ] Only `continuous-refactoring` keeps `disable-model-invocation: true`. `refactor-loop` and the
+- [x] Only `continuous-refactoring` keeps `disable-model-invocation: true`. `refactor-loop` and the
       four `continuous-<track>` skills do **not** set it — mirrors how `refactor-scan`/`-prioritize`/
       `-design`/`-implement`/`-learn` already work today (invoked via the Skill tool from another
       skill's own prose, with no flag of their own). Setting the flag on a nested target breaks the
       call chain: verified against Claude Code's own docs and a reproduced GitHub issue — a
       `disable-model-invocation: true` skill invoked via the Skill tool (not literally typed first by
       the user this turn) is refused outright, not silently skipped.
-- [ ] Residual auto-trigger risk from omitting the flag is mitigated, not eliminated: narrow,
+- [x] Residual auto-trigger risk from omitting the flag is mitigated, not eliminated: narrow,
       explicitly-internal `description:` fields on `refactor-loop` and the four `continuous-<track>`
       skills ("invoked by continuous-refactoring only, not a user entry point"); omitted from README's
       public skill table; fail-closed on missing/invalid required input.
-- [ ] Direct invocation of a `continuous-<track>` skill — or `continuous-refactoring <trackname>` —
+- [x] Direct invocation of a `continuous-<track>` skill — or `continuous-refactoring <trackname>` —
       is a full manual override: bypasses the Safety Net blockade and the one-time exception entirely,
       exactly like naming a Track already does today (`track-scheduler.md`'s Manual override section).
       No leaf skill ever reads another Track's state; each of the five new skills knows only its own
       Track, or none.
-- [ ] Cross-references elsewhere in the suite naming `continuous-refactoring/SKILL.md` steps 1, 2, 5,
+- [x] Cross-references elsewhere in the suite naming `continuous-refactoring/SKILL.md` steps 1, 2, 5,
       or 6 get repointed to `refactor-loop`: `refactor-learn/SKILL.md`,
       `refactor-design/references/decision-gate.md`,
       `refactor-scan/references/track-open-processing.md`, `README.md`, `fixtures/README.md`, and the
@@ -59,13 +59,13 @@ works exactly as documented in README today.
       References to steps 0b/0c stay pointing at `continuous-refactoring/SKILL.md` — those stay there.
       Historical ADRs (0050, 0051, 0053) and `.scratch/` ticket archives are **not** edited — this
       repo's convention treats them as an immutable record, amended by a new ADR, never rewritten.
-- [ ] `CONTEXT.md` is unchanged. The Track vocabulary itself doesn't change, only the implementation's
+- [x] `CONTEXT.md` is unchanged. The Track vocabulary itself doesn't change, only the implementation's
       file organization — out of scope for the domain glossary.
 - [x] A new ADR amending ADR-0055 records this decision, including its "the scheduler lives in
       continuous-refactoring/SKILL.md, refactor-scan becomes Track-aware" framing and its
       Housekeeping-trigger-centralization framing, both superseded in part by this split. —
       [ADR-0057](../../../docs/adr/0057-refactor-loop-and-per-track-skills.md)
-- [ ] `skills-validation.yml`/`validate_skills.py` pass unchanged — every new `skills/*` folder gets a
+- [x] `skills-validation.yml`/`validate_skills.py` pass unchanged — every new `skills/*` folder gets a
       valid `SKILL.md` (frontmatter, `## Completion criterion`) per existing convention; nothing here
       needs a registry update, the validator scans `skills/**` generically.
 

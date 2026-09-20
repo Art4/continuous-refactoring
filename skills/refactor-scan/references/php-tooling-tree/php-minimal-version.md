@@ -36,7 +36,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   gate — `rector-php-set`'s own fulfilment check already means "fully applied, no remaining findings".
   Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
   `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`) — **except** when this node is
+  (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`) — **except** when this node is
   already fulfilled the very first time it's evaluated (no delivering MR of its own ever runs): then
   `loop-config`'s own first MR contributes the line instead, so the target never permanently misses out on
   it just because the floor happened to be sufficient from day one (see `loop-config.md`'s own entry).
@@ -51,7 +51,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   pass). Not retroactive: an already-decided candidate elsewhere in the tree is unaffected, only still-open
   proposals are held back again. Elsewhere in this tree's own design discussions, the Housekeeping Track
   (triggered on its own fixed cadence,
-  `skills/continuous-refactoring/references/housekeeping-track.md`) is the other, time-driven — not
+  `skills/continuous-housekeeping/references/housekeeping-track.md`) is the other, time-driven — not
   fact-driven — case of a check that can flip back to "due" after being satisfied.
 - **`Blocked by: PHP >= X.Y.Z` reversal detection:** an out-of-scope rejection of this node written
   under a target's own history keeps reversing correctly if the floor it names is later satisfied (the

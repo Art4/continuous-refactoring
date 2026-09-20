@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, Investigation as permanent fallback
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) picking **Investigation**
 (`CONTEXT.md`) — this ticket's own core case: a Track with no numeric `Cadence`, always due and always
 eligible, selected purely because nothing else with a real ratio is due this pass, then handed off to
@@ -43,7 +43,7 @@ aren't stale enough to compete.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b), then hand off to `refactor-scan` for that Track
+Run the orchestrator's Track-selection step (step 1), then hand off to `refactor-scan` for that Track
 only — stop there, don't continue through design/implement. It should:
 
 1. Read `## Safety Net`, `## Guardrails`, and `## Investigation`; compute (or, for Investigation, note the

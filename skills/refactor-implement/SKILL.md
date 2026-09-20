@@ -74,6 +74,8 @@ The candidate branch stays checked out after this. `refactor-learn`'s bookkeepin
 
 The opened merge request → `refactor-learn`.
 
+Running as a subagent (no way to ask the human, forge access possibly missing): don't stall or retry around it — stop at the first thing you can't do (an unconfirmed seam before any test is written, a create-mode that asks the human, a failed or denied push, MR creation, or CI-status read) and return, instead of the MR: the branch, its commits, what was verified locally, and exactly what failed or is still open, with the error text. The caller finishes it; this skill's completion criterion then holds once the caller has.
+
 ## Fallback
 
 - **`/tdd`**: installed → use its discipline. Otherwise loop rules and test-quality criteria inlined at `skills/refactor-implement/references/review-fallback.md`.

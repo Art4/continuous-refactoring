@@ -1,7 +1,7 @@
 # Housekeeping Track process
 
-`continuous-refactoring/SKILL.md`'s own Housekeeping-specific process — run directly by the orchestrator
-once the Track scheduler selects this Track, not handed to `refactor-scan` the way Safety Net,
+`continuous-housekeeping`'s own process — run directly by that skill once
+`continuous-refactoring`'s Track scheduler selects this Track, not handed to `refactor-scan` the way Safety Net,
 Guardrails, and Investigation are (`skills/refactor-scan/references/safety-net-track.md`,
 `guardrails-track.md`, `investigation-track.md`). This Track isn't a tooling-tree scan: it's a complete
 due-check → reconcile → checklist-assembly → quality-gate → deliver pipeline in itself, the same shape
@@ -14,14 +14,14 @@ former steps 1–2 (its own setup interview and its own tracker-history due-chec
 
 Decided once, before this file's own process starts — the orchestrator's own Track-selection step
 (`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
-step 0b) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Housekeeping`
+step 1) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Housekeeping`
 section (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner down
 as this pass's selected Track. This section covers only what this Track does with that decision — it
 never re-derives due-ness itself:
 
-- **This Track wasn't the one step 0b selected** → nothing in this file runs this pass; the orchestrator
-  continues with whichever Track was actually selected instead (or with its ordinary scan/prioritise/
-  design/implement/learn pipeline, if none was due).
+- **This Track wasn't the one selected** (step 1, or a human naming another Track) → nothing in this file runs this
+  pass; `continuous-refactoring` dispatches to whichever Track was actually selected instead. Invoking
+  `continuous-housekeeping` directly counts as selecting it — a manual override, no due-check.
 - **This Track is the one that was selected** → continue below. Housekeeping carries no `Open` precondition
   (`refactoring-bookkeeping.md`'s own `## Housekeeping` section) — always eligible the moment it's due,
   the same "no `Open` concept" shape `## Investigation` already has (`track-scheduler.md`'s own
@@ -38,7 +38,7 @@ at all" discipline `## Safety Net`'s 90-day default and `## Guardrails`' 60-day 
 (`skills/refactor-learn/references/safety-net-write.md`, `guardrails-write.md`). A human who wants a
 different interval either hand-edits `## Housekeeping`'s `Cadence` field directly — hand-editable, same
 as `## Safety Net`'s/`## Guardrails`' own — or runs
-`skills/continuous-refactoring/references/housekeeping-cadence-interview.md` themselves, any time, for a
+`skills/continuous-housekeeping/references/housekeeping-cadence-interview.md` themselves, any time, for a
 guided one-question prompt instead of a bare number edit. That reference file is preserved for this
 optional, human-initiated use; it no longer gates the Track's very first run the way it used to gate the
 old skill's own first invocation.
@@ -64,7 +64,7 @@ remembered-MR tracking already uses elsewhere.
 **New cycle only** (skip this reconciliation when resuming an open cycle above — that one continues
 exactly as it already stands): a node's own delivering merge request is the *ordinary* way a
 `Housekeeping` line reaches `housekeeping-template.md`
-(`skills/continuous-refactoring/references/housekeeping-template-file-format.md`), but it's not the only
+(`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`), but it's not the only
 way a line can be missing — a hand-adopted tool (a node fulfilled before this target's `bookkeeping.md`
 ever gained a `## Housekeeping` section, or adopted outside the suite entirely) gets no second chance at
 a delivering MR to piggyback on, and the same is true the very first time this Track ever runs for a

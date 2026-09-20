@@ -1,13 +1,13 @@
 # Track scheduler
 
-`continuous-refactoring/SKILL.md` step 0b's own process: which **Track** (`CONTEXT.md`) this pass runs,
+`continuous-refactoring/SKILL.md` step 1's own process: which **Track** (`CONTEXT.md`) this pass runs,
 computed generically over every Track carrying a `Cadence`/`Last scan` bookkeeping section
 (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — not a fixed two-Track special
 case. Supersedes each Track's own earlier standalone "is my Track due?" check
 (`skills/refactor-scan/references/safety-net-track.md`, `skills/refactor-scan/references/
 guardrails-track.md`, each file's own "Is the Track due this pass?" section; and, for Housekeeping, the
 now-retired standalone `continuous-housekeeping` skill's own tracker-history due-check, replaced by
-`skills/continuous-refactoring/references/housekeeping-track.md`'s own same-named section) — that check
+`skills/continuous-housekeeping/references/housekeeping-track.md`'s own same-named section) — that check
 answered the question alone because, when it was written, no other Track existed yet to compete with.
 This file is the real competition those sections deferred — plus the one-time exception (below) that
 overrides that competition's outcome for exactly three turns per repo, right after Safety Net's
@@ -71,8 +71,8 @@ With that precondition met, check the following three, in order, and stop at the
    first scan.
 3. Else, **`## Housekeeping` section absent** → select **Housekeeping**, this pass, overriding ratio/
    tie-break. Housekeeping's entire cycle — reconcile, open this cycle's issue, work the checklist,
-   quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 0c performs
-   (`skills/continuous-refactoring/references/housekeeping-track.md`), so — unlike Investigation's own
+   quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 2 dispatches (to `continuous-housekeeping`)
+   (`skills/continuous-housekeeping/references/housekeeping-track.md`), so — unlike Investigation's own
    turn above — there is no multi-pass in-flight state to keep re-selecting across; the section exists
    with `Last scan` written by the time that same pass's closing call finishes.
 4. Else (all three sections present, and `## Investigation` carries no in-flight `Pending candidates`)
@@ -121,7 +121,7 @@ ratio comparison when it is both **due** and **eligible** this pass:
   of Investigation; with nothing workable, it yields. A Track with no `Open` concept at all
   (Housekeeping, Investigation — neither ever carries one, per the spec's own bookkeeping schema) is
   always eligible; a Housekeeping cycle already in progress is tracked by the tracker's own history
-  instead (`skills/continuous-refactoring/references/housekeeping-track.md`'s own *Resuming an
+  instead (`skills/continuous-housekeeping/references/housekeeping-track.md`'s own *Resuming an
   in-progress cycle* section), not by this eligibility rule. Investigation waits behind a Guardrails
   backlog with workable nodes — Guardrails' workable nodes outrank Investigation's permanent fallback
   status.
@@ -162,8 +162,8 @@ Safety Net's `Open` can't still be non-empty at the same moment Guardrails' is �
 own Scope section. The rule stays written anyway: it's still the correct fallback if a future Track ever
 gains its own `Open`-shaped in-flight state.
 
-**No wired Track is both due and eligible** → nothing is selected; step 1 (`refactor-scan`) runs with no
-Track this pass, the same outcome as today whenever nothing due was found. **In practice unreachable now
+**No wired Track is both due and eligible** → nothing is selected; step 2 has nothing to dispatch and
+the pass ends with that reported (no Track skill, hence no `refactor-loop`, runs). **In practice unreachable now
 that Investigation is wired** — Investigation is always due and always eligible in every case above
 (section absent, a real `overdue_ratio >= 1`, or its own no-day-count `Cadence` — it always matches at
 least the last), so it always fills this slot itself at minimum. Documented anyway: it's still the
@@ -191,8 +191,8 @@ Tracks already used — one surface, one argument, four possible names.
 ## Handing off to `refactor-scan`, or directly to the Housekeeping Track's own process
 
 `refactor-scan` no longer decides for itself whether a Track is due — this step decides once, before
-`refactor-scan` starts, and hands the winner down as an explicit input (or hands down "no Track" when
-nothing wired was due and eligible). `refactor-scan/SKILL.md` step 4 and each Track's own reference file
+`refactor-scan` starts, and dispatches to the winner's own skill (step 2), which hands the Track down
+through `refactor-loop` to `refactor-scan` as an explicit input. `refactor-scan/SKILL.md` step 4 and each Track's own reference file
 (`safety-net-track.md`, `guardrails-track.md` — Scope / Judging fulfilment / Proposing and recording;
 `investigation-track.md` — the single `structural-scan` gate, no judging, no `Open`) still perform their
 own process exactly as documented — the tree-walk/gate mechanics are unchanged. Only "which Track (if
@@ -203,14 +203,14 @@ tooling-tree scan at all — `refactor-scan`'s own contract is "detect, never wr
 (`skills/refactor-scan/SKILL.md`), and the Housekeeping Track's own process commits, opens issues, and
 opens merge requests directly, the same way it always did as the now-retired standalone
 `continuous-housekeeping` skill. Selecting Housekeeping hands off straight to
-`skills/continuous-refactoring/references/housekeeping-track.md`, run by the orchestrator itself
-(`skills/continuous-refactoring/SKILL.md` step 0c) — `refactor-scan` never runs at all this pass in that
-case.
+`skills/continuous-housekeeping/references/housekeeping-track.md`, run by `continuous-housekeeping`
+(dispatched to by `skills/continuous-refactoring/SKILL.md` step 2) — `refactor-scan`
+never runs at all this pass in that case.
 
 ## Suite-wide open-MR cap
 
 Unaffected by any of the above, and already Track-agnostic before this step existed:
-`refactor-prioritize/SKILL.md` step 1's "two or more suite MRs already open" stop condition reads every
+`refactor-loop/SKILL.md` step 5's cap gate ("two or more suite MRs already open", checked before a new MR is opened) reads every
 open `refactor:candidate` issue with a linked pull request, regardless of which Track (or no Track at
 all) filed it — a Safety Net or Guardrails Track candidate is filed and labeled exactly like any other
 candidate (`skills/refactor-learn/references/safety-net-write.md`,

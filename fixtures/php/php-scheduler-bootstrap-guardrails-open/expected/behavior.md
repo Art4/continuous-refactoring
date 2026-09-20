@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, one-time exception advances past Guardrails' non-empty Open
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) advancing the one-time bootstrap
 sequence to **Housekeeping** even though Guardrails still has a non-empty `Open` — confirming the
 bootstrap exception does not wait for Guardrails' `Open` to empty before advancing. The exception runs
@@ -37,7 +37,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — check the one-time exception *first*, before
+Run the orchestrator's Track-selection step (step 1) — check the one-time exception *first*, before
 any ratio/tie-break computation. It should:
 
 1. Read `## Safety Net`; recognize its `Open` is currently empty — the one-time exception's

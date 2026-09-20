@@ -29,7 +29,9 @@ for the fragment convention and the release recipe that consolidates them into `
 
 This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking them into a target repo's `.agents/skills/` (see `README.md`):
 
-- `continuous-refactoring` — the loop pass orchestrator (scan → prioritise → design → implement → learn), a thin data pipe between the lifecycle skills (ADR-0010)
+- `continuous-refactoring` — the single entry point: selects a Track (`references/track-scheduler.md`) and dispatches to that Track's skill (ADR-0057)
+- `refactor-loop` — internal, track-agnostic: one loop pass (scan → prioritise → design → implement → learn), a thin data pipe between the lifecycle skills (ADR-0010); takes a mandatory Track
+- `continuous-safety-net` / `continuous-guardrails` / `continuous-investigation` — internal, name their Track and delegate to `refactor-loop`; `continuous-housekeeping` — internal, owns Housekeeping's own process
 - `refactor-scan` — propose every currently-unblocked tooling-tree node, detect (never act on) closed/merged issues and MRs
 - `refactor-prioritize` — rank the proposals, recommend next; for a gate-shaped winner, also selects and minimally files the concrete candidate
 - `refactor-design` — grounds and grills a candidate into a plan, filing it (or adding the plan as a comment on an already-filed one)
