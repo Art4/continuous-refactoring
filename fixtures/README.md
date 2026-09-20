@@ -274,6 +274,40 @@ Same non-CI, local-only, advisory posture as the two fixtures above.
 
 Same non-CI, local-only, advisory posture as the three fixtures above.
 
+### php-track-open-* (Track Open walk, ticket 07)
+
+Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
+matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*`/`php-guardrails-*`
+above. Exercises the orchestrator's own `Open` walk behavior
+(`skills/continuous-refactoring/references/track-open-processing.md`) — top-to-bottom processing,
+Fulfilment re-check, and non-workable node collection. See each fixture's own
+`expected/behavior.md` for the full seeded state and reasoning.
+
+- **php-track-open-hand-adopted** — `## Safety Net`'s `Open` lists `php-cs-fixer (#5)` at the top,
+  but `friendsofphp/php-cs-fixer` is already installed and configured (adopted by hand after the
+  scan). Expects the re-check to find `php-cs-fixer` fulfilled, remove it from `Open` without a
+  merge request, and continue to the next workable node (`phpunit`).
+
+- **php-track-open-blocked-in-between** — `## Safety Net`'s `Open` lists `phpunit (#6)`,
+  `phpstan-level-0 (#7)`, `php-cs-fixer (#5)`. `phpstan-level-0` is blocked by `static-code-analyzer`
+  (required parent not fulfilled). Expects `phpunit` worked (first workable node), `phpstan-level-0`
+  skipped with reason ("blocked by static-code-analyzer") in the pass report, and `php-cs-fixer` not
+  worked (exactly one node per pass).
+
+- **php-track-open-priority-vs-top** — `## Safety Net`'s `Open` lists `phpunit (#6)`. A separate
+  `refactor:priority`-labeled structural candidate (`01-shallow-user-service.md`) exists on the
+  tracker. Expects the Safety Net blockade to remain active (Open non-empty), the `Open` walk to
+  process `phpunit`, and the priority issue to wait — Rank mode is not invoked, and the priority
+  issue does not bypass the blockade.
+
+```bash
+./fixtures/harness/run.sh safety-net-track php-track-open-hand-adopted --opencode
+./fixtures/harness/run.sh safety-net-track php-track-open-blocked-in-between --opencode
+./fixtures/harness/run.sh safety-net-track php-track-open-priority-vs-top --opencode
+```
+
+Same non-CI, local-only, advisory posture as the scheduler fixtures above.
+
 ### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
 
 Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI, alongside `tier1`/`tier2`, in a

@@ -1,0 +1,12 @@
+{
+    "name": "example/php-track-open-blocked-in-between",
+    "description": "Safety Net Open with a blocked node between two workable ones — blocked node skipped with reason",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}

@@ -74,10 +74,12 @@ line happens to mention.
 Every node in scope still unresolved (neither fulfilled by judgement above, nor already rejected under
 `out-of-scope/`) and currently unblocked (`php-safety-net` resolved, plus its own domain-specific
 required parent already fulfilled, per the tree's ordinary edge semantics) → propose it by Name, same
-as `refactor-scan/SKILL.md` step 4 already does for any other node. Once
-`refactor-prioritize`/`refactor-design` files it, its slug (with issue # once known) is added to `##
+as `refactor-scan/SKILL.md` step 4 already does for any other node. Its slug is added to `##
 Guardrails`'s `Open` list — `refactor-learn`'s own side of this,
-`skills/refactor-learn/references/guardrails-write.md`.
+`skills/refactor-learn/references/guardrails-write.md`. **No candidate issue is created at this
+point** — the node's issue is created only when it is actually worked via the `Open` walk
+(`skills/continuous-refactoring/references/track-open-processing.md`), not pre-filed during the
+scan.
 
 ## Filling `Open`
 
