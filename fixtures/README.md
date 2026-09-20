@@ -194,7 +194,7 @@ Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-b
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
 `php-safety-net-*`/`php-guardrails-*` above. Exercises the orchestrator's own new Track-selection step
-(`skills/continuous-refactoring/SKILL.md` step 0b, algorithm in
+(`skills/continuous-refactoring/SKILL.md` step 1, algorithm in
 `skills/continuous-refactoring/references/track-scheduler.md`) — real competition between every
 currently-wired Track, replacing each Track's own earlier standalone "is my Track due?" check. See each
 fixture's own `expected/behavior.md` for the full expected behavior.

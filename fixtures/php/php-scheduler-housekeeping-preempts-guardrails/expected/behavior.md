@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, Housekeeping preempts Guardrails backlog
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) selecting **Housekeeping** over
 Guardrails when both are due — Housekeeping preempts Guardrails for one pass when due
 (`overdue_ratio >= 1`), then Guardrails resumes afterwards. This tests the preemption rule:
@@ -36,7 +36,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — it should:
+Run the orchestrator's Track-selection step (step 1) — it should:
 
 1. Read `## Safety Net`; its `Open` is empty — the Safety Net blockade does not fire.
 2. Check the one-time exception: all four sections present, Investigation has no in-flight `Pending

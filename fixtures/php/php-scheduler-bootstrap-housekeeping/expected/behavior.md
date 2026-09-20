@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, one-time exception (turn 3: Housekeeping)
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) picking **Housekeeping** the pass right
 after both Investigation's and Guardrails' own one-time-exception turns already completed — the third and
 final turn of the sequence.
@@ -30,14 +30,14 @@ Guardrails both fully resolved at the filesystem level.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — check the one-time exception first. It should:
+Run the orchestrator's Track-selection step (step 1) — check the one-time exception first. It should:
 
 1. Read `## Safety Net`; `Open` is empty — precondition met.
 2. Check condition 1 (`## Investigation` absent or `Pending candidates` naming an issue) — false, both
    present and clear. Check condition 2 (`## Guardrails` absent) — false, present. Check condition 3
    (`## Housekeeping` absent) — **true** — select **Housekeeping**, this pass, overriding ratio/
    tie-break, without ever computing an `overdue_ratio` for any Track.
-3. Continue at `SKILL.md` step 0c: run `housekeeping-track.md`'s own process directly (not handed to
+3. Continue at `SKILL.md` step 2: run `housekeeping-track.md`'s own process directly (not handed to
    `refactor-scan`) — reconcile, open this cycle's issue, work the checklist, quality gate, reach Deliver.
    This sandbox has no git remote, so stop once `opening-a-merge-request.md`'s own "no forge/remote
    available" branch is reached — don't attempt a real push.

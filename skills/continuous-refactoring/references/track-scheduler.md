@@ -1,6 +1,6 @@
 # Track scheduler
 
-`continuous-refactoring/SKILL.md` step 0b's own process: which **Track** (`CONTEXT.md`) this pass runs,
+`continuous-refactoring/SKILL.md` step 1's own process: which **Track** (`CONTEXT.md`) this pass runs,
 computed generically over every Track carrying a `Cadence`/`Last scan` bookkeeping section
 (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — not a fixed two-Track special
 case. Supersedes each Track's own earlier standalone "is my Track due?" check
@@ -71,7 +71,7 @@ With that precondition met, check the following three, in order, and stop at the
    first scan.
 3. Else, **`## Housekeeping` section absent** → select **Housekeeping**, this pass, overriding ratio/
    tie-break. Housekeeping's entire cycle — reconcile, open this cycle's issue, work the checklist,
-   quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 0c dispatches (to `continuous-housekeeping`)
+   quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 2 dispatches (to `continuous-housekeeping`)
    (`skills/continuous-housekeeping/references/housekeeping-track.md`), so — unlike Investigation's own
    turn above — there is no multi-pass in-flight state to keep re-selecting across; the section exists
    with `Last scan` written by the time that same pass's closing call finishes.
@@ -162,7 +162,7 @@ Safety Net's `Open` can't still be non-empty at the same moment Guardrails' is �
 own Scope section. The rule stays written anyway: it's still the correct fallback if a future Track ever
 gains its own `Open`-shaped in-flight state.
 
-**No wired Track is both due and eligible** → nothing is selected; step 0c has nothing to dispatch and
+**No wired Track is both due and eligible** → nothing is selected; step 2 has nothing to dispatch and
 the pass ends with that reported (no Track skill, hence no `refactor-loop`, runs). **In practice unreachable now
 that Investigation is wired** — Investigation is always due and always eligible in every case above
 (section absent, a real `overdue_ratio >= 1`, or its own no-day-count `Cadence` — it always matches at
@@ -191,7 +191,7 @@ Tracks already used — one surface, one argument, four possible names.
 ## Handing off to `refactor-scan`, or directly to the Housekeeping Track's own process
 
 `refactor-scan` no longer decides for itself whether a Track is due — this step decides once, before
-`refactor-scan` starts, and dispatches to the winner's own skill (step 0c), which hands the Track down
+`refactor-scan` starts, and dispatches to the winner's own skill (step 2), which hands the Track down
 through `refactor-loop` to `refactor-scan` as an explicit input. `refactor-scan/SKILL.md` step 4 and each Track's own reference file
 (`safety-net-track.md`, `guardrails-track.md` — Scope / Judging fulfilment / Proposing and recording;
 `investigation-track.md` — the single `structural-scan` gate, no judging, no `Open`) still perform their
@@ -204,7 +204,7 @@ tooling-tree scan at all — `refactor-scan`'s own contract is "detect, never wr
 opens merge requests directly, the same way it always did as the now-retired standalone
 `continuous-housekeeping` skill. Selecting Housekeeping hands off straight to
 `skills/continuous-housekeeping/references/housekeeping-track.md`, run by `continuous-housekeeping`
-(dispatched to by `skills/continuous-refactoring/SKILL.md` step 0c) — `refactor-scan`
+(dispatched to by `skills/continuous-refactoring/SKILL.md` step 2) — `refactor-scan`
 never runs at all this pass in that case.
 
 ## Suite-wide open-MR cap

@@ -11,7 +11,7 @@ Housekeeping Track's own process, entirely unrelated to this section
 ## `Last scan` — written whenever `housekeeping-track.md`'s own process actually ran this pass
 
 `skills/continuous-housekeeping/references/housekeeping-track.md` ran this pass (Housekeeping was the
-Track step 0b/0c selected, and its own process was actually reached — whether it resumed an in-progress
+Track step 1 selected, and its own process was actually reached — whether it resumed an in-progress
 cycle, opened and delivered a fresh one, or found nothing registered to check) → write `## Housekeeping`'s
 `Last scan` to today's date (`YYYY-MM-DD`), last, in the closing call's own
 step ordering, same position `## Safety Net`'s/`## Guardrails`'/`## Investigation`'s own `Last scan`
@@ -21,7 +21,7 @@ section applies, written here rather than left for a later hand-edit. `Cadence` 
 written by this call once the section exists — see *`Cadence` is read, not written, past first creation*,
 below.
 
-**The Track didn't run this pass** — Housekeeping wasn't the Track step 0b/0c selected — don't touch
+**The Track didn't run this pass** — Housekeeping wasn't the Track step 1 selected — don't touch
 `## Housekeeping` at all.
 
 **Which branch**: land this write via the ordinary dedicated bookkeeping branch/MR

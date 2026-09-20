@@ -21,12 +21,12 @@ Guardrails node.
 
 Decided once, before `refactor-scan` even starts — the orchestrator's own Track-selection step
 (`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
-step 0b) reads `bookkeeping.md`'s `## Investigation` section
+step 1) reads `bookkeeping.md`'s `## Investigation` section
 (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner to
 `refactor-scan` as an explicit input, exactly as it does for every other wired Track. This section covers
 only what this Track does with that decision — it never re-derives due-ness itself:
 
-- **This Track wasn't the one step 0b selected** → nothing in this file runs this pass; `structural-scan`
+- **This Track wasn't the one step 1 selected** → nothing in this file runs this pass; `structural-scan`
   is **not** proposed this pass, even if its own resolved-edge gate would otherwise allow it —
   `refactor-scan` continues with whichever Track was actually selected instead (or with everything else
   it already does, if none was due). This is the actual behavior change here: before this Track existed,

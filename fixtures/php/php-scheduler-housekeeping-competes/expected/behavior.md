@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, Housekeeping's real Cadence competing in ratio comparison
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) picking **Housekeeping**
 (`CONTEXT.md`) — this ticket's own core case: unlike Investigation's permanent `continuous` Cadence,
 Housekeeping's `## Housekeeping` section carries a real day-count `Cadence` that has to actually win the
@@ -41,8 +41,8 @@ cycle has something real to check — not the "nothing registered" all-clear cas
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b), then dispatch to the Housekeeping Track's own process (step
-0c, `continuous-housekeeping`, which follows `skills/continuous-housekeeping/references/housekeeping-track.md`) — stop once that process reaches
+Run the orchestrator's Track-selection step (step 1), then dispatch to the Housekeeping Track's own process (step
+2, `continuous-housekeeping`, which follows `skills/continuous-housekeeping/references/housekeeping-track.md`) — stop once that process reaches
 its own *Deliver* step's "no forge/remote available" branch (this sandbox has no git remote), don't
 continue into a real push. It should:
 

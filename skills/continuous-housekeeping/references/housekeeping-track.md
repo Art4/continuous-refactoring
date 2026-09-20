@@ -14,12 +14,12 @@ former steps 1–2 (its own setup interview and its own tracker-history due-chec
 
 Decided once, before this file's own process starts — the orchestrator's own Track-selection step
 (`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
-step 0b) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Housekeeping`
+step 1) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Housekeeping`
 section (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner down
 as this pass's selected Track. This section covers only what this Track does with that decision — it
 never re-derives due-ness itself:
 
-- **This Track wasn't the one selected** (step 0b, or a human naming another Track) → nothing in this file runs this
+- **This Track wasn't the one selected** (step 1, or a human naming another Track) → nothing in this file runs this
   pass; `continuous-refactoring` dispatches to whichever Track was actually selected instead. Invoking
   `continuous-housekeeping` directly counts as selecting it — a manual override, no due-check.
 - **This Track is the one that was selected** → continue below. Housekeeping carries no `Open` precondition

@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, Safety Net blockade with nothing workable
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) selecting **Safety Net** even though
 none of its `Open` entries are currently workable — the Safety Net blockade is unconditional: while Safety
 Net `Open` is non-empty, it is selected and nothing else runs, even if no node is currently workable;
@@ -39,7 +39,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — it should:
+Run the orchestrator's Track-selection step (step 1) — it should:
 
 1. Read `## Safety Net`; recognize its `Open` is **non-empty** — the Safety Net blockade fires
    (`track-scheduler.md`'s own "Safety Net blockade" section). This is stronger than the ordinary

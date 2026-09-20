@@ -1,6 +1,6 @@
 # Expected behavior — Track scheduler, one-time exception (turn 2: Guardrails, not Investigation again)
 
-The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm
+The orchestrator's own Track-selection step (`skills/continuous-refactoring/SKILL.md` step 1, algorithm
 in `skills/continuous-refactoring/references/track-scheduler.md`) picking **Guardrails** the pass right
 after Investigation's own one bootstrap turn already completed — confirming the one-time exception's
 sequence actually advances instead of re-selecting Investigation forever (Investigation is otherwise the
@@ -34,7 +34,7 @@ both fully resolved at the filesystem level (`php-safety-net: true`, `next` hold
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b) — check the one-time exception first — then hand
+Run the orchestrator's Track-selection step (step 1) — check the one-time exception first — then hand
 off to `refactor-scan` for that Track only; stop there, don't continue through design/implement. It
 should:
 
