@@ -30,8 +30,9 @@ where external reports go.)
 ## Skill suite conventions
 
 If your change touches the skills themselves (`skills/**`), skim
-[AGENTS.md](AGENTS.md) and [CONTEXT.md](CONTEXT.md) first — they define the vocabulary and the
-orchestrator's data-flow rules (ADR-0010) that every skill follows. The `docs/adr/` directory
+[AGENTS.md](AGENTS.md), [CONTEXT.md](CONTEXT.md) and [docs/architecture.md](docs/architecture.md) first —
+they define the vocabulary and the data-flow rules (`refactor-loop` carries each skill's output to the
+next) that every skill follows. The `docs/adr/` directory
 records why past design decisions were made; check it before re-litigating one.
 
 ## Changelog
