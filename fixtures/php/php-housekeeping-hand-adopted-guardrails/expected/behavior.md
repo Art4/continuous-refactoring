@@ -5,7 +5,7 @@ gets its `Housekeeping` checklist line via agent judgement in the reconciliation
 reading `Fulfilled nodes`.
 
 Not deterministically checkable — pure skill process behavior. Run via
-`fixtures/harness/run.sh housekeeping php-housekeeping-hand-adopted-guardrails --opencode`,
+`fixtures/harness/run.sh housekeeping-track php-housekeeping-hand-adopted-guardrails --opencode`,
 same non-CI, local-only, advisory posture as `decision-gate-bypass`.
 
 ## Seeded state

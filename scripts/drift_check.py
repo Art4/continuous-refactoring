@@ -2,12 +2,14 @@
 graph-logic output on shared seed fixtures.
 
 The manual fallback (tree-walk-prompt.md) and the script (tooling_tree.py)
-encode the same graph rules in prose and code respectively. This advisory,
-local-only check runs both on shared seed inputs and reports any difference
-in workable (next_candidates) and withheld results.
+encode the same graph rules in prose and code respectively. This check runs
+both on shared seed inputs and reports any difference in workable
+(next_candidates) and withheld results.
 
-Tier 3 (ground truth) moved to local-only/advisory with ADR-0055 ticket 03.
-This drift check is similarly advisory — it never gates CI.
+Advisory and local-only: run it by hand (``python3 scripts/drift_check.py``).
+Its filename deliberately does not match the ``test_*.py`` pattern CI's
+unittest discovery collects (``python3 -m unittest discover -s scripts -p
+'test_*.py'``), so it never gates CI.
 """
 
 import importlib.util

@@ -4,7 +4,7 @@ Used by `fixtures/harness/run.sh judge <fixture> --opencode` — a second, indep
 opencode invocation grades a fixture's post-pass artifacts against the dimensions
 below, one score 1–5 each plus a one-line justification. Local-only advisory (this
 repo's CI has no model credentials to run a judge with), same posture as
-`roadmap --opencode`, `agent-loop`, and the rest of Tier 4/5's behavioral layer —
+`agent-loop` and the rest of Tier 4/5's behavioral layer —
 see `fixtures/README.md`.
 
 A judge run is a second opinion, not a gate: nothing here fails a build. It exists
