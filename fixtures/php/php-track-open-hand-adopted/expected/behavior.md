@@ -19,7 +19,10 @@ committed, `vendor/bin/php-cs-fixer fix --dry-run` clean (zero diffs). `composer
 also fulfilled (namespaced `src/Greeter.php` under `App\`).
 
 `docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01` (far past the
-default 90-day `Cadence`), `Open: - php-cs-fixer (#5), - phpunit (#6), - phpstan-level-0 (#7)`.
+default 90-day `Cadence`), `Open` as a list:
+- `php-cs-fixer (#5)`
+- `phpunit (#6)`
+- `phpstan-level-0 (#7)`
 
 `.scratch/refactor/issues/05-php-cs-fixer.md` — already carries `ready-for-agent` and a plan,
 simulating a pass that filed this candidate before the human adopted php-cs-fixer by hand.

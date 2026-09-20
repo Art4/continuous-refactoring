@@ -22,9 +22,9 @@ tree. All eleven Guardrails scope nodes are genuinely still missing.
 
 `docs/refactoring/bookkeeping.md`:
 
-- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (`overdue_ratio ≈ 0.2`), `Open: none`.
+- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (`overdue_ratio ≈ 0.2`), `Open` list `- none`.
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before this fixture's reference date
-  of 2026-09-19 → `overdue_ratio ≈ 1.33`), **`Open: none`**, `Out-of-scope: none`. **Due and eligible.**
+  of 2026-09-19 → `overdue_ratio ≈ 1.33`), **`Open` list `- none`**, `Out-of-scope` list `- none`. **Due and eligible.**
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (`overdue_ratio ≈ 0.57`). Not due.
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-10`. All four sections present, so the
   one-time bootstrap exception is done.
@@ -52,11 +52,20 @@ output for it (`python3 skills/refactor-scan/references/tooling_tree.py --seed <
    node's Fulfilment check against its Purpose, hands that fulfilled set to the script as a seed, and
    takes the resulting `backlog` in the script's order.
 3. `refactor-learn`'s closing call writes `## Guardrails`:
-   - `Open`, in exactly this order, one bullet per node, **no issue numbers** (none is being worked):
-     `phpmd`, `coverage-floor`, `composer-audit`, `phpstan-level-6`, `phpstan-level-7`,
-     `phpstan-level-8`, `phpstan-level-9`, `phpstan-level-10`, `phpstan-deprecation-rules`,
-     `php-minimal-version`, `semgrep` — the four blocked `phpstan-level-7..10` entries are present,
-     not omitted.
+   - `Open`, as a bullet list under `**Open:**`, in exactly this order, one bullet per node, **no
+     issue numbers** (none is being worked) — the four blocked `phpstan-level-7..10` entries are
+     present, not omitted:
+     - `phpmd`
+     - `coverage-floor`
+     - `composer-audit`
+     - `phpstan-level-6`
+     - `phpstan-level-7`
+     - `phpstan-level-8`
+     - `phpstan-level-9`
+     - `phpstan-level-10`
+     - `phpstan-deprecation-rules`
+     - `php-minimal-version`
+     - `semgrep`
    - `Last scan` set to today's date.
    - `Out-of-scope` left as it was (`- none`); `## Safety Net`, `## Housekeeping`, `## Investigation`
      and `Pending candidates` untouched.

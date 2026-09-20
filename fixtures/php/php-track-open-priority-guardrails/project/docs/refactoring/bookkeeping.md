@@ -25,6 +25,16 @@
 
 **Open:**
 - phpmd (#5)
+- coverage-floor
+- composer-audit
+- phpstan-level-6
+- phpstan-level-7
+- phpstan-level-8
+- phpstan-level-9
+- phpstan-level-10
+- phpstan-deprecation-rules
+- php-minimal-version
+- semgrep
 
 **Out-of-scope:**
 - none

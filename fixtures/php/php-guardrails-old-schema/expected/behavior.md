@@ -53,11 +53,11 @@ Run `/refactor-scan`. It should:
 
 Whichever candidate this pass actually carries through to completion (or, at minimum, the Track's own
 scan completing) creates the `## Guardrails` section fresh — `Cadence: 60`, `Last scan: <today>`,
-`Open` holding the complete Guardrails backlog in the script's order, blocked nodes included, no
-issue numbers: `phpmd`, `coverage-floor`, `composer-audit`, `phpstan-level-6`, `phpstan-level-7`,
-`phpstan-level-8`, `phpstan-level-9`, `phpstan-level-10`, `phpstan-deprecation-rules`,
-`php-minimal-version`, `semgrep` (computed with `tooling_tree.py` and a seed marking every other
-node fulfilled — see `php-guardrails-scan-fills-open`). The pre-existing `Fulfilled nodes`/`Pending
+`Open` holding the complete Guardrails backlog as a bullet list in the script's order, blocked nodes
+included, no issue numbers (computed with `tooling_tree.py` and a seed marking every other node
+fulfilled — the exact list is in `php-guardrails-scan-fills-open`): `phpmd`, `coverage-floor`,
+`composer-audit`, `phpstan-level-6` through `phpstan-level-10`, `phpstan-deprecation-rules`,
+`php-minimal-version`, `semgrep`. The pre-existing `Fulfilled nodes`/`Pending
 candidates` content, and `## Safety Net` itself, are left exactly as they were — this write never
 touches, migrates, or removes any of it.
 

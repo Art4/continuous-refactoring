@@ -263,7 +263,7 @@ Same non-CI, local-only, advisory posture as the two fixtures above.
   Net's own `Open` first empties). Each exercises one turn of the sequence Investigation → Guardrails →
   Housekeeping, plus the "retired permanently afterward" case — see each fixture's own
   `expected/behavior.md` for the full seeded state and reasoning.
-  - **php-scheduler-bootstrap-investigation** — `## Safety Net` just closed (`Open: none`, `Last scan`
+  - **php-scheduler-bootstrap-investigation** — `## Safety Net` just closed (`Open` list `- none`, `Last scan`
     one day old); `## Guardrails`/`## Housekeeping`/`## Investigation` all absent (never run). Under
     *ordinary* selection alone this would tie all three as "never run" and the fixed tie-break order
     would pick Guardrails; the one-time exception must instead pick **Investigation** — this ticket's own
@@ -349,7 +349,7 @@ Fulfilment re-check, and non-workable node collection. See each fixture's own
   issue does not bypass the blockade.
 
 - **php-track-open-priority-guardrails** — Guardrails counterpart of the fixture above. Safety Net is
-  closed (`Open: none`), `## Guardrails`'s `Open` lists `phpmd (#5)` (workable), Housekeeping is not
+  closed (`Open` list `- none`), `## Guardrails`'s `Open` is the complete Guardrails backlog as a list, `phpmd (#5)` first (workable), Housekeeping is not
   due, and a separate `refactor:priority`-labeled structural candidate (`01-shallow-user-service.md`)
   exists on the tracker. Expects Guardrails selected, the `Open` walk to work `phpmd` this pass, and
   the priority issue to wait until Guardrails has no workable node left — the label narrows the Rank
@@ -376,7 +376,7 @@ it no longer reads the retired `Fulfilled nodes` cache (ADR-0056). See each fixt
 
 - **php-housekeeping-hand-adopted-guardrails** — `composer-audit` adopted by hand (CI runs
   `composer audit` through a workflow step) with no delivering merge request anywhere in the
-  tracker's history; `## Guardrails` already closed (`Open: none`), `## Housekeeping` due
+  tracker's history; `## Guardrails` already closed (`Open` list `- none`), `## Housekeeping` due
   (`Cadence: 7`, `Last scan: 2026-09-01`), no `housekeeping-template.md` yet (first cycle). Expects
   the reconciliation to judge the `Housekeeping`-fielded nodes fulfilled by their Purpose —
   `composer-audit`, `phpstan-level-0`, `php-minimal-version` get their lines, `semgrep` (absent)

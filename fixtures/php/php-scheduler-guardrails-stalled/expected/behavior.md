@@ -21,9 +21,13 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference
-  date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open: none`. **Not due.**
+  date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before → `overdue_ratio ≈ 1.33`),
-  **`Open: phpstan-level-6 (#30), coverage-floor (#31)`**. Both entries are non-workable:
+  **`Open` (as a list):**
+  - `phpstan-level-6 (#30)`
+  - `coverage-floor (#31)`
+
+  Both entries are non-workable:
   `phpstan-level-6` is blocked by `phpstan-level-5` (required parent not yet fulfilled in the
   bookkeeping sense), and `coverage-floor` is flagged `needs-info` on its issue. The Track is
   non-empty but stalled — nothing can be worked.

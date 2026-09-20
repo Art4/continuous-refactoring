@@ -19,7 +19,8 @@ Track's own scan actually re-ran this pass, it would find several of these unblo
 
 `docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01` (far past the
 default 90-day `Cadence` — deliberately, to make sure staleness alone never forces a rescan while `Open`
-holds something), `Open: - php-cs-fixer (#5)`.
+holds something), `Open` as a list:
+- `php-cs-fixer (#5)`
 
 `.scratch/refactor/issues/05-php-cs-fixer.md` — already carries `ready-for-agent` and a plan in its own
 body (the tooling-tree-node shape, `refactor-scan/SKILL.md` step 2), simulating a pass that filed and

@@ -15,7 +15,7 @@ advisory way `safety-net-track`/`guardrails-track` already are. Run via
 `composer`/`psr-4` read fulfilled, but `phpunit`, `php-cs-fixer`, `phpstan-level-0` are all
 genuinely missing.
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01`, `Open:`
+`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01`, `Open` as a list:
 - `phpunit (#6)` — workable (no required parent blocking it)
 
 `.scratch/refactor/issues/01-shallow-user-service.md` — carries `refactor:priority` and

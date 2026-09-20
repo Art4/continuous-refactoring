@@ -12,8 +12,8 @@ posture as `decision-gate-bypass`.
 
 ## Seeded state
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Open: - php-cs-fixer (#5)`,
-`Out-of-scope: - none`. `.scratch/refactor/issues/05-php-cs-fixer.md` — already `Status: closed`,
+`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Open` as a list (`- php-cs-fixer (#5)`),
+`Out-of-scope` as a list (`- none`). `.scratch/refactor/issues/05-php-cs-fixer.md` — already `Status: closed`,
 `Labels: refactor:candidate, wontfix`, with a maintainer's own closing comment giving a load-bearing
 structural reason (code style enforced purely by PR review, no tool, by team convention) — the
 "agent-undetectable equivalent" case ADR-0055's Decision section names (a committed-artifact-free

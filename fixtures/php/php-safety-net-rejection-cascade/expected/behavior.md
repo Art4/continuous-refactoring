@@ -23,8 +23,13 @@ already rejected — so the only unresolved Safety Net scope nodes are `phpstan-
 and (Guardrails scope) `phpstan-level-6..10` and `phpstan-deprecation-rules`.
 
 `docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Cadence: 90`, `Last scan: 2026-09-01`,
-`Open: phpstan-level-3 (#12), phpstan-level-4, phpstan-level-5`, `Out-of-scope:
-psalm-taint-analysis — out-of-scope/psalm-taint-analysis.md`. There is no `## Guardrails` section.
+`Open` as a list:
+- `phpstan-level-3 (#12)`
+- `phpstan-level-4`
+- `phpstan-level-5`
+
+and `Out-of-scope` as a list: `- psalm-taint-analysis — out-of-scope/psalm-taint-analysis.md`. There
+is no `## Guardrails` section.
 
 `.scratch/refactor/issues/12-phpstan-level-3.md` — already `Status: closed`, `Labels:
 refactor:candidate, wontfix`, with a maintainer's closing comment giving a load-bearing structural
@@ -71,8 +76,11 @@ Track is due, or the human names the Track explicitly). It should:
 
 1. Judge every scope node again and hand the seed to the script; `phpstan-level-3` is no longer
    rejected, so its descendants are no longer closed.
-2. Record `Open` as `phpstan-level-3`, `phpstan-level-4`, `phpstan-level-5`, in that order, no issue
-   numbers, and write `Last scan` — the reopened nodes come back at this scan, not earlier.
+2. Record `Open`, as a bullet list, in this order, no issue numbers, and write `Last scan` — the
+   reopened nodes come back at this scan, not earlier:
+   - `phpstan-level-3`
+   - `phpstan-level-4`
+   - `phpstan-level-5`
 
 ## The behavior this regression-tests
 

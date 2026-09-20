@@ -24,9 +24,9 @@ Same deterministic node inventory as `php-scheduler-investigation-fallback`/`php
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference date
-  of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open: none`. **Not due.**
+  of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before → `overdue_ratio ≈ 1.33`),
-  `Open: none`. **Due, but modestly.**
+  `Open` list `- none`. **Due, but modestly.**
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-08-20` (30 days before → `overdue_ratio ≈ 4.29`). No
   `Open`/`Out-of-scope` field at all (this section never carries either, per
   `skills/continuous-refactoring/references/refactoring-bookkeeping.md`'s own `## Housekeeping` section)

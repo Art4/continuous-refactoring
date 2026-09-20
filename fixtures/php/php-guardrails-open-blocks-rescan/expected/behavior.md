@@ -22,7 +22,8 @@ re-ran this pass, it would find all six unblocked and propose them.
 
 `docs/refactoring/bookkeeping.md`'s `## Guardrails` section: `Last scan: 2026-01-01` (far past the
 default 60-day `Cadence` — deliberately, to make sure staleness alone never forces a rescan while
-`Open` holds something), `Open: - phpmd (#5)`.
+`Open` holds something), `Open` as a list:
+- `phpmd (#5)`
 
 `.scratch/refactor/issues/05-phpmd.md` — already carries `ready-for-agent` and a plan in its own body
 (the tooling-tree-node shape, `refactor-scan/SKILL.md` step 2), simulating a pass that filed and

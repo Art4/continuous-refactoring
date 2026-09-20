@@ -22,10 +22,13 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference
-  date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open: none`. **Not due.**
+  date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before → `overdue_ratio ≈ 1.33`),
-  `Open: composer-audit (#40), phpmd (#41)`. Both entries are workable (unblocked, not flagged,
-  no PHP floor issue). **Due and has workable Open entries — would win under ordinary selection.**
+  `Open` (as a list):
+  - `composer-audit (#40)`
+  - `phpmd (#41)`
+
+  Both entries are workable (unblocked, not flagged, no PHP floor issue). **Due and has workable Open entries — would win under ordinary selection.**
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-08-20` (30 days before → `overdue_ratio ≈ 4.29`).
   **Due at a materially higher ratio — preempts Guardrails.**
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-10`. Always due, always eligible.

@@ -25,9 +25,9 @@ namespace), `ci-runner` (`.github/workflows/ci.yml`), `php-cs-fixer`, `phpunit` 
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-06-16` (95 days before this fixture's reference
-  date of 2026-09-19 → `overdue_ratio ≈ 1.056`, just past due), `Open: none`.
+  date of 2026-09-19 → `overdue_ratio ≈ 1.056`, just past due), `Open` list `- none`.
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-04-22` (150 days before 2026-09-19 →
-  `overdue_ratio = 2.5`, far more overdue), `Open: none`.
+  `overdue_ratio = 2.5`, far more overdue), `Open` list `- none`.
 
 Both Tracks are due (`overdue_ratio >= 1`) and eligible (`Open` empty for both) — a genuine competition,
 not a tie: Guardrails' ratio (2.5) is more than double Safety Net's (≈1.056). The fixed tie-break order

@@ -21,10 +21,24 @@ reachable. `phpmd` is still genuinely missing.
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference
-  date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open: none`. Not due; no blockade.
+  date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. Not due; no blockade.
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before → `overdue_ratio ≈ 1.33`),
-  `Open: phpmd (#5)` — workable (unblocked, not flagged `needs-info`, no PHP floor issue). Due and
-  has a workable `Open` node.
+  `Open` as the complete Guardrails backlog, a list in the script's order (as computed for
+  `php-guardrails-scan-fills-open`):
+  - `phpmd (#5)`
+  - `coverage-floor`
+  - `composer-audit`
+  - `phpstan-level-6`
+  - `phpstan-level-7`
+  - `phpstan-level-8`
+  - `phpstan-level-9`
+  - `phpstan-level-10`
+  - `phpstan-deprecation-rules`
+  - `php-minimal-version`
+  - `semgrep`
+
+  The top entry, `phpmd`, is workable (unblocked, not flagged `needs-info`, no PHP floor issue); the
+  issue number is present because an earlier pass filed it. Due and has a workable `Open` node.
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (`overdue_ratio ≈ 0.57`). Not due, so it
   does not preempt Guardrails.
 - `## Investigation` — `Cadence: continuous`. Always due, always eligible, lowest tie-break.
@@ -53,8 +67,10 @@ Run the orchestrator through Track selection and the scan step. It should:
    left (Guardrails yields).
 4. Rank mode is not invoked at all this pass — Track nodes bypass it entirely, and a labeled
    structural issue is never compared against the head of `Open`.
-5. The closing report's **Status** line mentions `phpmd` was worked; the priority issue is not
-   mentioned (it's not a Track node and wasn't processed).
+5. The closing report's **Status** line mentions `phpmd` was worked, plus any skipped non-workable
+   nodes with their reasons (at least `phpstan-level-7` through `-10`, each blocked by its
+   predecessor in the chain); the priority issue is not mentioned (it's not a Track node and wasn't
+   processed).
 
 ## The behavior this regression-tests
 

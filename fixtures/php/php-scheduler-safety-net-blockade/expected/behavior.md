@@ -21,13 +21,16 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18` (1 day before this fixture's reference date
-  of 2026-09-19 → `overdue_ratio ≈ 0.01`), **`Open: phpstan-level-6 (#20), coverage-floor (#21)`**.
+  of 2026-09-19 → `overdue_ratio ≈ 0.01`), **`Open` (as a list):**
+  - `phpstan-level-6 (#20)`
+  - `coverage-floor (#21)`
+
   Both entries are non-workable: `phpstan-level-6` is blocked by `phpstan-level-5` (required parent not
   fulfilled in the bookkeeping sense — the node's issue exists but its prerequisite hasn't been worked
   yet), and `coverage-floor` is flagged `needs-info` on its issue. **The blockade is active — Safety Net
   is selected regardless of ratio or workability.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before → `overdue_ratio ≈ 1.33`),
-  `Open: none`. **Due, but blocked by the Safety Net blockade.**
+  `Open` list `- none`. **Due, but blocked by the Safety Net blockade.**
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (4 days before → `overdue_ratio ≈ 0.57`).
   **Not due, and also blocked by the Safety Net blockade.**
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-10`. Always due, always eligible —
