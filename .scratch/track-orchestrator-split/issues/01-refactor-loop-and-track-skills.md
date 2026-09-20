@@ -61,9 +61,10 @@ works exactly as documented in README today.
       repo's convention treats them as an immutable record, amended by a new ADR, never rewritten.
 - [ ] `CONTEXT.md` is unchanged. The Track vocabulary itself doesn't change, only the implementation's
       file organization — out of scope for the domain glossary.
-- [ ] A new ADR amending ADR-0055 records this decision, including its "the scheduler lives in
+- [x] A new ADR amending ADR-0055 records this decision, including its "the scheduler lives in
       continuous-refactoring/SKILL.md, refactor-scan becomes Track-aware" framing and its
-      Housekeeping-trigger-centralization framing, both superseded in part by this split.
+      Housekeeping-trigger-centralization framing, both superseded in part by this split. —
+      [ADR-0057](../../../docs/adr/0057-refactor-loop-and-per-track-skills.md)
 - [ ] `skills-validation.yml`/`validate_skills.py` pass unchanged — every new `skills/*` folder gets a
       valid `SKILL.md` (frontmatter, `## Completion criterion`) per existing convention; nothing here
       needs a registry update, the validator scans `skills/**` generically.
