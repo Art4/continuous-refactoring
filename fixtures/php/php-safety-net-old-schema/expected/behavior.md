@@ -40,7 +40,8 @@ Run `/refactor-scan`. It should:
 
 Whichever candidate this pass actually carries through to completion (or, at minimum, the Track's own
 scan completing) creates the `## Safety Net` section fresh — `Cadence: 90`, `Last scan: <today>`,
-`Open` naming whichever node(s) got proposed and filed this pass. The pre-existing `Fulfilled
+`Open` holding every unresolved node of the Safety Net scope in the script's order, blocked nodes
+included, no issue numbers (see `php-guardrails-scan-fills-open` for the semantics). The pre-existing `Fulfilled
 nodes`/`Pending candidates` content is left exactly as it was — this write never touches, migrates, or
 removes it.
 

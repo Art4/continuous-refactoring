@@ -636,6 +636,28 @@ run_decision_gate_bypass() {
     rm -rf "$FIXTURE_DST/.agents"
 }
 
+# Shared helper for the Track fixtures whose prompt asks the model to
+# self-report the backlog it would record as one final line,
+# `OPEN: slug, slug, ...`: pass when that line names every given slug in
+# exactly the given order (a slug is matched as a whole token, so
+# phpstan-level-1 never matches inside phpstan-level-10). Advisory
+# otherwise — never fails on a missing/unclear line, only on a wrong order.
+_check_open_order() {
+    local out="$1"; shift
+    local expected="$*"
+    local pattern="^OPEN:" s
+    for s in "$@"; do
+        pattern+=".*[^a-z0-9-]${s}"'([^a-z0-9-]|$)'
+    done
+    if grep -qiE "$pattern" "$out" 2>/dev/null; then
+        log_pass "Scan output reports OPEN in the script's order ($expected) — see $out"
+    elif grep -qiE "^OPEN:" "$out" 2>/dev/null; then
+        log_fail "Scan output's OPEN line doesn't list the backlog in the script's order ($expected) — see $out"
+    else
+        log_info "Scan output doesn't clearly self-report an OPEN line — check $out by hand (advisory, non-blocking)"
+    fi
+}
+
 # Tier 5 — Safety Net Track behavior regressions (ticket 01,
 # skills/refactor-scan/references/safety-net-track.md /
 # skills/refactor-learn/references/safety-net-write.md). Local-only,
@@ -727,6 +749,53 @@ run_safety_net_track() {
             else
                 log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
             fi
+            ;;
+        php-safety-net-rejection-cascade)
+            _safety_net_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for phpstan-level-3 (issue .scratch/refactor/issues/12-phpstan-level-3.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/safety-net-write.md. Report what you wrote."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local oosdir="$FIXTURE_DST/docs/refactoring/out-of-scope"
+            if [[ -f "$oosdir/phpstan-level-3.md" ]]; then
+                log_pass "out-of-scope/phpstan-level-3.md written"
+            else
+                log_fail "out-of-scope/phpstan-level-3.md missing after the run — see $bookkeeping and $oosdir/"
+            fi
+            if [[ -f "$oosdir/phpstan-level-4.md" || -f "$oosdir/phpstan-level-5.md" ]]; then
+                log_fail "An out-of-scope file was written for a downstream closure (phpstan-level-4/5) — closures are derived, never recorded — see $oosdir/"
+            else
+                log_pass "No out-of-scope file written for the closed descendants phpstan-level-4/5"
+            fi
+            if grep -qE "^- phpstan-level-(3|4|5)" <(sed -n '/Open:/,/^$/p' "$bookkeeping" 2>/dev/null); then
+                log_fail "## Safety Net's Open list still names phpstan-level-3/4/5 — the rejected node and its closed descendants should all have left it"
+            else
+                log_pass "## Safety Net's Open list no longer names phpstan-level-3/4/5"
+            fi
+            if grep -qE "^- phpstan-level-[45]" <(sed -n '/Out-of-scope:/,/^$/p' "$bookkeeping" 2>/dev/null); then
+                log_fail "## Safety Net's Out-of-scope list carries a pointer for phpstan-level-4/5 — only the rejected node gets one"
+            else
+                log_pass "## Safety Net's Out-of-scope list carries no pointer for the closed descendants"
+            fi
+            # Reversal half (scan-only, no writes): reverse the rejection by
+            # hand, then ask what the next Safety Net scan would record.
+            rm -f "$oosdir/phpstan-level-3.md"
+            sed -i '/^- phpstan-level-3/d' "$bookkeeping" 2>/dev/null
+            _safety_net_scan_prompt "The maintainer reversed the phpstan-level-3 rejection (its out-of-scope file and pointer are removed). Run /refactor-scan with the Safety Net Track named explicitly against this repo, following skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md. Do not write any file. Report, as your final line, the Open list the Track scan would record as: OPEN: <slugs, comma separated, in order>."
+            _check_open_order "/tmp/safety-net-track-$FIXTURE-scan.log" phpstan-level-3 phpstan-level-4 phpstan-level-5
+            ;;
+        php-safety-net-override-old-open)
+            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track, then /refactor-learn's closing call. Follow skills/refactor-scan/SKILL.md, skills/refactor-scan/references/safety-net-track.md and skills/refactor-learn/references/safety-net-write.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Fulfilled nodes/Focus areas residue. Report, as your final line, the Open list the Track's bookkeeping ends up with as: OPEN: <slugs, comma separated, in order>."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            if grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null && grep -q "loop-config" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing Fulfilled nodes residue still present, untouched"
+            else
+                log_fail "Pre-existing Fulfilled nodes residue is gone — see $bookkeeping"
+            fi
+            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+            if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
+                log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
+            else
+                log_pass "Scan output doesn't report an error on the old-meaning Open — see $out"
+            fi
+            _check_open_order "$out" phpstan-level-1 phpstan-level-2 phpstan-level-3 phpstan-level-4 phpstan-level-5
             ;;
         *)
             log_fail "No safety-net-track check wired for fixture: $FIXTURE"
@@ -876,6 +945,16 @@ run_guardrails_track() {
                 log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
             else
                 log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
+            fi
+            ;;
+        php-guardrails-scan-fills-open)
+            _guardrails_scan_prompt "Run one full pass against this repo: the Guardrails Track is due with an empty Open, so run /refactor-scan for it and then /refactor-learn's closing call. Follow skills/refactor-scan/SKILL.md, skills/refactor-scan/references/guardrails-track.md and skills/refactor-learn/references/guardrails-write.md literally. Report, as your final line, the Open list you recorded into ## Guardrails as: OPEN: <slugs, comma separated, in order>."
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            _check_open_order "$out" phpmd coverage-floor composer-audit phpstan-level-6 phpstan-level-7 phpstan-level-8 phpstan-level-9 phpstan-level-10 phpstan-deprecation-rules php-minimal-version semgrep
+            if ls "$FIXTURE_DST/.scratch/refactor/issues/" 2>/dev/null | grep -q .; then
+                log_fail "Issue file(s) exist under .scratch/refactor/issues/ — Track nodes must not be pre-filed by a scan — see $FIXTURE_DST/.scratch/refactor/issues/"
+            else
+                log_pass "No candidate issue was filed for the recorded Open nodes"
             fi
             ;;
         *)

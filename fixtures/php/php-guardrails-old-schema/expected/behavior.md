@@ -45,17 +45,21 @@ Run `/refactor-scan`. It should:
    from the repo either way).
 2. Find no `## Guardrails` section, treat the Track as due (never run), and confirm `php-safety-net`
    is resolved (it is — the Safety Net closed already), so every Guardrails node is reachable.
-3. Propose `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`, and
-   `phpstan-deprecation-rules` (`semgrep` too) as fresh Guardrails Track candidates — all six genuinely
-   still missing.
+3. Treat `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6` and
+   above, `phpstan-deprecation-rules`, and `semgrep` as the Track's unresolved scope — all genuinely
+   still missing — and record them as `Open` (below) rather than filing any of them.
 
 ## Expected: `refactor-learn`
 
 Whichever candidate this pass actually carries through to completion (or, at minimum, the Track's own
 scan completing) creates the `## Guardrails` section fresh — `Cadence: 60`, `Last scan: <today>`,
-`Open` naming whichever node(s) got proposed and filed this pass. The pre-existing `Fulfilled
-nodes`/`Pending candidates` content, and `## Safety Net` itself, are left exactly as they were — this
-write never touches, migrates, or removes any of it.
+`Open` holding the complete Guardrails backlog in the script's order, blocked nodes included, no
+issue numbers: `phpmd`, `coverage-floor`, `composer-audit`, `phpstan-level-6`, `phpstan-level-7`,
+`phpstan-level-8`, `phpstan-level-9`, `phpstan-level-10`, `phpstan-deprecation-rules`,
+`php-minimal-version`, `semgrep` (computed with `tooling_tree.py` and a seed marking every other
+node fulfilled — see `php-guardrails-scan-fills-open`). The pre-existing `Fulfilled nodes`/`Pending
+candidates` content, and `## Safety Net` itself, are left exactly as they were — this write never
+touches, migrates, or removes any of it.
 
 ## The behavior this regression-tests
 
