@@ -29,6 +29,14 @@ A Track with **no bookkeeping section at all yet** (never run) is treated as max
 always wins its own ratio comparison, the same "absence means never run, not nothing found" rule
 `refactoring-bookkeeping.md` already documents for each Track section.
 
+## Safety Net blockade
+
+While Safety Net `Open` is non-empty, Safety Net is selected and nothing else runs, even if no node is
+currently workable — the scheduler reports the wait. This is stronger than the ordinary eligibility rule
+(a non-empty `Open` making a Track ineligible for ratio comparison): Safety Net's `Open` acts as a
+system-wide blockade, not just a self-exclusion. Guardrails, Housekeeping, and Investigation all yield
+until Safety Net `Open` empties.
+
 ## One-time exception
 
 Checked first, every pass, **before** Eligibility/Selection below ever run — a target that just finished
@@ -58,11 +66,9 @@ With that precondition met, check the following three, in order, and stop at the
    row) — keeping Investigation force-selected on every pass until it clears, matching "one candidate,
    fully delivered," not just proposed.
 2. Else, **`## Guardrails` section absent** → select **Guardrails**, this pass, overriding ratio/
-   tie-break. No `Pending candidates`-style follow-up check is needed here: the instant this turn's scan
-   populates `## Guardrails`' own `Open`, the ordinary Eligibility rule below (non-empty `Open` ⇒ that
-   Track's entries get worked, not rescanned) already keeps Guardrails selected on its own, every
-   subsequent pass, for as long as it takes to clear — the same mechanism already built for ordinary
-   scheduling, reused here rather than duplicated.
+   tie-break. Guardrails gets one turn; once its section exists, the ordinary eligibility rule below
+   governs it like any other Track — there is no special mechanism that keeps it selected after its
+   first scan.
 3. Else, **`## Housekeeping` section absent** → select **Housekeeping**, this pass, overriding ratio/
    tie-break. Housekeeping's entire cycle — reconcile, open this cycle's issue, work the checklist,
    quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 0c performs
@@ -104,11 +110,14 @@ ratio comparison when it is both **due** and **eligible** this pass:
   (propose → design → implement → learn) instead of being rescanned this pass (each Track's own
   reference file, "Is the Track due this pass?") — it drops out of ratio comparison entirely, whether
   or not it's numerically overdue; staleness stops mattering the moment there's already in-flight work
-  to finish. A Track with no `Open` concept at all (Housekeeping, Investigation — neither ever carries
-  one, per the spec's own bookkeeping schema) is always eligible; a Housekeeping cycle already in
-  progress is tracked by the tracker's own history instead
-  (`skills/continuous-refactoring/references/housekeeping-track.md`'s own *Resuming an in-progress
-  cycle* section), not by this eligibility rule.
+  to finish. Guardrails follows this rule: with at least one workable `Open` node, it is selected ahead
+  of Investigation; with nothing workable, it yields. A Track with no `Open` concept at all
+  (Housekeeping, Investigation — neither ever carries one, per the spec's own bookkeeping schema) is
+  always eligible; a Housekeeping cycle already in progress is tracked by the tracker's own history
+  instead (`skills/continuous-refactoring/references/housekeeping-track.md`'s own *Resuming an
+  in-progress cycle* section), not by this eligibility rule. Investigation waits behind a Guardrails
+  backlog with workable nodes — Guardrails' workable nodes outrank Investigation's permanent fallback
+  status.
 
 ## Selection
 
@@ -125,6 +134,14 @@ does — any other wired Track that's due and eligible this pass, at any real ra
 and a never-run Track (maximally overdue, above) outranks it too. Investigation is selected only when
 every other wired Track is, this pass, either not due, not eligible (non-empty `Open`), or itself absent
 with nothing else changing that — never by out-competing another Track's genuine ratio.
+
+**Housekeeping preemption:** Housekeeping can preempt Guardrails for one pass when due (its
+`overdue_ratio >= 1`). This means Housekeeping is selected over Guardrails for that single pass,
+even though Guardrails has higher tie-break priority. After that one pass, ordinary selection resumes.
+
+**At most one Track is selected per pass.** Each pass runs exactly one Track's process (or no Track
+at all, if nothing was due and eligible). This keeps each pass focused and avoids interleaving
+different Tracks' work within a single pass.
 
 The same fixed order also decides which Track's own `Open` work gets this pass's design/implement effort
 on the rare occasion more than one wired Track holds non-empty `Open` at the same time — Open-bearing

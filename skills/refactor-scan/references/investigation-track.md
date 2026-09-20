@@ -43,14 +43,19 @@ only what this Track does with that decision — it never re-derives due-ness it
 
 Selected this pass, and `Pending candidates` didn't already resume a structural candidate (step 2) →
 propose `structural-scan` by Name, exactly the same mechanics `refactor-scan/SKILL.md` step 4 always
-used for it before this Track existed: once every node with a `resolved` edge into it is resolved (fulfilled, or
-explicitly rejected under `out-of-scope/`), it's proposable. The actual codebase walk that turns this gate
-name into one concrete candidate is still `refactor-prioritize`'s Select mode's own job
-(`skills/refactor-prioritize/references/structural-candidate-search.md`), run only once this proposal
-wins ranking — nothing about that pipeline changes here. Once filed, the concrete candidate's own
-open/done/rejected state lives entirely on the issue tracker / `merge-requests.md`, tracked in flight via
-the ordinary `Pending candidates` field (`refactoring-bookkeeping.md`) the same way any other candidate
-already is — `## Investigation` never gains an `Open` entry for it.
+used for it before this Track existed: `structural-scan` is proposable only when:
+
+1. The Safety Net section exists in `bookkeeping.md` and its `Open` is empty, **plus**
+2. Every node with a `resolved` edge into `structural-scan` is resolved — fulfilled, or explicitly
+   rejected under `out-of-scope/` (a recorded rejection counts as resolved).
+
+The actual codebase walk that turns this gate name into one concrete candidate is still
+`refactor-prioritize`'s Select mode's own job (`skills/refactor-prioritize/references/
+structural-candidate-search.md`), run only once this proposal wins ranking — nothing about that pipeline
+changes here. Once filed, the concrete candidate's own open/done/rejected state lives entirely on the
+issue tracker / `merge-requests.md`, tracked in flight via the ordinary `Pending candidates` field
+(`refactoring-bookkeeping.md`) the same way any other candidate already is — `## Investigation` never
+gains an `Open` entry for it.
 
 `structural-scan` still gate-blocked (its own resolved-parents not yet all resolved — typically because
 Safety Net or Guardrails hasn't fully closed yet) → nothing to propose, even though this Track was
