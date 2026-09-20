@@ -51,7 +51,7 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
      do not work a second node — exactly one node is worked per pass.
 5. All entries exhausted → the walk is complete. If at least one workable, unfulfilled node was
    found, it has been worked. If none was found, report that the Track has no workable `Open`
-   entries this pass (all skipped or fulfilled) — the orchestrator's own step routing (its
+   entries this pass (all skipped or fulfilled) — `refactor-loop`'s own step routing (its
    `SKILL.md` steps 2 and 6) carries the outcome from there.
 
 ## Pass report
@@ -68,11 +68,11 @@ Nodes found fulfilled during the walk (step 4, "now fulfilled") don't appear in 
 nothing was skipped or worked for them. Their leaving `Open` is `refactor-learn`'s early call's own
 write, performed on the finding above; the walk's only trace of them is the finding itself.
 
-## Relationship to the orchestrator, `refactor-learn`, and `refactor-prioritize`
+## Relationship to `refactor-loop`, `refactor-learn`, and `refactor-prioritize`
 
 The walk is `refactor-scan`'s own — part of its Track-specific process (`safety-net-track.md` /
-`guardrails-track.md`, each file's non-empty-`Open` section routes here), never an orchestrator
-step. `refactor-scan` hands the walk's outcome to the orchestrator as its own `## Output`: the one
+`guardrails-track.md`, each file's non-empty-`Open` section routes here), never a `refactor-loop`
+step. `refactor-scan` hands the walk's outcome to `refactor-loop` as its own `## Output`: the one
 workable node it selected (its issue, if one already exists), any fulfilled-at-pick-up findings (for `refactor-learn`'s
 early call), or "nothing workable". `refactor-learn` performs every write those findings imply —
 the `Open` removals above. `refactor-prioritize` Rank mode is not involved — Track nodes are no

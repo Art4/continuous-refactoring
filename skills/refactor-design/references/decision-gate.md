@@ -30,7 +30,7 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
   elsewhere (`forge-facing-writing.md`).
 
 The issue stays open, `refactor:candidate` unchanged — only its triage labels, and whether
-`refactor-implement` may run against it this pass. The orchestrator
+`refactor-implement` may run against it this pass. `refactor-loop`
 (`skills/refactor-loop/SKILL.md` step 5) skips implementation for a flagged candidate still
 missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
 (`refactor-scan/SKILL.md` steps 2 and 3b): a native-label tracker can always rediscover it later, so

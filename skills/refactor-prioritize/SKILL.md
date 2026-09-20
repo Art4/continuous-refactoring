@@ -5,12 +5,12 @@ description: Rank refactor-scan's proposals and recommend the next one to work o
 
 # Refactor Prioritize
 
-Rank the **proposals** `refactor-scan` handed the orchestrator this pass, and recommend the single one to work on next. The loop's value comes from working the *right* thing next, not from working any of them.
+Rank the **proposals** `refactor-scan` handed `refactor-loop` this pass, and recommend the single one to work on next. The loop's value comes from working the *right* thing next, not from working any of them.
 
-Runs in one of two modes, both dispatched by the orchestrator — never one calling the other inline:
+Runs in one of two modes, both dispatched by `refactor-loop` — never one calling the other inline:
 
 - **Rank mode** (default, steps 1–3): picks the next node to work on.
-- **Select mode** (step 4): the orchestrator re-invokes this skill, as a fresh dispatch, only when
+- **Select mode** (step 4): `refactor-loop` re-invokes this skill, as a fresh dispatch, only when
   Rank mode's winner was a gate (`structural-scan`, a PHPStan baseline-shrink family) — a name,
   not yet a concrete candidate. Select mode does the actual exploration (codebase or baseline) that
   Rank mode's own declarative ranking never does, picks one concrete candidate, and files it
@@ -27,7 +27,7 @@ Otherwise drop any proposal already in that set — it already has an open MR, s
 
 A `Pending candidates` entry never reaches this skill at all — `refactor-scan` step 2 routes it
 straight to `refactor-design` (not yet planned) or `refactor-implement` (already planned), bypassing
-Rank and Select mode both; see `refactor-scan/SKILL.md` step 2 and the orchestrator's own step 1.
+Rank and Select mode both; see `refactor-scan/SKILL.md` step 2 and `refactor-loop`'s own step 1.
 
 ### 2. Rank
 
@@ -55,7 +55,7 @@ Name the single next candidate by its Name (never slug); one line why it wins, o
 
 A proposable tooling-tree node is a strong default recommendation — the loop's structural work compounds faster once the underlying tooling is in place. Still a recommendation, not a **required edge** — the user may pick something else.
 
-Nothing survived step 1's filtering (every proposal already in flight, or scan proposed nothing) → report that explicitly instead; the orchestrator ends the pass here.
+Nothing survived step 1's filtering (every proposal already in flight, or scan proposed nothing) → report that explicitly instead; `refactor-loop` ends the pass here.
 
 ### 4. Select (Select mode only — a gate won)
 
@@ -83,7 +83,7 @@ checked out, and never to the default branch.
 
 ## Output
 
-**Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → the orchestrator ends the pass. Every tooling-tree proposal ranked this step now carries an issue (step 2's own filing, above) — the non-winning ones simply sit open, the same way Select mode's own non-winning findings already do below.
+**Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → `refactor-loop` ends the pass. Every tooling-tree proposal ranked this step now carries an issue (step 2's own filing, above) — the non-winning ones simply sit open, the same way Select mode's own non-winning findings already do below.
 
 **Select mode:** the single recommended candidate's issue (number + its minimal fields) →
 `refactor-design` — any other candidates filed this same run sit as ordinary open issues, for a

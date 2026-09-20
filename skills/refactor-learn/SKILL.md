@@ -7,7 +7,7 @@ description: The suite's only writer of bookkeeping — acts on refactor-scan's 
 
 The only skill that writes suite bookkeeping: the Refactoring Notes' `merge-requests.md` (only when `docs/agents/issue-tracker.md` names no native-label tracker — otherwise this data lives on the tracker), the Refactoring Notes' `out-of-scope/`, ADRs, `CONTEXT.md`, the Refactoring Notes' `bookkeeping.md`, and issue labels. Every other lifecycle skill may read these; only this one writes them.
 
-The orchestrator calls this skill up to **twice** a pass: an **early call**, right after `refactor-scan`, only when it produced findings; and a **closing call**, always, at the end. The split exists because `refactor-prioritize` reads the ledger to decide whether two MRs are already open — a finding this pass just resolved has to be written back before that check runs.
+`refactor-loop` calls this skill up to **twice** a pass: an **early call**, right after `refactor-scan`, only when it produced findings; and a **closing call**, always, at the end. The split exists because `refactor-prioritize` reads the ledger to decide whether two MRs are already open — a finding this pass just resolved has to be written back before that check runs.
 
 The closing call also consumes a second kind of input, in place of a freshly opened MR: a design-time
 breaking-change finding from `refactor-design`'s own decision gate
@@ -47,10 +47,10 @@ see whether a precondition might be satisfiable is exactly the detection work `r
 `refactor-implement` already own; this skill only ever acts on what the pass that produced it named,
 the same "detect, never write" discipline `refactor-scan` already holds itself to. Neither named →
 stop immediately, report "nothing to do", before reading anything else. In the ordinary orchestrated pass this mostly
-guards the closing call — the orchestrator already skips calling the early call when scan found
+guards the closing call — `refactor-loop` already skips calling the early call when scan found
 nothing (`skills/refactor-loop/SKILL.md` step 2), but still calls the closing call unconditionally
 every pass, including one where nothing above it produced anything. This same check is also what
-makes a human's direct, standalone `/refactor-learn` invocation — bypassing the orchestrator
+makes a human's direct, standalone `/refactor-learn` invocation — bypassing `refactor-loop`
 entirely — safe: named nothing, it stops before touching any state, instead of inventing work by
 going to check for itself.
 

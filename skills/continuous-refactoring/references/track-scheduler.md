@@ -203,8 +203,8 @@ tooling-tree scan at all — `refactor-scan`'s own contract is "detect, never wr
 (`skills/refactor-scan/SKILL.md`), and the Housekeeping Track's own process commits, opens issues, and
 opens merge requests directly, the same way it always did as the now-retired standalone
 `continuous-housekeeping` skill. Selecting Housekeeping hands off straight to
-`skills/continuous-housekeeping/references/housekeeping-track.md`, run by the orchestrator itself
-(`skills/continuous-refactoring/SKILL.md` step 0c dispatches to `continuous-housekeeping`) — `refactor-scan`
+`skills/continuous-housekeeping/references/housekeeping-track.md`, run by `continuous-housekeeping`
+(dispatched to by `skills/continuous-refactoring/SKILL.md` step 0c) — `refactor-scan`
 never runs at all this pass in that case.
 
 ## Suite-wide open-MR cap

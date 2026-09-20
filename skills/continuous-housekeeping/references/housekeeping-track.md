@@ -19,8 +19,9 @@ section (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) 
 as this pass's selected Track. This section covers only what this Track does with that decision — it
 never re-derives due-ness itself:
 
-- **This Track wasn't the one step 0b selected** → nothing in this file runs this pass; `continuous-refactoring`
-  dispatches to whichever Track was actually selected instead.
+- **This Track wasn't the one selected** (step 0b, or a human naming another Track) → nothing in this file runs this
+  pass; `continuous-refactoring` dispatches to whichever Track was actually selected instead. Invoking
+  `continuous-housekeeping` directly counts as selecting it — a manual override, no due-check.
 - **This Track is the one that was selected** → continue below. Housekeeping carries no `Open` precondition
   (`refactoring-bookkeeping.md`'s own `## Housekeeping` section) — always eligible the moment it's due,
   the same "no `Open` concept" shape `## Investigation` already has (`track-scheduler.md`'s own

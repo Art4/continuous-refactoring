@@ -41,8 +41,8 @@ cycle has something real to check — not the "nothing registered" all-clear cas
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
-Run the orchestrator's Track-selection step (step 0b), then the Housekeeping Track's own process (step
-0c, `skills/continuous-housekeeping/references/housekeeping-track.md`) — stop once that process reaches
+Run the orchestrator's Track-selection step (step 0b), then dispatch to the Housekeeping Track's own process (step
+0c, `continuous-housekeeping`, which follows `skills/continuous-housekeeping/references/housekeeping-track.md`) — stop once that process reaches
 its own *Deliver* step's "no forge/remote available" branch (this sandbox has no git remote), don't
 continue into a real push. It should:
 
