@@ -1,9 +1,9 @@
 # Track Open processing
 
 How `refactor-scan` walks a selected Track's `Open` list (Safety Net or Guardrails) when the Track
-has existing entries — dispatched from the orchestrator's scan step
-(`skills/continuous-refactoring/SKILL.md` step 1), which hands the selected Track down as input and
-routes the walk's outcome onward, but never walks or judges itself: the orchestrator is a thin data
+has existing entries — dispatched from `refactor-loop`'s scan step
+(`skills/refactor-loop/SKILL.md` step 1), which hands the selected Track down as input and
+routes the walk's outcome onward, but never walks or judges itself: `refactor-loop` is a thin data
 pipe, and the walk is scan's own work — `refactor-scan` is the skill that reads the tree and judges
 fulfilment. Replaces the earlier "resume the top entry" behavior for Track nodes — `Pending
 candidates` still resumes the same way as before, tracked separately.

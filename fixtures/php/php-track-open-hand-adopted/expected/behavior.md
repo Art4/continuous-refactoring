@@ -8,7 +8,7 @@ remove from `Open` — no merge request.
 
 Not deterministically checkable via `tooling_tree.py` — the parser has no notion of Tracks or the
 `Open` walk; this is a behavioral property of `refactor-scan`'s Track `Open` handling (dispatched
-from `continuous-refactoring/SKILL.md` step 1), checked the same non-CI, local-only, advisory way
+from `refactor-loop/SKILL.md` step 1), checked the same non-CI, local-only, advisory way
 `safety-net-track`/`guardrails-track` already are. Run via `fixtures/harness/run.sh safety-net-track
 php-track-open-hand-adopted --opencode`.
 

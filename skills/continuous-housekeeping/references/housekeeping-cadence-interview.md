@@ -3,7 +3,7 @@
 Optional, human-initiated only — the Housekeeping Track's own `Cadence` field
 (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`'s `## Housekeeping` section)
 defaults to `7` (days) silently on this Track's first-ever scheduler-driven run
-(`skills/continuous-refactoring/references/housekeeping-track.md`'s own *First-run cadence* section) —
+(`skills/continuous-housekeeping/references/housekeeping-track.md`'s own *First-run cadence* section) —
 this interview never blocks that. Run it any time a human wants to reconsider the interval through a
 guided question instead of hand-editing the number directly; mirrors `loop-config-interview.md`'s shape
 (`skills/continuous-refactoring/references/loop-config-interview.md`) at a much smaller scale: one

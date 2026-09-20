@@ -18,7 +18,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   have lost real gating value).
 - **Fulfilment check:** a CI job exists that runs `composer audit` (the pipeline fails when it reports a
   known advisory), **or** a line naming this node is already committed to the Refactoring Notes'
-  `housekeeping-template.md` (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`) — no
+  `housekeeping-template.md` (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`) — no
   proof of a completed run required, matching every other CI-gated check in this tree (presence/invocation
   is sufficient, never proof of a passing run history). The second path exists because `ci-runner` is now
   only a recommended parent: a target with no CI at all can still fulfil this node by adopting `composer
@@ -27,7 +27,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   `semgrep` are the first two audit-style nodes to get it (point-in-time audits whose value is in
   repetition, not one-time adoption), documented here as the pattern to reuse once further audit-style
   nodes are added (more are planned).
-- **MR scope:** wire `composer audit` into CI as a gate — no production-code change. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes' `housekeeping-template.md`, creating that file fresh if it doesn't exist yet (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`).
+- **MR scope:** wire `composer audit` into CI as a gate — no production-code change. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes' `housekeeping-template.md`, creating that file fresh if it doesn't exist yet (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`).
 - **Housekeeping:** review `composer audit`'s current report; attempt a fix for any advisory with an available patched version. A CI gate only fails on advisories present *right now* — it never surfaces one that appears later against an already-passing, unchanged lockfile.
 - **Stop conditions / when not to propose:** `composer` fulfilled is necessary but not sufficient — this
   node also stays blocked until `composer.json`'s `require` block names at least one real package

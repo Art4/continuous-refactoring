@@ -31,7 +31,7 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
 
 The issue stays open, `refactor:candidate` unchanged — only its triage labels, and whether
 `refactor-implement` may run against it this pass. The orchestrator
-(`skills/continuous-refactoring/SKILL.md` step 5) skips implementation for a flagged candidate still
+(`skills/refactor-loop/SKILL.md` step 5) skips implementation for a flagged candidate still
 missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
 (`refactor-scan/SKILL.md` steps 2 and 3b): a native-label tracker can always rediscover it later, so
 scan looks for other work instead of waiting on it; a git-only tracker has no such rediscovery, so the
@@ -45,6 +45,6 @@ ships one. This isn't `refactor-design`'s call to act on: don't write a plan, do
 issue, don't touch any label — only `refactor-learn` writes bookkeeping/labels/`out-of-scope`
 (`refactor-learn/SKILL.md`'s own stated boundary). Hand it forward instead as a **finding** — a short
 statement of what was found and why it needs a behavior change — to this same pass's closing
-`refactor-learn` call (`skills/continuous-refactoring/SKILL.md` step 6), which applies its existing
+`refactor-learn` call (`skills/refactor-loop/SKILL.md` step 6), which applies its existing
 rejection machinery (`wontfix`, a closing note or `out-of-scope/` entry) the same way it already
 would for a load-bearing MR-review rejection.

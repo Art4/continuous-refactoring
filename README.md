@@ -29,12 +29,14 @@ The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md);
 
 | Skill | Purpose |
 |---|---|
-| `continuous-refactoring` | Orchestrator — runs a loop pass (cadence or on-demand), passes each skill's output to the next |
+| `continuous-refactoring` | The one entry point — picks the Track due this pass (cadence or on-demand) and runs it; the pass passes each skill's output to the next |
 | `refactor-scan` | Propose every currently-unblocked tooling-tree node from `bookkeeping.md`; detect (never file) closed/merged issues and MRs |
 | `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects and files the concrete candidate |
 | `refactor-design` | Ground/grill the candidate → plan, filed or commented onto its issue |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
 | `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
+
+Internally, `continuous-refactoring` dispatches to a per-Track skill (`continuous-safety-net`, `continuous-guardrails`, `continuous-investigation`, `continuous-housekeeping`); the first three share the track-agnostic `refactor-loop` pass. They are implementation detail, not entry points — invoke `/continuous-refactoring`.
 
 The orchestrator also runs a recurring maintenance sweep — dependency currency, tooling-deprecation
 cleanup, documentation sync — as its own **Housekeeping Track**, scheduled alongside three other Tracks

@@ -1,6 +1,6 @@
 # Playbook: The Housekeeping Track
 
-The playbook for humans. `skills/continuous-refactoring/references/housekeeping-track.md` covers the
+The playbook for humans. `skills/continuous-housekeeping/references/housekeeping-track.md` covers the
 step-by-step; this document explains how you steer it as a person — cadence, reading a sweep, and what
 a housekeeping mention on an ordinary refactoring merge request means.
 
