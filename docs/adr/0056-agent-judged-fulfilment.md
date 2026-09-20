@@ -83,6 +83,17 @@ outrank Investigation's permanent fallback status.
 Each pass runs exactly one Track's process (or no Track at all). This keeps each pass focused and
 avoids interleaving different Tracks' work.
 
+### Priority label narrows the Rank pool only
+
+A `refactor:priority` label (ADR-0048) narrows the Rank-mode pool whenever Rank mode runs. It never
+preempts a Track's `Open` walk: Track nodes left the Rank pool (ADR-0047's Track-node amendment
+above), so a labeled issue is never compared against the head of `Open`. While a Track with a
+workable `Open` node is selected, the labeled issue waits until `Open` is empty (Safety Net: until
+the blockade lifts; Guardrails: until no workable node is left, at which point Guardrails yields).
+This narrows the spec's story 22 and case 9 ("priority outranks the top of `Open`") to the Rank-mode
+pool only. The label still takes no part in Track selection and still cannot bypass the Safety Net
+blockade.
+
 ### Investigation gate: Safety Net section must exist with `Open` empty
 
 `structural-scan` is proposable only when the Safety Net section exists in `bookkeeping.md` and its

@@ -25,7 +25,7 @@ Tiers:
     lift        With-skill vs without-skill lift measurement (local-only, advisory — ticket 27)
     decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
     safety-net-track       Safety Net Track behavior regressions (fixtures: php-safety-net-*; local-only, advisory)
-    guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*; local-only, advisory)
+    guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*, php-track-open-priority-guardrails; local-only, advisory)
     housekeeping-track     Housekeeping Track behavior regressions (fixtures: php-housekeeping-*; local-only, advisory)
     scheduler              Orchestrator Track-selection regressions (fixtures: php-scheduler-*; local-only, advisory — ADR-0055, ticket 04)
 
@@ -850,6 +850,17 @@ run_guardrails_track() {
                 log_fail "## Guardrails's Open list still names phpmd — should have been removed"
             else
                 log_pass "## Guardrails's Open list no longer names phpmd"
+            fi
+            ;;
+        php-track-open-priority-guardrails)
+            _guardrails_scan_prompt "Run one pass of the orchestrator against this repo: Track selection (skills/continuous-refactoring/SKILL.md step 0b, skills/continuous-refactoring/references/track-scheduler.md) and then /refactor-scan with the selected Track (skills/refactor-scan/SKILL.md, skills/refactor-scan/references/guardrails-track.md, skills/refactor-scan/references/track-open-processing.md). Stop after scan's output — do not implement. Report, as your final line: WORKED phpmd (the Guardrails Open walk worked phpmd) or WORKED priority (the refactor:priority issue was worked instead)."
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            if grep -qiE "^WORKED priority" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports WORKED priority — the priority label wrongly preempted the Guardrails Open walk — see $out"
+            elif grep -qiE "^WORKED phpmd" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports WORKED phpmd — the Open walk was not preempted — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report WORKED phpmd/priority — check $out by hand (advisory, non-blocking)"
             fi
             ;;
         php-guardrails-old-schema)
