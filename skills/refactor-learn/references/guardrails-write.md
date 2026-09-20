@@ -17,6 +17,16 @@ The early call's "Merged" finding, for a slug listed in `## Guardrails`'s `Open`
 (`skills/refactor-scan/references/guardrails-track.md` handed it forward as a resumable candidate) →
 remove that entry from `Open`. Nothing else about the early call's merge handling changes.
 
+## Fulfilled at pick-up → remove from `Open`
+
+The early call's "fulfilled at pick-up" finding — scan's `Open` walk found a `## Guardrails` node
+already served when it re-ran that node's Fulfilment check right before working it (typically
+adopted by hand since the last scan) — → remove that slug from `## Guardrails`' `Open`, nothing
+else: no merge request, no `out-of-scope/` entry, no issue filed. The node reached the outcome its
+`Open` entry was tracking; `refactor-learn/SKILL.md`'s findings list handles closing any
+already-filed issue. The walk itself never removes anything — it reports the finding, this call
+writes the removal.
+
 ## Rejection → remove from `Open`, write `out-of-scope/`, add the `Out-of-scope` pointer
 
 The early call's "Closed without merge" finding (closing comments support a structural rejection) or

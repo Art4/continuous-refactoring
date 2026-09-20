@@ -18,9 +18,9 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
 - **Fulfilment check:** a CI job that runs a recognized secret scanner (gitleaks, detect-secrets,
   trufflehog, or an equivalent) — presence of the invocation, not proof it actually fails the pipeline
   on a finding, same conservative approximation `composer-audit`'s own CI-gate check already uses.
-  The detection identifies which scanner the CI invokes (first match among the recognized needles wins);
-  the scanner name is exposed in the node's details so `refactor-scan/SKILL.md` step 4c can reuse it
-  without re-deriving the CI config.
+  Judging this check identifies which scanner the CI invokes (first match among the recognized
+  needles wins); `refactor-scan/SKILL.md` step 4c reuses that same identification — the CI job the
+  judgement just read — when it runs the node's one-time history scan.
 - **MR scope:** dependency/tool setup (however the chosen scanner installs) + CI job wiring it in +
   one initial scan pass (fix or explicitly baseline what it reports — a target's own judgement call at
   adoption time, same as `phpmd`'s equivalent note).

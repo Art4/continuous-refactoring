@@ -44,7 +44,7 @@ Run the orchestrator's Track-selection step (step 0b) — it should:
 2. **Select Safety Net**, this pass, without computing or comparing an `overdue_ratio` for any Track,
    and without applying the fixed tie-break order at all — the blockade overrides everything.
 3. Hand the Safety Net Track to `refactor-scan` as an explicit input; `refactor-scan` walks the Track's
-   `Open` list top to bottom (`track-open-processing.md`):
+   `Open` list top to bottom (`skills/refactor-scan/references/track-open-processing.md`):
    - `phpstan-level-6 (#20)` — not workable (blocked by `phpstan-level-5`); collected with reason.
    - `coverage-floor (#21)` — not workable (`needs-info` flagged); collected with reason.
 4. No node is worked this pass (none was workable). The pass report must list both skipped nodes with

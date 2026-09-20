@@ -1,5 +1,11 @@
 # Tooling-tree proposals are pre-filed as candidate issues before ranking, not only the winner
 
+> Amended by [ADR-0056](0056-agent-judged-fulfilment.md): pre-filing no longer applies to Track nodes
+> (Safety Net, Guardrails) — their backlog is the Track's own `Open` list in `bookkeeping.md`, and an
+> issue for a Track node is created only when the node is actually worked via the `Open` walk, never
+> pre-filed at proposal time. The pre-filing rule decided here stands unchanged for every non-Track
+> tooling-tree proposal.
+
 ## Context
 
 `refactor-scan` hands the orchestrator every currently-unblocked tooling-tree node as a **proposal** — but until now, nothing was filed for any of them until `refactor-prioritize`'s Rank mode picked one. The other unblocked nodes stayed invisible on the tracker until some future pass happened to rank them, or a human went and read the tree docs directly. This under-serves the one thing a human actually wants early in a target's life: a look at what the loop is about to propose, with a chance to comment or reject before any implementation work (and its tokens) is spent.

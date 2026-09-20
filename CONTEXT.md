@@ -133,8 +133,12 @@ The named factor (heat, leverage, security, blast radius of inaction, …) that 
 _Avoid_: (none — use the term as-is)
 
 **Findings**:
-Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Also covers a genuinely new discovery this same pass, not a remembered item's changed state — a secret a git-history scan turns up (`refactor-scan/SKILL.md` step 4c) is a finding the same way. `refactor-design` is the other origin: discovering, while grounding/grilling or planning a fix, that a candidate can't be done without changing behavior is a finding too (`skills/refactor-design/references/decision-gate.md`), handed straight to the closing call in the same pass instead of a plan. Handed to `refactor-learn` to act on either way — neither origin decides the outcome itself, only `refactor-learn` does.
+Remembered issues or merge requests `refactor-scan` detects have since merged, closed, or — a candidate MR left in draft by an earlier interrupted pass, its fold-in bookkeeping never landed — are still open but owe a write `refactor-learn` never got to finish. Also covers a genuinely new discovery this same pass, not a remembered item's changed state — a secret a git-history scan turns up (`refactor-scan/SKILL.md` step 4c) is a finding the same way, as is a **Fulfilled at pick-up** discovery from the Track `Open` walk (below). `refactor-design` is the other origin: discovering, while grounding/grilling or planning a fix, that a candidate can't be done without changing behavior is a finding too (`skills/refactor-design/references/decision-gate.md`), handed straight to the closing call in the same pass instead of a plan. Handed to `refactor-learn` to act on either way — neither origin decides the outcome itself, only `refactor-learn` does.
 _Avoid_: events, notifications
+
+**Fulfilled at pick-up**:
+The finding `refactor-scan`'s Track `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) reports when its re-check — re-running a node's **Fulfilment check** right before working it — finds the node already served, typically adopted by hand since the last scan. `refactor-learn`'s early call acts on it: the node leaves its Track's `Open` with no merge request and nothing filed — scan only reports the finding, `refactor-learn` performs the removal, the suite's ordinary detect-never-write split.
+_Avoid_: (none — use the term as-is)
 
 **Flagged candidate**:
 A candidate whose plan `refactor-design` already wrote, but which also surfaced a decision meeting

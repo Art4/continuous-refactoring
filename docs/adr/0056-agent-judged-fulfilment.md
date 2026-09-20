@@ -8,6 +8,11 @@
 > bootstrap exception is corrected: it does not wait for Guardrails' `Open`, and the claim that
 > ordinary eligibility keeps Guardrails selected after its first scan is removed.
 >
+> Amends [ADR-0047](0047-tooling-tree-proposals-are-pre-filed-before-ranking.md): pre-filing no
+> longer applies to Track nodes (Safety Net, Guardrails) — an issue for a Track node is created only
+> when the node is actually worked via the Track's `Open` walk, never pre-filed at proposal time.
+> ADR-0047's pre-filing rule stands unchanged for every non-Track tooling-tree proposal.
+>
 > Replaces the earlier, unnumbered decision that shipped the parser with detection under
 > `refactor-scan` — that parser's role as ground truth for fulfilment is superseded by agent judgement
 > against each node's Purpose statement (ADR-0055), and its `Fulfilled nodes` cache is now ignored.
@@ -42,6 +47,15 @@ Every Track node's `Open` list contains every node of the Track's scope that is 
 out-of-scope — blocked ones included, in the script's order, hand-reorderable. An issue number appears
 only while the node is being worked. `Open` empty means the Track is done. Existing files under the old
 meaning are not migrated; the next scan corrects them.
+
+### Track nodes are not pre-filed
+
+Issues for Track nodes (Safety Net, Guardrails) are created only when the node is actually worked via
+the Track's `Open` walk — the walk's pick-up re-check runs first, and the issue is filed at the
+moment the node is worked, at most one per pass. This amends ADR-0047's pre-filing decision: a
+Track's backlog is its own `Open` list in `bookkeeping.md`, not a set of pre-filed issues, so Rank
+mode's pre-filing no longer runs for Track nodes at all. ADR-0047's rule continues unchanged for
+every non-Track tooling-tree proposal.
 
 ### Safety Net blockade
 
@@ -91,6 +105,8 @@ turn during the exception, and after that the ordinary eligibility rule governs 
 ## Consequences
 
 `CONTEXT.md`'s **Track** entry is updated with blockade and yielding behavior. The **Proposals**
-entry notes that pre-filing no longer applies to Track nodes. The **Fulfilment check** entry notes it
+entry notes that pre-filing no longer applies to Track nodes, per the Track-node amendment of
+ADR-0047 recorded above — ADR-0047's own header carries the reciprocal note. The **Fulfilment
+check** entry notes it
 is now agent-judged for every node. A new **recognition-only gate node** entry is added. The
 bookkeeping schema documentation and scheduler documentation are updated to reflect all of the above.

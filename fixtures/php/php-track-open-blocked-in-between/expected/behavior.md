@@ -1,7 +1,7 @@
 # Expected behavior — Track Open: blocked node in between
 
-Confirms the orchestrator's own `Open` walk
-(`skills/continuous-refactoring/references/track-open-processing.md`) skips non-workable nodes with a
+Confirms `refactor-scan`'s own `Open` walk
+(`skills/refactor-scan/references/track-open-processing.md`) skips non-workable nodes with a
 reason and continues walking to collect them for the pass report, even after finding a workable node.
 
 Not deterministically checkable via `tooling_tree.py` — checked the same non-CI, local-only,
@@ -26,7 +26,7 @@ is also missing, which blocks `phpstan-level-0` (required parent per `php-toolin
 Run `/refactor-scan` with the Safety Net Track selected. It should:
 
 1. Read `## Safety Net`'s `Open` list — three entries.
-2. Walk the list top to bottom per `track-open-processing.md`:
+2. Walk the list top to bottom per `skills/refactor-scan/references/track-open-processing.md`:
    - **phpunit (#6)** — workable (unblocked, no `needs-info`, no PHP floor). Re-run Fulfilment:
      not fulfilled (no `phpunit/phpunit` dependency, no CI workflow). → Work this node: create its
      issue, continue to `refactor-design`.

@@ -15,6 +15,17 @@ references/safety-net-track.md` handed it forward as a resumable candidate) → 
 issue, drop the `merge-requests.md` entry if non-native-tracker — `refactor-learn/SKILL.md`'s own
 `## Process`).
 
+## Fulfilled at pick-up → remove from `Open`
+
+The early call's "fulfilled at pick-up" finding — scan's `Open` walk
+(`skills/refactor-scan/references/track-open-processing.md`) re-ran a node's Fulfilment check right
+before working it and found the node already served, typically adopted by hand since the last scan —
+→ remove that slug from `## Safety Net`'s `Open`. No merge request exists to remember, no rejection
+to record, nothing filed: the node is genuinely fulfilled, the exact outcome its `Open` entry existed
+to reach (`refactor-learn/SKILL.md`'s own findings list closes any already-filed issue for it). Scan
+itself never writes this removal — it only reports the finding; the removal is this call's write, the
+same split the merge case above already follows.
+
 ## Rejection → remove from `Open`, write `out-of-scope/`, add the `Out-of-scope` pointer
 
 The early call's "Closed without merge" finding (closing comments support a structural rejection) or the
