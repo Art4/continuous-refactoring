@@ -85,6 +85,13 @@ With that precondition met, check the following three, in order, and stop at the
    suite already keeps as ordinary staleness bookkeeping and never clears. Reusing it here needs no new
    stored flag, and each of the three conditions above can only ever be true once per Track, per repo.
 
+**Open state irrelevant during the one-time exception:** the exception runs before Eligibility/Selection
+below, so the `Open`-non-empty eligibility rule never fires during one of its turns. Guardrails' `Open`
+being non-empty (e.g. from its own scan filling it with in-flight entries) does not block the sequence
+from advancing to the next Track — the exception reads only whether each section *exists*, not whether
+its `Open` is empty. This matches the design intent: the one-time exception runs exactly once per Track,
+in order, regardless of in-flight state, then permanently retires.
+
 **What this can't distinguish, by construction:** with no per-pass history file to diff against — only
 `bookkeeping.md`'s current snapshot — this check cannot tell "Safety Net's `Open` just emptied for the
 first time" apart from "Safety Net's `Open` has simply always been empty" (a trivial tree with nothing to
