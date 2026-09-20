@@ -18,13 +18,15 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   `phpunit`: a rejected `phpunit` must still permanently close this node the ordinary required-edge way,
   which a bare `php-safety-net` edge alone wouldn't do.
 - **Fulfilment check:** `phpunit.xml.dist` (or `phpunit.xml`) declares a `<coverage>` report section,
-  and a coverage-floor value is committed to the target (`.coverage-floor`, a single percentage, e.g.
-  `62.5`). Once `ci-runner` is fulfilled, additionally requires a CI job that actually invokes the
-  coverage-enabled run and fails when the result drops below the committed floor — self-wired CI gate,
-  same shape `phpunit.md`'s own pattern already uses; no CI yet still fulfils the node on local
-  adoption alone. Driver-agnostic by design: the check never looks for "pcov" or "xdebug" by name,
-  only for coverage actually configured and (once CI exists) enforced — see *PCOV is a default, not a
-  requirement* below.
+  and a coverage-floor value is committed to the target (`.coverage-floor` — a file containing a
+  single numeric percentage, e.g. `62.5`; absent or unparseable files are treated as no floor set,
+  which keeps the node unfulfilled). Once `ci-runner` is fulfilled, additionally requires a CI job
+  that invokes the coverage-enabled run (the check looks for the `--coverage` invocation needle in
+  CI job files — driver-agnostic, tolerant of whichever concrete flag the runner uses) — self-wired
+  CI gate, same shape `phpunit.md`'s own pattern already uses; no CI yet still fulfils the node on
+  local adoption alone. Driver-agnostic by design: the check never looks for "pcov" or "xdebug" by
+  name, only for coverage actually configured and (once CI exists) enforced — see *PCOV is a default,
+  not a requirement* below.
 - **MR scope:** `phpunit.xml.dist`'s `<coverage>` section, report format Clover XML (the format Select
   mode reads back — see **Signal** below), a coverage driver wired into the local/CI run, the initial
   `.coverage-floor` value (whatever the very first coverage run actually measures — never invented),
