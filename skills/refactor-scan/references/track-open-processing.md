@@ -43,8 +43,10 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
      The pass moves on to the next entry — loop back to step 2. This skill never writes: the
      removal is `refactor-learn`'s write, the same detect-never-write split every other finding
      already follows.
-   - **Not fulfilled** → this is the one node worked this pass. Create its issue (if not already
-     filed), and continue to `refactor-design` / `refactor-implement` as usual. **Continue walking
+   - **Not fulfilled** → this is the one node worked this pass. Hand it forward to `refactor-design` /
+     `refactor-implement` as usual — the walk files no issue itself (`refactor-scan` detects, never
+     writes); `refactor-design` files the node's issue when it works the node, unless one already
+     exists. **Continue walking
      the remaining entries** to collect any non-workable nodes (step 3) for the pass report, but
      do not work a second node — exactly one node is worked per pass.
 5. All entries exhausted → the walk is complete. If at least one workable, unfulfilled node was
@@ -71,7 +73,7 @@ write, performed on the finding above; the walk's only trace of them is the find
 The walk is `refactor-scan`'s own — part of its Track-specific process (`safety-net-track.md` /
 `guardrails-track.md`, each file's non-empty-`Open` section routes here), never an orchestrator
 step. `refactor-scan` hands the walk's outcome to the orchestrator as its own `## Output`: the one
-workable node it worked (with its issue), any fulfilled-at-pick-up findings (for `refactor-learn`'s
+workable node it selected (its issue, if one already exists), any fulfilled-at-pick-up findings (for `refactor-learn`'s
 early call), or "nothing workable". `refactor-learn` performs every write those findings imply —
 the `Open` removals above. `refactor-prioritize` Rank mode is not involved — Track nodes are no
 longer ranked or pre-filed; only the single walk's winner reaches `refactor-design`.

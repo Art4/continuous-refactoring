@@ -49,8 +49,10 @@ Run the orchestrator's Track-selection step (step 0b) — it should:
    - `coverage-floor (#21)` — not workable (`needs-info` flagged); collected with reason.
 4. No node is worked this pass (none was workable). The pass report must list both skipped nodes with
    their reasons.
-5. `refactor-learn`'s closing call does **not** change `## Safety Net`'s `Open` (no node was removed),
-   but writes `Last scan` to today's date.
+5. `refactor-learn`'s closing call does **not** change `## Safety Net`'s `Open` (no node was removed)
+   and does **not** touch `Last scan` either — no scan ran this pass (the walk skipped both entries
+   and worked nothing), and `Last scan` is written only after a completed scan
+   (`skills/refactor-learn/references/safety-net-write.md`).
 6. `## Guardrails`, `## Housekeeping`, and `## Investigation` are **not** touched this pass — the
    blockade prevented them from being selected.
 

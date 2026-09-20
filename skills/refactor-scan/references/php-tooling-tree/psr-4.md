@@ -31,8 +31,10 @@ node.
 
 ## Reading a non-empty `unwired_entry_points` result
 
-`tooling_tree.py`'s own check for criterion (2) above is deliberately blunt: does this candidate's
-text contain a `require`/`include` resolving to `vendor/autoload.php`, yes or no. It has no way to
+The criterion (2) check above — does this candidate's text contain a `require`/`include` resolving
+to `vendor/autoload.php`, yes or no — is deliberately blunt when done mechanically (a plain
+text/grep-style walk, as the agent reading this node does it; `tooling_tree.py` no longer runs it and
+reports no `unwired_entry_points`, fulfilment comes from the seed/agent judgement). It has no way to
 tell a genuine, still-unwired application entry point apart from a script that structurally never
 needed the autoloader in the first place — a generated CI/build-tooling helper (e.g. a tooling-tree
 node's own MR-scope-written script under `scripts/`, `bin/`, or `tools/`) that never references the
@@ -41,23 +43,23 @@ target's own namespace at all, caught live once (`coverage-floor`'s own committe
 briefly made `psr-4`/`structural-scan` look unfulfilled on a target where the real request-time class
 loading hadn't changed at all).
 
-Sorting that out is a judgement call for whoever is actually consuming this result — `refactor-scan`
-proposing this node as needing work, or `refactor-learn` recording its fulfilment
-— not something the deterministic parser itself tries to guess at:
+Sorting that out is a judgement call for whoever is actually consuming this walk's result —
+`refactor-scan` proposing this node as needing work, or `refactor-learn` recording its fulfilment —
+never a mechanical verdict:
 
 - **An agent is doing the reading** (the ordinary case — `refactor-scan`/`refactor-learn` are both
-  agent-driven skills): before treating a non-empty `details.unwired_entry_points` as real,
+  agent-driven skills): before treating a non-empty list of flagged files as real,
   unaddressed work, look at each named file. One that's clearly not a genuine application entry
   point — it never references the target's own PSR-4 root namespace anywhere, and its own purpose is
   self-evidently a dev/CI/build utility — is exempt; skip it. A file that's ambiguous, or does
   reference the app's own classes, is real unwired work as reported.
-- **No agent reading it** (a headless `python3 tooling_tree.py` run — CI, this suite's own fixture
-  harness, a script consuming the JSON output directly): no exemption is applied. The raw result
-  stands as-is, a possible over-report until an actual agent-driven pass reviews it next.
+- **No agent reading it** (a purely mechanical walk with no judgement step): no exemption is
+  applied. The raw result stands as-is, a possible over-report until an actual agent-driven pass
+  reviews it next.
 
-This keeps the parser itself simple, predictable, and testable — it reports a plain fact
-(`unwired_entry_points`, not a guess at intent) — while the actual judgement call lives where the
-context to make it well already is.
+This keeps the mechanical walk simple and predictable — it reports a plain fact (which files look
+unwired, not a guess at intent) — while the actual judgement call lives where the context to make it
+well already is.
 
 ## Downstream effects once fulfilled
 

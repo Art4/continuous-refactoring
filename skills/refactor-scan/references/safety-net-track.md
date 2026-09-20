@@ -39,7 +39,7 @@ it never re-derives due-ness itself:
   `track-scheduler.md`'s own same-named section — or a manual override naming this Track directly) →
   the Track is still never rescanned. Walk the entries instead, per
   `skills/refactor-scan/references/track-open-processing.md`: workability triage, the pick-up
-  Fulfilment re-check, exactly one node worked per pass — its issue created only when worked, never
+  Fulfilment re-check, exactly one node worked per pass — its issue filed only when worked (by `refactor-design`, never by the walk), never
   pre-filed. A node the re-check finds now fulfilled is reported as a **fulfilled at pick-up**
   finding for `refactor-learn`'s early call, which removes it from `Open`. The walk's re-check still
   applies this file's "Judging fulfilment" discipline (below); the scan process past this section

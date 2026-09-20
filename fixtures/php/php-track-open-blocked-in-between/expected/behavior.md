@@ -28,8 +28,8 @@ Run `/refactor-scan` with the Safety Net Track selected. It should:
 1. Read `## Safety Net`'s `Open` list — three entries.
 2. Walk the list top to bottom per `skills/refactor-scan/references/track-open-processing.md`:
    - **phpunit (#6)** — workable (unblocked, no `needs-info`, no PHP floor). Re-run Fulfilment:
-     not fulfilled (no `phpunit/phpunit` dependency, no CI workflow). → Work this node: create its
-     issue, continue to `refactor-design`.
+     not fulfilled (no `phpunit/phpunit` dependency, no CI workflow). → Work this node: hand it to
+     `refactor-design` (which files its issue; the walk files nothing).
    - **phpstan-level-0 (#7)** — **not workable**: blocked by `static-code-analyzer` (required parent
      not fulfilled). → Skip, collect with reason for pass report.
    - **php-cs-fixer (#5)** — workable but **not worked**: exactly one node is worked per pass.

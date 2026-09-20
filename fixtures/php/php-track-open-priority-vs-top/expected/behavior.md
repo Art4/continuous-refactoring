@@ -30,8 +30,9 @@ simulating a previous pass that designed this candidate.
 Run the orchestrator with Safety Net selected (blockade active — `Open` non-empty). It should:
 
 1. Safety Net is selected because its `Open` is non-empty (the blockade).
-2. `refactor-scan`'s `Open` walk processes `phpunit (#6)` — workable, not fulfilled → create issue
-   (already filed), work it via `refactor-design`/`refactor-implement`.
+2. `refactor-scan`'s `Open` walk processes `phpunit (#6)` — workable, not fulfilled → hand it forward (its
+   issue is already filed; the walk itself files nothing), work it via
+   `refactor-design`/`refactor-implement`.
 3. The priority-labeled issue (`01-shallow-user-service.md`) is **not** worked this pass — the
    Safety Net blockade means the Track's `Open` walk runs, not Rank mode. The priority issue
    waits until the blockade lifts (Safety Net `Open` empties).

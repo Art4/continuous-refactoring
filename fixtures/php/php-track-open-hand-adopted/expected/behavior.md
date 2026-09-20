@@ -39,7 +39,8 @@ Run `/refactor-scan` with the Safety Net Track selected. It should:
      next entry.
    - **phpunit (#6)** — workable. Re-run its Fulfilment check: `phpunit/phpunit` is not in
      `composer.json` dev dependencies, no CI workflow references it. **Not fulfilled** → this is the
-     one node worked this pass. Create its issue and continue to `refactor-design`.
+     one node worked this pass. The walk files no issue itself — hand `phpunit` forward to
+     `refactor-design`, which files its issue when it works the node.
 3. `phpstan-level-0 (#7)` is **not** reached this pass — exactly one node is worked per pass.
 4. `php-cs-fixer` must **not** have a merge request opened for it — it left `Open` via
    `refactor-learn`'s early call, acting on scan's "fulfilled at pick-up" finding, not via any
