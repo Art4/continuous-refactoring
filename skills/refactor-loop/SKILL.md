@@ -38,6 +38,8 @@ Before step 1, tell the human in one sentence that a loop pass is starting now, 
 
 Each step runs the named lifecycle skill and carries its output to the next. Stop between steps where the skill itself stops for user input.
 
+Whenever a step stops the pass early — a precondition, a full backlog, two MRs already open, a breaking-change finding — tell the human at once, in one or a few sentences, what stopped it and why, before the closing report. Never end a pass silently.
+
 Prefer dispatching each step to a fresh subagent: hand it this pass's carried-forward input, bring back only its stated `## Output`. That keeps a skill's own reasoning inside its own context instead of leaking into this one's. No subagent mechanism available → run each step inline instead, same order.
 
 1. **Scan.** Run `/refactor-scan`, told this pass's Track (the required input above) — checks preconditions (git, backlog size) and resumes `Pending candidates` before proposing anything fresh. A Track's own `Open` list, when it carries one, is walked by `refactor-scan` itself (`skills/refactor-scan/references/track-open-processing.md`) — `refactor-scan` doesn't decide for itself which Track is due; this skill's caller already did, and this skill hands the answer down as input.
