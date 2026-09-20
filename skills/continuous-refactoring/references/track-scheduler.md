@@ -210,7 +210,7 @@ never runs at all this pass in that case.
 ## Suite-wide open-MR cap
 
 Unaffected by any of the above, and already Track-agnostic before this step existed:
-`refactor-prioritize/SKILL.md` step 1's "two or more suite MRs already open" stop condition reads every
+`refactor-loop/SKILL.md` step 5's cap gate ("two or more suite MRs already open", checked before a new MR is opened) reads every
 open `refactor:candidate` issue with a linked pull request, regardless of which Track (or no Track at
 all) filed it — a Safety Net or Guardrails Track candidate is filed and labeled exactly like any other
 candidate (`skills/refactor-learn/references/safety-net-write.md`,

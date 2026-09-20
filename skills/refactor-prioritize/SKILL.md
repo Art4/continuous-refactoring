@@ -21,9 +21,7 @@ Runs in one of two modes, both dispatched by `refactor-loop` — never one calli
 
 ### 1. Check whether anything should start at all
 
-Get the remembered set of in-flight suite MRs: `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → every open `refactor:candidate` issue that carries a linked pull request (the tracker's native issue↔closing-PR cross-reference); otherwise the Refactoring Notes' `merge-requests.md` directly. **Two or more already open?** Stop here: report which, and that the pass ends without starting new work while they await review/merge. Overrides everything below.
-
-Otherwise drop any proposal already in that set — it already has an open MR, so it isn't something to *start*.
+Get the remembered set of in-flight suite MRs: `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → every open `refactor:candidate` issue that carries a linked pull request (the tracker's native issue↔closing-PR cross-reference); otherwise the Refactoring Notes' `merge-requests.md` directly. Drop any proposal already in that set — it already has an open MR, so it isn't something to *start*. How many suite MRs are open is not this skill's concern: `refactor-loop` gates that once, right before implementation (its step 5), for new merge requests only.
 
 A `Pending candidates` entry never reaches this skill at all — `refactor-scan` step 2 routes it
 straight to `refactor-design` (not yet planned) or `refactor-implement` (already planned), bypassing

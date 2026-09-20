@@ -7,7 +7,7 @@ description: The suite's only writer of bookkeeping — acts on refactor-scan's 
 
 The only skill that writes suite bookkeeping: the Refactoring Notes' `merge-requests.md` (only when `docs/agents/issue-tracker.md` names no native-label tracker — otherwise this data lives on the tracker), the Refactoring Notes' `out-of-scope/`, ADRs, `CONTEXT.md`, the Refactoring Notes' `bookkeeping.md`, and issue labels. Every other lifecycle skill may read these; only this one writes them.
 
-`refactor-loop` calls this skill up to **twice** a pass: an **early call**, right after `refactor-scan`, only when it produced findings; and a **closing call**, always, at the end. The split exists because `refactor-prioritize` reads the ledger to decide whether two MRs are already open — a finding this pass just resolved has to be written back before that check runs.
+`refactor-loop` calls this skill up to **twice** a pass: an **early call**, right after `refactor-scan`, only when it produced findings; and a **closing call**, always, at the end. The split exists because `refactor-prioritize` reads the ledger to drop proposals already in flight, and `refactor-loop`'s step 5 cap gate counts the open MRs from it — a finding this pass just resolved has to be written back before either check runs.
 
 The closing call also consumes a second kind of input, in place of a freshly opened MR: a design-time
 breaking-change finding from `refactor-design`'s own decision gate
