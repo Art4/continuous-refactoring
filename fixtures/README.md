@@ -14,14 +14,13 @@ continuous-refactoring/
 │           │   ├── composer.json       # Composer configuration (or .github, phpstan.neon, psalm.xml …)
 │           │   └── ...
 │           └── expected/               # Expected results — stays outside container, sibling to project/
-│               ├── roadmap.json        # Next 10 MRs (tooling + structural, required/recommended)
 │               ├── issues/             # Expected refactor:candidate issues
 │               └── docs/refactoring/   # Expected loop state files (for php-project-with-candidates)
 └── scripts/
     └── run-test.sh                     # Test automation script
 ```
 
-> **Isolation:** `fixtures/harness/run.sh: setup_fixture` copies only `project/` to `/tmp/continuous-refactoring-tests/<fixture>` (`cp -r project/. DST/`). `expected/` is **not** mounted into Docker / not copied — it lives at `fixtures/php/<fixture>/expected/` and is compared on the host via `python3 skills/refactor-scan/references/tooling_tree.py`. This prevents the code under test from reading the expected results.
+> **Isolation:** `fixtures/harness/run.sh: setup_fixture` copies only `project/` to `/tmp/continuous-refactoring-tests/<fixture>` (`cp -r project/. DST/`). `expected/` is **not** mounted into Docker / not copied — it lives at `fixtures/php/<fixture>/expected/`, read only by the host-side checks. This prevents the code under test from reading the expected results.
 
 ## Available Fixtures
 
@@ -51,24 +50,20 @@ Same as `php-p0-empty` but baseline has 3 `ignoreErrors` (non-empty). Tests **sh
 
 ### php-clean
 
-Every deterministic PHP-tooling-tree node resolved (fulfilled or explicitly rejected): `composer`, `psr-4` (ticket 50: a real `autoload.psr-4` mapping declared and verifiably in use — `src/Greeter.php` under the mapped `App\` namespace), `ci-runner`, `php-cs-fixer`, `phpunit` (CI-gated), `phpstan-level-0` (level 0, empty baseline — this target's declared ceiling), `rector-dead-code`/`rector-type-coverage`/`rector-php-set`/`rector-code-quality`/`rector-phpunit-set` fully adopted (ticket 43's Rector set family — `rector-dead-code`/`rector-code-quality` gated by `rector-php-set` directly, `rector-type-coverage`/`rector-phpunit-set` gated via sibling recommended edges instead, per a later restructuring; ticket 48 later dropped the family's sixth node, `rector-early-return`, folding its scope into `rector-code-quality`). Levels 1–10 plus `phpstan-deprecation-rules` are explicitly rejected under `docs/refactoring/out-of-scope/` rather than climbed — climbing them would flip `phpstan-level-0` back to unfulfilled (it only recognizes level *exactly* 0) while `php-safety-net`'s `resolved` gate only cares about `phpstan-level-10` (ticket 43; was `phpstan-level-3`), so an honest "nothing tooling-side left to propose" state needs the reject path, not the climb (see `docs/refactoring/out-of-scope/phpstan-level-{1..10}.md` and `phpstan-deprecation-rules.md` for the reasoning). Also carries `docs/refactoring/out-of-scope/psalm-taint-analysis.md` (ticket 44): `psalm-taint-analysis` is a `php-safety-net` leaf too (a deterministic security-scan tool) and this target never adopted it. `psalm` itself needs no rejection here — it's not a `php-safety-net` leaf (ticket 37 tried that and dropped it as redundant ceremony). `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`, and `semgrep` all moved to (or joined) the **Signal wave**, gated on `php-safety-net` in addition to (or, for `semgrep`, instead of) their own domain-specific parent — this fixture keeps every one of them genuinely fulfilled (CI-gated `composer audit`/Semgrep, `phpmd`/`coverage-floor`/`php-minimal-version` adopted) so the invariant below still holds now that `php-safety-net` resolving makes them all proposable in principle. Tests **"scan on clean repo reports clean"** (ticket 27's deterministic Tier 4 negative control) — `next()` holds nothing but the perpetual `structural-scan` invitation, `withheld()` is empty. `expected/roadmap.json`'s 10-step *simulation* still falls back to the open `phpstan-level-11..20` chain (ticket 43: was `4..13`) rather than proposing `structural-scan` — a real gap in `roadmap()`'s simulation loop (it doesn't special-case an already-open `structural-scan` gate the way `next_candidates()` does), tracked separately; **use `next`, not `roadmap`, for this fixture's real signal**, exactly as `refactor-scan`'s own `SKILL.md` already warns.
+Every deterministic PHP-tooling-tree node resolved (fulfilled or explicitly rejected): `composer`, `psr-4` (ticket 50: a real `autoload.psr-4` mapping declared and verifiably in use — `src/Greeter.php` under the mapped `App\` namespace), `ci-runner`, `php-cs-fixer`, `phpunit` (CI-gated), `phpstan-level-0` (level 0, empty baseline — this target's declared ceiling), `rector-dead-code`/`rector-type-coverage`/`rector-php-set`/`rector-code-quality`/`rector-phpunit-set` fully adopted (ticket 43's Rector set family — `rector-dead-code`/`rector-code-quality` gated by `rector-php-set` directly, `rector-type-coverage`/`rector-phpunit-set` gated via sibling recommended edges instead, per a later restructuring; ticket 48 later dropped the family's sixth node, `rector-early-return`, folding its scope into `rector-code-quality`). Levels 1–10 plus `phpstan-deprecation-rules` are explicitly rejected under `docs/refactoring/out-of-scope/` rather than climbed — climbing them would flip `phpstan-level-0` back to unfulfilled (it only recognizes level *exactly* 0) while `php-safety-net`'s `resolved` gate only cares about `phpstan-level-10` (ticket 43; was `phpstan-level-3`), so an honest "nothing tooling-side left to propose" state needs the reject path, not the climb (see `docs/refactoring/out-of-scope/phpstan-level-{1..10}.md` and `phpstan-deprecation-rules.md` for the reasoning). Also carries `docs/refactoring/out-of-scope/psalm-taint-analysis.md` (ticket 44): `psalm-taint-analysis` is a `php-safety-net` leaf too (a deterministic security-scan tool) and this target never adopted it. `psalm` itself needs no rejection here — it's not a `php-safety-net` leaf (ticket 37 tried that and dropped it as redundant ceremony). `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`, and `semgrep` all moved to (or joined) the **Signal wave**, gated on `php-safety-net` in addition to (or, for `semgrep`, instead of) their own domain-specific parent — this fixture keeps every one of them genuinely fulfilled (CI-gated `composer audit`/Semgrep, `phpmd`/`coverage-floor`/`php-minimal-version` adopted) so the invariant below still holds now that `php-safety-net` resolving makes them all proposable in principle. Tests **"scan on clean repo reports clean"** (ticket 27's deterministic Tier 4 negative control) — `next()` holds nothing but the perpetual `structural-scan` invitation, `withheld()` is empty. This fixture's `project/` also carries the Refactoring Notes' `fulfilled-set.json` seed (every node resolved), so the graph logic reads the same state the tree docs describe.
 
 ### non-php-project
 
 A static HTML/CSS/JS site — `index.html`, `styles.css`, `script.js` — no `composer.json`, no `*.php` file
 anywhere. Stands in for a target like `continuous-refactoring.de`. Tests **`is-php-project`'s gate**
-(`skills/refactor-scan/references/tooling-tree.md`, ADR-0022): `is-php-project` detects `fulfilled: false`
-(present in `detected`, since every node's raw signal is still evaluated) but `composer`/
-`php-minimal-version` and everything beneath them stay out of `next`/`roadmap` — only `loop-config`,
-`ci-runner`, and `editorconfig` (all language-neutral) are real candidates. `roadmap`'s later steps fall
-into the same pre-existing "open PHPStan chain" filler `php-clean` already documents (a real gap in
-`roadmap()`'s simulation loop once no real candidate remains, tracked separately) — not specific to this
-fixture, `next` is the fixture's real signal for the gate.
+(`skills/refactor-scan/references/tooling-tree.md`, ADR-0022): `is-php-project` unfulfilled keeps
+`composer`/`php-minimal-version` and everything beneath them out of `next` — only `loop-config`,
+`ci-runner`, and `editorconfig` (all language-neutral) are real candidates; `next` is the fixture's
+real signal for the gate.
 
 ### php-decision-gate-bypass
 
-Not a tooling-tree fixture — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
-matrix (local-only now, see "Roadmap" below). Two independent retry-with-backoff implementations with genuinely different observable
+Not a tooling-tree fixture — no deterministic ground truth (local-only, advisory). Two independent retry-with-backoff implementations with genuinely different observable
 contracts, plus a pre-seeded `.scratch/refactor/issues/01-unify-retry-logic.md` (Local Markdown
 tracker) already carrying `refactor:candidate, ready-for-agent` and claiming to be fully specified.
 Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053) — see
@@ -76,17 +71,16 @@ Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053
 
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
-Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
-matrix (local-only now, see "Roadmap" below): the whole point under test is that `tooling_tree.py`'s own dependency-name match stops being
-authoritative for a Safety Net Track node, so there's no fixed deterministic ground truth to assert
-`roadmap`/`tier2`/`tier3` against here. Each fixture exercises one checklist item from
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory): the whole point
+under test is that a Safety Net Track node's fulfilment is agent-judged against its own Purpose, so
+there's no fixed deterministic ground truth to assert `tier2`/`tier3` against here. Each fixture
+exercises one checklist item from
 `skills/refactor-scan/references/safety-net-track.md` / `skills/refactor-learn/references/
 safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full expected behavior.
 
 - **php-safety-net-purpose-recognition** — `laravel/pint` installed and configured, no
   `friendsofphp/php-cs-fixer` anywhere. Expects `php-cs-fixer` judged fulfilled via its own Purpose
-  statement (Pint genuinely serves it) rather than `tooling_tree.py`'s raw dependency-name match, and
-  never proposed as a candidate.
+  statement (Pint genuinely serves it), and never proposed as a candidate.
 - **php-safety-net-open-blocks-rescan** — `docs/refactoring/bookkeeping.md`'s `## Safety Net` section
   holds a non-empty `Open` (`php-cs-fixer (#5)`, already `ready-for-agent` with a plan) and a `Last
   scan` far past the default 90-day `Cadence`. Expects the existing `Open` entry resumed straight to
@@ -103,6 +97,19 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
   (`Fulfilled nodes`, global `Pending candidates`, no `## Safety Net` section at all), with real
   Safety-Net-Track work still open (`psr-4`, `static-code-analyzer`/`phpstan-level-0` genuinely
   missing). Expects a normal pass — no error on, or migration of, the pre-existing old-shape fields.
+- **php-safety-net-rejection-cascade** — `## Safety Net`'s `Open` names `phpstan-level-3 (#12)`,
+  `phpstan-level-4`, `phpstan-level-5`; level 3's issue is closed `wontfix` with a structural reason.
+  Unlike the rejection fixtures above (`php-cs-fixer` has no required descendants), `phpstan-level-3`
+  has required descendants. Expects the rejection recorded once (`out-of-scope/phpstan-level-3.md` plus
+  the `Out-of-scope` pointer), `phpstan-level-4`/`-5` leaving `Open` with no files of their own, and —
+  once the rejection is reversed by hand — the next scan re-adding `phpstan-level-3`, `-4`, `-5` in
+  order (spec case 6; cascade verified with `tooling_tree.py`).
+- **php-safety-net-old-meaning-open** — `## Safety Net` still written under the old `Open` meaning
+  (`phpstan-level-1 (#7)` as the only list entry, plus `Fulfilled nodes`/`Focus areas` residue),
+  `Last scan` recent, and a pass that names the Safety Net Track explicitly. Expects no error, no
+  migration, and **no forced scan**: a selected Track with a non-empty `Open` works its `Open` walk
+  (`phpstan-level-1`), leaving `Open`/`Last scan` alone; the scan that runs once `Open` is empty records
+  the complete backlog. Deviates from the spec's case 10 ("forced rescan via override").
 
 ```bash
 ./fixtures/harness/run.sh safety-net-track php-safety-net-purpose-recognition --opencode
@@ -110,6 +117,8 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
 ./fixtures/harness/run.sh safety-net-track php-safety-net-first-run --opencode
 ./fixtures/harness/run.sh safety-net-track php-safety-net-rejection-symmetry --opencode
 ./fixtures/harness/run.sh safety-net-track php-safety-net-old-schema --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-rejection-cascade --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-old-meaning-open --opencode
 ```
 
 Same non-CI, local-only, advisory posture as `decision-gate-bypass`/`judge`/`lift` — a real, file-level
@@ -120,8 +129,8 @@ same reason `decision-gate-bypass` does — see its own note below.
 
 ### php-guardrails-* (Guardrails Track, ADR-0055, ticket 02)
 
-Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
-matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*` above. The Guardrails Track's own counterpart, reusing the
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
+`php-safety-net-*` above. The Guardrails Track's own counterpart, reusing the
 exact same mechanism (`skills/refactor-scan/references/guardrails-track.md` /
 `skills/refactor-learn/references/guardrails-write.md`) against a second node set — the nodes required
 on `structural-scan`/`php-safety-net` themselves (PHP: `composer-audit`, `phpmd`, `coverage-floor`,
@@ -133,9 +142,9 @@ own `expected/behavior.md` for the full expected behavior.
 - **php-guardrails-purpose-recognition** — `composer.json` defines a `scripts.security-check` entry
   whose command is literally `composer audit`, invoked from CI as `composer run security-check` — the
   literal substring `composer audit` never appears in any CI workflow file, only inside `composer.json`
-  itself, so `tooling_tree.py`'s own CI-gate check misses it. Expects `composer-audit` judged fulfilled
-  via its own Purpose statement (the CI gate is real, just invoked through one level of indirection)
-  rather than the raw literal-text match, and never proposed as a candidate.
+  itself, so no literal-text check would ever see it. Expects `composer-audit` judged fulfilled
+  via its own Purpose statement (the CI gate is real, just invoked through one level of indirection),
+  and never proposed as a candidate.
 - **php-guardrails-open-blocks-rescan** — `docs/refactoring/bookkeeping.md`'s `## Guardrails` section
   holds a non-empty `Open` (`phpmd (#5)`, already `ready-for-agent` with a plan) and a `Last scan` far
   past the default 60-day `Cadence`. Expects the existing `Open` entry resumed straight to
@@ -160,8 +169,15 @@ own `expected/behavior.md` for the full expected behavior.
   over (`composer`, `php-cs-fixer`, `phpunit`, `psr-4`, `phpstan-level-0`, the `rector-*` family), and
   no `## Guardrails` section yet. Expects a normal pass — no error on the coexistence, and real,
   still-open Guardrails work (`composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`,
-  `phpstan-level-6`, `phpstan-deprecation-rules`, `semgrep` are all genuinely missing) proposed as
-  usual.
+  `phpstan-level-6`, `phpstan-deprecation-rules`, `semgrep` are all genuinely missing) recorded as
+  `Open` (the complete backlog, in the script's order) rather than filed.
+- **php-guardrails-scan-fills-open** — Safety Net closed; `## Guardrails` present, due
+  (`overdue_ratio ≈ 1.33`) with an **empty** `Open`; all eleven Guardrails scope nodes missing, four of
+  them blocked (`phpstan-level-7..10`). Expects the scan to record `Open` as the complete backlog in
+  the script's deterministic order (`phpmd`, `coverage-floor`, `composer-audit`, `phpstan-level-6`
+  through `-10`, `phpstan-deprecation-rules`, `php-minimal-version`, `semgrep` — computed with
+  `tooling_tree.py` and a seed, not guessed), blocked nodes included, plus `Last scan`, and no
+  candidate issue filed (spec case 4).
 
 ```bash
 ./fixtures/harness/run.sh guardrails-track php-guardrails-purpose-recognition --opencode
@@ -169,15 +185,15 @@ own `expected/behavior.md` for the full expected behavior.
 ./fixtures/harness/run.sh guardrails-track php-guardrails-first-run --opencode
 ./fixtures/harness/run.sh guardrails-track php-guardrails-rejection-symmetry --opencode
 ./fixtures/harness/run.sh guardrails-track php-guardrails-old-schema --opencode
+./fixtures/harness/run.sh guardrails-track php-guardrails-scan-fills-open --opencode
 ```
 
 Same non-CI, local-only, advisory posture as `safety-net-track`/`decision-gate-bypass`/`judge`/`lift`.
 
 ### php-scheduler-* (Track scheduler, ADR-0055, tickets 04/05)
 
-Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
-matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*`/`php-guardrails-*`
-above. Exercises the orchestrator's own new Track-selection step
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
+`php-safety-net-*`/`php-guardrails-*` above. Exercises the orchestrator's own new Track-selection step
 (`skills/continuous-refactoring/SKILL.md` step 0b, algorithm in
 `skills/continuous-refactoring/references/track-scheduler.md`) — real competition between every
 currently-wired Track, replacing each Track's own earlier standalone "is my Track due?" check. See each
@@ -247,7 +263,7 @@ Same non-CI, local-only, advisory posture as the two fixtures above.
   Net's own `Open` first empties). Each exercises one turn of the sequence Investigation → Guardrails →
   Housekeeping, plus the "retired permanently afterward" case — see each fixture's own
   `expected/behavior.md` for the full seeded state and reasoning.
-  - **php-scheduler-bootstrap-investigation** — `## Safety Net` just closed (`Open: none`, `Last scan`
+  - **php-scheduler-bootstrap-investigation** — `## Safety Net` just closed (`Open` list `- none`, `Last scan`
     one day old); `## Guardrails`/`## Housekeeping`/`## Investigation` all absent (never run). Under
     *ordinary* selection alone this would tie all three as "never run" and the fixed tie-break order
     would pick Guardrails; the one-time exception must instead pick **Investigation** — this ticket's own
@@ -309,10 +325,9 @@ Same non-CI, local-only, advisory posture as the three fixtures above.
 
 ### php-track-open-* (Track Open walk, ticket 07)
 
-Not tooling-tree fixtures — no `expected/roadmap.json`, deliberately excluded from the roadmap fixture
-matrix (local-only now, see "Roadmap" below), same reasoning as `php-safety-net-*`/`php-guardrails-*`
-above. Exercises the orchestrator's own `Open` walk behavior
-(`skills/continuous-refactoring/references/track-open-processing.md`) — top-to-bottom processing,
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
+`php-safety-net-*`/`php-guardrails-*` above. Exercises the orchestrator's own `Open` walk behavior
+(`skills/refactor-scan/references/track-open-processing.md`) — top-to-bottom processing,
 Fulfilment re-check, and non-workable node collection. See each fixture's own
 `expected/behavior.md` for the full seeded state and reasoning.
 
@@ -333,13 +348,55 @@ Fulfilment re-check, and non-workable node collection. See each fixture's own
   process `phpunit`, and the priority issue to wait — Rank mode is not invoked, and the priority
   issue does not bypass the blockade.
 
+- **php-track-open-priority-guardrails** — Guardrails counterpart of the fixture above. Safety Net is
+  closed (`Open` list `- none`), `## Guardrails`'s `Open` is the complete Guardrails backlog as a list, `phpmd (#5)` first (workable), Housekeeping is not
+  due, and a separate `refactor:priority`-labeled structural candidate (`01-shallow-user-service.md`)
+  exists on the tracker. Expects Guardrails selected, the `Open` walk to work `phpmd` this pass, and
+  the priority issue to wait until Guardrails has no workable node left — the label narrows the Rank
+  pool, is otherwise only a tie-breaker between equally ranked candidates, and never preempts an `Open`
+  walk; Rank mode is not invoked.
+
 ```bash
 ./fixtures/harness/run.sh safety-net-track php-track-open-hand-adopted --opencode
 ./fixtures/harness/run.sh safety-net-track php-track-open-blocked-in-between --opencode
 ./fixtures/harness/run.sh safety-net-track php-track-open-priority-vs-top --opencode
+./fixtures/harness/run.sh guardrails-track php-track-open-priority-guardrails --opencode
 ```
 
 Same non-CI, local-only, advisory posture as the scheduler fixtures above.
+
+### php-housekeeping-* (Housekeeping Track, ticket 09)
+
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
+`php-safety-net-*`/`php-guardrails-*` above. Exercises the Housekeeping Track's reconciliation sweep
+(`skills/continuous-refactoring/references/housekeeping-track.md`): each cycle it checks only the
+nodes that carry a `Housekeeping` field and judges their Fulfilment check itself (agent judgement) —
+it no longer reads the retired `Fulfilled nodes` cache (ADR-0056). See each fixture's own
+`expected/behavior.md` for the full expected behavior.
+
+- **php-housekeeping-hand-adopted-guardrails** — `composer-audit` adopted by hand (CI runs
+  `composer audit` through a workflow step) with no delivering merge request anywhere in the
+  tracker's history; `## Guardrails` already closed (`Open` list `- none`), `## Housekeeping` due
+  (`Cadence: 7`, `Last scan: 2026-09-01`), no `housekeeping-template.md` yet (first cycle). Expects
+  the reconciliation to judge the `Housekeeping`-fielded nodes fulfilled by their Purpose —
+  `composer-audit`, `phpstan-level-0`, `php-minimal-version` get their lines, `semgrep` (absent)
+  doesn't — so the hand-adopted Guardrails tool gets its Housekeeping checklist line at the next
+  cycle even though no merge request ever delivered it and this target's bookkeeping.md carries no
+  `Fulfilled nodes` at all.
+
+- **php-housekeeping-old-schema** — `docs/refactoring/bookkeeping.md` still in the pre-ADR-0055
+  shape (`Fulfilled nodes` populated, global `Pending candidates`, no Track sections anywhere),
+  with the listed nodes genuinely fulfilled by the project. Expects a normal Housekeeping pass: the
+  retired `Fulfilled nodes` field is ignored — never read as an input, not migrated, left exactly as
+  it was — while the reconciliation judges fulfilment itself, creates
+  `housekeeping-template.md`, and the closing call writes `## Housekeeping` around the old content.
+
+```bash
+./fixtures/harness/run.sh housekeeping-track php-housekeeping-hand-adopted-guardrails --opencode
+./fixtures/harness/run.sh housekeeping-track php-housekeeping-old-schema --opencode
+```
+
+Same non-CI, local-only, advisory posture as `safety-net-track`/`guardrails-track`/`scheduler`.
 
 ### Tier 3 — Ground Truth (local-only, advisory — ADR-0055, ticket 03)
 
@@ -347,15 +404,12 @@ Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI, alongside `tier
 dedicated `tier3` job). `tier3` measures precision/recall — planted candidates
 (`expected/issues/*.md`) vs. what a run actually filed under `.scratch/**/issues/` — and, per
 ticket 27's Tier 5, checks that recall against a committed baseline (`fixtures/baselines/`,
-gitignored). Both the count and the baseline it's checked against are downstream of
-`tooling_tree.py`'s own deterministic, hardcoded-dependency-name detection for every node —
-including the Safety Net/Guardrails nodes ADR-0055 (tickets 01/02) moved to agent judgement
-against each node's own Purpose statement instead. For those nodes, `tooling_tree.py`'s match is
-no longer the operative fulfilment path, so `tier3`'s ground truth is stale for exactly the nodes
-that matter most here, the same reasoning that already put `tier4`'s behavioral checks and the
-`roadmap` fixture matrix (below) local-only. CI has no model credentials to run the agent-judged
-check that would actually be accurate instead, so `tier3` runs local-only/advisory now too — same
-posture as `tier4`'s non-deterministic parts, `judge`, `lift`, `agent-loop`, and
+gitignored). It used to be downstream of `tooling_tree.py`'s own deterministic,
+hardcoded-dependency-name detection for every node — stale for exactly the Safety Net/Guardrails
+nodes ADR-0055 (tickets 01/02) moved to agent judgement against each node's own Purpose statement,
+and a detection ADR-0056 has since deleted outright. CI has no model credentials to run the
+agent-judged check that would actually be accurate instead, so `tier3` runs local-only/advisory now
+too — same posture as `tier4`'s non-deterministic parts, `judge`, `lift`, `agent-loop`, and
 `decision-gate-bypass`. `tier1` (static validation) and `tier2` (artifact contracts) are unaffected
 and still gate CI.
 
@@ -367,55 +421,67 @@ and still gate CI.
 
 Ticket 27's three negative controls split across two layers:
 
-- **Deterministic** (`scripts/test_trigger_controls.py`, CI-gated via the `tier4` job): "scan on clean repo reports clean" is a real, fully-testable property of the deterministic parser — see `php-clean` above. The other two controls are prose-level judgment calls a skill makes, for two distinct reasons: "no git" is `refactor-scan`'s own step-1 precondition — `detect_nodes()` already reports a missing `.git` accurately, but whether that precondition is actually *followed* is a model-behavior question, not something the parser decides; "not a PHP project" is ADR-0008's deliberate carve-out, which keeps language recognition an informal heuristic on purpose ("premature before a second language specialization exists"). Either way, this module only checks the ground-truth *signal* each judgment reads (`detect_nodes()` reports `git`/`composer` accurately), not the judgment itself.
-- **Behavioral** (`fixtures/harness/run.sh tier4 <fixture> --opencode`, local-only advisory, same non-CI posture as `roadmap --opencode` and `agent-loop`): runs all three negative controls end-to-end via opencode, plus **explicit + implicit invocation per skill** — for each of the five lifecycle skills, both `/skill-name` and a natural-language paraphrase of its `description` should trigger it; for the orchestrator (`continuous-refactoring`, which ships `disable-model-invocation: true`), only the explicit form should.
+- **Deterministic** (`scripts/test_trigger_controls.py`, CI-gated via the `tier4` job): "scan on clean repo reports clean" is a real, fully-testable property of the deterministic graph logic — see `php-clean` above. The other two controls are prose-level judgment calls a skill makes, for two distinct reasons: "no git" is `refactor-scan`'s own step-1 precondition — whether that precondition is actually *followed* is a model-behavior question, not something the script decides; "not a PHP project" is ADR-0008's deliberate carve-out, which keeps language recognition an informal heuristic on purpose ("premature before a second language specialization exists"). Either way, this module only checks the ground-truth *signal* each judgment reads (the tree's edges keep every PHP-tree leaf gated behind `composer`/`is-php-project`, so nothing past the generic root is proposable without them), not the judgment itself.
+- **Behavioral** (`fixtures/harness/run.sh tier4 <fixture> --opencode`, local-only advisory, same non-CI posture as `agent-loop`): runs all three negative controls end-to-end via opencode, plus **explicit + implicit invocation per skill** — for each of the five lifecycle skills, both `/skill-name` and a natural-language paraphrase of its `description` should trigger it; for the orchestrator (`continuous-refactoring`, which ships `disable-model-invocation: true`), only the explicit form should.
 
 ```bash
 ./fixtures/harness/run.sh tier4 php-clean --opencode --verbose
 ```
 
-Without `--opencode` it just points at the deterministic test module and exits — same degrade-gracefully shape as `roadmap --opencode` when the binary is missing.
+Without `--opencode` it just points at the deterministic test module and exits — same degrade-gracefully shape as every other `--opencode` tier when the binary is missing.
 
-### Roadmap (dry-run, no MR) — local-only, advisory (ADR-0055, ticket 03)
+### Tooling-tree script (dry-run, no MR) — seed input, backlog output
 
-Not CI-gated (as of ADR-0055's ticket 03 — it used to gate CI as its own matrix job, one run per
-fixture, alongside `tier1`/`tier2`). Each fixture above has `expected/roadmap.json` — the next 10
-MRs the deterministic parser `skills/refactor-scan/references/tooling_tree.py` predicts (tool →
-fulfilment, required/recommended edges, empty-baseline gate, Psalm equivalence). That prediction is
-downstream of the same hardcoded-dependency-name matching `tier3` (above) relies on, and is
-similarly stale for the Safety Net/Guardrails nodes ADR-0055 (tickets 01/02) moved to agent
-judgement against each node's own Purpose — CI has no model credentials to check the accurate,
-agent-judged version instead, so this moved local-only/advisory too, same posture as `tier3`/
-`tier4`'s non-deterministic parts/`judge`/`lift`/`agent-loop`/`decision-gate-bypass`. Verified by:
+The forward-simulating `roadmap` tier and its fixture matrix are gone: with the parser's detection
+code deleted (ADR-0056), `skills/refactor-scan/references/tooling_tree.py` detects nothing and no
+longer predicts a next-10-MRs chain, and the eight `expected/roadmap.json` files were removed with
+it. What the script does today is the tree's graph logic only — dry-run, no mutation,
+deterministic given its inputs:
 
-```bash
-./fixtures/harness/run.sh roadmap php-empty --verbose          # single fixture (deterministic, no LLM)
-./fixtures/harness/run.sh roadmap php-p0-nonempty
-# all fixtures (used to also run in CI as the roadmap matrix; now local-only)
-for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean php-project-with-candidates non-php-project; do
-  ./fixtures/harness/run.sh roadmap $f
-done
-```
-Checks: which tools are recognized (`detected` fulfilled), whether decisions follow `skills/refactor-scan/references/php-tooling-tree.md`, correct 10-step order, recommended-edge outlook (`would benefit from …`), and **no MR/branch created** (still 1 commit, no `docs/refactoring/merge-requests.md` or `.scratch`).
-
-**Local with opencode (isolated, advisory):**
-
-The deterministic roadmap check itself needs no LLM (only Python, `pip install pyyaml`) — that part just no longer gates CI (above). Locally you can additionally start `opencode` as an isolated subprocess — without global skills, only `skills/` from this repo, as a comparison (non-blocking):
+- **Input:** the tree docs plus the recorded rejections, and a fulfilled set — either handed over
+  as a seed file (the `--seed` argument or the Refactoring Notes' `fulfilled-set.json`, a
+  `{node_slug: true/false}` JSON: the scan pass's agent judgement as a file — the agent judges,
+  the script orders) or, when no seed is given, derived from `bookkeeping.md`'s Track sections (a
+  scope node neither in `Open` nor in `Out-of-scope` is fulfilled).
+- **Output** (JSON): `backlog` — the ordered `Open` a scan should record: every unresolved node of
+  the Track's scope in tree order, blocked ones included; `next` — the currently-workable nodes;
+  `withheld`/`withheld_with_reasons` — nodes held back, with the reasons the stalled report needs;
+  `closed_by_rejection` — nodes derived as closed by a rejected required ancestor;
+  `reversals`/`php_floor_blocked` — the PHP-version findings; `detected` — the resolved fulfilled
+  map the outputs were computed from; `tree.edges`. `--unblocked-by NODE` adds the merge-request
+  outlook view: every node NODE's fulfilment newly makes proposable.
 
 ```bash
-# deterministic + opencode comparison (needs `opencode` binary via npm i -g opencode or npx)
-./fixtures/harness/run.sh roadmap php-empty --opencode --verbose
-./fixtures/harness/run.sh roadmap php-p0-nonempty --opencode
+python3 skills/refactor-scan/references/tooling_tree.py fixtures/php/php-clean/project            # seed auto-discovered from the Refactoring Notes
+python3 skills/refactor-scan/references/tooling_tree.py <repo> --seed fulfilled-set.json          # explicit seed (the scan-pass contract)
+python3 skills/refactor-scan/references/tooling_tree.py <repo> --unblocked-by composer           # outlook: what landing `composer` unblocks
 ```
 
-*What `--opencode` does:* `run.sh:roadmap` creates a `.agents/skills → skills/` symlink in the fixture, runs `timeout 60 opencode run "List the next 10 MRs without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md."` inside the fixture directory (subprocess, only `skills/` from this repo, no `~/.config/opencode/skills`), logs the first 80 lines to `/tmp/opencode-$FIXTURE.log` and advisory-checks whether the first expected node is mentioned. If the binary is missing, it only logs `opencode binary not found — skipping` (no fail). Neither the deterministic check nor `--opencode` runs in CI any more (ADR-0055, ticket 03) — both are local-only now, `--opencode` still opt-in on top of the deterministic pass.
+The contract is pinned deterministically by `scripts/test_tooling_tree.py` (CI-gated via
+`python3 -m unittest discover -s scripts -p 'test_*.py'`); the drift check comparing the manual
+tree-walk fallback's prose rules with the script's graph logic on shared seeds is
+`scripts/drift_check.py` (advisory, run manually — not collected by CI's `test_*.py` discovery).
+
+For agents (subprocess):
+
+```python
+# direct deterministic check — importlib, not a dotted import: "refactor-scan"'s
+# hyphen makes `skills.refactor_scan...` an invalid package path
+import importlib.util, json, pathlib
+spec = importlib.util.spec_from_file_location("tooling_tree", "skills/refactor-scan/references/tooling_tree.py")
+tooling_tree = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(tooling_tree)
+data = tooling_tree.detect_and_roadmap(pathlib.Path("fixtures/php/php-p0-nonempty"), fulfilled={"git": True})
+assert "composer" in data["backlog"]  # etc. — workable: data["next"], withheld: data["withheld_with_reasons"]
+```
 
 ### Reproducible local opencode test (for humans and agents)
 
-Prerequisites — one-time setup:
+Prerequisites — one-time setup, shared by every `--opencode` tier in this README (`tier4`, `judge`,
+`lift`, `decision-gate-bypass`, and the Track tiers):
 
 ```bash
-# 1. Python + deps (for deterministic gate)
+# 1. Python + deps (for deterministic checks)
 python3 --version  # ≥3.11
 pip install pyyaml
 
@@ -430,83 +496,20 @@ opencode models | grep -i "muse-spark"   # should list muse-spark-1.2-contributo
 opencode run -m opencode/muse-spark-1.2-contributor-free --help | head -n 5
 ```
 
-Run deterministic check (no LLM, fast — local-only, no longer CI-gated, ADR-0055 ticket 03):
-
-```bash
-# single fixture
-./fixtures/harness/run.sh roadmap php-empty --verbose
-# all 8 fixtures (the same set the CI roadmap matrix used to run)
-for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean php-project-with-candidates non-php-project; do
-  ./fixtures/harness/run.sh roadmap $f
-done
-# expected: 8× PASS — Detected nodes match, Roadmap order matches, No MR created
-```
-
-Run with opencode (isolated, advisory — requires model, ~60s per fixture):
-
-```bash
-# single fixture with opencode comparison (deterministic + LLM)
-./fixtures/harness/run.sh roadmap php-empty --opencode --verbose
-# all 5 new fixtures (opencode advisory)
-for f in php-empty php-partial php-p0-empty php-p0-nonempty php-psalm php-clean; do
-  ./fixtures/harness/run.sh roadmap $f --opencode
-done
-```
-
-Direct opencode call (what `run.sh --opencode` does internally; useful for agents via subprocess):
-
-```bash
-# 1. Prepare fixture copy exactly like the harness (git init)
-FIXTURE=php-p0-nonempty
-SRC=fixtures/php/$FIXTURE
-DST=/tmp/continuous-refactoring-tests/$FIXTURE
-rm -rf $DST && mkdir -p $(dirname $DST) && cp -r $SRC $DST
-(cd $DST && git init -q && git -c user.name="Test" -c user.email="test@test" add -A && git commit -q -m "init")
-
-# 2a. Run from repo root so opencode finds skills/refactor-scan/references/php-tooling-tree.md (needs --auto to allow reading /tmp fixture)
-opencode run -m opencode/muse-spark-1.2-contributor-free --auto \
-  --dir "$(pwd)" \
-  "For fixture at /tmp/continuous-refactoring-tests/$FIXTURE (copied from fixtures/php/$FIXTURE), show which tools are recognized per skills/refactor-scan/references/php-tooling-tree.md, whether decisions are correct, and list the next 10 MRs in order without creating branches/MRs. Use deterministic tree: required edge gates, recommended only outlook, empty-baseline absent OR empty ignoreErrors, psalm fulfils p0."
-
-# 2b. Alternative: run inside fixture with skills symlink (exactly what run.sh does)
-mkdir -p $DST/.agents && ln -sfn "$(pwd)/skills" $DST/.agents/skills
-timeout 60 opencode run -m opencode/muse-spark-1.2-contributor-free --auto --dir $DST \
-  "List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md." 2>&1 | head -n 80
-# log: /tmp/opencode-$FIXTURE.log
-```
-
-What to expect:
-
-* **Deterministic:** `Detected tools (fulfilled):` (e.g., `php-psalm: psalm fulfils p0`) + `Next 10 MRs` table + `✓ PASS: No MR created — still 1 commit` + `✓ PASS: Roadmap order matches`.
-* **With `--opencode`:** same deterministic output **plus** `=== Opencode isolated (advisory) ===` → `Opencode output (first 80 lines)` + `✓ PASS: Opencode (advisory) mentions expected first node: composer` (or `composer-audit`/`p1` depending on fixture). If model not reachable: `Opencode run failed or timed out — see /tmp/opencode-*.log (advisory, not failing test)` — harness still PASS.
-* **Logs:** deterministic JSON at `/tmp/roadmap-$FIXTURE.json`, opencode log at `/tmp/opencode-$FIXTURE.log`.
-
-For agents (subprocess):
-
-```python
-import subprocess, pathlib
-fixture = "php-p0-nonempty"
-subprocess.run(["./fixtures/harness/run.sh", "roadmap", fixture, "--opencode", "--verbose"], check=False)
-# or direct deterministic check — importlib, not a dotted import: "refactor-scan"'s
-# hyphen makes `skills.refactor_scan...` an invalid package path
-import importlib.util, json, pathlib
-spec = importlib.util.spec_from_file_location("tooling_tree", "skills/refactor-scan/references/tooling_tree.py")
-tooling_tree = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(tooling_tree)
-data = tooling_tree.detect_and_roadmap(pathlib.Path(f"fixtures/php/{fixture}"), steps=10)
-assert data["roadmap"][0]["node"] == "composer-audit"  # etc.
-```
+Every `--opencode` tier documents its own run command in its own section above; all of them share
+`run_opencode_advisory`'s isolated invocation (only `skills/` from this repo via an
+`.agents/skills` symlink — no `~/.config/opencode/skills`) and its degrade-gracefully behavior: no
+`opencode` binary found → one info line, exit clean, nothing fails.
 
 Troubleshooting:
 
 * `opencode binary not found` → `npm i -g opencode` or use `npx --yes opencode`.
 * `permission requested: external_directory … auto-rejecting` → add `--auto` (the harness does this).
-* `File not found: skills/refactor-scan/references/php-tooling-tree.md` when `--dir /tmp/...` → run with `--dir` pointing to repo root and mention fixture path in prompt, or use the `.agents/skills` symlink method.
 * Long runtime → harness uses `timeout 60`; increase if model is slow.
 
 ### Agent loop test (full pass, subagent-observed)
 
-Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010](../docs/adr/0010-orchestrator-explicit-data-flow.md) `## Validation`) so it can be repeated against this repo's own fixtures instead of an ad-hoc scratch copy of some other project. Where `roadmap --opencode` drives only `refactor-scan`'s proposal step via `opencode` in Docker, this drives the **full 6-step orchestrator pass** (`skills/continuous-refactoring/SKILL.md`: scan → learn → prioritise → design → implement → learn) via a Claude Code **Agent-tool subagent** — the tool a Claude Code session itself has, not a subprocess this script can launch. So `run.sh agent-loop` only prepares; running the subagent is a manual step, same as `--opencode` staying local-only and out of CI.
+Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010](../docs/adr/0010-orchestrator-explicit-data-flow.md) `## Validation`) so it can be repeated against this repo's own fixtures instead of an ad-hoc scratch copy of some other project. Where the `--opencode` tiers above drive single skills or single checks via an isolated `opencode` subprocess, this drives the **full 6-step orchestrator pass** (`skills/continuous-refactoring/SKILL.md`: scan → learn → prioritise → design → implement → learn) via a Claude Code **Agent-tool subagent** — the tool a Claude Code session itself has, not a subprocess this script can launch. So `run.sh agent-loop` only prepares; running the subagent is a manual step, same as `--opencode` staying local-only and out of CI.
 
 ```bash
 ./fixtures/harness/run.sh agent-loop php-partial
@@ -549,7 +552,7 @@ assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2
 ```bash
 ./fixtures/harness/run.sh tier3 php-project-with-candidates
 ```
-`run_tier3` compares the freshly-computed recall against whatever baseline is on disk (`assert_baseline_not_regressed`, `fixtures/harness/lib/assertions.sh`) *before* overwriting it, and reports a regression if recall dropped. Caveat worth knowing before you touch this: without a real `agent-loop`/`--opencode` run first, `found` is always `0` (nothing files under `.scratch/**/issues/` from a dry deterministic pass alone), so the check is comparing `0` against `0` until a baseline records an actual recall from one of those runs. The `roadmap` fixture matrix (`expected/roadmap.json`, exact match) is this harness's other regression check — extended to 7 fixtures by `php-clean`, then to 8 by `non-php-project` (ADR-0022's `is-php-project` gate) — also local-only now, per "Roadmap" above.
+`run_tier3` compares the freshly-computed recall against whatever baseline is on disk (`assert_baseline_not_regressed`, `fixtures/harness/lib/assertions.sh`) *before* overwriting it, and reports a regression if recall dropped. Caveat worth knowing before you touch this: without a real `agent-loop`/`--opencode` run first, `found` is always `0` (nothing files under `.scratch/**/issues/` from a dry deterministic pass alone), so the check is comparing `0` against `0` until a baseline records an actual recall from one of those runs. The `roadmap` fixture matrix that used to sit alongside it as this harness's other regression check is gone — removed together with the forward-simulating `roadmap` output and the parser's detection code (ADR-0056; see "Tooling-tree script" above).
 
 **LLM-judge rubric grading** (local-only, advisory, non-CI): grades one fixture's post-pass artifacts against `fixtures/harness/rubric.md`'s five dimensions (process fidelity, candidate selection, artifact quality, state hygiene, honesty about ambiguity).
 
@@ -563,7 +566,7 @@ assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2
 ./fixtures/harness/run.sh lift php-partial --opencode
 ```
 
-Both commands share the same degrade-gracefully behavior as `roadmap --opencode`: no `opencode` binary found → one info line, exit clean, nothing fails.
+Both commands share the same degrade-gracefully behavior as every other `--opencode` tier: no `opencode` binary found → one info line, exit clean, nothing fails.
 
 **Decision-gate `ready-for-agent` bypass regression** (local-only, advisory, non-CI; fixture: `php-decision-gate-bypass`, ADR-0053): reproduces the bug ADR-0053 fixes — an externally-labeled candidate issue pre-tagged `ready-for-agent`, describing a change that isn't actually fully specified (two retry implementations with genuinely different backoff contracts). Runs `refactor-design` against the seeded issue (`.scratch/refactor/issues/01-unify-retry-logic.md`), then checks — a real grep against the committed fixture, not a judgment call — whether the pre-existing `ready-for-agent` got actively cleared and `needs-info` added, per `skills/refactor-design/references/decision-gate.md`. A second pass then runs `refactor-scan` and looks (advisory, LLM output isn't deterministic) for it correctly holding the candidate back instead of routing it to `refactor-implement`. Full expected behavior: `fixtures/php/php-decision-gate-bypass/expected/behavior.md`.
 
@@ -630,7 +633,7 @@ Use the test script (see `scripts/run-test.sh`):
 
 1. Create a new directory under `fixtures/php/` (or appropriate language), e.g., `fixtures/php/my-fixture/`
 2. Create `project/` with the input that gets mounted/copied to `/tmp` — e.g., `project/src/` with planted candidates, `project/composer.json` + `project/composer.lock`, `project/phpstan.neon`, `project/.php-cs-fixer.php`, `project/.github/workflows/ci.yml`, etc.
-3. Create `expected/` as sibling to `project/` — e.g., `expected/roadmap.json` (next 10 MRs), `expected/issues/` with `refactor:candidate` issues, `expected/docs/refactoring/` — **never inside `project/`** (so it is not mounted into Docker / not visible to the code under test)
+3. Create `expected/` as sibling to `project/` — e.g., `expected/behavior.md`, `expected/issues/` with `refactor:candidate` issues, `expected/docs/refactoring/` — **never inside `project/`** (so it is not mounted into Docker / not visible to the code under test)
 4. Document the fixture's purpose and tooling-tree state in this README (see `php-empty` … `php-psalm` examples above)
 
 ## Design Principles

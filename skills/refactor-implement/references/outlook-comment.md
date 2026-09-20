@@ -7,8 +7,10 @@ node's **Name** and working its Purpose into the same sentence (e.g. "next up: C
 management for the Composer-stack track") — a later reader of the (by-then-closed) issue sees what
 this unlocked without digging through scan output. Nothing about how that was determined belongs in
 it — no shell command, no file path, no `Purpose:`-labelled field. To find it: re-run
-`tooling_tree.py --steps 1 --unblocked-by <landed-node-slug>` against the now-changed working tree
-and look up the returned `roadmap` entry's slug's Name in the tree doc — the same script
+`tooling_tree.py --unblocked-by <landed-node-slug> <target-repo>` (fulfilment comes from the
+seed/bookkeeping state the script reads, not from detection, so that state must already record the
+landed node) and look up the slug of the first entry in the returned `unblocked_by` list (each entry
+is `{"node": <slug>, "type": <edge type>}`) for its Name in the tree doc — the same script
 `refactor-scan` step 4 already runs, wherever `refactor-scan`'s own files are actually installed
 (its own `references/tooling_tree.py`, alongside its `SKILL.md`), never assumed relative to the
 suite's own repo as the current working directory. No `python3`, or not permitted → dispatch a

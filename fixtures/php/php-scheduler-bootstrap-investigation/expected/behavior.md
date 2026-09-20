@@ -23,7 +23,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18` (1 day before this fixture's reference date of
-  2026-09-19 → `overdue_ratio ≈ 0.01`), `Open: none`. **Just closed — this is the pass right after `Open`
+  2026-09-19 → `overdue_ratio ≈ 0.01`), `Open` list `- none`. **Just closed — this is the pass right after `Open`
   emptied.**
 - No `## Guardrails`, `## Housekeeping`, or `## Investigation` section at all — none of the three has
   ever run for this target. Under *ordinary* Eligibility/Selection alone (i.e. if the one-time exception

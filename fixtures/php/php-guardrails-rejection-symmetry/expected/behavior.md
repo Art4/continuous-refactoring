@@ -14,7 +14,7 @@ posture as `safety-net-track`/`decision-gate-bypass`.
 ## Seeded state
 
 The Safety Net is fully closed (same shape as `php-guardrails-open-blocks-rescan`). `docs/refactoring/
-bookkeeping.md`'s `## Guardrails` section: `Open: - phpmd (#5)`, `Out-of-scope: - none`.
+bookkeeping.md`'s `## Guardrails` section: `Open` as a list (`- phpmd (#5)`), `Out-of-scope` as a list (`- none`).
 `.scratch/refactor/issues/05-phpmd.md` — already `Status: closed`, `Labels: refactor:candidate,
 wontfix`, with a maintainer's own closing comment giving a load-bearing structural reason (cyclomatic
 complexity enforced purely by mandatory PR review against a documented checklist, no tool, by team

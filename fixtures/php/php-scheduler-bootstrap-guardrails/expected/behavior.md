@@ -20,7 +20,7 @@ both fully resolved at the filesystem level (`php-safety-net: true`, `next` hold
 
 `docs/refactoring/bookkeeping.md`:
 
-- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open: none`. Same as
+- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Same as
   `php-scheduler-bootstrap-investigation` — still the same "just closed" state.
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`. **Present** (unlike
   `php-scheduler-bootstrap-investigation`, where it was absent) — Investigation's own scan already ran
@@ -47,7 +47,7 @@ should:
 3. Hand the Guardrails Track to `refactor-scan` as an explicit input; `refactor-scan` runs
    `guardrails-track.md`'s own process, judging each Guardrails node's Purpose against the repo (this
    fixture's underlying files already fulfil every Guardrails node deterministically, so the scan should
-   find nothing new to propose and record `## Guardrails` with `Open: none`, `Last scan` set — the
+   find nothing new to propose and record `## Guardrails` with `Open` list `- none`, `Last scan` set — the
    "first-run, nothing missing" outcome, same shape `php-guardrails-first-run` already exercises for the
    Guardrails Track alone).
 4. Neither `## Safety Net` nor `## Investigation` should be touched this pass.

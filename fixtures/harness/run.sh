@@ -20,13 +20,12 @@ Tiers:
     tier2       Run artifact contract tests
     tier3       Run ground-truth precision/recall tests (also checks recall against the committed baseline — ticket 27)
     tier4       Trigger/discoverability tests: explicit+implicit invocation per skill, negative controls (fixture: php-clean; local-only, see fixtures/README.md)
-    roadmap     Dry-run: detect tools, show decision chain and next 10 MRs (no MR created)
     agent-loop  Prepare an isolated sandbox + prompt for a full-pass, Agent-tool-subagent-observed run (local-only, see fixtures/README.md)
     judge       LLM-judge rubric grading against fixtures/harness/rubric.md (local-only, advisory — ticket 27)
     lift        With-skill vs without-skill lift measurement (local-only, advisory — ticket 27)
     decision-gate-bypass   Decision-gate ready-for-agent bypass regression (fixture: php-decision-gate-bypass; local-only, advisory — ADR-0053)
     safety-net-track       Safety Net Track behavior regressions (fixtures: php-safety-net-*; local-only, advisory)
-    guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*; local-only, advisory)
+    guardrails-track       Guardrails Track behavior regressions (fixtures: php-guardrails-*, php-track-open-priority-guardrails; local-only, advisory)
     housekeeping-track     Housekeeping Track behavior regressions (fixtures: php-housekeeping-*; local-only, advisory)
     scheduler              Orchestrator Track-selection regressions (fixtures: php-scheduler-*; local-only, advisory — ADR-0055, ticket 04)
 
@@ -41,9 +40,6 @@ Examples:
     $(basename "$0") tier2 php-project-with-candidates
     $(basename "$0") tier3 php-project-with-candidates --php-version 8.2
     $(basename "$0") tier4 php-clean --opencode --verbose
-    $(basename "$0") roadmap php-empty
-    $(basename "$0") roadmap php-p0-empty --verbose
-    $(basename "$0") roadmap php-empty --opencode --verbose   # deterministic + opencode comparison
     $(basename "$0") agent-loop php-partial                   # prepare sandbox + prompt, then spawn a subagent yourself
     $(basename "$0") judge php-project-with-candidates --opencode
     $(basename "$0") lift php-partial --opencode
@@ -113,7 +109,7 @@ TIER="$1"
 FIXTURE="$2"
 shift 2
 
-# Parse trailing options (e.g., --opencode after fixture: roadmap php-empty --opencode)
+# Parse trailing options (e.g., --opencode after fixture: tier4 php-clean --opencode)
 while [[ $# -gt 0 ]]; do
     case "$1" in
         --opencode)
@@ -163,8 +159,8 @@ setup_fixture() {
 }
 
 # Resolve the opencode binary invocation (empty string if unavailable) —
-# shared by every local-only advisory check (roadmap --opencode, tier4,
-# judge, lift). Echoes the command prefix on stdout; logs and returns
+# shared by every local-only advisory check (tier4, judge, lift). Echoes the
+# command prefix on stdout; logs and returns
 # nonzero if no binary is found so callers can skip cleanly.
 resolve_opencode_bin() {
     if command -v opencode >/dev/null 2>&1; then
@@ -305,82 +301,11 @@ EOF
     log_info "Baseline saved to $baseline_dir/$FIXTURE.json"
 }
 
-# Roadmap: Dry-run — detect tools, decision chain, next 10 MRs (no mutation)
-run_roadmap() {
-    log_info "=== Roadmap (dry-run, no MR) — fixture: $FIXTURE ==="
-
-    local expected_roadmap="$FIXTURE_SRC/expected/roadmap.json"
-    if [[ ! -f "$expected_roadmap" ]]; then
-        log_fail "Missing expected roadmap: $expected_roadmap"
-        return 1
-    fi
-
-    # Generate roadmap via deterministic parser (no opencode, no mutation) — source of truth is skills/refactor-scan/references/php-tooling-tree.md
-    # Deterministic parser is intentionally used for reproducibility (no LLM flakiness); an opencode run
-    # `opencode run /refactor-scan` + `/refactor-prioritize` would yield the same required/recommended chain
-    # (see skills/continuous-refactoring: required edge gates, recommended only outlook). Optional: run_opencode "roadmap" can be added.
-    local generated="/tmp/roadmap-$FIXTURE.json"
-    if ! python3 "$REPO_DIR/skills/refactor-scan/references/tooling_tree.py" "$FIXTURE_DST" --steps 10 > "$generated" 2>/dev/null; then
-        log_fail "Failed to generate roadmap for $FIXTURE_DST"
-        return 1
-    fi
-
-    # Pretty print for human observation
-    log_info "Detected tools (fulfilled):"
-    python3 -c "
-import json
-d=json.load(open('$generated'))
-for n,v in d['detected'].items():
-    if v['fulfilled']:
-        print(f\"  - {n}: {v['reason']}\")
-" 2>&1 | while IFS= read -r line; do log_info \"$line\"; done
-
-    log_info "Next 10 MRs (decision chain):"
-    python3 -c "
-import json
-d=json.load(open('$generated'))
-for r in d['roadmap']:
-    print(f\"  {r['n']:2}. {r['node']:30} [{r['type']}] — {r.get('reason','')}\")
-" 2>&1 | while IFS= read -r line; do log_info \"$line\"; done
-
-    # Ensure no MR/branch was created (dry-run)
-    assert_no_mr_created "$FIXTURE_DST"
-    assert_file_not_exists "$FIXTURE_DST/docs/refactoring/merge-requests.md"
-    assert_file_not_exists "$FIXTURE_DST/.scratch"
-
-    # Compare detected & roadmap against expected
-    assert_detected_contains "$generated" "$expected_roadmap"
-    assert_roadmap_matches "$generated" "$expected_roadmap"
-
-    # Also verify expected file itself is well-formed
-    assert_file_exists "$expected_roadmap"
-
-    # Optional: run opencode isolated as subprocess (advisory, no hard fail)
-    if [[ "$WITH_OPENCODE" == true ]]; then
-        log_info "=== Opencode isolated (advisory, no other skills) ==="
-        local opencode_out="/tmp/opencode-$FIXTURE.log"
-        if run_opencode_advisory "$FIXTURE_DST" "List the next 10 MRs for this repo without creating branches/MRs. Use skills/refactor-scan/references/php-tooling-tree.md." "$opencode_out"; then
-            log_info "Opencode output (first 80 lines):"
-            head -n 80 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
-            # Advisory comparison: check if opencode mentions expected first node
-            local first_expected
-            first_expected=$(python3 -c "import json; print(json.load(open('$expected_roadmap'))['roadmap'][0]['node'])" 2>/dev/null || echo "")
-            if [[ -n "$first_expected" ]] && grep -qi "$first_expected" "$opencode_out" 2>/dev/null; then
-                log_pass "Opencode (advisory) mentions expected first node: $first_expected"
-            else
-                log_info "Opencode (advisory) does not mention expected first node $first_expected — check $opencode_out for details (non-blocking)"
-            fi
-        else
-            [[ -f "$opencode_out" ]] && head -n 40 "$opencode_out" 2>&1 | while IFS= read -r line; do log_info "  $line"; done
-        fi
-    fi
-}
-
 # Agent loop: prepare an isolated sandbox + prompt for a full-pass,
 # subagent-observed run. Formalizes the manual dry-run methodology from
 # ADR-0010's "## Validation" section against this repo's own fixtures.
 #
-# Unlike roadmap's --opencode (a Docker subprocess this script can launch
+# Unlike the `--opencode` advisory runs (subprocesses this script can launch
 # itself), a Claude Code Agent-tool subagent cannot be started from Bash —
 # this function only prepares the sandbox and a ready-to-use prompt; running
 # the subagent against that prompt is a separate, manual step (see
@@ -459,9 +384,9 @@ EOF
 # Tier 4: Trigger/discoverability tests (ticket 27) — explicit + implicit
 # invocation per skill, and the two negative controls that are prose-level
 # judgment calls a skill makes rather than something the deterministic
-# parser decides: "no git" (refactor-scan's own step-1 precondition —
-# whether the check the parser's detect_nodes() already reports accurately
-# is actually *followed* is a model-behavior question, not a parser one)
+# script decides: "no git" (refactor-scan's own step-1 precondition —
+# whether that precondition is actually *followed* is a model-behavior
+# question, not a script one)
 # and "not a PHP project" (ADR-0008 keeps language recognition an informal
 # heuristic on purpose, "premature before a second language specialization
 # exists"). The third negative control, "scan on clean repo reports clean",
@@ -469,9 +394,9 @@ EOF
 # (CI-gated) — the check here only confirms the skill's own wording matches
 # that deterministic result.
 #
-# Local-only advisory, same posture as `roadmap --opencode` and
-# `agent-loop`: this repo's CI has no model credentials, so nothing here
-# ever gates CI — see fixtures/README.md's "Tier 4" section. Run fixture
+# Local-only advisory, same posture as `agent-loop`: this repo's CI has no
+# model credentials, so nothing here ever gates CI — see fixtures/README.md's
+# "Tier 4" section. Run fixture
 # php-clean (its already-fully-resolved tree doubles as the clean-repo
 # scenario); the no-git and non-PHP scenarios are synthesized fresh here,
 # independent of $FIXTURE.
@@ -711,6 +636,28 @@ run_decision_gate_bypass() {
     rm -rf "$FIXTURE_DST/.agents"
 }
 
+# Shared helper for the Track fixtures whose prompt asks the model to
+# self-report the backlog it would record as one final line,
+# `OPEN: slug, slug, ...`: pass when that line names every given slug in
+# exactly the given order (a slug is matched as a whole token, so
+# phpstan-level-1 never matches inside phpstan-level-10). Advisory
+# otherwise — never fails on a missing/unclear line, only on a wrong order.
+_check_open_order() {
+    local out="$1"; shift
+    local expected="$*"
+    local pattern="^OPEN:" s
+    for s in "$@"; do
+        pattern+=".*[^a-z0-9-]${s}"'([^a-z0-9-]|$)'
+    done
+    if grep -qiE "$pattern" "$out" 2>/dev/null; then
+        log_pass "Scan output reports OPEN in the script's order ($expected) — see $out"
+    elif grep -qiE "^OPEN:" "$out" 2>/dev/null; then
+        log_fail "Scan output's OPEN line doesn't list the backlog in the script's order ($expected) — see $out"
+    else
+        log_info "Scan output doesn't clearly self-report an OPEN line — check $out by hand (advisory, non-blocking)"
+    fi
+}
+
 # Tier 5 — Safety Net Track behavior regressions (ticket 01,
 # skills/refactor-scan/references/safety-net-track.md /
 # skills/refactor-learn/references/safety-net-write.md). Local-only,
@@ -801,6 +748,64 @@ run_safety_net_track() {
                 log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
             else
                 log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
+            fi
+            ;;
+        php-safety-net-rejection-cascade)
+            _safety_net_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for phpstan-level-3 (issue .scratch/refactor/issues/12-phpstan-level-3.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/safety-net-write.md. Report what you wrote."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local oosdir="$FIXTURE_DST/docs/refactoring/out-of-scope"
+            if [[ -f "$oosdir/phpstan-level-3.md" ]]; then
+                log_pass "out-of-scope/phpstan-level-3.md written"
+            else
+                log_fail "out-of-scope/phpstan-level-3.md missing after the run — see $bookkeeping and $oosdir/"
+            fi
+            if [[ -f "$oosdir/phpstan-level-4.md" || -f "$oosdir/phpstan-level-5.md" ]]; then
+                log_fail "An out-of-scope file was written for a downstream closure (phpstan-level-4/5) — closures are derived, never recorded — see $oosdir/"
+            else
+                log_pass "No out-of-scope file written for the closed descendants phpstan-level-4/5"
+            fi
+            if grep -qE "^- phpstan-level-(3|4|5)" <(sed -n '/Open:/,/^$/p' "$bookkeeping" 2>/dev/null); then
+                log_fail "## Safety Net's Open list still names phpstan-level-3/4/5 — the rejected node and its closed descendants should all have left it"
+            else
+                log_pass "## Safety Net's Open list no longer names phpstan-level-3/4/5"
+            fi
+            if grep -qE "^- phpstan-level-[45]" <(sed -n '/Out-of-scope:/,/^$/p' "$bookkeeping" 2>/dev/null); then
+                log_fail "## Safety Net's Out-of-scope list carries a pointer for phpstan-level-4/5 — only the rejected node gets one"
+            else
+                log_pass "## Safety Net's Out-of-scope list carries no pointer for the closed descendants"
+            fi
+            # Reversal half (scan-only, no writes): reverse the rejection by
+            # hand, then ask what the next Safety Net scan would record.
+            rm -f "$oosdir/phpstan-level-3.md"
+            sed -i '/^- phpstan-level-3/d' "$bookkeeping" 2>/dev/null
+            _safety_net_scan_prompt "The maintainer reversed the phpstan-level-3 rejection (its out-of-scope file and pointer are removed). Run /refactor-scan with the Safety Net Track named explicitly against this repo, following skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md. Do not write any file. Report, as your final line, the Open list the Track scan would record as: OPEN: <slugs, comma separated, in order>."
+            _check_open_order "/tmp/safety-net-track-$FIXTURE-scan.log" phpstan-level-3 phpstan-level-4 phpstan-level-5
+            ;;
+        php-safety-net-old-meaning-open)
+            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Fulfilled nodes/Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
+            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+            if grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null && grep -q "loop-config" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing Fulfilled nodes residue still present, untouched"
+            else
+                log_fail "Pre-existing Fulfilled nodes residue is gone — see $bookkeeping"
+            fi
+            if grep -qE "^- phpstan-level-[2-5]" "$bookkeeping" 2>/dev/null; then
+                log_fail "bookkeeping.md's Open now names phpstan-level-2..5 — the old-meaning Open was rewritten by a rescan instead of walked — see $bookkeeping"
+            else
+                log_pass "bookkeeping.md's Open was not rewritten to the complete backlog"
+            fi
+            if grep -qiE "^RESCANNED" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports RESCANNED — naming the Track must not force a scan while Open has entries — see $out"
+            elif grep -qiE "^RESUMED" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports RESUMED — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report RESUMED/RESCANNED — check $out by hand (advisory, non-blocking)"
+            fi
+            if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
+                log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
+            else
+                log_pass "Scan output doesn't report an error on the old-meaning Open — see $out"
             fi
             ;;
         *)
@@ -927,6 +932,17 @@ run_guardrails_track() {
                 log_pass "## Guardrails's Open list no longer names phpmd"
             fi
             ;;
+        php-track-open-priority-guardrails)
+            _guardrails_scan_prompt "Run one pass of the orchestrator against this repo: Track selection (skills/continuous-refactoring/SKILL.md step 0b, skills/continuous-refactoring/references/track-scheduler.md) and then /refactor-scan with the selected Track (skills/refactor-scan/SKILL.md, skills/refactor-scan/references/guardrails-track.md, skills/refactor-scan/references/track-open-processing.md). Stop after scan's output — do not implement. Report, as your final line: WORKED phpmd (the Guardrails Open walk worked phpmd) or WORKED priority (the refactor:priority issue was worked instead)."
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            if grep -qiE "^WORKED priority" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports WORKED priority — the priority label wrongly preempted the Guardrails Open walk — see $out"
+            elif grep -qiE "^WORKED phpmd" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports WORKED phpmd — the Open walk was not preempted — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report WORKED phpmd/priority — check $out by hand (advisory, non-blocking)"
+            fi
+            ;;
         php-guardrails-old-schema)
             _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md. This repo's docs/refactoring/bookkeeping.md already has a closed ## Safety Net section but still carries old-style Fulfilled nodes residue and no ## Guardrails section. Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
@@ -940,6 +956,16 @@ run_guardrails_track() {
                 log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
             else
                 log_pass "Scan output doesn't report an error on the old-schema fields — see $out"
+            fi
+            ;;
+        php-guardrails-scan-fills-open)
+            _guardrails_scan_prompt "Run one full pass against this repo: the Guardrails Track is due with an empty Open, so run /refactor-scan for it and then /refactor-learn's closing call. Follow skills/refactor-scan/SKILL.md, skills/refactor-scan/references/guardrails-track.md and skills/refactor-learn/references/guardrails-write.md literally. Report, as your final line, the Open list you recorded into ## Guardrails as: OPEN: <slugs, comma separated, in order>."
+            local out="/tmp/guardrails-track-$FIXTURE-scan.log"
+            _check_open_order "$out" phpmd coverage-floor composer-audit phpstan-level-6 phpstan-level-7 phpstan-level-8 phpstan-level-9 phpstan-level-10 phpstan-deprecation-rules php-minimal-version semgrep
+            if ls "$FIXTURE_DST/.scratch/refactor/issues/" 2>/dev/null | grep -q .; then
+                log_fail "Issue file(s) exist under .scratch/refactor/issues/ — Track nodes must not be pre-filed by a scan — see $FIXTURE_DST/.scratch/refactor/issues/"
+            else
+                log_pass "No candidate issue was filed for the recorded Open nodes"
             fi
             ;;
         *)
@@ -1313,9 +1339,6 @@ main() {
             ;;
         tier4)
             run_tier4
-            ;;
-        roadmap)
-            run_roadmap
             ;;
         agent-loop)
             run_agent_loop

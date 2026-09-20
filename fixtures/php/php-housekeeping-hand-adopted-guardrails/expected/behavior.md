@@ -5,14 +5,14 @@ gets its `Housekeeping` checklist line via agent judgement in the reconciliation
 reading `Fulfilled nodes`.
 
 Not deterministically checkable — pure skill process behavior. Run via
-`fixtures/harness/run.sh housekeeping php-housekeeping-hand-adopted-guardrails --opencode`,
+`fixtures/harness/run.sh housekeeping-track php-housekeeping-hand-adopted-guardrails --opencode`,
 same non-CI, local-only, advisory posture as `decision-gate-bypass`.
 
 ## Seeded state
 
 The project has `composer-audit` fulfilled by hand (the `composer audit` command exists and is
 invoked in CI via a workflow step), but no merge request in the tracker's history that delivered
-it. The Guardrails section in `bookkeeping.md` shows `Open: none` — the Guardrails Track has
+it. The Guardrails section in `bookkeeping.md` shows `Open` list `- none` — the Guardrails Track has
 already closed. There is no `housekeeping-template.md` yet (first Housekeeping cycle for this
 target). The `## Housekeeping` section exists with `Cadence: 7`, `Last scan: 2026-09-01`.
 

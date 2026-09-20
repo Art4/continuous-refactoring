@@ -18,9 +18,9 @@ Guardrails both fully resolved at the filesystem level.
 
 `docs/refactoring/bookkeeping.md`:
 
-- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open: none`. Still the same "just closed"
+- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Still the same "just closed"
   state the whole sequence started from.
-- `## Guardrails` — `Cadence: 60`, `Last scan: 2026-09-18`, `Open: none`. **Present** — Guardrails' own
+- `## Guardrails` — `Cadence: 60`, `Last scan: 2026-09-18`, `Open` list `- none`. **Present** — Guardrails' own
   turn (from `php-scheduler-bootstrap-guardrails`) already ran and found nothing new to propose (this
   fixture's underlying project already fulfils every Guardrails node).
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`. Present, top-level `Pending

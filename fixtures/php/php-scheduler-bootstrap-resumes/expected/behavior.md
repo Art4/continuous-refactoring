@@ -21,9 +21,9 @@ Guardrails both fully resolved at the filesystem level.
 one-time exception's own three turns are all long finished):
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference date
-  of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open: none`. **Not due.**
+  of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-07-01` (80 days before → `overdue_ratio ≈ 1.33`),
-  `Open: none`. **Due.** (Same numbers as `php-scheduler-housekeeping-competes`'s own Guardrails section —
+  `Open` list `- none`. **Due.** (Same numbers as `php-scheduler-housekeeping-competes`'s own Guardrails section —
   reused deliberately, so this fixture's ratio math is easy to cross-check.)
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (4 days before → `overdue_ratio ≈ 0.57`). **Not
   due.**

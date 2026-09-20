@@ -21,7 +21,7 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 `docs/refactoring/bookkeeping.md`:
 
-- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open: none`. Just closed — the one-time
+- `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Just closed — the one-time
   exception's precondition is met.
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`. **Present** — Investigation's
   own scan already ran once this turn. `Pending candidates: none` — the bootstrap candidate is fully

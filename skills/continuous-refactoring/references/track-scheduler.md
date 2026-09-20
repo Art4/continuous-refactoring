@@ -177,8 +177,11 @@ computation above run at all — this pass runs that named Track's own process u
 the one-time exception (above) exactly the same way it bypasses ordinary Eligibility/Selection; naming a
 Track is the one thing that outranks the one-time exception. The
 `Open`-non-empty eligibility rule still applies to a manually-named Track exactly as it would to one the
-scheduler picked itself: naming Safety Net while its `Open` is non-empty still means working that `Open`
-entry, never a fresh rescan. One shared invocation surface across all four Track names — naming Safety
+scheduler picked itself. The rule for when a scan runs is the same either way: **a selected Track with
+no `Open` entries is scanned; a selected Track with a non-empty `Open` works its `Open` walk.** Naming
+Safety Net while its `Open` is non-empty means working that `Open` entry, never a fresh rescan — that
+includes an `Open` still written under the old meaning (only nodes that had a filed issue), which is
+walked like any other and corrected by the scan that runs once it empties. One shared invocation surface across all four Track names — naming Safety
 Net, Guardrails, Housekeeping, or Investigation directly when invoking `/continuous-refactoring` (e.g.
 "run the Housekeeping Track") all bypass selection the same way. This generalizes what used to be the
 now-retired standalone `continuous-housekeeping` skill's own separate on-demand invocation (a human

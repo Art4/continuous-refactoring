@@ -35,13 +35,17 @@ it never re-derives due-ness itself:
 - **This Track wasn't the one step 0b selected** → nothing in this file runs this pass; `refactor-scan`
   continues with whichever Track was actually selected instead (or with everything else it already does,
   if none was due).
-- **Selected, and `Open` is non-empty** — only reachable via a manual override naming this Track
-  directly (`track-scheduler.md`'s own ratio selection never picks a Track with non-empty `Open` in the
-  first place) → the Track is still never rescanned. Hand its entries forward the same way `Pending
-  candidates` already hands forward a resumable node — resuming at whichever step is next for each (no
-  plan yet → `refactor-design`; plan present, `ready-for-agent` set → `refactor-implement`). Skip
-  straight to `refactor-scan/SKILL.md`'s `## Output`; the rest of this file doesn't run.
-- **Selected, `Open` empty** → continue below; this is a genuine scan.
+- **Selected, and `Open` is non-empty** (the ordinary in-progress case under the Safety Net blockade —
+  `track-scheduler.md`'s own same-named section — or a manual override naming this Track directly) →
+  the Track is still never rescanned — naming it never forces a scan, and an `Open` still written under
+  the old meaning (nodes with filed issues only) is walked like any other. Walk the entries instead, per
+  `skills/refactor-scan/references/track-open-processing.md`: workability triage, the pick-up
+  Fulfilment re-check, exactly one node worked per pass — its issue filed only when worked (by `refactor-design`, never by the walk), never
+  pre-filed. A node the re-check finds now fulfilled is reported as a **fulfilled at pick-up**
+  finding for `refactor-learn`'s early call, which removes it from `Open`. The walk's re-check still
+  applies this file's "Judging fulfilment" discipline (below); the scan process past this section
+  doesn't run — skip straight to `refactor-scan/SKILL.md`'s `## Output`.
+- **Selected, `Open` empty** → continue below; this is a genuine scan. A scan runs only in this case.
 
 ## Judging fulfilment
 
@@ -87,7 +91,7 @@ per the tree's ordinary edge semantics) → propose it by Name, same as `refacto
 already does for any other node. Its slug is added to `## Safety Net`'s `Open` list — `refactor-learn`'s
 own side of this, `skills/refactor-learn/references/safety-net-write.md`. **No candidate issue is
 created at this point** — the node's issue is created only when it is actually worked via the `Open`
-walk (`skills/continuous-refactoring/references/track-open-processing.md`), not pre-filed during the
+walk (`skills/refactor-scan/references/track-open-processing.md`), not pre-filed during the
 scan.
 
 ## Filling `Open`

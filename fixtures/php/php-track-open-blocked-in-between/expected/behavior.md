@@ -1,7 +1,7 @@
 # Expected behavior — Track Open: blocked node in between
 
-Confirms the orchestrator's own `Open` walk
-(`skills/continuous-refactoring/references/track-open-processing.md`) skips non-workable nodes with a
+Confirms `refactor-scan`'s own `Open` walk
+(`skills/refactor-scan/references/track-open-processing.md`) skips non-workable nodes with a
 reason and continues walking to collect them for the pass report, even after finding a workable node.
 
 Not deterministically checkable via `tooling_tree.py` — checked the same non-CI, local-only,
@@ -15,7 +15,7 @@ advisory way `safety-net-track`/`guardrails-track` already are. Run via
 `phpstan-level-0`, `test-runner-if-missing`, `ci-runner` are all genuinely missing. `static-code-analyzer`
 is also missing, which blocks `phpstan-level-0` (required parent per `php-tooling-tree.md`).
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01`, `Open:`
+`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01`, `Open` as a list:
 - `phpunit (#6)` — workable (no required parent blocking it)
 - `phpstan-level-0 (#7)` — blocked by `static-code-analyzer` (required parent not fulfilled)
 - `php-cs-fixer (#5)` — workable (recommended parent `editorconfig` not yet decided, but
@@ -26,10 +26,10 @@ is also missing, which blocks `phpstan-level-0` (required parent per `php-toolin
 Run `/refactor-scan` with the Safety Net Track selected. It should:
 
 1. Read `## Safety Net`'s `Open` list — three entries.
-2. Walk the list top to bottom per `track-open-processing.md`:
+2. Walk the list top to bottom per `skills/refactor-scan/references/track-open-processing.md`:
    - **phpunit (#6)** — workable (unblocked, no `needs-info`, no PHP floor). Re-run Fulfilment:
-     not fulfilled (no `phpunit/phpunit` dependency, no CI workflow). → Work this node: create its
-     issue, continue to `refactor-design`.
+     not fulfilled (no `phpunit/phpunit` dependency, no CI workflow). → Work this node: hand it to
+     `refactor-design` (which files its issue; the walk files nothing).
    - **phpstan-level-0 (#7)** — **not workable**: blocked by `static-code-analyzer` (required parent
      not fulfilled). → Skip, collect with reason for pass report.
    - **php-cs-fixer (#5)** — workable but **not worked**: exactly one node is worked per pass.

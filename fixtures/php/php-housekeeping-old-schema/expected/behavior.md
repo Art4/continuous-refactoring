@@ -5,7 +5,7 @@ Confirms a target with a pre-ADR-0055 `bookkeeping.md` shape (`Fulfilled nodes` 
 or needing to understand the pre-existing old-shape `Fulfilled nodes` field.
 
 Not deterministically checkable — pure skill process behavior. Run via
-`fixtures/harness/run.sh housekeeping php-housekeeping-old-schema --opencode`,
+`fixtures/harness/run.sh housekeeping-track php-housekeeping-old-schema --opencode`,
 same non-CI, local-only, advisory posture as `decision-gate-bypass`.
 
 ## Seeded state

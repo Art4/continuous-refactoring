@@ -27,10 +27,14 @@ The exact same mechanism `safety-net-track.md`'s own section of this name alread
 against `bookkeeping.md`'s `## Guardrails` section instead of `## Safety Net` — due-ness is decided once,
 before `refactor-scan` starts, by the orchestrator's own Track-selection step
 (`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
-step 0b); this file never re-derives it. Not selected this pass → nothing here runs. Selected with `Open`
-non-empty (only reachable via a manual override naming this Track directly) → still never rescanned,
-`Open` worked instead, skipping straight to `refactor-scan/SKILL.md`'s `## Output`. Selected with `Open`
-empty → continue below, a genuine scan.
+step 0b); this file never re-derives it. Not selected this pass → nothing here runs. Selected with
+`Open` non-empty → still never rescanned, however the Track was selected (naming it manually forces no scan,
+and an old-meaning `Open` is walked like any other) — the entries are walked instead
+(`skills/refactor-scan/references/track-open-processing.md`), which owns the workability triage, the
+pick-up Fulfilment re-check, and the one-node-per-pass rule, and reports any node its re-check finds
+now fulfilled as a **fulfilled at pick-up** finding for `refactor-learn`'s early call to remove from
+`Open`; skip straight to `refactor-scan/SKILL.md`'s `## Output`, the rest of this file doesn't run.
+Selected with `Open` empty → continue below, a genuine scan.
 
 Independent of the above, and unchanged from today: a Guardrails node is never actually unblocked in
 the tree until `php-safety-net` itself is resolved (the Scope section's own required-parent edges) —
@@ -78,7 +82,7 @@ as `refactor-scan/SKILL.md` step 4 already does for any other node. Its slug is 
 Guardrails`'s `Open` list — `refactor-learn`'s own side of this,
 `skills/refactor-learn/references/guardrails-write.md`. **No candidate issue is created at this
 point** — the node's issue is created only when it is actually worked via the `Open` walk
-(`skills/continuous-refactoring/references/track-open-processing.md`), not pre-filed during the
+(`skills/refactor-scan/references/track-open-processing.md`), not pre-filed during the
 scan.
 
 ## Filling `Open`

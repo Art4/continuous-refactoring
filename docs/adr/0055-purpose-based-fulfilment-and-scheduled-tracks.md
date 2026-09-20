@@ -16,6 +16,14 @@
 > mechanism (`resolved` edges, cascading closure on a rejected required parent) is untouched, but *when*
 > it gets scanned for new candidates is now scheduled by the Track model below, under the name
 > **Investigation**, rather than simply "proposed once its required parents are decided."
+>
+> Amended by [ADR-0056](0056-agent-judged-fulfilment.md): `Open` in each Track's `bookkeeping.md`
+> section is redefined as the complete, ordered backlog for that Track — every unresolved node of the
+> Track's scope, blocked ones included, in script order, hand-reorderable, carrying an issue number
+> only while the node is being worked. `Open` empty means the Track is done. `Fulfilled nodes` is
+> retired from the schema and ignored where it still exists. The one-time bootstrap exception is
+> corrected: it does not wait for Guardrails' `Open`, and the claim that ordinary eligibility keeps
+> Guardrails selected after its first scan is removed.
 
 Raised against a live incident: `refactor-scan` proposed adopting `php-cs-fixer` on a target that
 already ran Laravel Pint (which wraps PHP CS Fixer internally, under its own config format). The

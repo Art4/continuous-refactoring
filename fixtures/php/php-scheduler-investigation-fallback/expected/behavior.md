@@ -25,9 +25,9 @@ The Safety Net **and** the Guardrails are both fully closed — same determinist
 `docs/refactoring/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference date
-  of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open: none`. **Not due.**
+  of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-09-10` (9 days before → `overdue_ratio = 0.15`),
-  `Open: none`. **Not due.**
+  `Open` list `- none`. **Not due.**
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-08-01`. No `Open` field at all (this
   section never carries one). Per `track-scheduler.md`'s own Eligibility section, a `continuous` Cadence
   carries no day-count to divide by — always due, no ratio to compute — and Investigation is always
