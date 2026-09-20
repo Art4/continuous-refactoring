@@ -39,7 +39,7 @@ _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 # (`php-safety-net`) are excluded separately via
 # `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
 # required-gated nodes instead.
-_NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project"}
+_NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "has-real-dependency", "phpstan-baseline-empty", "phpstan-not-psalm"}
 
 # The PHPStan level chain (1..10) — used by roadmap()'s per-level
 # empty-baseline gate and its open-chain filler.
@@ -1177,6 +1177,14 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         audit_reason,
         has_real_dep=has_real_dep,
     )
+    # has-real-dependency: recognition-only gate (php-tooling-tree.md) —
+    # hold composer-audit closed until there's something to audit.
+    set_node(
+        "has-real-dependency",
+        has_real_dep,
+        "composer.json require names a real package" if has_real_dep else "no real require dependency",
+        has_real_dep=has_real_dep,
+    )
     # static-code-analyzer: pure organizational/plumbing node,
     # always fulfilled once composer is — no independent state of its own.
     set_node(
@@ -1241,6 +1249,26 @@ def detect_nodes(repo: pathlib.Path, tree: dict | None = None) -> dict:
         set_node("phpstan-level-0", False, "phpstan level configured but baseline missing", level=phpstan_level, ephemeral_ci_dep=ephemeral_ci_dep)
     else:
         set_node("phpstan-level-0", False, "missing phpstan, no level configured, or no baseline", has_phpstan=has_phpstan_dep, level=phpstan_level, baseline_exists=baseline_exists, ephemeral_ci_dep=ephemeral_ci_dep)
+
+    # phpstan-baseline-empty: recognition-only gate (php-tooling-tree.md) —
+    # hold the level chain closed while the baseline has unaddressed
+    # findings. Recurring state (not one-way): re-derived fresh every pass.
+    set_node(
+        "phpstan-baseline-empty",
+        baseline_empty,
+        "phpstan-baseline.neon absent or empty" if baseline_empty else "phpstan-baseline.neon has unaddressed findings",
+        baseline_empty=baseline_empty,
+    )
+    # phpstan-not-psalm: recognition-only gate (php-tooling-tree.md) —
+    # prevent PHPStan level proposals when Psalm is the analyzer.
+    phpstan_not_psalm = not psalm_fulfilled or phpstan_genuinely_adopted
+    set_node(
+        "phpstan-not-psalm",
+        phpstan_not_psalm,
+        "psalm not the analyzer" if phpstan_not_psalm else "psalm is the analyzer — PHPStan levels not applicable",
+        psalm_fulfilled=psalm_fulfilled,
+        phpstan_genuinely_adopted=phpstan_genuinely_adopted,
+    )
 
     # phpstan-level-1..10 — phpstan-level-5 is the chain's resolved-leaf
     # into php-safety-net (see that node); levels 6-10 stay ordinary,
@@ -1485,31 +1513,6 @@ def next_candidates(repo: pathlib.Path, tree: dict | None = None, limit: int | N
                 continue
             if _undecided_recommended_parents(node, tree, detected, rejected):
                 continue  # withheld — see withheld_candidates()
-            if node == "composer-audit":
-                # Stop condition (a), php-tooling-tree/composer-audit.md: a
-                # real `require` dependency must exist — composer-audit has
-                # nothing to check without one. No longer paired with a
-                # fallback for a dependency-free target (removed alongside
-                # php-safety-net's own extra-gate helper) — this node isn't a
-                # php-safety-net leaf any more, so staying blocked here no
-                # longer risks leaving structural-scan blocked with it.
-                if not detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False):
-                    continue
-            if node in _PHPSTAN_LEVEL_NODES:
-                # Empty-baseline stop condition (php-tooling-tree/phpstan.md's
-                # "Stop conditions": baseline non-empty -> do not propose the
-                # next level). _is_unblocked() above only checks required-
-                # parent fulfilment (predecessor level reached), which says
-                # nothing about the *current* baseline's contents — a real
-                # target sitting on a fulfilled level with real, unshrunk
-                # baseline entries would otherwise get the next level
-                # proposed regardless. roadmap() already applies this same
-                # gate during its own simulation; next_candidates() needs it
-                # too since it's the set refactor-scan actually proposes from.
-                if not _is_baseline_empty(repo):
-                    continue
-                if detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
-                    continue
             result.append({"node": node, "reason": why})
         if limit is not None and len(result) >= limit:
             break
@@ -1780,30 +1783,6 @@ def roadmap(repo: pathlib.Path, steps: int = 10, tree: dict | None = None) -> li
             sim_ok, sim_why = _is_unblocked(node, tree, {k: {"fulfilled": v} for k, v in sim_fulfilled.items()})
             if not sim_ok:
                 continue
-            if node == "composer-audit":
-                # Stop condition (a) — see next_candidates()'s identical
-                # comment above.
-                if not detected.get("composer-audit", {}).get("details", {}).get("has_real_dep", False):
-                    continue
-            # For phpstan levels, the level chain's own empty-baseline gate
-            # (phpstan.md's Stop conditions): predecessor level fulfilled AND
-            # its baseline currently empty. roadmap() is a deterministic
-            # simulation over real repo state, not a second engine — it
-            # doesn't simulate baseline-shrink candidates landing (that's
-            # real, skill-prose-driven work: refactor-scan step 4b proposes
-            # the gate, refactor-design's phpstan-baseline-shrink.md picks
-            # the fix). A non-empty baseline just stops the chain here for
-            # the rest of this simulation, same as it does for real in
-            # next_candidates().
-            if node in _PHPSTAN_LEVEL_NODES:
-                lvl = int(node.rsplit("-", 1)[1])
-                pred = "phpstan-level-0" if lvl == 1 else f"phpstan-level-{lvl - 1}"
-                if not sim_fulfilled.get(pred, False):
-                    continue
-                if not _is_baseline_empty(repo):
-                    continue
-                if detected.get("phpstan-level-0", {}).get("details", {}).get("has_psalm"):
-                    continue
             # For rector nodes: require p0 fulfilled (already checked), recommended parents are advisory not blocking
             # Choose best by priority order (first found)
             best = node
