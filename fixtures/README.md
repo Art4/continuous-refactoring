@@ -104,12 +104,12 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
   the `Out-of-scope` pointer), `phpstan-level-4`/`-5` leaving `Open` with no files of their own, and —
   once the rejection is reversed by hand — the next scan re-adding `phpstan-level-3`, `-4`, `-5` in
   order (spec case 6; cascade verified with `tooling_tree.py`).
-- **php-safety-net-override-old-open** — `## Safety Net` still written under the old `Open` meaning
-  (`phpstan-level-1 (#7)` only, plus `Fulfilled nodes`/`Focus areas` residue), `Last scan` recent. A
-  pass that names the Safety Net Track explicitly expects no error, no migration, and an immediate scan
-  that rewrites `Open` as the complete backlog (`phpstan-level-1` through `-5`, blocked ones included)
-  and writes `Last scan` (spec case 10). Its `expected/behavior.md` notes a tension with the scheduler
-  docs' *Manual override* wording that needs reconciling before a live run.
+- **php-safety-net-old-meaning-open** — `## Safety Net` still written under the old `Open` meaning
+  (`phpstan-level-1 (#7)` as the only list entry, plus `Fulfilled nodes`/`Focus areas` residue),
+  `Last scan` recent, and a pass that names the Safety Net Track explicitly. Expects no error, no
+  migration, and **no forced scan**: a selected Track with a non-empty `Open` works its `Open` walk
+  (`phpstan-level-1`), leaving `Open`/`Last scan` alone; the scan that runs once `Open` is empty records
+  the complete backlog. Deviates from the spec's case 10 ("forced rescan via override").
 
 ```bash
 ./fixtures/harness/run.sh safety-net-track php-safety-net-purpose-recognition --opencode
@@ -118,7 +118,7 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
 ./fixtures/harness/run.sh safety-net-track php-safety-net-rejection-symmetry --opencode
 ./fixtures/harness/run.sh safety-net-track php-safety-net-old-schema --opencode
 ./fixtures/harness/run.sh safety-net-track php-safety-net-rejection-cascade --opencode
-./fixtures/harness/run.sh safety-net-track php-safety-net-override-old-open --opencode
+./fixtures/harness/run.sh safety-net-track php-safety-net-old-meaning-open --opencode
 ```
 
 Same non-CI, local-only, advisory posture as `decision-gate-bypass`/`judge`/`lift` — a real, file-level

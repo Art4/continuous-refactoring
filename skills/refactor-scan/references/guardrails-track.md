@@ -28,7 +28,8 @@ against `bookkeeping.md`'s `## Guardrails` section instead of `## Safety Net` �
 before `refactor-scan` starts, by the orchestrator's own Track-selection step
 (`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
 step 0b); this file never re-derives it. Not selected this pass → nothing here runs. Selected with
-`Open` non-empty → still never rescanned — the entries are walked instead
+`Open` non-empty → still never rescanned, however the Track was selected (naming it manually forces no scan,
+and an old-meaning `Open` is walked like any other) — the entries are walked instead
 (`skills/refactor-scan/references/track-open-processing.md`), which owns the workability triage, the
 pick-up Fulfilment re-check, and the one-node-per-pass rule, and reports any node its re-check finds
 now fulfilled as a **fulfilled at pick-up** finding for `refactor-learn`'s early call to remove from

@@ -781,21 +781,32 @@ run_safety_net_track() {
             _safety_net_scan_prompt "The maintainer reversed the phpstan-level-3 rejection (its out-of-scope file and pointer are removed). Run /refactor-scan with the Safety Net Track named explicitly against this repo, following skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md. Do not write any file. Report, as your final line, the Open list the Track scan would record as: OPEN: <slugs, comma separated, in order>."
             _check_open_order "/tmp/safety-net-track-$FIXTURE-scan.log" phpstan-level-3 phpstan-level-4 phpstan-level-5
             ;;
-        php-safety-net-override-old-open)
-            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track, then /refactor-learn's closing call. Follow skills/refactor-scan/SKILL.md, skills/refactor-scan/references/safety-net-track.md and skills/refactor-learn/references/safety-net-write.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Fulfilled nodes/Focus areas residue. Report, as your final line, the Open list the Track's bookkeeping ends up with as: OPEN: <slugs, comma separated, in order>."
+        php-safety-net-old-meaning-open)
+            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Fulfilled nodes/Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
             if grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null && grep -q "loop-config" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing Fulfilled nodes residue still present, untouched"
             else
                 log_fail "Pre-existing Fulfilled nodes residue is gone — see $bookkeeping"
             fi
-            local out="/tmp/safety-net-track-$FIXTURE-scan.log"
+            if grep -qE "^- phpstan-level-[2-5]" "$bookkeeping" 2>/dev/null; then
+                log_fail "bookkeeping.md's Open now names phpstan-level-2..5 — the old-meaning Open was rewritten by a rescan instead of walked — see $bookkeeping"
+            else
+                log_pass "bookkeeping.md's Open was not rewritten to the complete backlog"
+            fi
+            if grep -qiE "^RESCANNED" "$out" 2>/dev/null; then
+                log_fail "Scan output self-reports RESCANNED — naming the Track must not force a scan while Open has entries — see $out"
+            elif grep -qiE "^RESUMED" "$out" 2>/dev/null; then
+                log_pass "Scan output self-reports RESUMED — see $out"
+            else
+                log_info "Scan output doesn't clearly self-report RESUMED/RESCANNED — check $out by hand (advisory, non-blocking)"
+            fi
             if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
                 log_info "Scan output mentions an error/unrecognized-field phrase — check $out by hand (advisory, non-blocking)"
             else
                 log_pass "Scan output doesn't report an error on the old-meaning Open — see $out"
             fi
-            _check_open_order "$out" phpstan-level-1 phpstan-level-2 phpstan-level-3 phpstan-level-4 phpstan-level-5
             ;;
         *)
             log_fail "No safety-net-track check wired for fixture: $FIXTURE"

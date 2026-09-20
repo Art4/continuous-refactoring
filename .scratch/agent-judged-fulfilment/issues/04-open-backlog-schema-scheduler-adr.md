@@ -8,7 +8,7 @@ Spec: `agent-judged-fulfilment`.
 
 **Status:** ready-for-agent
 
-- [ ] The bookkeeping schema documentation describes `Open` (complete, ordered, hand-reorderable, issue number only while worked) and `Out-of-scope` (unchanged), marks `Fulfilled nodes` as retired and ignored, and states that existing files are not migrated (a section written under the old meaning is corrected by the Track's next scan, or an immediate scan via the Track override).
+- [ ] The bookkeeping schema documentation describes `Open` (complete, ordered, hand-reorderable, issue number only while worked) and `Out-of-scope` (unchanged), marks `Fulfilled nodes` as retired and ignored, and states that existing files are not migrated (a section written under the old meaning is worked like any other `Open`, and corrected by the scan that runs once it is empty; naming a Track never forces a scan while its `Open` has entries).
 - [ ] The scheduler documentation states the Safety Net blockade (also when no node is currently workable, the wait is reported), Guardrails' workable-versus-stalled behavior, Housekeeping's one-pass preemption when due, Investigation waiting behind a Guardrails backlog with workable nodes, and that at most one Track is selected per pass.
 - [ ] The one-time bootstrap exception's documentation is corrected: it does not wait for Guardrails' `Open`, and the claim that ordinary eligibility keeps Guardrails selected after its first scan is removed.
 - [ ] Investigation's gate is documented as the Safety Net section being present with `Open` empty, plus the existing rule that a recorded rejection counts as resolved.

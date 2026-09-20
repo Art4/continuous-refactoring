@@ -1,6 +1,6 @@
 {
-    "name": "example/php-safety-net-override-old-open",
-    "description": "Old-meaning Safety Net Open (only nodes with filed issues, issue numbers) plus a manual Track override — the scan must rewrite Open as the complete backlog",
+    "name": "example/php-safety-net-old-meaning-open",
+    "description": "Old-meaning Safety Net Open (only nodes with filed issues) plus old-schema residue; the selected Track works its Open walk",
     "require": {
         "php": "^8.1",
         "monolog/monolog": "^3.4"

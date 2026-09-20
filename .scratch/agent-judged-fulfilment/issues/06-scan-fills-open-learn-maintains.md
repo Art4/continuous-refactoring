@@ -13,5 +13,5 @@ Spec: `agent-judged-fulfilment`.
 - [ ] Merge of a Track candidate removes its entry from `Open`.
 - [ ] Rejection removes the entry, writes the recorded rejection and the `Out-of-scope` pointer, and removes every node closed by that rejection without writing further files.
 - [ ] After a rejection is reversed, the next scan re-adds the reopened nodes to `Open`.
-- [ ] Bookkeeping in the old shape or with an old-meaning `Open` is not migrated and does not cause an error; a Track override forces an immediate scan that corrects it.
+- [ ] Bookkeeping in the old shape or with an old-meaning `Open` is not migrated and does not cause an error; a selected Track with such an `Open` works it like any other (no forced rescan, also not via a manual Track override), and the scan that runs once `Open` is empty corrects it.
 - [ ] Advisory agent fixtures cover: populating `Open` with blocked nodes in order, the rejection cascade and its reversal, and old-shape pass-through. The manual fallback's prose describes the same steps.

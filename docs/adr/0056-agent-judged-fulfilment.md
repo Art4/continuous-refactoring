@@ -31,8 +31,10 @@ implicit, not documented.
   authoritative. The complete list is the only one the scheduler and lifecycle skills need.
 
 - **Migrate existing `bookkeeping.md` files to the new schema.** Rejected — migration is error-prone
-  and unnecessary. A section written under the old meaning is corrected by the Track's next scan, or
-  an immediate scan via the Track override. The old `Fulfilled nodes` field is simply ignored; old
+  and unnecessary. A section written under the old meaning is walked like any other `Open` (naming
+  the Track manually forces no scan while `Open` has entries) and is corrected by the scan that runs
+  once it is empty. A scan runs only when the selected Track has no `Open` entries; this narrows the spec's story 26
+  and case 10 ("manual Track override to force an immediate rescan") accordingly. The old `Fulfilled nodes` field is simply ignored; old
   files retain it for historical record.
 
 - **Keep `Fulfilled nodes` as a cache alongside the new `Open` model.** Rejected — the cache exists
