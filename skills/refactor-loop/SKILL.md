@@ -34,6 +34,8 @@ The Refactoring Notes' `bookkeeping.md` isn't scaffolded here — it's `loop-con
 
 ## Process
 
+Before step 1, tell the human in one sentence that a loop pass is starting now, naming the Track (e.g. "Starting a refactoring loop pass for the Guardrails Track."). Only after the Track input is validated — an aborted invocation announces nothing.
+
 Each step runs the named lifecycle skill and carries its output to the next. Stop between steps where the skill itself stops for user input.
 
 Prefer dispatching each step to a fresh subagent: hand it this pass's carried-forward input, bring back only its stated `## Output`. That keeps a skill's own reasoning inside its own context instead of leaking into this one's. No subagent mechanism available → run each step inline instead, same order.
