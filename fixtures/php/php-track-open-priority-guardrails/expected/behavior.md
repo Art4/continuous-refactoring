@@ -3,7 +3,8 @@
 Confirms that a `refactor:priority`-labeled issue never preempts a Guardrails Track's `Open` walk —
 Guardrails is selected because it has a workable `Open` node, the walk still works that node this
 pass, and the priority issue waits until Guardrails' `Open` has no workable node left (Guardrails
-yields). The label narrows the Rank pool only, and Track nodes are not in that pool.
+yields). The label narrows the Rank pool and is otherwise only a tie-breaker between equally ranked
+candidates, and Track nodes are not in that pool.
 
 Guardrails counterpart of `php-track-open-priority-vs-top` (which pins the same rule under the Safety
 Net blockade). Not deterministically checkable via `tooling_tree.py` — checked the same non-CI,
@@ -59,7 +60,8 @@ Run the orchestrator through Track selection and the scan step. It should:
 
 Without the "priority never preempts the `Open` walk" rule, a human-prioritized issue could steal a
 pass from a selected Guardrails Track that still has workable work, contradicting ADR-0056 (Track
-nodes left the Rank pool; the label narrows the Rank pool only).
+nodes left the Rank pool; the label narrows the Rank pool and is otherwise only a tie-breaker between
+equally ranked candidates).
 
 ## Verified
 

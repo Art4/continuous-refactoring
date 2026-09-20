@@ -353,7 +353,8 @@ Fulfilment re-check, and non-workable node collection. See each fixture's own
   due, and a separate `refactor:priority`-labeled structural candidate (`01-shallow-user-service.md`)
   exists on the tracker. Expects Guardrails selected, the `Open` walk to work `phpmd` this pass, and
   the priority issue to wait until Guardrails has no workable node left — the label narrows the Rank
-  pool only and never preempts an `Open` walk; Rank mode is not invoked.
+  pool, is otherwise only a tie-breaker between equally ranked candidates, and never preempts an `Open`
+  walk; Rank mode is not invoked.
 
 ```bash
 ./fixtures/harness/run.sh safety-net-track php-track-open-hand-adopted --opencode

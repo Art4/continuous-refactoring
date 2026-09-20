@@ -2,8 +2,8 @@
 
 Confirms that a `refactor:priority`-labeled issue does not bypass the Safety Net blockade and never
 preempts a Track's `Open` walk — the `Open` walk still processes the Track's top workable node, and
-the priority issue waits until the blockade lifts (the label narrows the Rank pool only, and Track
-nodes are not in that pool).
+the priority issue waits until the blockade lifts (the label narrows the Rank pool and is otherwise
+only a tie-breaker between equally ranked candidates, and Track nodes are not in that pool).
 
 Not deterministically checkable via `tooling_tree.py` — checked the same non-CI, local-only,
 advisory way `safety-net-track`/`guardrails-track` already are. Run via
@@ -44,7 +44,7 @@ Run the orchestrator with Safety Net selected (blockade active — `Open` non-em
 
 ## The behavior this regression-tests
 
-Without the "priority never preempts the `Open` walk / the Safety Net blockade" rule, a human-prioritized issue
+Without the "priority never preempts the `Open` walk / the Safety Net blockade" rule (the label is only a tie-breaker between equally ranked candidates), a human-prioritized issue
 could steal a pass from the Track's own `Open` work, delaying the Safety Net's completion. The
 blockade ensures Track `Open` work finishes before any other prioritized work runs.
 
