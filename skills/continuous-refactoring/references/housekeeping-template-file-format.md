@@ -32,11 +32,11 @@ validates against the tree.
   with just that one line, if it doesn't exist yet. Never waits for the Housekeeping Track to have run
   first; the file exists independently of whether this Track has ever been scheduled for this target yet.
 - **Appending a line, reconciliation path**: the Housekeeping Track itself, every cycle
-  (`housekeeping-track.md`'s own *Reconcile* section) — for any already-fulfilled node whose own
-  delivering MR predates this file, or predates this Track's `## Housekeeping` bookkeeping section ever
-  existing for this target, there's no future delivering MR left to carry the line. Reconciliation reads
-  `Fulfilled nodes` from `bookkeeping.md` and adds whatever's missing, so a node's line is never
-  permanently lost just because its own adoption happened first.
+  (`housekeeping-track.md`'s own *Reconcile* section) — for any fulfilled node whose own delivering MR
+  predates this file, or whose adoption happened outside the suite entirely (a hand-adopted tool,
+  Guardrails tools included), there's no future delivering MR left to carry the line. Reconciliation
+  walks the tooling tree and judges each node's Fulfilment check itself (agent judgement), adding
+  whatever's missing, so a node's line is never permanently lost just because no delivering MR exists.
 - **Reading it**: only the Housekeeping Track (`housekeeping-track.md`'s own *Reconcile* section), once
   per cycle, copying its current contents into that cycle's issue.
 - **Removing a line**: not a mechanism this document defines — a node rejected and later un-rejected, or
@@ -46,8 +46,8 @@ validates against the tree.
 ## Rules
 
 - Never hand-authored from scratch — always the byproduct of some tooling-tree node's own `Housekeeping`
-  field, reaching the file via whichever of the two paths above applies. A target with no PHP-tree nodes
-  contributing anything yet (and none listed in `Fulfilled nodes` that would) simply has no file, and the
+  field, reaching the file via whichever of the two paths above applies. A target with no tooling-tree
+  nodes contributing anything yet (and none judged fulfilled that would) simply has no file, and the
   Housekeeping Track reports "nothing registered to check" rather than erroring.
 - One line per concern, not one line per tool — a node with several housekeeping-relevant actions (e.g.
   "run X, then review Y") states them together in its own single contributed line, since the Housekeeping

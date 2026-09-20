@@ -5,7 +5,7 @@ call (a Guardrails Track candidate's fresh MR, or the scan itself completing wit
 — reached only once the call's own precondition already holds (a genuine event this pass). Applies
 only to a node in the Guardrails Track's own scope
 (`skills/refactor-scan/references/guardrails-track.md`); every other node keeps writing whichever
-section already governs it (`## Safety Net`, `Fulfilled nodes`/`Pending candidates`/`out-of-scope/`).
+section already governs it (`## Safety Net`, `Pending candidates`/`out-of-scope/`).
 
 The write mechanics below are identical to `skills/refactor-learn/references/safety-net-write.md`'s
 own — this file states the same rules, scoped to `## Guardrails` instead of `## Safety Net`, so both
@@ -56,7 +56,7 @@ the two Tracks' sections are independent, each written only by its own Track's o
 Whenever `guardrails-track.md`'s own process ran this pass — whether it found nothing to propose
 (every node in scope already resolved) or proposed something that `Open` now tracks — write `##
 Guardrails`'s `Last scan` to today's date (`YYYY-MM-DD`), last, alongside `## Safety Net`'s own write
-(if that Track also ran this pass) and `Fulfilled nodes` in the closing call's own step ordering.
+(if that Track also ran this pass) in the closing call's own step ordering.
 **Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 60`, `Last scan: <today>`,
 `Open`/`Out-of-scope` either freshly populated (something was proposed/rejected this scan) or both `-
 none` (a fully-compliant target's first scan — `Open` is empty because every node is resolved). **The
@@ -71,5 +71,5 @@ this write creates the section fresh, exactly as the first-ever-scan case above 
 This applies whether the rest of the file is on the current schema (e.g. an already-migrated `##
 Safety Net` section sitting alongside no `## Guardrails` one yet — a target whose Safety Net Track has
 already run at least once but hasn't yet reached its first Guardrails Track pass) or still carries the
-older `Fulfilled nodes`/`Pending candidates` shape untouched — either way, nothing about those other
+older `Pending candidates` shape untouched — either way, nothing about those other
 fields blocks or needs understanding for this section's own first write to proceed normally.

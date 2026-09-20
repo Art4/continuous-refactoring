@@ -1,0 +1,11 @@
+{
+    "name": "example/housekeeping-old-schema",
+    "description": "Old-schema bookkeeping.md with Fulfilled nodes — Housekeeping reconciliation should still work via agent judgement",
+    "require": {
+        "php": "^8.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.2",
+        "friendsofphp/php-cs-fixer": "^3.0"
+    }
+}

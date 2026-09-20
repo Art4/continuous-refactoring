@@ -65,15 +65,18 @@ remembered-MR tracking already uses elsewhere.
 exactly as it already stands): a node's own delivering merge request is the *ordinary* way a
 `Housekeeping` line reaches `housekeeping-template.md`
 (`skills/continuous-refactoring/references/housekeeping-template-file-format.md`), but it's not the only
-way a line can be missing — a node fulfilled before this target's `bookkeeping.md` ever gained a
-`## Housekeeping` section gets no second chance at a delivering MR to piggyback on, and the same is true
-the very first time this Track ever runs for a target that already has a worked-through tree. Before
-reading the checklist, reconcile: read `bookkeeping.md`'s `Fulfilled nodes`, and for each listed slug
-whose own tree-doc names a `Housekeeping` field, append that line to `housekeeping-template.md` if it
-isn't already there verbatim (creating the file fresh if this is the first line ever). Cheap and run
-every cycle, not just once — `Fulfilled nodes` is itself a self-healing cache that can lag briefly, so
-checking every cycle catches a slug this reconciliation missed on an earlier run rather than missing it
-forever. Don't commit this edit yet — *Open this cycle's issue*, next, creates the branch it belongs on.
+way a line can be missing — a hand-adopted tool (a node fulfilled before this target's `bookkeeping.md`
+ever gained a `## Housekeeping` section, or adopted outside the suite entirely) gets no second chance at
+a delivering MR to piggyback on, and the same is true the very first time this Track ever runs for a
+target that already has a worked-through tree. Before reading the checklist, reconcile: walk the tooling
+tree and check only the nodes that carry a `Housekeeping` field — judge each node's Fulfilment check
+itself (agent judgement against the node's Purpose statement, the same discipline every Track scan
+already uses) rather than reading `Fulfilled nodes`. For every node judged fulfilled whose
+`Housekeeping` line is not yet in `housekeeping-template.md`, append it (creating the file fresh if this
+is the first line ever). A hand-adopted tool therefore gets its line even when no delivering merge
+request ever existed — Guardrails tools included. Delivering such a node's merge request still contributes
+its line, and removing lines stays a hand edit. Don't commit this edit yet — *Open this cycle's issue*,
+next, creates the branch it belongs on.
 
 Then read `housekeeping-template.md`. Missing, or present but empty of contributed lines even after
 reconciling → nothing has ever been registered to check yet. Report "due, but nothing registered to

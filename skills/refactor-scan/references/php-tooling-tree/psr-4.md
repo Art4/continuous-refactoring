@@ -42,8 +42,8 @@ briefly made `psr-4`/`structural-scan` look unfulfilled on a target where the re
 loading hadn't changed at all).
 
 Sorting that out is a judgement call for whoever is actually consuming this result — `refactor-scan`
-proposing this node as needing work, or `refactor-learn` writing `psr-4` into (or out of)
-`Fulfilled nodes` — not something the deterministic parser itself tries to guess at:
+proposing this node as needing work, or `refactor-learn` recording its fulfilment
+— not something the deterministic parser itself tries to guess at:
 
 - **An agent is doing the reading** (the ordinary case — `refactor-scan`/`refactor-learn` are both
   agent-driven skills): before treating a non-empty `details.unwired_entry_points` as real,

@@ -13,7 +13,7 @@ Housekeeping Track's own process, entirely unrelated to this section
 `skills/continuous-refactoring/references/housekeeping-track.md` ran this pass (Housekeeping was the
 Track step 0b/0c selected, and its own process was actually reached — whether it resumed an in-progress
 cycle, opened and delivered a fresh one, or found nothing registered to check) → write `## Housekeeping`'s
-`Last scan` to today's date (`YYYY-MM-DD`), last, alongside `Fulfilled nodes` in the closing call's own
+`Last scan` to today's date (`YYYY-MM-DD`), last, in the closing call's own
 step ordering, same position `## Safety Net`'s/`## Guardrails`'/`## Investigation`'s own `Last scan`
 write already occupies. **Section didn't exist yet** (first-ever scan for this target) → create it here:
 `Cadence: 7`, `Last scan: <today>` — the same default `housekeeping-track.md`'s own *First-run cadence*
@@ -46,13 +46,13 @@ on first creation. Every later write to this section touches `Last scan` alone; 
 afterward edits the file directly, the same hand-editable discipline `## Safety Net`'s `90`/`## Guardrails`'
 `60` already follow.
 
-## Never writes `Open`, `Out-of-scope`, or `Fulfilled nodes` on this section's account
+## Never writes `Open`, `Out-of-scope`, or anything else on this section's account
 
 A Housekeeping cycle's own in-flight state was never tracked in `## Housekeeping` to begin with — it
 stays on the issue tracker, exactly as it did before this section existed
 (`housekeeping-track.md`'s own *Resuming an in-progress cycle* section). This write never adds, removes,
 or reads a slug from `Open`/`Out-of-scope` (this section has neither, the same shape `## Investigation`
-already has) and never writes anything to `Fulfilled nodes` on this section's account — a Housekeeping
+already has) and never writes anything on this section's account — a Housekeeping
 cycle delivers maintenance work, not a tooling-tree node adoption.
 
 ## Old-schema repos
