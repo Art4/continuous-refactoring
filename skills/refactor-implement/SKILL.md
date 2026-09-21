@@ -27,8 +27,6 @@ Tooling-tree node: no seam to confirm — its scope is a config/dependency chang
 
 Baseline-shrink candidate: no seam to confirm either — `refactor-prioritize`'s Select mode already picked the group and filed it, `refactor-design` already planned the fix (`phpstan-baseline-shrink.md` step 3). No red → green cycle: this satisfies a static-analysis finding without introducing new behavior, so there's no new test to write at a seam — the full test suite (step 3) is what catches an unintended behavior change instead.
 
-**`onboarding-setup` exception — this node itself:** `refactor-design` couldn't write `Pending candidates` (the Refactoring Notes' `bookkeeping.md` didn't exist yet). Creating the file here, perform every write `skills/continuous-refactoring/references/onboarding-setup-interview.md`'s `## Record` names (Create-mode, tracker file, the `Refactoring Notes:` line) — the interview already decided these, don't leave them unset or invent placeholders. Two things `## Record` doesn't cover, this step's own addition: set `Pending candidates` to this candidate's issue, and `Focus areas` only if the interview named one. All of it in the same MR as `bookkeeping.md` — this node's only one.
-
 ### 2. One slice at a time
 
 Skipped for a tooling-tree node (step 1 already made its one change). Structural candidate: before the first test, ensure `tests/README.md` exists if the active language specialization defines a test-layout convention (PHP: `skills/refactor-scan/references/php-tooling-tree/phpunit.md`'s *Test layout*). Missing → create it with that default. Present → read it fresh (a human may have adapted it), follow it, create a documented-but-not-yet-existing folder only once a test needs it. No language convention → place tests by judgment.
@@ -68,7 +66,7 @@ Wait for CI if the target runs it — confirm via the forge's actual CI status (
 
 **CI status unreadable via the API** (403, or nothing usable returned) — don't guess, and don't claim green. State plainly in the closing report that live CI status couldn't be confirmed via API and that verification instead ran locally in an environment equivalent to CI (name which checks). This is the documented fallback, not a silent workaround — see `docs/known-limitations.md`.
 
-The candidate branch stays checked out after this. `refactor-learn`'s bookkeeping writes go out on their own separate branch/MR, never this one (the `onboarding-setup`-in-flight case is the one exception, which `refactor-learn` handles).
+The candidate branch stays checked out after this. `refactor-learn`'s bookkeeping writes go out on their own separate branch/MR, never this one.
 
 ## Output
 

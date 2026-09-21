@@ -1,18 +1,21 @@
-# Reference: the `onboarding-setup` interview
+# Reference: the onboarding interview
 
-Backs `refactor-design`'s step 1 exception for the `onboarding-setup` node
-(`skills/refactor-design/SKILL.md`) — the one tooling-tree node whose plan
-isn't already fully specified by `skills/refactor-scan/references/tooling-tree.md`
-alone. Everywhere else, a tooling-tree node's Tool/Purpose/Fulfilment
-check/MR scope are fixed text a human already wrote once, for every target
-alike. `onboarding-setup` is different on purpose: which tracker to use, how
-merge requests get opened, and where the suite's own notes live are facts
-about *this* target and *this* human's preference — not something a tree
-doc can get right for every target by guessing. Run this once, the first
-time `onboarding-setup` is chosen; it never runs again for a target whose
-Refactoring Notes (see `## Explore`) already hold a `bookkeeping.md`.
+Backs step 0 of `continuous-refactoring` (`skills/continuous-refactoring/SKILL.md`),
+which fulfils the `onboarding-setup` node of the tooling tree
+(`skills/refactor-scan/references/tooling-tree/onboarding-setup.md`) before any
+Track runs. Everywhere else, a tooling-tree node's plan is fixed text a human
+wrote once, for every target alike. Onboarding is different on purpose: which
+tracker to use, how merge requests get opened, and where the suite's own notes
+live are facts about *this* target and *this* human's preference — not
+something a tree doc can get right for every target by guessing.
 
-Four parts, in order: **Explore**, **Ask**, **Summarize**, **Record**.
+It runs inline in the dispatcher (never in a subagent), once per target, and
+**ends the invocation** — no Track selection, no scan, no issue, no merge
+request, no branch, nothing created on the forge. It never runs again for a
+target whose Refactoring Notes already hold a `bookkeeping.md`.
+
+Parts, in order: **Explore**, **Setup gap** (only when the engineering-skills
+setup is incomplete), **Ask**, **Summarize**, **Record**, **Closing**.
 
 ## Explore
 
@@ -27,40 +30,76 @@ Read-only. No writes, no questions yet.
   doesn't rule the option out, only softens the recommendation's wording —
   never install `gh`/`glab` if either is missing; a missing CLI is scored
   the same as a failed reachability check, not something to fix first.
+- **Existing forge labels.** Reachable → list the repo's labels (`gh label
+  list` / `glab label list`) and note which of `refactor:candidate` and
+  `refactor:priority` already exist, and which existing labels plainly play
+  one of the triage roles under a different spelling (e.g. `wont-fix` for
+  `wontfix`). Unreachable → note that; it only softens the summary and the
+  closing text, never blocks.
 - **`AGENTS.md` / `CLAUDE.md`.** Read whichever exists. Note whether either
   already names a merge-request mode (`autonomous`, `ask-each-time`,
   `human-opens`, or an unambiguous paraphrase) — as a **finding**, never an
   auto-decision; suite state is never inferred silently from these files,
   only offered as a recommendation the human still confirms. Both exist and
-  disagree → note the conflict explicitly.
+  disagree → note the conflict explicitly. Also note whether a
+  `## Continuous-refactoring suite` section is already there and what it
+  already names (see `## Record`).
 - **`CONTEXT.md`.** Note whether it exists — informational only.
-- **Refactoring Notes / `bookkeeping.md`.** Check whether `AGENTS.md`, then
-  `CLAUDE.md`, already names a `Refactoring Notes:` line (`## Record`
-  below) — if one does, that's where to look for `bookkeeping.md`; if neither
-  does, check the default `docs/refactoring/`. Note whether the folder
-  exists, and separately whether `bookkeeping.md` already exists inside it.
-  Should be rare to impossible on a genuinely fresh target — `onboarding-setup`'s
-  own Fulfilment check already gates on `bookkeeping.md` *not* existing wherever
-  it resolves to. If it's there anyway (a resumed pass, an out-of-band
-  write): **don't re-run the interview.** Read what's already recorded —
-  `bookkeeping.md`'s `Create-mode` if set, `docs/agents/issue-tracker.md` if it
-  exists (its title names which tracker — see `## Record`) — and skip
-  asking whatever's already answered. If all three questions below are
-  already answered this way, skip straight to `## Summarize` with a recap
-  of what's on record; nothing new to write.
-- **Existing tracker hints.** Note whether `docs/agents/issue-tracker.md`
-  or `docs/agents/triage-labels.md` already exist — neither should on a
-  genuinely fresh target, but an existing convention is a strong signal for
-  Q1 below, never something to silently overwrite.
+- **Engineering-skills setup.** Read `docs/agents/issue-tracker.md` and
+  `docs/agents/triage-labels.md` if they exist. **Both exist → set up**;
+  anything less → not set up (a repo-based test — which skills are installed
+  on this machine is never consulted). An existing `issue-tracker.md` also
+  answers Q1 below: its title names the tracker (`# Issue tracker: GitHub` /
+  `GitLab` / `Local Markdown`, or a freeform description for anything else).
+  Note the tracker's native-label status from it and whether
+  `triage-labels.md` has a `done` row.
+- **Refactoring Notes.** Check whether `AGENTS.md`, then `CLAUDE.md`,
+  already names a `Refactoring Notes:` line (`## Record` below) — if one
+  does, that's where the notes live; if neither does, the default is
+  `docs/refactoring/`. Note whether the folder exists. `bookkeeping.md` is
+  missing — that's why onboarding is running at all.
+- **Partial state.** An earlier onboarding may have been interrupted between
+  writes (`bookkeeping.md` is written last, so it is the only file whose
+  absence means "not finished"). Whatever the files above already record —
+  the tracker in `issue-tracker.md`, a `Refactoring Notes:` line — counts as
+  **on record**: don't re-ask it, confirm it in `## Summarize` as "already
+  recorded", and add only what is missing in `## Record`. `Create-mode` is
+  the one answer an interruption can lose: its only home is `bookkeeping.md`
+  (`AGENTS.md`/`CLAUDE.md` hold a pointer, never the value), so an interrupted
+  run asks Q2 again (the earlier answer is at most an `AGENTS.md`/`CLAUDE.md`
+  finding, a recommendation only).
+  Nothing is overwritten silently.
+
+## Setup gap
+
+Only when `## Explore` found the engineering-skills setup incomplete. One
+up-front question, before Q1 — asked first because the answer decides
+whether the rest is worth asking at all:
+
+`❓ **Q0** - **Engineering-skills setup is incomplete**: <which of the two
+files is missing>. The engineering skills (issue-tracker config, triage
+labels) set the repo's issue-tracking vocabulary; this suite reads the same
+files.`
+
+- **Abort** — nothing is written. Point the human at the
+  `setup-matt-pocock-skills` setup skill, to run first; the next
+  `/continuous-refactoring` starts onboarding from scratch. Ends the
+  invocation here.
+- **Continue without it** — onboarding writes the minimal equivalents itself
+  (`## Record`). The setup skill can still be run later; it updates those
+  files in place.
+
+Recommendation: **Continue** — the suite works without the setup, and a human
+who wants it can add it any time.
 
 ## Ask
 
 Before asking anything, summarize `## Explore`'s findings in plain prose —
 what's already known (a matched remote or none; an `AGENTS.md`/`CLAUDE.md`
-create-mode finding, or none; any existing tracker hints) and, explicitly,
-which of Q1–Q3 below are still open (skip naming one `## Explore`'s resume
-case already answered). This comes first so the human isn't asked to
-re-derive context already gathered.
+create-mode finding, or none; whether the engineering-skills setup is
+present; anything already on record) and, explicitly, which of Q1–Q3 below
+are still open. This comes first so the human isn't asked to re-derive
+context already gathered.
 
 Then ask one question at a time — never batch. Each question uses the
 numbered shape `/grilling`'s fallback already uses
@@ -70,10 +109,11 @@ numbered shape `/grilling`'s fallback already uses
 single-question `AskUserQuestion` call when available (not all three
 questions in one call's `questions` array, even though the tool supports
 that), or the same numbered-prose shape otherwise — wait for the reply,
-then ask Q2, wait, then Q3, wait. Skip any question `## Explore`'s resume
-case already answered.
+then ask Q2, wait, then Q3, wait. Skip any question `## Explore` found
+already on record.
 
-**Q1 — where do issues and merge requests live?**
+**Q1 — where do issues and merge requests live?** Skipped when
+`docs/agents/issue-tracker.md` exists — its title already answers it.
 
 - **GitHub** — only offered when Explore found a `github.com` match.
 - **GitLab** — only offered when Explore found a `gitlab.com` match.
@@ -133,14 +173,11 @@ team, not a private or gitignored scratch space.
 - **No** — stop here (see below).
 
 Recommendation: always **Yes, default location**. On **No**: don't invent
-or wire up an alternative — out of this interview's scope. Stop here (skip
-`## Summarize`/`## Record` for whatever's still open); `refactor-design`
-reports the `onboarding-setup` candidate as not filed this pass, reason "human
-objected to storing the Refactoring Notes at all; the suite has no
-alternative today" — the pass ends the same way it ends when nothing
-survives prioritising. Next pass, `refactor-scan` proposes `onboarding-setup`
-again from scratch and this interview runs again, since nothing was
-recorded.
+or wire up an alternative — out of this interview's scope. Nothing is
+written (skip `## Summarize`/`## Record`), and the invocation ends saying
+so: "the suite has no alternative to storing the Refactoring Notes today;
+nothing was changed". The next `/continuous-refactoring` starts onboarding
+from scratch.
 
 **Not asked here: `Focus areas` or `Refactoring goal`.** Both free-form, no
 filesystem signal to recommend from, and piling on unanchored questions
@@ -150,99 +187,170 @@ folded in here.
 
 ## Summarize
 
-Before recording anything, recap in plain prose:
+Before recording anything, recap in plain prose. This is **informational —
+there is no approval gate**: the only abort points are the setup-gap
+question and Q3's **No**.
 
 > Tracker: <GitHub | GitLab | Local Markdown | other, as named>.
 > Create-mode: <autonomous | ask-each-time | human-opens>.
 > Refactoring Notes: `<path>`, to be recorded in `AGENTS.md`/`CLAUDE.md`.
-> Next: creating `<path>/bookkeeping.md` and `docs/agents/issue-tracker.md`[, the `refactor:candidate`/`refactor:priority` labels on <tracker>], filing this candidate's issue, and opening its merge request.
+> Files: <the files `## Record` will write — `<path>/bookkeeping.md`,
+> `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md` when
+> missing, the suite's section in `AGENTS.md`/`CLAUDE.md`>.
+> Labels: `refactor:candidate` and `refactor:priority` are recorded in
+> `AGENTS.md`/`CLAUDE.md` only — nothing is created on <the forge>[; label
+> overrides recorded: <role → existing label>][; not found on the forge
+> yet: <labels>].
 
-(When `## Explore`'s resume case skipped questions, name those as "already
-recorded" rather than "just decided" — same three lines, sourced from
-existing files instead of fresh answers. The fourth line still names what's
-about to happen either way.)
-
-This is the one summary the human sees before `## Record` writes anything —
-`onboarding-setup` runs exactly once per target (the resume case above aside), so
-there's no ongoing verbosity to manage afterward. Every write named in the
-`Next:` line above gets its own short status line as it happens instead of
-running silently — one per bullet in `## Record` below (its tracker choice,
-its Refactoring Notes path, any labels it creates), plus one each for the
-issue filed and the merge request opened. This is the only place the
-convention needs stating: `refactor-design`'s and `refactor-implement`'s own
-`onboarding-setup` exceptions already point back here for what to write, and now
-for announcing each write too.
+Anything the partial-state check found already on record is named as
+"already recorded" rather than "just decided" — same lines, sourced from
+existing files instead of fresh answers.
 
 ## Record
 
-What `refactor-design` files as this candidate's plan
-(`skills/refactor-design/SKILL.md` step 5's `onboarding-setup` exception);
-`refactor-implement` performs the actual writes later, from that plan
-(`skills/refactor-implement/SKILL.md` step 1's `onboarding-setup` exception):
+Executed directly by the dispatcher — no plan is handed to another skill.
+Each write gets **one short status line** as it happens (e.g. "Wrote
+`docs/agents/issue-tracker.md`."), never running silently. Order matters:
+`bookkeeping.md` goes **last**, because its existence is what every other
+skill reads as "onboarding complete" — an interruption before it simply
+means the next invocation onboards again, resuming from what's on record. A
+file that already exists is never overwritten; add only what's missing (a
+missing section, a missing table row) and say so.
 
-- **Create-mode** → the Refactoring Notes' `bookkeeping.md`'s `Create-mode`
-  field — the sole write-authority. `AGENTS.md`/`CLAUDE.md` (below) gets only
-  a read-only pointer to it, never the value itself.
-- **Tracker choice** → `docs/agents/issue-tracker.md`, created fresh:
-  - **GitHub or GitLab:** title names which (`# Issue tracker: GitHub` /
-    `GitLab`) — the one signal every lifecycle skill now reads instead of
-    re-probing `gh`/`glab` independently. Below the title: which remote,
-    that labels are native (`refactor:candidate`, and the triage roles
-    from `docs/agents/triage-labels.md` apply directly, no local mirror —
-    no `refactor:delivered` or other in-flight label; a candidate's
-    linked pull request, native to the tracker, is what's in flight), and
-    the two operations every skill needs ("file an issue": `gh`/`glab
-    issue create` or the forge UI on `origin`; "check the external
-    tracker": query the forge directly).
-  - **Local Markdown:** write
-    `skills/continuous-refactoring/references/local-issue-tracker-template.md`'s
-    content verbatim — don't restate it here, avoid two drifting copies.
-  - **Something else:** same shape as the two cases above, from what the
-    human described; no description given → fall through to Local
-    Markdown.
-- **Refactoring Notes path** → written, labeled `Refactoring Notes:`, into
-  whichever of the target's `AGENTS.md`/`CLAUDE.md` already exists — never
-  create the other one instead; only when neither exists, create
-  `AGENTS.md`. Appended under a new `## Continuous-refactoring suite`
-  heading if not already present:
+1. **Tracker choice** → `docs/agents/issue-tracker.md`, only when absent:
+   - **GitHub or GitLab:** title names which (`# Issue tracker: GitHub` /
+     `GitLab`) — the one signal every lifecycle skill reads instead of
+     re-probing `gh`/`glab` independently. Below the title: which remote,
+     that labels are native (`refactor:candidate`, `refactor:priority`, and
+     the triage roles from `docs/agents/triage-labels.md` apply directly, no
+     local mirror — no `refactor:delivered` or other in-flight label; a
+     candidate's linked pull request, native to the tracker, is what's in
+     flight; a closed issue is a done one, no `done` label), and the two
+     operations every skill needs ("file an issue": `gh`/`glab issue create`
+     or the forge UI on `origin`; "check the external tracker": query the
+     forge directly).
+   - **Local Markdown:** write
+     `skills/continuous-refactoring/references/local-issue-tracker-template.md`'s
+     content verbatim — don't restate it here, avoid two drifting copies.
+   - **Something else:** same shape as the two cases above, from what the
+     human described; no description given → fall through to Local
+     Markdown.
+2. **Triage labels** → `docs/agents/triage-labels.md`:
+   - **Engineering-skills setup present** (file exists) → leave it. Local
+     Markdown tracker and it has no `done` row → append that one row
+     (below). Forge tracker → nothing.
+   - **Not set up, continued** → write the table below, in the same shape
+     the engineering skills' own label table uses, so their setup skill can
+     later update it in place. Rows: `needs-info`, `ready-for-agent`,
+     `wontfix`, plus `done` **only for a Local Markdown tracker** (on
+     GitHub/GitLab a closed issue is done — no `done` label exists there).
+     A role whose label already exists on the forge under a different
+     spelling gets that spelling in the right-hand column instead of the
+     default. `needs-triage`/`ready-for-human` are the engineering skills'
+     own roles; the suite never applies them, so they are not written here.
 
-  ```markdown
-  ## Continuous-refactoring suite
+     ```markdown
+     # Triage Labels
 
-  Refactoring Notes: `docs/refactoring/` — the continuous-refactoring
-  suite's own config, in-flight merge-request bookkeeping, and
-  rejected-tooling records live here.
+     The skills speak in terms of triage roles. This file maps those roles to the actual label strings used in this repo's issue tracker.
 
-  Create-mode: see the Refactoring Notes' `bookkeeping.md` — that file is
-  the sole authoritative value, this is a pointer, not a copy.
+     | Label in mattpocock/skills | Label in our tracker | Meaning                                  |
+     | -------------------------- | -------------------- | ---------------------------------------- |
+     | `needs-info`               | `needs-info`         | Waiting on reporter for more information |
+     | `ready-for-agent`          | `ready-for-agent`    | Fully specified, ready for an AFK agent  |
+     | `wontfix`                  | `wontfix`            | Will not be actioned                     |
+     | —                          | `done`               | Work complete, delivered, no longer open |
 
-  Backlog label: `refactor:candidate` (native tracker only — see
-  `docs/agents/issue-tracker.md`).
+     When a skill mentions a role (e.g. "apply the AFK-ready triage label"), use the corresponding label string from this table.
+
+     Edit the right-hand column to match whatever vocabulary you actually use.
+     ```
+
+     (Drop the `done` row for a forge tracker.)
+3. **Refactoring Notes path and backlog labels** → written, labeled
+   `Refactoring Notes:`, into whichever of the target's `AGENTS.md`/`CLAUDE.md`
+   already exists — never create the other one instead; only when neither
+   exists, create `AGENTS.md`. Appended under a new
+   `## Continuous-refactoring suite` heading if not already present; when
+   the heading exists, add only the lines it lacks:
+
+   ```markdown
+   ## Continuous-refactoring suite
+
+   Refactoring Notes: `docs/refactoring/` — the continuous-refactoring
+   suite's own config, in-flight merge-request bookkeeping, and
+   rejected-tooling records live here.
+
+   Create-mode: see the Refactoring Notes' `bookkeeping.md` — that file is
+   the sole authoritative value, this is a pointer, not a copy.
+
+   Backlog labels: `refactor:candidate` (proposed work) and
+   `refactor:priority` (jumps the queue) — native tracker only, see
+   `docs/agents/issue-tracker.md`.
+   ```
+
+   The text written here (like every file this interview writes) is
+   self-contained: it never cites the suite's own skill files. Every other
+   skill in the suite refers to this folder by name — "the Refactoring
+   Notes" — never by restating the concrete path (see
+   `skills/continuous-refactoring/references/refactoring-bookkeeping.md` for the
+   resolution rule every skill, and the deterministic parser, follow).
+4. **Create-mode** → the Refactoring Notes' `bookkeeping.md` — **last**,
+   creating the folder if needed. It is the sole write-authority for
+   `Create-mode`; `AGENTS.md`/`CLAUDE.md` (above) holds only a pointer to it.
+   The shape is `refactoring-bookkeeping.md`'s `## Structure`, reduced to
+   the title line and `Create-mode`: no `Pending candidates` (nothing is
+   pending), no Track sections (each appears when its Track first runs).
+   `Focus areas` only if the human named one unprompted.
+
+No issue is filed, no branch or merge request is opened, no label is created
+on the forge, and nothing is committed — the human commits the files.
+
+## Closing
+
+Ends the invocation. Tell the human, in plain prose:
+
+- **What was created** — each file, one line each (and what was already
+  there and left alone).
+- **Commit them.** The new files should reach the default branch (commit and
+  merge them): candidate branches are based on it, so they only contain the
+  Refactoring Notes once it does. Not checked here — a reminder, not a gate.
+- **Run `/continuous-refactoring` again** to start the first scan —
+  optionally naming a Track (e.g. `/continuous-refactoring guardrails`).
+- **Setup was missing and onboarding continued without it** → the engineering
+  skills' setup can still be run later; it updates the files written here in
+  place.
+- **GitHub only — the two backlog labels.** GitHub doesn't create a label
+  when an issue is filed with one that doesn't exist yet (`gh issue create
+  --label` fails with a "label not found" error), so list the commands for
+  the labels the label check found missing (both when it couldn't run),
+  ready to copy — `--force` makes them safe to run twice:
+
+  ```
+  gh label create "refactor:candidate" --description "Proposed refactoring work" --force
+  gh label create "refactor:priority" --description "Refactoring work that jumps the queue" --force
   ```
 
-  Every other skill in the suite refers to this folder by name — "the
-  Refactoring Notes" — never by restating the concrete path (see
-  `skills/continuous-refactoring/references/refactoring-bookkeeping.md` for the
-  resolution rule every skill, and the deterministic parser, follow). Also
-  gates whether the interview (and the candidate) proceeds at all — see
-  Q3's **No** case above.
+  GitLab needs nothing: creating an issue with a label that doesn't exist
+  yet creates that project label. Local Markdown needs nothing.
+- **Proposed, not decided** — when no human was present (below), name each
+  answer that was taken as a recommendation.
 
 ## If no human is present to ask
 
 Two distinct cases:
 
 - **`AskUserQuestion` unavailable, but a human is present** — crash-safe
-  fallback: ask the same three questions as plain numbered prose instead
+  fallback: ask the same questions as plain numbered prose instead
   (`❓ **Q1**`/options/`➡️ recommendation`, per `## Ask`), one at a time,
   waiting for each reply in conversation before the next. Only the
   mechanism changes.
 - **No human present at all** (an unattended run — e.g. a scripted dry
   run with only a log file as output). Don't guess and proceed as if
-  confirmed — that's exactly what this redesign exists to stop. Take every
-  recommended answer from `## Ask` as *proposed, not decided* — Q3's stays
-  the default location; never invent a custom path with nobody to name one
-  — record it exactly as `## Record` describes, but flag every one in the
-  candidate issue and this pass's closing report as "recommended, not
-  confirmed by a human — first thing to double-check." A later pass or the
-  human reading the issue can correct any of the three by hand at any
-  time.
+  confirmed — that's exactly what this design exists to stop. Take every
+  recommended answer as *proposed, not decided* — the setup-gap question
+  defaults to **Continue**, Q3 stays the default location; never invent a
+  custom path with nobody to name one — record it exactly as `## Record`
+  describes, but flag every one in the closing text as "recommended, not
+  confirmed by a human — first thing to double-check." The human reading
+  the closing text can correct any of them by hand at any time.

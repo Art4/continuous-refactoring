@@ -61,9 +61,9 @@ Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/t
 
 - **Name:** Onboarding Setup
 - **Tool:** none — this is the suite's own state, not a third-party tool.
-- **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write focus areas and merge-request create-mode.
+- **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write focus areas and merge-request create-mode. Fulfilled by the dispatcher's onboarding step before any scan — never proposed as a candidate.
 
-Full definition (Fulfilment check, MR scope): `skills/refactor-scan/references/tooling-tree/onboarding-setup.md`.
+Full definition (Fulfilment check, scope): `skills/refactor-scan/references/tooling-tree/onboarding-setup.md`.
 
 ### `is-php-project`
 

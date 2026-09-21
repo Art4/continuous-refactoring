@@ -1,7 +1,7 @@
 # Reference: local Markdown issue-tracker template
 
 The exact content written to a target repo's `docs/agents/issue-tracker.md`
-when `onboarding-setup`'s interview
+when the onboarding interview
 (`skills/continuous-refactoring/references/onboarding-setup-interview.md`)
 records "Local Markdown" as the tracker choice — copy it verbatim, don't
 restate or paraphrase it (this file is the one place it's defined, to avoid
@@ -22,8 +22,7 @@ top records triage state and the filing date (`YYYY-MM-DD`; see
 
 Create a new file at `.scratch/refactor/issues/<NN>-<slug>.md`, its `Filed:`
 line set to today's date — the only place a filing date exists on this
-tracker, read wherever a skill needs an issue's age (e.g.
-`skills/refactor-prioritize/SKILL.md`'s Age ranking factor).
+tracker, read wherever an issue's age matters (e.g. when ranking candidates).
 
 ## When a skill says "check the external tracker"
 

@@ -36,10 +36,10 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   gate — `rector-php-set`'s own fulfilment check already means "fully applied, no remaining findings".
   Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
   `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`) — **except** when this node is
-  already fulfilled the very first time it's evaluated (no delivering MR of its own ever runs): then
-  `onboarding-setup`'s own first MR contributes the line instead, so the target never permanently misses out on
-  it just because the floor happened to be sufficient from day one (see `onboarding-setup.md`'s own entry).
+  (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`). A node already
+  fulfilled the very first time it's evaluated never gets a delivering MR of its own; its line then
+  reaches the file through the Housekeeping Track's own reconciliation instead
+  (`skills/continuous-housekeeping/references/housekeeping-track.md`, *Reconcile*).
 - **Housekeeping:** check whether a newer PHP patch/minor release exists for the declared floor
   (`_current_php_floor`) and update it if so — a distinct concern from this node's own Fulfilment check,
   which only asks whether the floor is *correct* (matches what `rector-php-set` has landed), not whether

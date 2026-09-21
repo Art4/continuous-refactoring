@@ -1,6 +1,6 @@
 ---
 name: refactor-loop
-description: Runs one refactoring pass — scan, prioritise, design, implement, learn — for a Track handed in by the caller. Internal — invoked by the continuous-<track> skills only, not a user entry point; aborts without a valid Track.
+description: Runs one refactoring pass — scan, prioritise, design, implement, learn — for a Track handed in by the caller. Internal — invoked by the continuous-<track> skills only, not a user entry point; aborts without a valid Track or an onboarded target.
 ---
 
 # Refactor Loop
@@ -19,22 +19,24 @@ Not a user entry point: which Track runs is decided by `continuous-refactoring` 
 
 Track missing, empty, or anything else → **abort now**: nothing runs, not even step 6. Report "refactor-loop needs a Track (`safety-net`, `guardrails`, or `investigation`) and was given none / <what it was given> — invoke `/continuous-refactoring`, or the matching `continuous-<track>` skill, instead." Never infer, default, or guess a Track from repo state.
 
+**Onboarded target** — the Refactoring Notes' `bookkeeping.md` must exist (`skills/continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now, same as a missing Track: nothing runs, not even step 6. Report "This repo isn't onboarded yet — the Refactoring Notes have no `bookkeeping.md`. Run `/continuous-refactoring` first; its onboarding step sets the repo up, then rerun." Never create the file here.
+
 This skill never runs Track selection and never reads another Track's bookkeeping state — the caller already settled which Track runs.
 
 ## Loop state
 
-State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-prioritize`'s Select mode files a gate-shaped candidate's issue and sets `Pending candidates`; `refactor-design` does the same for a tooling-tree node, `onboarding-setup`, or an externally-labeled candidate — the cases Select mode never runs for; `refactor-implement` sets `Create-mode` while delivering `onboarding-setup`) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
+State lives in the target repo, not the conversation. Every lifecycle skill reads it directly; each writes only the field its own step produces (`refactor-prioritize`'s Select mode files a gate-shaped candidate's issue and sets `Pending candidates`; `refactor-design` does the same for a tooling-tree node or an externally-labeled candidate — the cases Select mode never runs for) — `refactor-learn` writes everything else, and is the suite's only *dedicated* bookkeeping writer:
 
-- **Config** — the Refactoring Notes' `bookkeeping.md`: focus areas, merge-request create-mode (decided once, during `onboarding-setup`'s own interview — see `## Opening a merge request`), `Pending candidates`, and every currently-wired **Track**'s (`CONTEXT.md`) own bookkeeping section — `## Safety Net`, `## Guardrails`, `## Housekeeping`, `## Investigation` (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`).
+- **Config** — the Refactoring Notes' `bookkeeping.md`: focus areas, merge-request create-mode (decided once, during the dispatcher's onboarding step — see `## Opening a merge request`), `Pending candidates`, and every currently-wired **Track**'s (`CONTEXT.md`) own bookkeeping section — `## Safety Net`, `## Guardrails`, `## Housekeeping`, `## Investigation` (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`).
 - **Remembered MRs** — every open `refactor:candidate` issue with a linked pull request (the tracker's native issue↔closing-PR cross-reference), when `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab); otherwise the Refactoring Notes' `merge-requests.md`, a committed ledger with the same facts.
-- **Backlog** — `refactor:*` issues on the tracker named by `docs/agents/issue-tracker.md` — scaffolded once, during `onboarding-setup`'s own interview (`skills/continuous-refactoring/references/onboarding-setup-interview.md`); every place that needs "does the tracker support native labels" reads this file rather than re-deriving it from `gh`/`glab`.
+- **Backlog** — `refactor:*` issues on the tracker named by `docs/agents/issue-tracker.md` — scaffolded once, during the dispatcher's onboarding step (`skills/continuous-refactoring/references/onboarding-setup-interview.md`); every place that needs "does the tracker support native labels" reads this file rather than re-deriving it from `gh`/`glab`.
 - **Learned rejections** — the Refactoring Notes' `out-of-scope/` entries.
 
-The Refactoring Notes' `bookkeeping.md` isn't scaffolded here — it's `onboarding-setup`, a tooling-tree node like any other except one thing: `refactor-scan` proposes it, but `refactor-design` runs a human interview instead of copying the tree doc's generic spec, and `refactor-implement` creates the file with `Create-mode` already set from that interview, not left for `refactor-learn` to fill in later.
+The Refactoring Notes' `bookkeeping.md` isn't scaffolded here — `continuous-refactoring`'s onboarding step writes it (the `onboarding-setup` node, fulfilled before any Track runs), with `Create-mode` already set from its interview. This skill only checks that it exists (`## Input`).
 
 ## Process
 
-Before step 1, tell the human in one sentence that a loop pass is starting now, naming the Track (e.g. "Starting a refactoring loop pass for the Guardrails Track."). Only after the Track input is validated — an aborted invocation announces nothing.
+Before step 1, tell the human in one sentence that a loop pass is starting now, naming the Track (e.g. "Starting a refactoring loop pass for the Guardrails Track."). Only after the Track input and the onboarded-target check pass — an aborted invocation announces nothing.
 
 Each step runs the named lifecycle skill and carries its output to the next. Stop between steps where the skill itself stops for user input.
 
@@ -55,7 +57,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 3. **Prioritise.** Run `/refactor-prioritize` (Rank mode) on scan's proposals against the now-current ledger. Stops the pass (skip to step 5) if every proposal is already in flight. Otherwise hands forward one chosen node with its rationale — a gate (`structural-scan`, a PHPStan baseline-shrink family) → run `/refactor-prioritize` again (Select mode, a fresh dispatch) to pick and minimally file the concrete candidate within it before continuing to step 4. Already concrete (tooling-tree node, externally-labeled candidate) → straight to step 4, Select mode doesn't run.
 
-4. **Design.** Run `/refactor-design` on what step 3 handed forward — files (or updates) the issue itself for a tooling-tree node, `onboarding-setup`, or an externally-labeled candidate, same as always; grounds and grills a gate-shaped candidate Select mode already filed, then adds the plan as a comment on that same issue instead. Carries the issue/plan to step 5. Grounding/grilling (or planning a PHPStan baseline-shrink fix) may instead apply the decision gate (`skills/refactor-design/references/decision-gate.md`): a flagged decision still carries the issue/plan forward, but step 5's own precondition then holds it back; a genuine breaking change carries a finding forward to step 6 instead, and step 5 doesn't run at all this pass for this candidate.
+4. **Design.** Run `/refactor-design` on what step 3 handed forward — files (or updates) the issue itself for a tooling-tree node or an externally-labeled candidate, same as always; grounds and grills a gate-shaped candidate Select mode already filed, then adds the plan as a comment on that same issue instead. Carries the issue/plan to step 5. Grounding/grilling (or planning a PHPStan baseline-shrink fix) may instead apply the decision gate (`skills/refactor-design/references/decision-gate.md`): a flagged decision still carries the issue/plan forward, but step 5's own precondition then holds it back; a genuine breaking change carries a finding forward to step 6 instead, and step 5 doesn't run at all this pass for this candidate.
 
 5. **Implement.** Skip entirely when step 4 didn't produce a confirmed, implementable plan this pass — a flagged candidate still missing `ready-for-agent`, or a breaking-change finding handed to step 6 instead; continue at step 6 either way. **Cap gate — new MRs only.** If this step would open a *new* merge request, count the in-flight suite MRs first — the same remembered set `refactor-prioritize` step 1 reads (against this pass's now-reconciled ledger); two or more open → don't run `/refactor-implement`: the candidate keeps its plan and stays pending for a later pass, tell the human which MRs are waiting and that the pass ends without new work, then continue at step 6. Applies on every path into this step — a Track `Open` walk and a `Pending candidates` resume never pass through `refactor-prioritize`. Continuing an already-open MR (a resume-candidate with reviewer activity) opens no new MR and isn't gated. Otherwise: tell the human in one sentence that implementation is starting in a subagent (e.g. "Starting the implementation in a subagent."), then run `/refactor-implement` in a fresh subagent — always, not merely preferred; no subagent mechanism → inline, and say so in that sentence instead — one candidate, one branch, created here. Reviews its own diff (standards + spec) until clean, looping back to its own earlier steps on findings, before opening the merge request. Carries the opened MR to step 6.
 
@@ -65,7 +67,7 @@ Prefer dispatching each step to a fresh subagent: hand it this pass's carried-fo
 
 ## Opening a merge request
 
-Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, via `onboarding-setup`'s own interview), basing, description — in `skills/continuous-refactoring/references/opening-a-merge-request.md`. The tooling-tree candidate's own outlook comment (what it unlocks next) lives on the issue instead — `skills/refactor-implement/references/outlook-comment.md`.
+Followed by `refactor-implement` when it opens the reviewable, and by `refactor-learn` for its bookkeeping MR. Full rules — create-mode (decided once, during the dispatcher's onboarding step), basing, description — in `skills/continuous-refactoring/references/opening-a-merge-request.md`. The tooling-tree candidate's own outlook comment (what it unlocks next) lives on the issue instead — `skills/refactor-implement/references/outlook-comment.md`.
 
 ## Fallback
 
@@ -80,7 +82,7 @@ Every claim in **Status** must reflect state freshly confirmed this pass, not an
 - **Status:** one line, what happened this pass. When a Track's `Open` was walked this pass, include any skipped non-workable nodes with their reason (e.g. "Skipped: phpstan-level-6 (blocked by phpstan-level-5), coverage-floor (needs-info)").
 - **Next:** one line, what the human can or should do now.
 
-Examples: "Status: design flagged issue #12 for confirmation before implementing — ready-for-agent needed. Next: review the open question on issue #12 and add ready-for-agent once satisfied." / "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun." / "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then." / "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands." / "Status: Onboarding Setup prepared on local branch `refactor/onboarding-setup` — no forge/remote here, so nothing was pushed. Next: commit it yourself, or push it and open the merge request once you have forge access."
+Examples: "Status: design flagged issue #12 for confirmation before implementing — ready-for-agent needed. Next: review the open question on issue #12 and add ready-for-agent once satisfied." / "Status: no git repository found — the loop can't run here. Next: initialize git, then rerun." / "Status: 2 merge requests already open (links). Next: review/merge one; nothing else to do until then." / "Status: delivered PHPStan Level 0 — merge request #12 open. Next: review and merge; the following pass proposes PHPStan Level 1 once this lands."
 
 ## Completion criterion
 

@@ -1,6 +1,6 @@
 ---
 name: continuous-housekeeping
-description: Runs one Housekeeping Track cycle — reconcile, checklist, quality gate, deliver — then records its Last scan. Internal — invoked by continuous-refactoring only, not a user entry point.
+description: Runs one Housekeeping Track cycle — reconcile, checklist, quality gate, deliver — then records its Last scan; aborts on a target that isn't onboarded. Internal — invoked by continuous-refactoring only, not a user entry point.
 ---
 
 # Continuous Housekeeping
@@ -14,6 +14,8 @@ Invoked by `continuous-refactoring` once its Track scheduler selects Housekeepin
 The Track's own reference files live beside this skill: `references/housekeeping-track.md` (the process), `references/housekeeping-cadence-interview.md` (the human-run cadence interview), `references/housekeeping-template-file-format.md` (the checklist file's format).
 
 ## Process
+
+0. **Onboarded target.** The Refactoring Notes' `bookkeeping.md` must exist (`skills/continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report "This repo isn't onboarded yet — the Refactoring Notes have no `bookkeeping.md`. Run `/continuous-refactoring` first; its onboarding step sets the repo up, then rerun." Never create the file here — this skill doesn't go through `refactor-loop`, so it makes this check itself.
 
 1. **Housekeeping cycle.** Follow `skills/continuous-housekeeping/references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, open this cycle's issue, work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run.
 2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`skills/refactor-learn/references/housekeeping-write.md`) via `refactor-learn`'s ordinary dedicated bookkeeping branch. `refactor-learn` writes it only when the process was actually reached.
