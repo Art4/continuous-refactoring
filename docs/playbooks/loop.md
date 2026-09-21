@@ -6,25 +6,25 @@ The playbook for humans. The skills do the work; this document explains how you 
 
 Continuous refactoring is **stateful and repeatable**: each pass does only the work due since the last one, and writes learned decisions back. So a weekly turnus and a spontaneous invocation both work — they run the same loop.
 
+Each pass has two stages. First `/continuous-refactoring` selects one **Track** — Safety Net, Guardrails, Housekeeping or Investigation ([Track playbook](tracks.md)). Then that Track's skill runs the pass:
+
 ```
-scan (propose nodes, detect closed MRs) → prioritise → design (grill, file the issue) → implement (tdd + review)
-   └────────────────────────────────── learn (ledger / ADR / CONTEXT.md / issue status) ←──────┘
+select Track
+   └─ scan (propose nodes, detect closed MRs) → prioritise → design (grill, file the issue) → implement (tdd + review)
+         └────────────────────────────────── learn (ledger / ADR / CONTEXT.md / issue status) ←──────┘
 ```
 
-The orchestrator passes each skill's output to the next as its input (ADR-0010) — nobody re-derives context from shared state except `refactor-scan`'s own detection and whatever local state doc a skill reads directly.
+(Housekeeping runs its own sweep instead of this pipeline — see the [Housekeeping playbook](housekeeping.md).) A thin data pipe carries each skill's output to the next as its input — nobody re-derives context from shared state except `refactor-scan`'s own detection and whatever local state doc a skill reads directly. The scan and implement steps run in subagents, so their reasoning stays out of the main conversation.
 
-Structural work (the `structural-scan` gate) only opens once the tooling adoption chain is in place —
-this playbook calls that chain the **Safety Net**: deterministic checks (static analysis, a test
-suite) that catch a regression before an agent's own structural judgement has to. It's the same
-mechanism `CONTEXT.md` and the skills themselves still call the tooling tree — "Safety Net" is a
-reading aid for this playbook, not a renamed concept.
+Structural work (Investigation) only opens once the tooling adoption chain is in place — this playbook calls that chain the **Safety Net**: deterministic checks (static analysis, a test suite) that catch a regression before an agent's own structural judgement has to. It's the same mechanism `CONTEXT.md` and the skills themselves still call the tooling tree — "Safety Net" is a reading aid for this playbook, not a renamed concept.
 
 ## Triggers
 
 The loop never triggers itself — it has no stored schedule (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`). You kick it off, however often that is: by hand, or via whatever recurring trigger you set up outside the suite.
 
 - **On-demand:** `/continuous-refactoring` any time — after a feature, before a release, when an area hurts.
-- **Recurring:** point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring` on whatever interval fits — the loop does the same one pass regardless of how often it's invoked.
+- **Recurring:** point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring` on whatever interval fits — every invocation runs exactly one pass, and the Track scheduler decides what that pass works on from each Track's own cadence.
+- **A specific Track:** name it ("run the Guardrails Track") or invoke its skill directly to bypass selection for one pass.
 - **Triggers that make an early scan worthwhile:** many commits in the same module (a hot spot), a bug that's been fixed three times, an area the fulfilled tooling keeps flagging.
 
 ## What you decide each pass
@@ -33,11 +33,15 @@ The loop stops exactly where human judgement is needed:
 
 | Step | Skill | Your decision |
 |---|---|---|
+| Select Track | `continuous-refactoring` | optionally, which Track to force |
 | Propose nodes | `refactor-scan` | focus area, if you name one |
-| Prioritise | `refactor-prioritize` | which node is next |
-| Design | `refactor-design` | sign off the interface / seam |
+| Prioritise | `refactor-prioritize` | which node is next; a `refactor:priority` label you set narrows the ranking |
+| Design | `refactor-design` | sign off the interface / seam; answer a flagged open question (the issue carries `needs-info` until you do, and `ready-for-agent` once it may proceed) |
 | Implement (review included) | `refactor-implement` | the seams that get tested; accept or reject review findings |
+| Merge request | `refactor-implement` | with create-mode `ask-each-time` or `human-opens`, whether the merge request gets opened — and by whom |
 | Learn | `refactor-learn` | none — bookkeeping only |
+
+Two merge requests at most are open at once. With two waiting, a pass tells you which ones and ends without new work — merging or closing one is what unblocks the loop.
 
 ## After the pass
 
@@ -51,4 +55,5 @@ The loop closes with the **learn step**:
 
 - **Ignoring tooling-tree (Safety Net) pressure.** When fulfilled tooling flags a candidate, the loop prioritises it — unfulfilled tooling is a missing tree node, not a baseline delay.
 - **Scanning everything at once.** Scope to hot spots or named areas; a scan that wants everything finds nothing well.
+- **Waiting on a Track that's blocked.** While Safety Net still has open items, nothing else runs; the closing report names what is waiting (a parent node, a `needs-info` answer). Answer or adopt it by hand — don't force another Track.
 - **Merging reviews into one score.** Standards and spec stay two separate axes — that's the only way you see a violation of one when the other is green.

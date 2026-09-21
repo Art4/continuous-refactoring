@@ -7,13 +7,13 @@ a housekeeping mention on an ordinary refactoring merge request means.
 ## What it is, and why it's a Track of its own
 
 A periodic maintenance sweep — dependency currency, tooling-deprecation fixes, documentation sync — on
-its own cadence, one of the four **Tracks** (Safety Net, Guardrails, Housekeeping, Investigation) the
-`continuous-refactoring` orchestrator schedules between passes. Unlike the other three, it isn't part of
-the ordinary scan → prioritise → design → implement → learn pipeline: that pipeline ranks and delivers
-one candidate at a time, but Housekeeping works through a standing checklist instead, on a calendar
-interval rather than competing for priority against a proposal. See ADR-0037 for the original reasoning
-behind the mechanism itself (the checklist file, one issue per cycle) — its trigger has since changed
-from a standalone skill to the shared Track scheduler.
+its own cadence, one of the four **Tracks** (Safety Net, Guardrails, Housekeeping, Investigation) that
+`/continuous-refactoring` chooses between on each pass ([Track playbook](tracks.md)). Unlike the other
+three, it isn't part of the ordinary scan → prioritise → design → implement → learn pipeline: that
+pipeline ranks and delivers one candidate at a time, but Housekeeping works through a standing checklist
+instead, on a calendar interval rather than competing for priority against a proposal. It has its own
+skill (`continuous-housekeeping`) with its own process: reconcile the checklist, open one issue for the
+cycle, work it, run the quality gate, deliver.
 
 ## Cadence
 
@@ -22,6 +22,13 @@ the Track scheduler selects it, the same silent default `Safety Net`'s 90 days a
 already use. Read or change the interval directly in the Refactoring Notes' `bookkeeping.md`'s
 `## Housekeeping` section — hand-edit `Cadence` any time, or ask for a guided one-question prompt instead
 of a bare number by running the Housekeeping Track's own cadence interview.
+
+## When its first cycle runs
+
+Once Safety Net's open items are all done, a target gets one dedicated turn each for Investigation, then
+Guardrails, then Housekeeping before ordinary cadence-based scheduling takes over — so Housekeeping's
+first cycle can arrive earlier than its 7-day interval alone would suggest. After that, it's scheduled by
+cadence like any other Track.
 
 ## Invoking it manually
 

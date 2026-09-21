@@ -25,6 +25,18 @@ A noteworthy, user-visible change (`skills/**`, `docs/**`, `CONTEXT.md`, `README
 `.changelog.d/<slug>.md` fragment — CI enforces this. See `CONTRIBUTING.md`'s "Changelog" section
 for the fragment convention and the release recipe that consolidates them into `CHANGELOG.md`.
 
+### Docs stay in sync
+
+A change to a skill's behaviour is done only when every human-facing doc that describes it reads true against the change — in the same PR. `grep` the changed skill, Track, or term across `README.md` and `docs/` (outside `docs/adr/`) and update each hit:
+
+- Skill roster, Track selection, cadence, hand-offs → `README.md` (skills table, "How it works"), `docs/architecture.md`, `docs/playbooks/tracks.md`, `docs/playbooks/loop.md`
+- A Track's own process → its playbook (`docs/playbooks/housekeeping.md`)
+- New limits, fallbacks, or reasons a pass ends early → `docs/known-limitations.md` (troubleshooting table)
+- A design choice a user would ask "why?" about → `docs/FAQ.md`
+- New or changed vocabulary → `CONTEXT.md`
+
+`README.md` and `docs/**` explain in their own words: they cite no ADR numbers, ticket numbers, or `.scratch/` paths.
+
 ## The continuous-refactoring suite
 
 This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking them into a target repo's `.agents/skills/` (see `README.md`):
