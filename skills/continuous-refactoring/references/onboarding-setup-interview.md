@@ -1,15 +1,15 @@
-# Reference: the `loop-config` interview
+# Reference: the `onboarding-setup` interview
 
-Backs `refactor-design`'s step 1 exception for the `loop-config` node
+Backs `refactor-design`'s step 1 exception for the `onboarding-setup` node
 (`skills/refactor-design/SKILL.md`) — the one tooling-tree node whose plan
 isn't already fully specified by `skills/refactor-scan/references/tooling-tree.md`
 alone. Everywhere else, a tooling-tree node's Tool/Purpose/Fulfilment
 check/MR scope are fixed text a human already wrote once, for every target
-alike. `loop-config` is different on purpose: which tracker to use, how
+alike. `onboarding-setup` is different on purpose: which tracker to use, how
 merge requests get opened, and where the suite's own notes live are facts
 about *this* target and *this* human's preference — not something a tree
 doc can get right for every target by guessing. Run this once, the first
-time `loop-config` is chosen; it never runs again for a target whose
+time `onboarding-setup` is chosen; it never runs again for a target whose
 Refactoring Notes (see `## Explore`) already hold a `bookkeeping.md`.
 
 Four parts, in order: **Explore**, **Ask**, **Summarize**, **Record**.
@@ -39,7 +39,7 @@ Read-only. No writes, no questions yet.
   below) — if one does, that's where to look for `bookkeeping.md`; if neither
   does, check the default `docs/refactoring/`. Note whether the folder
   exists, and separately whether `bookkeeping.md` already exists inside it.
-  Should be rare to impossible on a genuinely fresh target — `loop-config`'s
+  Should be rare to impossible on a genuinely fresh target — `onboarding-setup`'s
   own Fulfilment check already gates on `bookkeeping.md` *not* existing wherever
   it resolves to. If it's there anyway (a resumed pass, an out-of-band
   write): **don't re-run the interview.** Read what's already recorded —
@@ -135,10 +135,10 @@ team, not a private or gitignored scratch space.
 Recommendation: always **Yes, default location**. On **No**: don't invent
 or wire up an alternative — out of this interview's scope. Stop here (skip
 `## Summarize`/`## Record` for whatever's still open); `refactor-design`
-reports the `loop-config` candidate as not filed this pass, reason "human
+reports the `onboarding-setup` candidate as not filed this pass, reason "human
 objected to storing the Refactoring Notes at all; the suite has no
 alternative today" — the pass ends the same way it ends when nothing
-survives prioritising. Next pass, `refactor-scan` proposes `loop-config`
+survives prioritising. Next pass, `refactor-scan` proposes `onboarding-setup`
 again from scratch and this interview runs again, since nothing was
 recorded.
 
@@ -163,22 +163,22 @@ existing files instead of fresh answers. The fourth line still names what's
 about to happen either way.)
 
 This is the one summary the human sees before `## Record` writes anything —
-`loop-config` runs exactly once per target (the resume case above aside), so
+`onboarding-setup` runs exactly once per target (the resume case above aside), so
 there's no ongoing verbosity to manage afterward. Every write named in the
 `Next:` line above gets its own short status line as it happens instead of
 running silently — one per bullet in `## Record` below (its tracker choice,
 its Refactoring Notes path, any labels it creates), plus one each for the
 issue filed and the merge request opened. This is the only place the
 convention needs stating: `refactor-design`'s and `refactor-implement`'s own
-`loop-config` exceptions already point back here for what to write, and now
+`onboarding-setup` exceptions already point back here for what to write, and now
 for announcing each write too.
 
 ## Record
 
 What `refactor-design` files as this candidate's plan
-(`skills/refactor-design/SKILL.md` step 5's `loop-config` exception);
+(`skills/refactor-design/SKILL.md` step 5's `onboarding-setup` exception);
 `refactor-implement` performs the actual writes later, from that plan
-(`skills/refactor-implement/SKILL.md` step 1's `loop-config` exception):
+(`skills/refactor-implement/SKILL.md` step 1's `onboarding-setup` exception):
 
 - **Create-mode** → the Refactoring Notes' `bookkeeping.md`'s `Create-mode`
   field — the sole write-authority. `AGENTS.md`/`CLAUDE.md` (below) gets only

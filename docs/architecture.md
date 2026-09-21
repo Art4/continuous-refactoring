@@ -42,7 +42,7 @@ Early exits are normal: no git repository ends the pass; a full backlog, a resum
 
 ### Only `refactor-learn` writes bookkeeping
 
-`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (an issue filed, a branch pushed, `Create-mode` set while delivering `loop-config`). This keeps "what changed the state" answerable by looking at one skill.
+`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (an issue filed, a branch pushed, `Create-mode` set while delivering `onboarding-setup`). This keeps "what changed the state" answerable by looking at one skill.
 
 ### Subagents and hand-back
 
@@ -74,7 +74,7 @@ State lives in the target repo, never in the conversation; every lifecycle skill
 | Housekeeping checklist | `housekeeping-template.md` |
 | Domain language, decisions | the target's `CONTEXT.md` and ADRs |
 
-`bookkeeping.md` doesn't exist on a fresh target. It comes into being through the `loop-config` node like any other node — except that its design step is a short human interview instead of a copied spec, and the interview's answers (merge request create-mode, tracker, Refactoring Notes location) are decided once.
+`bookkeeping.md` doesn't exist on a fresh target. It comes into being through the `onboarding-setup` node like any other node — except that its design step is a short human interview instead of a copied spec, and the interview's answers (merge request create-mode, tracker, Refactoring Notes location) are decided once.
 
 ## Fallbacks and self-containment
 

@@ -59,26 +59,26 @@ class DriftCheckTests(unittest.TestCase):
     seed and asserts the expected workable/withheld sets. If the script
     drifts from the prose, these tests fail."""
 
-    def test_empty_repo_workable_starts_with_loop_config(self):
-        """Prose: the first workable node after git is loop-config (required
+    def test_empty_repo_workable_starts_with_onboarding_setup(self):
+        """Prose: the first workable node after git is onboarding-setup (required
         parent: git, which is always fulfilled in the script)."""
         tmp, root = _make_repo({})
         try:
             seed = {"git": True}
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
-            self.assertEqual(workable[0], "loop-config")
+            self.assertEqual(workable[0], "onboarding-setup")
         finally:
             tmp.cleanup()
 
-    def test_loop_config_fulfilled_unblocks_editorconfig(self):
-        """Prose point 2: editorconfig is unblocked once loop-config (its
+    def test_onboarding_setup_fulfilled_unblocks_editorconfig(self):
+        """Prose point 2: editorconfig is unblocked once onboarding-setup (its
         required parent) is fulfilled."""
         tmp, root = _make_repo({})
         try:
-            seed = {"git": True, "loop-config": True}
+            seed = {"git": True, "onboarding-setup": True}
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
             self.assertIn("editorconfig", workable)
-            self.assertNotIn("loop-config", workable)
+            self.assertNotIn("onboarding-setup", workable)
         finally:
             tmp.cleanup()
 
@@ -90,7 +90,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
@@ -106,7 +106,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpunit": True,
             }
@@ -122,7 +122,7 @@ class DriftCheckTests(unittest.TestCase):
         })
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
@@ -156,7 +156,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpstan-level-0": True,
             }
@@ -175,7 +175,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "php-cs-fixer": True, "phpstan-level-0": True,
             }
@@ -194,7 +194,7 @@ class DriftCheckTests(unittest.TestCase):
         })
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpstan-level-0": True,
             }
@@ -209,7 +209,7 @@ class DriftCheckTests(unittest.TestCase):
         """Prose: php-safety-net (aggregation node) is never a candidate."""
         tmp, root = _make_repo({})
         try:
-            seed = {"git": True, "loop-config": True, "is-php-project": True, "composer": True}
+            seed = {"git": True, "onboarding-setup": True, "is-php-project": True, "composer": True}
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
             withheld = [w["node"] for w in withheld_candidates(root, fulfilled=seed)]
             self.assertNotIn("php-safety-net", workable)
@@ -221,7 +221,7 @@ class DriftCheckTests(unittest.TestCase):
         """Prose: static-code-analyzer is never a candidate."""
         tmp, root = _make_repo({})
         try:
-            seed = {"git": True, "loop-config": True, "is-php-project": True, "composer": True}
+            seed = {"git": True, "onboarding-setup": True, "is-php-project": True, "composer": True}
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
             self.assertNotIn("static-code-analyzer", workable)
         finally:
@@ -231,7 +231,7 @@ class DriftCheckTests(unittest.TestCase):
         """Prose: psalm is recognition-only, never proposed."""
         tmp, root = _make_repo({})
         try:
-            seed = {"git": True, "loop-config": True, "is-php-project": True, "composer": True}
+            seed = {"git": True, "onboarding-setup": True, "is-php-project": True, "composer": True}
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
             self.assertNotIn("psalm", workable)
         finally:
@@ -251,7 +251,7 @@ class DriftCheckTests(unittest.TestCase):
         """Prose: Open includes blocked nodes in tree order."""
         tmp, root = _make_repo({})
         try:
-            seed = {"git": True, "loop-config": True, "is-php-project": True, "composer": True}
+            seed = {"git": True, "onboarding-setup": True, "is-php-project": True, "composer": True}
             backlog = ordered_backlog(root, fulfilled=seed)
             # phpunit is blocked by phpunit's own required parent (composer)
             # which is fulfilled — but phpunit's CI gate blocks it when CI
@@ -266,7 +266,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpunit": True, "psr-4": True, "phpstan-level-0": True,
             }
@@ -283,7 +283,7 @@ class DriftCheckTests(unittest.TestCase):
             "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
         })
         try:
-            seed = {"git": True, "loop-config": True, "is-php-project": True, "composer": True}
+            seed = {"git": True, "onboarding-setup": True, "is-php-project": True, "composer": True}
             backlog = ordered_backlog(root, fulfilled=seed)
             self.assertNotIn("phpunit", backlog)
         finally:
@@ -294,7 +294,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             tree = load_tree()
-            seed = {"git": True, "loop-config": True, "is-php-project": True, "composer": True}
+            seed = {"git": True, "onboarding-setup": True, "is-php-project": True, "composer": True}
             backlog = ordered_backlog(root, tree=tree, fulfilled=seed)
             # Verify backlog is a subset of tree order, preserving relative order
             tree_order = [n for n in tree["order"] if n not in _NEVER_PROPOSED]
@@ -317,7 +317,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "php-cs-fixer": True, "phpstan-level-0": True,
                 "phpstan-level-1": True, "phpstan-level-2": True,
@@ -363,7 +363,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpstan-level-0": True,
             }
@@ -379,7 +379,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             workable = {c["node"] for c in next_candidates(root, fulfilled=seed)}
@@ -412,7 +412,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpstan-level-0": True, "php-cs-fixer": True,
             }
@@ -428,7 +428,7 @@ class DriftCheckTests(unittest.TestCase):
         tmp, root = _make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]
@@ -445,7 +445,7 @@ class DriftCheckTests(unittest.TestCase):
         })
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             workable = [c["node"] for c in next_candidates(root, fulfilled=seed)]

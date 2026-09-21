@@ -31,7 +31,7 @@ so `phpstan-level-1` through `-5` are unresolved; `psalm-taint-analysis` is alre
   — the one node an earlier pass filed an issue for (the old meaning of `Open`); the other unresolved
   nodes are not listed. `Out-of-scope`, as a list: `psalm-taint-analysis —
   out-of-scope/psalm-taint-analysis.md`.
-- Old-schema residue: `Focus areas: none` and a `Fulfilled nodes` list (`loop-config`, `composer`,
+- Old-schema residue: `Focus areas: none` and a `Fulfilled nodes` list (`onboarding-setup`, `composer`,
   `ci-runner`, `psr-4`, `php-cs-fixer`, `phpunit`, `phpstan-level-0`, the `rector-*` family) — ignored.
 - No `## Guardrails`/`## Housekeeping`/`## Investigation` sections.
 

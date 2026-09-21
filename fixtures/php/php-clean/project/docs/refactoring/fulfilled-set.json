@@ -4,7 +4,7 @@
   "composer-audit": true,
   "coverage-floor": true,
   "editorconfig": true,
-  "loop-config": true,
+  "onboarding-setup": true,
   "php-cs-fixer": true,
   "php-minimal-version": true,
   "php-safety-net": true,

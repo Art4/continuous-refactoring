@@ -20,7 +20,7 @@
 - none
 
 **Fulfilled nodes:**
-- loop-config
+- onboarding-setup
 - composer
 - ci-runner
 - psr-4

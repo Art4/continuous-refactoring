@@ -92,7 +92,7 @@ class NonPhpProjectSignalTests(unittest.TestCase):
             (root / ".git").mkdir()
             (root / "package.json").write_text('{"name": "not-php"}')
             proposed = {c["node"] for c in next_candidates(root)}
-            self.assertTrue(proposed.issubset({"loop-config", "composer", "ci-runner"}))
+            self.assertTrue(proposed.issubset({"onboarding-setup", "composer", "ci-runner"}))
 
     def test_next_never_proposes_a_php_leaf_before_composer(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -100,7 +100,7 @@ class NonPhpProjectSignalTests(unittest.TestCase):
             (root / ".git").mkdir()
             (root / "package.json").write_text('{"name": "not-php"}')
             proposed = {c["node"] for c in next_candidates(root)}
-            self.assertTrue(proposed.issubset({"loop-config", "composer", "ci-runner"}))
+            self.assertTrue(proposed.issubset({"onboarding-setup", "composer", "ci-runner"}))
 
 
 if __name__ == "__main__":

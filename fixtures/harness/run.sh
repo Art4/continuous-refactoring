@@ -314,8 +314,8 @@ run_agent_loop() {
     log_info "=== Agent loop (full pass, subagent-observed) — fixture: $FIXTURE ==="
 
     # docs/agents/issue-tracker.md is deliberately NOT pre-seeded here — the
-    # loop-config interview (skills/continuous-refactoring/references/
-    # loop-config-interview.md) is what's supposed to create it, and this
+    # onboarding-setup interview (skills/continuous-refactoring/references/
+    # onboarding-setup-interview.md) is what's supposed to create it, and this
     # sandbox has no `origin` remote, so Explore finds nothing and the
     # interview's own recommendation should converge on Local Markdown on
     # its own. Pre-seeding it would skip the one thing this dry-run mode
@@ -361,10 +361,10 @@ to run it.
 
 Run exactly one pass. Where the skill text is ambiguous or you have to guess
 at a behavior it doesn't spell out, do not silently improvise past it and do
-not edit the skill files — note the ambiguity instead. If the loop-config
+not edit the skill files — note the ambiguity instead. If the onboarding-setup
 interview runs and there is nobody here to answer it, follow its own
 "## If no human is present to ask" section (skills/continuous-refactoring/
-references/loop-config-interview.md) rather than guessing past it. When the
+references/onboarding-setup-interview.md) rather than guessing past it. When the
 pass ends (or stops itself per its own completion criterion), append your
 findings to:
     $friction_file
@@ -738,8 +738,8 @@ run_safety_net_track() {
         php-safety-net-old-schema)
             _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md. This repo's docs/refactoring/bookkeeping.md is still in the pre-existing shape (Fulfilled nodes, global Pending candidates, no Safety Net section). Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            if grep -q "loop-config" "$bookkeeping" 2>/dev/null; then
-                log_pass "Pre-existing Fulfilled nodes content (loop-config) still present, untouched"
+            if grep -q "onboarding-setup" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing Fulfilled nodes content (onboarding-setup) still present, untouched"
             else
                 log_fail "Pre-existing Fulfilled nodes content is gone — see $bookkeeping"
             fi
@@ -785,7 +785,7 @@ run_safety_net_track() {
             _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Fulfilled nodes/Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
             local out="/tmp/safety-net-track-$FIXTURE-scan.log"
-            if grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null && grep -q "loop-config" "$bookkeeping" 2>/dev/null; then
+            if grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null && grep -q "onboarding-setup" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing Fulfilled nodes residue still present, untouched"
             else
                 log_fail "Pre-existing Fulfilled nodes residue is gone — see $bookkeeping"
@@ -1031,7 +1031,7 @@ run_housekeeping_track() {
         php-housekeeping-old-schema)
             _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-housekeeping/references/housekeeping-track.md literally. This target's bookkeeping.md is still in the old shape (Fulfilled nodes present, no ## Housekeeping section). The reconciliation should walk the tooling tree and judge fulfilment via agent judgement, NOT by reading Fulfilled nodes. Report explicitly: (1) did the pass run normally without erroring on the old Fulfilled nodes field, (2) which nodes got their Housekeeping lines, and (3) was ## Housekeeping created."
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            if grep -q "loop-config" "$bookkeeping" 2>/dev/null && grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null; then
+            if grep -q "onboarding-setup" "$bookkeeping" 2>/dev/null && grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing Fulfilled nodes content still present, untouched"
             else
                 log_fail "Pre-existing Fulfilled nodes content is gone — see $bookkeeping"

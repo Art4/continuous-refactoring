@@ -20,7 +20,7 @@
 - psalm-taint-analysis — out-of-scope/psalm-taint-analysis.md
 
 **Fulfilled nodes:**
-- loop-config
+- onboarding-setup
 - composer
 - ci-runner
 - psr-4

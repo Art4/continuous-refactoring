@@ -5,8 +5,8 @@ Optional, human-initiated only — the Housekeeping Track's own `Cadence` field
 defaults to `7` (days) silently on this Track's first-ever scheduler-driven run
 (`skills/continuous-housekeeping/references/housekeeping-track.md`'s own *First-run cadence* section) —
 this interview never blocks that. Run it any time a human wants to reconsider the interval through a
-guided question instead of hand-editing the number directly; mirrors `loop-config-interview.md`'s shape
-(`skills/continuous-refactoring/references/loop-config-interview.md`) at a much smaller scale: one
+guided question instead of hand-editing the number directly; mirrors `onboarding-setup-interview.md`'s shape
+(`skills/continuous-refactoring/references/onboarding-setup-interview.md`) at a much smaller scale: one
 question, not three.
 
 ## Ask

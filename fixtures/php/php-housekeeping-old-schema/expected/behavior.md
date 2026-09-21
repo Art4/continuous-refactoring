@@ -11,7 +11,7 @@ same non-CI, local-only, advisory posture as `decision-gate-bypass`.
 ## Seeded state
 
 `docs/refactoring/bookkeeping.md` in the pre-ADR-0055 shape: `Fulfilled nodes` already lists
-`loop-config`, `composer`, `php-cs-fixer`, `phpunit`, `phpstan-level-0` (no issue numbers —
+`onboarding-setup`, `composer`, `php-cs-fixer`, `phpunit`, `phpstan-level-0` (no issue numbers —
 predates that convention), `Pending candidates: - none`. **No `## Safety Net`, `## Guardrails`,
 or `## Housekeeping` heading anywhere in the file.** The project genuinely fulfils those nodes
 (`composer.json` + `.php-cs-fixer.php` + `phpunit.xml` + `phpstan.neon` with level 0 and empty

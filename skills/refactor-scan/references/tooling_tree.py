@@ -18,7 +18,7 @@ import re
 
 _HERE = pathlib.Path(__file__).resolve().parent
 TREE_MD = _HERE / "php-tooling-tree.md"
-# Generic root: git -> loop-config, and the structural-scan node that PHP's
+# Generic root: git -> onboarding-setup, and the structural-scan node that PHP's
 # tree leaves point into via `resolved` edges.
 GENERIC_TREE_MD = _HERE / "tooling-tree.md"
 
@@ -365,7 +365,7 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
     """Where the suite keeps its own state in this target repo — the
     Refactoring Notes. Default docs/refactoring/; overridden by a
     `Refactoring Notes: `<path>`` line in the target's AGENTS.md or
-    CLAUDE.md (loop-config's own interview writes this once, into whichever
+    CLAUDE.md (onboarding-setup's own interview writes this once, into whichever
     of the two already existed — never both) — see
     skills/continuous-refactoring/references/refactoring-bookkeeping.md for the
     exact line format this parses."""

@@ -6,5 +6,5 @@
 - none
 
 **Fulfilled nodes:**
-- loop-config
+- onboarding-setup
 - composer

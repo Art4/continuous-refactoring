@@ -57,7 +57,7 @@ Every deterministic PHP-tooling-tree node resolved (fulfilled or explicitly reje
 A static HTML/CSS/JS site — `index.html`, `styles.css`, `script.js` — no `composer.json`, no `*.php` file
 anywhere. Stands in for a target like `continuous-refactoring.de`. Tests **`is-php-project`'s gate**
 (`skills/refactor-scan/references/tooling-tree.md`, ADR-0022): `is-php-project` unfulfilled keeps
-`composer`/`php-minimal-version` and everything beneath them out of `next` — only `loop-config`,
+`composer`/`php-minimal-version` and everything beneath them out of `next` — only `onboarding-setup`,
 `ci-runner`, and `editorconfig` (all language-neutral) are real candidates; `next` is the fixture's
 real signal for the gate.
 
@@ -518,7 +518,7 @@ Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010
 What it does:
 
 1. Reuses `setup_fixture` — isolated copy at `/tmp/continuous-refactoring-tests/<fixture>`, fresh git repo, no remote (safe to commit/branch inside freely).
-2. Seeds `docs/agents/triage-labels.md`, a minimal `CONTEXT.md`, and `docs/adr/` — but deliberately **not** `docs/agents/issue-tracker.md`: with no `origin` remote in this sandbox, that file is left for the subagent's own `loop-config` interview (`skills/continuous-refactoring/references/loop-config-interview.md`) to create, converging on Local Markdown on its own — pre-seeding it would skip the one thing this dry-run mode exists to actually exercise.
+2. Seeds `docs/agents/triage-labels.md`, a minimal `CONTEXT.md`, and `docs/adr/` — but deliberately **not** `docs/agents/issue-tracker.md`: with no `origin` remote in this sandbox, that file is left for the subagent's own `onboarding-setup` interview (`skills/continuous-refactoring/references/onboarding-setup-interview.md`) to create, converging on Local Markdown on its own — pre-seeding it would skip the one thing this dry-run mode exists to actually exercise.
 3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one pass, note (don't silently fix) ambiguity, follow the interview's own "no human present" fallback if nobody's here to answer it, write friction notes to `agent-loop-friction-<fixture>.md`.
 4. Prints the sandbox and prompt paths and stops — spawn the subagent yourself (Agent tool, `run_in_background: false`, prompt = the file's contents) and let it run.
 
@@ -530,7 +530,7 @@ assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/docs/refactori
 assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2 = after setup_fixture's init + tracker-seed commits
 ```
 
-`php-partial` is a good default target — no `docs/refactoring/bookkeeping.md` yet, so a pass exercises the `loop-config` bootstrap exception before reasoning about `composer`'s children. Any fixture name works; nothing here depends on `php-partial` specifically.
+`php-partial` is a good default target — no `docs/refactoring/bookkeeping.md` yet, so a pass exercises the `onboarding-setup` bootstrap exception before reasoning about `composer`'s children. Any fixture name works; nothing here depends on `php-partial` specifically.
 
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting

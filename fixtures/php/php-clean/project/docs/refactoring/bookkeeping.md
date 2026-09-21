@@ -8,7 +8,7 @@
 - none
 
 **Fulfilled nodes:**
-- loop-config
+- onboarding-setup
 - composer
 - ci-runner
 - php-cs-fixer

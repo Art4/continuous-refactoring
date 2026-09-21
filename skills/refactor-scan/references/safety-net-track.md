@@ -6,9 +6,9 @@ whether it's due this pass, and how a node's Fulfilment check gets judged once i
 
 ## Scope
 
-Every tooling-tree node reachable before `structural-scan` opens, except `git`, `loop-config`, and the
+Every tooling-tree node reachable before `structural-scan` opens, except `git`, `onboarding-setup`, and the
 language specialization's own recognition gate (`is-php-project` for PHP) — those stay outside every
-Track: `loop-config` remains its own mandatory human interview (`CONTEXT.md`'s **Onboarding** entry),
+Track: `onboarding-setup` remains its own mandatory human interview (`CONTEXT.md`'s **Onboarding** entry),
 since `bookkeeping.md` doesn't exist yet and its own decisions are genuine preferences no scan can
 derive. Concretely, for PHP: every
 node in `skills/refactor-scan/references/php-tooling-tree.md` that isn't itself Guardrails-gated
