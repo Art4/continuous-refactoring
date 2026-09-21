@@ -1,7 +1,5 @@
 # Bookkeeping writes go through their own merge request, never straight to the default branch
 
-> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the `loop-config`-in-flight exception described under Consequences no longer exists — onboarding writes its files directly, with no candidate branch.
->
 > Amends [ADR-0009](0009-merge-request-outlook-and-delivered-label.md): the labels, description shape, and outlook rules decided there are unchanged. What changes is how `refactor-learn`'s writes physically land — through their own merge request, not a direct commit to the default branch.
 >
 > Amended by [ADR-0012](0012-remembered-merge-requests-follow-the-tracker.md): this rule no longer applies to `docs/refactoring/merge-requests.md` when the target's issue tracker natively supports labels — there is nothing to commit in that case. It still governs `config.md`, ADRs, `CONTEXT.md`, and `merge-requests.md` itself when the target has no such tracker.

@@ -1,17 +1,13 @@
 # Onboarding is step 0 of the dispatcher, and the `loop-config` node becomes `onboarding-setup`
 
-> Supersedes in part [ADR-0024](0024-loop-config-interview-decides-tracker-create-mode-storage.md): the
-> interview it introduced (tracker, create-mode, Refactoring Notes location) stays, but no longer runs as the
-> design step of a `loop-config` candidate — the dispatcher runs it directly and its answers are written
-> without a plan/issue/merge request in between. Supersedes in part
-> [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md) and
-> [ADR-0028](0028-native-tracker-in-flight-bookkeeping-rides-the-candidate-branch.md): the
-> `loop-config`-in-flight exception disappears, because onboarding no longer has a candidate branch.
-> Supersedes in part [ADR-0047](0047-tooling-tree-proposals-are-pre-filed-before-ranking.md) and
-> [ADR-0029](0029-native-tracker-design-skips-the-pending-candidate-write.md): the "no `bookkeeping.md` yet
-> → propose only `loop-config`" scan precondition and the `loop-config` exceptions in design and implement
-> are removed. Amends [ADR-0025](0025-agents-md-gets-a-create-mode-pointer-not-the-value.md): the pointer
-> section in `AGENTS.md`/`CLAUDE.md` now also records `refactor:priority`, next to `refactor:candidate`.
+> Supersedes in part [ADR-0024](0024-loop-config-interview-decides-tracker-create-mode-storage.md) and
+> [ADR-0057](0057-refactor-loop-and-per-track-skills.md): the interview ADR-0024 introduced stays, but is
+> now the dispatcher's own step 0 rather than the design step of a `loop-config` candidate; the dispatcher
+> ADR-0057 shrank to "Track selection and dispatch only" now also onboards. Amends
+> [ADR-0025](0025-agents-md-gets-a-create-mode-pointer-not-the-value.md): the pointer section in
+> `AGENTS.md`/`CLAUDE.md` now also records the backlog labels. The `loop-config`-specific exceptions and
+> preconditions in ADR-0011, -0028, -0029 and -0047 no longer exist (onboarding has no candidate branch), but
+> the decisions of those ADRs otherwise still hold.
 > [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md)'s **Onboarding** phase stands; this ADR only
 > changes how its first step is carried out.
 
@@ -54,10 +50,14 @@ an issue and opened a merge request, and never told the maintainer that the engi
   written, or continue) → tracker (skipped when the issue-tracker file exists), create-mode, Refactoring
   Notes location → an informational summary with no approval gate → the writes, one status line each →
   the closing text. **Setup is detected from the repo**: both `docs/agents/triage-labels.md` and
-  `docs/agents/issue-tracker.md` exist, or it counts as incomplete.
-- **Write order and resume.** `bookkeeping.md` is written last — its existence is the "onboarding complete"
-  marker. Partial state from an interrupted run is recognised, confirmed in the summary and completed
-  without re-asking what is on record; nothing is overwritten silently. (`Create-mode`, whose only home is
+  `docs/agents/issue-tracker.md` exist, or it counts as incomplete. The setup-gap question is the only
+  choice that can end onboarding without writing; the Refactoring Notes folder is a requirement, so the
+  location question has no "don't store them" option.
+- **Write order and resume.** The suite's section in `AGENTS.md`/`CLAUDE.md` is written first — the
+  "onboarding started" marker, whose presence on a later run skips the setup-gap question — and
+  `bookkeeping.md` last, the "onboarding complete" marker. Partial state from an interrupted run is
+  recognised, confirmed in the summary and completed without re-asking what is on record; nothing is
+  overwritten silently. (`Create-mode`, whose only home is
   `bookkeeping.md`, is the one answer an interruption can lose.)
 - **Labels.** Recorded only in files. With the setup present: `refactor:candidate`/`refactor:priority` in the
   `AGENTS.md`/`CLAUDE.md` section, plus a `done` row appended to the label table on a Local Markdown tracker.
@@ -66,8 +66,8 @@ an issue and opened a merge request, and never told the maintainer that the engi
   on GitHub/GitLab a closed issue is done, and no path of the suite applies a `done` label there.
 - **Missing labels on the forge.** GitLab's API creates a project label when an issue is filed with one that
   doesn't exist; GitHub does not — `gh issue create --label` fails for a missing label — so the GitHub
-  closing text lists ready-to-copy `gh label create` commands for the labels found missing. GitLab needs no
-  instruction.
+  closing text always lists both ready-to-copy `gh label create` commands. GitLab needs no instruction
+  (verified against the API documentation only, not the `glab` client).
 - **Internal skills abort without notes.** `refactor-loop` (next to its Track check) and
   `continuous-housekeeping` (which doesn't go through the loop) stop and point at `/continuous-refactoring`
   when there is no `bookkeeping.md`. The scan's cold-start precondition is removed — a second abort there
@@ -84,8 +84,8 @@ an issue and opened a merge request, and never told the maintainer that the engi
 - **PHP minimum-version line.** The exception that had the onboarding merge request contribute the
   `php-minimal-version` Housekeeping line moves nowhere: that node belongs to the Guardrails scope (the first
   Safety Net write never evaluates it), and the Housekeeping Track's own reconciliation already adds the line
-  of any fulfilled node without a delivering merge request. The exception is dropped, with a note in the
-  known-limitations page.
+  of any fulfilled node without a delivering merge request. The exception is dropped; such a target's line
+  arrives with its first Housekeeping cycle.
 
 ## Consequences
 

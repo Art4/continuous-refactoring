@@ -1,5 +1,7 @@
 # `continuous-refactoring` splits into a thin dispatcher, a track-agnostic `refactor-loop`, and four per-Track skills
 
+> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): `continuous-refactoring/SKILL.md` no longer does Track selection and dispatch only — it also onboards a target with no `bookkeeping.md` as step 0 before selecting a Track.
+>
 > Amends [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): "The scheduler lives in
 > `continuous-refactoring/SKILL.md`, at the start of a pass; `refactor-scan` becomes Track-aware" stays
 > true for the scheduler itself, but the pass pipeline (scan → learn → prioritize → design → implement

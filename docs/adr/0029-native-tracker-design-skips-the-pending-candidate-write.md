@@ -1,7 +1,5 @@
 # On a native-label tracker, `refactor-design` skips writing `Pending candidates`
 
-> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the `loop-config` exception mentioned in the Decision section no longer exists.
->
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its core discipline —
 > bookkeeping writes always go out through a review — is unaffected for every write this ADR
 > doesn't name. What narrows is one specific write: on a native-label tracker,

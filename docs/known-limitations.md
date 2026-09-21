@@ -21,7 +21,8 @@ couldn't confirm.
 Without a reachable git remote the loop has nowhere to push or open a merge request, in any create-mode.
 It prepares the branch and its commits locally and stops there.
 
-**Fix:** either commit the branch yourself (skipping review — reasonable for a low-stakes change) or push it and open the merge request yourself. The candidate stays in its
+**Fix:** either commit the branch yourself (skipping review — reasonable for a first, low-stakes change
+such as the initial config) or push it and open the merge request yourself. The candidate stays in its
 "merge request open" state; a later pass detects it delivered once your action lands it.
 
 ## Without `gh`/`glab`, merged and closed merge requests are detected from git only
@@ -71,13 +72,6 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 
 Onboarding records the two backlog labels (`refactor:candidate`, `refactor:priority`) in your `AGENTS.md`/`CLAUDE.md` but creates
 nothing on the forge. On GitHub, filing an issue with a label that doesn't exist yet fails, so the closing
-text lists ready-to-copy `gh label create` commands for the labels it found missing; run them once before the
+text lists ready-to-copy `gh label create` commands for both; run them once before the
 first pass. GitLab creates a missing project label when an issue is filed with it, so nothing is needed there.
 Local Markdown trackers need no labels.
-
-## PHP minimum-version housekeeping line can arrive late
-
-A target whose declared PHP floor is already sufficient never gets a merge request from the PHP-minimum-version
-node, so its "check for a newer PHP patch/minor release" line isn't contributed at delivery time. It reaches
-`housekeeping-template.md` through the Housekeeping Track's own reconciliation instead — on the first
-Housekeeping cycle rather than at onboarding.

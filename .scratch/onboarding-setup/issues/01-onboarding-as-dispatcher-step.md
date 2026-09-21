@@ -7,7 +7,7 @@ dispatcher**: it asks the interview questions, writes the files, tells the human
 and ends the invocation — the next invocation starts the Safety Net scan. No issue, no merge request, no scan / prioritise /
 design / implement / learn. Rename the tooling-tree node `loop-config` to `onboarding-setup` (Name "Onboarding Setup").
 
-**Status:** ready-for-agent
+**Status:** done — PR pending
 
 ## Decided behaviour (grilled with the maintainer)
 
@@ -50,25 +50,25 @@ design / implement / learn. Rename the tooling-tree node `loop-config` to `onboa
 
 ## Tasks
 
-- [ ] **A. Rename** (first commit, purely mechanical): `git mv` `tooling-tree/loop-config.md` → `onboarding-setup.md` and
+- [x] **A. Rename** (first commit, purely mechanical): `git mv` `tooling-tree/loop-config.md` → `onboarding-setup.md` and
       `loop-config-interview.md` → `onboarding-setup-interview.md`; replace the slug everywhere except `docs/adr/00*.md`,
       `.scratch/**`, `CHANGELOG.md`, existing `.changelog.d/*`; display name "Refactoring Config" → "Onboarding Setup";
       slug seeds in `scripts/drift_check.py`, `test_tooling_tree.py`, `test_trigger_controls.py`; fixtures
       (`fulfilled-set.json`, ignored "Fulfilled nodes" lists), `fixtures/harness/run.sh`, `fixtures/README.md`.
-- [ ] **B. Dispatcher:** step 0 in `skills/continuous-refactoring/SKILL.md`; adapt intro, description, completion criterion.
-- [ ] **C. Interview reference:** owner = dispatcher; extended Explore; setup-gap question; Summarize (files + recorded labels,
+- [x] **B. Dispatcher:** step 0 in `skills/continuous-refactoring/SKILL.md`; adapt intro, description, completion criterion.
+- [x] **C. Interview reference:** owner = dispatcher; extended Explore; setup-gap question; Summarize (files + recorded labels,
       no issue/MR, no gate); Record executed directly, `bookkeeping.md` last, no `Pending candidates`; new Closing; "no human"
       case; `triage-labels.md` template reference compatible with the matt-pocock one.
-- [ ] **D. Clean up the loop:** aborts in `refactor-loop` / `continuous-housekeeping`; drop `refactor-scan` precondition;
+- [x] **D. Clean up the loop:** aborts in `refactor-loop` / `continuous-housekeeping`; drop `refactor-scan` precondition;
       remove or rewrite the exceptions in `refactor-design`, `refactor-implement`, `refactor-learn`, `refactor-prioritize`,
       `opening-a-merge-request.md`, `local-issue-tracker-template.md`, `refactoring-bookkeeping.md`, `safety-net-track.md`,
       `tooling-tree.md`; rewrite `tooling-tree/onboarding-setup.md`; re-home the `php-minimal-version` line.
-- [ ] **E. Docs** (own words, no ADR/ticket numbers): README callout on the optional matt-pocock setup before "Quick start" +
+- [x] **E. Docs** (own words, no ADR/ticket numbers): README callout on the optional matt-pocock setup before "Quick start" +
       quick-start step 1; `docs/FAQ.md` ("Do I need the matt-pocock skills?", "Why two invocations?");
       `docs/known-limitations.md`; `docs/architecture.md`; `docs/playbooks/loop.md`, `tracks.md`; `CONTEXT.md`
       (**Onboarding**, **Tooling tree**); new ADR recording the decision, the rename and the rejected alternatives; changelog
       fragment `.changelog.d/onboarding-as-dispatcher-step.md`.
-- [ ] **F. Fixtures/harness:** `fixtures/harness/run.sh` interview references; fixtures without `bookkeeping.md` expect the
+- [x] **F. Fixtures/harness:** `fixtures/harness/run.sh` interview references; fixtures without `bookkeeping.md` expect the
       onboarding stop instead of a `loop-config` proposal.
 - [ ] Before every push: `python3 -m unittest discover -s scripts -p 'test_*.py'` and
       `python3 scripts/validate_skills.py .` green; fixture/parser changes also need the relevant
@@ -250,3 +250,38 @@ and stays as the tree's root prerequisite, fulfilled by the dispatcher before an
 - Work on branch `feat/onboarding-setup-dispatcher-step`; the rename is its own first commit. Before every push run the
   unit tests and the validator; fixture/parser changes also need the relevant harness tier. Deliver through a pull request,
   never a direct commit to `main`.
+
+### 2026-09-21 — Implementation notes (branch `feat/onboarding-setup-dispatcher-step`, PR pending)
+
+**Open items, as resolved**
+
+1. **Missing labels on the forge.** GitLab: the official REST API docs for creating an issue say "If a label does
+   not already exist, this creates a new project label and assigns it to the issue" — verified for the API only,
+   not for the `glab` client. GitHub: the official `gh issue create` manual only says `--label` "Add labels by
+   name" and is silent on missing labels; the failure ("could not add label: … not found") is documented only in
+   community sources (community discussion #35377, cli/cli #3284). So the GitHub closing text always lists both
+   `gh label create "<name>" --description "…" --force` commands (`--force` is in the official `gh label create`
+   manual); GitLab and Local Markdown get no instruction.
+2. **`done` label.** No forge path of the suite applies a `done` label. The one ambiguity was `refactor-learn`'s
+   "mark `done`", now worded as: on GitHub/GitLab closing the issue is done, never a `done` label; `done` is a label
+   only on a Local Markdown tracker.
+3. **`php-minimal-version` Housekeeping line.** Dropped. The node is Guardrails-scoped, so the first Safety Net
+   bookkeeping write never evaluates it, and the Housekeeping Track's own reconciliation already adds the line of
+   any fulfilled node with no delivering merge request — it arrives with the first Housekeeping cycle. Recorded in
+   the new ADR only (not in `docs/known-limitations.md`: internal behaviour, not something a user hits).
+
+**Process.** `/implement` could not be invoked from the implementing subagent (the skill is user-invocation
+only), so the tasks were implemented directly. Two `/code-review` rounds (Standards and Spec axes) ran against the
+first implementation; the findings were fixed in follow-up commits: resume no longer re-asks the setup-gap question
+(the suite's own `AGENTS.md`/`CLAUDE.md` section is written first as the "onboarding started" marker,
+`bookkeeping.md` last); the setup gap is the only abort point (the Refactoring Notes are a requirement, Q3 only asks
+where); the backlog-labels line dropped its "native tracker only" qualifier; label overrides are only recorded in
+the not-set-up path; both `gh label create` commands are always listed; the missing fixtures were added (abort,
+direct Track invocation, second invocation, one-file partial state); the triage-label table has one source
+(`triage-labels-template.md`); the "not onboarded yet" abort text is defined once in `refactoring-bookkeeping.md`;
+CONTEXT.md, the node doc and the ADR banners were tightened (superseded-in-part banners only on ADR-0024, -0025 and
+-0057).
+
+**Outstanding.** A live dry run of the onboarding (Verification 2–4) has not been done — every `php-onboarding-*`
+fixture's `expected/behavior.md` is marked "not yet manually confirmed live". Unit tests, `drift_check`, the skill
+validator and harness tier 2 are green.
