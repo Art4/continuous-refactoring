@@ -25,7 +25,7 @@ flowchart LR
     HK --> Learn
 ```
 
-Each invocation is one **loop pass**: pick the Track that is due, run it, record what was learned. A thin data pipe carries each skill's output to the next skill's input — no skill re-derives its own context from shared state.
+Each invocation is one **loop pass**: pick the Track that is due, run it, record what was learned. The very first invocation on a project is the exception: it only **onboards** the project (a short interview, a few setup files) and stops. A thin data pipe carries each skill's output to the next skill's input — no skill re-derives its own context from shared state.
 
 The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md); the first specialization is a **[general PHP project](skills/refactor-scan/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
 
@@ -46,7 +46,7 @@ Tracks that adopt tooling work through their open items one node per pass, top t
 
 | Skill | Purpose |
 |---|---|
-| `continuous-refactoring` | The one entry point — a thin dispatcher: selects the Track due this pass (cadence or on-demand) and hands it to that Track's skill |
+| `continuous-refactoring` | The one entry point — a thin dispatcher: onboards a project that has never run the loop, otherwise selects the Track due this pass (cadence or on-demand) and hands it to that Track's skill |
 | `refactor-scan` | Propose every currently-unblocked tooling-tree node from `bookkeeping.md`; detect (never file) closed/merged issues and MRs |
 | `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects and files the concrete candidate |
 | `refactor-design` | Ground/grill the candidate → plan, filed or commented onto its issue |
@@ -65,11 +65,11 @@ ln -s /path/to/continuous-refactoring/skills/* <target>/.agents/skills/
 
 Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skills/`), a symlink on the `skills/` directories there is enough.
 
-The target project needs the engineering-skills setup (`setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills), see [aihero.dev](https://www.aihero.dev/): issue-tracker config, triage labels, domain docs). If it's missing, `/continuous-refactoring` points that out.
+> **Recommended, not required — the engineering-skills setup.** `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)) configures the issue tracker, triage labels and domain docs the suite reads. Run it first if you can. Without it the first `/continuous-refactoring` notices, asks whether to stop and set it up or to continue, and writes a minimal issue-tracker file and label table itself; running the setup later updates those files in place.
 
 ## Quick start
 
-1. **Start the loop:** `/continuous-refactoring` — the first pass walks you through a short config interview, then scaffolds `docs/refactoring/`. The loop has no cadence of its own; trigger it however often fits (by hand, or your own scheduler such as `/schedule` or `/loop`). Each pass picks whichever of the four Tracks is most overdue and works that one — Housekeeping's weekly sweep needs no separate opt-in step.
+1. **Start the loop:** `/continuous-refactoring` — on a project that has never run it, this first invocation only **onboards**: a short config interview, then it writes `docs/refactoring/` and the other setup files, tells you what it did, and stops without scanning anything. Commit those files, then run `/continuous-refactoring` again — that second invocation starts the first real pass. The loop has no cadence of its own; trigger it however often fits (by hand, or your own scheduler such as `/schedule` or `/loop`). Each pass picks whichever of the four Tracks is most overdue and works that one — Housekeeping's weekly sweep needs no separate opt-in step.
 2. **Optional — force a specific Track:** name one directly when invoking `/continuous-refactoring` (e.g. "run the Housekeeping Track") to bypass the scheduler's own staleness comparison for this pass.
 3. **Review and merge** the merge requests the loop opens. With two already open, a pass ends without new work until you merge or close one.
 

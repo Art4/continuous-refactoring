@@ -2,7 +2,7 @@
 
 Rules for any suite skill opening or basing a merge request (MR): `refactor-implement` for a candidate, `refactor-learn` for a bookkeeping MR.
 
-**Create-mode.** Read the Refactoring Notes' `bookkeeping.md`'s `Create-mode` field and follow it — `autonomous`, `ask-each-time`, or `human-opens`. Decided exactly once, during `loop-config`'s own interview (`skills/continuous-refactoring/references/loop-config-interview.md`) — not inferred fresh per merge request, not deferred to `refactor-learn`. That interview reads `AGENTS.md`/`CLAUDE.md` first: either already names a mode → that becomes the recommended (not automatic) answer put to the human; neither does → the recommended answer is `autonomous`. Either way, the human decides, and the answer lands in `Create-mode` when `refactor-implement` creates `bookkeeping.md`. `refactor-learn` follows the same field for its own bookkeeping MR — it no longer decides the mode itself, except a narrow fallback for a `bookkeeping.md` that predates this convention.
+**Create-mode.** Read the Refactoring Notes' `bookkeeping.md`'s `Create-mode` field and follow it — `autonomous`, `ask-each-time`, or `human-opens`. Decided exactly once, during the dispatcher's onboarding step (`skills/continuous-refactoring/references/onboarding-setup-interview.md`) — not inferred fresh per merge request, not deferred to `refactor-learn`. That interview reads `AGENTS.md`/`CLAUDE.md` first: either already names a mode → that becomes the recommended (not automatic) answer put to the human; neither does → the recommended answer is `autonomous`. Either way, the human decides, and the answer lands in `Create-mode` when the onboarding step writes `bookkeeping.md`. `refactor-learn` follows the same field for its own bookkeeping MR — it no longer decides the mode itself, except a narrow fallback for a `bookkeeping.md` that predates this convention.
 
 **Vocabulary.** Skills always say **merge request**; talking to the human, use the forge's own word (pull request on GitHub, merge request on GitLab).
 
@@ -16,7 +16,7 @@ Rules for any suite skill opening or basing a merge request (MR): `refactor-impl
 
 **No forge/remote available.** `git remote -v` (or equivalent) shows nothing, or the configured remote can't be reached — there is nowhere to push to, in any create-mode. This is not the same situation `git-only-reconciliation.md` covers (that's "a remote exists, only the API is unavailable") — here there's no remote at all. Don't invent a substitute: no local-only "merge request," no direct commit to the default branch. Stop at this step and hand the branch to the human with both options named:
 
-- **They commit it themselves** — merge or cherry-pick the branch into the default branch by hand, skipping review. Reasonable for a low-stakes, first-ever change (`loop-config` itself is the common case).
+- **They commit it themselves** — merge or cherry-pick the branch into the default branch by hand, skipping review. Reasonable for a low-stakes change.
 - **They push and open the merge request themselves**, once forge access exists — the branch and its commits stay exactly as prepared, nothing about them changes.
 
 Name the branch and what it contains in the closing report. Leave the candidate's own state exactly as if its merge request were still open (label, `Pending candidates`) — a later pass detects it delivered once the human's own action lands it, via `git-only-reconciliation.md`'s no-remote variant, the same as any merge request closing outside the loop's own action.

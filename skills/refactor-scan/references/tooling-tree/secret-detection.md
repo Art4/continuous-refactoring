@@ -10,7 +10,7 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
   (the Security signal), it doesn't hold up structural work the way the tree's deterministic-tooling
   leaves do. Proposed and ranked through the ordinary scan/prioritize cycle like any other node.
 - **Required parent:** `structural-scan` (`tooling-tree.md`'s own gate) — a **Signal wave** node
-  (`CONTEXT.md`): proposed only once the Safety Net has closed, not from `loop-config` directly, so a
+  (`CONTEXT.md`): proposed only once the Safety Net has closed, not from `onboarding-setup` directly, so a
   target's very first passes are never asked to wire up a secret scanner before the deterministic
   Safety Net has even settled. Stays outside
   `php-safety-net` on purpose — it's language-neutral, gated on the generic root's own

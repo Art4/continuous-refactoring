@@ -1,4 +1,4 @@
-# Refactoring Loop Config
+# Refactoring Bookkeeping
 
 **Create-mode:** autonomous
 
@@ -18,7 +18,7 @@
 - none
 
 **Fulfilled nodes:**
-- loop-config
+- onboarding-setup
 - composer
 
 ## Guardrails

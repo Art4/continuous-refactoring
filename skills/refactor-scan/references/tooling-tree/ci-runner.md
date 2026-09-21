@@ -6,7 +6,7 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
 - **Tool:** GitHub Actions / GitLab CI
 - **Purpose:** an existing pipeline that later hosts quality jobs. Language-neutral — a CI pipeline is
   useful regardless of which language specialization (if any) ends up active, so it stays a direct
-  `loop-config` child here rather than gated behind any specialization's recognition gate. Referenced
+  `onboarding-setup` child here rather than gated behind any specialization's recognition gate. Referenced
   externally by `skills/refactor-scan/references/php-tooling-tree.md` for the PHP-specific edges that hang
   off it (`ci-runner → php-minimal-version`, `ci-runner → composer-audit`) — the same way that document
   already references `editorconfig`

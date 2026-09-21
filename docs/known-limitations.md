@@ -54,7 +54,7 @@ conversation.
 
 ## Troubleshooting: why did the pass end without doing anything?
 
-The closing report's **Status** line always says why. The usual reasons:
+The closing report's **Status** line (or, for onboarding, its closing text) always says why. The usual reasons:
 
 | Status says | Cause | What to do |
 |---|---|---|
@@ -64,4 +64,14 @@ The closing report's **Status** line always says why. The usual reasons:
 | Two merge requests already open | The suite-wide cap | Review and merge or close one |
 | Candidate waiting on `ready-for-agent` | The design step left an open question (`needs-info`) | Answer it on the issue, then add `ready-for-agent` |
 | Safety Net walk: nodes skipped | Blocked by an unfulfilled parent, `needs-info`, or an unverified PHP floor | Read each reason; adopt the parent, answer the question, or reject the node |
+| Onboarding wrote setup files and stopped | The project had no `bookkeeping.md`, so this invocation only onboarded it | Commit the new files to the default branch, rerun `/continuous-refactoring` |
+| Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no `bookkeeping.md` | Run `/continuous-refactoring` first |
 | Housekeeping: nothing registered to check | No node has contributed a housekeeping check yet | Expected on a young target |
+
+## Onboarding: GitHub backlog labels are not created for you
+
+Onboarding records the two backlog labels (`refactor:candidate`, `refactor:priority`) in your `AGENTS.md`/`CLAUDE.md` but creates
+nothing on the forge. On GitHub, filing an issue with a label that doesn't exist yet fails, so the closing
+text lists ready-to-copy `gh label create` commands for both; run them once before the
+first pass. GitLab creates a missing project label when an issue is filed with it, so nothing is needed there.
+Local Markdown trackers need no labels.

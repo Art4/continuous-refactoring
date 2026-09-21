@@ -1,5 +1,7 @@
 # `loop-config` runs a human interview instead of guessing tracker, create-mode, and storage
 
+> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the interview is now the dispatcher's own step 0 rather than the design step of a `loop-config` candidate, and the node was renamed `onboarding-setup`.
+>
 > Amends [ADR-0006](0006-loop-delivers-remembered-merge-requests.md): its "read `AGENTS.md` / `CLAUDE.md`
 > first; if neither says, propose `autonomous` and remember" mechanism (line 27) is replaced by a one-time,
 > human-confirmed interview, run when `loop-config` itself is filed rather than inferred fresh per merge

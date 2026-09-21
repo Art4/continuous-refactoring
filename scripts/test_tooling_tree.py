@@ -36,10 +36,10 @@ class LoadTreeTests(unittest.TestCase):
     def test_edges_parsed(self):
         tree = load_tree()
         self.assertGreaterEqual(len(tree["edges"]), 15)
-        # generic root (ADR-0008): git -> loop-config, loop-config -> is-php-project
+        # generic root (ADR-0008): git -> onboarding-setup, onboarding-setup -> is-php-project
         # (the PHP specialization's recognition gate, ADR-0022) -> the PHP tree roots.
-        self.assertIn({"from": "git", "to": "loop-config", "type": "required"}, tree["edges"])
-        self.assertIn({"from": "loop-config", "to": "is-php-project", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "git", "to": "onboarding-setup", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "onboarding-setup", "to": "is-php-project", "type": "required"}, tree["edges"])
         self.assertIn({"from": "is-php-project", "to": "composer", "type": "required"}, tree["edges"])
         # check required edge
         self.assertIn({"from": "phpstan-level-0", "to": "phpstan-level-1", "type": "required"}, tree["edges"])
@@ -60,10 +60,10 @@ class LoadTreeTests(unittest.TestCase):
         self.assertIn({"from": "composer", "to": "composer-audit", "type": "required"}, tree["edges"])
         self.assertIn({"from": "ci-runner", "to": "composer-audit", "type": "recommended"}, tree["edges"])
         self.assertNotIn({"from": "ci-runner", "to": "composer-audit", "type": "required"}, tree["edges"])
-        # ticket 01: `.editorconfig` node — required from loop-config (its own
+        # ticket 01: `.editorconfig` node — required from onboarding-setup (its own
         # prerequisite, mirroring composer/ci-runner), recommended into
         # php-cs-fixer (settle basic formatting before style-tool adoption).
-        self.assertIn({"from": "loop-config", "to": "editorconfig", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "onboarding-setup", "to": "editorconfig", "type": "required"}, tree["edges"])
         self.assertIn({"from": "editorconfig", "to": "php-cs-fixer", "type": "recommended"}, tree["edges"])
         # ticket 41: editorconfig also resolves into structural-scan —
         # declared in tooling-tree.md's own edge table (both endpoints are
@@ -92,17 +92,17 @@ class LoadTreeTests(unittest.TestCase):
         self.assertIn({"from": "php-safety-net", "to": "phpmd", "type": "required"}, tree["edges"])
         self.assertNotIn({"from": "phpmd", "to": "php-safety-net", "type": "resolved"}, tree["edges"])
         # ticket 63: secret-detection's required parent is repointed from
-        # loop-config to structural-scan itself — a Signal wave node,
+        # onboarding-setup to structural-scan itself — a Signal wave node,
         # proposed only once the (language-neutral) Safety Net has closed,
         # not from the very first wave. Still no resolved edge either way
         # (language-neutral, not part of any Safety Net).
-        self.assertNotIn({"from": "loop-config", "to": "secret-detection", "type": "required"}, tree["edges"])
+        self.assertNotIn({"from": "onboarding-setup", "to": "secret-detection", "type": "required"}, tree["edges"])
         self.assertIn({"from": "structural-scan", "to": "secret-detection", "type": "required"}, tree["edges"])
         self.assertNotIn({"from": "secret-detection", "to": "structural-scan", "type": "resolved"}, tree["edges"])
 
     def test_order_contains_nodes(self):
         tree = load_tree()
-        for n in ["git", "loop-config", "composer", "phpstan-level-0", "phpstan-level-1", "rector-dead-code", "structural-scan"]:
+        for n in ["git", "onboarding-setup", "composer", "phpstan-level-0", "phpstan-level-1", "rector-dead-code", "structural-scan"]:
             self.assertIn(n, tree["order"])
 
     def test_resolved_parents_of_structural_scan(self):
@@ -515,7 +515,7 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
     def test_never_in_next_candidates(self):
         files = self._fully_tooled_php_leaves()
         p0_fulfilled = {
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
             "phpstan-level-0": True, "rector-php-set": True,
             "phpunit": True, "php-cs-fixer": True, "phpstan-level-5": True,
@@ -773,7 +773,7 @@ class RejectionRespectedTests(unittest.TestCase):
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
         }, fulfilled={
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
         })
         try:
@@ -833,7 +833,7 @@ class RecommendedGateTests(unittest.TestCase):
 
     def _p0_fulfilled_dict(self):
         return {
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
             "phpstan-level-0": True, "rector-php-set": True, "editorconfig": True,
             "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
@@ -934,7 +934,7 @@ class RecommendedGateTests(unittest.TestCase):
     def test_next_candidates_uncapped_by_default(self):
         # Six nodes genuinely unblocked at once — past the old five-node cap
         # ADR-0016 lifts (real even without this ticket's recommended-gate
-        # change: loop-config, php-cs-fixer, phpunit, test-runner-if-missing,
+        # change: onboarding-setup, php-cs-fixer, phpunit, test-runner-if-missing,
         # composer-audit, phpstan-level-1).
         files = self._p0_fulfilled_files()
         files["composer.json"] = json.dumps({
@@ -1210,13 +1210,13 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
             # ticket 01: decided (fulfilled), so php-cs-fixer's own recommended
             # gate doesn't interfere with what this test actually exercises.
             ".editorconfig": "root = true\n\n[*]\ncharset = utf-8\n",
         }, fulfilled={
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
             "editorconfig": True,
         })
@@ -1235,7 +1235,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
         })
         try:
@@ -1277,31 +1277,31 @@ class OrderedBacklogTests(unittest.TestCase):
             )
         return tmp, root
 
-    def test_empty_repo_backlog_starts_with_loop_config(self):
+    def test_empty_repo_backlog_starts_with_onboarding_setup(self):
         tmp, root = self._make_repo({})
         try:
             backlog = ordered_backlog(root)
-            self.assertIn("loop-config", backlog)
+            self.assertIn("onboarding-setup", backlog)
             self.assertNotIn("git", backlog)
         finally:
             tmp.cleanup()
 
     def test_backlog_excludes_fulfilled_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
-        }, fulfilled={"loop-config": True, "is-php-project": True, "composer": True})
+        }, fulfilled={"onboarding-setup": True, "is-php-project": True, "composer": True})
         try:
             backlog = ordered_backlog(root)
-            self.assertNotIn("loop-config", backlog)
+            self.assertNotIn("onboarding-setup", backlog)
             self.assertNotIn("composer", backlog)
         finally:
             tmp.cleanup()
 
     def test_backlog_excludes_rejected_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
         })
         try:
@@ -1340,13 +1340,13 @@ class WithheldWithReasonsTests(unittest.TestCase):
 
     def test_withheld_with_undecided_recommended_parent(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 0\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
         }, fulfilled={
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
             "phpstan-level-0": True, "rector-php-set": True,
             "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
@@ -1361,7 +1361,7 @@ class WithheldWithReasonsTests(unittest.TestCase):
 
     def test_withheld_empty_when_all_decided(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
@@ -1435,15 +1435,15 @@ class SeedInputTests(unittest.TestCase):
         tmp, root = self._make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
             # composer fulfilled -> phpunit, psr-4 should be proposable
             self.assertIn("phpunit", nodes)
             self.assertIn("psr-4", nodes)
-            # loop-config fulfilled -> not in candidates
-            self.assertNotIn("loop-config", nodes)
+            # onboarding-setup fulfilled -> not in candidates
+            self.assertNotIn("onboarding-setup", nodes)
         finally:
             tmp.cleanup()
 
@@ -1451,13 +1451,13 @@ class SeedInputTests(unittest.TestCase):
         tmp, root = self._make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
             }
             nodes = [c["node"] for c in next_candidates(root, fulfilled=seed)]
-            # Detection would say loop-config is not fulfilled
+            # Detection would say onboarding-setup is not fulfilled
             # Seed says it is — seed wins
-            self.assertNotIn("loop-config", nodes)
+            self.assertNotIn("onboarding-setup", nodes)
         finally:
             tmp.cleanup()
 
@@ -1465,10 +1465,10 @@ class SeedInputTests(unittest.TestCase):
         tmp = tempfile.TemporaryDirectory()
         root = pathlib.Path(tmp.name)
         seed_path = root / "fulfilled-set.json"
-        seed_path.write_text(json.dumps({"git": True, "composer": False, "loop-config": True}))
+        seed_path.write_text(json.dumps({"git": True, "composer": False, "onboarding-setup": True}))
         try:
             loaded = _load_fulfilled_seed(seed_path)
-            self.assertEqual(loaded, {"git": True, "composer": False, "loop-config": True})
+            self.assertEqual(loaded, {"git": True, "composer": False, "onboarding-setup": True})
         finally:
             tmp.cleanup()
 
@@ -1595,7 +1595,7 @@ class PortabilityTests(unittest.TestCase):
             finally:
                 os.chdir(old_cwd)
         self.assertGreaterEqual(len(tree["edges"]), 15)
-        self.assertIn({"from": "git", "to": "loop-config", "type": "required"}, tree["edges"])
+        self.assertIn({"from": "git", "to": "onboarding-setup", "type": "required"}, tree["edges"])
 
     def test_tree_docs_are_siblings_of_the_module(self):
         module_dir = pathlib.Path(tooling_tree.__file__).resolve().parent
@@ -1637,7 +1637,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             "composer.lock": "{}",
         })
         try:
-            fulfilled = {"git": True, "loop-config": True, "composer": True, "static-code-analyzer": True}
+            fulfilled = {"git": True, "onboarding-setup": True, "composer": True, "static-code-analyzer": True}
             got = {(c["node"], c["type"]) for c in directly_unblocked_children(root, "composer", fulfilled=fulfilled)}
             self.assertEqual(
                 got,
@@ -1686,7 +1686,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
         for leaf in other_leaves:
             files[f"docs/refactoring/out-of-scope/{leaf}.md"] = "rejected\n"
         fulfilled = {
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
             "phpstan-level-0": True, "phpstan-level-5": True,
             "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
@@ -1709,11 +1709,11 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             tmp.cleanup()
 
     def test_no_children_when_nothing_new(self):
-        # Empty repo: loop-config isn't fulfilled, so forcing it "unfulfilled"
+        # Empty repo: onboarding-setup isn't fulfilled, so forcing it "unfulfilled"
         # in the counterfactual changes nothing real -- no children to report.
         tmp, root = self._make_repo({})
         try:
-            self.assertEqual(directly_unblocked_children(root, "loop-config"), [])
+            self.assertEqual(directly_unblocked_children(root, "onboarding-setup"), [])
         finally:
             tmp.cleanup()
 class TrackOpenFillingTests(unittest.TestCase):
@@ -1741,20 +1741,20 @@ class TrackOpenFillingTests(unittest.TestCase):
         ``ordered_backlog()`` in script order — the complete backlog a scan
         records into ``Open``."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n\n**Cadence:** weekly\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         }, fulfilled={
-            "git": True, "loop-config": True, "is-php-project": True,
+            "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
         })
         try:
             backlog = ordered_backlog(root)
-            # loop-config fulfilled, composer fulfilled — phpunit, psr-4,
+            # onboarding-setup fulfilled, composer fulfilled — phpunit, psr-4,
             # phpstan-level-0, test-runner-if-missing should all appear,
             # even though some are blocked by each other or by
             # recommended-gating.
-            self.assertNotIn("loop-config", backlog)
+            self.assertNotIn("onboarding-setup", backlog)
             self.assertNotIn("composer", backlog)
             self.assertIn("phpunit", backlog)
             self.assertIn("psr-4", backlog)
@@ -1774,7 +1774,7 @@ class TrackOpenFillingTests(unittest.TestCase):
         tmp, root = self._make_repo({})
         try:
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True,
                 "phpunit": True, "psr-4": True, "phpstan-level-0": True,
                 "phpstan-level-1": True, "phpstan-level-2": True,
@@ -1839,7 +1839,7 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpstan-level-0", closed)
 
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "docs/refactoring/out-of-scope/composer.md": "rejected\n",
         })
         try:
@@ -1859,7 +1859,7 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpunit", closed)
 
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/composer.md": "rejected\n",
@@ -1878,7 +1878,7 @@ class RejectionCascadeTests(unittest.TestCase):
         """Rejecting a non-root node only closes nodes that transitively
         depend on it via required edges — siblings remain in the backlog."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 5\n",
@@ -1931,7 +1931,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "Fulfilled nodes:\n\n"
-                "- loop-config\n"
+                "- onboarding-setup\n"
                 "- composer\n\n"
                 "## Safety Net\n\n"
                 "**Last scan:** 2026-09-14\n\n"
@@ -1953,9 +1953,9 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             self.assertFalse(derived["php-cs-fixer"])
             # psalm is in Out-of-scope -> not fulfilled
             self.assertFalse(derived["psalm"])
-            # loop-config and composer are NOT in Open or Out-of-scope
+            # onboarding-setup and composer are NOT in Open or Out-of-scope
             # -> treated as fulfilled by derivation
-            self.assertTrue(derived["loop-config"])
+            self.assertTrue(derived["onboarding-setup"])
             self.assertTrue(derived["composer"])
             # the retired field's entries (top-level or inside a Track
             # section) are ignored, not migrated — editorconfig is
@@ -1972,7 +1972,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "Fulfilled nodes:\n\n"
-                "- loop-config\n"
+                "- onboarding-setup\n"
                 "- composer\n"
             ),
         })
@@ -1991,7 +1991,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "Fulfilled nodes:\n\n"
-                "- loop-config\n"
+                "- onboarding-setup\n"
                 "- composer\n"
                 "- phpunit\n"
             ),
@@ -2017,7 +2017,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "Fulfilled nodes:\n\n"
-                "- loop-config\n"
+                "- onboarding-setup\n"
                 "- composer\n"
             ),
             "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
@@ -2029,7 +2029,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             # phpunit is genuinely fulfilled (dep + CI gate), so the
             # backlog should NOT include it once the seed is applied.
             seed = {
-                "git": True, "loop-config": True, "is-php-project": True,
+                "git": True, "onboarding-setup": True, "is-php-project": True,
                 "composer": True, "editorconfig": True, "phpunit": True,
             }
             backlog = ordered_backlog(root, fulfilled=seed)

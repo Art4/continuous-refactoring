@@ -1,4 +1,4 @@
-# Refactoring Loop Config
+# Refactoring Bookkeeping
 
 **Create-mode:** autonomous
 
@@ -20,7 +20,7 @@
 - none
 
 **Fulfilled nodes:**
-- loop-config
+- onboarding-setup
 - composer
 - ci-runner
 - psr-4

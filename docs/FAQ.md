@@ -64,6 +64,26 @@ part of it that must be settled before structural work starts — deterministic 
 runner and static analysis — and also names the Track that adopts them. Guardrails is the part that comes
 after. One is the map, the other names regions of it.
 
+## Do I need the matt-pocock skills?
+
+No, but they help. `setup-matt-pocock-skills` (from [mattpocock/skills](https://github.com/mattpocock/skills))
+writes the issue-tracker file and the triage-label table the suite reads. The suite decides whether that
+setup is in place from the repo itself: both `docs/agents/issue-tracker.md` and `docs/agents/triage-labels.md`
+must exist. If either is missing, the first `/continuous-refactoring` asks once whether to stop so you can
+run the setup first (nothing is written) or to continue, in which case it writes a minimal issue-tracker
+file and label table itself. Running the setup later updates those files in place. Labels are only ever
+recorded in files — the suite never creates a label on GitHub or GitLab during onboarding.
+
+## Why do I have to run `/continuous-refactoring` twice on a new project?
+
+Because setting up a project is a different job from refactoring it. The first invocation on a project with
+no `bookkeeping.md` only onboards: it asks a few questions, writes the setup files, tells you what it did
+and stops. That keeps one-time setup out of the scan-prioritise-design-implement pipeline — no issue, no
+merge request, no branch — and it means the very first thing you see is that onboarding is happening, not a
+scan starting in the background. Commit the new files to the default branch (candidate branches are based on
+it), then run `/continuous-refactoring` again: that invocation selects a Track and starts the first scan.
+Naming a Track on a project that was never onboarded still onboards first.
+
 ## How do I make the loop work on a specific Track?
 
 Name it when you invoke `/continuous-refactoring` ("run the Housekeeping Track"), or invoke the Track's

@@ -17,7 +17,9 @@ Safety Net and Guardrails walk the [tooling tree](../../skills/refactor-scan/ref
 
 ## How a Track is selected
 
-The `/continuous-refactoring` skill decides one thing per pass — which Track — and hands it to that Track's own skill. It applies these rules in order:
+Before any of this, a project that has never run the loop (no `bookkeeping.md`) is **onboarded** instead: that invocation asks a few setup questions, writes the setup files and stops, without selecting a Track — even when you named one. Track selection only happens once onboarding has run.
+
+The `/continuous-refactoring` skill then decides one thing per pass — which Track — and hands it to that Track's own skill. It applies these rules in order:
 
 1. **You named a Track** ("run the Guardrails Track", or you invoked `/continuous-guardrails` directly) → that Track runs, no computation. See *Overrides* below.
 2. **The one-time exception**, once per repo — see below.
@@ -50,7 +52,7 @@ A Track with an empty `Open` is *scanned* instead: fulfilment of every node is j
 ## Overrides
 
 - **Name the Track:** `/continuous-refactoring` with a Track name ("run the Housekeeping Track") bypasses selection *and* the one-time exception for this pass.
-- **Invoke the Track skill directly** (`/continuous-safety-net`, …): the same override.
+- **Invoke the Track skill directly** (`/continuous-safety-net`, …): the same override — but a project that was never onboarded is refused with a pointer to `/continuous-refactoring`, which onboards it first.
 - A named Track still respects its own `Open`: naming Safety Net while its `Open` is non-empty means working that entry, never a fresh rescan.
 - **Change a cadence:** hand-edit `Cadence` in that Track's section of `bookkeeping.md` (Housekeeping also offers a one-question interview). Investigation's `Cadence` is fixed.
 - **Priority label:** a `refactor:priority` label you set on an issue narrows which proposals get ranked. It plays no part in Track selection, cannot bypass the Safety Net blockade, and never preempts an open-item walk — a labelled issue waits until `Open` is empty (Safety Net) or has nothing workable left (Guardrails).
