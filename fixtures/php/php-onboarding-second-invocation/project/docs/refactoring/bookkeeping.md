@@ -1,3 +1,3 @@
-# Refactoring Loop Config
+# Refactoring Bookkeeping
 
 **Create-mode:** human-opens

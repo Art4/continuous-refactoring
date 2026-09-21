@@ -277,7 +277,7 @@ missing table row) and say so.
    creating the folder if needed. It is the sole write-authority for
    `Create-mode`; the instruction file (step 1) holds only a pointer to it.
    The shape is `refactoring-bookkeeping.md`'s `## Structure`, reduced to
-   the title line and `Create-mode`: no `Pending candidates` (nothing is
+   the title line (`# Refactoring Bookkeeping`) and `Create-mode`: no `Pending candidates` (nothing is
    pending), no Track sections (each appears when its Track first runs).
    `Focus areas` only if the human named one unprompted.
 

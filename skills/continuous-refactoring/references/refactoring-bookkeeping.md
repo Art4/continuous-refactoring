@@ -13,7 +13,7 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 ## Structure
 
 ```markdown
-# Refactoring Loop Config
+# Refactoring Bookkeeping
 
 **Create-mode:** autonomous
 

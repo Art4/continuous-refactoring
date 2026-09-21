@@ -1210,7 +1210,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
             # ticket 01: decided (fulfilled), so php-cs-fixer's own recommended
             # gate doesn't interfere with what this test actually exercises.
@@ -1235,7 +1235,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
         })
         try:
@@ -1288,7 +1288,7 @@ class OrderedBacklogTests(unittest.TestCase):
 
     def test_backlog_excludes_fulfilled_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         }, fulfilled={"onboarding-setup": True, "is-php-project": True, "composer": True})
@@ -1301,7 +1301,7 @@ class OrderedBacklogTests(unittest.TestCase):
 
     def test_backlog_excludes_rejected_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
         })
         try:
@@ -1340,7 +1340,7 @@ class WithheldWithReasonsTests(unittest.TestCase):
 
     def test_withheld_with_undecided_recommended_parent(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 0\n",
@@ -1361,7 +1361,7 @@ class WithheldWithReasonsTests(unittest.TestCase):
 
     def test_withheld_empty_when_all_decided(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
@@ -1741,7 +1741,7 @@ class TrackOpenFillingTests(unittest.TestCase):
         ``ordered_backlog()`` in script order — the complete backlog a scan
         records into ``Open``."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n\n**Cadence:** weekly\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n\n**Cadence:** weekly\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         }, fulfilled={
@@ -1839,7 +1839,7 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpstan-level-0", closed)
 
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "docs/refactoring/out-of-scope/composer.md": "rejected\n",
         })
         try:
@@ -1859,7 +1859,7 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpunit", closed)
 
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
             "docs/refactoring/out-of-scope/composer.md": "rejected\n",
@@ -1878,7 +1878,7 @@ class RejectionCascadeTests(unittest.TestCase):
         """Rejecting a non-root node only closes nodes that transitively
         depend on it via required edges — siblings remain in the backlog."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Loop Config\n",
+            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 5\n",
