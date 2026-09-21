@@ -1,5 +1,7 @@
 # `AGENTS.md`/`CLAUDE.md` gets a Create-mode pointer, not the value itself
 
+> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the pointer section now records both backlog labels, `refactor:candidate` and `refactor:priority`.
+>
 > Cross-references [ADR-0006](0006-loop-delivers-remembered-merge-requests.md): its "Write the
 > create-mode into `AGENTS.md` / `CLAUDE.md`" option — rejected there ("those files are read as
 > hints; suite state is not mixed into the human's agent config") — was reconsidered and the

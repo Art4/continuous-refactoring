@@ -1,5 +1,7 @@
 # Tooling-tree proposals are pre-filed as candidate issues before ranking, not only the winner
 
+> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the scan precondition that proposed only `loop-config` when `bookkeeping.md` is missing was removed; the dispatcher onboards first.
+>
 > Amended by [ADR-0056](0056-agent-judged-fulfilment.md): pre-filing no longer applies to Track nodes
 > (Safety Net, Guardrails) — their backlog is the Track's own `Open` list in `bookkeeping.md`, and an
 > issue for a Track node is created only when the node is actually worked via the `Open` walk, never

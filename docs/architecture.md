@@ -5,7 +5,7 @@ How the suite is put together, for someone who wants to understand or extend it.
 ## Skill hierarchy
 
 ```
-/continuous-refactoring            ← the only user entry point; picks a Track, nothing else
+/continuous-refactoring            ← the only user entry point; onboards a new project, otherwise picks a Track
    ├── /continuous-safety-net      ┐
    ├── /continuous-guardrails      ├─ each names its Track and delegates to ↓
    ├── /continuous-investigation   ┘
@@ -18,10 +18,10 @@ How the suite is put together, for someone who wants to understand or extend it.
    └── /continuous-housekeeping    ← owns Housekeeping's own process; never calls refactor-loop
 ```
 
-- **`continuous-refactoring`** is a thin dispatcher. It selects a [Track](playbooks/tracks.md), announces the choice in one sentence and invokes that Track's skill. It never runs the pass itself.
+- **`continuous-refactoring`** is a thin dispatcher. Step 0 is **onboarding**: when the target has no `bookkeeping.md` it runs a short interview inline, writes the setup files and ends the invocation (see [Loop state](#loop-state)). Otherwise it selects a [Track](playbooks/tracks.md), announces the choice in one sentence and invokes that Track's skill. It never runs the pass itself.
 - **`continuous-safety-net` / `-guardrails` / `-investigation`** are internal. Each does nothing but name its Track and call `refactor-loop`.
-- **`continuous-housekeeping`** runs the Housekeeping Track's own reconcile → checklist → quality gate → deliver process, then records its `Last scan` through `refactor-learn`.
-- **`refactor-loop`** requires a Track and aborts without a valid one; it never guesses one from repo state and never branches on a Track's name itself.
+- **`continuous-housekeeping`** runs the Housekeeping Track's own reconcile → checklist → quality gate → deliver process, then records its `Last scan` through `refactor-learn`. It aborts, pointing at `/continuous-refactoring`, on a target with no `bookkeeping.md`.
+- **`refactor-loop`** requires a Track and an onboarded target (a `bookkeeping.md`) and aborts without either; it never guesses a Track from repo state and never branches on a Track's name itself.
 
 Only `continuous-refactoring` is meant to be typed by a human; the others are implementation detail, though invoking a `continuous-<track>` skill directly is a valid manual override.
 
@@ -42,7 +42,7 @@ Early exits are normal: no git repository ends the pass; a full backlog, a resum
 
 ### Only `refactor-learn` writes bookkeeping
 
-`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (an issue filed, a branch pushed, `Create-mode` set while delivering `onboarding-setup`). This keeps "what changed the state" answerable by looking at one skill.
+`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (an issue filed, a branch pushed) and the dispatcher's one-time onboarding files. This keeps "what changed the state" answerable by looking at one skill.
 
 ### Subagents and hand-back
 
@@ -74,7 +74,7 @@ State lives in the target repo, never in the conversation; every lifecycle skill
 | Housekeeping checklist | `housekeeping-template.md` |
 | Domain language, decisions | the target's `CONTEXT.md` and ADRs |
 
-`bookkeeping.md` doesn't exist on a fresh target. It comes into being through the `onboarding-setup` node like any other node — except that its design step is a short human interview instead of a copied spec, and the interview's answers (merge request create-mode, tracker, Refactoring Notes location) are decided once.
+`bookkeeping.md` doesn't exist on a fresh target. The dispatcher's onboarding step creates it: a short human interview (tracker, merge request create-mode, Refactoring Notes location — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete", suggests committing the new files and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
 
 ## Fallbacks and self-containment
 

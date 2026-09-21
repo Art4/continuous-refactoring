@@ -1,5 +1,7 @@
 # On a native-label tracker, in-flight bookkeeping rides the candidate's own branch
 
+> Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the `loop-config` case named as this rule's narrowest instance no longer exists.
+>
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its core discipline —
 > bookkeeping writes always go out through a review, never a direct commit to the default branch —
 > is unchanged. What narrows is *which* review: on a native-label tracker, the closing call's

@@ -6,6 +6,8 @@ The playbook for humans. The skills do the work; this document explains how you 
 
 Continuous refactoring is **stateful and repeatable**: each pass does only the work due since the last one, and writes learned decisions back. So a weekly turnus and a spontaneous invocation both work — they run the same loop.
 
+The first invocation on a project that has never run the loop is different: it only **onboards** — a short interview, a few setup files written, then it stops (no scan, no issue, no merge request). Commit those files and run `/continuous-refactoring` again; every invocation after that is a pass as described next.
+
 Each pass has two stages. First `/continuous-refactoring` selects one **Track** — Safety Net, Guardrails, Housekeeping or Investigation ([Track playbook](tracks.md)). Then that Track's skill runs the pass:
 
 ```
@@ -33,6 +35,7 @@ The loop stops exactly where human judgement is needed:
 
 | Step | Skill | Your decision |
 |---|---|---|
+| Onboarding (first invocation only) | `continuous-refactoring` | tracker, merge-request create-mode, where the Refactoring Notes live — and, if the engineering-skills setup is missing, whether to stop and run it first |
 | Select Track | `continuous-refactoring` | optionally, which Track to force |
 | Propose nodes | `refactor-scan` | focus area, if you name one |
 | Prioritise | `refactor-prioritize` | which node is next; a `refactor:priority` label you set narrows the ranking |
