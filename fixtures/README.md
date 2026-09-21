@@ -219,9 +219,9 @@ fixture's own `expected/behavior.md` for the full expected behavior.
 
 - **php-scheduler-staleness-selection** — spec Testing Decision #2 ("Track selection under simple
   staleness"). Safety Net closed (`php-safety-net` resolved), both `## Safety Net`
-  (`Cadence: 90`, `Last scan: 2026-06-16`, `overdue_ratio ≈ 1.056`) and `## Guardrails`
-  (`Cadence: 60`, `Last scan: 2026-04-22`, `overdue_ratio = 2.5`) due, neither holding `Open` work.
-  Expects **Guardrails** selected — its ratio is the higher one, even though Safety Net outranks it in
+  (`Cadence: 90 days`, `Last scan: 2026-06-16`, `overdue_ratio ≈ 1.056`) and `## Guardrails`
+  (`Cadence: 60 days`, `Last scan: 2026-04-22`, `overdue_ratio = 2.5`) due, neither holding `Open` work. Written in the unit form the loop now writes itself; the other
+  fixtures keep bare numbers, read as days. Expects **Guardrails** selected — its ratio is the higher one, even though Safety Net outranks it in
   the fixed tie-break order (Safety Net > Guardrails > Housekeeping > Investigation). The fixed order
   only ever breaks a tie or resolves two "never run" Tracks with no ratio to compare; it must not
   override a genuine, non-tied staleness difference.

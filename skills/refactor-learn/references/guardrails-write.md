@@ -67,7 +67,7 @@ Whenever `guardrails-track.md`'s own process ran this pass — whether it found 
 (every node in scope already resolved) or proposed something that `Open` now tracks — write `##
 Guardrails`'s `Last scan` to today's date (`YYYY-MM-DD`), last, alongside `## Safety Net`'s own write
 (if that Track also ran this pass) in the closing call's own step ordering.
-**Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 60`, `Last scan: <today>`,
+**Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 60 days`, `Last scan: <today>`,
 `Open`/`Out-of-scope` either freshly populated (something was proposed/rejected this scan) or both `-
 none` (a fully-compliant target's first scan — `Open` is empty because every node is resolved). **The
 scan didn't run this pass** (`Open` was already non-empty, so `guardrails-track.md` skipped straight to

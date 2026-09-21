@@ -7,7 +7,7 @@
 
 ## Safety Net
 
-**Cadence:** 90
+**Cadence:** 90 days
 
 **Last scan:** 2026-06-16
 
@@ -23,7 +23,7 @@
 
 ## Guardrails
 
-**Cadence:** 60
+**Cadence:** 60 days
 
 **Last scan:** 2026-04-22
 

@@ -17,11 +17,11 @@ cycle, work it, run the quality gate, deliver.
 
 ## Cadence
 
-Nothing to opt into — a fresh target already gets weekly Housekeeping (`Cadence: 7` days) the first time
+Nothing to opt into — a fresh target already gets weekly Housekeeping (`Cadence: 7 days`) the first time
 the Track scheduler selects it, the same silent default `Safety Net`'s 90 days and `Guardrails`' 60 days
 already use. Read or change the interval directly in the Refactoring Notes' `bookkeeping.md`'s
-`## Housekeeping` section — hand-edit `Cadence` any time, or ask for a guided one-question prompt instead
-of a bare number by running the Housekeeping Track's own cadence interview.
+`## Housekeeping` section — hand-edit `Cadence` any time — a number with a unit (`12 hours`, `3 days`, `2 weeks`, `1 month`) or a fixed calendar day (`monthly on the 1st`) — or ask for a guided one-question prompt instead
+of a hand edit by running the Housekeeping Track's own cadence interview.
 
 ## When its first cycle runs
 

@@ -68,6 +68,12 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 | Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no `bookkeeping.md` | Run `/continuous-refactoring` first |
 | Housekeeping: nothing registered to check | No node has contributed a housekeeping check yet | Expected on a young target |
 
+## Cadence: hours are day-accurate, a month is 30 days
+
+A Track's `Last scan` is a date, not a timestamp. A `Cadence` in hours (`12 hours`) therefore behaves as "due again from the next calendar day on" — a Track scanned this morning is not due again this afternoon, however short the interval. `1 month` counts as 30 days, not a calendar month. The calendar form only anchors monthly (`monthly on the 1st` to `monthly on the 28th`); weekly or weekday anchors aren't supported.
+
+**Fix:** none needed for day-or-longer cadences. For a fixed day of the month, use `monthly on the <N>th`; if the loop has to run more often than daily, trigger `/continuous-refactoring` from your own scheduler, and let each pass pick whichever Track is due.
+
 ## Onboarding: GitHub backlog labels are not created for you
 
 Onboarding records the two backlog labels (`refactor:candidate`, `refactor:priority`) in your `AGENTS.md`/`CLAUDE.md` but creates

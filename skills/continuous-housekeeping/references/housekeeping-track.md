@@ -25,21 +25,21 @@ never re-derives due-ness itself:
 - **This Track is the one that was selected** → continue below. Housekeeping carries no `Open` precondition
   (`refactoring-bookkeeping.md`'s own `## Housekeeping` section) — always eligible the moment it's due,
   the same "no `Open` concept" shape `## Investigation` already has (`track-scheduler.md`'s own
-  Eligibility section). Unlike Investigation, though, Housekeeping *does* carry a real numeric `Cadence`
+  Eligibility section). Unlike Investigation, though, Housekeeping *does* carry a real, unit-carrying `Cadence`
   that competes in ratio comparison the same way `## Safety Net`'s/`## Guardrails`' own does — see
   *First-run cadence*, next.
 
 ## First-run cadence
 
-`## Housekeeping` section absent (never run for this target) → this pass creates it, `Cadence: 7` —
+`## Housekeeping` section absent (never run for this target) → this pass creates it, `Cadence: 7 days` —
 the same default the old skill's own setup interview always recommended (`weekly`), applied silently
 here instead: no interview question blocks an orchestrator-driven pass, the same "no first-run interview
 at all" discipline `## Safety Net`'s 90-day default and `## Guardrails`' 60-day default already use
 (`skills/refactor-learn/references/safety-net-write.md`, `guardrails-write.md`). A human who wants a
-different interval either hand-edits `## Housekeeping`'s `Cadence` field directly — hand-editable, same
+different interval either hand-edits `## Housekeeping`'s `Cadence` field directly (any form in `refactoring-bookkeeping.md`'s *Cadence values*, e.g. `1 month` or `monthly on the 1st`) — hand-editable, same
 as `## Safety Net`'s/`## Guardrails`' own — or runs
 `skills/continuous-housekeeping/references/housekeeping-cadence-interview.md` themselves, any time, for a
-guided one-question prompt instead of a bare number edit. That reference file is preserved for this
+guided one-question prompt instead of a hand edit. That reference file is preserved for this
 optional, human-initiated use; it no longer gates the Track's very first run the way it used to gate the
 old skill's own first invocation.
 

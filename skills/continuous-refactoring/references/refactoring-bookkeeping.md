@@ -28,7 +28,7 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 
 ## Safety Net
 
-**Cadence:** 90
+**Cadence:** 90 days
 
 **Last scan:** 2026-09-14
 
@@ -40,7 +40,7 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 
 ## Guardrails
 
-**Cadence:** 60
+**Cadence:** 60 days
 
 **Last scan:** 2026-09-01
 
@@ -52,7 +52,7 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 
 ## Housekeeping
 
-**Cadence:** 7
+**Cadence:** 7 days
 
 **Last scan:** 2026-09-15
 
@@ -64,6 +64,26 @@ Every other skill in this suite refers to this folder by name — "the Refactori
 ```
 
 `Pending candidates` sorts last, not alphabetically or by write-frequency. The `## Safety Net`, `## Guardrails`, `## Housekeeping`, and `## Investigation` sections (below) sit between `Pending candidates` and the end of the file, in that order — the same Safety Net > Guardrails > Housekeeping > Investigation priority the scheduling algorithm uses elsewhere (`CONTEXT.md`'s **Track** entry) — each is its own heading, not a top-level field, so none competes with that ordering rule.
+
+## Cadence values
+
+Every Track's `Cadence` (except Investigation's literal `continuous`, below) is one of these forms — a number *with its unit*, or a monthly calendar anchor. Written out in full, singular or plural (`1 month`, `2 months`); case-insensitive. This is the only place the forms are defined; `track-scheduler.md`, the `*-write.md` files and the docs point here.
+
+| Form | Example | Interval used for `overdue_ratio` |
+|---|---|---|
+| `<n> hours` | `12 hours` | `n / 24` days |
+| `<n> days` | `90 days` | `n` days |
+| `<n> weeks` | `2 weeks` | `7n` days |
+| `<n> months` | `1 month` | `30n` days — a deliberate approximation, not calendar-exact |
+| `monthly on the <N>th` (`N` = 1–28) | `monthly on the 1st` | a 30-day period; due by calendar, not by elapsed time (below) |
+| `continuous` | Investigation only | no interval — always due, contributes no ratio |
+
+- **Interval forms** — `overdue_ratio = (today − Last scan, in days) / interval in days`; due at `>= 1`. `Last scan` is a plain date, so an `hours` cadence is only as precise as a calendar day: a Track last scanned today is not due again today, one last scanned yesterday is due for any `hours` value up to `24`.
+- **Calendar anchor** — due as soon as at least one `<N>`th of a month falls after `Last scan` and on or before `today` (`Last scan` itself excluded, `today` included). Then `overdue_ratio = max(1, (today − Last scan, in days) / 30)`; not due, `(today − Last scan, in days) / 30` (always `< 1`). So "due ⇔ `overdue_ratio >= 1`" and the Housekeeping preemption rule (`track-scheduler.md`) hold unchanged for anchored Tracks too.
+- **A bare number** (`90`, from a file written before units existed) is read as days. No migration; the next hand-edit or interview may add the unit.
+- **A value that matches none of the forms** is never guessed at: the Track's own default (`90 days` / `60 days` / `7 days`) is used for this pass and the closing report names the unreadable value.
+- **Section absent** (never run) is unchanged: maximally overdue, always due.
+- **Written defaults carry the unit** — `refactor-learn` writes `90 days`, `60 days`, `7 days` on first creation.
 
 ## Fields
 
@@ -97,7 +117,7 @@ reports the wait.
 ```markdown
 ## Safety Net
 
-**Cadence:** 90
+**Cadence:** 90 days
 
 **Last scan:** 2026-09-14
 
@@ -108,7 +128,7 @@ reports the wait.
 - phpmd — out-of-scope/phpmd.md
 ```
 
-- **`Cadence`** — days between scans, `90` unless hand-edited. Never read to decide whether to scan when `Open` is non-empty (below).
+- **`Cadence`** — interval between scans (forms: *Cadence values*, above), `90 days` unless hand-edited. Never read to decide whether to scan when `Open` is non-empty (below).
 - **`Last scan`** — the date (`YYYY-MM-DD`) the Track's scan last completed, written even when it found nothing to do. **The whole section is absent until the Track's first scan completes** — absence means "never run," never "nothing found"; a Track with no section is always due, the same as one whose `Last scan` is more than `Cadence` days old.
 - **`Open`** — the complete, ordered backlog for this Track: every node of the Track's scope that is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per bulleted line, `- <slug> (#<issue>)` (issue # only while the node is being worked, omitted otherwise — same convention as the old `Fulfilled nodes`' own `(#<issue>)`). `- none` when empty. **`Open` empty means the Track is done.** Non-empty `Open` means the Track is never rescanned this pass — its existing entries are worked through the ordinary propose → design → implement → learn pipeline first, the same "resume before propose fresh" discipline `Pending candidates` already applies, just scoped to this Track and able to hold more than one entry at a time. A scan runs only for a selected Track whose `Open` is empty (due by cadence, or named manually — naming a Track never forces a scan while `Open` has entries). Existing files under the old meaning (where `Open` listed only nodes with filed issues) are not migrated: such an `Open` is walked like any other, and the scan that runs once it empties records the complete backlog.
 - **`Out-of-scope`** — every Safety Net node rejected via this Track, one per bulleted line, `- <slug> — out-of-scope/<slug>.md` (the pointer, not a restatement — the entry's own reasoning lives in that file, format unchanged from every other `out-of-scope/` entry). Never removed except by the ordinary reversal path (the `out-of-scope/<slug>.md` file deleted by hand or by a PHP-version-reversal finding, `refactor-scan/SKILL.md` step 3) — this bulleted pointer and the file are added/removed together.
@@ -129,7 +149,7 @@ step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads
 ```markdown
 ## Guardrails
 
-**Cadence:** 60
+**Cadence:** 60 days
 
 **Last scan:** 2026-09-14
 
@@ -140,7 +160,7 @@ step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads
 - none
 ```
 
-- **`Cadence`** — days between scans, `60` unless hand-edited (shorter than Safety Net's default 90 —
+- **`Cadence`** — interval between scans (forms: *Cadence values*, above), `60 days` unless hand-edited (shorter than Safety Net's default 90 —
   Guardrails nodes are mostly point-in-time audits whose value is in repetition, `php-tooling-tree/
   composer-audit.md`'s own Housekeeping entry). Never read to decide whether to scan when `Open` is
   non-empty (below).
@@ -159,7 +179,7 @@ step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads
 
 A hybrid of the two shapes above and `## Investigation`'s own: only `Cadence`/`Last scan`, like
 `## Investigation` — no `Open`/`Out-of-scope`, since a maintenance cycle isn't a tooling-tree node
-adoption — but a real numeric `Cadence` that competes in ratio comparison exactly like `## Safety
+adoption — but a real, unit-carrying `Cadence` that competes in ratio comparison exactly like `## Safety
 Net`'s/`## Guardrails`' own, unlike `## Investigation`'s permanent literal `continuous`. Replaces the
 old, now-retired top-level `Housekeeping cadence` field the standalone `continuous-housekeeping` skill
 used to own; the swept checklist content itself stays in `housekeeping-template.md`, entirely unrelated
@@ -174,12 +194,12 @@ Guardrails`'s own).
 ```markdown
 ## Housekeeping
 
-**Cadence:** 7
+**Cadence:** 7 days
 
 **Last scan:** 2026-09-15
 ```
 
-- **`Cadence`** — days between scans, `7` unless hand-edited — the same default the old
+- **`Cadence`** — interval between scans (forms: *Cadence values*, above), `7 days` unless hand-edited — the same default the old
   `continuous-housekeeping` skill's own setup interview always recommended (`weekly`), applied silently
   on this Track's first-ever scheduler-driven run instead of asked
   (`skills/continuous-housekeeping/references/housekeeping-track.md`'s own *First-run cadence* section).
@@ -225,11 +245,11 @@ pass, well before design/implement/learn actually finish it).
 **Last scan:** 2026-09-14
 ```
 
-- **`Cadence`** — always the literal `continuous`, never a day count and never hand-edited (unlike
+- **`Cadence`** — always the literal `continuous`, never an interval and never hand-edited (unlike
   `## Safety Net`'s/`## Guardrails`' own `Cadence`, above). Investigation carries no fixed interval
   (`CONTEXT.md`'s **Track** entry; spec's Scheduling algorithm decision) — it's the scheduler's
   permanent fallback, not a Track that becomes overdue on its own timer. `track-scheduler.md` treats a
-  Track whose `Cadence` carries no day-count as always due, contributing no `overdue_ratio` to compare
+  Track whose `Cadence` carries no interval as always due, contributing no `overdue_ratio` to compare
   numerically — the same "no ratio to compare" case that file already defines for a never-run Track,
   except this one holds permanently for Investigation, every pass, not only before its first scan.
 - **`Last scan`** — the date the Track's scan (`investigation-track.md`) last actually ran, written even

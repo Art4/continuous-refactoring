@@ -21,7 +21,7 @@ every one of the four currently-wired Tracks (`CONTEXT.md`'s **Track** entry). N
 special-cases any Track by name beyond the fixed tie-break order (below), which already names all
 four — including Investigation, whose own section carries only `Cadence`/`Last scan` and no `Open` at
 all (`refactoring-bookkeeping.md`'s own `## Investigation` section), and Housekeeping, whose own section
-carries the same two fields but, unlike Investigation, a real numeric `Cadence` that competes in ratio
+carries the same two fields but, unlike Investigation, a real, unit-carrying `Cadence` that competes in ratio
 comparison exactly like Safety Net's/Guardrails' own (`refactoring-bookkeeping.md`'s own `##
 Housekeeping` section); see Eligibility and Selection below for exactly how each shape competes.
 
@@ -77,7 +77,7 @@ With that precondition met, check the following three, in order, and stop at the
    with `Last scan` written by the time that same pass's closing call finishes.
 4. Else (all three sections present, and `## Investigation` carries no in-flight `Pending candidates`)
    → this exception is permanently done for this repo. Every later pass — including a later, ordinary
-   Safety Net rescan (`Cadence: 90`) whose own `Open` goes non-empty then empty again — runs
+   Safety Net rescan (`Cadence: 90 days`) whose own `Open` goes non-empty then empty again — runs
    Eligibility/Selection below unmodified, forever. This is what makes the exception fire **exactly
    once**: the trigger above never reads Safety Net's `Open` transition itself (this file has no history
    to diff against, only the current `bookkeeping.md` snapshot — see the note below), only each of
@@ -106,8 +106,10 @@ Reached only once the one-time exception (above) didn't apply this pass. A Track
 ratio comparison when it is both **due** and **eligible** this pass:
 
 - **Due** — the section is absent (never run, see above); or
-  `overdue_ratio(track) = (today − Last scan) / Cadence >= 1`; or the Track's own `Cadence` carries no
-  day-count at all — Investigation's literal `continuous`, `refactoring-bookkeeping.md`'s own
+  `overdue_ratio(track) >= 1`, where `overdue_ratio` is computed from the Track's `Cadence` and `Last scan`
+  per `refactoring-bookkeeping.md`'s *Cadence values* (an interval in hours/days/weeks/months:
+  `(today − Last scan) / interval`; a `monthly on the <N>th` anchor: due once such a day has passed since
+  `Last scan`, ratio `max(1, elapsed / 30)`); or the Track's own `Cadence` carries no interval at all — Investigation's literal `continuous`, `refactoring-bookkeeping.md`'s own
   `## Investigation` section — in which case it's always due, contributing no ratio to compute at all.
   This is a different reason than "never run" (that one has no `Last scan` yet either; Investigation
   simply has no interval to measure staleness against, full stop, `Last scan` present or not) but the
@@ -130,7 +132,7 @@ ratio comparison when it is both **due** and **eligible** this pass:
 
 Among the Tracks that are due and eligible, pick the one with the highest `overdue_ratio`. **Ties** —
 including two Tracks that are each "never run," and **Investigation, which never produces a numeric
-`overdue_ratio` at all** (no `Cadence` day-count to divide by, above) — fall back to the fixed order:
+`overdue_ratio` at all** (no `Cadence` interval to divide by, above) — fall back to the fixed order:
 
 **Safety Net > Guardrails > Housekeeping > Investigation**
 
@@ -165,7 +167,7 @@ gains its own `Open`-shaped in-flight state.
 **No wired Track is both due and eligible** → nothing is selected; step 2 has nothing to dispatch and
 the pass ends with that reported (no Track skill, hence no `refactor-loop`, runs). **In practice unreachable now
 that Investigation is wired** — Investigation is always due and always eligible in every case above
-(section absent, a real `overdue_ratio >= 1`, or its own no-day-count `Cadence` — it always matches at
+(section absent, a real `overdue_ratio >= 1`, or its own no-interval `Cadence` — it always matches at
 least the last), so it always fills this slot itself at minimum. Documented anyway: it's still the
 correct answer for a target with no wired Tracks at all, and stays correct if a future Track is ever
 added that, unlike Investigation, genuinely can go both not-due and not-eligible at once.
