@@ -18,4 +18,11 @@ The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping
 
 ## Verified
 
-Not yet manually confirmed live — see the implementing pull request's own report.
+Confirmed live on 2026-09-21: the sandbox left by the `php-onboarding-fresh` run above, its four files
+committed by the human, then `/continuous-refactoring` again (`opencode` 1.18.31, `opencode/big-pickle`).
+Observed: no onboarding interview; the existing `bookkeeping.md` — holding only `Create-mode` — was accepted,
+all four Tracks counted as never run, the fixed order selected Safety Net, and the scan subagent started
+normally; the files the onboarding wrote (`issue-tracker.md`, `triage-labels.md`, `AGENTS.md`) were read and
+used through prioritise, design, implement and the closing bookkeeping write. One deviation: the run said
+aloud that onboarding "is complete" before selecting the Track (the second invocation should not mention
+onboarding at all).

@@ -285,3 +285,21 @@ CONTEXT.md, the node doc and the ADR banners were tightened (superseded-in-part 
 **Outstanding.** A live dry run of the onboarding (Verification 2–4) has not been done — every `php-onboarding-*`
 fixture's `expected/behavior.md` is marked "not yet manually confirmed live". Unit tests, `drift_check`, the skill
 validator and harness tier 2 are green.
+
+### 2026-09-21 — Live check (opencode, `opencode/big-pickle`)
+
+Two live runs against the branch, both driven by hand in a sandbox copy of `php-onboarding-fresh` with only this repo's
+skills linked (Verification 2 "not set up + continue" and 3 done; the rest is still open):
+
+- **First invocation (attended):** announcement first, no subagent, setup-gap question once, Q1–Q3 one at a time,
+  informational summary, one status line per write, `bookkeeping.md` last, closing text complete. Sandbox files: exactly
+  the four expected ones; no issue, no branch, no commit. All ten deterministic file checks passed.
+- **Second invocation (after the human committed the files):** Safety Net selected, scan subagent started normally; the
+  minimal `bookkeeping.md` (only `Create-mode`) was enough — absent Track sections read as never run. The pass ran to the
+  hand-off (no remote: `refactor/composer` and a bookkeeping branch prepared).
+- **Findings for follow-up tickets (not part of this PR):** (1) the `bookkeeping.md` title `# Refactoring Loop Config` should
+  read `# Refactoring Bookkeeping`; (2) the dispatcher said aloud "onboarding is complete" on an already-onboarded repo — it
+  should mention onboarding only when it is needed. Unrelated observations: a context compaction mid-pass, and a scratch
+  file written outside the sandbox.
+- **Still not run live:** Verification 2 variants (set up, abort, interrupted), 4 (direct Track invocation), and the
+  unattended path. The fixtures for those stay marked "not yet manually confirmed live".

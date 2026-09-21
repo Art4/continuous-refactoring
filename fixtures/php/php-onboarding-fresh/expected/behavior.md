@@ -51,4 +51,12 @@ saw no hint it was onboarding. It also filed an issue and opened a merge request
 
 ## Verified
 
-Not yet manually confirmed live — see the implementing pull request's own report.
+Confirmed live on 2026-09-21: one attended `opencode` run (1.18.31, model `opencode/big-pickle`) in a
+sandbox copy of this fixture, the setup-gap question answered *continue*, Q1–Q3 answered with the
+recommended options (Local Markdown, `human-opens`, `docs/refactoring/`). Observed: the first output was
+the onboarding announcement; no subagent, scan or Track selection; the four questions one at a time; an
+informational summary; one status line per write in the documented order, `bookkeeping.md` last; a closing
+text with the commit hint, the rerun hint and the later-setup hint. Afterwards the sandbox held exactly
+`AGENTS.md`, `docs/agents/triage-labels.md`, `docs/agents/issue-tracker.md` and
+`docs/refactoring/bookkeeping.md` — no issue, branch or commit. Not covered live: the unattended
+("no human present") path.
