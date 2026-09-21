@@ -323,7 +323,9 @@ run_agent_loop() {
     # engineering-skills setup counts as incomplete, so the interview's
     # setup-gap question is exercised too. The php-onboarding-* fixtures
     # carry their own docs/agents state (none, complete, or interrupted)
-    # and are left exactly as they are.
+    # and are left exactly as they are. The label table seeded below is a
+    # static test copy; the source of truth for the table onboarding writes is
+    # skills/continuous-refactoring/references/triage-labels-template.md.
     mkdir -p "$FIXTURE_DST/docs/agents"
     if [[ "$FIXTURE" != php-onboarding-* && ! -f "$FIXTURE_DST/docs/agents/triage-labels.md" ]]; then
     cat > "$FIXTURE_DST/docs/agents/triage-labels.md" <<'EOF'

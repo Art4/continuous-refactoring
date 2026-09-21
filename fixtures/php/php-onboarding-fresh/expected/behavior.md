@@ -27,11 +27,11 @@ A minimal PHP project (`composer.json`, `src/Greeter.php`). No `docs/`, no `AGEN
    recommended answer.
 4. An informational summary — no approval gate — naming the files to be written and the recorded backlog
    labels.
-5. One status line per write, in this order: `docs/agents/issue-tracker.md` (the Local Markdown template),
-   `docs/agents/triage-labels.md` (`needs-info`, `ready-for-agent`, `wontfix`, plus a `done` row — Local
-   Markdown), the suite's section in a **newly created** `AGENTS.md` (`Refactoring Notes:` line, the
-   `Create-mode` pointer, both backlog labels), then `docs/refactoring/bookkeeping.md` **last**, holding
-   `Create-mode` and no `Pending candidates`.
+5. One status line per write, in this order: the suite's section in a **newly created** `AGENTS.md`
+   (`Refactoring Notes:` line, the `Create-mode` pointer, the backlog labels line), `docs/agents/triage-labels.md`
+   (`needs-info`, `ready-for-agent`, `wontfix`, plus a `done` row — Local Markdown), `docs/agents/issue-tracker.md`
+   (the Local Markdown template), then `docs/refactoring/bookkeeping.md` **last**, holding `Create-mode` and no
+   `Pending candidates`.
 6. A closing text: what was created; commit or merge the files to the default branch; run
    `/continuous-refactoring` again (optionally naming a Track); the engineering-skills setup can still be
    run later and updates the files in place.

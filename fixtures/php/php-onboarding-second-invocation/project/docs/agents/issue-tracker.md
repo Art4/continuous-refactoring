@@ -14,5 +14,4 @@ tracker, read wherever an issue's age matters (e.g. when ranking candidates).
 
 ## When a skill says "check the external tracker"
 
-Read the files under `.scratch/refactor/issues/` directly — there is no
-external forge in this sandbox.
+Read the files under `.scratch/refactor/issues/` directly.

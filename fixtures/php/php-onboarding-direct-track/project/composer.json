@@ -1,0 +1,12 @@
+{
+    "name": "example/php-onboarding-direct-track",
+    "description": "Never ran the loop - a Track skill is invoked directly",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}

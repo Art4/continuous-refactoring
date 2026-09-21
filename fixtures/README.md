@@ -73,15 +73,19 @@ Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053
 ### php-onboarding-* (dispatcher onboarding step)
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), exercised through the
-`agent-loop` mode below. Three targets that have never run the loop, so `/continuous-refactoring` onboards
+`agent-loop` mode below. Targets around the moment of first use: mostly ones that have never run the loop, so `/continuous-refactoring` onboards
 them as step 0 of the dispatcher and ends the invocation
 (`skills/continuous-refactoring/references/onboarding-setup-interview.md`): `php-onboarding-fresh` (no
 engineering-skills setup — the setup-gap question, all three questions, every file written),
 `php-onboarding-set-up` (both `docs/agents/` files present — no setup-gap question, no tracker question,
-existing files untouched) and `php-onboarding-interrupted` (everything written except `bookkeeping.md` —
-resumes without re-asking what is on record). See each fixture's `expected/behavior.md`; the second
-invocation, which selects a Track and starts the scan, is what the `php-safety-net-first-run` family
-already covers.
+existing files untouched), `php-onboarding-interrupted` (the suite's `AGENTS.md` section and the label table
+written, the rest not — resumes without re-asking the setup gap or what is on record), `php-onboarding-abort`
+(the setup-gap question answered *abort* — nothing written), `php-onboarding-direct-track` (a Track skill invoked
+without onboarding — aborts with a pointer) and `php-onboarding-second-invocation` (the state onboarding leaves
+behind — the next invocation selects a Track and scans). See each fixture's `expected/behavior.md`. The
+`docs/agents/` files in these fixtures are static copies; the sources of truth are the two template references
+under `skills/continuous-refactoring/references/` (`local-issue-tracker-template.md`,
+`triage-labels-template.md`).
 
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
