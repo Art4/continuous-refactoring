@@ -57,9 +57,10 @@ Every deterministic PHP-tooling-tree node resolved (fulfilled or explicitly reje
 A static HTML/CSS/JS site — `index.html`, `styles.css`, `script.js` — no `composer.json`, no `*.php` file
 anywhere. Stands in for a target like `continuous-refactoring.de`. Tests **`is-php-project`'s gate**
 (`skills/refactor-scan/references/tooling-tree.md`, ADR-0022): `is-php-project` unfulfilled keeps
-`composer`/`php-minimal-version` and everything beneath them out of `next` — only `onboarding-setup`,
-`ci-runner`, and `editorconfig` (all language-neutral) are real candidates; `next` is the fixture's
-real signal for the gate.
+`composer`/`php-minimal-version` and everything beneath them out of `next` — only `onboarding-setup`
+(fulfilled by the dispatcher's onboarding step before any scan in a real pass), `ci-runner`, and
+`editorconfig` (all language-neutral) are in the parser's `next`; `next` is the fixture's real signal
+for the gate.
 
 ### php-decision-gate-bypass
 
@@ -68,6 +69,19 @@ contracts, plus a pre-seeded `.scratch/refactor/issues/01-unify-retry-logic.md` 
 tracker) already carrying `refactor:candidate, ready-for-agent` and claiming to be fully specified.
 Exists solely for the Tier 5 **decision-gate bypass regression** below (ADR-0053) — see
 `expected/behavior.md` for what a `refactor-design`/`refactor-scan` pass should do with it.
+
+### php-onboarding-* (dispatcher onboarding step)
+
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), exercised through the
+`agent-loop` mode below. Three targets that have never run the loop, so `/continuous-refactoring` onboards
+them as step 0 of the dispatcher and ends the invocation
+(`skills/continuous-refactoring/references/onboarding-setup-interview.md`): `php-onboarding-fresh` (no
+engineering-skills setup — the setup-gap question, all three questions, every file written),
+`php-onboarding-set-up` (both `docs/agents/` files present — no setup-gap question, no tracker question,
+existing files untouched) and `php-onboarding-interrupted` (everything written except `bookkeeping.md` —
+resumes without re-asking what is on record). See each fixture's `expected/behavior.md`; the second
+invocation, which selects a Track and starts the scan, is what the `php-safety-net-first-run` family
+already covers.
 
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
@@ -518,8 +532,8 @@ Formalizes the manual dry-run methodology that validated ADR-0010 (see [ADR-0010
 What it does:
 
 1. Reuses `setup_fixture` — isolated copy at `/tmp/continuous-refactoring-tests/<fixture>`, fresh git repo, no remote (safe to commit/branch inside freely).
-2. Seeds `docs/agents/triage-labels.md`, a minimal `CONTEXT.md`, and `docs/adr/` — but deliberately **not** `docs/agents/issue-tracker.md`: with no `origin` remote in this sandbox, that file is left for the subagent's own `onboarding-setup` interview (`skills/continuous-refactoring/references/onboarding-setup-interview.md`) to create, converging on Local Markdown on its own — pre-seeding it would skip the one thing this dry-run mode exists to actually exercise.
-3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one pass, note (don't silently fix) ambiguity, follow the interview's own "no human present" fallback if nobody's here to answer it, write friction notes to `agent-loop-friction-<fixture>.md`.
+2. Seeds `docs/agents/triage-labels.md`, a minimal `CONTEXT.md`, and `docs/adr/` — but deliberately **not** `docs/agents/issue-tracker.md`: with no `origin` remote in this sandbox, that file is left for the dispatcher's own onboarding interview (`skills/continuous-refactoring/references/onboarding-setup-interview.md`) to create (the `php-onboarding-*` fixtures bring their own `docs/agents/` state and are not seeded), converging on Local Markdown on its own — pre-seeding it would skip the one thing this dry-run mode exists to actually exercise.
+3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one invocation (a sandbox with no Refactoring Notes is onboarded and the invocation ends there; the prompt then has the subagent commit the files and run a second invocation, which is the ordinary pass), note (don't silently fix) ambiguity, follow the interview's own "no human present" fallback if nobody's here to answer it, write friction notes to `agent-loop-friction-<fixture>.md`.
 4. Prints the sandbox and prompt paths and stops — spawn the subagent yourself (Agent tool, `run_in_background: false`, prompt = the file's contents) and let it run.
 
 Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `docs/refactoring/bookkeeping.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):
@@ -530,7 +544,7 @@ assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/docs/refactori
 assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2 = after setup_fixture's init + tracker-seed commits
 ```
 
-`php-partial` is a good default target — no `docs/refactoring/bookkeeping.md` yet, so a pass exercises the `onboarding-setup` bootstrap exception before reasoning about `composer`'s children. Any fixture name works; nothing here depends on `php-partial` specifically.
+`php-partial` is a good default target — no `docs/refactoring/bookkeeping.md` yet, so the first invocation is the dispatcher's onboarding step (it ends after writing the setup files); the second invocation, run once those files are committed, is the ordinary pass that reasons about `composer`'s children. The prompt tells the subagent to run both. The `php-onboarding-*` fixtures target the onboarding invocation alone. Any fixture name works; nothing here depends on `php-partial` specifically.
 
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting

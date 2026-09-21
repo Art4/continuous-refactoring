@@ -314,13 +314,18 @@ run_agent_loop() {
     log_info "=== Agent loop (full pass, subagent-observed) — fixture: $FIXTURE ==="
 
     # docs/agents/issue-tracker.md is deliberately NOT pre-seeded here — the
-    # onboarding-setup interview (skills/continuous-refactoring/references/
+    # dispatcher's onboarding step (skills/continuous-refactoring/references/
     # onboarding-setup-interview.md) is what's supposed to create it, and this
     # sandbox has no `origin` remote, so Explore finds nothing and the
     # interview's own recommendation should converge on Local Markdown on
     # its own. Pre-seeding it would skip the one thing this dry-run mode
-    # exists to actually exercise.
+    # exists to actually exercise. With only triage-labels.md seeded the
+    # engineering-skills setup counts as incomplete, so the interview's
+    # setup-gap question is exercised too. The php-onboarding-* fixtures
+    # carry their own docs/agents state (none, complete, or interrupted)
+    # and are left exactly as they are.
     mkdir -p "$FIXTURE_DST/docs/agents"
+    if [[ "$FIXTURE" != php-onboarding-* && ! -f "$FIXTURE_DST/docs/agents/triage-labels.md" ]]; then
     cat > "$FIXTURE_DST/docs/agents/triage-labels.md" <<'EOF'
 # Triage Labels
 
@@ -333,6 +338,7 @@ run_agent_loop() {
 | `wontfix`                    | `wontfix`               | Will not be actioned                      |
 | —                            | `done`                  | Work complete, delivered, no longer open  |
 EOF
+    fi
     if [[ ! -f "$FIXTURE_DST/CONTEXT.md" ]]; then
         printf '# %s\n\n_Domain vocabulary for this sandbox project — the loop appends terms here as they crystallise._\n' "$FIXTURE" > "$FIXTURE_DST/CONTEXT.md"
     fi
@@ -359,10 +365,15 @@ refactor-prioritize, refactor-design, refactor-implement, refactor-learn)
 under $REPO_DIR/skills/ — read each one when the orchestrator step tells you
 to run it.
 
-Run exactly one pass. Where the skill text is ambiguous or you have to guess
-at a behavior it doesn't spell out, do not silently improvise past it and do
-not edit the skill files — note the ambiguity instead. If the onboarding-setup
-interview runs and there is nobody here to answer it, follow its own
+Run exactly one invocation. A sandbox with no Refactoring Notes
+(docs/refactoring/bookkeeping.md) is onboarded by that invocation, which then
+ends by itself with a closing text — that is the whole invocation, no scan
+follows. Once it has ended that way, commit the files it wrote to the default
+branch, then run the SKILL.md a second time as the next invocation: that one
+selects a Track and runs one pass. Where the skill text is ambiguous or you
+have to guess at a behavior it doesn't spell out, do not silently improvise
+past it and do not edit the skill files — note the ambiguity instead. If the
+onboarding interview runs and there is nobody here to answer it, follow its own
 "## If no human is present to ask" section (skills/continuous-refactoring/
 references/onboarding-setup-interview.md) rather than guessing past it. When the
 pass ends (or stops itself per its own completion criterion), append your
@@ -372,7 +383,7 @@ covering: what you did each step, any ambiguity or guessed behavior, and
 whether each step's completion criterion was actually met.
 EOF
 
-    log_info "Sandbox ready: $FIXTURE_DST (git initialized, no remote, triage-labels/CONTEXT.md/docs/adr seeded)"
+    log_info "Sandbox ready: $FIXTURE_DST (git initialized, no remote, triage-labels/CONTEXT.md/docs/adr seeded unless the fixture brings its own)"
     log_info "Prompt written: $prompt_file"
     log_info "Next step (manual — this script cannot spawn a Claude Code subagent itself):"
     log_info "  spawn an Agent-tool subagent with the contents of $prompt_file, let it run, then inspect"
