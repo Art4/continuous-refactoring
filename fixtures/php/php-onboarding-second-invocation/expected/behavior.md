@@ -7,7 +7,8 @@ The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping
 
 ## Expected: `/continuous-refactoring`
 
-1. **No onboarding text** — step 0 finds `bookkeeping.md` and skips straight to Track selection.
+1. **No onboarding text** — step 0 finds `bookkeeping.md` and skips straight to Track selection, without
+   saying anything about onboarding (not even that it is complete).
 2. No `## Safety Net` section exists, so the Safety Net Track is treated as never run and selected (it wins its own
    ratio comparison; the one-time exception needs an existing `## Safety Net`). The dispatcher says so in one
    sentence and invokes `/continuous-safety-net`.
@@ -24,5 +25,5 @@ Observed: no onboarding interview; the existing `bookkeeping.md` — holding onl
 all four Tracks counted as never run, the fixed order selected Safety Net, and the scan subagent started
 normally; the files the onboarding wrote (`issue-tracker.md`, `triage-labels.md`, `AGENTS.md`) were read and
 used through prioritise, design, implement and the closing bookkeeping write. One deviation: the run said
-aloud that onboarding "is complete" before selecting the Track (the second invocation should not mention
-onboarding at all).
+aloud that onboarding "is complete" before selecting the Track. Step 0's wording was changed afterwards so
+the already-onboarded case stays silent; that change has not been re-run live.
