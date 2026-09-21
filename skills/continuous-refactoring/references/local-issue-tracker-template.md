@@ -6,8 +6,6 @@ when the onboarding interview
 records "Local Markdown" as the tracker choice — copy it verbatim, don't
 restate or paraphrase it (this file is the one place it's defined, to avoid
 two independently-drifting copies of the same convention).
-`fixtures/harness/run.sh`'s `agent-loop` sandbox-seeding step draws from
-this same file for the same reason — keep both in sync.
 
 ```markdown
 # Issue tracker: Local Markdown
@@ -26,6 +24,5 @@ tracker, read wherever an issue's age matters (e.g. when ranking candidates).
 
 ## When a skill says "check the external tracker"
 
-Read the files under `.scratch/refactor/issues/` directly — there is no
-external forge in this sandbox.
+Read the files under `.scratch/refactor/issues/` directly.
 ```
