@@ -31,7 +31,7 @@ The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md);
 
 ## How it works
 
-A pass spends itself on exactly one of four **Tracks**. Each has its own cadence in the target's `bookkeeping.md`; the most overdue one wins.
+A pass spends itself on exactly one of four **Tracks**. Each has its own cadence in the target's `bookkeeping.md` — an interval with a unit (`12 hours`, `7 days`, `2 weeks`, `1 month`) or a monthly calendar day (`monthly on the 1st`); the most overdue one wins.
 
 | Track | What it does | Default cadence |
 |---|---|---|

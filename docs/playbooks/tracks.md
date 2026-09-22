@@ -15,6 +15,10 @@ A **Track** is one scheduled work mode a loop pass can spend itself on. Each pas
 
 Safety Net and Guardrails walk the [tooling tree](../../skills/refactor-scan/references/tooling-tree.md): each adoption step is a *node*, and a Track's `Open` list holds the nodes still to do. Housekeeping and Investigation have no `Open` list.
 
+### Writing a `Cadence`
+
+`Cadence` is a number with its unit — `12 hours`, `90 days`, `2 weeks`, `1 month` — or a fixed calendar day, `monthly on the 1st` (any day from the 1st to the 28th). A bare number from an older file still reads as days. Edit it by hand any time; the Track's next pass reads it as written. A value the loop can't read is never guessed at: the Track's default is used for that pass and the report says which value was unreadable. Limits (a month counts as 30 days, hours are only day-accurate): [known limitations](../known-limitations.md).
+
 ## How a Track is selected
 
 Before any of this, a project that has never run the loop (no `bookkeeping.md`) is **onboarded** instead: that invocation asks a few setup questions, writes the setup files and stops, without selecting a Track — even when you named one. Track selection only happens once onboarding has run.

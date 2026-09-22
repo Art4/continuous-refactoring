@@ -68,7 +68,7 @@ that field on account of a Safety Net Track candidate resolving.
 Whenever `safety-net-track.md`'s own process ran this pass — whether it found nothing to propose (every
 node in scope already resolved) or proposed something that `Open` now tracks — write `## Safety Net`'s
 `Last scan` to today's date (`YYYY-MM-DD`), last, in the closing call's own
-step ordering. **Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 90`, `Last
+step ordering. **Section didn't exist yet** (first-ever scan) → create it here: `Cadence: 90 days`, `Last
 scan: <today>`, `Open`/`Out-of-scope` either freshly populated (something was proposed/rejected this
 scan) or both `- none` (a fully-compliant target's first scan — `Open` is empty because every node is
 resolved). **The scan didn't run this pass** (`Open` was already non-empty, so `safety-net-track.md`

@@ -16,7 +16,7 @@ cycle, opened and delivered a fresh one, or found nothing registered to check) �
 `Last scan` to today's date (`YYYY-MM-DD`), last, in the closing call's own
 step ordering, same position `## Safety Net`'s/`## Guardrails`'/`## Investigation`'s own `Last scan`
 write already occupies. **Section didn't exist yet** (first-ever scan for this target) → create it here:
-`Cadence: 7`, `Last scan: <today>` — the same default `housekeeping-track.md`'s own *First-run cadence*
+`Cadence: 7 days`, `Last scan: <today>` — the same default `housekeeping-track.md`'s own *First-run cadence*
 section applies, written here rather than left for a later hand-edit. `Cadence` is otherwise never
 written by this call once the section exists — see *`Cadence` is read, not written, past first creation*,
 below.
@@ -38,8 +38,8 @@ special case for the cases that do have a branch.
 
 ## `Cadence` is read, not written, past first creation — same discipline as `## Safety Net`'s/`## Guardrails`' own
 
-Unlike `## Investigation`'s always-literal `continuous`, `## Housekeeping`'s `Cadence` is a real day
-count — `7` unless hand-edited, or set via
+Unlike `## Investigation`'s always-literal `continuous`, `## Housekeeping`'s `Cadence` is a real interval
+(`refactoring-bookkeeping.md`'s *Cadence values*) — `7 days` unless hand-edited, or set via
 `skills/continuous-housekeeping/references/housekeeping-cadence-interview.md`'s own optional, human-run
 interview (`housekeeping-track.md`'s *First-run cadence* section) — but this write only ever sets it once,
 on first creation. Every later write to this section touches `Last scan` alone; a human tuning `Cadence`
