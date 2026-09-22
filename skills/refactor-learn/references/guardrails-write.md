@@ -56,10 +56,25 @@ leaves `Open` once its delivering MR actually **merges** (the early call's own f
 
 **Never touches `Pending candidates`.** A Guardrails Track candidate's in-flight state lives entirely
 in `## Guardrails`'s own `Open` list
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — it's never also written to
-the global `Pending candidates` field, and `refactor-learn` never clears that field on account of a
-Guardrails Track candidate resolving. Also never touches `## Safety Net`'s own `Open`/`Out-of-scope` —
+(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — `refactor-design` skips
+writing that field for a candidate handed to it this way (marked self-tracking,
+`skills/refactor-scan/references/track-open-processing.md`), so it's never even transiently set for
+one of these, and this call correspondingly never clears it on account of a Guardrails Track candidate
+resolving. Also never touches `## Safety Net`'s own `Open`/`Out-of-scope` —
 the two Tracks' sections are independent, each written only by its own Track's own candidates.
+
+## Issue filed for the picked `Open` entry → record its number
+
+This pass's `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) picked exactly one
+workable, unfulfilled entry and handed it to `refactor-design`, which files that node's issue (unless one
+already existed) — the closing call's own precondition
+(`skills/refactor-learn/SKILL.md`) is authorized by that hand-off alone, independent of whether
+`refactor-implement` also got as far as opening a merge request this same pass. Once the issue is known
+(freshly filed this pass, or already existing), rewrite that entry from a bare `- <slug>` to
+`- <slug> (#<issue>)` (`skills/refactor-scan/references/guardrails-track.md`'s "Filling `Open`" already
+documents this as `Open`'s target shape) — the entry's only change; it stays in `Open` exactly where it
+was, not touched by any of the removal cases above. Already carries `(#<issue>)` (a prior pass got this
+far and was interrupted before its own closing call ran) → nothing to write, this case is idempotent.
 
 ## `Last scan` — written every time the Track's scan actually ran this pass
 

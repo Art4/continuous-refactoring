@@ -49,7 +49,9 @@ When a selected Track (Safety Net or Guardrails) has a non-empty `Open` list, th
 - A node is *workable* when every required parent is fulfilled (or rejected), every recommended parent is decided, its issue isn't waiting on `needs-info`, and it isn't held back by an unverified PHP floor.
 - Non-workable nodes are skipped and listed with their reason in the closing report (e.g. "Skipped: phpstan-level-6 (blocked by phpstan-level-5)").
 - Right before working a node, its fulfilment is judged again. If you adopted the tool by hand since the last scan, the node simply leaves `Open` — no issue, no merge request — and the walk moves on.
-- The node's issue is filed only when it is actually worked.
+- The node's issue is filed only when it is actually worked. Once filed, that `Open` entry is
+  annotated with its issue number (`- <slug> (#<issue>)`) — so `bookkeeping.md` shows at a glance
+  which entries already have work underway, without anyone needing to search the tracker for it.
 
 A Track with an empty `Open` is *scanned* instead: fulfilment of every node is judged against its purpose (an agent judgement, not a dependency-name match), and the unfulfilled, unblocked ones become the new `Open` list.
 

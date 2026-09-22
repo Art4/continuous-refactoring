@@ -1,0 +1,1 @@
+Safety Net and Guardrails Track `Open` entries now record their issue number (`- <slug> (#<issue>)`) as soon as `refactor-design` files it, instead of staying unlinked until a merge request opens or merges — closes a bookkeeping gap that previously forced `refactor-scan` to rediscover already-filed tickets by searching instead of reading the link.
