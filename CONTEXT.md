@@ -140,6 +140,18 @@ _Avoid_: events, notifications
 The finding `refactor-scan`'s Track `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) reports when its re-check — re-running a node's **Fulfilment check** right before working it — finds the node already served, typically adopted by hand since the last scan. `refactor-learn`'s early call acts on it: the node leaves its Track's `Open` with no merge request and nothing filed — scan only reports the finding, `refactor-learn` performs the removal, the suite's ordinary detect-never-write split.
 _Avoid_: (none — use the term as-is)
 
+**Self-tracking** (hand-off marker):
+How `refactor-scan`'s Track `Open` walk (`skills/refactor-scan/references/track-open-processing.md`)
+hands its picked node to `refactor-design` — the same marker `refactor-prioritize`'s Select mode
+already puts on a structural/baseline-shrink candidate. `refactor-design` reads it as "this
+candidate's own resume marker lives elsewhere, don't set `Pending candidates`" and nothing more — it
+never learns what "elsewhere" is, keeping it free of any vocabulary for **Track**, **Safety Net**, or
+**Guardrails**. What "elsewhere" actually is stays known only to whoever set the marker and to
+`refactor-learn`'s own write files: `refactor-prioritize`'s own filing for a structural/
+baseline-shrink candidate, or a Track's own `Open` entry for an `Open`-walk node
+(`docs/adr/0060-track-open-entries-record-their-issue-number.md`).
+_Avoid_: (none — use the term as-is)
+
 **Flagged candidate**:
 A candidate whose plan `refactor-design` already wrote, but which also surfaced a decision meeting
 the ADR bar (hard to reverse, surprising without context, a real trade-off) while staying

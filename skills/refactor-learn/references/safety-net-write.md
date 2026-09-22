@@ -52,16 +52,29 @@ without the rejected ancestor) and records the reopened nodes.
 ## Fresh MR → remove from `Open` (redundant with merge, kept for symmetry)
 
 The closing call's freshly-opened-MR handling doesn't itself remove anything from `Open` — a node only
-leaves `Open` once its delivering MR actually **merges** (the early call's own finding, above), same as
-`Pending candidates` only clears once the candidate resolves, not the moment its MR opens. What *does*
-happen at this point, same as for any other node: `Pending candidates` itself is cleared if it named this
-candidate (it doesn't, for a Safety Net Track candidate — see below) and the MR is remembered
-(`merge-requests.md` / the tracker's native link).
+leaves `Open` once its delivering MR actually **merges** (the early call's own finding, above). What
+*does* happen at this point, same as for any other node: the MR is remembered (`merge-requests.md` /
+the tracker's native link).
 
 **Never touches `Pending candidates`.** A Safety Net Track candidate's in-flight state lives entirely in
 `## Safety Net`'s own `Open` list (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`)
-— it's never also written to the global `Pending candidates` field, and `refactor-learn` never clears
-that field on account of a Safety Net Track candidate resolving.
+— `refactor-design` skips writing that field for a candidate handed to it this way (marked
+self-tracking, `skills/refactor-scan/references/track-open-processing.md`), so it's never even
+transiently set for one of these, and this call correspondingly never clears it on account of a Safety
+Net Track candidate resolving.
+
+## Issue filed for the picked `Open` entry → record its number
+
+This pass's `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) picked exactly one
+workable, unfulfilled entry and handed it to `refactor-design`, which files that node's issue (unless one
+already existed) — the closing call's own precondition
+(`skills/refactor-learn/SKILL.md`) is authorized by that hand-off alone, independent of whether
+`refactor-implement` also got as far as opening a merge request this same pass. Once the issue is known
+(freshly filed this pass, or already existing), rewrite that entry from a bare `- <slug>` to
+`- <slug> (#<issue>)` (`skills/refactor-scan/references/safety-net-track.md`'s "Filling `Open`" already
+documents this as `Open`'s target shape) — the entry's only change; it stays in `Open` exactly where it
+was, not touched by any of the removal cases above. Already carries `(#<issue>)` (a prior pass got this
+far and was interrupted before its own closing call ran) → nothing to write, this case is idempotent.
 
 ## `Last scan` — written every time the Track's scan actually ran this pass
 

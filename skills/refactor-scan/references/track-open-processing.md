@@ -44,9 +44,15 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
      removal is `refactor-learn`'s write, the same detect-never-write split every other finding
      already follows.
    - **Not fulfilled** → this is the one node worked this pass. Hand it forward to `refactor-design` /
-     `refactor-implement` as usual — the walk files no issue itself (`refactor-scan` detects, never
+     `refactor-implement` as usual, **marked self-tracking** — `refactor-design/SKILL.md` step 5
+     already skips `Pending candidates` for a candidate marked this way, without needing to know why;
+     this `Open` entry is this node's own resume marker instead, so the two must never both point at
+     the same candidate. The walk files no issue itself (`refactor-scan` detects, never
      writes); `refactor-design` files the node's issue when it works the node, unless one already
-     exists. **Continue walking
+     exists — this pass's pick, and the issue it ends up with, is this walk's own `## Output`
+     (below), which is what authorizes `refactor-learn`'s closing call to write that issue's number
+     onto this `Open` entry (`safety-net-write.md`/`guardrails-write.md`), whether or not
+     `refactor-implement` also got as far as opening a merge request this same pass. **Continue walking
      the remaining entries** to collect any non-workable nodes (step 3) for the pass report, but
      do not work a second node — exactly one node is worked per pass.
 5. All entries exhausted → the walk is complete. If at least one workable, unfulfilled node was
@@ -77,3 +83,10 @@ workable node it selected (its issue, if one already exists), any fulfilled-at-p
 early call), or "nothing workable". `refactor-learn` performs every write those findings imply —
 the `Open` removals above. `refactor-prioritize` Rank mode is not involved — Track nodes are no
 longer ranked or pre-filed; only the single walk's winner reaches `refactor-design`.
+
+`refactor-loop` carries this same `## Output` — which node this pass's walk picked — forward past
+`refactor-design`/`refactor-implement` to `refactor-learn`'s closing call, the way it already carries
+a freshly opened MR or a design-time breaking-change finding: this is that call's own precondition
+(`skills/refactor-learn/SKILL.md`), authorizing it to write the picked node's now-known issue number
+onto its `Open` entry (`safety-net-write.md`/`guardrails-write.md`) even on a pass where
+`refactor-implement` never got as far as opening a merge request.

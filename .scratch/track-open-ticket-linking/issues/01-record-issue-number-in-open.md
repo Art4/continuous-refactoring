@@ -35,7 +35,7 @@ planned (issue already existed, plan already written, `ready-for-agent`) — und
 right answer), but forces avoidable rediscovery work every pass an `Open` list has more than one entry,
 and defeats the point of the `(#<issue>)` shape the docs already claim exists.
 
-**Status:** needs-triage.
+**Status:** done — PR #119.
 
 **Parked, not part of this ticket:** whether `refactor-scan`'s own `Open` walk should short-circuit
 using a recorded number instead of re-deriving fulfilment/workability from scratch (a performance
@@ -50,3 +50,35 @@ place.
 > tracker) — and a concrete `moodle-sync` observation: a `refactor-scan` pass needed a subagent to scan
 > all 6 `## Safety Net` `Open` entries because none carried a `(#<issue>)` link, even though one
 > (`rector-php-set`) already had a filed, planned ticket (`#08`).
+
+> **2026-09-22 (grilling):** Settled via `/grilling` (5 questions, one round each plus a
+> confirmation): **Q1 — bundle in a second, independently found bug**:
+> `refactor-design/SKILL.md` step 5 is entirely blind to the Safety Net/Guardrails split and sets
+> `Pending candidates` for *every* freshly-filed non-native-tracker tooling-tree node, contradicting
+> `safety-net-write.md`/`guardrails-write.md`'s "never touches `Pending candidates`" — and risking a
+> double-resume (`refactor-scan/SKILL.md` step 2's own `Pending candidates` resume racing the Track's
+> `Open`-based one) if a pass is interrupted before that field is cleared. Fixed together, same code
+> path. **Q2/Q5 — where the write happens**: not `refactor-design` (would require it to learn about
+> Tracks), not a `Pending candidates`-vs-`Open` reconciliation (reopens the double-resume risk) —
+> `refactor-scan`'s `Open` walk hands its pick to `refactor-design` marked **self-tracking**, the same
+> generic marker a structural/baseline-shrink candidate already carries; design skips
+> `Pending candidates` without ever learning why. `refactor-learn`'s closing call, already
+> Track-aware, performs the actual `(#<issue>)` write, authorized by a new fourth precondition case
+> (the `Open` walk having picked a node this pass) — covers the observed case where `refactor-design`
+> ran but `refactor-implement` hadn't yet opened a merge request this same pass. **Q3 — scope
+> narrowed**: `refactor-design`'s existing title-based lookup (`Tooling tree: <Name>`) already
+> prevents duplicate filing independent of any `Open` link — this ticket is a discoverability/
+> bookkeeping-accuracy fix, not a correctness one. **Q4 — new ADR**: yes.
+
+> **2026-09-22 (implement):** [ADR-0060](/docs/adr/0060-track-open-entries-record-their-issue-number.md)
+> added (amends ADR-0051, ADR-0055). Changed: `refactor-design/SKILL.md` (widened the existing
+> structural/baseline-shrink `Pending candidates`-skip into a generic "handed forward already marked
+> self-tracking" case, no Track vocabulary added), `track-open-processing.md` (marks the hand-off
+> self-tracking; documents its own `## Output` as the closing call's new trigger),
+> `refactor-learn/SKILL.md` (fourth closing-call precondition case), `safety-net-write.md`/
+> `guardrails-write.md` (new "Issue filed for the picked `Open` entry → record its number" section
+> each; corrected the now-true "never touches `Pending candidates`" claim to explain *why* — design
+> skips the write, not just that nothing removes it), `refactoring-bookkeeping.md` (`Pending
+> candidates` field doc), `CONTEXT.md` (new **Self-tracking** entry), `docs/playbooks/tracks.md`
+> (documents the annotation for human readers). New `.changelog.d/119-track-open-issue-linking.md`
+> fragment.
