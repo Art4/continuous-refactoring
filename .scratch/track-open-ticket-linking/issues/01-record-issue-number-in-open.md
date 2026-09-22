@@ -20,7 +20,7 @@ ever writes its number back into `Open`. Checked both write-side files
 cases for `Open` (Merge → remove, Fulfilled at pick-up → remove, Rejection → remove + `Out-of-scope`
 pointer) plus a redundant "Fresh MR doesn't itself remove" note. None of them adds the number.
 
-Consequence, observed live against a real target repo (`moodle-sync`): `## Safety Net`'s `Open` held 6
+Consequence, observed live against a real target repo: `## Safety Net`'s `Open` held 6
 bare slugs, none linked to a ticket. `refactor-scan`'s next walk had to re-derive, per entry, whether a
 candidate issue already existed at all — required by workability check 2 ("the node's own candidate
 issue, *if already filed*, does not carry `needs-info`",
@@ -46,8 +46,9 @@ place.
 
 > **2026-09-22:** Filed after a live design-review conversation (German) cross-checking
 > `docs/refactoring/merge-requests.md`'s continued necessity — confirmed still required for both this
-> repo and `moodle-sync`, per ADR-0012's local-Markdown-tracker fallback (neither uses a native-label
-> tracker) — and a concrete `moodle-sync` observation: a `refactor-scan` pass needed a subagent to scan
+> repo and a real target repo checked live, per ADR-0012's local-Markdown-tracker fallback (neither
+> uses a native-label tracker) — and a concrete observation there: a `refactor-scan` pass needed a
+> subagent to scan
 > all 6 `## Safety Net` `Open` entries because none carried a `(#<issue>)` link, even though one
 > (`rector-php-set`) already had a filed, planned ticket (`#08`).
 
