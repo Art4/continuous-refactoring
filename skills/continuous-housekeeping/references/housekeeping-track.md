@@ -71,7 +71,7 @@ a delivering MR to piggyback on, and the same is true the very first time this T
 target that already has a worked-through tree. Before reading the checklist, reconcile: walk the tooling
 tree and check only the nodes that carry a `Housekeeping` field — judge each node's Fulfilment check
 itself (agent judgement against the node's Purpose statement, the same discipline every Track scan
-already uses) rather than reading `Fulfilled nodes`. For every node judged fulfilled whose
+already uses). For every node judged fulfilled whose
 `Housekeeping` line is not yet in `housekeeping-template.md`, append it (creating the file fresh if this
 is the first line ever). A hand-adopted tool therefore gets its line even when no delivering merge
 request ever existed — Guardrails tools included. Delivering such a node's merge request still contributes

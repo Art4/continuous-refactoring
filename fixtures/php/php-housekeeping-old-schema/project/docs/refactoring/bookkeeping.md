@@ -6,10 +6,3 @@
 
 **Pending candidates:**
 - none
-
-**Fulfilled nodes:**
-- onboarding-setup
-- composer
-- php-cs-fixer
-- phpunit
-- phpstan-level-0

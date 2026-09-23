@@ -74,8 +74,8 @@ def _derive_fulfilled_from_bookkeeping(
     (the documented schema, written by
     skills/refactor-learn/references/safety-net-write.md and
     guardrails-write.md).  A scope node that is neither in ``Open`` nor
-    in ``Out-of-scope`` is fulfilled.  Other fields (e.g. ``Last scan``,
-    the retired ``Fulfilled nodes``) are ignored, not migrated.  Returns
+    in ``Out-of-scope`` is fulfilled.  Other fields (e.g. ``Last scan``)
+    are ignored, not migrated.  Returns
     ``None`` when no bookkeeping file or no Track-section state exists
     (the caller returns ``{}`` — there is no detection fallback; scan
     passes require a seed).
@@ -109,7 +109,7 @@ def _derive_fulfilled_from_bookkeeping(
             saw_track_state = True
             continue
         if stripped.startswith("**"):
-            collecting = None  # any other field (Last scan, retired Fulfilled nodes) ends the list
+            collecting = None  # any other field (e.g. Last scan) ends the list
             continue
         if collecting == "open" and stripped.startswith("- "):
             slug = stripped[2:].split()[0].strip("`").strip()

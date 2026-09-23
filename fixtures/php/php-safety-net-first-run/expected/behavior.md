@@ -37,7 +37,7 @@ Run `/refactor-scan`. It should:
 1. Create the `## Safety Net` section for the first time: `Cadence: 90`, `Last scan: <today's date>`,
    `Open` and `Out-of-scope` both `- none` — the section is written **even though nothing was found
    missing**, purely to record that the scan ran.
-2. Nothing is written to `Fulfilled nodes` or `Pending candidates` on account of this Track's own
+2. Nothing is written to `Pending candidates` on account of this Track's own
    nodes — those fields stay untouched by this write (`skills/refactor-learn/references/
    safety-net-write.md`).
 

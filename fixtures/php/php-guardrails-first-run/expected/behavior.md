@@ -42,7 +42,7 @@ Run `/refactor-scan`. It should:
 1. Create the `## Guardrails` section for the first time: `Cadence: 60`, `Last scan: <today's date>`,
    `Open` and `Out-of-scope` both `- none` — written **even though nothing was found missing**, purely
    to record that the scan ran.
-2. Nothing is written to `Fulfilled nodes` or `Pending candidates` on account of this Track's own
+2. Nothing is written to `Pending candidates` on account of this Track's own
    nodes — those fields, and `## Safety Net`'s own section, stay untouched by this write
    (`skills/refactor-learn/references/guardrails-write.md`).
 
@@ -63,7 +63,7 @@ Track's scan ran and found nothing to propose" — so a strictly literal reading
 before it ever reached `guardrails-write.md`'s own "`Last scan` regardless" write, contradicting
 ADR-0055's own stated rule. Fixed by adding a third precondition clause naming a Safety Net/Guardrails
 Track's own scan having run this pass as itself a genuine, sufficient event — narrowly scoped to
-authorize only that one write, not `Fulfilled nodes` or anything else. After the fix, the model wrote
+authorize only that one write, nothing else. After the fix, the model wrote
 `## Guardrails` with `Cadence: 60`, `Last scan: <today>`, `Open`/`Out-of-scope` both `- none`. See the
 implementing pull request's own report for the full transcript summary and the judgement call on why
 this fix was made in this PR rather than deferred.

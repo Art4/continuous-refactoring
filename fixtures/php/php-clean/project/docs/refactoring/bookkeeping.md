@@ -6,15 +6,3 @@
 
 **Pending candidates:**
 - none
-
-**Fulfilled nodes:**
-- onboarding-setup
-- composer
-- ci-runner
-- php-cs-fixer
-- phpunit
-- test-runner-if-missing
-- composer-audit
-- phpstan-level-0
-- rector-dead-code
-- rector-type-coverage

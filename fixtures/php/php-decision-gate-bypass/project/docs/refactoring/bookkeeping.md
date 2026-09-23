@@ -4,6 +4,3 @@
 
 **Pending candidates:**
 - none
-
-**Fulfilled nodes:**
-- git
