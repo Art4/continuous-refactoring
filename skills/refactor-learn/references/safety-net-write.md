@@ -4,7 +4,7 @@ Part of `refactor-learn/SKILL.md`'s early call (a Safety Net Track candidate's f
 call (a Safety Net Track candidate's fresh MR, or the scan itself completing with nothing to propose) —
 reached only once the call's own precondition already holds (a genuine event this pass). Applies only to
 a node in the Safety Net Track's own scope
-(`skills/refactor-scan/references/safety-net-track.md`); every other node keeps writing
+(`../../refactor-scan/references/safety-net-track.md`); every other node keeps writing
 `Pending candidates`/`out-of-scope/` exactly as `refactor-learn/SKILL.md` already documents.
 
 ## Merge → remove from `Open`
@@ -18,7 +18,7 @@ issue, drop the `merge-requests.md` entry if non-native-tracker — `refactor-le
 ## Fulfilled at pick-up → remove from `Open`
 
 The early call's "fulfilled at pick-up" finding — scan's `Open` walk
-(`skills/refactor-scan/references/track-open-processing.md`) re-ran a node's Fulfilment check right
+(`../../refactor-scan/references/track-open-processing.md`) re-ran a node's Fulfilment check right
 before working it and found the node already served, typically adopted by hand since the last scan —
 → remove that slug from `## Safety Net`'s `Open`. No merge request exists to remember, no rejection
 to record, nothing filed: the node is genuinely fulfilled, the exact outcome its `Open` entry existed
@@ -31,7 +31,7 @@ same split the merge case above already follows.
 The early call's "Closed without merge" finding (closing comments support a structural rejection) or the
 closing call's design-time breaking-change finding, either one naming a Safety Net Track slug → the
 existing rejection handling already writes `out-of-scope/<slug>.md` (format unchanged,
-`skills/continuous-refactoring/references/forge-facing-writing.md`) — additionally:
+`../../continuous-refactoring/references/forge-facing-writing.md`) — additionally:
 
 - Remove the slug from `## Safety Net`'s `Open`.
 - Add it to `## Safety Net`'s `Out-of-scope`: `- <slug> — out-of-scope/<slug>.md`.
@@ -57,21 +57,21 @@ leaves `Open` once its delivering MR actually **merges** (the early call's own f
 the tracker's native link).
 
 **Never touches `Pending candidates`.** A Safety Net Track candidate's in-flight state lives entirely in
-`## Safety Net`'s own `Open` list (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`)
+`## Safety Net`'s own `Open` list (`../../continuous-refactoring/references/refactoring-bookkeeping.md`)
 — `refactor-design` skips writing that field for a candidate handed to it this way (marked
-self-tracking, `skills/refactor-scan/references/track-open-processing.md`), so it's never even
+self-tracking, `../../refactor-scan/references/track-open-processing.md`), so it's never even
 transiently set for one of these, and this call correspondingly never clears it on account of a Safety
 Net Track candidate resolving.
 
 ## Issue filed for the picked `Open` entry → record its number
 
-This pass's `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) picked exactly one
+This pass's `Open` walk (`../../refactor-scan/references/track-open-processing.md`) picked exactly one
 workable, unfulfilled entry and handed it to `refactor-design`, which files that node's issue (unless one
 already existed) — the closing call's own precondition
-(`skills/refactor-learn/SKILL.md`) is authorized by that hand-off alone, independent of whether
+(`../SKILL.md`) is authorized by that hand-off alone, independent of whether
 `refactor-implement` also got as far as opening a merge request this same pass. Once the issue is known
 (freshly filed this pass, or already existing), rewrite that entry from a bare `- <slug>` to
-`- <slug> (#<issue>)` (`skills/refactor-scan/references/safety-net-track.md`'s "Filling `Open`" already
+`- <slug> (#<issue>)` (`../../refactor-scan/references/safety-net-track.md`'s "Filling `Open`" already
 documents this as `Open`'s target shape) — the entry's only change; it stays in `Open` exactly where it
 was, not touched by any of the removal cases above. Already carries `(#<issue>)` (a prior pass got this
 far and was interrupted before its own closing call ran) → nothing to write, this case is idempotent.

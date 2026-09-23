@@ -4,17 +4,17 @@ Part of `refactor-learn/SKILL.md`'s early call (a Guardrails Track candidate's f
 call (a Guardrails Track candidate's fresh MR, or the scan itself completing with nothing to propose)
 — reached only once the call's own precondition already holds (a genuine event this pass). Applies
 only to a node in the Guardrails Track's own scope
-(`skills/refactor-scan/references/guardrails-track.md`); every other node keeps writing whichever
+(`../../refactor-scan/references/guardrails-track.md`); every other node keeps writing whichever
 section already governs it (`## Safety Net`, `Pending candidates`/`out-of-scope/`).
 
-The write mechanics below are identical to `skills/refactor-learn/references/safety-net-write.md`'s
+The write mechanics below are identical to `safety-net-write.md`'s
 own — this file states the same rules, scoped to `## Guardrails` instead of `## Safety Net`, so both
 sections stay independently readable without cross-referencing each other for the actual mechanics.
 
 ## Merge → remove from `Open`
 
 The early call's "Merged" finding, for a slug listed in `## Guardrails`'s `Open`
-(`skills/refactor-scan/references/guardrails-track.md` handed it forward as a resumable candidate) →
+(`../../refactor-scan/references/guardrails-track.md` handed it forward as a resumable candidate) →
 remove that entry from `Open`. Nothing else about the early call's merge handling changes.
 
 ## Fulfilled at pick-up → remove from `Open`
@@ -32,7 +32,7 @@ writes the removal.
 The early call's "Closed without merge" finding (closing comments support a structural rejection) or
 the closing call's design-time breaking-change finding, either one naming a Guardrails Track slug →
 the existing rejection handling already writes `out-of-scope/<slug>.md` (format unchanged,
-`skills/continuous-refactoring/references/forge-facing-writing.md`) — additionally:
+`../../continuous-refactoring/references/forge-facing-writing.md`) — additionally:
 
 - Remove the slug from `## Guardrails`'s `Open`.
 - Add it to `## Guardrails`'s `Out-of-scope`: `- <slug> — out-of-scope/<slug>.md`.
@@ -56,22 +56,22 @@ leaves `Open` once its delivering MR actually **merges** (the early call's own f
 
 **Never touches `Pending candidates`.** A Guardrails Track candidate's in-flight state lives entirely
 in `## Guardrails`'s own `Open` list
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — `refactor-design` skips
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`) — `refactor-design` skips
 writing that field for a candidate handed to it this way (marked self-tracking,
-`skills/refactor-scan/references/track-open-processing.md`), so it's never even transiently set for
+`../../refactor-scan/references/track-open-processing.md`), so it's never even transiently set for
 one of these, and this call correspondingly never clears it on account of a Guardrails Track candidate
 resolving. Also never touches `## Safety Net`'s own `Open`/`Out-of-scope` —
 the two Tracks' sections are independent, each written only by its own Track's own candidates.
 
 ## Issue filed for the picked `Open` entry → record its number
 
-This pass's `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) picked exactly one
+This pass's `Open` walk (`../../refactor-scan/references/track-open-processing.md`) picked exactly one
 workable, unfulfilled entry and handed it to `refactor-design`, which files that node's issue (unless one
 already existed) — the closing call's own precondition
-(`skills/refactor-learn/SKILL.md`) is authorized by that hand-off alone, independent of whether
+(`../SKILL.md`) is authorized by that hand-off alone, independent of whether
 `refactor-implement` also got as far as opening a merge request this same pass. Once the issue is known
 (freshly filed this pass, or already existing), rewrite that entry from a bare `- <slug>` to
-`- <slug> (#<issue>)` (`skills/refactor-scan/references/guardrails-track.md`'s "Filling `Open`" already
+`- <slug> (#<issue>)` (`../../refactor-scan/references/guardrails-track.md`'s "Filling `Open`" already
 documents this as `Open`'s target shape) — the entry's only change; it stays in `Open` exactly where it
 was, not touched by any of the removal cases above. Already carries `(#<issue>)` (a prior pass got this
 far and was interrupted before its own closing call ran) → nothing to write, this case is idempotent.

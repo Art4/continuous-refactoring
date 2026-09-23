@@ -1,6 +1,6 @@
 # `psr-4`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **resolved edge**).
+Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **resolved edge**).
 
 - **Name:** PSR-4 Autoloading
 - **Tool:** none — a `composer.json` autoload declaration plus a namespace convention, not a runnable tool (same shape as `.editorconfig`'s own "plain-text convention file" node).

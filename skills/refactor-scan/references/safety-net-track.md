@@ -11,7 +11,7 @@ language specialization's own recognition gate (`is-php-project` for PHP) — th
 Track: `onboarding-setup` is fulfilled by the dispatcher's own onboarding step (`CONTEXT.md`'s **Onboarding**
 entry) before any Track runs — its decisions are genuine preferences no scan can derive — so a scan
 never proposes it. Concretely, for PHP: every
-node in `skills/refactor-scan/references/php-tooling-tree.md` that isn't itself Guardrails-gated
+node in `php-tooling-tree.md` that isn't itself Guardrails-gated
 (required on `structural-scan`/`php-safety-net` — `composer-audit`, `phpmd`, `coverage-floor`,
 `php-minimal-version`, `phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep`) or
 `structural-scan` itself. This includes every node with a direct `resolved` edge into `php-safety-net`
@@ -26,9 +26,9 @@ changes (below), and how its Fulfilment check gets evaluated (Judging fulfilment
 ## Is the Track due this pass?
 
 Decided once, before `refactor-scan` even starts — the orchestrator's own Track-selection step
-(`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
+(`../../continuous-refactoring/references/track-scheduler.md`, `../../continuous-refactoring/SKILL.md`
 step 1) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Safety Net` section
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner to
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner to
 `refactor-scan` as an explicit input. This section covers only what this Track does with that decision —
 it never re-derives due-ness itself:
 
@@ -39,7 +39,7 @@ it never re-derives due-ness itself:
   `track-scheduler.md`'s own same-named section — or a manual override naming this Track directly) →
   the Track is still never rescanned — naming it never forces a scan, and an `Open` still written under
   the old meaning (nodes with filed issues only) is walked like any other. Walk the entries instead, per
-  `skills/refactor-scan/references/track-open-processing.md`: workability triage, the pick-up
+  `track-open-processing.md`: workability triage, the pick-up
   Fulfilment re-check, exactly one node worked per pass — its issue filed only when worked (by `refactor-design`, never by the walk), never
   pre-filed. A node the re-check finds now fulfilled is reported as a **fulfilled at pick-up**
   finding for `refactor-learn`'s early call, which removes it from `Open`. The walk's re-check still
@@ -70,7 +70,7 @@ line happens to mention.
   collision Pint's own presence already avoided.
 - **Genuinely ambiguous** — two plausible tools present at once, or real uncertainty about whether one
   actually serves the Purpose or might collide with it — routes through the existing Flagged-candidate
-  mechanism (`needs-info`, `skills/refactor-design/references/decision-gate.md`), unchanged. Don't guess
+  mechanism (`needs-info`, `../../refactor-design/references/decision-gate.md`), unchanged. Don't guess
   past a real collision risk; flag it instead, the same as any other genuinely ambiguous design decision.
 - **No committed artifact at all, purpose stated as served some other way** (e.g., code style enforced
   by convention/review, no tool involved) — not a fulfilment judgement call at all: an ordinary
@@ -89,9 +89,9 @@ Every node in scope still unresolved (neither fulfilled by judgement above, nor 
 `out-of-scope/`) and currently unblocked (its own required/recommended parents already resolved/decided,
 per the tree's ordinary edge semantics) → propose it by Name, same as `refactor-scan/SKILL.md` step 4
 already does for any other node. Its slug is added to `## Safety Net`'s `Open` list — `refactor-learn`'s
-own side of this, `skills/refactor-learn/references/safety-net-write.md`. **No candidate issue is
+own side of this, `../../refactor-learn/references/safety-net-write.md`. **No candidate issue is
 created at this point** — the node's issue is created only when it is actually worked via the `Open`
-walk (`skills/refactor-scan/references/track-open-processing.md`), not pre-filed during the
+walk (`track-open-processing.md`), not pre-filed during the
 scan.
 
 ## Filling `Open`

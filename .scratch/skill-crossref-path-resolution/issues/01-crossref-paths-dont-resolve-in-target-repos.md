@@ -56,12 +56,12 @@ the identical mismatch once installed via symlink into a target repo, per ADR-00
 target repo (the suite's own documented, and only recommended, install method), not a single-file edge
 case.
 
-**Status:** needs-triage.
+**Status:** done — this PR.
 
 **Parked, not part of this ticket:** whether the copy-install alternative `README.md` also mentions
-("Or copy") has the same problem (it likely doesn't — a flat copy of `skills/*` into `.agents/skills/`
-has the identical missing-parent issue as the symlink case, so probably in scope too, but not yet
-checked) — worth confirming during triage/grilling rather than assumed here.
+("Or copy") has the same problem — confirmed during implementation: no, the accepted fix (paths
+relative to the citing file) resolves identically under either install method, since both produce the
+same flat-sibling directory shape under `.agents/skills/`. Nothing further to do there.
 
 ## Comments
 
@@ -70,3 +70,39 @@ checked) — worth confirming during triage/grilling rather than assumed here.
 > Verified live against that target repo's actual installed symlink layout; traced the convention to
 > ADR-0013 and found the mismatch between its stated reasoning and the path shape it actually
 > accepted. Not yet grilled or fixed — filed for triage.
+
+> **2026-09-22 (grilling):** Settled via `/grilling` (6 questions, one round). **Q1 — scope**: migrate
+> only the 292 citations inside `skills/**` (the only tree that ships); the other 55 citations
+> elsewhere (`docs/adr/`, `docs/playbooks/`, `.scratch/`, `CONTEXT.md`, `README.md`) are never
+> installed, so the old form already resolves correctly there — left untouched. **Q2 — same-skill vs.
+> cross-skill**: simplified separately — a same-skill citation drops the now-redundant own-skill
+> segment (shortest relative form); a real cross-skill citation gets a depth-correct `../` count. **Q3
+> — migration mechanism**: one-off script, discarded after the run, not kept as a maintenance tool.
+> **Q4 — new ADR**: yes, amending ADR-0013. **Q5 — `scripts/validate_skills.py`**: updated to resolve
+> the new form relative to the citing file and to flag any reappearance of the old
+> `skills/<name>/references/...` form as an error. **Q6 — testing**: the extended static check plus the
+> existing `unittest` suite is sufficient; no separate symlink-fixture integration test.
+>
+> Before committing to the direction, the proposed relative-path format was checked empirically, not
+> just reasoned about: a scratch copy of four real skills, two real citations rewritten to the proposed
+> form, symlink-installed into an empty fake target exactly per `README.md`'s own command, and a real
+> coding-agent subagent (OpenCode) told to follow each citation as written. Both a one-level
+> (`SKILL.md`-to-sibling) and a two-level (nested `references/`-to-sibling) citation resolved directly
+> on the first `Read`, no search needed.
+
+> **2026-09-23 (implement):**
+> [ADR-0061](/docs/adr/0061-skill-crossref-paths-are-citing-file-relative.md) added, amending ADR-0013.
+> All 292 in-scope citations migrated via a one-off script (discarded after the run): same-skill ones
+> simplified, cross-skill ones rewritten `../<skill>/references/...` with a depth-correct `../` count.
+> Two citations the script's plain substring approach couldn't reach — each split across a line by
+> prose reflow — fixed by hand. `scripts/validate_skills.py`: `local_ref_issues` now resolves a
+> `../`-/`references/`-prefixed citation relative to its own citing file and unconditionally flags any
+> remaining `skills/<name>/references/...` citation inside `skills/**` as an error; the orphaned-
+> reference advisory now matches a reference file's basename instead of its full former path (a
+> citation no longer repeats that full path in any form); the ADR-0004 keyword-propagation check's
+> cross-skill-content augmentation now resolves the new relative form too. New unit tests for all three.
+> Incidentally found and fixed along the way: `outlook-comment.md` used backtick-quoted
+> `references/tooling_tree.py`/`references/tree-walk-prompt.md` descriptively (another skill's own
+> installed location, not a literal citation from this file) — dropped the backticks so it no longer
+> reads as a path the new check should validate. Full test suite green (229 tests), `validate_skills.py`
+> clean (same pre-existing warning-only baseline as before this change, zero new errors).

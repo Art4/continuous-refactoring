@@ -1,7 +1,7 @@
 # Reference: triage-label table template
 
 The exact content written to a target repo's `docs/agents/triage-labels.md` when the onboarding interview
-(`skills/continuous-refactoring/references/onboarding-setup-interview.md`) continues without the
+(`onboarding-setup-interview.md`) continues without the
 engineering-skills setup — copy it, don't restate or paraphrase it (this file is the one place it's defined, to
 avoid drifting copies; the static copies under `fixtures/` are seeds for tests). The shape is the engineering
 skills' own label table, so their setup skill can later update the file in place. `needs-triage` and

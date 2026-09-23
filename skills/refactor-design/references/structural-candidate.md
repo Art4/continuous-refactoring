@@ -2,10 +2,10 @@
 
 `refactor-design` steps 3–4, run only for a **structural candidate** — a concrete candidate
 `refactor-prioritize` already selected and minimally filed (Where/Problem/Signal) via its own Select
-mode (`skills/refactor-prioritize/references/structural-candidate-search.md`, that file's own step 2
+mode (`../../refactor-prioritize/references/structural-candidate-search.md`, that file's own step 2
 — the candidate *search* itself no longer lives here). An ordinary tooling-tree node skips straight
 to step 5 — see `refactor-design/SKILL.md` step 1. Step numbering matches
-`skills/refactor-design/SKILL.md` so its own cross-references ("step 4's side effects") still
+`../SKILL.md` so its own cross-references ("step 4's side effects") still
 resolve, and `refactor-prioritize/references/structural-candidate-search.md`'s "step 2" still
 resolves too.
 
@@ -31,7 +31,7 @@ Run `/grilling` on the candidate, along these branches:
   goal set → skip this branch, same as today.
 
 While grilling any of these branches: a decision meeting the ADR bar, or the seam turning out to
-require an actual behavior change → `skills/refactor-design/references/decision-gate.md`, before
+require an actual behavior change → `decision-gate.md`, before
 continuing to step 5.
 
 Side effects happen inline as decisions crystallise (per `/domain-modeling`): naming a module after a concept not in `CONTEXT.md` → add the term. User rejects a design with a load-bearing reason a future scan shouldn't re-suggest → offer an ADR.
@@ -43,4 +43,4 @@ here or deferred to the decision gate above — post one bundled comment on the 
 question and the answer reached (`CONTEXT.md`'s **Decision trail**). This is separate from the
 decision gate: the gate blocks progress on an unresolved, unattended decision; this only records one
 already resolved, and never blocks anything. No qualifying question this pass → no comment. Follow
-`skills/continuous-refactoring/references/forge-facing-writing.md` like any other forge-facing text.
+`../../continuous-refactoring/references/forge-facing-writing.md` like any other forge-facing text.

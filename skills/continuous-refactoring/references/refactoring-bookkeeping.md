@@ -1,12 +1,12 @@
 # Reference: `bookkeeping.md`, in the target repo's Refactoring Notes
 
-The config file the suite reads and writes. It doesn't exist on a fresh target repo: `continuous-refactoring`'s onboarding step (step 0 of the dispatcher) runs a short human interview and writes it, with `Create-mode` set from the answers (`skills/continuous-refactoring/references/onboarding-setup-interview.md`). It is written last of everything onboarding produces, so its existence means "onboarding completed" — the `onboarding-setup` node's Fulfilment check (`skills/refactor-scan/references/tooling-tree.md`). A freshly onboarded file holds only the title line and `Create-mode`; every other field and section below joins the first time something needs it, and an absent field reads as unset (`Pending candidates` absent = `- none`).
+The config file the suite reads and writes. It doesn't exist on a fresh target repo: `continuous-refactoring`'s onboarding step (step 0 of the dispatcher) runs a short human interview and writes it, with `Create-mode` set from the answers (`onboarding-setup-interview.md`). It is written last of everything onboarding produces, so its existence means "onboarding completed" — the `onboarding-setup` node's Fulfilment check (`../../refactor-scan/references/tooling-tree.md`). A freshly onboarded file holds only the title line and `Create-mode`; every other field and section below joins the first time something needs it, and an absent field reads as unset (`Pending candidates` absent = `- none`).
 
 ## Where the Refactoring Notes live
 
-The **Refactoring Notes** are the target repo's own folder holding the loop's state — `bookkeeping.md` (this file), `merge-requests.md`, `out-of-scope/`. Default `docs/refactoring/`; overridable per target, decided once during the dispatcher's onboarding step (`skills/continuous-refactoring/references/onboarding-setup-interview.md`, Q3) and recorded, by that name, in the target's `AGENTS.md`/`CLAUDE.md`.
+The **Refactoring Notes** are the target repo's own folder holding the loop's state — `bookkeeping.md` (this file), `merge-requests.md`, `out-of-scope/`. Default `docs/refactoring/`; overridable per target, decided once during the dispatcher's onboarding step (`onboarding-setup-interview.md`, Q3) and recorded, by that name, in the target's `AGENTS.md`/`CLAUDE.md`.
 
-**Resolution rule**, followed independently by every lifecycle skill (and by the deterministic parser, `skills/refactor-scan/references/tooling_tree.py`) wherever it needs the Refactoring Notes, the same way the suite already resolves "does the tracker support native labels" from `docs/agents/issue-tracker.md` — not a value threaded through the orchestrator's carried-data chain: read the target's `AGENTS.md`, and if that doesn't exist or doesn't name one, `CLAUDE.md` — whichever names a line matching `` Refactoring Notes: `<path>` `` (path backtick-quoted, trailing slash optional) wins. Neither names one → the Refactoring Notes default to `docs/refactoring/`.
+**Resolution rule**, followed independently by every lifecycle skill (and by the deterministic parser, `../../refactor-scan/references/tooling_tree.py`) wherever it needs the Refactoring Notes, the same way the suite already resolves "does the tracker support native labels" from `docs/agents/issue-tracker.md` — not a value threaded through the orchestrator's carried-data chain: read the target's `AGENTS.md`, and if that doesn't exist or doesn't name one, `CLAUDE.md` — whichever names a line matching `` Refactoring Notes: `<path>` `` (path backtick-quoted, trailing slash optional) wins. Neither names one → the Refactoring Notes default to `docs/refactoring/`.
 
 Every other skill in this suite refers to this folder by name — "the Refactoring Notes" — never by restating or assuming the concrete path; this section is the one place the resolution rule itself is defined.
 
@@ -89,9 +89,9 @@ Every Track's `Cadence` (except Investigation's literal `continuous`, below) is 
 
 | Field | Meaning | Written by |
 |---|---|---|
-| `Create-mode` | How merge requests get opened: `autonomous`, `ask-each-time`, or `human-opens` | the dispatcher's onboarding step, once (`skills/continuous-refactoring/references/onboarding-setup-interview.md`) — hand-editable after that, same as `Focus areas` |
+| `Create-mode` | How merge requests get opened: `autonomous`, `ask-each-time`, or `human-opens` | the dispatcher's onboarding step, once (`onboarding-setup-interview.md`) — hand-editable after that, same as `Focus areas` |
 | `Focus areas` | Areas scans should target first | you, any time |
-| `Refactoring goal` | Freeform description of the *shape* structural work should converge toward — not *where* to look (that's `Focus areas`), but what the result should become (e.g. "convert legacy procedural code to OOP"). Read only by `refactor-prioritize`'s Select mode, picking a `structural-scan` candidate (`skills/refactor-prioritize/references/structural-candidate-search.md`) — never by a tooling-tree node's own Fulfilment check, and never by Rank mode. Omitted → today's behaviour, unchanged: no bias on candidate search. | you, any time |
+| `Refactoring goal` | Freeform description of the *shape* structural work should converge toward — not *where* to look (that's `Focus areas`), but what the result should become (e.g. "convert legacy procedural code to OOP"). Read only by `refactor-prioritize`'s Select mode, picking a `structural-scan` candidate (`../../refactor-prioritize/references/structural-candidate-search.md`) — never by a tooling-tree node's own Fulfilment check, and never by Rank mode. Omitted → today's behaviour, unchanged: no bias on candidate search. | you, any time |
 | `Secret history scan` | Whether the one-time full git-history secret scan (`refactor-scan/SKILL.md` step 4c) has already run — absent until it has, `done (YYYY-MM-DD)` (the date the scan ran, purely for human-readable audit trail — nothing reads or compares it) once every finding from that run is filed. Read only by that step, to decide whether to run at all; gated on the `secret-detection` node itself being fulfilled first, so it's meaningless (and never written) on a target that hasn't adopted that node yet. | `refactor-learn`, early call, once, the pass the scan actually runs — never hand-edited (a target that genuinely wants the scan to run again removes the field by hand instead, the same escape hatch an `out-of-scope/` rejection uses) |
 | `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue most recently filed for this candidate, not yet delivered as a merge request. Written as a list purely for formatting consistency and easier diffing — it still holds at most one entry; the suite tracks exactly one thing in flight at a time (`refactor-scan`/`refactor-prioritize`), this is not a multi-pending queue. **No native-label tracker only** — on a native tracker, filing a tooling-tree node/externally-labeled candidate skips this write entirely (stays `none` there in the ordinary case); a structural/baseline-shrink candidate's early filing (`refactor-prioritize`'s Select mode) writes it *even on a native tracker* — a narrow, deliberate exception, see below. | `refactor-design` sets it when it files a tooling-tree node/externally-labeled candidate (non-native tracker only) — except a Safety Net/Guardrails Track's `Open`-walk node, which `refactor-scan` hands to `refactor-design` already marked self-tracking, so this write is skipped for those the same way it's skipped for a structural/baseline-shrink candidate; `refactor-prioritize`'s Select mode sets it when it files a structural/baseline-shrink candidate (always, native tracker included); `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the candidate is resolved another way |
 | `Fulfilled nodes` | **Retired.** Old files keep this field; it is ignored by all lifecycle skills. No skill reads or writes it. | — (retired) |
@@ -104,9 +104,9 @@ Replaces `Fulfilled nodes`/`Pending candidates` for every node the **Safety Net 
 works through — every tooling-tree node reachable before `structural-scan` opens, `git`/`onboarding-setup`/the
 language specialization's own recognition gate excepted (those stay outside every Track — `onboarding-setup`
 is fulfilled by the dispatcher's onboarding step and never proposed, `CONTEXT.md`'s **Onboarding** entry). Full read/write mechanics:
-`skills/refactor-scan/references/safety-net-track.md` (`refactor-scan`'s own scan step),
-`skills/refactor-learn/references/safety-net-write.md` (`refactor-learn`'s own write step),
-`skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
+`../../refactor-scan/references/safety-net-track.md` (`refactor-scan`'s own scan step),
+`../../refactor-learn/references/safety-net-write.md` (`refactor-learn`'s own write step),
+`track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan`/`Open` to decide whether this Track even runs this
 pass, competing against every other currently-wired Track; this section's `Open` field is also what that
 file's own "One-time exception" reads to decide whether Investigation/Guardrails/Housekeeping each still
@@ -141,9 +141,9 @@ works through — the nodes required on `structural-scan`/`php-safety-net` thems
 the Safety Net has closed (PHP: `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`,
 `phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep`). Same shape as `## Safety Net`
 above, independent of it — a slug lives in at most one Track's section, never both. Full read/write
-mechanics: `skills/refactor-scan/references/guardrails-track.md` (`refactor-scan`'s own scan step),
-`skills/refactor-learn/references/guardrails-write.md` (`refactor-learn`'s own write step),
-`skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
+mechanics: `../../refactor-scan/references/guardrails-track.md` (`refactor-scan`'s own scan step),
+`../../refactor-learn/references/guardrails-write.md` (`refactor-learn`'s own write step),
+`track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads `## Safety Net`'s own). With at least one workable `Open` node, Guardrails is selected ahead of Investigation; with nothing workable, it yields.
 
 ```markdown
@@ -173,7 +173,7 @@ step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads
   `## Safety Net`'s own `Out-of-scope`.
 - A slug **never appears in both `Open` and `Out-of-scope` at once** — and
   never in `## Safety Net`'s own `Open`/`Out-of-scope` either — the two Tracks' node sets are disjoint
-  by construction (Scope, `skills/refactor-scan/references/guardrails-track.md`).
+  by construction (Scope, `../../refactor-scan/references/guardrails-track.md`).
 
 ## `Housekeeping` section
 
@@ -184,10 +184,10 @@ Net`'s/`## Guardrails`' own, unlike `## Investigation`'s permanent literal `cont
 old, now-retired top-level `Housekeeping cadence` field the standalone `continuous-housekeeping` skill
 used to own; the swept checklist content itself stays in `housekeeping-template.md`, entirely unrelated
 to this section and unchanged by any of this. Full read/write mechanics:
-`skills/continuous-housekeeping/references/housekeeping-track.md` (`continuous-housekeeping`'s process, run
+`../../continuous-housekeeping/references/housekeeping-track.md` (`continuous-housekeeping`'s process, run
 directly rather than through `refactor-scan` — this Track isn't a tooling-tree scan),
-`skills/refactor-learn/references/housekeeping-write.md` (`refactor-learn`'s own write step),
-`skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
+`../../refactor-learn/references/housekeeping-write.md` (`refactor-learn`'s own write step),
+`track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan` the same way it reads `## Safety Net`'s/`##
 Guardrails`'s own).
 
@@ -202,9 +202,9 @@ Guardrails`'s own).
 - **`Cadence`** — interval between scans (forms: *Cadence values*, above), `7 days` unless hand-edited — the same default the old
   `continuous-housekeeping` skill's own setup interview always recommended (`weekly`), applied silently
   on this Track's first-ever scheduler-driven run instead of asked
-  (`skills/continuous-housekeeping/references/housekeeping-track.md`'s own *First-run cadence* section).
+  (`../../continuous-housekeeping/references/housekeeping-track.md`'s own *First-run cadence* section).
   Hand-editable any time, same as `## Safety Net`'s/`## Guardrails`' own — directly, or via the optional,
-  human-run `skills/continuous-housekeeping/references/housekeeping-cadence-interview.md`. Never read to
+  human-run `../../continuous-housekeeping/references/housekeeping-cadence-interview.md`. Never read to
   decide whether to scan when an in-progress cycle exists (below).
 - **`Last scan`** — the date the Track's process (`housekeeping-track.md`) last ran, written even when it
   found nothing registered to check. **The whole section is absent until the Track's first scan
@@ -227,9 +227,9 @@ unlike `## Safety Net`/`## Guardrails` above, a structural candidate's own open/
 stays on the issue tracker / the Refactoring Notes' `merge-requests.md` exactly as today (`Pending
 candidates`, above, still tracks the one in-flight structural/baseline-shrink candidate exactly as it
 already did before this section existed). Full read/write mechanics:
-`skills/refactor-scan/references/investigation-track.md` (`refactor-scan`'s own scan step),
-`skills/refactor-learn/references/investigation-write.md` (`refactor-learn`'s own write step),
-`skills/continuous-refactoring/references/track-scheduler.md` (the orchestrator's own Track-selection
+`../../refactor-scan/references/investigation-track.md` (`refactor-scan`'s own scan step),
+`../../refactor-learn/references/investigation-write.md` (`refactor-learn`'s own write step),
+`track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan` the same way it reads `## Safety Net`'s/`##
 Guardrails`'s own, with one difference, next; that file's own "One-time exception" also reads whether
 this section exists at all, and, once it does, whether the top-level `Pending candidates` field still
@@ -254,7 +254,7 @@ pass, well before design/implement/learn actually finish it).
   except this one holds permanently for Investigation, every pass, not only before its first scan.
 - **`Last scan`** — the date the Track's scan (`investigation-track.md`) last actually ran, written even
   when it proposed nothing (`structural-scan` still gated by its own unchanged resolved-edge parents,
-  `skills/refactor-scan/references/tooling-tree/structural-scan.md`) — same "the first/every run records
+  `../../refactor-scan/references/tooling-tree/structural-scan.md`) — same "the first/every run records
   that it happened" discipline `## Safety Net`/`## Guardrails` already follow. **The whole section is
   absent until the Track's first scan completes** — absence means "never run," not "nothing found," same
   as either other section — but unlike those two, this never changes whether Investigation is due: with
@@ -274,7 +274,7 @@ pass, well before design/implement/learn actually finish it).
 **Retired and ignored.** Old files keep this field; it is ignored. Every node's fulfilled state is now
 tracked in the Track's own `Open` list (absence from `Open` means fulfilled or out-of-scope) and by the
 agent's judgement against the node's Purpose during each Track's scan. The deterministic parser
-(`skills/refactor-scan/references/tooling_tree.py`) never reads this field, and the tree-walk-fallback
+(`../../refactor-scan/references/tooling_tree.py`) never reads this field, and the tree-walk-fallback
 prompt no longer relies on it. `refactor-learn` no longer writes to it.
 
 - **Read:** no longer read by any skill — this field is retired.
@@ -286,8 +286,8 @@ prompt no longer relies on it. `refactor-learn` no longer writes to it.
   time** — fulfilled and rejected are different, mutually exclusive states for a node; rejection state
   lives entirely in `out-of-scope/` (one file per rejected node), never duplicated here. A node moves from
   rejected to fulfilled only through the normal reversal path (an out-of-scope entry removed, then the
-  node adopted for real) — see `skills/refactor-scan/references/php-tooling-tree.md`'s Nodes intro and
-  `skills/refactor-learn/SKILL.md`. (This invariant is retained for backward compatibility in old files
+  node adopted for real) — see `../../refactor-scan/references/php-tooling-tree.md`'s Nodes intro and
+  `../../refactor-learn/SKILL.md`. (This invariant is retained for backward compatibility in old files
   but is no longer enforced by any lifecycle skill, since `Fulfilled nodes` is retired.)
 
 There is deliberately no `Cadence` field for the continuous-refactoring loop itself: it never triggers itself — you kick it off whenever it's due, whether that's you running `/continuous-refactoring` by hand or a scheduler you set up outside the suite. `## Housekeeping`'s own `Cadence` (above) doesn't contradict this — it belongs to one Track among the four this loop schedules internally once it does run, not to the loop's own outer trigger.
@@ -309,4 +309,4 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
 ## Not onboarded yet
 
 When `refactor-loop` or `continuous-housekeeping` finds no `bookkeeping.md` in the Refactoring Notes, it aborts before doing anything — nothing runs, nothing is announced, and it never creates the file. Report: "This repo isn't onboarded yet — the Refactoring Notes have no `bookkeeping.md`. Run `/continuous-refactoring` first; its onboarding step sets the repo up, then rerun." This is the one place that text lives; both skills point here.
-- **Old-schema repos need no migration.** A `bookkeeping.md` predating any of these sections (no `## Safety Net`/`## Guardrails`/`## Housekeeping`/`## Investigation` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old `Fulfilled nodes`/`Pending candidates`/`Housekeeping cadence` fields already on the file blocks this — that last one is the standalone `continuous-housekeeping` skill's own now-retired field, superseded by `## Housekeeping`'s own `Cadence`, never read or migrated into it — and none of them needs to be understood, migrated, or removed for any Track's own first scan to proceed normally (`skills/refactor-scan/references/safety-net-track.md`, `skills/refactor-scan/references/guardrails-track.md`, `skills/continuous-housekeeping/references/housekeeping-track.md`, `skills/refactor-scan/references/investigation-track.md`). The four sections migrate independently, too — a target that's already run its first Safety Net Track scan (so `## Safety Net` exists) but never its first Guardrails Track scan (so `## Guardrails` doesn't yet) is an entirely ordinary, expected state, not a partial or inconsistent one; `## Housekeeping`/`## Investigation` join the same way, each on its own first scan, independent of the others.
+- **Old-schema repos need no migration.** A `bookkeeping.md` predating any of these sections (no `## Safety Net`/`## Guardrails`/`## Housekeeping`/`## Investigation` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old `Fulfilled nodes`/`Pending candidates`/`Housekeeping cadence` fields already on the file blocks this — that last one is the standalone `continuous-housekeeping` skill's own now-retired field, superseded by `## Housekeeping`'s own `Cadence`, never read or migrated into it — and none of them needs to be understood, migrated, or removed for any Track's own first scan to proceed normally (`../../refactor-scan/references/safety-net-track.md`, `../../refactor-scan/references/guardrails-track.md`, `../../continuous-housekeeping/references/housekeeping-track.md`, `../../refactor-scan/references/investigation-track.md`). The four sections migrate independently, too — a target that's already run its first Safety Net Track scan (so `## Safety Net` exists) but never its first Guardrails Track scan (so `## Guardrails` doesn't yet) is an entirely ordinary, expected state, not a partial or inconsistent one; `## Housekeeping`/`## Investigation` join the same way, each on its own first scan, independent of the others.

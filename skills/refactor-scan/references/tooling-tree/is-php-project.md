@@ -1,6 +1,6 @@
 # `is-php-project`
 
-Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
+Node on the generic **tooling tree** (`../tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
 
 - **Name:** PHP Project Recognition
 - **Tool:** none — recognition-only, the tree's own gate, not a third-party tool.
@@ -13,17 +13,17 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
 - **Fulfilment check:** `composer.json` (or `composer/composer.json`) present, **or** at least one `*.php`
   file anywhere in the tree, `vendor/` excluded. Deliberately not `composer.json`-only: a PHP project that
   hasn't adopted Composer yet should still open this tree — including the `composer` node
-  (`skills/refactor-scan/references/php-tooling-tree.md`) that proposes adopting it in the first place.
+  (`../php-tooling-tree.md`) that proposes adopting it in the first place.
   Re-derived fresh every pass, so a target that only later becomes a PHP project opens the tree
   retroactively — no separate mechanism needed for that.
 - **MR scope:** none — never proposed as a candidate (`tooling_tree.py`'s `_NEVER_PROPOSED`, the same set
   `git` is in). Rejecting a `required` parent by hand never unblocks its children (unlike a `resolved`
   parent — see `structural-scan`'s own node entry,
-  `skills/refactor-scan/references/tooling-tree/structural-scan.md`), so there is nothing to gain from a human ever filing an
+  `structural-scan.md`), so there is nothing to gain from a human ever filing an
   `out-of-scope/is-php-project.md` entry in the Refactoring Notes: leaving it unfulfilled already does
   everything a rejection could.
 - **Known gap, not fixed by this node:** `php-safety-net`'s own `resolved` gate
-  (`skills/refactor-scan/references/php-tooling-tree.md`) checks each of its nine leaves for "fulfilled,
+  (`../php-tooling-tree.md`) checks each of its nine leaves for "fulfilled,
   or explicitly rejected under `out-of-scope/`" — it does not understand a leaf permanently closed by an
   unfulfilled `required` ancestor as a form of resolution. A leaf gated shut by this node (e.g.
   `phpunit`) therefore counts as neither fulfilled nor rejected there; `structural-scan` still cannot

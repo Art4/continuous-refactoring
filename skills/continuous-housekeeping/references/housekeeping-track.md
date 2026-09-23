@@ -2,7 +2,7 @@
 
 `continuous-housekeeping`'s own process — run directly by that skill once
 `continuous-refactoring`'s Track scheduler selects this Track, not handed to `refactor-scan` the way Safety Net,
-Guardrails, and Investigation are (`skills/refactor-scan/references/safety-net-track.md`,
+Guardrails, and Investigation are (`../../refactor-scan/references/safety-net-track.md`,
 `guardrails-track.md`, `investigation-track.md`). This Track isn't a tooling-tree scan: it's a complete
 due-check → reconcile → checklist-assembly → quality-gate → deliver pipeline in itself, the same shape
 the now-retired standalone `continuous-housekeeping` skill always ran — preserved here **verbatim**
@@ -13,9 +13,9 @@ former steps 1–2 (its own setup interview and its own tracker-history due-chec
 ## Is the Track due this pass?
 
 Decided once, before this file's own process starts — the orchestrator's own Track-selection step
-(`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
+(`../../continuous-refactoring/references/track-scheduler.md`, `../../continuous-refactoring/SKILL.md`
 step 1) computes every wired Track's `overdue_ratio` against `bookkeeping.md`'s `## Housekeeping`
-section (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner down
+section (`../../continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner down
 as this pass's selected Track. This section covers only what this Track does with that decision — it
 never re-derives due-ness itself:
 
@@ -35,10 +35,10 @@ never re-derives due-ness itself:
 the same default the old skill's own setup interview always recommended (`weekly`), applied silently
 here instead: no interview question blocks an orchestrator-driven pass, the same "no first-run interview
 at all" discipline `## Safety Net`'s 90-day default and `## Guardrails`' 60-day default already use
-(`skills/refactor-learn/references/safety-net-write.md`, `guardrails-write.md`). A human who wants a
+(`../../refactor-learn/references/safety-net-write.md`, `guardrails-write.md`). A human who wants a
 different interval either hand-edits `## Housekeeping`'s `Cadence` field directly (any form in `refactoring-bookkeeping.md`'s *Cadence values*, e.g. `1 month` or `monthly on the 1st`) — hand-editable, same
 as `## Safety Net`'s/`## Guardrails`' own — or runs
-`skills/continuous-housekeeping/references/housekeeping-cadence-interview.md` themselves, any time, for a
+`housekeeping-cadence-interview.md` themselves, any time, for a
 guided one-question prompt instead of a hand edit. That reference file is preserved for this
 optional, human-initiated use; it no longer gates the Track's very first run the way it used to gate the
 old skill's own first invocation.
@@ -64,7 +64,7 @@ remembered-MR tracking already uses elsewhere.
 **New cycle only** (skip this reconciliation when resuming an open cycle above — that one continues
 exactly as it already stands): a node's own delivering merge request is the *ordinary* way a
 `Housekeeping` line reaches `housekeeping-template.md`
-(`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`), but it's not the only
+(`housekeeping-template-file-format.md`), but it's not the only
 way a line can be missing — a hand-adopted tool (a node fulfilled before this target's `bookkeeping.md`
 ever gained a `## Housekeeping` section, or adopted outside the suite entirely) gets no second chance at
 a delivering MR to piggyback on, and the same is true the very first time this Track ever runs for a
@@ -81,7 +81,7 @@ next, creates the branch it belongs on.
 Then read `housekeeping-template.md`. Missing, or present but empty of contributed lines even after
 reconciling → nothing has ever been registered to check yet. Report "due, but nothing registered to
 check yet" and stop — don't open an empty issue. This still counts as this Track's own process having
-run this pass (`skills/refactor-learn/references/housekeeping-write.md` writes `Last scan` regardless).
+run this pass (`../../refactor-learn/references/housekeeping-write.md` writes `Last scan` regardless).
 
 ## Open this cycle's issue
 
@@ -121,7 +121,7 @@ request already holds itself to.
 ## Deliver
 
 **Any code change made:** open the merge request per
-`skills/continuous-refactoring/references/opening-a-merge-request.md` (same create-mode, basing, and
+`../../continuous-refactoring/references/opening-a-merge-request.md` (same create-mode, basing, and
 description rules every other suite MR already follows) — referencing this cycle's issue so it closes on
 merge, per that document's own conventions. Do not close the issue directly.
 
@@ -136,4 +136,4 @@ checked (with its report/decision recorded) and is either delivered via merge re
 (zero changes) — never left half-checked with the pass reported as finished. Whenever this file's own
 process is reached at all this pass — whether it resumed a cycle, opened a fresh one, or found nothing
 registered — `refactor-learn`'s closing call records that (`## Housekeeping`'s `Last scan`,
-`skills/refactor-learn/references/housekeeping-write.md`).
+`../../refactor-learn/references/housekeeping-write.md`).

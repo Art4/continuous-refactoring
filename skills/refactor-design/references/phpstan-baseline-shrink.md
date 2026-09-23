@@ -2,7 +2,7 @@
 
 `refactor-design` step 1's own case for a **PHPStan baseline-shrink candidate** —
 `refactor-prioritize` already selected the group and filed it minimally, via its own Select mode
-(`skills/refactor-prioritize/references/baseline-shrink-selection.md`, that file's own steps 1–2 —
+(`../../refactor-prioritize/references/baseline-shrink-selection.md`, that file's own steps 1–2 —
 resuming/reading/grouping no longer lives here). Run this before step 5.
 
 ## 3. Plan the fix
@@ -17,7 +17,7 @@ pass's MR will actually touch if the group is large enough that not all of it fi
 bounded MR.
 
 The fix can't be made without changing behavior → don't plan it here at all;
-`skills/refactor-design/references/decision-gate.md`'s breaking-change case applies instead, and
+`decision-gate.md`'s breaking-change case applies instead, and
 step 5 below doesn't run this pass for this candidate.
 
 Continue at `refactor-design/SKILL.md` step 5: the plan above goes on as a **comment** on the issue

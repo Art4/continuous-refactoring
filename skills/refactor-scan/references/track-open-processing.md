@@ -2,7 +2,7 @@
 
 How `refactor-scan` walks a selected Track's `Open` list (Safety Net or Guardrails) when the Track
 has existing entries — dispatched from `refactor-loop`'s scan step
-(`skills/refactor-loop/SKILL.md` step 1), which hands the selected Track down as input and
+(`../../refactor-loop/SKILL.md` step 1), which hands the selected Track down as input and
 routes the walk's outcome onward, but never walks or judges itself: `refactor-loop` is a thin data
 pipe, and the walk is scan's own work — `refactor-scan` is the skill that reads the tree and judges
 fulfilment. Replaces the earlier "resume the top entry" behavior for Track nodes — `Pending
@@ -38,8 +38,8 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
    - **Now fulfilled** → report a **fulfilled at pick-up** finding — the node was adopted,
      typically by hand, since the last scan, and the re-check this walk exists to perform caught
      it — and hand it to `refactor-learn`'s early call, which removes the node from `Open`
-     (`skills/refactor-learn/references/safety-net-write.md` /
-     `skills/refactor-learn/references/guardrails-write.md`): no merge request, no issue created.
+     (`../../refactor-learn/references/safety-net-write.md` /
+     `../../refactor-learn/references/guardrails-write.md`): no merge request, no issue created.
      The pass moves on to the next entry — loop back to step 2. This skill never writes: the
      removal is `refactor-learn`'s write, the same detect-never-write split every other finding
      already follows.
@@ -87,6 +87,6 @@ longer ranked or pre-filed; only the single walk's winner reaches `refactor-desi
 `refactor-loop` carries this same `## Output` — which node this pass's walk picked — forward past
 `refactor-design`/`refactor-implement` to `refactor-learn`'s closing call, the way it already carries
 a freshly opened MR or a design-time breaking-change finding: this is that call's own precondition
-(`skills/refactor-learn/SKILL.md`), authorizing it to write the picked node's now-known issue number
+(`../../refactor-learn/SKILL.md`), authorizing it to write the picked node's now-known issue number
 onto its `Open` entry (`safety-net-write.md`/`guardrails-write.md`) even on a pass where
 `refactor-implement` never got as far as opening a merge request.

@@ -1,6 +1,6 @@
 # `phpmd`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Signal wave**).
+Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Signal wave**).
 
 - **Name:** PHPMD
 - **Tool:** PHPMD
@@ -20,6 +20,6 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   adoption time).
 - **Signal:** Understandability (the complexity measurement itself — nested conditionals, long
   methods, deep coupling) and Defect density (complexity's well-established empirical correlation
-  with bug rates) — both `skills/refactor-prioritize/references/signals.md` factors. Once this node is
+  with bug rates) — both `../../../refactor-prioritize/references/signals.md` factors. Once this node is
   fulfilled, `refactor-prioritize`'s Select mode prefers its real cyclomatic-complexity output over
   `signals.md`'s generic (reading-the-code) recognition method for these two factors.

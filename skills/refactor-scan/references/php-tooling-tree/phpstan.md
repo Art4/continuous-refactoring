@@ -1,6 +1,6 @@
 # PHPStan (`phpstan-level-0`, `phpstan-level-1` through `phpstan-level-10`, `phpstan-deprecation-rules`)
 
-Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **Signal wave**). One file for the whole PHPStan family (a deliberate exception to this directory's usual one-file-per-node shape — see `php-tooling-tree.md`'s *Nodes* preamble) because the level chain, the deprecation-rules leaf, and the Psalm equivalence are one continuous story, not independent ones.
+Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **Signal wave**). One file for the whole PHPStan family (a deliberate exception to this directory's usual one-file-per-node shape — see `php-tooling-tree.md`'s *Nodes* preamble) because the level chain, the deprecation-rules leaf, and the Psalm equivalence are one continuous story, not independent ones.
 
 ### `phpstan-level-0`
 
@@ -48,7 +48,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **Empty baseline — operational definition:** `phpstan-baseline.neon` is **absent** at repo root **OR** the file exists but `parameters.ignoreErrors` is absent or an empty array (no `message:` entries). Both count as empty. A file that exists and contains one or more ignore entries is non-empty and blocks the next level raise. The scan performs this check by parsing the Neon file (or, equivalently, counting `message:` entries); an absent file is treated as zero entries. After the introduce MR the file is normally present; absence is tolerated as empty for the purpose of gating the next level, but after any successful analysis the committed state should include the file (empty list when green without baseline).
 - **MR scope:** level bump (single integer increment) + regenerated baseline (overwritten in place) + only those source fixes that strictly reduce the new baseline's `ignoreErrors` count. Shrinking findings into the regenerated baseline is part of the same MR — the MR must commit the reduced baseline alongside any fixes that produced the reduction. Unrelated refactoring or feature changes stay out. The chain stays open above level 10 — further levels are appended as new nodes with the same rules, not a redesign.
 - **Stop conditions / when not to raise:**
-  - Baseline is non-empty → do not propose the next level; instead the highest currently-fulfilled level's own non-empty baseline is itself a candidate — `refactor-scan` step 4b proposes it generically ("PHPStan Level N — baseline shrink"), `refactor-design`'s `skills/refactor-design/references/phpstan-baseline-shrink.md` groups its findings by root cause and picks one to fix — until the baseline becomes empty and the next level is proposable again.
+  - Baseline is non-empty → do not propose the next level; instead the highest currently-fulfilled level's own non-empty baseline is itself a candidate — `refactor-scan` step 4b proposes it generically ("PHPStan Level N — baseline shrink"), `refactor-design`'s `../../../refactor-design/references/phpstan-baseline-shrink.md` groups its findings by root cause and picks one to fix — until the baseline becomes empty and the next level is proposable again.
   - Immediate predecessor level node is not fulfilled → blocked by the required edge; the scan does not propose out-of-order levels.
   - Target uses Psalm as its `phpstan-level-0` fulfiller → level nodes are not proposed at all (see *Equivalents*). Psalm strictness is governed by `psalm.xml` `errorLevel`, not by this chain.
   - CI is irrelevant to this node's gating: the fulfilment check is local (`vendor/bin/phpstan analyse` green). The CI-job child with two parents (tool + `ci-runner`) remains deferred and does not gate the level chain.
@@ -69,7 +69,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
 - **MR scope:** dependency/config addition enabling the ruleset, no production-code change beyond fixing
   surfaced deprecations. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
   `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`).
+  (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`).
 - **Housekeeping:** after any dependency update, re-run PHPStan and check for newly-surfaced deprecation
   warnings (a dependency bump can start calling a now-deprecated API this ruleset didn't flag before);
   fix in scope.

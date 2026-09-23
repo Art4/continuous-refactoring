@@ -2,7 +2,7 @@
 
 The exact content written to a target repo's `docs/agents/issue-tracker.md`
 when the onboarding interview
-(`skills/continuous-refactoring/references/onboarding-setup-interview.md`)
+(`onboarding-setup-interview.md`)
 records "Local Markdown" as the tracker choice — copy it verbatim, don't
 restate or paraphrase it (this file is the one place it's defined, to avoid
 two independently-drifting copies of the same convention).

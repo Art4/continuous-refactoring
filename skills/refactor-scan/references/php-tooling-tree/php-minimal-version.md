@@ -1,6 +1,6 @@
 # `php-minimal-version`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Floor correction**, **Floor raise**, **Breaking change**, **Signal wave**).
+Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Floor correction**, **Floor raise**, **Breaking change**, **Signal wave**).
 
 - **Name:** PHP Minimum Version
 - **Tool:** none — the tree's own gap detection, not a third-party tool.
@@ -36,10 +36,10 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   gate — `rector-php-set`'s own fulfilment check already means "fully applied, no remaining findings".
   Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
   `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`skills/continuous-housekeeping/references/housekeeping-template-file-format.md`). A node already
+  (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`). A node already
   fulfilled the very first time it's evaluated never gets a delivering MR of its own; its line then
   reaches the file through the Housekeeping Track's own reconciliation instead
-  (`skills/continuous-housekeeping/references/housekeeping-track.md`, *Reconcile*).
+  (`../../../continuous-housekeeping/references/housekeeping-track.md`, *Reconcile*).
 - **Housekeeping:** check whether a newer PHP patch/minor release exists for the declared floor
   (`_current_php_floor`) and update it if so — a distinct concern from this node's own Fulfilment check,
   which only asks whether the floor is *correct* (matches what `rector-php-set` has landed), not whether
@@ -51,7 +51,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   pass). Not retroactive: an already-decided candidate elsewhere in the tree is unaffected, only still-open
   proposals are held back again. Elsewhere in this tree's own design discussions, the Housekeeping Track
   (triggered on its own fixed cadence,
-  `skills/continuous-housekeeping/references/housekeeping-track.md`) is the other, time-driven — not
+  `../../../continuous-housekeeping/references/housekeeping-track.md`) is the other, time-driven — not
   fact-driven — case of a check that can flip back to "due" after being satisfied.
 - **`Blocked by: PHP >= X.Y.Z` reversal detection:** an out-of-scope rejection of this node written
   under a target's own history keeps reversing correctly if the floor it names is later satisfied (the

@@ -235,6 +235,56 @@ class LocalRefTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_old_repo_root_relative_form_always_flagged(self):
+        # ADR-0061: a skills/**-internal citation must be skill-relative —
+        # the old skills/<name>/references/... form is now forbidden
+        # outright, even when (as here) it still happens to exist.
+        tmp, root = self._repo()
+        try:
+            write_tree(root, {
+                "skills/refactor-scan/references/foo.md": "content",
+                "skills/refactor-design/SKILL.md": "x",
+            })
+            text = "See `skills/refactor-scan/references/foo.md`."
+            issues = vs.local_ref_issues(text, root, citing_dir=root / "skills/refactor-design")
+            self.assertTrue(any("old repo-root-relative form" in i.message for i in issues))
+        finally:
+            tmp.cleanup()
+
+    def test_relative_cross_skill_ref_resolves(self):
+        tmp, root = self._repo()
+        try:
+            write_tree(root, {
+                "skills/refactor-scan/references/foo.md": "content",
+                "skills/refactor-design/SKILL.md": "x",
+            })
+            citing_dir = root / "skills/refactor-design"
+            text = "See `../refactor-scan/references/foo.md`."
+            self.assertEqual(vs.local_ref_issues(text, root, citing_dir=citing_dir), [])
+        finally:
+            tmp.cleanup()
+
+    def test_relative_cross_skill_ref_missing_flagged(self):
+        tmp, root = self._repo()
+        try:
+            write_tree(root, {"skills/refactor-design/SKILL.md": "x"})
+            citing_dir = root / "skills/refactor-design"
+            text = "See `../refactor-scan/references/missing.md`."
+            issues = vs.local_ref_issues(text, root, citing_dir=citing_dir)
+            self.assertTrue(any("does not exist relative to its citing file" in i.message for i in issues))
+        finally:
+            tmp.cleanup()
+
+    def test_bare_same_skill_ref_resolves(self):
+        tmp, root = self._repo()
+        try:
+            write_tree(root, {"skills/refactor-design/references/foo.md": "content"})
+            citing_dir = root / "skills/refactor-design"
+            text = "See `references/foo.md`."
+            self.assertEqual(vs.local_ref_issues(text, root, citing_dir=citing_dir), [])
+        finally:
+            tmp.cleanup()
+
 
 class AdrTests(unittest.TestCase):
     def test_any_adr_ref_flagged(self):
@@ -402,6 +452,67 @@ class ADR0004PropagationTests(unittest.TestCase):
         skills = {"refactor-design": "", "refactor-implement": ""}
         issues = vs.adr0004_propagation_issues(skills)
         self.assertEqual(len(issues), 5)
+
+
+class CrossSkillRefAugmentTests(unittest.TestCase):
+    def _repo(self):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, {
+            "skills/continuous-refactoring/references/shared.md": "the shared rule text",
+        })
+        return tmp, root
+
+    def test_relative_cross_skill_ref_pulled_in(self):
+        # A one-``../`` citation (from a top-level SKILL.md) is pulled in...
+        tmp, root = self._repo()
+        try:
+            skills_text = {
+                "refactor-design": "See `../continuous-refactoring/references/shared.md`.",
+            }
+            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
+            self.assertIn("the shared rule text", augmented["refactor-design"])
+        finally:
+            tmp.cleanup()
+
+    def test_deeper_relative_cross_skill_ref_pulled_in(self):
+        # ...and so is a deeper one (from a nested references/ file) — the
+        # dotdot count is matched loosely, not walked literally.
+        tmp, root = self._repo()
+        try:
+            skills_text = {
+                "refactor-design": "See `../../continuous-refactoring/references/shared.md`.",
+            }
+            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
+            self.assertIn("the shared rule text", augmented["refactor-design"])
+        finally:
+            tmp.cleanup()
+
+    def test_same_skill_ref_not_duplicated(self):
+        # A skill's own reference file is already in its full text via the
+        # ordinary references/ scan — this augmentation must not re-pull it.
+        tmp, root = self._repo()
+        try:
+            skills_text = {
+                "continuous-refactoring": "See `../continuous-refactoring/references/shared.md`.",
+            }
+            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
+            self.assertEqual(augmented["continuous-refactoring"], skills_text["continuous-refactoring"])
+        finally:
+            tmp.cleanup()
+
+    def test_missing_cross_skill_ref_skipped_silently(self):
+        # This function only augments text for other checks to read — a
+        # dangling ref is local_ref_issues's job to flag, not this one's.
+        tmp, root = self._repo()
+        try:
+            skills_text = {
+                "refactor-design": "See `../continuous-refactoring/references/missing.md`.",
+            }
+            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
+            self.assertEqual(augmented["refactor-design"], skills_text["refactor-design"])
+        finally:
+            tmp.cleanup()
 
 
 class ContractConsistencyTests(unittest.TestCase):
@@ -824,6 +935,16 @@ class OrphanedReferenceTests(unittest.TestCase):
         all_text = {
             "skills/continuous-refactoring/references/shared.md": "Shared rule.",
             "skills/refactor-design/SKILL.md": "See `skills/continuous-refactoring/references/shared.md`.",
+        }
+        self.assertEqual(vs.orphaned_reference_issues(refs, all_text), [])
+
+    def test_referenced_via_skill_relative_citation_not_flagged(self):
+        # ADR-0061: a real citation no longer repeats the full suite-root
+        # path -- only the basename is a style-independent signal now.
+        refs = [("continuous-refactoring", "skills/continuous-refactoring/references/shared.md")]
+        all_text = {
+            "skills/continuous-refactoring/references/shared.md": "Shared rule.",
+            "skills/refactor-design/SKILL.md": "See `../continuous-refactoring/references/shared.md`.",
         }
         self.assertEqual(vs.orphaned_reference_issues(refs, all_text), [])
 

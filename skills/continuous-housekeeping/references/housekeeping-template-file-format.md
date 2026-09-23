@@ -1,13 +1,13 @@
 # Reference: `housekeeping-template.md`, in the target repo's Refactoring Notes
 
 The accumulated checklist the Housekeeping Track
-(`skills/continuous-housekeeping/references/housekeeping-track.md`) copies into each cycle's issue
+(`housekeeping-track.md`) copies into each cycle's issue
 (*Open this cycle's issue*). Doesn't exist until some tooling-tree node's own `Housekeeping` field first
 contributes a line to it — either as part of that node's own delivering merge request, or via the
 Housekeeping Track's own reconciliation step for a node already fulfilled before this file (or this
 Track's own bookkeeping section) existed for this target — see `CONTEXT.md`'s **Tooling tree** entry, and
 a node's own `Housekeeping` field where one names it (e.g.
-`skills/refactor-scan/references/php-tooling-tree/composer.md`).
+`../../refactor-scan/references/php-tooling-tree/composer.md`).
 
 ## Structure
 

@@ -2,12 +2,12 @@
 
 `continuous-refactoring/SKILL.md` step 1's own process: which **Track** (`CONTEXT.md`) this pass runs,
 computed generically over every Track carrying a `Cadence`/`Last scan` bookkeeping section
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — not a fixed two-Track special
+(`refactoring-bookkeeping.md`) — not a fixed two-Track special
 case. Supersedes each Track's own earlier standalone "is my Track due?" check
-(`skills/refactor-scan/references/safety-net-track.md`, `skills/refactor-scan/references/
-guardrails-track.md`, each file's own "Is the Track due this pass?" section; and, for Housekeeping, the
+(`../../refactor-scan/references/safety-net-track.md`, `../../refactor-scan/references/guardrails-track.md`,
+each file's own "Is the Track due this pass?" section; and, for Housekeeping, the
 now-retired standalone `continuous-housekeeping` skill's own tracker-history due-check, replaced by
-`skills/continuous-housekeeping/references/housekeeping-track.md`'s own same-named section) — that check
+`../../continuous-housekeeping/references/housekeeping-track.md`'s own same-named section) — that check
 answered the question alone because, when it was written, no other Track existed yet to compete with.
 This file is the real competition those sections deferred — plus the one-time exception (below) that
 overrides that competition's outcome for exactly three turns per repo, right after Safety Net's
@@ -56,13 +56,13 @@ With that precondition met, check the following three, in order, and stop at the
 1. **`## Investigation` section absent, or present with `Pending candidates` currently naming an
    issue (not `none`)** → select **Investigation**, this pass, overriding ratio/tie-break entirely. The
    `Pending candidates` half of this check is load-bearing, not redundant with "section absent": per
-   `skills/refactor-learn/references/investigation-write.md`, `## Investigation`'s `Last scan` is written
+   `../../refactor-learn/references/investigation-write.md`, `## Investigation`'s `Last scan` is written
    the moment the Track's *scan* step runs — the very first pass of this turn — long before its one
    candidate is actually delivered (design → implement → learn can each take a further pass).
    Investigation carries no `Open` list of its own to lean on the way Guardrails/Safety Net do for this
    same "stay selected until done" job, so this check reads `Pending candidates` instead — the existing
    field that already tracks exactly this one in-flight candidate
-   (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`'s own `Pending candidates`
+   (`refactoring-bookkeeping.md`'s own `Pending candidates`
    row) — keeping Investigation force-selected on every pass until it clears, matching "one candidate,
    fully delivered," not just proposed.
 2. Else, **`## Guardrails` section absent** → select **Guardrails**, this pass, overriding ratio/
@@ -72,7 +72,7 @@ With that precondition met, check the following three, in order, and stop at the
 3. Else, **`## Housekeeping` section absent** → select **Housekeeping**, this pass, overriding ratio/
    tie-break. Housekeeping's entire cycle — reconcile, open this cycle's issue, work the checklist,
    quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 2 dispatches (to `continuous-housekeeping`)
-   (`skills/continuous-housekeeping/references/housekeeping-track.md`), so — unlike Investigation's own
+   (`../../continuous-housekeeping/references/housekeeping-track.md`), so — unlike Investigation's own
    turn above — there is no multi-pass in-flight state to keep re-selecting across; the section exists
    with `Last scan` written by the time that same pass's closing call finishes.
 4. Else (all three sections present, and `## Investigation` carries no in-flight `Pending candidates`)
@@ -123,7 +123,7 @@ ratio comparison when it is both **due** and **eligible** this pass:
   of Investigation; with nothing workable, it yields. A Track with no `Open` concept at all
   (Housekeeping, Investigation — neither ever carries one, per the spec's own bookkeeping schema) is
   always eligible; a Housekeeping cycle already in progress is tracked by the tracker's own history
-  instead (`skills/continuous-housekeeping/references/housekeeping-track.md`'s own *Resuming an
+  instead (`../../continuous-housekeeping/references/housekeeping-track.md`'s own *Resuming an
   in-progress cycle* section), not by this eligibility rule. Investigation waits behind a Guardrails
   backlog with workable nodes — Guardrails' workable nodes outrank Investigation's permanent fallback
   status.
@@ -202,11 +202,11 @@ any) runs this pass" moved, from each Track re-deriving it independently to this
 
 **Housekeeping is the one exception to "hands the winner down to `refactor-scan`."** It isn't a
 tooling-tree scan at all — `refactor-scan`'s own contract is "detect, never write"
-(`skills/refactor-scan/SKILL.md`), and the Housekeeping Track's own process commits, opens issues, and
+(`../../refactor-scan/SKILL.md`), and the Housekeeping Track's own process commits, opens issues, and
 opens merge requests directly, the same way it always did as the now-retired standalone
 `continuous-housekeeping` skill. Selecting Housekeeping hands off straight to
-`skills/continuous-housekeeping/references/housekeeping-track.md`, run by `continuous-housekeeping`
-(dispatched to by `skills/continuous-refactoring/SKILL.md` step 2) — `refactor-scan`
+`../../continuous-housekeeping/references/housekeeping-track.md`, run by `continuous-housekeeping`
+(dispatched to by `../SKILL.md` step 2) — `refactor-scan`
 never runs at all this pass in that case.
 
 ## Suite-wide open-MR cap
@@ -215,8 +215,8 @@ Unaffected by any of the above, and already Track-agnostic before this step exis
 `refactor-loop/SKILL.md` step 5's cap gate ("two or more suite MRs already open", checked before a new MR is opened) reads every
 open `refactor:candidate` issue with a linked pull request, regardless of which Track (or no Track at
 all) filed it — a Safety Net or Guardrails Track candidate is filed and labeled exactly like any other
-candidate (`skills/refactor-learn/references/safety-net-write.md`,
-`skills/refactor-learn/references/guardrails-write.md`), so it already counts toward this same cap. A
+candidate (`../../refactor-learn/references/safety-net-write.md`,
+`../../refactor-learn/references/guardrails-write.md`), so it already counts toward this same cap. A
 structural (Investigation Track) candidate always has, too — an ordinary `refactor:candidate` issue,
 nothing new about Track selection changes that. Track selection introduces no duplication here: there
 was never a per-Track cap to begin with, only the one suite-wide check this file leaves untouched.

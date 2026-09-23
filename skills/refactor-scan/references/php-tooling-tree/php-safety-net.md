@@ -1,10 +1,10 @@
 # `php-safety-net`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **Safety Net**, **Signal wave**).
+Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **Safety Net**, **Signal wave**).
 
 - **Name:** PHP Safety Net (internal — never proposed; see below)
 - **Tool:** none — pure aggregation node, no fulfilment check or MR scope of its own.
-- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`skills/refactor-scan/references/tooling-tree.md`), collapsed into one `resolved` edge instead of nine direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way). Renamed from `php-structural-scan` — same node, same mechanism, still resolved once its leaves are resolved, still the PHP tree's sole `resolved` contribution to `structural-scan`; new name because other nodes now read its resolved-ness too (the **Signal wave**, below), not just `structural-scan`.
+- **Purpose:** the PHP tree's own contribution to `structural-scan`'s gate (`../tooling-tree.md`), collapsed into one `resolved` edge instead of nine direct ones — see that document's `structural-scan` node for why (scales to a future second language specialization contributing its own aggregation node the same way). Renamed from `php-structural-scan` — same node, same mechanism, still resolved once its leaves are resolved, still the PHP tree's sole `resolved` contribution to `structural-scan`; new name because other nodes now read its resolved-ness too (the **Signal wave**, below), not just `structural-scan`.
 - **Fulfilment check:** every one of its nine `resolved` parents (`psr-4` — `psr-4.md`;
   `phpunit` — `phpunit.md`; `phpstan-level-5` — `phpstan.md`; `rector-dead-code`,
   `rector-type-coverage`, `rector-php-set`, `rector-code-quality`, `rector-phpunit-set`

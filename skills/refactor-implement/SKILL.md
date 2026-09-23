@@ -9,7 +9,7 @@ Execute a **plan** (from `refactor-design`) as vertical slices, red → green, a
 
 Use `/tdd` if installed for what a good test is and the red → green rules; otherwise `## Fallback` below governs.
 
-Every slice follows the foundational refactoring rules: `skills/continuous-refactoring/references/foundational-refactoring-rules.md`.
+Every slice follows the foundational refactoring rules: `../continuous-refactoring/references/foundational-refactoring-rules.md`.
 
 ## Process
 
@@ -29,7 +29,7 @@ Baseline-shrink candidate: no seam to confirm either — `refactor-prioritize`'s
 
 ### 2. One slice at a time
 
-Skipped for a tooling-tree node (step 1 already made its one change). Structural candidate: before the first test, ensure `tests/README.md` exists if the active language specialization defines a test-layout convention (PHP: `skills/refactor-scan/references/php-tooling-tree/phpunit.md`'s *Test layout*). Missing → create it with that default. Present → read it fresh (a human may have adapted it), follow it, create a documented-but-not-yet-existing folder only once a test needs it. No language convention → place tests by judgment.
+Skipped for a tooling-tree node (step 1 already made its one change). Structural candidate: before the first test, ensure `tests/README.md` exists if the active language specialization defines a test-layout convention (PHP: `../refactor-scan/references/php-tooling-tree/phpunit.md`'s *Test layout*). Missing → create it with that default. Present → read it fresh (a human may have adapted it), follow it, create a documented-but-not-yet-existing folder only once a test needs it. No language convention → place tests by judgment.
 
 Each slice: write the failing test first (red), then only enough code to pass it (green). One seam, one test, one minimal implementation per cycle. Don't anticipate future slices or add speculative features.
 
@@ -54,11 +54,11 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 ### 5. Open the merge request
 
-Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `skills/continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil — the common case for a baseline-shrink candidate, whose chosen group can span more MRs than fit this pass — don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
+Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `../continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil — the common case for a baseline-shrink candidate, whose chosen group can span more MRs than fit this pass — don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
 
-**Outlook, tooling-tree candidate only:** comment on the candidate issue with what this unlocks, never the MR description — `skills/refactor-implement/references/outlook-comment.md`.
+**Outlook, tooling-tree candidate only:** comment on the candidate issue with what this unlocks, never the MR description — `references/outlook-comment.md`.
 
-`docs/agents/issue-tracker.md` names a native-label tracker and `refactor-learn`'s native-tracker in-flight fold-in exception applies (its closing call will ride this same branch later this pass) → open the MR **as a draft** (`skills/continuous-refactoring/references/opening-a-merge-request.md`'s *Draft candidate MRs*) — the fold-in commit landing and marking it ready for review is `refactor-learn`'s job, not this step's. No native-label tracker, or the fold-in exception doesn't apply → open it normally, same as always.
+`docs/agents/issue-tracker.md` names a native-label tracker and `refactor-learn`'s native-tracker in-flight fold-in exception applies (its closing call will ride this same branch later this pass) → open the MR **as a draft** (`../continuous-refactoring/references/opening-a-merge-request.md`'s *Draft candidate MRs*) — the fold-in commit landing and marking it ready for review is `refactor-learn`'s job, not this step's. No native-label tracker, or the fold-in exception doesn't apply → open it normally, same as always.
 
 Wait for CI if the target runs it — confirm via the forge's actual CI status (`gh pr checks` or equivalent), not a local rerun of step 3's checks. Red CI is a review finding like any other — back to step 2/1.
 
@@ -76,8 +76,8 @@ Running as a subagent (no way to ask the human, forge access possibly missing): 
 
 ## Fallback
 
-- **`/tdd`**: installed → use its discipline. Otherwise loop rules and test-quality criteria inlined at `skills/refactor-implement/references/review-fallback.md`.
-- **`mattpocock/skills` implement skill**: installed → it already embeds step 4's review. Otherwise run step 4's two axes by the standards-axis rules (repo standards plus a fixed Fowler smell set) at the same `skills/refactor-implement/references/review-fallback.md`.
+- **`/tdd`**: installed → use its discipline. Otherwise loop rules and test-quality criteria inlined at `references/review-fallback.md`.
+- **`mattpocock/skills` implement skill**: installed → it already embeds step 4's review. Otherwise run step 4's two axes by the standards-axis rules (repo standards plus a fixed Fowler smell set) at the same `references/review-fallback.md`.
 
 ## Completion criterion
 
