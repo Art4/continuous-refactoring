@@ -1,5 +1,7 @@
 # `AGENTS.md`/`CLAUDE.md` gets a Create-mode pointer, not the value itself
 
+> Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): the pointer line names `MR-create-mode` and gains a `Ticket-create-mode` line.
+
 > Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the pointer section now records both backlog labels, `refactor:candidate` and `refactor:priority`.
 >
 > Cross-references [ADR-0006](0006-loop-delivers-remembered-merge-requests.md): its "Write the

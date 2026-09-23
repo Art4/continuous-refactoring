@@ -1,5 +1,7 @@
 # Orchestrator passes explicit data between skills; scan detects, design searches, learn writes
 
+> Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): the orchestrator is no longer a pure data pipe — it creates new tickets from the drafts the lifecycle skills hand it.
+
 > Amends [ADR-0005](0005-tooling-tree-not-baseline-skill.md): "Scan files missing-tool and structural candidates together" no longer holds — `refactor-scan` files nothing at all; it proposes tree nodes, and issues for a chosen node are filed by `refactor-design`.
 >
 > Amends [ADR-0006](0006-loop-delivers-remembered-merge-requests.md) (itself amended by [ADR-0009](0009-merge-request-outlook-and-delivered-label.md)): the pass no longer *starts* from remembered merge-request state inline in the orchestrator. `refactor-scan` detects it (comments arrived, merged, closed); `refactor-learn` acts on it (follow-up-commit note, `done`, `wontfix` + out-of-scope entry).
