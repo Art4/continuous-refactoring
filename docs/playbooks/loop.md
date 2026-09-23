@@ -12,7 +12,7 @@ Each pass has two stages. First `/continuous-refactoring` selects one **Track** 
 
 ```
 select Track
-   └─ scan (propose nodes, detect closed MRs) → prioritise → design (grill, file the issue) → implement (tdd + review)
+   └─ scan (propose nodes, detect closed MRs) → prioritise → design (grill, plan onto the ticket) → implement (tdd + review)
          └────────────────────────────────── learn (ledger / ADR / CONTEXT.md / issue status) ←──────┘
 ```
 
@@ -39,13 +39,14 @@ The loop stops exactly where human judgement is needed:
 
 | Step | Skill | Your decision |
 |---|---|---|
-| Onboarding (first invocation only) | `continuous-refactoring` | tracker, merge-request create-mode, where the Refactoring Notes live — and, if the engineering-skills setup is missing, whether to stop and run it first |
+| Onboarding (first invocation only) | `continuous-refactoring` | tracker, whether tickets get created automatically or after asking (`Ticket-create-mode`), the same for merge requests (`MR-create-mode`), where the Refactoring Notes live — and, if the engineering-skills setup is missing, whether to stop and run it first |
 | Select Track | `continuous-refactoring` | optionally, which Track to force |
 | Propose nodes | `refactor-scan` | focus area, if you name one |
 | Prioritise | `refactor-prioritize` | which node is next; a `refactor:priority` label you set narrows the ranking |
+| Ticket | `refactor-loop` | with `Ticket-create-mode` `ask-each-time`, whether the tickets it proposes get created — one question for the batch of proposed nodes, then one for the candidate it chose. Say no to the chosen one and the pass ends; you're offered to reject that node for good so it isn't asked again |
 | Design | `refactor-design` | sign off the interface / seam; answer a flagged open question (the issue carries `needs-info` until you do, and `ready-for-agent` once it may proceed) |
 | Implement (review included) | `refactor-implement` | the seams that get tested; accept or reject review findings |
-| Merge request | `refactor-implement` | with create-mode `ask-each-time` or `human-opens`, whether the merge request gets opened — and by whom |
+| Merge request | `refactor-implement` | with MR-create-mode `ask-each-time` or `human-opens`, whether the merge request gets opened — and by whom |
 | Learn | `refactor-learn` | none — bookkeeping only |
 
 Two merge requests at most are open at once. With two waiting, a pass tells you which ones and ends without new work — merging or closing one is what unblocks the loop.

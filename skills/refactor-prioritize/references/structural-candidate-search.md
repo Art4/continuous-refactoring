@@ -2,7 +2,7 @@
 
 `refactor-prioritize`'s own Select mode, run only when Rank mode recommended the `structural-scan`
 node — a gate name, not a concrete candidate yet. This is a fresh dispatch, separate from Rank mode's
-own (see `refactor-prioritize/SKILL.md` step 4): explore, file every genuine candidate found, hand
+own (see `refactor-prioritize/SKILL.md` step 4): explore, draft every genuine candidate found, hand
 forward the single strongest to continue this pass. The actual grounding and grilling that turns the
 forwarded candidate into a full plan is `refactor-design`'s job afterward
 (`../../refactor-design/references/structural-candidate.md`, that file's own steps 3–4) — not run
@@ -37,8 +37,8 @@ candidate's description — not "component," "service," "API."
 
 More than one genuine friction spot found → don't discard the rest. Rank them by the same four
 factors Rank mode itself uses (heat, leverage, tooling pressure, risk), same as always for deciding
-which one is strongest — that one is this pass's recommendation, carried forward per *File it* below.
-The others still get filed (next step), just not pursued this pass.
+which one is strongest — that one is this pass's recommendation, carried forward per *Draft it* below.
+The others still get drafted (next step), just not pursued this pass.
 
 ## 4. Admission tier per candidate
 
@@ -49,16 +49,16 @@ read it fresh here rather than restating the number, so the two never drift apar
 this exploration finds but the cap has no room for queues for a future exploration, same as today's
 single-pick behaviour, just for the overflow instead of everything past the first.
 
-## File it
+## Draft it
 
-Each candidate to file gets an issue labelled **`refactor:candidate`** — plus **`refactor:priority`**
+Each candidate gets an issue draft labelled **`refactor:candidate`** — plus **`refactor:priority`**
 too, for a priority-tier one — naming **Where** (module/files), **Problem** (the friction, in the
 project's domain language), **Signal** (which `signals.md` factor drove the pick). This is the
 minimal payload — the full plan (deepened module, seam, interface, surviving tests, slice ordering)
 is `refactor-design`'s job afterward, added as a comment only on the one candidate this pass actually
 pursues.
 
-Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (`Pending candidates` write, naming
-only the single recommended candidate — the others sit as ordinary open issues for a future pass) —
+Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (the others sit as ordinary open issues
+for a future pass once `refactor-loop` has created them; `Pending candidates` is `refactor-design`'s write) —
 no dedupe check here, unlike a baseline-shrink group: a structural candidate's Where/Problem/Signal
 has no deterministic title to dedupe against the way a fresh group's does.

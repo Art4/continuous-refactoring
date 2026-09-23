@@ -51,6 +51,10 @@ than you can review them, and each one would go stale. With two open, a pass tel
 ends without new work. Each merge request also branches off the default branch, never off another
 one, so merging them in any order is safe.
 
+## Why does only the loop create tickets — and why would it ask?
+
+A ticket is visible to everyone watching the tracker, and it can be closed but not un-created. The steps that come up with candidates run in subagents, and a subagent can't ask you anything, so they hand back drafts and the loop — the one place that can ask — creates them. `Ticket-create-mode` decides how: `autonomous` (also what a missing field means) creates them as the pass needs them; `ask-each-time` asks once for the whole batch of tickets proposed up front and once more for the candidate the pass chose. It's separate from `MR-create-mode`, which is only about opening merge requests; you can be asked about one and not the other. If you decline the chosen candidate's ticket the pass ends without touching anything else, and you're offered to reject the node for good. With nobody there to answer, nothing is created and the pass says it is waiting — switching the field to `autonomous` in `bookkeeping.md` is the way to run unattended.
+
 ## Why does the loop write everything through `refactor-learn`?
 
 So "what changed the loop's state?" has one answer. The other skills detect, decide, plan or implement;

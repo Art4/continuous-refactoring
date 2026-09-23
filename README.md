@@ -40,7 +40,7 @@ A pass spends itself on exactly one of four **Tracks**. Each has its own cadence
 | **Housekeeping** | Recurring maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync | 7 days |
 | **Investigation** | Finds and delivers one structural refactoring candidate (hot spots, deepening opportunities) at a time | always due, lowest priority |
 
-While a pass runs, the loop tells you what it is doing — a sentence before and after every step, and one line per change to your repository (issue, branch, merge request). Tracks that adopt tooling work through their open items one node per pass, top to bottom; a Track that still has open work is finished before it is rescanned. Structural work only opens once the Safety Net is in place. At most two suite merge requests are open at any time. Details: [Track playbook](docs/playbooks/tracks.md) and [Architecture](docs/architecture.md).
+Tickets are created by the loop only — automatically, or after asking you (`Ticket-create-mode`). While a pass runs, the loop tells you what it is doing — a sentence before and after every step, and one line per change to your repository (issue, branch, merge request). Tracks that adopt tooling work through their open items one node per pass, top to bottom; a Track that still has open work is finished before it is rescanned. Structural work only opens once the Safety Net is in place. At most two suite merge requests are open at any time. Details: [Track playbook](docs/playbooks/tracks.md) and [Architecture](docs/architecture.md).
 
 ## Skills
 
@@ -48,8 +48,8 @@ While a pass runs, the loop tells you what it is doing — a sentence before and
 |---|---|
 | `continuous-refactoring` | The one entry point — a thin dispatcher: onboards a project that has never run the loop, otherwise selects the Track due this pass (cadence or on-demand) and hands it to that Track's skill |
 | `refactor-scan` | Propose every currently-unblocked tooling-tree node from `bookkeeping.md`; detect (never file) closed/merged issues and MRs |
-| `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects and files the concrete candidate |
-| `refactor-design` | Ground/grill the candidate → plan, filed or commented onto its issue |
+| `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects the concrete candidate; drafts the tickets the loop then creates |
+| `refactor-design` | Ground/grill the candidate → plan, written or commented onto its ticket |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
 | `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
 
@@ -77,7 +77,7 @@ Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skill
 
 Everything lives in the target repo, not in the conversation:
 
-- **Config + last run:** `docs/refactoring/bookkeeping.md` — create-mode, focus areas, and each Track's cadence, last scan and open items
+- **Config + last run:** `docs/refactoring/bookkeeping.md` — `Ticket-create-mode`, `MR-create-mode`, focus areas, and each Track's cadence, last scan and open items
 - **Remembered merge requests:** open `refactor:candidate` issues with a linked pull request; `docs/refactoring/merge-requests.md` on trackers without native labels
 - **Backlog:** `refactor:*` issues on the issue tracker
 - **Learned rejections:** `docs/refactoring/out-of-scope/`

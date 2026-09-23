@@ -85,3 +85,9 @@ dedupe live in `skills/continuous-refactoring/references/filing-a-ticket.md`, al
   process, the onboarding interview, `refactoring-bookkeeping.md`, the docs and the 38 fixtures naming
   `Create-mode` change accordingly.
 - The `ticket` glossary entry is a human-facing name, not a rename: skills keep saying "issue".
+- `Pending candidates` for a structural or baseline-shrink candidate is now written by `refactor-design`
+  (still on every tracker, native-label ones included), not by `refactor-prioritize`'s Select mode: the
+  Select-mode dispatch returns drafts and never sees the created issue's number.
+- `refactor-learn` returns secret-history findings as drafts, so the `Secret history scan: done` write moves
+  to its closing call, made once the loop reports that every draft has a ticket. Declined or unattended → the
+  field stays absent and the scan runs again next pass.

@@ -5,7 +5,7 @@ description: Propose every currently-unblocked tooling-tree node from bookkeepin
 
 # Refactor Scan
 
-**Detect, never write.** Proposes what could be worked on next and notices what has already resolved itself since the last pass — never files an issue, never decides an outcome. `refactor-prioritize`/`refactor-design` file issues for what gets chosen; `refactor-learn` acts on what this skill detects.
+**Detect, never write.** Proposes what could be worked on next and notices what has already resolved itself since the last pass — never files an issue, never decides an outcome. `refactor-prioritize` drafts issues for the proposals, `refactor-loop` creates them and `refactor-design` writes the plan onto the chosen one; `refactor-learn` acts on what this skill detects.
 
 ## Process
 
@@ -108,7 +108,7 @@ the target's complete
 history, reusing that scanner's own baseline mechanism
 (gitleaks `--baseline-path`, detect-secrets `.secrets.baseline`, or the equivalent) so a finding
 already known — filed earlier, or explicitly accepted — never resurfaces. Every new finding becomes
-its own finding, handed to `refactor-learn` alongside step 3's: file/line and the scanner's own
+its own finding, handed to `refactor-learn` alongside step 3's (which returns its drafts to `refactor-loop`, `filing-a-ticket.md`): file/line and the scanner's own
 rule/finding id, **the secret's value redacted**. `secret-detection` unfulfilled, or `Secret
 history scan` already `done` → nothing to detect here — this scan runs at most once per target.
 
@@ -121,7 +121,7 @@ Handed onward by `refactor-loop`, plainly — this skill writes nothing, so it h
 - **A resume-candidate**, if one was detected → straight to `refactor-implement`, bypassing `refactor-prioritize`/`refactor-design`.
 - **A pending candidate**, if one was detected and resumable (step 2) → straight to `refactor-design` (no plan yet, or a plan present but neither label set — design has more to finish either way) or straight to `refactor-implement` (plan present, `ready-for-agent` set), bypassing `refactor-prioritize` either way. Found but still flagged and waiting (`needs-info` present) → not handed forward at all this pass; treated as absent.
 - **A flagged candidate now carrying `ready-for-agent`** (step 3b), if one was detected → straight to `refactor-implement`, same as a pending candidate whose plan is already present.
-- **A walked Track `Open` outcome** (Safety Net or Guardrails, `Open` non-empty — `references/track-open-processing.md`) → the one workable node the walk selected (its issue filed downstream by `refactor-design` when the node is worked, unless it already has one), straight to `refactor-design` (or straight to `refactor-implement` if it already carries a plan with `ready-for-agent`), bypassing `refactor-prioritize`; any **fulfilled at pick-up** findings (nodes the walk's re-check found already adopted) go with the other findings to `refactor-learn`; non-workable nodes are reported with their reasons for the closing report. Nothing workable → the walk reports exactly that.
+- **A walked Track `Open` outcome** (Safety Net or Guardrails, `Open` non-empty — `references/track-open-processing.md`) → the one workable node the walk selected (with a draft of its issue, unless it already has one — `refactor-loop` creates it before design runs, `../continuous-refactoring/references/filing-a-ticket.md`), straight to `refactor-design` (or straight to `refactor-implement` if it already carries a plan with `ready-for-agent`), bypassing `refactor-prioritize`; any **fulfilled at pick-up** findings (nodes the walk's re-check found already adopted) go with the other findings to `refactor-learn`; non-workable nodes are reported with their reasons for the closing report. Nothing workable → the walk reports exactly that.
 - **Proposals** — every currently-unblocked node, by Name (never slugs) or, once pre-filed, by its issue (step 3b), never capped, plus any other issue-backed candidate from step 3b and any baseline-shrink candidate from step 4b, or none → `refactor-prioritize`. Every node currently unblocked (required parents fulfilled, not rejected, every recommended parent already decided) — never a priority-truncated subset. Alongside it, name every `withheld` node and which parent(s) it's waiting on (e.g. "Rector: Type Coverage Set — waiting on: PHP CS Fixer").
 
 ## Completion criterion

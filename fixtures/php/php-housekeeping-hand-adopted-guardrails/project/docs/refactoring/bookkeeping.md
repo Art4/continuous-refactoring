@@ -1,6 +1,6 @@
 # Refactoring Bookkeeping
 
-**Create-mode:** autonomous
+**MR-create-mode:** autonomous
 
 **Focus areas:** none
 

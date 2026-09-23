@@ -87,6 +87,14 @@ behind — the next invocation selects a Track and scans). See each fixture's `e
 under `skills/continuous-refactoring/references/` (`local-issue-tracker-template.md`,
 `triage-labels-template.md`).
 
+### php-ticket-create-mode-ask, php-mr-create-mode-old-name (create-modes)
+
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), exercised through the
+`agent-loop` mode. `php-ticket-create-mode-ask` (an onboarded target with `Ticket-create-mode: ask-each-time`:
+the loop asks before a ticket exists; a refusal, a refusal-for-good and an unattended run) and
+`php-mr-create-mode-old-name` (a `bookkeeping.md` still carrying the old `Create-mode` field name, no
+`Ticket-create-mode`: read as the new names, nothing asked). See each fixture's `expected/behavior.md`.
+
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory): the whole point

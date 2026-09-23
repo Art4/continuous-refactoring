@@ -47,9 +47,11 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
      `refactor-implement` as usual, **marked self-tracking** — `refactor-design/SKILL.md` step 5
      already skips `Pending candidates` for a candidate marked this way, without needing to know why;
      this `Open` entry is this node's own resume marker instead, so the two must never both point at
-     the same candidate. The walk files no issue itself (`refactor-scan` detects, never
-     writes); `refactor-design` files the node's issue when it works the node, unless one already
-     exists — this pass's pick, and the issue it ends up with, is this walk's own `## Output`
+     the same candidate. The walk creates no issue itself (`refactor-scan` detects, never
+     writes): unless the node already has one, it returns a draft for it — title `Tooling tree: <Name>`, label
+     `refactor:candidate`, body = the node's Purpose line — and `refactor-loop` creates it before design runs
+     (`../../continuous-refactoring/references/filing-a-ticket.md`); `refactor-design` then writes the full plan onto it.
+     This pass's pick, and the issue it ends up with, is this walk's own `## Output`
      (below), which is what authorizes `refactor-learn`'s closing call to write that issue's number
      onto this `Open` entry (`safety-net-write.md`/`guardrails-write.md`), whether or not
      `refactor-implement` also got as far as opening a merge request this same pass. **Continue walking

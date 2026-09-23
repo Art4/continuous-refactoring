@@ -85,9 +85,13 @@ run this pass (`../../refactor-learn/references/housekeeping-write.md` writes `L
 
 ## Open this cycle's issue
 
-File an issue titled `Housekeeping — <today's date>`, body = every line from `housekeeping-template.md`
+Create an issue titled `Housekeeping — <today's date>`, body = every line from `housekeeping-template.md`
 as an unchecked checkbox, in the file's own order, plus the standing item from *Work the checklist*,
-below, as one more checkbox (always present, not sourced from the template file).
+below, as one more checkbox (always present, not sourced from the template file). Follow
+`../../continuous-refactoring/references/filing-a-ticket.md`: `Ticket-create-mode: ask-each-time` →
+ask the human first (this process runs in their conversation, so it asks directly); declined, or nobody
+there to ask → this cycle doesn't run: nothing more is written, the reconcile edit above stays
+uncommitted, and `Last scan` isn't recorded, so the Track is due again next pass. Say so in the closing report.
 
 Branch `chore/housekeeping-<today's date>` (existing → reuse, don't reset) — the reconciliation commit
 above, if it changed anything, lands here as this cycle's first commit.
@@ -121,7 +125,7 @@ request already holds itself to.
 ## Deliver
 
 **Any code change made:** open the merge request per
-`../../continuous-refactoring/references/opening-a-merge-request.md` (same create-mode, basing, and
+`../../continuous-refactoring/references/opening-a-merge-request.md` (same MR-create-mode, basing, and
 description rules every other suite MR already follows) — referencing this cycle's issue so it closes on
 merge, per that document's own conventions. Do not close the issue directly.
 

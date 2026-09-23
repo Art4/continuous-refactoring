@@ -10,7 +10,7 @@ the prompt to supply "Q0: abort" explicitly.
 ## Expected: the invocation
 
 1. The first output says onboarding is starting; the engineering-skills setup is reported incomplete and the one
-   up-front question is asked. Q1–Q3 are never asked.
+   up-front question is asked. Q1–Q4 are never asked.
 2. On **abort**: **nothing is written** — no `AGENTS.md`, no `docs/agents/` file, no `docs/refactoring/`, no commit,
    no branch. The human is pointed at `setup-matt-pocock-skills` to run first, and the invocation ends. No scan
    subagent, no Track selected.

@@ -22,15 +22,15 @@ A minimal PHP project (`composer.json`, `src/Greeter.php`). No `docs/`, no `AGEN
 2. The engineering-skills setup is reported incomplete; **one** up-front question offers abort (nothing
    written, hint to run `setup-matt-pocock-skills`) or continue. Continue is taken for the rest of this
    scenario. (Answering **abort** instead: nothing is written, the invocation ends.)
-3. Q1 (tracker — recommendation Local Markdown, no remote), Q2 (merge-request create-mode) and Q3
-   (Refactoring Notes location — recommendation `docs/refactoring/`), asked one at a time, each with a
-   recommended answer.
+3. Q1 (tracker — recommendation Local Markdown, no remote), Q2 (`Ticket-create-mode` — recommendation
+   `autonomous`), Q3 (`MR-create-mode`) and Q4 (Refactoring Notes location — recommendation
+   `docs/refactoring/`), asked one at a time, each with a recommended answer.
 4. An informational summary — no approval gate — naming the files to be written and the recorded backlog
    labels.
 5. One status line per write, in this order: the suite's section in a **newly created** `AGENTS.md`
-   (`Refactoring Notes:` line, the `Create-mode` pointer, the backlog labels line), `docs/agents/triage-labels.md`
+   (`Refactoring Notes:` line, the `Ticket-create-mode`/`MR-create-mode` pointer, the backlog labels line), `docs/agents/triage-labels.md`
    (`needs-info`, `ready-for-agent`, `wontfix`, plus a `done` row — Local Markdown), `docs/agents/issue-tracker.md`
-   (the Local Markdown template), then `docs/refactoring/bookkeeping.md` **last**, holding `Create-mode` and no
+   (the Local Markdown template), then `docs/refactoring/bookkeeping.md` **last**, holding `Ticket-create-mode` and `MR-create-mode` and no
    `Pending candidates`.
 6. A closing text: what was created; commit or merge the files to the default branch; run
    `/continuous-refactoring` again (optionally naming a Track); the engineering-skills setup can still be
@@ -52,7 +52,7 @@ saw no hint it was onboarding. It also filed an issue and opened a merge request
 ## Verified
 
 Confirmed live on 2026-09-21: one attended `opencode` run (1.18.31, model `opencode/big-pickle`) in a
-sandbox copy of this fixture, the setup-gap question answered *continue*, Q1–Q3 answered with the
+sandbox copy of this fixture, the setup-gap question answered *continue*, Q1–Q3 (the ticket question did not exist yet) answered with the
 recommended options (Local Markdown, `human-opens`, `docs/refactoring/`). Observed: the first output was
 the onboarding announcement; no subagent, scan or Track selection; the four questions one at a time; an
 informational summary; one status line per write in the documented order, `bookkeeping.md` last; a closing

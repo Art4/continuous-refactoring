@@ -1,6 +1,6 @@
 # Expected behavior — the invocation after onboarding is an ordinary pass
 
-The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping.md` holding only `Create-mode`
+The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping.md` holding only the two create-mode fields (`Ticket-create-mode`, `MR-create-mode`)
 (no `Pending candidates`, no Track sections), `docs/agents/issue-tracker.md` (Local Markdown),
 `docs/agents/triage-labels.md` and the suite's section in `AGENTS.md`. Not deterministically checkable; run via
 `fixtures/harness/run.sh agent-loop php-onboarding-second-invocation`, local-only and advisory.
@@ -21,7 +21,7 @@ The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping
 
 Confirmed live on 2026-09-21: the sandbox left by the `php-onboarding-fresh` run above, its four files
 committed by the human, then `/continuous-refactoring` again (`opencode` 1.18.31, `opencode/big-pickle`).
-Observed: no onboarding interview; the existing `bookkeeping.md` — holding only `Create-mode` — was accepted,
+Observed: no onboarding interview; the existing `bookkeeping.md` — holding only `MR-create-mode` — was accepted,
 all four Tracks counted as never run, the fixed order selected Safety Net, and the scan subagent started
 normally; the files the onboarding wrote (`issue-tracker.md`, `triage-labels.md`, `AGENTS.md`) were read and
 used through prioritise, design, implement and the closing bookkeeping write. One deviation: the run said

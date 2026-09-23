@@ -1,6 +1,6 @@
 ---
 name: refactor-prioritize
-description: Rank refactor-scan's proposals and recommend the next one to work on, or say why nothing should start this pass. For a gate-shaped winner, also selects and minimally files the concrete candidate within it.
+description: Rank refactor-scan's proposals and recommend the next one to work on, or say why nothing should start this pass. For a gate-shaped winner, also selects the concrete candidate within it and drafts its issue.
 ---
 
 # Refactor Prioritize
@@ -13,8 +13,8 @@ Runs in one of two modes, both dispatched by `refactor-loop` — never one calli
 - **Select mode** (step 4): `refactor-loop` re-invokes this skill, as a fresh dispatch, only when
   Rank mode's winner was a gate (`structural-scan`, a PHPStan baseline-shrink family) — a name,
   not yet a concrete candidate. Select mode does the actual exploration (codebase or baseline) that
-  Rank mode's own declarative ranking never does, picks one concrete candidate, and files it
-  minimally. A fresh dispatch, not a continuation of Rank mode's own context, so the exploration
+  Rank mode's own declarative ranking never does, picks one concrete candidate, and drafts each
+  found candidate's issue minimally. A fresh dispatch, not a continuation of Rank mode's own context, so the exploration
   never bleeds into the (much lighter) ranking reasoning, or vice versa.
 
 ## Process
@@ -43,7 +43,7 @@ For each proposal in that pool, assess:
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 
-**File as you read.** A tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → file its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-design` step 5 already looks for before filing one itself, so whichever proposal later wins a ranking is recognized as already filed, updated in place rather than duplicated. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already files every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. Doesn't apply to a proposal that arrives already issue-backed (`refactor-scan` step 3b: an earlier pass's own filing, or a human-labeled issue) — nothing to file, rank it as-is — or to a gate name (`structural-scan`, a baseline-shrink family) — those stay names until Select mode's own exploration makes one concrete, exactly as today. **Does not apply to Track nodes** (Safety Net, Guardrails) — those are tracked in the Track's own `Open` list and their issues are created only when the node is worked via the `Open` walk (`../refactor-scan/references/track-open-processing.md`), not pre-filed here. A proposal filed this way scores **Age** zero and carries no `refactor:priority` — both trivially true of an issue that's existed for the length of this same pass.
+**Draft as you read.** A tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → draft its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-loop` looks for before creating one, so whichever proposal later wins a ranking is recognized as already created, updated in place by `refactor-design` rather than duplicated. This skill never creates the issue itself — `refactor-loop` does, per `../continuous-refactoring/references/filing-a-ticket.md`, which also decides whether the human is asked first. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already drafts every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. Doesn't apply to a proposal that arrives already issue-backed (`refactor-scan` step 3b: an earlier pass's own filing, or a human-labeled issue) — nothing to file, rank it as-is — or to a gate name (`structural-scan`, a baseline-shrink family) — those stay names until Select mode's own exploration makes one concrete, exactly as today. **Does not apply to Track nodes** (Safety Net, Guardrails) — those are tracked in the Track's own `Open` list and their issues are created only when the node is worked via the `Open` walk (`../refactor-scan/references/track-open-processing.md`), not pre-filed here. A proposal drafted this way scores **Age** zero and carries no `refactor:priority` — both trivially true of an issue that has, at most, existed for the length of this same pass.
 
 Present the ranking as a short ordered list of Names only (never slugs) — save the rationale for the winner for step 3.
 
@@ -64,30 +64,21 @@ for a winner that's already concrete (an ordinary tooling-tree node, an external
 - **Winner is `structural-scan`** → run `references/structural-candidate-search.md` in full.
 - **Winner is a "PHPStan Level N — baseline shrink" proposal** → run `references/baseline-shrink-selection.md` in full.
 
-Both end the same way: every genuine candidate found gets filed (minimal fields, never the full
+Both end the same way: every genuine candidate found gets drafted (minimal fields, never the full
 plan — that's `refactor-design`'s job, added as a comment only on the one this pass pursues), sorted
 into a **priority** or **capped** admission tier by its Signal
 (`references/signals.md`), and the single strongest is this pass's
 recommendation, carried forward.
 
-`docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → **still write**
-`Pending candidates` to this issue, unlike the ordinary design→implement handoff (which native
-trackers skip, `../continuous-refactoring/references/refactoring-bookkeeping.md`) — a pass
-interrupted between this filing and `refactor-design`'s follow-up comment needs `refactor-scan` to
-resume exactly this issue next pass, not treat it as a fresh externally-labeled candidate and
-potentially select a different one. No native-label tracker → unchanged, same write as always. Either
-way, via the dedicated bookkeeping branch — never a direct commit to whatever branch happens to be
-checked out, and never to the default branch.
+This mode writes no `Pending candidates` — it can't, the issue doesn't exist yet. `refactor-design` sets it for the recommended candidate as soon as `refactor-loop` hands it the created issue's number (its step 5), on every tracker, native-label ones included.
 
 ## Output
 
-Name the writes this call made so the caller can report them — every issue filed (number and title), or none when nothing was filed.
+This skill creates no issue and writes nothing to the target; it names the drafts it returns.
 
-**Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → `refactor-loop` ends the pass. Every tooling-tree proposal ranked this step now carries an issue (step 2's own filing, above) — the non-winning ones simply sit open, the same way Select mode's own non-winning findings already do below.
+**Rank mode:** step 3's two lines, verbatim, → `refactor-loop`, **or** "nothing to do, because …" → `refactor-loop` ends the pass. Plus the drafts for every tooling-tree proposal ranked this step that had no issue yet (step 2's *Draft as you read*), the winner's marked as such — `refactor-loop` creates them per `filing-a-ticket.md` and hands the winner's issue to `refactor-design`. The non-winning ones simply sit open once created, the same way Select mode's own non-winning findings do below.
 
-**Select mode:** the single recommended candidate's issue (number + its minimal fields) →
-`refactor-design` — any other candidates filed this same run sit as ordinary open issues, for a
-future pass.
+**Select mode:** every candidate found as a draft (minimal fields, admission tier, Signal), the single recommended one marked — `refactor-loop` creates them and hands the recommended one's issue (number + its minimal fields) to `refactor-design`; the others sit as ordinary open issues for a future pass.
 
 ## Fallback
 
@@ -95,4 +86,4 @@ future pass.
 
 ## Completion criterion
 
-**Rank mode:** either a single next candidate is recommended with a reason and what it unlocks, or the pass is explicitly reported as having nothing to start — never both. **Select mode:** the candidate has an issue (newly filed, or resumed) naming Where/Problem/Signal (structural) or the chosen group (baseline-shrink) — no plan yet, that's `refactor-design`'s completion criterion.
+**Rank mode:** either a single next candidate is recommended with a reason and what it unlocks, or the pass is explicitly reported as having nothing to start — never both. **Select mode:** the candidate is returned as a draft naming Where/Problem/Signal (structural) or the chosen group (baseline-shrink), the recommended one marked — no plan yet, that's `refactor-design`'s completion criterion.
