@@ -112,6 +112,10 @@ Then, regardless of which branch the writes above rode:
 - `continuous-housekeeping` ran the Housekeeping Track this pass (`../continuous-housekeeping/references/housekeeping-track.md` — its own process was reached, whether it resumed an in-progress cycle, delivered a fresh one, or found nothing registered to check) → write `## Housekeeping`'s `Last scan` only, via the ordinary dedicated bookkeeping branch (never folded onto the Housekeeping cycle's own branch): `references/housekeeping-write.md`. No `Open`/`Out-of-scope` to write here at all — this section never carries either, the same shape `## Investigation`'s own write already follows, but with a real, unit-carrying `Cadence` (`7 days` unless hand-edited) instead of the literal `continuous`. Housekeeping wasn't the Track step 1/2 selected this pass → don't touch `## Housekeeping` at all.
 - **Last of all**: the branch these writes just landed on carries a candidate MR still marked draft (`opening-a-merge-request.md`'s *Draft candidate MRs* — opened as one this same pass, or resumed via the early call's **fold-in still owed** finding above) → mark it ready for review now that every fold-in write above is actually pushed (`gh pr ready` / `glab mr update <n> --ready`). Not draft (the ordinary non-native-tracker/dedicated-branch case) → nothing to do here.
 
+## Output
+
+The writes this call made, named so the caller can report them: the bookkeeping (or candidate) branch and merge request, issue labels and closings, `out-of-scope/` entries, ADR/`CONTEXT.md` changes — or "nothing to do", when the precondition stopped it.
+
 ## Fallback
 
 - **`/domain-modeling`**: installed → use its discipline for the ADR/`CONTEXT.md` side effects. Otherwise skip with a note — the ledger, label, and stamp writes are inline and suite-internal, run regardless. Crash-safe.

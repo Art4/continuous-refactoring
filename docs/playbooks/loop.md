@@ -20,6 +20,10 @@ select Track
 
 Structural work (Investigation) only opens once the tooling adoption chain is in place — this playbook calls that chain the **Safety Net**: deterministic checks (static analysis, a test suite) that catch a regression before an agent's own structural judgement has to. It's the same mechanism `CONTEXT.md` and the skills themselves still call the tooling tree — "Safety Net" is a reading aid for this playbook, not a renamed concept.
 
+### What you see while it runs
+
+The loop narrates the pass in your conversation: one sentence before each step says what starts, one after says what came back (what scan found, which node won and why, what design planned). Every change to your repository is reported on its own line when it happens — an issue created, a branch pushed, a merge request opened, a bookkeeping merge request. Housekeeping does the same. The steps that run in subagents can't talk to you directly, so the loop reports for them after they return; the closing report stays two lines and doesn't repeat any of it.
+
 ## Triggers
 
 The loop never triggers itself — it has no stored schedule (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`). You kick it off, however often that is: by hand, or via whatever recurring trigger you set up outside the suite.
