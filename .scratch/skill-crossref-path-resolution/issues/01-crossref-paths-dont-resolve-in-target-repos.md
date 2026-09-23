@@ -106,3 +106,15 @@ same flat-sibling directory shape under `.agents/skills/`. Nothing further to do
 > installed location, not a literal citation from this file) — dropped the backticks so it no longer
 > reads as a path the new check should validate. Full test suite green (229 tests), `validate_skills.py`
 > clean (same pre-existing warning-only baseline as before this change, zero new errors).
+
+> **2026-09-23 (follow-up):** A second session test-ran the fixed suite live against a real symlink-
+> installed target repo — every citation resolved directly except one: `safety-net-track.md`/
+> `guardrails-track.md` (2 occurrences each) described a node's tree-doc entry with the placeholder
+> `php-tooling-tree/<node>.md`, implying a 1:1 slug→filename derivation that doesn't hold for a
+> multi-node file (`rector.md` covers five `rector-*` nodes, `psalm.md` covers two) — the agent had to
+> `find` its way to `rector.md`. Not a regression of this ticket's own fix (a separate, narrower
+> documentation-accuracy gap, unrelated to the citing-root problem this ticket closed) but folded in
+> here rather than filed separately, since it's the same class of "agent has to search instead of being
+> told exactly where to look." Fixed: all 4 occurrences reworded to point at `php-tooling-tree.md`'s own
+> per-node *Full definition* pointer (which already names the correct file for every node, multi-node
+> ones included) instead of implying direct slug-to-filename derivation.

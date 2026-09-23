@@ -19,9 +19,12 @@ node in `php-tooling-tree.md` that isn't itself Guardrails-gated
 upstream of them that gates their proposability without itself carrying a `resolved` edge — `composer`,
 `php-cs-fixer`, `test-runner-if-missing`, `static-code-analyzer`, `psalm`, `phpstan-level-0..4` — the
 same set `CONTEXT.md`'s **Onboarding** entry names as "everything before `structural-scan` opens." A
-node's tree-doc entry (`php-tooling-tree/<node>.md`) is unchanged by any of this — same Purpose,
-Fulfilment check, MR scope, edges; only which bookkeeping section a node in this scope reads/writes
-changes (below), and how its Fulfilment check gets evaluated (Judging fulfilment, below).
+node's tree-doc entry — the file `php-tooling-tree.md`'s own per-node *Full definition* pointer
+names, not always one-file-per-node (every `rector-*` node points at `php-tooling-tree/rector.md`;
+`psalm`/`psalm-taint-analysis` both point at `php-tooling-tree/psalm.md`) — is unchanged by any of
+this — same Purpose, Fulfilment check, MR scope, edges; only which bookkeeping section a node in this
+scope reads/writes changes (below), and how its Fulfilment check gets evaluated (Judging fulfilment,
+below).
 
 ## Is the Track due this pass?
 
@@ -53,7 +56,8 @@ Run `python3 references/tooling_tree.py <target-repo>` once, same as `refactor-s
 already does — its `detected` map is a first signal, not the verdict, for every node in this Track's
 scope. **Don't take a Safety Net node's `fulfilled` value at face value** — the same discipline step 4
 already applies to `psr-4`'s `unwired_entry_points`, generalized here to every node in scope: read the
-node's own Purpose line (`php-tooling-tree/<node>.md`), then judge the actual repo against it — does a
+node's own Purpose line — its tree-doc entry, found via `php-tooling-tree.md`'s own per-node *Full
+definition* pointer, not always one-file-per-node — then judge the actual repo against it — does a
 real, working tool genuinely serve that Purpose, under any name, not only the one the node's own `Tool`
 line happens to mention.
 
