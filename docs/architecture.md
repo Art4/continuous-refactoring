@@ -48,6 +48,10 @@ Early exits are normal: no git repository ends the pass; a full backlog, a resum
 
 `refactor-loop` runs the scan step and the implement step in fresh subagents, so their reasoning stays in their own context and only their stated output comes back. A subagent can't ask you a question or reliably reach the forge, so it hands back instead of stalling: it reports the branch and commits plus whatever it couldn't do (seams awaiting your confirmation, a create-mode that asks you, a failed push or merge request, an unreadable CI status). The loop then finishes that part in its own context. Without a subagent mechanism, the steps run inline.
 
+### What the loop reports
+
+A subagent has no channel to you, so each lifecycle skill's output names the writes it made — issues filed, a branch pushed, a merge request opened, bookkeeping written. The loop turns that into a sentence before and after every step and one line per write, so nothing changes in your repository without being announced. Housekeeping, which runs in your conversation itself, reports the same way.
+
 ### The two-merge-request cap
 
 Before implement would open a *new* merge request, the loop counts the suite's open ones. Two or more → the candidate keeps its plan, stays pending, and the pass ends with a note naming the waiting merge requests. Continuing an already-open merge request is never gated. Merge requests always branch off the default branch — never off each other.

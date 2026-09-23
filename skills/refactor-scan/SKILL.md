@@ -114,7 +114,7 @@ history scan` already `done` → nothing to detect here — this scan runs at mo
 
 ## Output
 
-Handed onward by `refactor-loop`, plainly:
+Handed onward by `refactor-loop`, plainly — this skill writes nothing, so it has no writes to name:
 
 - Which precondition stopped the pass, if one did — nothing below applies this pass.
 - **Findings** (possibly empty) → `refactor-learn`.

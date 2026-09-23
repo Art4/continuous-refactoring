@@ -81,6 +81,8 @@ checked out, and never to the default branch.
 
 ## Output
 
+Name the writes this call made so the caller can report them — every issue filed (number and title), or none when nothing was filed.
+
 **Rank mode:** step 3's two lines, verbatim, → `refactor-design`, **or** "nothing to do, because …" → `refactor-loop` ends the pass. Every tooling-tree proposal ranked this step now carries an issue (step 2's own filing, above) — the non-winning ones simply sit open, the same way Select mode's own non-winning findings already do below.
 
 **Select mode:** the single recommended candidate's issue (number + its minimal fields) →

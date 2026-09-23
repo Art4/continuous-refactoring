@@ -1,0 +1,1 @@
+- The loop now says what it is doing while it runs: one sentence before and after each step (scan, ranking, design, implementation, recording), and a separate line for every change it makes in your repository — an issue created, a branch pushed, a merge request opened. Housekeeping reports the same way.

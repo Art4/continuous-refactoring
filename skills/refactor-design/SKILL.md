@@ -53,6 +53,8 @@ or a comment (everything else). A flagged candidate never reaches this step this
 
 ## Output
 
+Name the writes this call made so the caller can report them — the issue filed, updated or commented, its labels set or removed, `Pending candidates` if written.
+
 The candidate issue, now carrying the plan (freshly filed here, or already filed by `refactor-prioritize`'s Select mode and now commented) → `refactor-implement`.
 
 ## Fallback

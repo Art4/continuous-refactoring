@@ -70,6 +70,8 @@ The candidate branch stays checked out after this. `refactor-learn`'s bookkeepin
 
 ## Output
 
+Name the writes this call made so the caller can report them — the branch pushed, the merge request opened (draft or not), the outlook comment on the candidate issue.
+
 The opened merge request → `refactor-learn`.
 
 Running as a subagent (no way to ask the human, forge access possibly missing): don't stall or retry around it — stop at the first thing you can't do (an unconfirmed seam before any test is written, a create-mode that asks the human, a failed or denied push, MR creation, or CI-status read) and return, instead of the MR: the branch, its commits, what was verified locally, and exactly what failed or is still open, with the error text. The caller finishes it; this skill's completion criterion then holds once the caller has.

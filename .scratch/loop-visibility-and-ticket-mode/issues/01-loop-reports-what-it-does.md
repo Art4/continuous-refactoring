@@ -2,7 +2,7 @@
 
 **What to build:** Today the loop announces the pass start, the scan and implement subagents, and every early stop. Prioritise, Design, both Learn calls and every write to the target (ticket creation, push, merge request, bookkeeping merge request) run silently. Make the progress visible.
 
-**Status:** ready-for-agent
+**Status:** done — PR pending
 
 ## Decided behaviour (grilled with the maintainer)
 

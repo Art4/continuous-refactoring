@@ -40,7 +40,7 @@ A pass spends itself on exactly one of four **Tracks**. Each has its own cadence
 | **Housekeeping** | Recurring maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync | 7 days |
 | **Investigation** | Finds and delivers one structural refactoring candidate (hot spots, deepening opportunities) at a time | always due, lowest priority |
 
-Tracks that adopt tooling work through their open items one node per pass, top to bottom; a Track that still has open work is finished before it is rescanned. Structural work only opens once the Safety Net is in place. At most two suite merge requests are open at any time. Details: [Track playbook](docs/playbooks/tracks.md) and [Architecture](docs/architecture.md).
+While a pass runs, the loop tells you what it is doing — a sentence before and after every step, and one line per change to your repository (issue, branch, merge request). Tracks that adopt tooling work through their open items one node per pass, top to bottom; a Track that still has open work is finished before it is rescanned. Structural work only opens once the Safety Net is in place. At most two suite merge requests are open at any time. Details: [Track playbook](docs/playbooks/tracks.md) and [Architecture](docs/architecture.md).
 
 ## Skills
 
