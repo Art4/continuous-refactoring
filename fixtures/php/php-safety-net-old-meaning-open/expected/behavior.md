@@ -31,8 +31,7 @@ so `phpstan-level-1` through `-5` are unresolved; `psalm-taint-analysis` is alre
   — the one node an earlier pass filed an issue for (the old meaning of `Open`); the other unresolved
   nodes are not listed. `Out-of-scope`, as a list: `psalm-taint-analysis —
   out-of-scope/psalm-taint-analysis.md`.
-- Old-schema residue: `Focus areas: none` and a `Fulfilled nodes` list (`onboarding-setup`, `composer`,
-  `ci-runner`, `psr-4`, `php-cs-fixer`, `phpunit`, `phpstan-level-0`, the `rector-*` family) — ignored.
+- Old-schema residue: `Focus areas: none` — ignored.
 - No `## Guardrails`/`## Housekeeping`/`## Investigation` sections.
 
 `.scratch/refactor/issues/07-phpstan-level-1.md` — carries a plan and `ready-for-agent`, simulating a
@@ -40,8 +39,8 @@ pass that filed and designed this candidate.
 
 ## Expected: a pass invoked as "run the Safety Net Track" (or an ordinary pass — same outcome)
 
-1. The old-shape fields (`Focus areas`, `Fulfilled nodes`, the old-meaning `Open`) cause **no error**
-   and no migration step; `Fulfilled nodes` is simply not consulted.
+1. The old-shape fields (`Focus areas`, the old-meaning `Open`) cause **no error**
+   and no migration step.
 2. Safety Net is selected (its `Open` is non-empty — the blockade — and here also named explicitly).
    `Open` has an entry, so **no scan runs**: `refactor-scan` walks `Open` per
    `skills/refactor-scan/references/track-open-processing.md`.
@@ -50,8 +49,8 @@ pass that filed and designed this candidate.
    `ready-for-agent`.
 4. The incomplete list is **not** rewritten this pass: `Open` is not replaced by the complete backlog
    (`phpstan-level-1` through `-5`), and `Last scan` is left untouched — only a completed scan earns
-   that write (`skills/refactor-learn/references/safety-net-write.md`). `Fulfilled nodes` and
-   `Focus areas` are left exactly as they were.
+   that write (`skills/refactor-learn/references/safety-net-write.md`). `Focus areas` is
+   left exactly as it was.
 5. Once `phpstan-level-1` merges and `Open` empties, the scan that runs next records the complete
    backlog (`phpstan-level-2` through `-5`, in order) — that later scan, not this pass, corrects the
    old-meaning list.

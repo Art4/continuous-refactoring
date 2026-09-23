@@ -112,7 +112,7 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
   `Out-of-scope` — the same merge/rejection symmetry every other rejection in the suite already
   follows.
 - **php-safety-net-old-schema** — `docs/refactoring/bookkeeping.md` still in the pre-ADR-0055 shape
-  (`Fulfilled nodes`, global `Pending candidates`, no `## Safety Net` section at all), with real
+  (global `Pending candidates`, no `## Safety Net` section at all), with real
   Safety-Net-Track work still open (`psr-4`, `static-code-analyzer`/`phpstan-level-0` genuinely
   missing). Expects a normal pass — no error on, or migration of, the pre-existing old-shape fields.
 - **php-safety-net-rejection-cascade** — `## Safety Net`'s `Open` names `phpstan-level-3 (#12)`,
@@ -123,7 +123,7 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
   once the rejection is reversed by hand — the next scan re-adding `phpstan-level-3`, `-4`, `-5` in
   order (spec case 6; cascade verified with `tooling_tree.py`).
 - **php-safety-net-old-meaning-open** — `## Safety Net` still written under the old `Open` meaning
-  (`phpstan-level-1 (#7)` as the only list entry, plus `Fulfilled nodes`/`Focus areas` residue),
+  (`phpstan-level-1 (#7)` as the only list entry, plus `Focus areas` residue),
   `Last scan` recent, and a pass that names the Safety Net Track explicitly. Expects no error, no
   migration, and **no forced scan**: a selected Track with a non-empty `Open` works its `Open` walk
   (`phpstan-level-1`), leaving `Open`/`Last scan` alone; the scan that runs once `Open` is empty records
@@ -183,8 +183,7 @@ own `expected/behavior.md` for the full expected behavior.
   (a target still fully on the pre-ADR-0055 shape never reaches the Guardrails Track in the same pass —
   the Safety Net Track outranks it and is more overdue). This fixture instead seeds a target
   mid-migration: `## Safety Net` already present and closed (ticket 01 has already run on it), but
-  `Fulfilled nodes` still carries pre-ADR-0055 residue for nodes the Safety Net Track has since taken
-  over (`composer`, `php-cs-fixer`, `phpunit`, `psr-4`, `phpstan-level-0`, the `rector-*` family), and
+  the old-shape `Focus areas`/global `Pending candidates` fields still present, and
   no `## Guardrails` section yet. Expects a normal pass — no error on the coexistence, and real,
   still-open Guardrails work (`composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`,
   `phpstan-level-6`, `phpstan-deprecation-rules`, `semgrep` are all genuinely missing) recorded as
@@ -388,8 +387,7 @@ Same non-CI, local-only, advisory posture as the scheduler fixtures above.
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), same reasoning as
 `php-safety-net-*`/`php-guardrails-*` above. Exercises the Housekeeping Track's reconciliation sweep
 (`skills/continuous-housekeeping/references/housekeeping-track.md`): each cycle it checks only the
-nodes that carry a `Housekeeping` field and judges their Fulfilment check itself (agent judgement) —
-it no longer reads the retired `Fulfilled nodes` cache (ADR-0056). See each fixture's own
+nodes that carry a `Housekeeping` field and judges their Fulfilment check itself (agent judgement). See each fixture's own
 `expected/behavior.md` for the full expected behavior.
 
 - **php-housekeeping-hand-adopted-guardrails** — `composer-audit` adopted by hand (CI runs
@@ -400,13 +398,13 @@ it no longer reads the retired `Fulfilled nodes` cache (ADR-0056). See each fixt
   `composer-audit`, `phpstan-level-0`, `php-minimal-version` get their lines, `semgrep` (absent)
   doesn't — so the hand-adopted Guardrails tool gets its Housekeeping checklist line at the next
   cycle even though no merge request ever delivered it and this target's bookkeeping.md carries no
-  `Fulfilled nodes` at all.
+  per-node cache to lean on.
 
 - **php-housekeeping-old-schema** — `docs/refactoring/bookkeeping.md` still in the pre-ADR-0055
-  shape (`Fulfilled nodes` populated, global `Pending candidates`, no Track sections anywhere),
+  shape (global `Pending candidates`, no Track sections anywhere),
   with the listed nodes genuinely fulfilled by the project. Expects a normal Housekeeping pass: the
-  retired `Fulfilled nodes` field is ignored — never read as an input, not migrated, left exactly as
-  it was — while the reconciliation judges fulfilment itself, creates
+  old-shape fields are ignored — not migrated, left exactly as
+  they were — while the reconciliation judges fulfilment itself, creates
   `housekeeping-template.md`, and the closing call writes `## Housekeeping` around the old content.
 
 ```bash

@@ -1,12 +1,9 @@
 # Expected behavior — Guardrails Track mid-migration pass-through
 
 Confirms a target that's already worked through ticket 01's own migration (`## Safety Net` present and
-closed) but never run a Guardrails Track pass — and whose `Fulfilled nodes` field still carries
-pre-ADR-0055 residue for nodes the Safety Net Track has since taken over (`composer`, `php-cs-fixer`,
-`phpunit`, `psr-4`, `phpstan-level-0`, the `rector-*` family — none of which the new schema ever writes
-there again, per `skills/continuous-refactoring/references/refactoring-bookkeeping.md`'s "no Done
-cache" `## Safety Net` design) — runs a normal Guardrails Track pass without erroring on, migrating, or
-needing to understand that stale residue.
+closed) but never run a Guardrails Track pass — and whose file still carries
+pre-ADR-0055 residue (`Focus areas`, the global `Pending candidates`) — runs a normal Guardrails Track
+pass without erroring on, migrating, or needing to understand that residue.
 
 Deliberately **not** the same scenario as `fixtures/php/php-safety-net-old-schema` (a target still
 fully on the pre-ADR-0055 shape, no Track section at all): a fully pre-ADR-0055 repo would never reach
@@ -25,11 +22,8 @@ guardrails-track php-guardrails-old-schema --opencode`, same non-CI, local-only,
 ## Seeded state
 
 `docs/refactoring/bookkeeping.md`: `## Safety Net` present and closed (`Open`/`Out-of-scope` both
-empty — the Safety Net Track has already run to completion on this target), but `Fulfilled nodes` still
-lists `composer`, `php-cs-fixer`, `phpunit`, `psr-4`, `phpstan-level-0`, and the `rector-*` family —
-entries written before ticket 01 ever ran on this target, never cleared since (the new schema simply
-stops reading or writing them for a Safety-Net-Track-scoped node; nothing goes back and removes the old
-ones). **No `## Guardrails` heading anywhere in the file.** The project itself matches: the Safety Net
+empty — the Safety Net Track has already run to completion on this target), but the old-shape `Focus areas` and
+global `Pending candidates` fields remain. **No `## Guardrails` heading anywhere in the file.** The project itself matches: the Safety Net
 is genuinely fully resolved (same shape as `php-guardrails-open-blocks-rescan`'s own seeded state), but
 `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`,
 `phpstan-deprecation-rules`, and `semgrep` are all still genuinely missing — real, still-open
@@ -39,10 +33,8 @@ Guardrails Track work exists here, this isn't a "nothing to do" fixture.
 
 Run `/refactor-scan`. It should:
 
-1. Read `bookkeeping.md` without erroring on `Fulfilled nodes` still carrying old-style entries for
-   Safety-Net-Track-scoped nodes — nothing about reading them is invalid, they're simply never
-   consulted for those nodes any more (the deterministic parser re-derives their live state directly
-   from the repo either way).
+1. Read `bookkeeping.md` without erroring on the old-shape `Focus areas`/`Pending
+   candidates` fields — nothing about reading them is invalid.
 2. Find no `## Guardrails` section, treat the Track as due (never run), and confirm `php-safety-net`
    is resolved (it is — the Safety Net closed already), so every Guardrails node is reachable.
 3. Treat `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6` and
@@ -57,7 +49,7 @@ scan completing) creates the `## Guardrails` section fresh — `Cadence: 60`, `L
 included, no issue numbers (computed with `tooling_tree.py` and a seed marking every other node
 fulfilled — the exact list is in `php-guardrails-scan-fills-open`): `phpmd`, `coverage-floor`,
 `composer-audit`, `phpstan-level-6` through `phpstan-level-10`, `phpstan-deprecation-rules`,
-`php-minimal-version`, `semgrep`. The pre-existing `Fulfilled nodes`/`Pending
+`php-minimal-version`, `semgrep`. The pre-existing `Pending
 candidates` content, and `## Safety Net` itself, are left exactly as they were — this write never
 touches, migrates, or removes any of it.
 
@@ -74,5 +66,5 @@ Confirmed live via `OPENCODE_TIMEOUT=280 fixtures/harness/run.sh guardrails-trac
 php-guardrails-old-schema --opencode` (`opencode/muse-spark-1.2-contributor-free`): the model
 explicitly confirmed "no error, no migration," read `refactoring-bookkeeping.md`'s own "Old-schema
 repos need no migration" rule, and treated the mid-migration state (`## Safety Net` present, `##
-Guardrails` absent, `Fulfilled nodes` residue) as the ordinary, documented case. See the implementing
+Guardrails` absent, old-shape residue) as the ordinary, documented case. See the implementing
 pull request's own report for the full transcript summary.

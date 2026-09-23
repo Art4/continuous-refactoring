@@ -18,7 +18,3 @@
 
 **Out-of-scope:**
 - none
-
-**Fulfilled nodes:**
-- onboarding-setup
-- composer

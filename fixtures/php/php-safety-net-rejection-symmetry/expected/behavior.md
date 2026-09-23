@@ -3,7 +3,7 @@
 Confirms `refactor-learn`'s rejection handling for a Safety Net Track candidate mirrors the suite's
 existing rejection symmetry everywhere else — merge removes from the in-flight list, rejection removes
 from the in-flight list **and** adds a durable pointer — scoped to `## Safety Net`'s own `Open`/
-`Out-of-scope` lists instead of the global `Fulfilled nodes`/`out-of-scope/` (`skills/refactor-learn/
+`Out-of-scope` lists instead of the global `out-of-scope/` (`skills/refactor-learn/
 references/safety-net-write.md`).
 
 Not deterministically checkable — pure bookkeeping-write behavior. Run via `fixtures/harness/run.sh
@@ -31,7 +31,7 @@ reason already on the issue), it should:
 3. Remove `php-cs-fixer` from `## Safety Net`'s `Open` list.
 4. Add `php-cs-fixer` to `## Safety Net`'s `Out-of-scope` list, pointing at the file written in step 2
    (`- php-cs-fixer — out-of-scope/php-cs-fixer.md`).
-5. **Never** write `php-cs-fixer` to the global `Fulfilled nodes` or a bare global `out-of-scope/`
+5. **Never** write `php-cs-fixer` to a bare global `out-of-scope/`
    pointer outside this Track's own section — this candidate's whole lifecycle stays inside `##
    Safety Net`.
 

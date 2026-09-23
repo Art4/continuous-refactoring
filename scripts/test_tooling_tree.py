@@ -1561,8 +1561,8 @@ class SeedInputTests(unittest.TestCase):
             derived = _derive_fulfilled_from_bookkeeping(root, tree)
             self.assertIsNotNone(derived)
             # The fixture's `## Safety Net` Open holds php-cs-fixer (#5);
-            # its Out-of-scope is `- none`, its `**Fulfilled nodes:**`
-            # field (old schema, retained) is ignored.
+            # its Out-of-scope is `- none`, old-schema
+            # fields elsewhere in the file are ignored.
             self.assertFalse(derived["php-cs-fixer"])
             self.assertTrue(derived["composer"])
             self.assertTrue(derived["phpunit"])
@@ -1921,27 +1921,22 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             )
         return tmp, root
 
-    def test_old_fulfilled_nodes_field_ignored(self):
-        """The old ``Fulfilled nodes`` field is retired — the script's
-        ``_derive_fulfilled_from_bookkeeping`` doesn't read it. Only the
-        ``## Safety Net``/``## Guardrails`` sections' ``**Open:**`` and
-        ``**Out-of-scope:**`` fields matter, wherever the retired field
-        sits."""
+    def test_only_open_and_out_of_scope_matter(self):
+        """Only the ``## Safety Net``/``## Guardrails`` sections'
+        ``**Open:**`` and ``**Out-of-scope:**`` fields matter; other
+        fields, wherever they sit, are ignored."""
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
-                "Fulfilled nodes:\n\n"
-                "- onboarding-setup\n"
-                "- composer\n\n"
+                "**Pending candidates:**\n"
+                "- none\n\n"
                 "## Safety Net\n\n"
                 "**Last scan:** 2026-09-14\n\n"
                 "**Open:**\n"
                 "- phpunit\n"
                 "- php-cs-fixer\n\n"
                 "**Out-of-scope:**\n"
-                "- psalm\n\n"
-                "**Fulfilled nodes:**\n"
-                "- editorconfig\n"
+                "- psalm\n"
             ),
         })
         try:
@@ -1957,9 +1952,6 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             # -> treated as fulfilled by derivation
             self.assertTrue(derived["onboarding-setup"])
             self.assertTrue(derived["composer"])
-            # the retired field's entries (top-level or inside a Track
-            # section) are ignored, not migrated — editorconfig is
-            # fulfilled by the absence rule, not by its listing
             self.assertTrue(derived["editorconfig"])
         finally:
             tmp.cleanup()
@@ -1971,9 +1963,8 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
-                "Fulfilled nodes:\n\n"
-                "- onboarding-setup\n"
-                "- composer\n"
+                "**Pending candidates:**\n"
+                "- none\n"
             ),
         })
         try:
@@ -1984,16 +1975,15 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_old_schema_fulfilled_nodes_not_affecting_backlog(self):
-        """Old ``Fulfilled nodes`` entries don't interfere with the
-        ordered backlog — only Track sections and detection matter."""
+    def test_old_schema_pending_candidates_not_affecting_backlog(self):
+        """An old-shape ``Pending candidates`` field doesn't interfere
+        with the ordered backlog — only Track sections and detection
+        matter."""
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
-                "Fulfilled nodes:\n\n"
-                "- onboarding-setup\n"
-                "- composer\n"
-                "- phpunit\n"
+                "**Pending candidates:**\n"
+                "- none\n"
             ),
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
@@ -2002,9 +1992,8 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         })
         try:
             backlog = ordered_backlog(root)
-            # phpunit is listed in old Fulfilled nodes but NOT fulfilled
-            # by detection (no CI gate) — the old field is ignored, so
-            # phpunit should still appear in the backlog.
+            # phpunit is not fulfilled by detection (no CI gate), so it
+            # should still appear in the backlog.
             self.assertIn("phpunit", backlog)
         finally:
             tmp.cleanup()
@@ -2016,9 +2005,8 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "docs/refactoring/bookkeeping.md": (
                 "# Bookkeeping\n\n"
-                "Fulfilled nodes:\n\n"
-                "- onboarding-setup\n"
-                "- composer\n"
+                "**Pending candidates:**\n"
+                "- none\n"
             ),
             "composer.json": json.dumps({"require-dev": {"phpunit/phpunit": "^10.0"}}),
             "composer.lock": "{}",

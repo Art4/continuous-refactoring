@@ -749,12 +749,12 @@ run_safety_net_track() {
             fi
             ;;
         php-safety-net-old-schema)
-            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md. This repo's docs/refactoring/bookkeeping.md is still in the pre-existing shape (Fulfilled nodes, global Pending candidates, no Safety Net section). Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
+            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md. This repo's docs/refactoring/bookkeeping.md is still in the pre-existing shape (global Pending candidates, no Safety Net section). Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            if grep -q "onboarding-setup" "$bookkeeping" 2>/dev/null; then
-                log_pass "Pre-existing Fulfilled nodes content (onboarding-setup) still present, untouched"
+            if grep -q "Pending candidates" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing global Pending candidates field still present, untouched"
             else
-                log_fail "Pre-existing Fulfilled nodes content is gone — see $bookkeeping"
+                log_fail "Pre-existing global Pending candidates field is gone — see $bookkeeping"
             fi
             local out="/tmp/safety-net-track-$FIXTURE-scan.log"
             if grep -qiE "error|cannot proceed|unrecognized field" "$out" 2>/dev/null; then
@@ -795,13 +795,13 @@ run_safety_net_track() {
             _check_open_order "/tmp/safety-net-track-$FIXTURE-scan.log" phpstan-level-3 phpstan-level-4 phpstan-level-5
             ;;
         php-safety-net-old-meaning-open)
-            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Fulfilled nodes/Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
+            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
             local out="/tmp/safety-net-track-$FIXTURE-scan.log"
-            if grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null && grep -q "onboarding-setup" "$bookkeeping" 2>/dev/null; then
-                log_pass "Pre-existing Fulfilled nodes residue still present, untouched"
+            if grep -q "Focus areas" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing Focus areas residue still present, untouched"
             else
-                log_fail "Pre-existing Fulfilled nodes residue is gone — see $bookkeeping"
+                log_fail "Pre-existing Focus areas residue is gone — see $bookkeeping"
             fi
             if grep -qE "^- phpstan-level-[2-5]" "$bookkeeping" 2>/dev/null; then
                 log_fail "bookkeeping.md's Open now names phpstan-level-2..5 — the old-meaning Open was rewritten by a rescan instead of walked — see $bookkeeping"
@@ -957,7 +957,7 @@ run_guardrails_track() {
             fi
             ;;
         php-guardrails-old-schema)
-            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md. This repo's docs/refactoring/bookkeeping.md already has a closed ## Safety Net section but still carries old-style Fulfilled nodes residue and no ## Guardrails section. Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
+            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md. This repo's docs/refactoring/bookkeeping.md already has a closed ## Safety Net section but still carries old-style residue (global Pending candidates) and no ## Guardrails section. Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
             if grep -q "## Safety Net" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing ## Safety Net section still present, untouched"
@@ -1022,32 +1022,21 @@ run_housekeeping_track() {
 
     case "$FIXTURE" in
         php-housekeeping-hand-adopted-guardrails)
-            _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-housekeeping/references/housekeeping-track.md literally — this target has a ## Housekeeping section (Cadence: 7, Last scan: 2026-09-01) and ## Guardrails already closed. The reconciliation step should walk the tooling tree and judge each node's Fulfilment check itself (agent judgement), NOT read Fulfilled nodes. Report explicitly: (1) which nodes were judged fulfilled and got their Housekeeping lines added, (2) whether Fulfilled nodes was read or not, and (3) whether housekeeping-template.md was created."
+            _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-housekeeping/references/housekeeping-track.md literally — this target has a ## Housekeeping section (Cadence: 7, Last scan: 2026-09-01) and ## Guardrails already closed. The reconciliation step should walk the tooling tree and judge each node's Fulfilment check itself (agent judgement). Report explicitly: (1) which nodes were judged fulfilled and got their Housekeeping lines added, and (2) whether housekeeping-template.md was created."
             local template="$FIXTURE_DST/docs/refactoring/housekeeping-template.md"
             if [[ -f "$template" ]]; then
                 log_pass "housekeeping-template.md was created"
-                if grep -qi "Fulfilled nodes" "$template" 2>/dev/null; then
-                    log_fail "housekeeping-template.md mentions Fulfilled nodes — should not depend on it"
-                else
-                    log_pass "housekeeping-template.md doesn't reference Fulfilled nodes"
-                fi
             else
                 log_fail "housekeeping-template.md was not created — reconciliation may have failed"
             fi
-            local out="/tmp/housekeeping-track-$FIXTURE-scan.log"
-            if grep -qi "Fulfilled nodes" "$out" 2>/dev/null; then
-                log_info "Scan output mentions Fulfilled nodes — check $out by hand (advisory, non-blocking)"
-            else
-                log_pass "Scan output doesn't reference Fulfilled nodes — agent judgement used instead"
-            fi
             ;;
         php-housekeeping-old-schema)
-            _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-housekeeping/references/housekeeping-track.md literally. This target's bookkeeping.md is still in the old shape (Fulfilled nodes present, no ## Housekeeping section). The reconciliation should walk the tooling tree and judge fulfilment via agent judgement, NOT by reading Fulfilled nodes. Report explicitly: (1) did the pass run normally without erroring on the old Fulfilled nodes field, (2) which nodes got their Housekeeping lines, and (3) was ## Housekeeping created."
+            _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-housekeeping/references/housekeeping-track.md literally. This target's bookkeeping.md is still in the old shape (global Pending candidates, no ## Housekeeping section). The reconciliation should walk the tooling tree and judge fulfilment via agent judgement. Report explicitly: (1) did the pass run normally without erroring on the old-shape fields, (2) which nodes got their Housekeeping lines, and (3) was ## Housekeeping created."
             local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            if grep -q "onboarding-setup" "$bookkeeping" 2>/dev/null && grep -q "Fulfilled nodes" "$bookkeeping" 2>/dev/null; then
-                log_pass "Pre-existing Fulfilled nodes content still present, untouched"
+            if grep -q "Pending candidates" "$bookkeeping" 2>/dev/null; then
+                log_pass "Pre-existing global Pending candidates field still present, untouched"
             else
-                log_fail "Pre-existing Fulfilled nodes content is gone — see $bookkeeping"
+                log_fail "Pre-existing global Pending candidates field is gone — see $bookkeeping"
             fi
             local template="$FIXTURE_DST/docs/refactoring/housekeeping-template.md"
             if [[ -f "$template" ]]; then

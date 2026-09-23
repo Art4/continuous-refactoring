@@ -1,6 +1,6 @@
 {
     "name": "example/php-guardrails-old-schema",
-    "description": "Mid-migration target: ## Safety Net already closed (its own Track has already run once), Fulfilled nodes/Pending candidates still carry old-schema residue, no ## Guardrails section yet",
+    "description": "Mid-migration target: ## Safety Net already closed (its own Track has already run once), Pending candidates still carries old-schema residue, no ## Guardrails section yet",
     "require": {
         "php": "^8.1",
         "monolog/monolog": "^3.4"
