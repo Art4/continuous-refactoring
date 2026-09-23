@@ -1,3 +1,5 @@
 # Refactoring Bookkeeping
 
-**Create-mode:** human-opens
+**Ticket-create-mode:** autonomous
+
+**MR-create-mode:** human-opens

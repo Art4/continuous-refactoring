@@ -66,8 +66,8 @@ the two Tracks' sections are independent, each written only by its own Track's o
 ## Issue filed for the picked `Open` entry → record its number
 
 This pass's `Open` walk (`../../refactor-scan/references/track-open-processing.md`) picked exactly one
-workable, unfulfilled entry and handed it to `refactor-design`, which files that node's issue (unless one
-already existed) — the closing call's own precondition
+workable, unfulfilled entry and handed it forward — `refactor-loop` created that node's issue from scan's draft (unless one
+already existed) before `refactor-design` ran — the closing call's own precondition
 (`../SKILL.md`) is authorized by that hand-off alone, independent of whether
 `refactor-implement` also got as far as opening a merge request this same pass. Once the issue is known
 (freshly filed this pass, or already existing), rewrite that entry from a bare `- <slug>` to

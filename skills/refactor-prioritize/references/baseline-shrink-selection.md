@@ -25,13 +25,13 @@ reference it).
 ## 2. Resume already-open groups, rank the rest
 
 For each group: an issue titled `PHPStan Level N: baseline shrink — <group>` (same `N`) already open
-→ resume it (skip to *File it* below's "already open" path) unless the group is now empty (a prior MR
+→ resume it (skip to *Draft it* below's "already open" path) unless the group is now empty (a prior MR
 already cleared it) — close it instead, drop it from consideration.
 
 More than one fresh (not-yet-filed) group remains → don't discard the rest, same as a structural
 search. Rank them by ordinary judgment (largest, most tractable, whatever makes for the most sensible
 next MR — same reasoning Rank mode already applies elsewhere) to decide which one is this pass's
-recommendation; the others still get filed, just not pursued this pass.
+recommendation; the others still get drafted, just not pursued this pass.
 
 ## 3. Admission tier per group
 
@@ -40,15 +40,15 @@ pressure** — these are static-analysis residuals by definition — unless the 
 clearly names a sharper factor (a group of null-dereference findings on security-sensitive input is
 **security**, not just tooling pressure; ordinary judgment, not a fixed rule).
 
-- **Priority** (Signal is security or blast radius of inaction) → file regardless of backlog size.
-- **Capped** (everything else, tooling pressure included) → file only while headroom remains. The
+- **Priority** (Signal is security or blast radius of inaction) → draft regardless of backlog size.
+- **Capped** (everything else, tooling pressure included) → draft only while headroom remains. The
   actual threshold and admission rule live in one place, `refactor-scan/SKILL.md` step 1
   (`../../refactor-scan/SKILL.md`) — read it fresh here rather than restating the number; a capped
   group this exploration finds but the cap has no room for queues for a future exploration.
 
 Same admission rule as `structural-candidate-search.md`'s — identical shape on both Select-mode paths.
 
-## File it
+## Draft it
 
 Title: `PHPStan Level N: baseline shrink — <short group description>` (e.g. `PHPStan Level 1:
 baseline shrink — $db might not be defined`), label `refactor:candidate` — plus `refactor:priority`
@@ -58,5 +58,5 @@ added as a comment only on the one group this pass actually pursues, including w
 a future pass if that group is larger than one MR covers.
 
 Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (dedupe check already done above;
-`Pending candidates` names only the single recommended group — the others sit as ordinary open issues
-for a future pass).
+`Pending candidates` is `refactor-design`'s write and names only the single recommended group — the
+others sit as ordinary open issues for a future pass once `refactor-loop` has created them).

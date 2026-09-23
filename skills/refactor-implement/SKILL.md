@@ -54,7 +54,7 @@ Findings on either axis send the work back to step 2 (structural) or step 1 (too
 
 ### 5. Open the merge request
 
-Review clean → push the branch and open the MR (create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `../continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil — the common case for a baseline-shrink candidate, whose chosen group can span more MRs than fit this pass — don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
+Review clean → push the branch and open the MR (MR-create-mode per the Refactoring Notes' `bookkeeping.md`; full rules: `../continuous-refactoring/references/opening-a-merge-request.md`). No forge/remote to push to at all → don't attempt it; hand the branch to the human instead, per that same reference's "No forge/remote available" — this is expected, not a failure, and the completion criterion below adjusts for it. Include `Closes #<candidate-issue-number>` only when this MR is understood to satisfy the candidate issue's Fulfilment check on its own — the common case. A node needing more than one MR to fulfil — the common case for a baseline-shrink candidate, whose chosen group can span more MRs than fit this pass — don't add `Closes` to an intermediate one; `refactor-learn`'s own early-call behavior (closing the issue once it sees the candidate merged) is the designed fallback.
 
 **Outlook, tooling-tree candidate only:** comment on the candidate issue with what this unlocks, never the MR description — `references/outlook-comment.md`.
 
@@ -74,7 +74,7 @@ Name the writes this call made so the caller can report them — the branch push
 
 The opened merge request → `refactor-learn`.
 
-Running as a subagent (no way to ask the human, forge access possibly missing): don't stall or retry around it — stop at the first thing you can't do (an unconfirmed seam before any test is written, a create-mode that asks the human, a failed or denied push, MR creation, or CI-status read) and return, instead of the MR: the branch, its commits, what was verified locally, and exactly what failed or is still open, with the error text. The caller finishes it; this skill's completion criterion then holds once the caller has.
+Running as a subagent (no way to ask the human, forge access possibly missing): don't stall or retry around it — stop at the first thing you can't do (an unconfirmed seam before any test is written, an MR-create-mode that asks the human, a failed or denied push, MR creation, or CI-status read) and return, instead of the MR: the branch, its commits, what was verified locally, and exactly what failed or is still open, with the error text. The caller finishes it; this skill's completion criterion then holds once the caller has.
 
 ## Fallback
 

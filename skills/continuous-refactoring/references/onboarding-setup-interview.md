@@ -5,7 +5,7 @@ which fulfils the `onboarding-setup` node of the tooling tree
 (`../../refactor-scan/references/tooling-tree/onboarding-setup.md`) before any
 Track runs. Everywhere else, a tooling-tree node's plan is fixed text a human
 wrote once, for every target alike. Onboarding is different on purpose: which
-tracker to use, how merge requests get opened, and where the suite's own notes
+tracker to use, whether tickets and merge requests get created on their own or only after asking, and where the suite's own notes
 live are facts about *this* target and *this* human's preference — not
 something a tree doc can get right for every target by guessing.
 
@@ -44,7 +44,7 @@ Read-only. No writes, no questions yet.
   blocks.
 - **The instruction file.** Read it. Note whether it already names a
   merge-request mode (`autonomous`, `ask-each-time`, `human-opens`, or an
-  unambiguous paraphrase) — as a **finding**, never an auto-decision; suite
+  unambiguous paraphrase) or ticket mode (`autonomous`, `ask-each-time`) — as a **finding**, never an auto-decision; suite
   state is never inferred silently from it, only offered as a recommendation
   the human still confirms. Note whether it already carries the suite's
   `## Continuous-refactoring suite` section and what that names (see
@@ -71,10 +71,11 @@ Read-only. No writes, no questions yet.
   `Refactoring Notes:` line — as **on record** (don't re-ask it, confirm it in
   `## Summarize` as "already recorded"), and write only what is missing. A
   missing `issue-tracker.md` or `triage-labels.md` is then simply the next
-  write, in the not-set-up form. `Create-mode` is the one answer an
-  interruption can lose: its only home is `bookkeeping.md` (the instruction
-  file holds a pointer, never the value), so Q2 is asked again (the earlier
-  answer is at most an instruction-file finding, a recommendation only).
+  write, in the not-set-up form. `Ticket-create-mode` and `MR-create-mode`
+  are the answers an interruption can lose: their only home is `bookkeeping.md`
+  (the instruction file holds a pointer, never the value), so Q2 and Q3 are
+  asked again (the earlier answers are at most instruction-file findings,
+  recommendations only).
   Nothing is overwritten silently.
 - **Was the setup missing?** Needed for `## Closing`. Not set up (above), or —
   on a resume — `triage-labels.md` lacks the `needs-triage` and
@@ -109,8 +110,8 @@ who wants it can add it any time.
 
 Before asking anything, summarize `## Explore`'s findings in plain prose —
 what's already known (a matched remote or none; an instruction-file
-create-mode finding, or none; whether the engineering-skills setup is
-present; anything already on record) and, explicitly, which of Q1–Q3 below
+MR-create-mode finding, or none; whether the engineering-skills setup is
+present; anything already on record) and, explicitly, which of Q1–Q4 below
 are still open. This comes first so the human isn't asked to re-derive
 context already gathered.
 
@@ -119,10 +120,10 @@ numbered shape `/grilling`'s fallback already uses
 (`../../refactor-design/references/grilling-fallback.md`):
 `❓ **Q1** - **<title>**: <body>`, 2–4 concrete options, one recommended
 (`➡️ <recommendation>`) derived from `## Explore`. Ask Q1 — a
-single-question `AskUserQuestion` call when available (not all three
+single-question `AskUserQuestion` call when available (not all four
 questions in one call's `questions` array, even though the tool supports
 that), or the same numbered-prose shape otherwise — wait for the reply,
-then ask Q2, wait, then Q3, wait. Skip any question `## Explore` found
+then ask Q2, wait, then Q3, wait, then Q4, wait. Skip any question `## Explore` found
 already on record.
 
 **Q1 — where do issues and merge requests live?** Skipped when
@@ -144,7 +145,23 @@ found, or when a match was a different/unrecognized host ("no built-in
 native handling for this host yet — Local Markdown works everywhere; pick
 'something else' if you'd rather describe a different convention").
 
-**Q2 — merge requests: open automatically, or check with you first?**
+**Q2 — tickets: create automatically, or check with you first?**
+
+A ticket is the issue that states a candidate's plan. Creating one is visible
+to everyone who watches the tracker, so you can choose to be asked first.
+
+- **Autonomous** — the loop creates tickets as a pass needs them.
+  (`Ticket-create-mode: autonomous`)
+- **Ask each time** — the loop asks before creating: once per pass for the
+  tickets it would create up front for every proposed node, then for the
+  ticket of the candidate it chose. With nobody there to answer, it creates
+  nothing and says it is waiting. (`Ticket-create-mode: ask-each-time`)
+
+Recommendation: whatever the instruction file already named, said explicitly
+("AGENTS.md already says ask-each-time"); neither names one → recommend
+**Autonomous**, the suite's default (and what a missing field means).
+
+**Q3 — merge requests: open automatically, or check with you first?**
 
 Whichever mode is chosen, review still happens at the merge request, not
 the issue — the issue only states the plan; the merge request shows the
@@ -152,12 +169,12 @@ actual diff, so you see exactly what changed before it lands, regardless
 of mode.
 
 - **Autonomous** — open automatically, right after filing the issue.
-  (`Create-mode: autonomous`)
+  (`MR-create-mode: autonomous`)
 - **Ask each time** — check with you before opening each one.
-  (`Create-mode: ask-each-time`)
+  (`MR-create-mode: ask-each-time`)
 - **You open them** — the suite prepares branch + change, you push/open it
   (forge access exists), or commit it yourself directly (it doesn't).
-  (`Create-mode: human-opens`)
+  (`MR-create-mode: human-opens`)
 
 Recommendation: `## Explore` found no git remote at all → recommend
 **You open them** — `autonomous`/`ask-each-time` both mean "push and open a
@@ -168,7 +185,7 @@ already named, said explicitly ("AGENTS.md already says autonomous");
 neither names one → recommend **Autonomous**, the suite's existing default
 bias.
 
-**Q3 — where should the suite keep its own metadata?**
+**Q4 — where should the suite keep its own metadata?**
 
 The suite needs a folder for the loop's own state: `bookkeeping.md` (this
 interview's own decisions), `merge-requests.md` (in-flight merge-request
@@ -189,7 +206,7 @@ next `/continuous-refactoring` starts onboarding from scratch.
 **Not asked here: `Focus areas` or `Refactoring goal`.** Both free-form, no
 filesystem signal to recommend from, and piling on unanchored questions
 risks rubber-stamping the whole round. Both stay hand-editable any time,
-same as `Create-mode` — natural additions for a later, focused pass, not
+same as the two modes — natural additions for a later, focused pass, not
 folded in here.
 
 ## Summarize
@@ -199,7 +216,8 @@ there is no approval gate**; the setup-gap question is the only choice that
 can end onboarding without writing.
 
 > Tracker: <GitHub | GitLab | Local Markdown | other, as named>.
-> Create-mode: <autonomous | ask-each-time | human-opens>.
+> Ticket-create-mode: <autonomous | ask-each-time>.
+> MR-create-mode: <autonomous | ask-each-time | human-opens>.
 > Refactoring Notes: `<path>`, to be recorded in the instruction file.
 > Files: <the files `## Record` will write — the instruction file's section,
 > `docs/agents/triage-labels.md` and `docs/agents/issue-tracker.md` when
@@ -228,7 +246,7 @@ missing table row) and say so.
    instruction file, creating `AGENTS.md` only when neither file exists.
    Appended under a new `## Continuous-refactoring suite` heading if not
    already present; when the heading exists, add only the lines it lacks.
-   `<path>` is Q3's answer (default `docs/refactoring/`):
+   `<path>` is Q4's answer (default `docs/refactoring/`):
 
    ```markdown
    ## Continuous-refactoring suite
@@ -237,8 +255,9 @@ missing table row) and say so.
    suite's own config, in-flight merge-request bookkeeping, and
    rejected-tooling records live here.
 
-   Create-mode: see the Refactoring Notes' `bookkeeping.md` — that file is
-   the sole authoritative value, this is a pointer, not a copy.
+   Ticket-create-mode and MR-create-mode: see the Refactoring Notes'
+   `bookkeeping.md` — that file is the sole authoritative value, this is a
+   pointer, not a copy.
 
    Backlog labels: `refactor:candidate` (proposed work) and
    `refactor:priority` (jumps the queue) — see `docs/agents/issue-tracker.md`.
@@ -273,12 +292,12 @@ missing table row) and say so.
    - **Something else:** same shape as the two cases above, from what the
      human described; no description given → fall through to Local
      Markdown.
-4. **Create-mode** → the Refactoring Notes' `bookkeeping.md` — **last**,
-   creating the folder if needed. It is the sole write-authority for
-   `Create-mode`; the instruction file (step 1) holds only a pointer to it.
-   The shape is `refactoring-bookkeeping.md`'s `## Structure`, reduced to
-   the title line (`# Refactoring Bookkeeping`) and `Create-mode`: no `Pending candidates` (nothing is
-   pending), no Track sections (each appears when its Track first runs).
+4. **Ticket-create-mode and MR-create-mode** → the Refactoring Notes'
+   `bookkeeping.md` — **last**, creating the folder if needed. It is the sole
+   write-authority for both; the instruction file (step 1) holds only a
+   pointer to them. The shape is `refactoring-bookkeeping.md`'s `## Structure`,
+   reduced to the title line (`# Refactoring Bookkeeping`) and the two mode
+   fields: no `Pending candidates` (nothing is pending), no Track sections (each appears when its Track first runs).
    `Focus areas` only if the human named one unprompted.
 
 No issue is filed, no branch or merge request is opened, no label is created
@@ -327,7 +346,7 @@ Two distinct cases:
   run with only a log file as output). Don't guess and proceed as if
   confirmed — that's exactly what this design exists to stop. Take every
   recommended answer as *proposed, not decided* — the setup-gap question
-  defaults to **Continue**, Q3 stays the default location; never invent a
+  defaults to **Continue**, Q4 stays the default location; never invent a
   custom path with nobody to name one — record it exactly as `## Record`
   describes, but flag every one in the closing text as "recommended, not
   confirmed by a human — first thing to double-check." The human reading

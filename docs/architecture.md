@@ -33,20 +33,24 @@ Only `continuous-refactoring` is meant to be typed by a human; the others are im
 |---|---|---|---|
 | 1 | `refactor-scan` | Check preconditions (git, backlog size), resume pending work, walk the Track's `Open` list or scan the tooling tree, detect merged/closed merge requests | never |
 | 2 | `refactor-learn` (early call) | Record what scan found — only if it found something — so ranking sees a current ledger | yes |
-| 3 | `refactor-prioritize` | Rank the proposals; for a gate-shaped winner (structural work, PHPStan baseline shrink), select and minimally file the concrete candidate | files the candidate issue |
-| 4 | `refactor-design` | Ground and grill the candidate into a plan; file or update the issue, add the plan as a comment | files/updates the issue |
+| 3 | `refactor-prioritize` | Rank the proposals; for a gate-shaped winner (structural work, PHPStan baseline shrink), select the concrete candidate. Returns minimal ticket drafts; the loop creates them right after | never (the loop creates the tickets) |
+| 4 | `refactor-design` | Ground and grill the candidate into a plan; write it onto the ticket the loop created (or add it as a comment) | updates/comments on the ticket |
 | 5 | `refactor-implement` | Branch, execute the plan test-first, review the diff (standards and spec, separately), open the merge request | branch, commits, merge request |
 | 6 | `refactor-learn` (closing call) | Record the outcome — always, even when nothing past step 3 ran | yes |
 
 Early exits are normal: no git repository ends the pass; a full backlog, a resumable candidate or a candidate still waiting for an answer skip ahead. Whenever a step stops the pass early, the human is told why immediately, and the closing report is always two lines (**Status**, **Next**).
 
+### Only the loop creates tickets
+
+A subagent can't ask you a question, and creating a ticket is visible to everyone watching the tracker. So no lifecycle skill creates one: scan, prioritise and learn return **ticket drafts** (title, labels, body), and `refactor-loop` creates them — after reading `Ticket-create-mode` in `bookkeeping.md`: `autonomous` (the default when the field is missing) creates them as they arrive; `ask-each-time` asks first, once per pass for the batch of proposed tickets and then for the ticket of the candidate it chose. Comments, plan updates and label changes on an existing ticket stay with the skills. The Housekeeping Track, which runs in your conversation itself, follows the same rule for its cycle ticket. Merge requests have their own, separate setting, `MR-create-mode`.
+
 ### Only `refactor-learn` writes bookkeeping
 
-`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (an issue filed, a branch pushed) and the dispatcher's one-time onboarding files. This keeps "what changed the state" answerable by looking at one skill.
+`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (a ticket created by the loop, a branch pushed) and the dispatcher's one-time onboarding files. This keeps "what changed the state" answerable by looking at one skill.
 
 ### Subagents and hand-back
 
-`refactor-loop` runs the scan step and the implement step in fresh subagents, so their reasoning stays in their own context and only their stated output comes back. A subagent can't ask you a question or reliably reach the forge, so it hands back instead of stalling: it reports the branch and commits plus whatever it couldn't do (seams awaiting your confirmation, a create-mode that asks you, a failed push or merge request, an unreadable CI status). The loop then finishes that part in its own context. Without a subagent mechanism, the steps run inline.
+`refactor-loop` runs the scan step and the implement step in fresh subagents, so their reasoning stays in their own context and only their stated output comes back. A subagent can't ask you a question or reliably reach the forge, so it hands back instead of stalling: it reports the branch and commits plus whatever it couldn't do (seams awaiting your confirmation, an MR-create-mode that asks you, a failed push or merge request, an unreadable CI status). The loop then finishes that part in its own context. Without a subagent mechanism, the steps run inline.
 
 ### What the loop reports
 
@@ -71,14 +75,14 @@ State lives in the target repo, never in the conversation; every lifecycle skill
 
 | What | Where |
 |---|---|
-| Config, `Create-mode`, focus areas, `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | Refactoring Notes' `bookkeeping.md` (default folder `docs/refactoring/`, overridable) — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
+| Config, `MR-create-mode`, focus areas, `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | Refactoring Notes' `bookkeeping.md` (default folder `docs/refactoring/`, overridable) — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
 | Remembered merge requests | open `refactor:candidate` issues with a linked pull request (native-label trackers); `merge-requests.md` otherwise |
 | Backlog | `refactor:*` issues on the tracker named in `docs/agents/issue-tracker.md` |
 | Learned rejections | `out-of-scope/` |
 | Housekeeping checklist | `housekeeping-template.md` |
 | Domain language, decisions | the target's `CONTEXT.md` and ADRs |
 
-`bookkeeping.md` doesn't exist on a fresh target. The dispatcher's onboarding step creates it: a short human interview (tracker, merge request create-mode, Refactoring Notes location — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete", suggests committing the new files and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
+`bookkeeping.md` doesn't exist on a fresh target. The dispatcher's onboarding step creates it: a short human interview (tracker, `Ticket-create-mode`, `MR-create-mode`, Refactoring Notes location — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete", suggests committing the new files and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
 
 ## Fallbacks and self-containment
 

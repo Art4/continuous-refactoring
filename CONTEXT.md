@@ -6,7 +6,7 @@ The vocabulary of a portable agent-skill suite that keeps a software project und
 
 **Candidate**:
 A backlog item filed on the project's issue tracker — either a structural deepening or a missing node on the **tooling tree**.
-_Avoid_: task, ticket, todo
+_Avoid_: task, todo
 
 **Backlog**:
 The set of candidate issues on the tracker, awaiting prioritisation.
@@ -19,6 +19,18 @@ _Avoid_: session, sprint
 **Merge request**:
 The forge reviewable that delivers a completed candidate. Skills always use this term; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
+
+**Ticket**:
+What the human calls an issue on the project's tracker. The skills themselves say "issue" (`refactor:candidate` issues, "file an issue"); "ticket" is the word the human-facing settings and questions use, because it is the wording of the engineering skills the suite builds on. Not a synonym for **Candidate**: a candidate is a ticket with a role in the loop, not every ticket is one. A skill that would create a ticket returns a draft instead; the loop creates it.
+_Avoid_: task, todo
+
+**Ticket-create-mode**:
+The `bookkeeping.md` setting for how a new **ticket** gets created: `autonomous` (the loop creates it) or `ask-each-time` (the loop asks first — once per pass for the tickets it would create up front, then for the ticket of the candidate it chose). Absent means `autonomous`. Only the loop creates tickets, as `skills/continuous-refactoring/references/filing-a-ticket.md` describes; with no human to ask, nothing is created and the pass reports that it waits for a confirmation. Decided once, during **Onboarding**.
+_Avoid_: issue-create-mode, filing mode
+
+**MR-create-mode**:
+The `bookkeeping.md` setting for how a **merge request** gets opened: `autonomous` (the loop opens it), `ask-each-time` (the loop asks first), or `human-opens` (the loop prepares the branch, the human opens it). Decided once, during **Onboarding**. Formerly named `Create-mode`; an older `bookkeeping.md` still carrying that name is read as this field.
+_Avoid_: create-mode (unqualified — ambiguous next to **Ticket-create-mode**)
 
 **Tooling tree**:
 The directed graph of adoption steps a target repo climbs — a generic root (`skills/refactor-scan/references/tooling-tree.md`: `git`, `onboarding-setup`) that every language specialization's tree (PHP: `skills/refactor-scan/references/php-tooling-tree.md`) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry. Each node also carries a human-facing **Name** (the tree doc's `**Name:**` field), used instead of the slug anywhere a human reads it — issue titles, merge requests, the loop's closing report; internal bookkeeping (the edges table, the **Refactoring Notes**' `out-of-scope/` filenames, ledger matching) stays keyed by the slug. A node may also carry a **Housekeeping** field — a recurring-maintenance line contributed to `housekeeping-template.md` (below), ordinarily when the node's own MR delivers, or via the **Housekeeping** Track's own reconciliation pass for a node already fulfilled before that file existed; unrelated to the node's own one-time Fulfilment check. A node may also carry a **Signal** field, naming which `signals.md` factor its tool output feeds once the node is adopted — see the **Signal** entry below for the full picture across both usages. Deliberately not every node produces one: a node can gate `structural-scan` without producing a Signal, and vice versa — a Signal-producing node like `phpmd` or `secret-detection` carries no `resolved` edge into `structural-scan` at all (see those nodes' own entries in `php-tooling-tree.md`/`tooling-tree.md`).

@@ -19,7 +19,7 @@ The Track's own reference files live beside this skill: `references/housekeeping
 
 0. **Onboarded target.** The Refactoring Notes' `bookkeeping.md` must exist (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. This skill doesn't go through `refactor-loop`, so it makes this check itself.
 
-1. **Housekeeping cycle.** Follow `references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, open this cycle's issue, work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run.
+1. **Housekeeping cycle.** Follow `references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, create this cycle's issue (per `../continuous-refactoring/references/filing-a-ticket.md`), work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run. The human declined to have this cycle's issue created (`Ticket-create-mode: ask-each-time`), or nobody was there to ask → the cycle doesn't run, this pass ends here without step 2, and the report says so.
 2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`../refactor-learn/references/housekeeping-write.md`) via `refactor-learn`'s ordinary dedicated bookkeeping branch. `refactor-learn` writes it only when the process was actually reached.
 
 ## Fallback
@@ -35,4 +35,4 @@ Wherever the pass ends, close with exactly two lines to the human:
 
 ## Completion criterion
 
-One Housekeeping cycle's process ran per `housekeeping-track.md` and `refactor-learn`'s closing call recorded `## Housekeeping`'s `Last scan`, and the outcome is reported: a delivered merge request (or a direct issue close on a zero-change cycle), a cycle resumed, or "due, but nothing registered to check yet".
+One Housekeeping cycle's process ran per `housekeeping-track.md` — or its issue was declined and the report says so — and `refactor-learn`'s closing call recorded `## Housekeeping`'s `Last scan`, and the outcome is reported: a delivered merge request (or a direct issue close on a zero-change cycle), a cycle resumed, or "due, but nothing registered to check yet".

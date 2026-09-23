@@ -18,7 +18,7 @@ couldn't confirm.
 
 ## No remote or forge: nothing gets pushed
 
-Without a reachable git remote the loop has nowhere to push or open a merge request, in any create-mode.
+Without a reachable git remote the loop has nowhere to push or open a merge request, in any MR-create-mode.
 It prepares the branch and its commits locally and stops there.
 
 **Fix:** either commit the branch yourself (skipping review — reasonable for a first, low-stakes change
@@ -45,7 +45,7 @@ only as current as the last pass that wrote it.
 ## The implement step can hand back instead of finishing
 
 The implement step runs in a subagent that can't ask you questions or reliably reach the forge. When the
-plan's seams aren't confirmed yet, the create-mode asks you (`ask-each-time`, `human-opens`), or a push or
+plan's seams aren't confirmed yet, the MR-create-mode asks you (`ask-each-time`, `human-opens`), or a push or
 merge-request creation fails, it reports the branch and what's left, and the loop finishes that part
 itself. If the subagent mechanism isn't available at all, the same steps simply run in the main
 conversation.
@@ -64,6 +64,7 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 | Two merge requests already open | The suite-wide cap | Review and merge or close one |
 | Candidate waiting on `ready-for-agent` | The design step left an open question (`needs-info`) | Answer it on the issue, then add `ready-for-agent` |
 | Safety Net walk: nodes skipped | Blocked by an unfulfilled parent, `needs-info`, or an unverified PHP floor | Read each reason; adopt the parent, answer the question, or reject the node |
+| Waiting for a confirmation to create a ticket | `Ticket-create-mode` is `ask-each-time` and nobody was there to answer — or you declined the ticket for the candidate the pass chose | Rerun and answer; or set `Ticket-create-mode` to `autonomous` in `bookkeeping.md` if nobody will be there. Declined for good? Say so when offered and the node stops being proposed |
 | Onboarding wrote setup files and stopped | The project had no `bookkeeping.md`, so this invocation only onboarded it | Commit the new files to the default branch, rerun `/continuous-refactoring` |
 | Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no `bookkeeping.md` | Run `/continuous-refactoring` first |
 | Housekeeping: nothing registered to check | No node has contributed a housekeeping check yet | Expected on a young target |
