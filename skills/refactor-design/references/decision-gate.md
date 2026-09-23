@@ -18,7 +18,7 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
   raises and the default chosen — plain enough that a human can confirm it as written, or override
   it, by commenting, removing `needs-info`, and adding `ready-for-agent`
   (`docs/agents/triage-labels.md`) once satisfied. This lands on the target repo's own issue —
-  `skills/continuous-refactoring/references/forge-facing-writing.md`.
+  `../../continuous-refactoring/references/forge-facing-writing.md`.
 - **Actively manage both labels — don't just withhold one.** Add `needs-info`: the visible signal
   that this issue is waiting on a human, not merely unprocessed. This is what makes the candidate a
   **flagged candidate**: designed, but not yet cleared to implement. And remove `ready-for-agent` if
@@ -31,7 +31,7 @@ behavior-preserving. The loop runs unattended; don't stop and wait for a live an
 
 The issue stays open, `refactor:candidate` unchanged — only its triage labels, and whether
 `refactor-implement` may run against it this pass. `refactor-loop`
-(`skills/refactor-loop/SKILL.md` step 5) skips implementation for a flagged candidate still
+(`../../refactor-loop/SKILL.md` step 5) skips implementation for a flagged candidate still
 missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
 (`refactor-scan/SKILL.md` steps 2 and 3b): a native-label tracker can always rediscover it later, so
 scan looks for other work instead of waiting on it; a git-only tracker has no such rediscovery, so the
@@ -40,11 +40,11 @@ pass stops there rather than risk losing track of it.
 ## A genuine breaking change
 
 The fix can't be made without changing observable behavior — the foundational rule
-(`skills/continuous-refactoring/references/foundational-refactoring-rules.md`) that a refactor never
+(`../../continuous-refactoring/references/foundational-refactoring-rules.md`) that a refactor never
 ships one. This isn't `refactor-design`'s call to act on: don't write a plan, don't comment on the
 issue, don't touch any label — only `refactor-learn` writes bookkeeping/labels/`out-of-scope`
 (`refactor-learn/SKILL.md`'s own stated boundary). Hand it forward instead as a **finding** — a short
 statement of what was found and why it needs a behavior change — to this same pass's closing
-`refactor-learn` call (`skills/refactor-loop/SKILL.md` step 6), which applies its existing
+`refactor-learn` call (`../../refactor-loop/SKILL.md` step 6), which applies its existing
 rejection machinery (`wontfix`, a closing note or `out-of-scope/` entry) the same way it already
 would for a load-bearing MR-review rejection.

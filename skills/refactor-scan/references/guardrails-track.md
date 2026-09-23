@@ -12,25 +12,27 @@ The nodes `safety-net-track.md`'s own Scope section explicitly excludes from the
 node required on `structural-scan`/`php-safety-net` themselves, not merely reachable before
 `structural-scan` opens. Concretely, for PHP: `composer-audit`, `phpmd`, `coverage-floor`,
 `php-minimal-version`, `phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep` (every
-edge confirmed against `skills/refactor-scan/references/php-tooling-tree.md`'s current edge table).
+edge confirmed against `php-tooling-tree.md`'s current edge table).
 Every one of these already carries its own required parent inside the tree (e.g. `composer` for
 `composer-audit`, `phpstan-level-5` for `phpstan-level-6`) *and* an additional required parent on
 `php-safety-net` itself — both must be satisfied, the ordinary AND-combination every node with more
-than one required parent already gets. A node's tree-doc entry (`php-tooling-tree/<node>.md`) is
-unchanged by any of this — same Purpose, Fulfilment check, MR scope, edges; only which bookkeeping
-section a node in this scope reads/writes changes (below), and how its Fulfilment check gets
-evaluated (Judging fulfilment, below).
+than one required parent already gets. A node's tree-doc entry — the file `php-tooling-tree.md`'s own
+per-node *Full definition* pointer names, not always one-file-per-node (every `rector-*` node points
+at `php-tooling-tree/rector.md`; `psalm`/`psalm-taint-analysis` both point at
+`php-tooling-tree/psalm.md`) — is unchanged by any of this — same Purpose, Fulfilment check, MR scope,
+edges; only which bookkeeping section a node in this scope reads/writes changes (below), and how its
+Fulfilment check gets evaluated (Judging fulfilment, below).
 
 ## Is the Track due this pass?
 
 The exact same mechanism `safety-net-track.md`'s own section of this name already documents, read
 against `bookkeeping.md`'s `## Guardrails` section instead of `## Safety Net` — due-ness is decided once,
 before `refactor-scan` starts, by the orchestrator's own Track-selection step
-(`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
+(`../../continuous-refactoring/references/track-scheduler.md`, `../../continuous-refactoring/SKILL.md`
 step 1); this file never re-derives it. Not selected this pass → nothing here runs. Selected with
 `Open` non-empty → still never rescanned, however the Track was selected (naming it manually forces no scan,
 and an old-meaning `Open` is walked like any other) — the entries are walked instead
-(`skills/refactor-scan/references/track-open-processing.md`), which owns the workability triage, the
+(`track-open-processing.md`), which owns the workability triage, the
 pick-up Fulfilment re-check, and the one-node-per-pass rule, and reports any node its re-check finds
 now fulfilled as a **fulfilled at pick-up** finding for `refactor-learn`'s early call to remove from
 `Open`; skip straight to `refactor-scan/SKILL.md`'s `## Output`, the rest of this file doesn't run.
@@ -48,7 +50,8 @@ Run `python3 references/tooling_tree.py <target-repo>` once, same as `refactor-s
 already does — its `detected` map is a first signal, not the verdict, for every node in this Track's
 scope. **Don't take a Guardrails node's `fulfilled` value at face value** — the exact same discipline
 `safety-net-track.md` already applies, generalized here to this Track's own seven nodes: read the
-node's own Purpose line (`php-tooling-tree/<node>.md`), then judge the actual repo against it — does a
+node's own Purpose line — its tree-doc entry, found via `php-tooling-tree.md`'s own per-node *Full
+definition* pointer, not always one-file-per-node — then judge the actual repo against it — does a
 real, working tool genuinely serve that Purpose, under any name, not only the one the node's own `Tool`
 line happens to mention.
 
@@ -64,7 +67,7 @@ line happens to mention.
   the parser's own text match doesn't follow. Never propose `composer-audit` here.
 - **Genuinely ambiguous** — two plausible tools present at once, or real uncertainty about whether one
   actually serves the Purpose — routes through the existing Flagged-candidate mechanism (`needs-info`,
-  `skills/refactor-design/references/decision-gate.md`), unchanged.
+  `../../refactor-design/references/decision-gate.md`), unchanged.
 - **No committed artifact at all, purpose stated as served some other way** — not a fulfilment
   judgement call at all: an ordinary `out-of-scope/<slug>.md` rejection with the maintainer's stated
   reason, same as `safety-net-track.md` already documents. Only safe for a node without a required
@@ -80,9 +83,9 @@ Every node in scope still unresolved (neither fulfilled by judgement above, nor 
 required parent already fulfilled, per the tree's ordinary edge semantics) → propose it by Name, same
 as `refactor-scan/SKILL.md` step 4 already does for any other node. Its slug is added to `##
 Guardrails`'s `Open` list — `refactor-learn`'s own side of this,
-`skills/refactor-learn/references/guardrails-write.md`. **No candidate issue is created at this
+`../../refactor-learn/references/guardrails-write.md`. **No candidate issue is created at this
 point** — the node's issue is created only when it is actually worked via the `Open` walk
-(`skills/refactor-scan/references/track-open-processing.md`), not pre-filed during the
+(`track-open-processing.md`), not pre-filed during the
 scan.
 
 ## Filling `Open`

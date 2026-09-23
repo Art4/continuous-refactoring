@@ -1,6 +1,6 @@
 # `editorconfig`
 
-Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
+Node on the generic **tooling tree** (`../tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
 
 - **Name:** `.editorconfig`
 - **Tool:** none — plain-text convention file, read by any EditorConfig-aware editor, not a runnable tool.
@@ -8,11 +8,11 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
   language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
   exists so "later Rector output lands styled." Language-independent, so it lives at the generic root and
   its `required` parent (`onboarding-setup`,
-  `skills/refactor-scan/references/tooling-tree/onboarding-setup.md`) is declared in `tooling-tree.md`'s own edge
+  `onboarding-setup.md`) is declared in `tooling-tree.md`'s own edge
   table. Two outgoing edges: `editorconfig → structural-scan` (`resolved`, see `structural-scan`'s own node
-  entry, `skills/refactor-scan/references/tooling-tree/structural-scan.md`) stays declared in
+  entry, `structural-scan.md`) stays declared in
   `tooling-tree.md` too, since `structural-scan` is itself a generic-root node; only `editorconfig →
-  php-cs-fixer` crosses into a language tree (`skills/refactor-scan/references/php-tooling-tree.md`'s edge
+  php-cs-fixer` crosses into a language tree (`../php-tooling-tree.md`'s edge
   table: `editorconfig → php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
 - **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
   equivalent-detection nuance.

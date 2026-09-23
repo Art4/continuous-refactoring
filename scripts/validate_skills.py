@@ -247,7 +247,7 @@ def global_ref_issues(text, skill, suite_names, ledger):
 # Local file references and ADR references
 # --------------------------------------------------------------------------
 
-_PATH_LIKE = re.compile(r"(?:^docs/|^CONTEXT(?:-MAP)?\.md$|\.md$|^skills/)")
+_PATH_LIKE = re.compile(r"(?:^docs/|^CONTEXT(?:-MAP)?\.md$|\.md$|^skills/|^\.\./|^references/)")
 # A fenced code block's ``` pair is itself two backticks short of the naive
 # `x` scanner's expectations — without stripping fences first, the scanner
 # desyncs on the first fence in the file and misreads every inline `ref`
@@ -255,7 +255,15 @@ _PATH_LIKE = re.compile(r"(?:^docs/|^CONTEXT(?:-MAP)?\.md$|\.md$|^skills/)")
 _FENCE_RE = re.compile(r"```.*?```", re.S)
 
 
-def local_ref_issues(text, repo_root, skill=""):
+def local_ref_issues(text, repo_root, skill="", citing_dir=None):
+    """``citing_dir``: the directory the citing file itself lives in (its
+    ``SKILL.md``'s own directory, or a ``references/`` file's parent) —
+    every ``skills/**`` cross-reference is written relative to it (ADR-0061),
+    since ``skills/<name>/references/...`` only ever resolves against the
+    suite repo's own root, which doesn't exist once a skill ships into a
+    target repo. A ``skills/`` -prefixed citation is therefore always the old,
+    now-forbidden form, regardless of whether it happens to still resolve
+    from here."""
     issues = []
     repo_root = pathlib.Path(repo_root)
     text = _FENCE_RE.sub("", text)
@@ -266,6 +274,17 @@ def local_ref_issues(text, repo_root, skill=""):
         if ref in EXEMPT_LOCAL_REFS:
             continue
         if any(ref.startswith(p) for p in EXEMPT_LOCAL_PREFIXES):
+            continue
+        if ref.startswith("skills/"):
+            issues.append(Issue(
+                skill or ref,
+                f"local reference '{ref}' uses the old repo-root-relative form — "
+                "cite it relative to this file instead (ADR-0061)",
+            ))
+            continue
+        if citing_dir is not None and (ref.startswith("../") or ref.startswith("references/")):
+            if not (pathlib.Path(citing_dir) / ref).exists():
+                issues.append(Issue(skill or ref, f"local reference '{ref}' does not exist relative to its citing file"))
             continue
         if not (repo_root / ref).exists():
             issues.append(Issue(skill or ref, f"local reference '{ref}' does not exist in the suite repo"))
@@ -686,7 +705,11 @@ def orphaned_reference_issues(reference_files, all_text_by_path):
     issues = []
     for skill, rel_path in reference_files:
         haystack = "\n".join(t for p, t in all_text_by_path.items() if p != rel_path)
-        if rel_path not in haystack:
+        # A citation is now written relative to the citing file (ADR-0061),
+        # so it never repeats the full suite-root-relative path found here —
+        # only its basename is a reliable, style-independent signal.
+        basename = pathlib.PurePosixPath(rel_path).name
+        if basename not in haystack:
             issues.append(
                 Issue(
                     skill,
@@ -780,26 +803,29 @@ def completion_clarity_issues(skills_text):
 # Whole-repo orchestration
 # --------------------------------------------------------------------------
 
-_CROSS_SKILL_REF_RE = re.compile(r"skills/[a-z0-9_-]+/references/[a-zA-Z0-9_./-]+\.(?:md|py)")
+_CROSS_SKILL_REF_RE = re.compile(r"(?:\.\./)+([a-z0-9_-]+)/(references/[a-zA-Z0-9_./-]+\.(?:md|py))")
 
 
 def _augment_with_cross_skill_refs(skills_text_full, repo_root):
     """A skill's own text may point at a reference file shipped under a
     *different* skill's directory — e.g. ``refactor-design`` and
     ``refactor-implement`` both point at
-    ``skills/continuous-refactoring/references/foundational-refactoring-rules.md``
+    ``continuous-refactoring``'s own ``references/foundational-refactoring-rules.md``
     rather than each restating the rules inline. Pull such a file's content
     into the pointing skill's full text too, one hop deep, so a semantic
     check reading "this skill's full text" sees what the skill actually
-    directs a reader to, not just what ships in its own ``references/``."""
+    directs a reader to, not just what ships in its own ``references/``.
+    Citations are skill-relative (ADR-0061), so the leading ``../`` count
+    varies with the citing file's own depth — matched loosely (one or more)
+    and resolved via ``repo_root/skills/<cited skill>/...`` directly rather
+    than by literally walking that many levels up."""
     augmented = dict(skills_text_full)
     for name, text in skills_text_full.items():
-        own_prefix = f"skills/{name}/"
         extra = []
-        for path in sorted(set(_CROSS_SKILL_REF_RE.findall(text))):
-            if path.startswith(own_prefix):
+        for cited_skill, rest in sorted(set(_CROSS_SKILL_REF_RE.findall(text))):
+            if cited_skill == name:
                 continue  # already included via this skill's own references/ scan
-            f = repo_root / path
+            f = repo_root / "skills" / cited_skill / rest
             if f.is_file():
                 extra.append(f.read_text())
         if extra:
@@ -858,7 +884,7 @@ def validate_repo(repo_root):
         issues += frontmatter_issues(text, d.name)
         issues += section_issues(text, d.name, requires_fallback=shipped)
         issues += global_ref_issues(text, d.name, set(suite_names), ledger)
-        issues += local_ref_issues(text, repo_root, skill=d.name)
+        issues += local_ref_issues(text, repo_root, skill=d.name, citing_dir=d)
         issues += adr_issues(text, skill=d.name)
         issues += scratch_ref_issues(text, skill=d.name)
         issues += ticket_ref_issues(text, skill=d.name)
@@ -877,7 +903,7 @@ def validate_repo(repo_root):
             ref_text = ref_file.read_text()
             ref_skill = f"{d.name}/references/{ref_file.relative_to(references_dir)}"
             ref_rel_path = ref_file.relative_to(repo_root).as_posix()
-            issues += local_ref_issues(ref_text, repo_root, skill=ref_skill)
+            issues += local_ref_issues(ref_text, repo_root, skill=ref_skill, citing_dir=ref_file.parent)
             issues += adr_issues(ref_text, skill=ref_skill)
             issues += scratch_ref_issues(ref_text, skill=ref_skill)
             issues += ticket_ref_issues(ref_text, skill=ref_skill)

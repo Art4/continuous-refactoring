@@ -26,5 +26,5 @@ finding itself, not from where — or in what words — this suite happens to ke
 
 **Example.**
 
-- Not this: "Per the suite's foundational rule (`skills/continuous-refactoring/references/foundational-refactoring-rules.md`), this candidate is closed as `wontfix`."
+- Not this: "Per the suite's foundational rule (`foundational-refactoring-rules.md`), this candidate is closed as `wontfix`."
 - This instead: "Closing this — the fix would start persisting data the app currently drops, which is a behavior change, not a structural one." The concrete facts stay in either version: the function name, the parameter, the target-repo file paths this candidate actually names — those live in the target repo, so the reader can already open them.

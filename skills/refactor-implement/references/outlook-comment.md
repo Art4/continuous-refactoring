@@ -12,9 +12,9 @@ seed/bookkeeping state the script reads, not from detection, so that state must 
 landed node) and look up the slug of the first entry in the returned `unblocked_by` list (each entry
 is `{"node": <slug>, "type": <edge type>}`) for its Name in the tree doc — the same script
 `refactor-scan` step 4 already runs, wherever `refactor-scan`'s own files are actually installed
-(its own `references/tooling_tree.py`, alongside its `SKILL.md`), never assumed relative to the
+(its own references/tooling_tree.py, alongside its `SKILL.md`), never assumed relative to the
 suite's own repo as the current working directory. No `python3`, or not permitted → dispatch a
-sub-agent with `refactor-scan`'s own `references/tree-walk-prompt.md` prompt (`{N}=1`, same
+sub-agent with `refactor-scan`'s own references/tree-walk-prompt.md prompt (`{N}=1`, same
 resolution rule) instead; no sub-agent mechanism → run that prompt's steps yourself inline. The
 sub-agent/inline fallback covers the sentence only — it has no equivalent for the diagram below, so a
 comment posted that way carries the sentence alone.
@@ -29,5 +29,5 @@ one-box fan-out repeats what the sentence already said.
 Structural candidates carry no Outlook at all, diagram included — there's no single next child a
 deepening unlocks the way a tree node does.
 
-Follow `skills/continuous-refactoring/references/forge-facing-writing.md` like any other forge-facing
+Follow `../../continuous-refactoring/references/forge-facing-writing.md` like any other forge-facing
 text.

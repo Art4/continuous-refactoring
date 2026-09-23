@@ -1,6 +1,6 @@
 # Rector (`rector-php-set`, `rector-dead-code`, `rector-type-coverage`, `rector-code-quality`, `rector-phpunit-set`)
 
-Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**). One file for the whole Rector family (a deliberate exception to this directory's usual one-file-per-node shape — see `php-tooling-tree.md`'s *Nodes* preamble, and `phpstan.md`'s own opening note for the precedent): `rector-php-set` is the hub the other four read their static-analyzer gate through, and `rector-type-coverage`/`rector-phpunit-set` explicitly point at sibling entries below for their own caveats.
+Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**). One file for the whole Rector family (a deliberate exception to this directory's usual one-file-per-node shape — see `php-tooling-tree.md`'s *Nodes* preamble, and `phpstan.md`'s own opening note for the precedent): `rector-php-set` is the hub the other four read their static-analyzer gate through, and `rector-type-coverage`/`rector-phpunit-set` explicitly point at sibling entries below for their own caveats.
 
 ### `rector-php-set`
 

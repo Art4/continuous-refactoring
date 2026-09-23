@@ -1,6 +1,6 @@
 # Psalm (`psalm`, `psalm-taint-analysis`)
 
-Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**). One file for both nodes (a deliberate exception to this directory's usual one-file-per-node shape — see `php-tooling-tree.md`'s *Nodes* preamble, and `phpstan.md`'s own opening note for the precedent) because `psalm-taint-analysis`'s Co-presence caveat and `psalm`'s own Co-presence bullet constantly cross-reference each other.
+Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**). One file for both nodes (a deliberate exception to this directory's usual one-file-per-node shape — see `php-tooling-tree.md`'s *Nodes* preamble, and `phpstan.md`'s own opening note for the precedent) because `psalm-taint-analysis`'s Co-presence caveat and `psalm`'s own Co-presence bullet constantly cross-reference each other.
 
 ### `psalm`
 
@@ -74,7 +74,7 @@ Nodes on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-
   `phpstan.md`) — only the tree structure and each node's own detection record it. Nothing reads
   `psalm.fulfilled` in a way this incidental flip could break.
 - **`php-safety-net` resolved-leaf:** yes — one of the nine. The gate's purpose is "deterministic
-  tooling has had its say before agent-driven structural work begins" (`skills/refactor-scan/references/tooling-tree.md`'s
+  tooling has had its say before agent-driven structural work begins" (`../tooling-tree.md`'s
   `structural-scan` node), not "structural-quality tools only" — `composer-audit` (`composer-audit.md`) is
   already one of these thirteen leaves and is itself a pure security scan (dependency vulnerabilities), so
   excluding this node on a "security vs. structural" distinction wouldn't have been consistent with that

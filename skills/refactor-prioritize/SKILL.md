@@ -29,7 +29,7 @@ Rank and Select mode both; see `refactor-scan/SKILL.md` step 2 and `refactor-loo
 
 ### 2. Rank
 
-**`refactor:priority` narrows the pool first.** At least one surviving proposal's issue already carries the `refactor:priority` label (a human set it directly — nothing here sets it automatically) → rank only among those this pass, the rest wait for a future one regardless of how they'd otherwise score. None carry it → rank the full surviving pool, unchanged. **Track nodes excluded.** This pool contains only proposals `refactor-scan` handed forward — never a node sitting in a Track's own `Open` list (Safety Net, Guardrails). Track nodes are worked top to bottom by `refactor-scan`'s own `Open` walk (`skills/refactor-scan/references/track-open-processing.md`), not ranked here. Otherwise the label is only a tie-breaker between equally ranked candidates; it never preempts a Track's `Open` walk — a labeled issue waits until `Open` is empty (Safety Net) or has no workable node left (Guardrails). It takes no part in Track selection and cannot bypass the Safety Net blockade.
+**`refactor:priority` narrows the pool first.** At least one surviving proposal's issue already carries the `refactor:priority` label (a human set it directly — nothing here sets it automatically) → rank only among those this pass, the rest wait for a future one regardless of how they'd otherwise score. None carry it → rank the full surviving pool, unchanged. **Track nodes excluded.** This pool contains only proposals `refactor-scan` handed forward — never a node sitting in a Track's own `Open` list (Safety Net, Guardrails). Track nodes are worked top to bottom by `refactor-scan`'s own `Open` walk (`../refactor-scan/references/track-open-processing.md`), not ranked here. Otherwise the label is only a tie-breaker between equally ranked candidates; it never preempts a Track's `Open` walk — a labeled issue waits until `Open` is empty (Safety Net) or has no workable node left (Guardrails). It takes no part in Track selection and cannot bypass the Safety Net blockade.
 
 For each proposal in that pool, assess:
 
@@ -43,7 +43,7 @@ For each proposal in that pool, assess:
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 
-**File as you read.** A tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → file its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-design` step 5 already looks for before filing one itself, so whichever proposal later wins a ranking is recognized as already filed, updated in place rather than duplicated. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already files every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. Doesn't apply to a proposal that arrives already issue-backed (`refactor-scan` step 3b: an earlier pass's own filing, or a human-labeled issue) — nothing to file, rank it as-is — or to a gate name (`structural-scan`, a baseline-shrink family) — those stay names until Select mode's own exploration makes one concrete, exactly as today. **Does not apply to Track nodes** (Safety Net, Guardrails) — those are tracked in the Track's own `Open` list and their issues are created only when the node is worked via the `Open` walk (`skills/refactor-scan/references/track-open-processing.md`), not pre-filed here. A proposal filed this way scores **Age** zero and carries no `refactor:priority` — both trivially true of an issue that's existed for the length of this same pass.
+**File as you read.** A tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → file its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-design` step 5 already looks for before filing one itself, so whichever proposal later wins a ranking is recognized as already filed, updated in place rather than duplicated. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already files every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. Doesn't apply to a proposal that arrives already issue-backed (`refactor-scan` step 3b: an earlier pass's own filing, or a human-labeled issue) — nothing to file, rank it as-is — or to a gate name (`structural-scan`, a baseline-shrink family) — those stay names until Select mode's own exploration makes one concrete, exactly as today. **Does not apply to Track nodes** (Safety Net, Guardrails) — those are tracked in the Track's own `Open` list and their issues are created only when the node is worked via the `Open` walk (`../refactor-scan/references/track-open-processing.md`), not pre-filed here. A proposal filed this way scores **Age** zero and carries no `refactor:priority` — both trivially true of an issue that's existed for the length of this same pass.
 
 Present the ranking as a short ordered list of Names only (never slugs) — save the rationale for the winner for step 3.
 
@@ -61,18 +61,18 @@ Only runs on this second, fresh dispatch — never inline after step 3 in the sa
 for a winner that's already concrete (an ordinary tooling-tree node, an externally-labeled candidate
 — those go straight to `refactor-design`, this step doesn't apply).
 
-- **Winner is `structural-scan`** → run `skills/refactor-prioritize/references/structural-candidate-search.md` in full.
-- **Winner is a "PHPStan Level N — baseline shrink" proposal** → run `skills/refactor-prioritize/references/baseline-shrink-selection.md` in full.
+- **Winner is `structural-scan`** → run `references/structural-candidate-search.md` in full.
+- **Winner is a "PHPStan Level N — baseline shrink" proposal** → run `references/baseline-shrink-selection.md` in full.
 
 Both end the same way: every genuine candidate found gets filed (minimal fields, never the full
 plan — that's `refactor-design`'s job, added as a comment only on the one this pass pursues), sorted
 into a **priority** or **capped** admission tier by its Signal
-(`skills/refactor-prioritize/references/signals.md`), and the single strongest is this pass's
+(`references/signals.md`), and the single strongest is this pass's
 recommendation, carried forward.
 
 `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → **still write**
 `Pending candidates` to this issue, unlike the ordinary design→implement handoff (which native
-trackers skip, `skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — a pass
+trackers skip, `../continuous-refactoring/references/refactoring-bookkeeping.md`) — a pass
 interrupted between this filing and `refactor-design`'s follow-up comment needs `refactor-scan` to
 resume exactly this issue next pass, not treat it as a fresh externally-labeled candidate and
 potentially select a different one. No native-label tracker → unchanged, same write as always. Either
@@ -89,7 +89,7 @@ future pass.
 
 ## Fallback
 
-- **`/codebase-design`**: installed → use its vocabulary in Select mode's structural-candidate search (`skills/refactor-prioritize/references/structural-candidate-search.md`). Otherwise the vocabulary (module, interface, depth, seam, leverage, locality) is already inline in that same reference file — nothing else needed.
+- **`/codebase-design`**: installed → use its vocabulary in Select mode's structural-candidate search (`references/structural-candidate-search.md`). Otherwise the vocabulary (module, interface, depth, seam, leverage, locality) is already inline in that same reference file — nothing else needed.
 
 ## Completion criterion
 

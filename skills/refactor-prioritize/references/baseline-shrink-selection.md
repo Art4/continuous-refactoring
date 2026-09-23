@@ -4,7 +4,7 @@
 baseline shrink"** proposal (`refactor-scan` step 4b) — a gate named generically ("level N fulfilled,
 its baseline non-empty"), not yet a concrete candidate. This is a fresh dispatch, separate from Rank
 mode's own (see `refactor-prioritize/SKILL.md` step 4). Planning the actual fix
-(`skills/refactor-design/references/phpstan-baseline-shrink.md`, that file's own step 3) is
+(`../../refactor-design/references/phpstan-baseline-shrink.md`, that file's own step 3) is
 `refactor-design`'s job afterward — not run here.
 
 ## Why this exists
@@ -35,7 +35,7 @@ recommendation; the others still get filed, just not pursued this pass.
 
 ## 3. Admission tier per group
 
-Each group's Signal (`skills/refactor-prioritize/references/signals.md`) is usually **tooling
+Each group's Signal (`signals.md`) is usually **tooling
 pressure** — these are static-analysis residuals by definition — unless the group's actual nature
 clearly names a sharper factor (a group of null-dereference findings on security-sensitive input is
 **security**, not just tooling pressure; ordinary judgment, not a fixed rule).
@@ -43,7 +43,7 @@ clearly names a sharper factor (a group of null-dereference findings on security
 - **Priority** (Signal is security or blast radius of inaction) → file regardless of backlog size.
 - **Capped** (everything else, tooling pressure included) → file only while headroom remains. The
   actual threshold and admission rule live in one place, `refactor-scan/SKILL.md` step 1
-  (`skills/refactor-scan/SKILL.md`) — read it fresh here rather than restating the number; a capped
+  (`../../refactor-scan/SKILL.md`) — read it fresh here rather than restating the number; a capped
   group this exploration finds but the cap has no room for queues for a future exploration.
 
 Same admission rule as `structural-candidate-search.md`'s — identical shape on both Select-mode paths.

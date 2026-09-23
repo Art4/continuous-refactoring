@@ -1,8 +1,8 @@
 # Reference: the onboarding interview
 
-Backs step 0 of `continuous-refactoring` (`skills/continuous-refactoring/SKILL.md`),
+Backs step 0 of `continuous-refactoring` (`../SKILL.md`),
 which fulfils the `onboarding-setup` node of the tooling tree
-(`skills/refactor-scan/references/tooling-tree/onboarding-setup.md`) before any
+(`../../refactor-scan/references/tooling-tree/onboarding-setup.md`) before any
 Track runs. Everywhere else, a tooling-tree node's plan is fixed text a human
 wrote once, for every target alike. Onboarding is different on purpose: which
 tracker to use, how merge requests get opened, and where the suite's own notes
@@ -20,7 +20,7 @@ setup is incomplete), **Ask**, **Summarize**, **Record**, **Closing**.
 **The instruction file.** Wherever this reference says "the instruction file"
 it means `AGENTS.md` if it exists, otherwise `CLAUDE.md` — the same order the
 suite uses to resolve the Refactoring Notes
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`, *Where the
+(`refactoring-bookkeeping.md`, *Where the
 Refactoring Notes live*). Neither exists → onboarding creates `AGENTS.md`
 (`## Record`), and never creates the other one when one exists.
 
@@ -80,7 +80,7 @@ Read-only. No writes, no questions yet.
   on a resume — `triage-labels.md` lacks the `needs-triage` and
   `ready-for-human` rows (the minimal table this onboarding writes, as against
   the engineering skills' full one,
-  `skills/continuous-refactoring/references/triage-labels-template.md`).
+  `triage-labels-template.md`).
 
 ## Setup gap
 
@@ -116,7 +116,7 @@ context already gathered.
 
 Then ask one question at a time — never batch. Each question uses the
 numbered shape `/grilling`'s fallback already uses
-(`skills/refactor-design/references/grilling-fallback.md`):
+(`../../refactor-design/references/grilling-fallback.md`):
 `❓ **Q1** - **<title>**: <body>`, 2–4 concrete options, one recommended
 (`➡️ <recommendation>`) derived from `## Explore`. Ask Q1 — a
 single-question `AskUserQuestion` call when available (not all three
@@ -252,7 +252,7 @@ missing table row) and say so.
    - **File exists** → leave it. Local Markdown tracker and it has no `done`
      row → append that one row. Otherwise nothing.
    - Absent → write
-     `skills/continuous-refactoring/references/triage-labels-template.md`'s
+     `triage-labels-template.md`'s
      content (its `## Variants` say when the `done` row is dropped and how
      forge overrides apply) — don't restate it here.
 3. **Tracker choice** → `docs/agents/issue-tracker.md`, only when absent:
@@ -268,7 +268,7 @@ missing table row) and say so.
      or the forge UI on `origin`; "check the external tracker": query the
      forge directly).
    - **Local Markdown:** write
-     `skills/continuous-refactoring/references/local-issue-tracker-template.md`'s
+     `local-issue-tracker-template.md`'s
      content verbatim — don't restate it here, avoid two drifting copies.
    - **Something else:** same shape as the two cases above, from what the
      human described; no description given → fall through to Local

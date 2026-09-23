@@ -1,6 +1,6 @@
 # `secret-detection`
 
-Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
+Node on the generic **tooling tree** (`../tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
 
 - **Name:** Secret Detection
 - **Tool:** any secret scanner — a generic, tool-agnostic node (like `test-runner-if-missing`'s own
@@ -24,7 +24,7 @@ Node on the generic **tooling tree** (`skills/refactor-scan/references/tooling-t
 - **MR scope:** dependency/tool setup (however the chosen scanner installs) + CI job wiring it in +
   one initial scan pass (fix or explicitly baseline what it reports — a target's own judgement call at
   adoption time, same as `phpmd`'s equivalent note).
-- **Signal:** Security (`skills/refactor-prioritize/references/signals.md`) — once fulfilled,
+- **Signal:** Security (`../../../refactor-prioritize/references/signals.md`) — once fulfilled,
   `refactor-prioritize`'s Select mode prefers a clean CI-gated scan as positive evidence over the
   generic (reading-the-code) recognition method for this factor.
 

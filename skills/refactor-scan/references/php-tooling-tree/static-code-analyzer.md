@@ -1,6 +1,6 @@
 # `static-code-analyzer`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
+Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
 
 - **Name:** Static Code Analyzer
 - **Tool:** none — pure organizational node, no fulfilment check or MR scope of its own.

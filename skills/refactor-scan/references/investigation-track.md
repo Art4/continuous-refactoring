@@ -7,7 +7,7 @@ of anything else to decide. Vocabulary: `CONTEXT.md` (**Track**, **Investigation
 
 ## Scope
 
-Exactly one node: `structural-scan` (`skills/refactor-scan/references/tooling-tree/structural-scan.md`).
+Exactly one node: `structural-scan` (`tooling-tree/structural-scan.md`).
 Its own Fulfilment check, edge semantics (`resolved` parents, not `required`/`recommended`), and MR scope
 are completely unchanged by any of this — this file only changes *when* `structural-scan` gets proposed,
 never how its own gate works. No Purpose-based judgement applies here at all: per the spec's
@@ -20,9 +20,9 @@ Guardrails node.
 ## Is the Track due this pass?
 
 Decided once, before `refactor-scan` even starts — the orchestrator's own Track-selection step
-(`skills/continuous-refactoring/references/track-scheduler.md`, `skills/continuous-refactoring/SKILL.md`
+(`../../continuous-refactoring/references/track-scheduler.md`, `../../continuous-refactoring/SKILL.md`
 step 1) reads `bookkeeping.md`'s `## Investigation` section
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner to
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`) and hands the winner to
 `refactor-scan` as an explicit input, exactly as it does for every other wired Track. This section covers
 only what this Track does with that decision — it never re-derives due-ness itself:
 
@@ -50,8 +50,8 @@ used for it before this Track existed: `structural-scan` is proposable only when
    rejected under `out-of-scope/` (a recorded rejection counts as resolved).
 
 The actual codebase walk that turns this gate name into one concrete candidate is still
-`refactor-prioritize`'s Select mode's own job (`skills/refactor-prioritize/references/
-structural-candidate-search.md`), run only once this proposal wins ranking — nothing about that pipeline
+`refactor-prioritize`'s Select mode's own job
+(`../../refactor-prioritize/references/structural-candidate-search.md`), run only once this proposal wins ranking — nothing about that pipeline
 changes here. Once filed, the concrete candidate's own open/done/rejected state lives entirely on the
 issue tracker / `merge-requests.md`, tracked in flight via the ordinary `Pending candidates` field
 (`refactoring-bookkeeping.md`) the same way any other candidate already is — `## Investigation` never
@@ -67,7 +67,7 @@ until then, the same gate that already did this job before Track selection exist
 **This file's own process actually running this pass is what counts as a completed scan** — reaching the
 *Proposing* step above at all, whether it proposed `structural-scan` or found it still gate-blocked:
 `refactor-learn`'s closing call writes `## Investigation`'s `Last scan` whenever that happened
-(`skills/refactor-learn/references/investigation-write.md`). **A structural candidate resumed via
+(`../../refactor-learn/references/investigation-write.md`). **A structural candidate resumed via
 `Pending candidates` at `refactor-scan/SKILL.md` step 2 never reaches this file at all** — step 4 skips
 outright once step 2 already has a pending candidate to resume (same as it always has, Track selection
 notwithstanding) — so resolving that candidate this pass, on its own, doesn't write `Last scan` either;

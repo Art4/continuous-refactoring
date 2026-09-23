@@ -6,11 +6,11 @@ both handle a Merge/Rejection finding during the early call too) — same shape 
 `investigation-write.md`'s own single-call scope. Applies only to `## Housekeeping`'s own `Cadence`/
 `Last scan` fields; the sweep's own checklist content, issue, and merge request/close mechanics are the
 Housekeeping Track's own process, entirely unrelated to this section
-(`skills/continuous-housekeeping/references/housekeeping-track.md`).
+(`../../continuous-housekeeping/references/housekeeping-track.md`).
 
 ## `Last scan` — written whenever `housekeeping-track.md`'s own process actually ran this pass
 
-`skills/continuous-housekeeping/references/housekeeping-track.md` ran this pass (Housekeeping was the
+`../../continuous-housekeeping/references/housekeeping-track.md` ran this pass (Housekeeping was the
 Track step 1 selected, and its own process was actually reached — whether it resumed an in-progress
 cycle, opened and delivered a fresh one, or found nothing registered to check) → write `## Housekeeping`'s
 `Last scan` to today's date (`YYYY-MM-DD`), last, in the closing call's own
@@ -40,7 +40,7 @@ special case for the cases that do have a branch.
 
 Unlike `## Investigation`'s always-literal `continuous`, `## Housekeeping`'s `Cadence` is a real interval
 (`refactoring-bookkeeping.md`'s *Cadence values*) — `7 days` unless hand-edited, or set via
-`skills/continuous-housekeeping/references/housekeeping-cadence-interview.md`'s own optional, human-run
+`../../continuous-housekeeping/references/housekeeping-cadence-interview.md`'s own optional, human-run
 interview (`housekeeping-track.md`'s *First-run cadence* section) — but this write only ever sets it once,
 on first creation. Every later write to this section touches `Last scan` alone; a human tuning `Cadence`
 afterward edits the file directly, the same hand-editable discipline `## Safety Net`'s `90`/`## Guardrails`'

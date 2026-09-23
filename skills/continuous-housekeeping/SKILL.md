@@ -5,20 +5,20 @@ description: Runs one Housekeeping Track cycle — reconcile, checklist, quality
 
 # Continuous Housekeeping
 
-The **Housekeeping** Track (`CONTEXT.md`) as one loop pass. Unlike the other three Tracks, Housekeeping isn't a tooling-tree scan: its own reconcile → checklist-assembly → quality-gate → deliver process is a complete pipeline in itself, in `skills/continuous-housekeeping/references/housekeeping-track.md`. This skill runs it directly and never calls `refactor-loop` — the generic pass (scan → prioritise → design → implement) doesn't apply to it. Its own merge request (or, on a cycle with zero code changes, a direct issue close) is the pass's entire delivery.
+The **Housekeeping** Track (`CONTEXT.md`) as one loop pass. Unlike the other three Tracks, Housekeeping isn't a tooling-tree scan: its own reconcile → checklist-assembly → quality-gate → deliver process is a complete pipeline in itself, in `references/housekeeping-track.md`. This skill runs it directly and never calls `refactor-loop` — the generic pass (scan → prioritise → design → implement) doesn't apply to it. Its own merge request (or, on a cycle with zero code changes, a direct issue close) is the pass's entire delivery.
 
 Invoked by `continuous-refactoring` once its Track scheduler selects Housekeeping. Not a user entry point — a human who wants this Track runs `/continuous-refactoring housekeeping`. Housekeeping's *trigger* stays centrally scheduled; only its process lives here.
 
-**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track, or typed directly — it runs the Housekeeping Track without consulting the scheduler, bypassing the Safety Net blockade and the one-time exception exactly as `skills/continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
+**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track, or typed directly — it runs the Housekeeping Track without consulting the scheduler, bypassing the Safety Net blockade and the one-time exception exactly as `../continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
 
 The Track's own reference files live beside this skill: `references/housekeeping-track.md` (the process), `references/housekeeping-cadence-interview.md` (the human-run cadence interview), `references/housekeeping-template-file-format.md` (the checklist file's format).
 
 ## Process
 
-0. **Onboarded target.** The Refactoring Notes' `bookkeeping.md` must exist (`skills/continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. This skill doesn't go through `refactor-loop`, so it makes this check itself.
+0. **Onboarded target.** The Refactoring Notes' `bookkeeping.md` must exist (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. This skill doesn't go through `refactor-loop`, so it makes this check itself.
 
-1. **Housekeeping cycle.** Follow `skills/continuous-housekeeping/references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, open this cycle's issue, work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run.
-2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`skills/refactor-learn/references/housekeeping-write.md`) via `refactor-learn`'s ordinary dedicated bookkeeping branch. `refactor-learn` writes it only when the process was actually reached.
+1. **Housekeeping cycle.** Follow `references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, open this cycle's issue, work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run.
+2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`../refactor-learn/references/housekeeping-write.md`) via `refactor-learn`'s ordinary dedicated bookkeeping branch. `refactor-learn` writes it only when the process was actually reached.
 
 ## Fallback
 

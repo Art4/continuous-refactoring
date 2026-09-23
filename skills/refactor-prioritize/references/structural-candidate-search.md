@@ -5,7 +5,7 @@ node — a gate name, not a concrete candidate yet. This is a fresh dispatch, se
 own (see `refactor-prioritize/SKILL.md` step 4): explore, file every genuine candidate found, hand
 forward the single strongest to continue this pass. The actual grounding and grilling that turns the
 forwarded candidate into a full plan is `refactor-design`'s job afterward
-(`skills/refactor-design/references/structural-candidate.md`, that file's own steps 3–4) — not run
+(`../../refactor-design/references/structural-candidate.md`, that file's own steps 3–4) — not run
 here.
 
 ## 2. Find every genuine structural candidate
@@ -16,7 +16,7 @@ files/areas that keep coming up — and let those pull your attention first; sca
 hot spot → widen the net.
 
 The Refactoring Notes' `bookkeeping.md` may also name a **`Refactoring goal`**
-(`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — a stated target *shape*
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`) — a stated target *shape*
 for structural work (e.g. "convert legacy procedural code to OOP"), as opposed to `Focus areas`'
 *where*. When set, treat it as an added lens on top of wherever you're looking: friction that keeps
 the code away from the stated shape is a genuine signal in its own right, on top of the factors below
@@ -24,7 +24,7 @@ the code away from the stated shape is a genuine signal in its own right, on top
 Unset → look for friction exactly as today, no change.
 
 Explore organically, note every genuine friction spot — checking against the full catalogue in
-`skills/refactor-prioritize/references/signals.md` (structural cues: shallow modules, missing
+`signals.md` (structural cues: shallow modules, missing
 locality, low leverage, tightly-coupled seams, untested/hard-to-test, tooling pressure; consequence
 cues: security, blast radius of inaction, defect density, understandability, observability,
 domain/business criticality, timing). The quality bar doesn't drop for filing more than one — a
@@ -44,7 +44,7 @@ The others still get filed (next step), just not pursued this pass.
 
 Each found candidate sorts into one of two admission tiers by its Signal — **priority** (security or
 blast radius of inaction, `signals.md`) or **capped** (everything else). The actual threshold and
-admission rule live in one place, `refactor-scan/SKILL.md` step 1 (`skills/refactor-scan/SKILL.md`) —
+admission rule live in one place, `refactor-scan/SKILL.md` step 1 (`../../refactor-scan/SKILL.md`) —
 read it fresh here rather than restating the number, so the two never drift apart. A capped candidate
 this exploration finds but the cap has no room for queues for a future exploration, same as today's
 single-pick behaviour, just for the overflow instead of everything past the first.

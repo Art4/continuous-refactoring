@@ -1,5 +1,14 @@
 # Skill reference docs live under `skills/*/references/`, not `docs/playbooks/`
 
+> Amended by [ADR-0061](0061-skill-crossref-paths-are-citing-file-relative.md): the accepted option's
+> path convention (`skills/<name>/references/...`, keeping the suite-repo-root `skills/` prefix) is
+> reversed for citations *between* skills — its own reasoning (every citing skill ships alongside the
+> cited one under a shared parent) was right, but the path shape it accepted doesn't match that parent
+> once a skill ships into a target repo, where there is no enclosing `skills/` directory to be rooted
+> at. A cross-skill citation is now written relative to the citing file itself instead. This ADR's rule
+> for *where* a skill-facing reference doc lives (`skills/<owning-skill>/references/`, not
+> `docs/playbooks/`) is untouched — only how another skill cites it changes.
+
 Manual testing that found the unresolvable ADR self-citations (bookkeeping-branch/MR fix era) surfaced a sibling bug: `docs/playbooks/refactoring-config.md` is cited inline, as something the executing agent should consult, from four `SKILL.md` files — but `docs/playbooks/` never ships. Install is `ln -s .../skills/* <target>/.agents/skills/` (`README.md`): an entire `skills/<name>/` directory ships as a unit, and nothing outside `skills/` reaches the target repo. Every citation of `docs/playbooks/refactoring-config.md` from skill prose pointed at a file the agent could never resolve, the exact same class of gap the ADR self-citation fix closed for `docs/adr/`.
 
 Not every file under `docs/playbooks/` has this problem, though. `docs/playbooks/loop.md` is a human-facing steering guide referenced only from `README.md` — no skill instructs the agent to consult it mid-run, so it has nothing to ship and stays exactly where it is.

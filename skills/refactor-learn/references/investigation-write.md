@@ -12,7 +12,7 @@ rejected; only *the underlying concrete candidate* a pass produced from it could
 
 ## `Last scan` — written whenever `investigation-track.md`'s own process actually ran this pass
 
-`skills/refactor-scan/references/investigation-track.md` ran this pass (Investigation was the Track step
+`../../refactor-scan/references/investigation-track.md` ran this pass (Investigation was the Track step
 1 selected, and its own *Proposing* step was reached — whether it proposed `structural-scan`, found it
 still gate-blocked, or found the Investigation Track's own precondition-free scope simply had nothing new
 to say) → write `## Investigation`'s `Last scan` to today's date (`YYYY-MM-DD`), last, in the
@@ -39,7 +39,7 @@ carries no interval by design (`CONTEXT.md`'s **Track** entry).
 
 A structural candidate's own state was never tracked in `## Investigation` to begin with — it stays on
 the issue tracker / `merge-requests.md`, exactly as it did before this section existed
-(`skills/refactor-scan/references/investigation-track.md`'s own *Proposing* section). This write never
+(`../../refactor-scan/references/investigation-track.md`'s own *Proposing* section). This write never
 adds, removes, or reads a slug from `Open`/`Out-of-scope` (this section has neither).
 
 ## Old-schema repos

@@ -1,6 +1,6 @@
 # `coverage-floor`
 
-Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
+Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
 
 - **Name:** Test Coverage Floor
 - **Tool:** PHPUnit's own coverage report — PCOV or Xdebug as the underlying driver, either works; a
@@ -32,7 +32,7 @@ Node on the PHP **tooling tree** (`skills/refactor-scan/references/php-tooling-t
   `.coverage-floor` value (whatever the very first coverage run actually measures — never invented),
   and — once `ci-runner` is fulfilled — a CI step that fails when a fresh run drops below the
   committed floor.
-- **Signal:** Untested / hard-to-test (`skills/refactor-prioritize/references/signals.md`) — once
+- **Signal:** Untested / hard-to-test (`../../../refactor-prioritize/references/signals.md`) — once
   fulfilled, Select mode reads the coverage report's real per-file numbers (Clover XML) instead of the
   generic "read the test suite" heuristic: a file sitting more than 20 percentage points under the
   current `.coverage-floor` value is this factor's own real evidence, not a separate criterion.
