@@ -1,1 +1,0 @@
-- The retired `Fulfilled nodes` bookkeeping field is removed from the documented schema and from every fixture and harness check. Nothing changes for a `bookkeeping.md` that still carries it: the block is ignored, and can be deleted by hand at any time.

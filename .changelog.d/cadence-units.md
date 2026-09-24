@@ -1,1 +1,0 @@
-A Track's `Cadence` can now be written with a unit — `12 hours`, `7 days`, `2 weeks`, `1 month` — or as a fixed monthly day (`monthly on the 1st`); a bare number from an older `bookkeeping.md` still reads as days, and the loop now writes its defaults as `90 days`, `60 days` and `7 days`.
