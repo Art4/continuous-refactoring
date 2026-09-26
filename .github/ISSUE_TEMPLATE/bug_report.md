@@ -14,7 +14,7 @@ What the skill(s) should have done instead.
 
 **Steps to reproduce**
 1. Which skill(s) were invoked, and how (on-demand / recurring trigger)
-2. Relevant target-repo state (language, `docs/refactoring/bookkeeping.md` contents if relevant)
+2. Relevant target-repo state (language, `.scratch/refactor/config.md` and `bookkeeping.md` contents if relevant)
 3. ...
 
 **Environment**

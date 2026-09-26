@@ -1,13 +1,13 @@
 # Expected behavior — the invocation after onboarding is an ordinary pass
 
-The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping.md` holding only the two create-mode fields (`Ticket-create-mode`, `MR-create-mode`)
+The state the onboarding leaves behind: `.scratch/refactor/config.md` (the `Bookkeeping:` pointer and the two create-modes) and `.scratch/refactor/bookkeeping.md` holding only its title line
 (no `Pending candidates`, no Track sections), `docs/agents/issue-tracker.md` (Local Markdown),
 `docs/agents/triage-labels.md` and the suite's section in `AGENTS.md`. Not deterministically checkable; run via
 `fixtures/harness/run.sh agent-loop php-onboarding-second-invocation`, local-only and advisory.
 
 ## Expected: `/continuous-refactoring`
 
-1. **No onboarding text** — step 0 finds `bookkeeping.md` and skips straight to Track selection, without
+1. **No onboarding text** — step 0 resolves the pointer, finds `bookkeeping.md` and skips straight to Track selection, without
    saying anything about onboarding (not even that it is complete).
 2. No `## Safety Net` section exists, so the Safety Net Track is treated as never run and selected (it wins its own
    ratio comparison; the one-time exception needs an existing `## Safety Net`). The dispatcher says so in one
@@ -19,7 +19,7 @@ The state the onboarding leaves behind, committed: `docs/refactoring/bookkeeping
 
 ## Verified
 
-Confirmed live on 2026-09-21: the sandbox left by the `php-onboarding-fresh` run above, its four files
+Confirmed live on 2026-09-21, against the earlier flow that kept the create-modes in `bookkeeping.md` (not re-run since the config file split): the sandbox left by the `php-onboarding-fresh` run above, its four files
 committed by the human, then `/continuous-refactoring` again (`opencode` 1.18.31, `opencode/big-pickle`).
 Observed: no onboarding interview; the existing `bookkeeping.md` — holding only `MR-create-mode` — was accepted,
 all four Tracks counted as never run, the fixed order selected Safety Net, and the scan subagent started

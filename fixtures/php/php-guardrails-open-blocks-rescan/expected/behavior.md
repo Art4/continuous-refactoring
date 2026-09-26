@@ -20,7 +20,7 @@ genuinely reachable. `composer-audit`, `coverage-floor`, `php-minimal-version`, 
 `tooling_tree.py`, every one of them appears in `next`. If the Guardrails Track's own scan actually
 re-ran this pass, it would find all six unblocked and propose them.
 
-`docs/refactoring/bookkeeping.md`'s `## Guardrails` section: `Last scan: 2026-01-01` (far past the
+`.scratch/refactor/bookkeeping.md`'s `## Guardrails` section: `Last scan: 2026-01-01` (far past the
 default 60-day `Cadence` — deliberately, to make sure staleness alone never forces a rescan while
 `Open` holds something), `Open` as a list:
 - `phpmd (#5)`

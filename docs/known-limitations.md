@@ -37,10 +37,24 @@ assuming an outcome.
 
 ## Trackers without native labels use a ledger file
 
-Where the tracker isn't GitHub or GitLab, remembered merge requests are kept in the committed
+Where the tracker isn't GitHub or GitLab, remembered merge requests are kept in the
 `merge-requests.md` ledger instead of being read from the tracker's own issue-to-pull-request linkage, and
 an in-flight candidate is tracked in `Pending candidates`. The loop works the same way, but the ledger is
 only as current as the last pass that wrote it.
+
+## The suite's state is local: one person, one working tree
+
+The config file and the bookkeeping document live under `.scratch/refactor/` and the suite never commits
+them. Nothing carries them to another machine or teammate for you, and two people running the loop each
+keep their own cadence and open items — so each runs Housekeeping on their own schedule, too. Copy or
+commit the files yourself when you switch machines. The Housekeeping checklist
+(`docs/refactoring/housekeeping-template.md`) is the exception: it is shared, committed like code.
+
+## Create-modes default to the safe values
+
+A config file that doesn't state `Ticket-create-mode`, or doesn't exist, reads as `ask-each-time`;
+`MR-create-mode` reads as `human-opens`. The pass says so in its closing report. Onboarding writes both
+explicitly, so this only shows on a machine that skipped it.
 
 ## The implement step can hand back instead of finishing
 
@@ -64,9 +78,9 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 | Two merge requests already open | The suite-wide cap | Review and merge or close one |
 | Candidate waiting on `ready-for-agent` | The design step left an open question (`needs-info`) | Answer it on the issue, then add `ready-for-agent` |
 | Safety Net walk: nodes skipped | Blocked by an unfulfilled parent, `needs-info`, or an unverified PHP floor | Read each reason; adopt the parent, answer the question, or reject the node |
-| Waiting for a confirmation to create a ticket | `Ticket-create-mode` is `ask-each-time` and nobody was there to answer — or you declined the ticket for the candidate the pass chose | Rerun and answer; or set `Ticket-create-mode` to `autonomous` in `bookkeeping.md` if nobody will be there. Declined for good? Say so when offered and the node stops being proposed |
-| Onboarding wrote setup files and stopped | The project had no `bookkeeping.md`, so this invocation only onboarded it | Commit the new files to the default branch, rerun `/continuous-refactoring` |
-| Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no `bookkeeping.md` | Run `/continuous-refactoring` first |
+| Waiting for a confirmation to create a ticket | `Ticket-create-mode` is `ask-each-time` and nobody was there to answer — or you declined the ticket for the candidate the pass chose | Rerun and answer; or set `Ticket-create-mode` to `autonomous` in your config file if nobody will be there. Declined for good? Say so when offered and the node stops being proposed |
+| Onboarding wrote setup files and stopped | The project had no bookkeeping document, so this invocation only onboarded it | Commit what belongs in Git (the instruction-file section, `docs/agents/*`), rerun `/continuous-refactoring` |
+| Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no bookkeeping document | Run `/continuous-refactoring` first |
 | Housekeeping: nothing registered to check | No node has contributed a housekeeping check yet | Expected on a young target |
 
 ## Cadence: hours are day-accurate, a month is 30 days

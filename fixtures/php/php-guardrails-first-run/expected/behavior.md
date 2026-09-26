@@ -24,7 +24,7 @@ matches what `rector-php-set` applied), and `semgrep` (CI step with the OWASP To
 genuinely fulfilled; `phpstan-level-6` and `phpstan-deprecation-rules` are effectively rejected —
 closed the same cascading way `phpstan-level-1`'s own explicit rejection closes every level above it,
 confirmed directly against `tooling_tree.py`: both come back outside `next` even though their own raw
-`fulfilled` flag reads `false`. `docs/refactoring/bookkeeping.md` carries `## Safety Net` but no `##
+`fulfilled` flag reads `false`. `.scratch/refactor/bookkeeping.md` carries `## Safety Net` but no `##
 Guardrails` heading at all — this Track has never run on this target.
 
 ## Expected: `refactor-scan` pass

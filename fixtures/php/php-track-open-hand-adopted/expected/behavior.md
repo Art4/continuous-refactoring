@@ -18,7 +18,7 @@ php-track-open-hand-adopted --opencode`.
 committed, `vendor/bin/php-cs-fixer fix --dry-run` clean (zero diffs). `composer` and `psr-4` are
 also fulfilled (namespaced `src/Greeter.php` under `App\`).
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01` (far past the
+`.scratch/refactor/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01` (far past the
 default 90-day `Cadence`), `Open` as a list:
 - `php-cs-fixer (#5)`
 - `phpunit (#6)`

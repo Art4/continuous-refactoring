@@ -15,7 +15,7 @@ continuous-refactoring/
 │           │   └── ...
 │           └── expected/               # Expected results — stays outside container, sibling to project/
 │               ├── issues/             # Expected refactor:candidate issues
-│               └── docs/refactoring/   # Expected loop state files (for php-project-with-candidates)
+│               └── .scratch/refactor/   # Expected loop state files (for php-project-with-candidates)
 └── scripts/
     └── run-test.sh                     # Test automation script
 ```
@@ -46,11 +46,11 @@ Same as `php-p0-empty` but baseline has 3 `ignoreErrors` (non-empty). Tests **sh
 
 ### php-psalm
 
-`composer` with `vimeo/psalm` + `psalm.xml`, no PHPStan. Tests **Psalm equivalence** — `vimeo/psalm` fulfils `phpstan-level-0` (via the `psalm` node, ticket 43), level chain `p1..10` is not proposable, `rector-*` (including the `rector-php-set`-gated family) still via `p0` equivalence — this equivalence is deliberately *not* touched by ticket 37's mutual exclusion (see `php-tooling-tree.md`'s `phpstan` equivalents section). Also carries `docs/refactoring/out-of-scope/phpstan-level-10.md` (ticket 37): the mutual-exclusion housekeeping that resolves `phpstan-level-10` — the PHPStan level chain's `php-safety-net` leaf (renamed from `php-structural-scan`) — as rejected, since a Psalm-only target never fulfils it. Without that entry `phpstan-level-10` stays neither fulfilled nor rejected and `php-safety-net`/`structural-scan` stay permanently blocked; this fixture demonstrates the fixed steady state. `psalm` is not itself a `php-safety-net` leaf (ticket 37 tried that and dropped it as redundant — see `php-tooling-tree.md`'s `psalm` node entry). `psalm-taint-analysis` (ticket 44, a `php-safety-net` leaf) reads fulfilled here incidentally — the same `vimeo/psalm` dependency and `psalm.xml` satisfy both nodes' detection, and there's no CI here to gate the taint-specific check on.
+`composer` with `vimeo/psalm` + `psalm.xml`, no PHPStan. Tests **Psalm equivalence** — `vimeo/psalm` fulfils `phpstan-level-0` (via the `psalm` node, ticket 43), level chain `p1..10` is not proposable, `rector-*` (including the `rector-php-set`-gated family) still via `p0` equivalence — this equivalence is deliberately *not* touched by ticket 37's mutual exclusion (see `php-tooling-tree.md`'s `phpstan` equivalents section). Also carries `.scratch/refactor/out-of-scope/phpstan-level-10.md` (ticket 37): the mutual-exclusion housekeeping that resolves `phpstan-level-10` — the PHPStan level chain's `php-safety-net` leaf (renamed from `php-structural-scan`) — as rejected, since a Psalm-only target never fulfils it. Without that entry `phpstan-level-10` stays neither fulfilled nor rejected and `php-safety-net`/`structural-scan` stay permanently blocked; this fixture demonstrates the fixed steady state. `psalm` is not itself a `php-safety-net` leaf (ticket 37 tried that and dropped it as redundant — see `php-tooling-tree.md`'s `psalm` node entry). `psalm-taint-analysis` (ticket 44, a `php-safety-net` leaf) reads fulfilled here incidentally — the same `vimeo/psalm` dependency and `psalm.xml` satisfy both nodes' detection, and there's no CI here to gate the taint-specific check on.
 
 ### php-clean
 
-Every deterministic PHP-tooling-tree node resolved (fulfilled or explicitly rejected): `composer`, `psr-4` (ticket 50: a real `autoload.psr-4` mapping declared and verifiably in use — `src/Greeter.php` under the mapped `App\` namespace), `ci-runner`, `php-cs-fixer`, `phpunit` (CI-gated), `phpstan-level-0` (level 0, empty baseline — this target's declared ceiling), `rector-dead-code`/`rector-type-coverage`/`rector-php-set`/`rector-code-quality`/`rector-phpunit-set` fully adopted (ticket 43's Rector set family — `rector-dead-code`/`rector-code-quality` gated by `rector-php-set` directly, `rector-type-coverage`/`rector-phpunit-set` gated via sibling recommended edges instead, per a later restructuring; ticket 48 later dropped the family's sixth node, `rector-early-return`, folding its scope into `rector-code-quality`). Levels 1–10 plus `phpstan-deprecation-rules` are explicitly rejected under `docs/refactoring/out-of-scope/` rather than climbed — climbing them would flip `phpstan-level-0` back to unfulfilled (it only recognizes level *exactly* 0) while `php-safety-net`'s `resolved` gate only cares about `phpstan-level-10` (ticket 43; was `phpstan-level-3`), so an honest "nothing tooling-side left to propose" state needs the reject path, not the climb (see `docs/refactoring/out-of-scope/phpstan-level-{1..10}.md` and `phpstan-deprecation-rules.md` for the reasoning). Also carries `docs/refactoring/out-of-scope/psalm-taint-analysis.md` (ticket 44): `psalm-taint-analysis` is a `php-safety-net` leaf too (a deterministic security-scan tool) and this target never adopted it. `psalm` itself needs no rejection here — it's not a `php-safety-net` leaf (ticket 37 tried that and dropped it as redundant ceremony). `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`, and `semgrep` all moved to (or joined) the **Signal wave**, gated on `php-safety-net` in addition to (or, for `semgrep`, instead of) their own domain-specific parent — this fixture keeps every one of them genuinely fulfilled (CI-gated `composer audit`/Semgrep, `phpmd`/`coverage-floor`/`php-minimal-version` adopted) so the invariant below still holds now that `php-safety-net` resolving makes them all proposable in principle. Tests **"scan on clean repo reports clean"** (ticket 27's deterministic Tier 4 negative control) — `next()` holds nothing but the perpetual `structural-scan` invitation, `withheld()` is empty. This fixture's `project/` also carries the Refactoring Notes' `fulfilled-set.json` seed (every node resolved), so the graph logic reads the same state the tree docs describe.
+Every deterministic PHP-tooling-tree node resolved (fulfilled or explicitly rejected): `composer`, `psr-4` (ticket 50: a real `autoload.psr-4` mapping declared and verifiably in use — `src/Greeter.php` under the mapped `App\` namespace), `ci-runner`, `php-cs-fixer`, `phpunit` (CI-gated), `phpstan-level-0` (level 0, empty baseline — this target's declared ceiling), `rector-dead-code`/`rector-type-coverage`/`rector-php-set`/`rector-code-quality`/`rector-phpunit-set` fully adopted (ticket 43's Rector set family — `rector-dead-code`/`rector-code-quality` gated by `rector-php-set` directly, `rector-type-coverage`/`rector-phpunit-set` gated via sibling recommended edges instead, per a later restructuring; ticket 48 later dropped the family's sixth node, `rector-early-return`, folding its scope into `rector-code-quality`). Levels 1–10 plus `phpstan-deprecation-rules` are explicitly rejected under `.scratch/refactor/out-of-scope/` rather than climbed — climbing them would flip `phpstan-level-0` back to unfulfilled (it only recognizes level *exactly* 0) while `php-safety-net`'s `resolved` gate only cares about `phpstan-level-10` (ticket 43; was `phpstan-level-3`), so an honest "nothing tooling-side left to propose" state needs the reject path, not the climb (see `.scratch/refactor/out-of-scope/phpstan-level-{1..10}.md` and `phpstan-deprecation-rules.md` for the reasoning). Also carries `.scratch/refactor/out-of-scope/psalm-taint-analysis.md` (ticket 44): `psalm-taint-analysis` is a `php-safety-net` leaf too (a deterministic security-scan tool) and this target never adopted it. `psalm` itself needs no rejection here — it's not a `php-safety-net` leaf (ticket 37 tried that and dropped it as redundant ceremony). `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`, and `semgrep` all moved to (or joined) the **Signal wave**, gated on `php-safety-net` in addition to (or, for `semgrep`, instead of) their own domain-specific parent — this fixture keeps every one of them genuinely fulfilled (CI-gated `composer audit`/Semgrep, `phpmd`/`coverage-floor`/`php-minimal-version` adopted) so the invariant below still holds now that `php-safety-net` resolving makes them all proposable in principle. Tests **"scan on clean repo reports clean"** (ticket 27's deterministic Tier 4 negative control) — `next()` holds nothing but the perpetual `structural-scan` invitation, `withheld()` is empty. This fixture's `project/` also carries the Refactoring Notes' `fulfilled-set.json` seed (every node resolved), so the graph logic reads the same state the tree docs describe.
 
 ### non-php-project
 
@@ -87,13 +87,12 @@ behind — the next invocation selects a Track and scans). See each fixture's `e
 under `skills/continuous-refactoring/references/` (`local-issue-tracker-template.md`,
 `triage-labels-template.md`).
 
-### php-ticket-create-mode-ask, php-mr-create-mode-old-name (create-modes)
+### php-ticket-create-mode-ask (create-modes)
 
-Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), exercised through the
-`agent-loop` mode. `php-ticket-create-mode-ask` (an onboarded target with `Ticket-create-mode: ask-each-time`:
-the loop asks before a ticket exists; a refusal, a refusal-for-good and an unattended run) and
-`php-mr-create-mode-old-name` (a `bookkeeping.md` still carrying the old `Create-mode` field name, no
-`Ticket-create-mode`: read as the new names, nothing asked). See each fixture's `expected/behavior.md`.
+Not a tooling-tree fixture — no deterministic ground truth (local-only, advisory), exercised through the
+`agent-loop` mode. An onboarded target whose `.scratch/refactor/config.md` says `Ticket-create-mode: ask-each-time`:
+the loop asks before a ticket exists; a refusal, a refusal-for-good and an unattended run. See its
+`expected/behavior.md`.
 
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
@@ -107,7 +106,7 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
 - **php-safety-net-purpose-recognition** — `laravel/pint` installed and configured, no
   `friendsofphp/php-cs-fixer` anywhere. Expects `php-cs-fixer` judged fulfilled via its own Purpose
   statement (Pint genuinely serves it), and never proposed as a candidate.
-- **php-safety-net-open-blocks-rescan** — `docs/refactoring/bookkeeping.md`'s `## Safety Net` section
+- **php-safety-net-open-blocks-rescan** — `.scratch/refactor/bookkeeping.md`'s `## Safety Net` section
   holds a non-empty `Open` (`php-cs-fixer (#5)`, already `ready-for-agent` with a plan) and a `Last
   scan` far past the default 90-day `Cadence`. Expects the existing `Open` entry resumed straight to
   `refactor-implement`, not a fresh Track walk proposing the project's other genuinely-missing nodes.
@@ -119,7 +118,7 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
   Expects it removed from `Open`, `out-of-scope/php-cs-fixer.md` written, and a pointer added under
   `Out-of-scope` — the same merge/rejection symmetry every other rejection in the suite already
   follows.
-- **php-safety-net-old-schema** — `docs/refactoring/bookkeeping.md` still in the pre-ADR-0055 shape
+- **php-safety-net-old-schema** — `.scratch/refactor/bookkeeping.md` still in the pre-ADR-0055 shape
   (global `Pending candidates`, no `## Safety Net` section at all), with real
   Safety-Net-Track work still open (`psr-4`, `static-code-analyzer`/`phpstan-level-0` genuinely
   missing). Expects a normal pass — no error on, or migration of, the pre-existing old-shape fields.
@@ -148,7 +147,7 @@ safety-net-write.md`; see each fixture's own `expected/behavior.md` for the full
 ```
 
 Same non-CI, local-only, advisory posture as `decision-gate-bypass`/`judge`/`lift` — a real, file-level
-grep against the fixture's own post-run `docs/refactoring/bookkeeping.md`/`out-of-scope/` where the
+grep against the fixture's own post-run `.scratch/refactor/bookkeeping.md`/`out-of-scope/` where the
 check can be made deterministic that way (mirroring `decision-gate-bypass`'s own label check), an
 advisory transcript grep otherwise (LLM output isn't deterministic). Uses `opencode run --auto` for the
 same reason `decision-gate-bypass` does — see its own note below.
@@ -171,7 +170,7 @@ own `expected/behavior.md` for the full expected behavior.
   itself, so no literal-text check would ever see it. Expects `composer-audit` judged fulfilled
   via its own Purpose statement (the CI gate is real, just invoked through one level of indirection),
   and never proposed as a candidate.
-- **php-guardrails-open-blocks-rescan** — `docs/refactoring/bookkeeping.md`'s `## Guardrails` section
+- **php-guardrails-open-blocks-rescan** — `.scratch/refactor/bookkeeping.md`'s `## Guardrails` section
   holds a non-empty `Open` (`phpmd (#5)`, already `ready-for-agent` with a plan) and a `Last scan` far
   past the default 60-day `Cadence`. Expects the existing `Open` entry resumed straight to
   `refactor-implement`, not a fresh Track walk proposing the project's other genuinely-missing
@@ -408,7 +407,7 @@ nodes that carry a `Housekeeping` field and judges their Fulfilment check itself
   cycle even though no merge request ever delivered it and this target's bookkeeping.md carries no
   per-node cache to lean on.
 
-- **php-housekeeping-old-schema** — `docs/refactoring/bookkeeping.md` still in the pre-ADR-0055
+- **php-housekeeping-old-schema** — `.scratch/refactor/bookkeeping.md` still in the pre-ADR-0055
   shape (global `Pending candidates`, no Track sections anywhere),
   with the listed nodes genuinely fulfilled by the project. Expects a normal Housekeeping pass: the
   old-shape fields are ignored — not migrated, left exactly as
@@ -546,15 +545,15 @@ What it does:
 3. Writes a ready-to-use prompt to `/tmp/continuous-refactoring-tests/agent-loop-prompt-<fixture>.md`: read `skills/continuous-refactoring/SKILL.md` and follow it literally, one invocation (a sandbox with no Refactoring Notes is onboarded and the invocation ends there; the prompt then has the subagent commit the files and run a second invocation, which is the ordinary pass), note (don't silently fix) ambiguity, follow the interview's own "no human present" fallback if nobody's here to answer it, write friction notes to `agent-loop-friction-<fixture>.md`.
 4. Prints the sandbox and prompt paths and stops — spawn the subagent yourself (Agent tool, `run_in_background: false`, prompt = the file's contents) and let it run.
 
-Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `docs/refactoring/bookkeeping.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):
+Afterwards, inspect the sandbox to see what happened: `git -C /tmp/continuous-refactoring-tests/<fixture> log`, `.scratch/refactor/bookkeeping.md` / `merge-requests.md`, `.scratch/refactor/issues/`, and the friction file. An optional advisory sanity check (not a hard gate — subagent output isn't deterministic):
 
 ```bash
 source fixtures/harness/lib/assertions.sh
-assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/docs/refactoring/bookkeeping.md"
+assert_config_format "/tmp/continuous-refactoring-tests/<fixture>/.scratch/refactor/bookkeeping.md"
 assert_git_has_new_commits "/tmp/continuous-refactoring-tests/<fixture>" 2   # 2 = after setup_fixture's init + tracker-seed commits
 ```
 
-`php-partial` is a good default target — no `docs/refactoring/bookkeeping.md` yet, so the first invocation is the dispatcher's onboarding step (it ends after writing the setup files); the second invocation, run once those files are committed, is the ordinary pass that reasons about `composer`'s children. The prompt tells the subagent to run both. The `php-onboarding-*` fixtures target the onboarding invocation alone. Any fixture name works; nothing here depends on `php-partial` specifically.
+`php-partial` is a good default target — no `.scratch/refactor/bookkeeping.md` yet, so the first invocation is the dispatcher's onboarding step (it ends after writing the setup files); the second invocation, run once those files are committed, is the ordinary pass that reasons about `composer`'s children. The prompt tells the subagent to run both. The `php-onboarding-*` fixtures target the onboarding invocation alone. Any fixture name works; nothing here depends on `php-partial` specifically.
 
 **Components:**
 - `src/UserService.php` — Shallow "god service" mixing authentication, profile management, notifications, and reporting
@@ -616,8 +615,8 @@ The fixture contains five planted candidates that a `refactor-scan` should disco
 
 After a successful loop pass, the fixture should produce:
 
-- `expected/docs/refactoring/bookkeeping.md` — Loop configuration (cadence: weekly)
-- `expected/docs/refactoring/merge-requests.md` — No open merge requests
+- `expected/.scratch/refactor/bookkeeping.md` — Loop configuration (cadence: weekly)
+- `expected/.scratch/refactor/merge-requests.md` — No open merge requests
 
 ## Usage
 
@@ -657,7 +656,7 @@ Use the test script (see `scripts/run-test.sh`):
 
 1. Create a new directory under `fixtures/php/` (or appropriate language), e.g., `fixtures/php/my-fixture/`
 2. Create `project/` with the input that gets mounted/copied to `/tmp` — e.g., `project/src/` with planted candidates, `project/composer.json` + `project/composer.lock`, `project/phpstan.neon`, `project/.php-cs-fixer.php`, `project/.github/workflows/ci.yml`, etc.
-3. Create `expected/` as sibling to `project/` — e.g., `expected/behavior.md`, `expected/issues/` with `refactor:candidate` issues, `expected/docs/refactoring/` — **never inside `project/`** (so it is not mounted into Docker / not visible to the code under test)
+3. Create `expected/` as sibling to `project/` — e.g., `expected/behavior.md`, `expected/issues/` with `refactor:candidate` issues, `expected/.scratch/refactor/` — **never inside `project/`** (so it is not mounted into Docker / not visible to the code under test)
 4. Document the fixture's purpose and tooling-tree state in this README (see `php-empty` … `php-psalm` examples above)
 
 ## Design Principles

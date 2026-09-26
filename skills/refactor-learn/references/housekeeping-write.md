@@ -24,18 +24,6 @@ below.
 **The Track didn't run this pass** — Housekeeping wasn't the Track step 1 selected — don't touch
 `## Housekeeping` at all.
 
-**Which branch**: land this write via the ordinary dedicated bookkeeping branch/MR
-(`refactor-learn/SKILL.md`'s own "Which branch" rule), the same as `## Safety Net`'s/`## Guardrails`'/
-`## Investigation`'s own `Last scan` writes in their ordinary case. Deliberately not folded onto the
-Housekeeping Track's own cycle branch (`chore/housekeeping-<date>`) the way a candidate's own fold-in
-exception rides that candidate's branch — `refactor-learn`'s existing fold-in exception is scoped
-specifically to a native-tracker candidate MR `refactor-implement` opened this same pass
-(`refactor-learn/SKILL.md`'s own "Exception" paragraph); Housekeeping's own branch is opened directly by
-`housekeeping-track.md` itself, on any tracker, and there isn't always one to fold onto at all (the
-"nothing registered to check" and "zero code changes, issue closed directly" outcomes both leave no
-Housekeeping branch open by the time this call runs) — one uniform path avoids a second, narrower
-special case for the cases that do have a branch.
-
 ## `Cadence` is read, not written, past first creation — same discipline as `## Safety Net`'s/`## Guardrails`' own
 
 Unlike `## Investigation`'s always-literal `continuous`, `## Housekeeping`'s `Cadence` is a real interval

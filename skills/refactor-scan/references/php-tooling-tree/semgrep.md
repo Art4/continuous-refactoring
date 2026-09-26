@@ -41,7 +41,7 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   same note `phpmd`'s and `secret-detection`'s own MR scopes already carry). No separate "security
   checklist" document — the tool's own deterministic CI findings are the check; a parallel manual
   checklist covering the same ground would be duplicate upkeep for no real additional coverage. Also
-  contribute this node's `Housekeeping` line (below) to the Refactoring Notes' `housekeeping-template.md`,
+  contribute this node's `Housekeeping` line (below) to `docs/refactoring/housekeeping-template.md`,
   creating that file fresh if it doesn't exist yet
   (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`).
 - **Housekeeping:** re-run Semgrep's OWASP Top 10 ruleset periodically and review new findings — a

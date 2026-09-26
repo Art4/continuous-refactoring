@@ -61,7 +61,7 @@ Full definition (Fulfilment check, MR scope): `tooling-tree/git.md`.
 
 - **Name:** Onboarding Setup
 - **Tool:** none — this is the suite's own state, not a third-party tool.
-- **Purpose:** the continuous-refactoring loop's own configuration exists in the target repo, so a pass has somewhere to read/write focus areas, ticket-create-mode and MR-create-mode. Fulfilled by the dispatcher's onboarding step before any scan.
+- **Purpose:** the continuous-refactoring loop's own state and configuration exist for this person and target, so a pass has somewhere to read/write its bookkeeping and knows its ticket-create-mode and MR-create-mode. Fulfilled by the dispatcher's onboarding step before any scan.
 
 Full definition (Fulfilment check, MR scope): `tooling-tree/onboarding-setup.md`.
 
