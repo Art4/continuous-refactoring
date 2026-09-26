@@ -19,7 +19,7 @@ Not a user entry point: which Track runs is decided by `continuous-refactoring` 
 
 Track missing, empty, or anything else → **abort now**: nothing runs, not even step 6. Report "refactor-loop needs a Track (`safety-net`, `guardrails`, or `investigation`) and was given none / <what it was given> — invoke `/continuous-refactoring`, or the matching `continuous-<track>` skill, instead." Never infer, default, or guess a Track from repo state.
 
-**Onboarded target** — the Bookkeeping pointer must resolve to an existing `bookkeeping.md` (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now, same as a missing Track: nothing runs, not even step 6. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says.
+**Onboarded target** — the Bookkeeping pointer must resolve to an existing `bookkeeping.md` (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now, same as a missing Track: nothing runs, not even step 6. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. A pointer that is an issue URL is **loaded** first (`../continuous-refactoring/references/issue-mode.md`) — an issue that can't be read stops the pass there, and nothing is created in its place.
 
 This skill never runs Track selection and never reads another Track's bookkeeping state — the caller already settled which Track runs.
 
