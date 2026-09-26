@@ -16,7 +16,7 @@ fixtures already are. Run via `fixtures/harness/run.sh scheduler php-scheduler-b
 Same deterministic node inventory as the other `php-scheduler-bootstrap-*` fixtures — Safety Net and
 Guardrails both fully resolved at the filesystem level.
 
-`docs/refactoring/bookkeeping.md`:
+`.scratch/refactor/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Still the same "just closed"
   state the whole sequence started from.

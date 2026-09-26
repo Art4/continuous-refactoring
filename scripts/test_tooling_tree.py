@@ -317,10 +317,11 @@ class LoadTreeTests(unittest.TestCase):
 
 
 class RefactoringNotesResolutionTests(unittest.TestCase):
-    """`_resolve_refactoring_notes_dir` — the Refactoring Notes' path,
-    default docs/refactoring/, overridable via a `Refactoring Notes:
-    `<path>`` line in AGENTS.md/CLAUDE.md (skills/continuous-refactoring/
-    references/refactoring-bookkeeping.md's resolution rule)."""
+    """`_resolve_refactoring_notes_dir` — the Refactoring Notes' folder, the
+    parent of the Bookkeeping pointer: the config file's `**Bookkeeping:**`
+    field, else a `Bookkeeping: `<path>`` line in AGENTS.md/CLAUDE.md;
+    default .scratch/refactor/ (skills/continuous-refactoring/references/
+    refactoring-bookkeeping.md's resolution rule)."""
 
     def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
@@ -331,7 +332,7 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -341,35 +342,78 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
     def test_default_with_neither_file_present(self):
         tmp, root = self._make_repo({})
         try:
-            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "docs" / "refactoring")
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / ".scratch" / "refactor")
         finally:
             tmp.cleanup()
 
     def test_default_when_agents_md_present_without_the_line(self):
         tmp, root = self._make_repo({"AGENTS.md": "# Agents\n\nSome other instructions.\n"})
         try:
-            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "docs" / "refactoring")
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / ".scratch" / "refactor")
         finally:
             tmp.cleanup()
+
+    def test_default_when_agents_md_has_only_the_old_notes_line(self):
+        tmp, root = self._make_repo({"AGENTS.md": "Refactoring Notes: `alt/notes/`\n"})
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / ".scratch" / "refactor")
+        finally:
+            tmp.cleanup()
+
+    def test_config_file_pointer_names_the_folder(self):
+        tmp, root = self._make_repo({
+            ".scratch/refactor/config.md": "# Refactoring Config\n\n**Bookkeeping:** elsewhere/state/bookkeeping.md\n",
+        })
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "elsewhere" / "state")
+        finally:
+            tmp.cleanup()
+
+    def test_agents_md_pointer_is_the_shared_fallback(self):
+        tmp, root = self._make_repo({"AGENTS.md": "Bookkeeping: `team/notes/bookkeeping.md`\n"})
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "team" / "notes")
+        finally:
+            tmp.cleanup()
+
     def test_agents_md_without_line_falls_through_to_claude_md(self):
         tmp, root = self._make_repo({
             "AGENTS.md": "# Agents\n\nNo suite section here.\n",
-            "CLAUDE.md": "Refactoring Notes: `alt/notes/`\n",
+            "CLAUDE.md": "Bookkeeping: `alt/notes/bookkeeping.md`\n",
         })
         try:
             self.assertEqual(_resolve_refactoring_notes_dir(root), root / "alt" / "notes")
         finally:
             tmp.cleanup()
 
+    def test_config_file_wins_over_agents_md(self):
+        tmp, root = self._make_repo({
+            ".scratch/refactor/config.md": "**Bookkeeping:** mine/bookkeeping.md\n",
+            "AGENTS.md": "Bookkeeping: `team/bookkeeping.md`\n",
+        })
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / "mine")
+        finally:
+            tmp.cleanup()
+
+    def test_url_pointer_is_not_a_path(self):
+        tmp, root = self._make_repo({
+            ".scratch/refactor/config.md": "**Bookkeeping:** https://github.com/o/r/issues/7\n",
+        })
+        try:
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / ".scratch" / "refactor")
+        finally:
+            tmp.cleanup()
+
     def test_out_of_scope_honors_custom_path(self):
         tmp, root = self._make_repo({
-            "AGENTS.md": "Refactoring Notes: `custom/path/`\n",
+            "AGENTS.md": "Bookkeeping: `custom/path/bookkeeping.md`\n",
             "custom/path/out-of-scope/psalm.md": "# psalm\n\nRejected.\n",
         })
         try:
             self.assertIn("psalm", _rejected_nodes(root))
             # the default location has nothing, so it must not be found there
-            self.assertFalse((root / "docs" / "refactoring" / "out-of-scope" / "psalm.md").exists())
+            self.assertFalse((root / ".scratch" / "refactor" / "out-of-scope" / "psalm.md").exists())
         finally:
             tmp.cleanup()
 
@@ -387,7 +431,7 @@ class StructuralScanGateTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -445,7 +489,7 @@ class StructuralScanGateTests(unittest.TestCase):
             # fulfilled nor rejected and this helper stops being "fully
             # resolved". `psalm` itself is not a leaf (ticket 37, dropped as
             # redundant) so it needs no rejection here.
-            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
+            ".scratch/refactor/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
 class PhpSafetyNetAggregationTests(unittest.TestCase):
     """Ticket 42: `php-safety-net` (renamed from `php-structural-scan`,
@@ -464,7 +508,7 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -510,7 +554,7 @@ class PhpSafetyNetAggregationTests(unittest.TestCase):
             # too (same reasoning as StructuralScanGateTests'
             # `_fully_tooled_files` above). `psalm` itself is not a leaf
             # (ticket 37, dropped as redundant) so it needs no rejection.
-            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
+            ".scratch/refactor/out-of-scope/psalm-taint-analysis.md": "rejected: no taint analysis adopted\n",
         }
     def test_never_in_next_candidates(self):
         files = self._fully_tooled_php_leaves()
@@ -736,7 +780,7 @@ class RejectionRespectedTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -747,7 +791,7 @@ class RejectionRespectedTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/php-cs-fixer.md": "rejected\n",
         })
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
@@ -759,7 +803,7 @@ class RejectionRespectedTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpunit.md": "rejected\n",
         })
         try:
             nodes = [c["node"] for c in next_candidates(root, limit=10)]
@@ -771,7 +815,7 @@ class RejectionRespectedTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/php-cs-fixer.md": "rejected\n",
         }, fulfilled={
             "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
@@ -799,7 +843,7 @@ class RecommendedGateTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -851,8 +895,8 @@ class RecommendedGateTests(unittest.TestCase):
     def test_child_released_once_recommended_parent_rejected(self):
         tmp, root = self._make_repo(self._p0_fulfilled_files(), fulfilled=self._p0_fulfilled_dict())
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "php-cs-fixer.md").write_text("rejected\n")
+            (root / ".scratch" / "refactor" / "out-of-scope").mkdir(parents=True, exist_ok=True)
+            (root / ".scratch" / "refactor" / "out-of-scope" / "php-cs-fixer.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-dead-code", nodes)
         finally:
@@ -910,10 +954,10 @@ class RecommendedGateTests(unittest.TestCase):
         fulfilled = {**self._p0_fulfilled_dict(), "php-cs-fixer": True}
         tmp, root = self._make_repo(files, fulfilled=fulfilled)
         try:
-            (root / "docs" / "refactoring" / "out-of-scope").mkdir(parents=True, exist_ok=True)
-            (root / "docs" / "refactoring" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
-            (root / "docs" / "refactoring" / "out-of-scope" / "rector-dead-code.md").write_text("rejected\n")
-            (root / "docs" / "refactoring" / "out-of-scope" / "rector-code-quality.md").write_text("rejected\n")
+            (root / ".scratch" / "refactor" / "out-of-scope").mkdir(parents=True, exist_ok=True)
+            (root / ".scratch" / "refactor" / "out-of-scope" / "phpstan-level-1.md").write_text("rejected\n")
+            (root / ".scratch" / "refactor" / "out-of-scope" / "rector-dead-code.md").write_text("rejected\n")
+            (root / ".scratch" / "refactor" / "out-of-scope" / "rector-code-quality.md").write_text("rejected\n")
             nodes = [c["node"] for c in next_candidates(root)]
             self.assertIn("rector-type-coverage", nodes)
         finally:
@@ -968,7 +1012,7 @@ class GateNodeContractTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1043,7 +1087,7 @@ class PhpVersionReversalTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1054,7 +1098,7 @@ class PhpVersionReversalTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=7.2"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
+            ".scratch/refactor/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
         })
         try:
             nodes = [f["node"] for f in php_version_reversal_findings(root)]
@@ -1066,7 +1110,7 @@ class PhpVersionReversalTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
+            ".scratch/refactor/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
         })
         try:
             self.assertEqual(php_version_reversal_findings(root), [])
@@ -1077,7 +1121,7 @@ class PhpVersionReversalTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/some-stylistic-rejection.md": "Not worth it here.\n",
+            ".scratch/refactor/out-of-scope/some-stylistic-rejection.md": "Not worth it here.\n",
         })
         try:
             self.assertEqual(php_version_reversal_findings(root), [])
@@ -1091,7 +1135,7 @@ class PhpVersionReversalTests(unittest.TestCase):
                 "config": {"platform": {"php": "7.2.34"}},
             }),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
+            ".scratch/refactor/out-of-scope/phpunit.md": "**Blocked by:** PHP >= 7.0\n",
         })
         try:
             nodes = [f["node"] for f in php_version_reversal_findings(root)]
@@ -1105,7 +1149,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
     of the five deterministic PHP tooling leaves' known minimum-ever PHP
     version, instead of proposing/rejecting each one individually. Design
     decision (see `php_floor_precheck`'s docstring): skip silently, no
-    `docs/refactoring/out-of-scope/` entry written."""
+    `.scratch/refactor/out-of-scope/` entry written."""
 
     def _make_repo(self, files: dict, fulfilled: dict | None = None):
         tmp = tempfile.TemporaryDirectory()
@@ -1116,7 +1160,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1210,7 +1254,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
             # ticket 01: decided (fulfilled), so php-cs-fixer's own recommended
             # gate doesn't interfere with what this test actually exercises.
@@ -1235,7 +1279,7 @@ class PhpFloorPrecheckTests(unittest.TestCase):
         tmp, root = self._make_repo({
             "composer.json": json.dumps({"require": {"php": ">=5.6"}}),
             "composer.lock": "{}",
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             ".github/workflows/ci.yml": "jobs:\n  lint:\n    steps:\n      - run: php -l\n",
         })
         try:
@@ -1270,7 +1314,7 @@ class OrderedBacklogTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1288,7 +1332,7 @@ class OrderedBacklogTests(unittest.TestCase):
 
     def test_backlog_excludes_fulfilled_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         }, fulfilled={"onboarding-setup": True, "is-php-project": True, "composer": True})
@@ -1301,8 +1345,8 @@ class OrderedBacklogTests(unittest.TestCase):
 
     def test_backlog_excludes_rejected_nodes(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
-            "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/out-of-scope/phpunit.md": "rejected\n",
         })
         try:
             backlog = ordered_backlog(root)
@@ -1331,7 +1375,7 @@ class WithheldWithReasonsTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1340,7 +1384,7 @@ class WithheldWithReasonsTests(unittest.TestCase):
 
     def test_withheld_with_undecided_recommended_parent(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 0\n",
@@ -1361,30 +1405,30 @@ class WithheldWithReasonsTests(unittest.TestCase):
 
     def test_withheld_empty_when_all_decided(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": ">=8.1"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/phpunit.md": "rejected\n",
-            "docs/refactoring/out-of-scope/php-cs-fixer.md": "rejected\n",
-            "docs/refactoring/out-of-scope/rector-dead-code.md": "rejected\n",
-            "docs/refactoring/out-of-scope/rector-type-coverage.md": "rejected\n",
-            "docs/refactoring/out-of-scope/rector-php-set.md": "rejected\n",
-            "docs/refactoring/out-of-scope/rector-code-quality.md": "rejected\n",
-            "docs/refactoring/out-of-scope/rector-phpunit-set.md": "rejected\n",
-            "docs/refactoring/out-of-scope/psr-4.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-level-0.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-level-1.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-level-2.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-level-3.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-level-4.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-level-5.md": "rejected\n",
-            "docs/refactoring/out-of-scope/psalm-taint-analysis.md": "rejected\n",
-            "docs/refactoring/out-of-scope/coverage-floor.md": "rejected\n",
-            "docs/refactoring/out-of-scope/composer-audit.md": "rejected\n",
-            "docs/refactoring/out-of-scope/semgrep.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpmd.md": "rejected\n",
-            "docs/refactoring/out-of-scope/phpstan-deprecation-rules.md": "rejected\n",
-            "docs/refactoring/out-of-scope/php-minimal-version.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpunit.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/php-cs-fixer.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/rector-dead-code.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/rector-type-coverage.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/rector-php-set.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/rector-code-quality.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/rector-phpunit-set.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/psr-4.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-0.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-1.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-2.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-3.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-4.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-5.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/psalm-taint-analysis.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/coverage-floor.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/composer-audit.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/semgrep.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpmd.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-deprecation-rules.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/php-minimal-version.md": "rejected\n",
         })
         try:
             withheld = withheld_with_reasons(root)
@@ -1424,7 +1468,7 @@ class SeedInputTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1486,7 +1530,7 @@ class SeedInputTests(unittest.TestCase):
 
     def test_bookkeeping_derivation(self):
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": (
+            ".scratch/refactor/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "## Safety Net\n\n"
                 "**Last scan:** 2026-09-14\n\n"
@@ -1515,7 +1559,7 @@ class SeedInputTests(unittest.TestCase):
         # pointer (only the slug itself counts), and `#82` issue refs on
         # Open bullets (first token is the slug).
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": (
+            ".scratch/refactor/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "## Safety Net\n\n"
                 "**Open:**\n"
@@ -1551,10 +1595,10 @@ class SeedInputTests(unittest.TestCase):
         fixture_bookkeeping = (
             pathlib.Path(__file__).resolve().parents[1]
             / "fixtures" / "php" / "php-safety-net-open-blocks-rescan"
-            / "project" / "docs" / "refactoring" / "bookkeeping.md"
+            / "project" / ".scratch" / "refactor" / "bookkeeping.md"
         )
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": fixture_bookkeeping.read_text(encoding="utf-8"),
+            ".scratch/refactor/bookkeeping.md": fixture_bookkeeping.read_text(encoding="utf-8"),
         })
         try:
             tree = load_tree()
@@ -1617,7 +1661,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1684,7 +1728,7 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
             "composer.lock": "{}",
         }
         for leaf in other_leaves:
-            files[f"docs/refactoring/out-of-scope/{leaf}.md"] = "rejected\n"
+            files[f".scratch/refactor/out-of-scope/{leaf}.md"] = "rejected\n"
         fulfilled = {
             "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
@@ -1729,7 +1773,7 @@ class TrackOpenFillingTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1741,7 +1785,7 @@ class TrackOpenFillingTests(unittest.TestCase):
         ``ordered_backlog()`` in script order — the complete backlog a scan
         records into ``Open``."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n\n**Cadence:** weekly\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n\n**Cadence:** weekly\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
         }, fulfilled={
@@ -1819,7 +1863,7 @@ class RejectionCascadeTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1839,8 +1883,8 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpstan-level-0", closed)
 
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
-            "docs/refactoring/out-of-scope/composer.md": "rejected\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/out-of-scope/composer.md": "rejected\n",
         })
         try:
             backlog = ordered_backlog(root)
@@ -1859,16 +1903,16 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpunit", closed)
 
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require": {"php": "^8.1"}}),
             "composer.lock": "{}",
-            "docs/refactoring/out-of-scope/composer.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/composer.md": "rejected\n",
         })
         try:
             backlog_before = ordered_backlog(root)
             self.assertNotIn("phpunit", backlog_before)
             # Reverse the rejection
-            (root / "docs/refactoring/out-of-scope" / "composer.md").unlink()
+            (root / ".scratch/refactor/out-of-scope" / "composer.md").unlink()
             backlog_after = ordered_backlog(root)
             self.assertIn("phpunit", backlog_after)
         finally:
@@ -1878,12 +1922,12 @@ class RejectionCascadeTests(unittest.TestCase):
         """Rejecting a non-root node only closes nodes that transitively
         depend on it via required edges — siblings remain in the backlog."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": "# Refactoring Bookkeeping\n",
+            ".scratch/refactor/bookkeeping.md": "# Refactoring Bookkeeping\n",
             "composer.json": json.dumps({"require-dev": {"phpstan/phpstan": "^1.0"}}),
             "composer.lock": "{}",
             "phpstan.neon": "parameters:\n    level: 5\n",
             "phpstan-baseline.neon": "parameters:\n    ignoreErrors: []\n",
-            "docs/refactoring/out-of-scope/phpstan-level-2.md": "rejected\n",
+            ".scratch/refactor/out-of-scope/phpstan-level-2.md": "rejected\n",
         })
         try:
             backlog = ordered_backlog(root)
@@ -1914,7 +1958,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
             p.write_text(content)
         (root / ".git").mkdir()
         if fulfilled is not None:
-            seed_dir = root / "docs" / "refactoring"
+            seed_dir = root / ".scratch" / "refactor"
             seed_dir.mkdir(parents=True, exist_ok=True)
             (seed_dir / "fulfilled-set.json").write_text(
                 json.dumps(fulfilled) + "\n"
@@ -1926,7 +1970,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         ``**Open:**`` and ``**Out-of-scope:**`` fields matter; other
         fields, wherever they sit, are ignored."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": (
+            ".scratch/refactor/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "**Pending candidates:**\n"
                 "- none\n\n"
@@ -1961,7 +2005,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         treated as a target whose Tracks have never run — not an error.
         The caller returns {} — no detection fallback."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": (
+            ".scratch/refactor/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "**Pending candidates:**\n"
                 "- none\n"
@@ -1980,7 +2024,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         with the ordered backlog — only Track sections and detection
         matter."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": (
+            ".scratch/refactor/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "**Pending candidates:**\n"
                 "- none\n"
@@ -2003,7 +2047,7 @@ class OldSchemaPassThroughTests(unittest.TestCase):
         that corrects old Open entries — verified by providing a fresh
         seed reflecting actual state."""
         tmp, root = self._make_repo({
-            "docs/refactoring/bookkeeping.md": (
+            ".scratch/refactor/bookkeeping.md": (
                 "# Bookkeeping\n\n"
                 "**Pending candidates:**\n"
                 "- none\n"

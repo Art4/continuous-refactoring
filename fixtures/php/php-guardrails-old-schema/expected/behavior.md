@@ -21,7 +21,7 @@ guardrails-track php-guardrails-old-schema --opencode`, same non-CI, local-only,
 
 ## Seeded state
 
-`docs/refactoring/bookkeeping.md`: `## Safety Net` present and closed (`Open`/`Out-of-scope` both
+`.scratch/refactor/bookkeeping.md`: `## Safety Net` present and closed (`Open`/`Out-of-scope` both
 empty — the Safety Net Track has already run to completion on this target), but the old-shape `Focus areas` and
 global `Pending candidates` fields remain. **No `## Guardrails` heading anywhere in the file.** The project itself matches: the Safety Net
 is genuinely fully resolved (same shape as `php-guardrails-open-blocks-rescan`'s own seeded state), but

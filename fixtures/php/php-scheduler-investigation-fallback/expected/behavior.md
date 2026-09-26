@@ -22,7 +22,7 @@ The Safety Net **and** the Guardrails are both fully closed — same determinist
 `tooling_tree.py` run before trusting this file: `php-safety-net: true`, and `next` holds nothing but
 `structural-scan`.
 
-`docs/refactoring/bookkeeping.md`:
+`.scratch/refactor/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference date
   of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**

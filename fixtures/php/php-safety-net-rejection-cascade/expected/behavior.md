@@ -22,7 +22,7 @@ already rejected — so the only unresolved Safety Net scope nodes are `phpstan-
 `phpstan-level-3` has required descendants: `phpstan-level-4` → `phpstan-level-5` in the Safety Net,
 and (Guardrails scope) `phpstan-level-6..10` and `phpstan-deprecation-rules`.
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Cadence: 90`, `Last scan: 2026-09-01`,
+`.scratch/refactor/bookkeeping.md`'s `## Safety Net` section: `Cadence: 90`, `Last scan: 2026-09-01`,
 `Open` as a list:
 - `phpstan-level-3 (#12)`
 - `phpstan-level-4`
@@ -44,7 +44,7 @@ entries outside the Safety Net scope (the Guardrails nodes, `structural-scan`, t
 
 - No rejection recorded: `closed_by_rejection` is empty; `backlog` holds `phpstan-level-3`,
   `phpstan-level-4`, `phpstan-level-5` (in that order) as its Safety Net entries.
-- With `docs/refactoring/out-of-scope/phpstan-level-3.md` present: `closed_by_rejection` is
+- With `.scratch/refactor/out-of-scope/phpstan-level-3.md` present: `closed_by_rejection` is
   `phpstan-level-4`, `phpstan-level-5`, `phpstan-level-6`, `phpstan-level-7`, `phpstan-level-8`,
   `phpstan-level-9`, `phpstan-level-10`, `phpstan-deprecation-rules`, and `backlog` no longer holds
   `phpstan-level-3`/`-4`/`-5`. (Read the cascade from `closed_by_rejection` and `backlog`; the
@@ -57,7 +57,7 @@ entries outside the Safety Net scope (the Guardrails nodes, `structural-scan`, t
 Given the finding "closed without merge, `phpstan-level-3`, the issue's closing comment gives a
 maintainer's structural reason", it should:
 
-1. Write `docs/refactoring/out-of-scope/phpstan-level-3.md` — the recorded rejection, reason taken from
+1. Write `.scratch/refactor/out-of-scope/phpstan-level-3.md` — the recorded rejection, reason taken from
    the closing comment.
 2. Remove `phpstan-level-3` from `## Safety Net`'s `Open`, and add
    `- phpstan-level-3 — out-of-scope/phpstan-level-3.md` to its `Out-of-scope`.

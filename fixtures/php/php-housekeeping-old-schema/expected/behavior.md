@@ -10,7 +10,7 @@ same non-CI, local-only, advisory posture as `decision-gate-bypass`.
 
 ## Seeded state
 
-`docs/refactoring/bookkeeping.md` in the pre-ADR-0055 shape: `Pending candidates: - none`. **No `## Safety Net`, `## Guardrails`,
+`.scratch/refactor/bookkeeping.md` in the pre-ADR-0055 shape: `Pending candidates: - none`. **No `## Safety Net`, `## Guardrails`,
 or `## Housekeeping` heading anywhere in the file.** The project genuinely fulfils those nodes
 (`composer.json` + `.php-cs-fixer.php` + `phpunit.xml` + `phpstan.neon` with level 0 and empty
 baseline). `php-minimal-version` is also fulfilled (PHP 8.1 declared).

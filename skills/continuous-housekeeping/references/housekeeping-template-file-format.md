@@ -1,4 +1,6 @@
-# Reference: `housekeeping-template.md`, in the target repo's Refactoring Notes
+# Reference: `housekeeping-template.md`, at `docs/refactoring/` in the target repo
+
+Unlike the rest of the Refactoring Notes, this file is shared: it is reviewed and committed like code, at the fixed path `docs/refactoring/housekeeping-template.md`, whatever the bookkeeping pointer says.
 
 The accumulated checklist the Housekeeping Track
 (`housekeeping-track.md`) copies into each cycle's issue

@@ -64,7 +64,8 @@ Git at all, is the developer's job. This mode is documented as for one person.
 "absent means `autonomous`": a fresh machine without a config file must not create tickets or merge requests
 on its own.
 
-**Housekeeping.** `housekeeping-template.md` stays a file in the repo, shared and reviewed like code; a
+**Housekeeping.** `housekeeping-template.md` stays a file in the repo at the fixed path
+`docs/refactoring/housekeeping-template.md`, outside the Refactoring Notes — shared and reviewed like code; a
 tooling-tree node's merge request still adds its own line. Housekeeping's `Cadence` and `Last scan` are in the
 bookkeeping document, so two separate documents mean two independent Housekeeping schedules — accepted and
 documented.
@@ -72,6 +73,10 @@ documented.
 **Architecture.** The lifecycle skills and the parser keep working on one local file; two operations, `load`
 and `save`, move it between that file and the backend (issue body and comments, or the file itself). This
 leaves the skills and the deterministic parser unchanged, and puts all mode differences into one place.
+
+**`refactor-learn` commits nothing.** Its state writes go into the working tree in place; the ADR and
+`CONTEXT.md` changes it makes are written there too and named in its output for the developer to commit —
+never onto the candidate's branch, whose review is about the candidate's own diff.
 
 **`refactor-implement` stages only what it changed itself,** never `git add -A`, so a candidate commit can't
 pick up state from `.scratch/`.

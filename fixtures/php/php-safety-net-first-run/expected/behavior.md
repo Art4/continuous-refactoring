@@ -16,9 +16,9 @@ Every node in the Safety Net Track's own scope is already resolved: `composer`, 
 `autoload.psr-4` mapping, `src/Greeter.php` under the mapped `App\` namespace, no entry point so
 criterion 2 is vacuous), `ci-runner` (`.github/workflows/ci.yml`), `php-cs-fixer`, `phpunit`
 (CI-gated), `phpstan-level-0` (empty baseline — this target's declared ceiling; levels 1–5 explicitly
-rejected under `docs/refactoring/out-of-scope/`, which is what actually resolves `php-safety-net`'s own
+rejected under `.scratch/refactor/out-of-scope/`, which is what actually resolves `php-safety-net`'s own
 `phpstan-level-5` leaf), the `rector-*` family (`rector.php` applies all the relevant sets),
-`psalm-taint-analysis` (rejected under `out-of-scope/`, no Psalm anywhere). `docs/refactoring/
+`psalm-taint-analysis` (rejected under `out-of-scope/`, no Psalm anywhere). `.scratch/refactor/
 bookkeeping.md` carries no `## Safety Net` heading at all — this Track has never run on this target.
 
 ## Expected: `refactor-scan` pass

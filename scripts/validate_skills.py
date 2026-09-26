@@ -15,7 +15,7 @@ Tier 1 — structural:
   recorded for that skill in ``docs/agents/skill-references.md``
 - local file references (``docs/...``, ``CONTEXT.md``, ``*.md``) resolve to real
   files; target-repo artifacts (``CODING_STANDARDS.md``, ``CONTRIBUTING.md``)
-  and target-repo suite state (``docs/refactoring/**``, ADR-0005) are exempt
+  and target-repo suite state (``.scratch/refactor/**``, ``docs/refactoring/**``) are exempt
 - ADR references — the bare ``ADR-NNNN`` shorthand, or a backtick-quoted
   ``docs/adr/NNNN-slug.md`` path — are forbidden in skill prose and in
   ``references/*.md`` — the suite's own ADRs are internal maintainer docs that
@@ -82,10 +82,12 @@ EXEMPT_LOCAL_REFS = {
     "CONTRIBUTING.md": "target-repo artifact (optional)",
 }
 
-# Target-repo suite state lives under docs/refactoring/ in the target repo
-# (ADR-0005); the suite repo itself never contains these files.
+# Target-repo suite state lives under .scratch/refactor/ in the target repo (the
+# shared housekeeping-template.md under docs/refactoring/); the suite repo itself
+# never contains these files.
 EXEMPT_LOCAL_PREFIXES = {
-    "docs/refactoring/": "target-repo suite state (ADR-0005)",
+    ".scratch/refactor/": "target-repo suite state",
+    "docs/refactoring/": "target-repo shared housekeeping template",
 }
 
 # Glossary avoid-terms whose use in prose is legitimate. Keyed by (skill, term)
