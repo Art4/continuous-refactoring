@@ -94,6 +94,10 @@ Not a tooling-tree fixture — no deterministic ground truth (local-only, adviso
 the loop asks before a ticket exists; a refusal, a refusal-for-good and an unattended run. See its
 `expected/behavior.md`.
 
+### php-guardrails-leaves-structural-candidates (candidate intake per Track)
+
+Not a tooling-tree fixture — local-only, advisory. A fully-resolved Guardrails target with one unplanned structural `refactor:candidate` issue: the Guardrails pass leaves it for an Investigation pass and reports the count. See its `expected/behavior.md`.
+
 ### php-onboarding-migration, php-issue-mode-unreadable (state location)
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), exercised through the

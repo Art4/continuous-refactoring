@@ -30,7 +30,7 @@ The `/continuous-refactoring` skill then decides one thing per pass — which Tr
 3. **Safety Net blockade:** while Safety Net's `Open` is non-empty, Safety Net runs and nothing else does — even on a pass where no node is currently workable (the loop then reports what it is waiting for).
 4. **Otherwise the most overdue Track wins.** A Track is *due* when it has never run or `(today − Last scan) / Cadence >= 1`; the highest ratio is selected. A Track whose `Open` is non-empty drops out of this comparison — its existing work is finished instead of rescanned. Ties, and Tracks that never ran, fall back to the fixed order **Safety Net > Guardrails > Housekeeping > Investigation**.
 
-Investigation has no interval to measure staleness against, so it is always due — but it is last in the fixed order, so it only wins a pass when nothing else does. A Guardrails Track with workable `Open` nodes is selected ahead of it; with nothing workable, it yields.
+Investigation has no interval to measure staleness against, so it is always due — but it is last in the fixed order, so it only wins a pass when nothing else does. It also owns the structural candidates: an issue labelled `refactor:candidate` that isn't a tooling-tree node's is picked up only in an Investigation pass (a Safety Net or Guardrails pass leaves it and reports how many are waiting), except one you labelled `refactor:priority`, which any pass takes. A Guardrails Track with workable `Open` nodes is selected ahead of it; with nothing workable, it yields.
 
 ## The one-time exception
 
