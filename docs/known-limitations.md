@@ -42,13 +42,16 @@ Where the tracker isn't GitHub or GitLab, remembered merge requests are kept in 
 an in-flight candidate is tracked in `Pending candidates`. The loop works the same way, but the ledger is
 only as current as the last pass that wrote it.
 
-## The suite's state is local: one person, one working tree
+## Where the state lives decides what carries over
 
-The config file and the bookkeeping document live under `.scratch/refactor/` and the suite never commits
-them. Nothing carries them to another machine or teammate for you, and two people running the loop each
-keep their own cadence and open items — so each runs Housekeeping on their own schedule, too. Copy or
-commit the files yourself when you switch machines. The Housekeeping checklist
-(`docs/refactoring/housekeeping-template.md`) is the exception: it is shared, committed like code.
+With local files, the config file and the bookkeeping document under `.scratch/refactor/` are never committed by
+the suite: nothing carries them to another machine or teammate for you, and two people running the loop each
+keep their own cadence and open items — so each runs Housekeeping on their own schedule, too. Copy or commit the
+files yourself when you switch machines. With a bookkeeping issue, any machine that has `gh` / `glab` access to it
+picks the state up, but the last write wins (an edit you make during a pass can be overwritten) and an issue that
+can't be read — deleted, no access, no CLI — stops the pass rather than creating a new one; a closed issue is
+still used, and the report says so. The Housekeeping checklist (`docs/refactoring/housekeeping-template.md`) is
+the exception in both cases: it is shared, committed like code.
 
 ## Create-modes default to the safe values
 
@@ -80,6 +83,7 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 | Safety Net walk: nodes skipped | Blocked by an unfulfilled parent, `needs-info`, or an unverified PHP floor | Read each reason; adopt the parent, answer the question, or reject the node |
 | Waiting for a confirmation to create a ticket | `Ticket-create-mode` is `ask-each-time` and nobody was there to answer — or you declined the ticket for the candidate the pass chose | Rerun and answer; or set `Ticket-create-mode` to `autonomous` in your config file if nobody will be there. Declined for good? Say so when offered and the node stops being proposed |
 | Onboarding wrote setup files and stopped | The project had no bookkeeping document, so this invocation only onboarded it | Commit what belongs in Git (the instruction-file section, `docs/agents/*`), rerun `/continuous-refactoring` |
+| Bookkeeping issue can't be read | The pointer names an issue that was deleted, is out of reach (no access, no `gh`/`glab`), or the forge is down | Restore access or point the config file at another issue; the loop never creates a replacement. Onboarding again only after removing the pointer |
 | Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no bookkeeping document | Run `/continuous-refactoring` first |
 | Housekeeping: nothing registered to check | No node has contributed a housekeeping check yet | Expected on a young target |
 

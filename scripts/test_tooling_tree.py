@@ -396,6 +396,14 @@ class RefactoringNotesResolutionTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_agents_md_url_pointer_is_not_a_path(self):
+        tmp, root = self._make_repo({"AGENTS.md": "Bookkeeping: `https://github.com/o/r/issues/7`\n"})
+        try:
+            # issue mode: the working copy under .scratch/refactor/ is what the parser reads
+            self.assertEqual(_resolve_refactoring_notes_dir(root), root / ".scratch" / "refactor")
+        finally:
+            tmp.cleanup()
+
     def test_url_pointer_is_not_a_path(self):
         tmp, root = self._make_repo({
             ".scratch/refactor/config.md": "**Bookkeeping:** https://github.com/o/r/issues/7\n",
