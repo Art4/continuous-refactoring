@@ -1,5 +1,7 @@
 # `loop-config` runs a human interview instead of guessing tracker, create-mode, and storage
 
+> Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): the create-modes move into the per-person config file.
+
 > Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): its `Create-mode` field is renamed `MR-create-mode`, and the interview gains a ticket-create-mode question.
 
 > Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the interview is now the dispatcher's own step 0 rather than the design step of a `loop-config` candidate, and the node was renamed `onboarding-setup`.

@@ -1,5 +1,7 @@
 # On a native-label tracker, `refactor-design` skips writing `Pending candidates`
 
+> Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): the per-tracker-kind special case for `Pending candidates` goes away; it stays an ordinary state field.
+
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its core discipline —
 > bookkeeping writes always go out through a review — is unaffected for every write this ADR
 > doesn't name. What narrows is one specific write: on a native-label tracker,

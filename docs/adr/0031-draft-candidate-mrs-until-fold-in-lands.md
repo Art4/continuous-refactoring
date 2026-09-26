@@ -1,5 +1,7 @@
 # Candidate MRs open as draft until the fold-in bookkeeping lands
 
+> Superseded by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): with no fold-in, there is no draft-until-fold-in.
+
 > Amends [ADR-0028](0028-native-tracker-in-flight-bookkeeping-rides-the-candidate-branch.md): its
 > mechanism — the closing call's in-flight writes ride the candidate's own already-open merge
 > request on a native-label tracker — is unchanged. What's added is a visible signal for it:
