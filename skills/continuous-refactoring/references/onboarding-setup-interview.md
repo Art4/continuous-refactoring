@@ -311,10 +311,10 @@ missing table row) and say so.
      human described; no description given → fall through to Local
      Markdown.
 4. **The bookkeeping issue** — only when Q4 chose a new one. Look for an
-   open issue titled `Refactoring bookkeeping` first: found → ask whether to
+   open issue titled `Continuous Refactoring` first: found → ask whether to
    adopt it instead of creating a second one. Otherwise create it as
    `issue-mode.md` describes (`gh issue create` / `glab issue create`): title
-   `Refactoring bookkeeping`, body the two plain sentences, `---` and the
+   `Continuous Refactoring`, body the two plain sentences, `---` and the
    document, with no labels. Its URL becomes the Bookkeeping pointer.
 5. **Earlier state, moved** — only when Q5 chose to move it. The old
    `bookkeeping.md` minus the fields that go elsewhere becomes the new
