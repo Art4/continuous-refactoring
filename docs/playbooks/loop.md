@@ -39,7 +39,7 @@ The loop stops exactly where human judgement is needed:
 
 | Step | Skill | Your decision |
 |---|---|---|
-| Onboarding (first invocation only) | `continuous-refactoring` | tracker, whether tickets get created automatically or after asking (`Ticket-create-mode`), the same for merge requests (`MR-create-mode`), where the suite keeps its state — and, if the engineering-skills setup is missing, whether to stop and run it first |
+| Onboarding (first invocation only) | `continuous-refactoring` | tracker, whether tickets get created automatically or after asking (`Ticket-create-mode`), the same for merge requests (`MR-create-mode`), where the suite keeps its state (local files, a new bookkeeping issue, or an existing one), whether to move state from an earlier version — and, if the engineering-skills setup is missing, whether to stop and run it first |
 | Select Track | `continuous-refactoring` | optionally, which Track to force |
 | Propose nodes | `refactor-scan` | focus area, if you name one |
 | Prioritise | `refactor-prioritize` | which node is next; a `refactor:priority` label you set narrows the ranking |

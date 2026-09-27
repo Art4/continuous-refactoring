@@ -71,20 +71,30 @@ Safety Net and Guardrails work through the **tooling tree**: a directed graph of
 
 ## Loop state
 
-State lives in the target repo's working tree, never in the conversation; every lifecycle skill reads it directly. The suite writes its own files there and never commits them.
+State lives in the target repo's working tree, never in the conversation; every lifecycle skill reads it directly. The suite never commits its own state: it writes local files, or keeps the bookkeeping in one tracker issue.
 
 | What | Where |
 |---|---|
 | `Ticket-create-mode`, `MR-create-mode`, where the bookkeeping lives — per person and machine | `.scratch/refactor/config.md` — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
-| `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document (`bookkeeping.md`, default folder `.scratch/refactor/`, named by the pointer in the config file) |
+| `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document: a file (`bookkeeping.md`, default folder `.scratch/refactor/`) or one tracker issue, named by the pointer in the config file |
+| Learned rejections, remembered merge requests (issue mode) | comments on that issue |
 | Focus areas, refactoring goal | two lines in `AGENTS.md`/`CLAUDE.md`, written by you only |
 | Remembered merge requests | open `refactor:candidate` issues with a linked pull request (native-label trackers); `merge-requests.md` otherwise |
 | Backlog | `refactor:*` issues on the tracker named in `docs/agents/issue-tracker.md` |
-| Learned rejections | `out-of-scope/` |
+| Learned rejections | `out-of-scope/` (a comment each, in issue mode) |
 | Housekeeping checklist | `docs/refactoring/housekeeping-template.md` — shared, reviewed like code |
 | Domain language, decisions | the target's `CONTEXT.md` and ADRs |
 
 Neither the config file nor `bookkeeping.md` exists on a fresh target. The dispatcher's onboarding step creates them: a short human interview (tracker, `Ticket-create-mode`, `MR-create-mode`, where the suite keeps its state — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete"; it suggests committing only what belongs in Git (the instruction-file section, `docs/agents/*`) and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
+
+### Issue mode
+
+With the bookkeeping in an issue, the skills still read and write the same local files under `.scratch/refactor/`;
+that folder is a copy. The entry point (`refactor-loop`, `continuous-housekeeping`, the dispatcher's Track
+selection) loads the issue into it before anything is read, and every skill that wrote — `refactor-learn`,
+`refactor-design` for its `Pending candidates` — saves it back before returning. The issue body is the document;
+each learned rejection and each remembered merge request is a comment. The last write wins. An issue that can't be
+read stops the pass and nothing is created in its place; only onboarding, with you there, creates one.
 
 ## Fallbacks and self-containment
 

@@ -4,7 +4,7 @@ Rules for whoever runs a pass in the human's own conversation — `refactor-loop
 
 **Before each step: one sentence** saying what starts (and, when a subagent runs it, that it does). **After each step: one sentence** with the result — what was found, what was chosen and why in a few words, what came back. Two sentences at most, plain words, no slugs: name a tooling-tree node by its Name.
 
-**Every write to the target is reported on its own, as it happens** — an issue created, a comment or label on an issue, a branch pushed, a merge request opened, an `out-of-scope/` entry. Name the thing and where it lives (number, branch, link). Say "merge request" or the forge's own word (pull request on GitHub), per `opening-a-merge-request.md`.
+**Every write to the target is reported on its own, as it happens** — an issue created, a comment or label on an issue, a branch pushed, a merge request opened, an `out-of-scope/` entry, a comment or the body of the bookkeeping issue saved. Name the thing and where it lives (number, branch, link). Say "merge request" or the forge's own word (pull request on GitHub), per `opening-a-merge-request.md`.
 
 **A step that doesn't run** gets one sentence naming why, when the reason is a choice the pass made (e.g. resuming an open candidate skips ranking and design). A step that stops the pass early is reported at once — that rule already lives in the caller.
 

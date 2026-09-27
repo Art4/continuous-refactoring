@@ -14,7 +14,7 @@ breaking-change finding from `refactor-design`'s own decision gate
 (`../refactor-design/references/decision-gate.md`), when this pass's design discovered the
 candidate can't be done without changing behavior.
 
-**Write in place, never commit.** Every write below goes straight into the Refactoring Notes' files in the working tree as they are — no branch, no merge request, no commit. What happens to those files in Git is the developer's decision, not this skill's. The same goes for an ADR or a `CONTEXT.md` change: written into the working tree and named in the output for the developer to commit, never committed here — and never onto the candidate's branch, whose review is about the candidate's own diff.
+**Write in place, never commit.** Every write below goes straight into the Refactoring Notes' files in the working tree as they are — no branch, no merge request, no commit. What happens to those files in Git is the developer's decision, not this skill's. In issue mode the working copy is then **saved** to the bookkeeping issue before the call returns (`../continuous-refactoring/references/issue-mode.md`, *Save*). The same goes for an ADR or a `CONTEXT.md` change: written into the working tree and named in the output for the developer to commit, never committed here — and never onto the candidate's branch, whose review is about the candidate's own diff.
 
 **Before deleting or abandoning any branch that carries the only record of a decision**, land that record first: `references/never-delete-without-record.md`.
 

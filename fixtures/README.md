@@ -94,6 +94,14 @@ Not a tooling-tree fixture — no deterministic ground truth (local-only, adviso
 the loop asks before a ticket exists; a refusal, a refusal-for-good and an unattended run. See its
 `expected/behavior.md`.
 
+### php-onboarding-migration, php-issue-mode-unreadable (state location)
+
+Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory), exercised through the
+`agent-loop` mode. `php-onboarding-migration` (a target carrying an earlier version's committed `docs/refactoring/`:
+onboarding moves its state, keeps the modes it states, and removes the old files after confirmation) and
+`php-issue-mode-unreadable` (a config file whose Bookkeeping pointer is an issue that can't be read: the pass stops,
+nothing is created in its place). See each fixture's `expected/behavior.md`.
+
 ### php-safety-net-* (Safety Net Track, ADR-0055)
 
 Not tooling-tree fixtures — no deterministic ground truth (local-only, advisory): the whole point

@@ -75,10 +75,10 @@ Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skill
 
 ## Loop state
 
-Everything lives in the target repo's working tree, not in the conversation. The suite writes these files and never commits them — whether they go into Git, and how they reach another machine, is up to you (the bookkeeping is meant for one person):
+Everything lives in the target repo's working tree, not in the conversation. The suite never commits its own state. By default it is written as local files — whether they go into Git, and how they reach another machine, is up to you (meant for one person); or you keep the bookkeeping in a tracker issue, which any machine can pick up:
 
 - **Your config:** `.scratch/refactor/config.md` — where the bookkeeping lives, `Ticket-create-mode` and `MR-create-mode`; per person and machine
-- **Last run:** `.scratch/refactor/bookkeeping.md` — each Track's cadence, last scan and open items
+- **Last run:** `.scratch/refactor/bookkeeping.md`, or one tracker issue if you chose that during onboarding — each Track's cadence, last scan and open items
 - **Focus areas and refactoring goal:** two lines you add to `AGENTS.md` (or `CLAUDE.md`), any time
 - **Remembered merge requests:** open `refactor:candidate` issues with a linked pull request; `.scratch/refactor/merge-requests.md` on trackers without native labels
 - **Backlog:** `refactor:*` issues on the issue tracker

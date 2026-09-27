@@ -10,8 +10,9 @@ lives are facts about *this* target and *this* human's preference — not
 something a tree doc can get right for every target by guessing.
 
 It runs inline in the dispatcher (never in a subagent), once per target, and
-**ends the invocation** — no Track selection, no scan, no issue, no merge
-request, no branch, nothing created on the forge. It never runs again for a
+**ends the invocation** — no Track selection, no scan, no candidate issue, no
+merge request, no branch, nothing created on the forge — except the one
+bookkeeping issue, when the human chose to keep the state in one (Q4). It never runs again for a
 target whose Bookkeeping pointer already resolves to an existing `bookkeeping.md`.
 
 Parts, in order: **Explore**, **Setup gap** (only when the engineering-skills
@@ -61,6 +62,13 @@ Read-only. No writes, no questions yet.
   *Where the Refactoring Notes live*) says where they live; none → the default
   `.scratch/refactor/`. `bookkeeping.md` is missing — that's why onboarding is
   running at all.
+- **Earlier state.** A target that ran a version of the suite which kept its
+  state in a committed folder has that folder: `docs/refactoring/`, or the
+  path an old `Refactoring Notes: <path>` line in the instruction file names,
+  holding a `bookkeeping.md`. Read it: the values of `Ticket-create-mode`,
+  `MR-create-mode` (or its older name `Create-mode`), `Focus areas` and
+  `Refactoring goal` in it are **on record** (Q2 and Q3 are skipped for the
+  modes it states), and Q5 offers to move the rest.
 - **Partial state — resume.** An earlier onboarding may have been interrupted
   between writes. `## Record`'s order makes that recognisable: the suite's own
   `## Continuous-refactoring suite` section is written **first** (it exists
@@ -109,7 +117,7 @@ who wants it can add it any time.
 
 Before asking anything, summarize `## Explore`'s findings in plain prose —
 what's already known (a matched remote or none; whether the engineering-skills setup is
-present; anything already on record) and, explicitly, which of Q1–Q4 below
+present; anything already on record) and, explicitly, which of Q1–Q5 below
 are still open. This comes first so the human isn't asked to re-derive
 context already gathered.
 
@@ -118,10 +126,10 @@ numbered shape `/grilling`'s fallback already uses
 (`../../refactor-design/references/grilling-fallback.md`):
 `❓ **Q1** - **<title>**: <body>`, 2–4 concrete options, one recommended
 (`➡️ <recommendation>`) derived from `## Explore`. Ask Q1 — a
-single-question `AskUserQuestion` call when available (not all four
+single-question `AskUserQuestion` call when available (not all the
 questions in one call's `questions` array, even though the tool supports
 that), or the same numbered-prose shape otherwise — wait for the reply,
-then ask Q2, wait, then Q3, wait, then Q4, wait. Skip any question `## Explore` found
+then ask Q2, wait, then Q3, wait, then Q4, wait, then Q5 if it applies, wait. Skip any question `## Explore` found
 already on record.
 
 **Q1 — where do issues and merge requests live?** Skipped when
@@ -144,7 +152,7 @@ native handling for this host yet — Local Markdown works everywhere; pick
 'something else' if you'd rather describe a different convention").
 
 **Q2 — tickets: create automatically, or check with you first?** Skipped when
-`config.md` already states `Ticket-create-mode`.
+`config.md`, or the earlier state's `bookkeeping.md`, already states `Ticket-create-mode`.
 
 A ticket is the issue that states a candidate's plan. Creating one is visible
 to everyone who watches the tracker, so you can choose to be asked first.
@@ -161,7 +169,7 @@ doesn't state the field reads as `ask-each-time`; the answer is written down
 either way.)
 
 **Q3 — merge requests: open automatically, or check with you first?**
-Skipped when `config.md` already states `MR-create-mode`.
+Skipped when `config.md`, or the earlier state's `bookkeeping.md`, already states `MR-create-mode`.
 
 Whichever mode is chosen, review still happens at the merge request, not
 the issue — the issue only states the plan; the merge request shows the
@@ -186,21 +194,37 @@ suite's existing bias.
 **Q4 — where should the suite keep its own state?** Skipped when the
 instruction file already names a `Bookkeeping:` line.
 
-The suite needs a folder for the loop's own state: `bookkeeping.md` (each
-Track's cadence, last scan and open items), `merge-requests.md` (in-flight
-merge-request bookkeeping, only when the tracker has no native labels), and
-`out-of-scope/` (learned rejections) — together, the **Refactoring
-Notes**. The suite writes these files and never commits them; whether they go
-into Git, and how they reach another machine, is the developer's job — this is
-for one person. So the question is only *where*:
+The suite needs somewhere for the loop's own state: each Track's cadence, last
+scan and open items, plus the learned rejections and, on a tracker without
+native labels, the merge-request ledger — together, the **bookkeeping
+document** and the **Refactoring Notes**. The suite never commits them; how
+they reach another machine depends on where they live:
 
-- **Default location (`.scratch/refactor/`)** — recommended.
-- **A different location** — name the path of the `bookkeeping.md`.
+- **Local files (`.scratch/refactor/`)** — recommended. Nothing else to set
+  up; whether they go into Git, and how they reach another machine, is up to
+  you, and this is meant for one person.
+- **A new issue on the tracker** — only offered for GitHub or GitLab, and only
+  when Explore found the forge reachable. The state lives in the issue, so any
+  machine can pick it up; this interview creates the issue (the one thing it
+  creates on the forge).
+- **One that already exists** — name the file's path or the issue's URL, e.g.
+  to continue on a second machine. It must exist and be readable.
 
-Recommendation: always the default location. If the human refuses to store
-the Refactoring Notes at all, don't invent or wire up an alternative: say the
-suite can't run without them, write nothing, and end the invocation — the
-next `/continuous-refactoring` starts onboarding from scratch.
+Recommendation: **Local files**, unless the human said they work from more
+than one machine, then the issue. If the human refuses to store the state at
+all, don't invent or wire up an alternative: say the suite can't run without
+it, write nothing, and end the invocation — the next `/continuous-refactoring`
+starts onboarding from scratch.
+
+**Q5 — move the earlier state?** Only when `## Explore` found earlier state.
+The folder's `bookkeeping.md`, `merge-requests.md` and `out-of-scope/` would
+move to where Q4 says; its create-modes go to the config file, its `Focus
+areas` and `Refactoring goal` (when not `none`) to the instruction file.
+
+- **Move it and remove the old files** — recommended. The old files are only
+  removed once the new state is written.
+- **Move it, keep the old files.**
+- **Don't move it** — start fresh; the old files stay untouched.
 
 **Not asked here: `Focus areas` or `Refactoring goal`.** Both free-form, no
 filesystem signal to recommend from, and piling on unanchored questions
@@ -217,7 +241,8 @@ can end onboarding without writing.
 > Tracker: <GitHub | GitLab | Local Markdown | other, as named>.
 > Ticket-create-mode: <autonomous | ask-each-time>.
 > MR-create-mode: <autonomous | ask-each-time | human-opens>.
-> Bookkeeping: `<path>`, to be recorded in `.scratch/refactor/config.md`.
+> Bookkeeping: `<path or issue URL>`, to be recorded in `.scratch/refactor/config.md` (a new issue is created for it — only when Q4 chose one).
+> Earlier state: <moved and removed | moved, kept | not moved | none found>.
 > Files: <the files `## Record` will write — the instruction file's section,
 > `docs/agents/triage-labels.md` and `docs/agents/issue-tracker.md` when
 > missing, `.scratch/refactor/config.md`, `<path>`>.
@@ -285,30 +310,56 @@ missing table row) and say so.
    - **Something else:** same shape as the two cases above, from what the
      human described; no description given → fall through to Local
      Markdown.
-4. **Bookkeeping pointer and the two create-modes** → `.scratch/refactor/config.md`,
+4. **The bookkeeping issue** — only when Q4 chose a new one. Look for an
+   open issue titled `Continuous Refactoring` first: found → ask whether to
+   adopt it instead of creating a second one. Otherwise create it as
+   `issue-mode.md` describes (`gh issue create` / `glab issue create`): title
+   `Continuous Refactoring`, body the two plain sentences, `---` and the
+   document, with no labels. Its URL becomes the Bookkeeping pointer.
+5. **Earlier state, moved** — only when Q5 chose to move it. The old
+   `bookkeeping.md` minus the fields that go elsewhere becomes the new
+   document; `out-of-scope/` and `merge-requests.md` come across as they are
+   (in issue mode, `issue-mode.md`'s *Save* turns them into comments); a
+   `housekeeping-template.md` inside a custom old folder moves to
+   `docs/refactoring/housekeeping-template.md`. `Focus areas` and `Refactoring
+   goal` (when not `none`) are added as lines to the instruction file's
+   section; the old `Refactoring Notes:` line and the pointer paragraph that
+   named the create-modes are removed from it.
+6. **Bookkeeping pointer and the two create-modes** → `.scratch/refactor/config.md`,
    creating the folder if needed. The shape is `refactoring-bookkeeping.md`'s
-   *The config file*: the title line, `**Bookkeeping:**` (Q4's path, default
-   `.scratch/refactor/bookkeeping.md`), `**Ticket-create-mode:**` and
-   `**MR-create-mode:**`. A file that already exists keeps the values it has;
-   only missing fields are added.
-5. **The bookkeeping document** → `<path>/bookkeeping.md` — **last**, creating
-   the folder if needed. The shape is `refactoring-bookkeeping.md`'s
-   `## Structure`, reduced to the title line (`# Refactoring Bookkeeping`):
-   no `Pending candidates` (nothing is pending), no Track sections (each
-   appears when its Track first runs).
+   *The config file*: the title line, `**Bookkeeping:**` (Q4's path or URL,
+   default `.scratch/refactor/bookkeeping.md`), `**Ticket-create-mode:**` and
+   `**MR-create-mode:**` (Q2/Q3, or the values moved from earlier state). A
+   file that already exists keeps the values it has; only missing fields are
+   added.
+7. **The bookkeeping document** → `<path>/bookkeeping.md` (in issue mode, the
+   working copy under `.scratch/refactor/`, which is then saved to the issue
+   as `issue-mode.md`'s *Save* says) — **last**, creating the folder if needed. The shape is
+   `refactoring-bookkeeping.md`'s `## Structure`, reduced to the title line
+   (`# Refactoring Bookkeeping`) — or, after a move, what the old document
+   carried: no `Pending candidates` (nothing is pending), no Track sections
+   (each appears when its Track first runs).
+8. **Old files removed** — only when Q5 chose to remove them, and only after
+   steps 5–7 are done: the old `bookkeeping.md`, `merge-requests.md`,
+   `out-of-scope/`, `fulfilled-set.json` (in file mode it moves with the
+   folder instead) and then the old folder, if empty. They stay in Git
+   history if they were ever committed.
 
-No issue is filed, no branch or merge request is opened, no label is created
-on the forge, and nothing is committed.
+No candidate issue is filed, no branch or merge request is opened, no label is
+created on the forge, and nothing is committed. The bookkeeping issue (step 4)
+is not a ticket: `Ticket-create-mode` doesn't govern it.
 
 ## Closing
 
 Ends the invocation. Tell the human, in plain prose:
 
-- **What was created** — each file, one line each (and what was already
-  there and left alone).
+- **What was created** — each file, one line each, and the bookkeeping issue
+  with its link (and what was already there and left alone). After a move:
+  what was moved and what was removed.
 - **Commit what belongs in Git** — only when this run wrote something that
   does: the instruction file's section, `docs/agents/triage-labels.md`,
-  `docs/agents/issue-tracker.md`. Everything under `.scratch/refactor/` is the
+  `docs/agents/issue-tracker.md`, and — after a move — the removal of the old
+  folder's files. Everything under `.scratch/refactor/` is the
   developer's own: the suite doesn't commit or ignore it, and whether it goes
   into Git is their call. Nothing committable written → don't mention
   committing at all. A reminder, not a gate.
@@ -346,7 +397,8 @@ Two distinct cases:
   run with only a log file as output). Don't guess and proceed as if
   confirmed — that's exactly what this design exists to stop. Take every
   recommended answer as *proposed, not decided* — the setup-gap question
-  defaults to **Continue**, Q4 stays the default location; never invent a
+  defaults to **Continue**, Q4 stays local files at the default location and Q5 becomes *don't move it* — no issue is
+  created and nothing is removed with nobody there to confirm; never invent a
   custom path with nobody to name one — record it exactly as `## Record`
   describes, but flag every one in the closing text as "recommended, not
   confirmed by a human — first thing to double-check." The human reading

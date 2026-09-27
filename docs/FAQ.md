@@ -82,11 +82,18 @@ recorded in files — the suite never creates a label on GitHub or GitLab during
 
 Because the state — each Track's last scan and open items, your create-modes — is bookkeeping about *your*
 runs, not part of the project. Committing it meant bookkeeping branches, extra merge requests and a
-review nobody wanted to give. The suite now writes those files in place under `.scratch/refactor/` and
-leaves Git alone: whether they are committed, ignored or copied to another machine is your decision. Your
-config (`Ticket-create-mode`, `MR-create-mode`) is a separate file precisely because it can differ per
-person and machine. The trade-off: this is meant for one person on one working tree, and a second
-machine only sees what you carry over.
+review nobody wanted to give. The suite now keeps it in one of two places and leaves Git alone. **Local files**
+under `.scratch/refactor/` are the default: whether they are committed, ignored or copied to another machine is
+your decision, and this is meant for one person on one working tree. Or **one tracker issue** (GitHub or GitLab),
+created during onboarding: the suite loads it before a pass and saves after each write, so you can run the loop
+from another machine without carrying files around. Your config (`Ticket-create-mode`, `MR-create-mode`, the
+pointer to the bookkeeping) is a separate file either way, because it can differ per person and machine.
+
+## What happens if two people edit the bookkeeping issue at once?
+
+The last write wins. The suite doesn't reload and merge before saving, so an edit you make in the issue while a
+pass is running can be overwritten by that pass. The loop is meant to run on one machine at a time; edit the
+issue between passes.
 
 ## Why do I have to run `/continuous-refactoring` twice on a new project?
 

@@ -1,0 +1,12 @@
+{
+    "name": "example/php-onboarding-second-invocation",
+    "description": "Onboarding already ran and its files are committed - the next invocation is an ordinary pass",
+    "require": {
+        "php": "^8.2"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
+    }
+}
