@@ -35,7 +35,33 @@ The issue stays open, `refactor:candidate` unchanged — only its triage labels,
 missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
 (`refactor-scan/SKILL.md` steps 2 and 3b): a native-label tracker can always rediscover it later, so
 scan looks for other work instead of waiting on it; a git-only tracker has no such rediscovery, so the
-pass stops there rather than risk losing track of it.
+pass stops there rather than risk losing track of it. A native-label tracker also checks the issue for a
+human's own answer each time it's rediscovered — see "A flagged candidate's human answer arrives" below.
+
+## A flagged candidate's human answer arrives
+
+`refactor-scan` (`refactor-scan/SKILL.md` steps 2 and 3b) hands a flagged candidate back here, instead
+of skipping it silently, when its issue's most recent comment is newer than this skill's own flagging
+comment and its author is a human, not the suite's own bot account — someone answered. Read that
+comment and judge it exactly the way grilling already judges a live answer:
+
+- **Plainly confirms the default as written, raises no new question** → self-confirm: remove
+  `needs-info`, add `ready-for-agent`, and post a short comment naming that this proceeds on the
+  confirmation above (date it, so a later reader sees why the labels moved without re-reading the whole
+  thread). The candidate is `ready-for-agent` from here on, same as any other confirmed plan.
+- **Anything else** — a stated alternative, a further question, or not a plain yes — stays flagged.
+  Check whether the suite's own most recent comment is already newer than this human comment; if so, a
+  nudge was already posted for it, so say nothing further this pass. Otherwise post exactly one nudge
+  comment: name plainly that a plain confirmation needs the label swap to take effect, or that a
+  different choice needs to be spelled out concretely enough to replan against. Never apply a stated
+  alternative automatically — only a plain "yes" self-confirms; a human still has to either restate
+  their answer as a plain confirmation or swap the labels themselves once satisfied.
+
+This is the return trip of this same page's "actively manage both labels" discipline above — the human
+transcribing a settled answer into the two labels was always mechanical once the answer was plain; this
+just means the suite does that transcription instead of leaving it for the human to remember to do. It
+never lets the suite decide the actual trade-off — that still requires the human's own words on the
+issue.
 
 ## A genuine breaking change
 

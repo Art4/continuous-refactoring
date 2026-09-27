@@ -44,7 +44,7 @@ The loop stops exactly where human judgement is needed:
 | Propose nodes | `refactor-scan` | focus area, if you name one |
 | Prioritise | `refactor-prioritize` | which node is next; a `refactor:priority` label you set narrows the ranking |
 | Ticket | `refactor-loop` | with `Ticket-create-mode` `ask-each-time`, whether the tickets it proposes get created — one question for the batch of proposed nodes, then one for the candidate it chose. Say no to the chosen one and the pass ends; you're offered to reject that node for good so it isn't asked again |
-| Design | `refactor-design` | sign off the interface / seam; answer a flagged open question (the issue carries `needs-info` until you do, and `ready-for-agent` once it may proceed) |
+| Design | `refactor-design` | sign off the interface / seam; answer a flagged open question (the issue carries `needs-info` until you do). A plain "yes, proceed" comment is enough — the suite swaps the labels itself; a different choice or a further question still needs you to swap them to `ready-for-agent` by hand once satisfied |
 | Implement (review included) | `refactor-implement` | the seams that get tested; accept or reject review findings |
 | Merge request | `refactor-implement` | with MR-create-mode `ask-each-time` or `human-opens`, whether the merge request gets opened — and by whom |
 | Learn | `refactor-learn` | none — writes the bookkeeping in place |
