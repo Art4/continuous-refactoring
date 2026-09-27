@@ -11,9 +11,9 @@ A **Track** is one scheduled work mode a loop pass can spend itself on. Each pas
 | **Safety Net** | Adopt the deterministic tooling (test runner, coding standards, static analysis, CI) that catches a regression *before* structural work starts | `Cadence`, `Last scan`, `Open`, `Out-of-scope` | 90 days |
 | **Guardrails** | Adopt further quality and security tooling once the Safety Net has closed (dependency audit, coverage floor, mess detection, …) | `Cadence`, `Last scan`, `Open`, `Out-of-scope` | 60 days |
 | **Housekeeping** | Recurring maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync ([playbook](housekeeping.md)) | `Cadence`, `Last scan` | 7 days |
-| **Investigation** | Find and deliver one structural refactoring candidate (hot spot, deepening) — only opens once the Safety Net is in place | `Cadence` (always `continuous`), `Last scan`, `Open` (at most one candidate) | none — always due |
+| **Investigation** | Find and deliver structural refactoring candidates (hot spot, deepening) — only opens once the Safety Net is in place | `Cadence` (always `continuous`), `Last scan`, `Open` (the candidate(s) currently in flight) | none — always due |
 
-Safety Net and Guardrails walk the [tooling tree](../../skills/refactor-scan/references/tooling-tree.md): each adoption step is a *node*, and a Track's `Open` list holds the nodes still to do. Investigation's own `Open` holds at most the one candidate it's actively working — every other open candidate stays an ordinary tracker issue, re-discovered fresh each Investigation pass, not a tracked backlog. Housekeeping is the only Track with no `Open` at all.
+Safety Net and Guardrails walk the [tooling tree](../../skills/refactor-scan/references/tooling-tree.md): each adoption step is a *node*, and a Track's `Open` list holds the nodes still to do. Investigation's own `Open` holds whichever candidate(s) it's actively working — normally one, occasionally two if the suite-wide two-merge-request cap lets a second land while the first is still out for review — every other open candidate stays an ordinary tracker issue, re-discovered fresh each Investigation pass, not a tracked backlog. Housekeeping is the only Track with no `Open` at all.
 
 ### Writing a `Cadence`
 

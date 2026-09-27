@@ -1,7 +1,7 @@
 # Investigation Track scan
 
 `refactor-scan/SKILL.md` step 4's own Investigation-specific process: whether the Track is due this
-pass and, once due, whether to resume its one in-flight candidate or scan fresh — the one real
+pass and, once due, whether to resume its in-flight candidate(s) or scan fresh — the one real
 difference from `safety-net-track.md`/`guardrails-track.md` is that a fresh scan here only ever proposes
 one fixed node, `structural-scan`, never a backlog of many. Vocabulary: `CONTEXT.md` (**Track**, **Investigation**, **Hot spot**,
 **Deepening**).
@@ -34,12 +34,20 @@ only what this Track does with that decision — it never re-derives due-ness it
   `structural-scan` was proposed unconditionally, every pass, the moment its resolved-edge parents
   cleared, with no Track gate at all.
 - **Selected, `Open` non-empty** → the same "resume before propose fresh" discipline Safety Net/
-  Guardrails apply to their own `Open`, just single-entry: don't rescan, resume the one candidate it
-  names instead. `refactor-scan/SKILL.md` step 2 already does this before step 4 is ever reached — this
-  file's own process doesn't run this pass at all (skip straight to `refactor-scan/SKILL.md`'s
-  `## Output`), the same way `safety-net-track.md`/`guardrails-track.md` skip their own scan while their
-  `Open` is non-empty. Unlike those two, resuming here is never a multi-node walk
-  (`track-open-processing.md`) — `## Investigation`'s `Open` holds at most one entry, read directly.
+  Guardrails apply to their own `Open`: don't rescan for brand-new work while any entry remains.
+  `refactor-scan/SKILL.md` step 2 already does this before step 4 is ever reached — this file's own
+  process doesn't run this pass at all (skip straight to `refactor-scan/SKILL.md`'s `## Output`), the
+  same way `safety-net-track.md`/`guardrails-track.md` skip their own scan while their `Open` is
+  non-empty. Unlike those two, resuming here is never a Fulfilment-based workability walk
+  (`track-open-processing.md`) — an Investigation entry always already carries a plan by construction
+  (`refactor-design` is what adds it), so step 2's existing per-entry logic (plan + `ready-for-agent` →
+  implement; plan + `needs-info` → flagged, checked for a newer human comment) applies to each entry in
+  turn, top to bottom, same as reading one entry always has been. Advance at most one entry per pass —
+  the same "one candidate per pass" discipline the suite-wide two-merge-request cap already assumes
+  (`../../continuous-refactoring/references/refactoring-bookkeeping.md`'s *Why more than one entry*). An
+  entry already past design and implement, sitting on an open, unmerged PR with no reviewer activity,
+  has nothing to advance here — step 3's own reconciliation is what watches it, not this read. No entry
+  has anything to advance this pass → report that; `Open` still being non-empty still means no fresh scan.
 - **Selected, `Open` empty** → continue below; this is a genuine scan.
 
 ## Proposing
@@ -57,8 +65,9 @@ The actual codebase walk that turns this gate name into one concrete candidate i
 (`../../refactor-prioritize/references/structural-candidate-search.md`), run only once this proposal wins ranking — nothing about that pipeline
 changes here. Once filed, the concrete candidate's own open/done/rejected state lives entirely on the
 issue tracker / `merge-requests.md`; in flight, it's tracked in `## Investigation`'s own `Open`
-(`refactoring-bookkeeping.md`) — `refactor-design` sets it the moment the candidate has an issue, on
-every tracker, native-label ones included (`../../refactor-design/SKILL.md`).
+(`refactoring-bookkeeping.md`) — `refactor-design` adds an entry for it the moment the candidate has an
+issue, on every tracker, native-label ones included, alongside any other entry already there
+(`../../refactor-design/SKILL.md`).
 
 `structural-scan` still gate-blocked (its own resolved-parents not yet all resolved — typically because
 Safety Net or Guardrails hasn't fully closed yet) → nothing to propose, even though this Track was

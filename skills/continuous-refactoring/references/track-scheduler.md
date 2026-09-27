@@ -19,7 +19,7 @@ Every Track whose own `Cadence`/`Last scan` bookkeeping section currently exists
 `bookkeeping.md` — right now: `## Safety Net`, `## Guardrails`, `## Housekeeping`, `## Investigation`,
 every one of the four currently-wired Tracks (`CONTEXT.md`'s **Track** entry). Nothing here
 special-cases any Track by name beyond the fixed tie-break order (below), which already names all
-four — including Investigation, whose own section carries a single-entry `Open` alongside `Cadence`/`Last
+four — including Investigation, whose own section carries its own `Open` alongside `Cadence`/`Last
 scan` (`refactoring-bookkeeping.md`'s own `## Investigation` section), and Housekeeping, whose own section
 carries only the latter two but, unlike Investigation, a real, unit-carrying `Cadence` that competes in ratio
 comparison exactly like Safety Net's/Guardrails' own (`refactoring-bookkeeping.md`'s own `##

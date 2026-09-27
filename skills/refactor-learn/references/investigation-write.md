@@ -8,34 +8,39 @@ Investigation pass (`../../refactor-scan/references/investigation-track.md`); ev
 keeps writing the top-level `Pending candidates`/`out-of-scope/` exactly as `refactor-learn/SKILL.md`
 already documents.
 
-## Merge → clear `Open`
+## Merge → remove that one entry from `Open`
 
-The early call's "Merged" finding, for a candidate named in `## Investigation`'s own `Open`
-(`refactor-scan/SKILL.md` step 3 handed it forward as a resumable candidate) → clear `Open` to `- none`.
+The early call's "Merged" finding, for a candidate named among `## Investigation`'s own `Open` entries
+(`refactor-scan/SKILL.md` step 3 handed it forward as a resumable candidate) → remove *exactly that
+entry*, leaving any other entry untouched; `Open` reads `- none` only once the last entry is gone.
 Nothing else about the early call's merge handling changes (mark the candidate `done`, close the issue,
 drop the `merge-requests.md` entry if non-native-tracker — `refactor-learn/SKILL.md`'s own `## Process`).
 
-## Rejection → clear `Open` (no `out-of-scope/` — Investigation carries none)
+## Rejection → remove that one entry from `Open` (no `out-of-scope/` — Investigation carries none)
 
 The early call's "Closed without merge" finding, or the closing call's design-time breaking-change
-finding, either one naming the candidate `## Investigation`'s `Open` names → clear `Open` to `- none`.
-Unlike a Safety Net or Guardrails Track slug, nothing is written to `out-of-scope/`: Investigation
-doesn't reject a fixed set of candidates the way the tree does — a declined candidate's own closing note
-on the issue (`../../continuous-refactoring/references/forge-facing-writing.md`) is the whole record.
+finding, either one naming a candidate among `## Investigation`'s `Open` entries → remove that one entry
+the same way, other entries untouched. Unlike a Safety Net or Guardrails Track slug, nothing is written
+to `out-of-scope/`: Investigation doesn't reject a fixed set of candidates the way the tree does — a
+declined candidate's own closing note on the issue
+(`../../continuous-refactoring/references/forge-facing-writing.md`) is the whole record.
 
 ## Fresh MR → nothing extra (redundant with merge, kept for symmetry)
 
-The closing call's freshly-opened-MR handling doesn't itself clear `Open` — a candidate only leaves
-`Open` once its delivering MR actually **merges** (above). What *does* happen at this point, same as for
-any other candidate: the MR is remembered (`merge-requests.md` / the tracker's native link).
+The closing call's freshly-opened-MR handling doesn't itself touch `Open` — a candidate only leaves
+`Open` once its own delivering MR actually **merges** (above), and only its own entry leaves; any other
+entry already there is unaffected either way. What *does* happen at this point, same as for any other
+candidate: the MR is remembered (`merge-requests.md` / the tracker's native link).
 
-## `refactor-design` sets `Open` — this call never does
+## `refactor-design` adds an entry to `Open` — this call never does
 
 Unlike `## Safety Net`'s/`## Guardrails`' own `Open`, which starts as a bare slug and only gains its
-issue number once one is filed, `## Investigation`'s `Open` is only ever written once the candidate
-already has an issue — `refactor-design` sets it directly, `- <issue title> (#<issue>)`, the moment it
-writes the candidate's plan (`../../refactor-design/SKILL.md`) — on every tracker, native-label ones
-included. This call only ever *clears* it (above); it never sets or rewrites the entry itself.
+issue number once one is filed, an `## Investigation` `Open` entry is only ever written once its
+candidate already has an issue — `refactor-design` appends it directly, `- <issue title> (#<issue>)`,
+the moment it writes that candidate's plan (`../../refactor-design/SKILL.md`) — on every tracker,
+native-label ones included, alongside any entry already there (more than one candidate can be in flight
+at once, bounded by the suite-wide two-merge-request cap, `../../continuous-refactoring/references/refactoring-bookkeeping.md`'s *Why more than one entry*). This call only ever *removes* an
+entry (above); it never adds or rewrites one itself.
 
 ## `Last scan` — written whenever `investigation-track.md`'s own process actually ran this pass
 
@@ -48,7 +53,7 @@ Net`'s/`## Guardrails`' own `Last scan` write already occupies. **Section didn't
 scan) → create it here: `Cadence: continuous`, `Last scan: <today>`, `Open: - none`.
 
 **The scan didn't run this pass** — Investigation wasn't the Track step 1 selected, or its own `Open`
-was non-empty so `investigation-track.md` skipped straight to resuming that one entry instead of
+was non-empty so `investigation-track.md` skipped straight to resuming its entries instead of
 reaching *Proposing* — don't touch `Last scan`. Resuming existing work isn't scanning, the same
 distinction `## Safety Net`'s/`## Guardrails`' own writes already draw for their `Open`-resume path.
 
