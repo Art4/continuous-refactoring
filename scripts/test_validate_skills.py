@@ -211,9 +211,10 @@ class LocalRefTests(unittest.TestCase):
         tmp, root = self._repo()
         try:
             text = (
-                "Config lives in `docs/refactoring/bookkeeping.md`, remembered merge requests "
-                "in `docs/refactoring/merge-requests.md`, learned rejections under "
-                "`docs/refactoring/out-of-scope/`."
+                "Config lives in `.scratch/refactor/config.md`, remembered merge requests "
+                "in `.scratch/refactor/merge-requests.md`, learned rejections under "
+                "`.scratch/refactor/out-of-scope/`, the checklist in "
+                "`docs/refactoring/housekeeping-template.md`."
             )
             self.assertEqual(vs.local_ref_issues(text, root), [])
         finally:

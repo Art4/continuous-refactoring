@@ -17,7 +17,7 @@ fixtures already are. Run via `fixtures/harness/run.sh scheduler php-scheduler-b
 Same deterministic node inventory as the other `php-scheduler-bootstrap-*` fixtures — Safety Net and
 Guardrails both fully resolved at the filesystem level.
 
-`docs/refactoring/bookkeeping.md` — all four sections present, each having already run at least once (the
+`.scratch/refactor/bookkeeping.md` — all four sections present, each having already run at least once (the
 one-time exception's own three turns are all long finished):
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference date

@@ -13,7 +13,7 @@ php-safety-net-old-schema --opencode`, same non-CI, local-only, advisory posture
 
 ## Seeded state
 
-`docs/refactoring/bookkeeping.md` in the pre-ADR-0055 shape: `Pending candidates: - none`. **No `## Safety Net` heading anywhere in the file.** The project itself
+`.scratch/refactor/bookkeeping.md` in the pre-ADR-0055 shape: `Pending candidates: - none`. **No `## Safety Net` heading anywhere in the file.** The project itself
 matches: `composer.json` + `.php-cs-fixer.php` + `phpunit.xml` genuinely fulfill those four nodes, but
 carries no `autoload.psr-4` mapping (`psr-4` unfulfilled — `src/Greeter.php` has no namespace at all,
 a legacy flat layout) and no PHPStan/Psalm config (`static-code-analyzer`/`phpstan-level-0`

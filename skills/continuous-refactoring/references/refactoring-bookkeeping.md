@@ -1,27 +1,95 @@
-# Reference: `bookkeeping.md`, in the target repo's Refactoring Notes
+# Reference: the bookkeeping document, the config file, and where they live
 
-The config file the suite reads and writes. It doesn't exist on a fresh target repo: `continuous-refactoring`'s onboarding step (step 0 of the dispatcher) runs a short human interview and writes it, with `Ticket-create-mode` and `MR-create-mode` set from the answers (`onboarding-setup-interview.md`). It is written last of everything onboarding produces, so its existence means "onboarding completed" — the `onboarding-setup` node's Fulfilment check (`../../refactor-scan/references/tooling-tree.md`). A freshly onboarded file holds only the title line and those two fields; every other field and section below joins the first time something needs it, and an absent field reads as unset (`Pending candidates` absent = `- none`).
+The suite's state is split in two, and both are written by the onboarding interview
+(`onboarding-setup-interview.md`), which is why a fresh target has neither:
+
+- the **bookkeeping document** (`bookkeeping.md`, below) — the loop's state: each Track's `Cadence`, `Last scan`,
+  `Open` and `Out-of-scope`, `Pending candidates`, `Secret history scan`. Nothing personal.
+- the **config file** (`.scratch/refactor/config.md`, *The config file*, below) — per person and machine: the
+  **Bookkeeping pointer**, `Ticket-create-mode` and `MR-create-mode`.
+
+`Focus areas` and `Refactoring goal` are in neither: they are lines in the instruction file (`AGENTS.md`, else
+`CLAUDE.md`), written only by humans (*Project lines*, below).
+
+The document is written last of everything onboarding produces, so its existence means "onboarding completed" — the
+`onboarding-setup` node's Fulfilment check (`../../refactor-scan/references/tooling-tree.md`). A freshly
+onboarded document holds only the title line; every other field and section below joins the first time something
+needs it, and an absent field reads as unset (`Pending candidates` absent = `- none`).
+
+The suite reads and writes the document as one local file. Today that file is the whole story — **file mode**: the
+suite writes it and never commits, branches or ignores anything; whether it goes into Git, and how it reaches another
+machine, is the developer's job, and this mode is meant for one person. Any other place the document can live
+would only change how that one file is loaded and saved, not what any skill does with it.
 
 ## Where the Refactoring Notes live
 
-The **Refactoring Notes** are the target repo's own folder holding the loop's state — `bookkeeping.md` (this file), `merge-requests.md`, `out-of-scope/`. Default `docs/refactoring/`; overridable per target, decided once during the dispatcher's onboarding step (`onboarding-setup-interview.md`, Q4) and recorded, by that name, in the target's `AGENTS.md`/`CLAUDE.md`.
+The **Refactoring Notes** are the folder holding the loop's state — the bookkeeping document (`bookkeeping.md`,
+this file), `merge-requests.md`, `out-of-scope/`. It is the folder the Bookkeeping pointer points into. The default
+is `.scratch/refactor/`, next to the local Markdown tracker's own `issues/` folder.
 
-**Resolution rule**, followed independently by every lifecycle skill (and by the deterministic parser, `../../refactor-scan/references/tooling_tree.py`) wherever it needs the Refactoring Notes, the same way the suite already resolves "does the tracker support native labels" from `docs/agents/issue-tracker.md` — not a value threaded through the orchestrator's carried-data chain: read the target's `AGENTS.md`, and if that doesn't exist or doesn't name one, `CLAUDE.md` — whichever names a line matching `` Refactoring Notes: `<path>` `` (path backtick-quoted, trailing slash optional) wins. Neither names one → the Refactoring Notes default to `docs/refactoring/`.
+**Resolution rule**, followed independently by every lifecycle skill (and by the deterministic parser,
+`../../refactor-scan/references/tooling_tree.py`) wherever it needs the Refactoring Notes, the same way the suite
+already resolves "does the tracker support native labels" from `docs/agents/issue-tracker.md` — not a value
+threaded through the orchestrator's carried-data chain. The **Bookkeeping pointer** is, in this order:
 
-Every other skill in this suite refers to this folder by name — "the Refactoring Notes" — never by restating or assuming the concrete path; this section is the one place the resolution rule itself is defined.
+1. the config file's `**Bookkeeping:**` field — the path of the bookkeeping document;
+2. else a `` Bookkeeping: `<path>` `` line (path backtick-quoted) in `AGENTS.md`, else `CLAUDE.md` — the shared
+   fallback, for a team that wants one common document.
+
+The Refactoring Notes are that path's folder. **No pointer anywhere means the target isn't onboarded** (*Not
+onboarded yet*, below); the deterministic parser, which has no such notion, reads `.scratch/refactor/` then.
+
+Every other skill in this suite refers to this folder by name — "the Refactoring Notes" — never by restating or
+assuming the concrete path; this section is the one place the resolution rule itself is defined.
+
+## The config file
+
+`.scratch/refactor/config.md`, at this fixed path (so it needs no pointer of its own) and per person and machine.
+Whether it goes into Git is the developer's decision, like the rest of `.scratch/`.
+
+```markdown
+# Refactoring Config
+
+**Bookkeeping:** .scratch/refactor/bookkeeping.md
+
+**Ticket-create-mode:** ask-each-time
+
+**MR-create-mode:** human-opens
+```
+
+| Field | Meaning | Written by |
+|---|---|---|
+| `Bookkeeping` | The Bookkeeping pointer — the path of the bookkeeping document | the dispatcher's onboarding step, once — hand-editable after that |
+| `Ticket-create-mode` | How new tickets (issues) get created: `autonomous` or `ask-each-time`. Read by `refactor-loop` and the Housekeeping Track (`filing-a-ticket.md`) | the dispatcher's onboarding step, once — hand-editable after that |
+| `MR-create-mode` | How merge requests get opened: `autonomous`, `ask-each-time`, or `human-opens`. Read by `refactor-implement` and the Housekeeping Track (`opening-a-merge-request.md`) | the dispatcher's onboarding step, once — hand-editable after that |
+
+**A create-mode the file doesn't state — or no config file at all — reads as the safe value:**
+`Ticket-create-mode: ask-each-time`, `MR-create-mode: human-opens`. A fresh machine without a config file must not
+create tickets or open merge requests on its own; whichever pass runs on those defaults says so in its closing
+report. No skill writes this file after onboarding.
+
+## Project lines
+
+`Focus areas` (areas scans should target first) and `Refactoring goal` (a freeform description of the *shape*
+structural work should converge toward — not *where* to look, that's `Focus areas`, but what the result should
+become, e.g. "convert legacy procedural code to OOP") are lines in the instruction file's `## Continuous-refactoring
+suite` section:
+
+```markdown
+Focus areas: order intake, billing
+
+Refactoring goal: convert legacy procedural code to OOP
+```
+
+Only humans write them, any time; the suite never does. Both are optional — absent reads as unset. `Focus areas`
+is a hint for where scans should look first; `Refactoring goal` is read only by `refactor-prioritize`'s Select mode, picking a
+`structural-scan` candidate (`../../refactor-prioritize/references/structural-candidate-search.md`) — never by a
+tooling-tree node's Fulfilment check, and never by Rank mode. Omitted → no bias on candidate search.
 
 ## Structure
 
 ```markdown
 # Refactoring Bookkeeping
-
-**Ticket-create-mode:** autonomous
-
-**MR-create-mode:** autonomous
-
-**Focus areas:** order intake, billing
-
-**Refactoring goal:** convert legacy procedural code to OOP
 
 **Secret history scan:** done (2026-09-12)
 
@@ -91,10 +159,6 @@ Every Track's `Cadence` (except Investigation's literal `continuous`, below) is 
 
 | Field | Meaning | Written by |
 |---|---|---|
-| `Ticket-create-mode` | How new tickets (issues) get created: `autonomous` or `ask-each-time`. Absent → `autonomous`. Read by `refactor-loop` and the Housekeeping Track (`filing-a-ticket.md`) | the dispatcher's onboarding step, once (`onboarding-setup-interview.md`) — hand-editable after that, same as `Focus areas` |
-| `MR-create-mode` | How merge requests get opened: `autonomous`, `ask-each-time`, or `human-opens`. Formerly named `Create-mode` — an older file still carrying that name is read as `MR-create-mode`, and `refactor-learn` writes the new name the next time it writes this file | the dispatcher's onboarding step, once (`onboarding-setup-interview.md`) — hand-editable after that, same as `Focus areas` |
-| `Focus areas` | Areas scans should target first | you, any time |
-| `Refactoring goal` | Freeform description of the *shape* structural work should converge toward — not *where* to look (that's `Focus areas`), but what the result should become (e.g. "convert legacy procedural code to OOP"). Read only by `refactor-prioritize`'s Select mode, picking a `structural-scan` candidate (`../../refactor-prioritize/references/structural-candidate-search.md`) — never by a tooling-tree node's own Fulfilment check, and never by Rank mode. Omitted → today's behaviour, unchanged: no bias on candidate search. | you, any time |
 | `Secret history scan` | Whether the one-time full git-history secret scan (`refactor-scan/SKILL.md` step 4c) has already run — absent until it has, `done (YYYY-MM-DD)` (the date the scan ran, purely for human-readable audit trail — nothing reads or compares it) once every finding from that run is filed. Read only by that step, to decide whether to run at all; gated on the `secret-detection` node itself being fulfilled first, so it's meaningless (and never written) on a target that hasn't adopted that node yet. | `refactor-learn`, early call, once, the pass the scan actually runs — never hand-edited (a target that genuinely wants the scan to run again removes the field by hand instead, the same escape hatch an `out-of-scope/` rejection uses) |
 | `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue most recently filed for this candidate, not yet delivered as a merge request. Written as a list purely for formatting consistency and easier diffing — it still holds at most one entry; the suite tracks exactly one thing in flight at a time (`refactor-scan`/`refactor-prioritize`), this is not a multi-pending queue. **No native-label tracker only** — on a native tracker, a tooling-tree node/externally-labeled candidate skips this write entirely (stays `none` there in the ordinary case); a structural/baseline-shrink candidate's issue (drafted by `refactor-prioritize`'s Select mode) has it written *even on a native tracker* — a narrow, deliberate exception, see below. | `refactor-design` sets it for a tooling-tree node/externally-labeled candidate once it has the issue (non-native tracker only) — except a Safety Net/Guardrails Track's `Open`-walk node, which `refactor-scan` hands to `refactor-design` already marked self-tracking, so this write is skipped for those the same way it's skipped for a structural/baseline-shrink candidate; `refactor-design` also sets it for a structural/baseline-shrink candidate, from the issue `refactor-loop` created out of `refactor-prioritize`'s Select-mode draft (always, native tracker included); `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the candidate is resolved another way |
 
@@ -275,8 +339,8 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
 
 ## Rules
 
-- **`Pending candidates` is `refactor-learn`-written — never by hand.** `Ticket-create-mode`, `MR-create-mode`, `Focus areas`, and `Refactoring goal` you can edit by hand any time
-  — that's what they're for. `Secret history scan` is `refactor-learn`-written too (to
+- **`Pending candidates` is `refactor-learn`-written — never by hand.** The config file and the project lines
+  (above) are the hand-edited part; this document is the suite's. `Secret history scan` is `refactor-learn`-written too (to
   `done (YYYY-MM-DD)`, once) — the one exception you *can* hand-edit, but only to remove it outright, on
   the rare target that genuinely wants the one-time scan to run again. The `## Safety Net`, `## Guardrails`,
   and `## Housekeeping` sections are the same: `refactor-learn`-written, never by hand, except each
@@ -284,10 +348,10 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
   `housekeeping-cadence-interview.md`). `## Investigation` is `refactor-learn`-written too, but unlike those
   three, *nothing* in it is hand-editable — its `Cadence` is always the literal `continuous` (above), never
   a number to tune.
-- The file travels with the repo. Loop state does not live in the agent's own conversation but here (ticket-create-mode, MR-create-mode, focus areas, refactoring goal, pending candidates, the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections).
-- If the file is missing, the target isn't onboarded yet: the dispatcher's onboarding step runs before anything else, and every other skill that needs the file aborts (*Not onboarded yet*, below) rather than creating it.
+- The suite never commits this document. Loop state does not live in the agent's own conversation but here (pending candidates, the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
+- If the Bookkeeping pointer is missing, or names a document that doesn't exist, the target isn't onboarded yet: the dispatcher's onboarding step runs before anything else, and every other skill that needs the document aborts (*Not onboarded yet*, below) rather than creating it.
 
 ## Not onboarded yet
 
-When `refactor-loop` or `continuous-housekeeping` finds no `bookkeeping.md` in the Refactoring Notes, it aborts before doing anything — nothing runs, nothing is announced, and it never creates the file. Report: "This repo isn't onboarded yet — the Refactoring Notes have no `bookkeeping.md`. Run `/continuous-refactoring` first; its onboarding step sets the repo up, then rerun." This is the one place that text lives; both skills point here.
+When `refactor-loop` or `continuous-housekeeping` finds no Bookkeeping pointer, or no `bookkeeping.md` where it points, it aborts before doing anything — nothing runs, nothing is announced, and it never creates the file. Report: "This repo isn't onboarded yet — there is no bookkeeping document. Run `/continuous-refactoring` first; its onboarding step sets the repo up, then rerun." This is the one place that text lives; both skills point here.
 - **Old-schema repos need no migration.** A `bookkeeping.md` predating any of these sections (no `## Safety Net`/`## Guardrails`/`## Housekeeping`/`## Investigation` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old `Pending candidates`/`Housekeeping cadence` fields already on the file blocks this — that last one is the standalone `continuous-housekeeping` skill's own now-retired field, superseded by `## Housekeeping`'s own `Cadence`, never read or migrated into it — and none of them needs to be understood, migrated, or removed for any Track's own first scan to proceed normally (`../../refactor-scan/references/safety-net-track.md`, `../../refactor-scan/references/guardrails-track.md`, `../../continuous-housekeeping/references/housekeeping-track.md`, `../../refactor-scan/references/investigation-track.md`). The four sections migrate independently, too — a target that's already run its first Safety Net Track scan (so `## Safety Net` exists) but never its first Guardrails Track scan (so `## Guardrails` doesn't yet) is an entirely ordinary, expected state, not a partial or inconsistent one; `## Housekeeping`/`## Investigation` join the same way, each on its own first scan, independent of the others.

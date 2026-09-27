@@ -13,7 +13,7 @@ posture as `safety-net-track`/`decision-gate-bypass`.
 
 ## Seeded state
 
-The Safety Net is fully closed (same shape as `php-guardrails-open-blocks-rescan`). `docs/refactoring/
+The Safety Net is fully closed (same shape as `php-guardrails-open-blocks-rescan`). `.scratch/refactor/
 bookkeeping.md`'s `## Guardrails` section: `Open` as a list (`- phpmd (#5)`), `Out-of-scope` as a list (`- none`).
 `.scratch/refactor/issues/05-phpmd.md` — already `Status: closed`, `Labels: refactor:candidate,
 wontfix`, with a maintainer's own closing comment giving a load-bearing structural reason (cyclomatic
@@ -28,7 +28,7 @@ already on the issue), it should:
 
 1. Recognize the closing comment as a structural rejection — mark `wontfix` (already set), close the
    issue (already closed).
-2. Write `docs/refactoring/out-of-scope/phpmd.md` — a human-readable rejection entry, format unchanged
+2. Write `.scratch/refactor/out-of-scope/phpmd.md` — a human-readable rejection entry, format unchanged
    from any other `out-of-scope/` entry, stating the reason from the closing comment.
 3. Remove `phpmd` from `## Guardrails`'s `Open` list.
 4. Add `phpmd` to `## Guardrails`'s `Out-of-scope` list, pointing at the file written in step 2

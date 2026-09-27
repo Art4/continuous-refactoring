@@ -12,7 +12,7 @@ posture as `decision-gate-bypass`.
 
 ## Seeded state
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Open` as a list (`- php-cs-fixer (#5)`),
+`.scratch/refactor/bookkeeping.md`'s `## Safety Net` section: `Open` as a list (`- php-cs-fixer (#5)`),
 `Out-of-scope` as a list (`- none`). `.scratch/refactor/issues/05-php-cs-fixer.md` — already `Status: closed`,
 `Labels: refactor:candidate, wontfix`, with a maintainer's own closing comment giving a load-bearing
 structural reason (code style enforced purely by PR review, no tool, by team convention) — the
@@ -26,7 +26,7 @@ reason already on the issue), it should:
 
 1. Recognize the closing comment as a structural rejection — mark `wontfix` (already set), close the
    issue (already closed).
-2. Write `docs/refactoring/out-of-scope/php-cs-fixer.md` — a human-readable rejection entry, format
+2. Write `.scratch/refactor/out-of-scope/php-cs-fixer.md` — a human-readable rejection entry, format
    unchanged from any other `out-of-scope/` entry, stating the reason from the closing comment.
 3. Remove `php-cs-fixer` from `## Safety Net`'s `Open` list.
 4. Add `php-cs-fixer` to `## Safety Net`'s `Out-of-scope` list, pointing at the file written in step 2

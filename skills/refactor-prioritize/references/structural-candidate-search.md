@@ -15,8 +15,8 @@ take it. Otherwise walk back a good stretch of `git log --oneline` for **hot spo
 files/areas that keep coming up — and let those pull your attention first; scattered with no clear
 hot spot → widen the net.
 
-The Refactoring Notes' `bookkeeping.md` may also name a **`Refactoring goal`**
-(`../../continuous-refactoring/references/refactoring-bookkeeping.md`) — a stated target *shape*
+The instruction file (`AGENTS.md`, else `CLAUDE.md`) may also carry a **`Refactoring goal`** line
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`, *Project lines*) — a stated target *shape*
 for structural work (e.g. "convert legacy procedural code to OOP"), as opposed to `Focus areas`'
 *where*. When set, treat it as an added lens on top of wherever you're looking: friction that keeps
 the code away from the stated shape is a genuine signal in its own right, on top of the factors below

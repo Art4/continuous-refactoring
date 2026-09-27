@@ -6,7 +6,7 @@ The playbook for humans. The skills do the work; this document explains how the 
 
 A **Track** is one scheduled work mode a loop pass can spend itself on. Each pass runs exactly one Track — or, if none is due, ends and says so. There are four:
 
-| Track | Purpose | Own state in `bookkeeping.md` | Default `Cadence` |
+| Track | Purpose | Own state in the bookkeeping document | Default `Cadence` |
 |---|---|---|---|
 | **Safety Net** | Adopt the deterministic tooling (test runner, coding standards, static analysis, CI) that catches a regression *before* structural work starts | `Cadence`, `Last scan`, `Open`, `Out-of-scope` | 90 days |
 | **Guardrails** | Adopt further quality and security tooling once the Safety Net has closed (dependency audit, coverage floor, mess detection, …) | `Cadence`, `Last scan`, `Open`, `Out-of-scope` | 60 days |
@@ -21,7 +21,7 @@ Safety Net and Guardrails walk the [tooling tree](../../skills/refactor-scan/ref
 
 ## How a Track is selected
 
-Before any of this, a project that has never run the loop (no `bookkeeping.md`) is **onboarded** instead: that invocation asks a few setup questions, writes the setup files and stops, without selecting a Track — even when you named one. Track selection only happens once onboarding has run.
+Before any of this, a project that has never run the loop (no bookkeeping document) is **onboarded** instead: that invocation asks a few setup questions, writes the setup files and stops, without selecting a Track — even when you named one. Track selection only happens once onboarding has run.
 
 The `/continuous-refactoring` skill then decides one thing per pass — which Track — and hands it to that Track's own skill. It applies these rules in order:
 

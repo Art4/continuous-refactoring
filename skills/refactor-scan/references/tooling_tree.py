@@ -76,7 +76,7 @@ def _derive_fulfilled_from_bookkeeping(
     guardrails-write.md).  A scope node that is neither in ``Open`` nor
     in ``Out-of-scope`` is fulfilled.  Other fields (e.g. ``Last scan``)
     are ignored, not migrated.  Returns
-    ``None`` when no bookkeeping file or no Track-section state exists
+    ``None`` when no bookkeeping document or no Track-section state exists
     (the caller returns ``{}`` — there is no detection fallback; scan
     passes require a seed).
     """
@@ -363,24 +363,32 @@ def _read_composer(repo: pathlib.Path) -> dict | None:
 
 def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
     """Where the suite keeps its own state in this target repo — the
-    Refactoring Notes. Default docs/refactoring/; overridden by a
-    `Refactoring Notes: `<path>`` line in the target's AGENTS.md or
-    CLAUDE.md (onboarding-setup's own interview writes this once, into whichever
-    of the two already existed — never both) — see
+    Refactoring Notes, the folder the Bookkeeping pointer points into.
+    The pointer is the `**Bookkeeping:** <path>` field of
+    `.scratch/refactor/config.md`, else a `Bookkeeping: `<path>`` line in the
+    target's AGENTS.md or CLAUDE.md (the shared fallback); the folder is that
+    path's parent. No pointer (an un-onboarded target, which this parser has no
+    notion of) → the default `.scratch/refactor/`. A URL pointer isn't a path
+    and is skipped — see
     skills/continuous-refactoring/references/refactoring-bookkeeping.md for the
-    exact line format this parses."""
-    default = repo / "docs" / "refactoring"
-    for name in ("AGENTS.md", "CLAUDE.md"):
-        p = repo / name
+    exact formats this parses."""
+    default = repo / ".scratch" / "refactor"
+    config = repo / ".scratch" / "refactor" / "config.md"
+    candidates: list[tuple[pathlib.Path, str]] = [
+        (config, r"^\*\*Bookkeeping:\*\*\s*(\S+)\s*$"),
+        (repo / "AGENTS.md", r"^Bookkeeping:\s*`([^`]+)`"),
+        (repo / "CLAUDE.md", r"^Bookkeeping:\s*`([^`]+)`"),
+    ]
+    for p, pattern in candidates:
         if not p.exists():
             continue
         try:
             txt = p.read_text(encoding="utf-8")
         except OSError:
             continue
-        m = re.search(r"^Refactoring Notes:\s*`([^`]+)`", txt, re.MULTILINE)
-        if m:
-            return repo / m.group(1).strip().strip("/")
+        m = re.search(pattern, txt, re.MULTILINE)
+        if m and "://" not in m.group(1):
+            return (repo / m.group(1).strip()).parent
     return default
 
 
@@ -463,7 +471,7 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     and `detect_and_roadmap()` surfaces the list so a caller can report the
     fact in one pass instead of it silently vanishing.
 
-    Design decision: skip silently, no `docs/refactoring/out-of-scope/`
+    Design decision: skip silently, no `<Refactoring Notes>/out-of-scope/`
     entry written for a blocked leaf. The check is cheap and re-derived
     fully from `composer.json` every pass, so nothing is lost by not
     persisting it — and that directory otherwise records a genuine human/
@@ -634,7 +642,7 @@ def _rejected_nodes(repo: pathlib.Path) -> set[str]:
 
     Convention: one file per rejected node at
     ``<Refactoring Notes>/out-of-scope/<node>.md`` (default
-    ``docs/refactoring/out-of-scope/<node>.md`` — see
+    ``<Refactoring Notes>/out-of-scope/<node>.md`` — see
     _resolve_refactoring_notes_dir). This is the minimal convention needed
     for structural-scan's `resolved` gate — it does not parse
     structural-candidate rejections, which are keyed by issue number, not

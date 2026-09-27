@@ -1,6 +1,6 @@
 # Expected behavior — `Ticket-create-mode: ask-each-time`
 
-An onboarded target whose `bookkeeping.md` says `Ticket-create-mode: ask-each-time` and `MR-create-mode: human-opens`
+An onboarded target whose `config.md` says `Ticket-create-mode: ask-each-time` and `MR-create-mode: human-opens`
 (the seed is `php-onboarding-second-invocation`'s project with those two values). Confirms the loop asks before it
 creates a ticket and never creates one on its own — the rules in
 `skills/continuous-refactoring/references/filing-a-ticket.md`. Not deterministically checkable; run via
@@ -33,7 +33,7 @@ Answering *not for good* leaves everything as is — the next pass proposes the 
 ## Expected: unattended (no human to answer)
 
 Nothing is created. The pass ends with a report that it waits for a confirmation, and adds that
-`Ticket-create-mode` can be set to `autonomous` in the Refactoring Notes' `bookkeeping.md`. No recommendation is
+`Ticket-create-mode` can be set to `autonomous` in the config file. No recommendation is
 taken as an answer.
 
 ## Not covered here

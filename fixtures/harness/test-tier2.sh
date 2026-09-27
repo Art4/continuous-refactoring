@@ -75,17 +75,17 @@ run_tier2_tests() {
 
     # Test 7: Check expected docs structure
     log_info "Test 7: Expected docs structure"
-    assert_dir_exists "$FIXTURE_SRC/expected/docs"
-    assert_dir_exists "$FIXTURE_SRC/expected/docs/refactoring"
+    assert_dir_exists "$FIXTURE_SRC/expected/.scratch/refactor"
 
     # Test 8: Check expected config
     log_info "Test 8: Expected config"
-    assert_file_exists "$FIXTURE_SRC/expected/docs/refactoring/bookkeeping.md"
-    assert_config_format "$FIXTURE_SRC/expected/docs/refactoring/bookkeeping.md"
+    assert_file_exists "$FIXTURE_SRC/expected/.scratch/refactor/config.md"
+    assert_file_exists "$FIXTURE_SRC/expected/.scratch/refactor/bookkeeping.md"
+    assert_config_format "$FIXTURE_SRC/expected/.scratch/refactor/bookkeeping.md"
 
     # Test 9: Check expected MR file
     log_info "Test 9: Expected MR file"
-    assert_file_exists "$FIXTURE_SRC/expected/docs/refactoring/merge-requests.md"
+    assert_file_exists "$FIXTURE_SRC/expected/.scratch/refactor/merge-requests.md"
 }
 
 # Main

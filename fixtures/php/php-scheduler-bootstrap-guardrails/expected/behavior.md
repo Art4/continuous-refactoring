@@ -18,7 +18,7 @@ Same deterministic node inventory as `php-scheduler-bootstrap-investigation` —
 both fully resolved at the filesystem level (`php-safety-net: true`, `next` holds nothing but
 `structural-scan`).
 
-`docs/refactoring/bookkeeping.md`:
+`.scratch/refactor/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Same as
   `php-scheduler-bootstrap-investigation` — still the same "just closed" state.

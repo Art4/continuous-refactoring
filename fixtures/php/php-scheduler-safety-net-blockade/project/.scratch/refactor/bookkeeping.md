@@ -1,0 +1,41 @@
+# Refactoring Bookkeeping
+
+**Pending candidates:**
+- none
+
+## Safety Net
+
+**Cadence:** 90
+
+**Last scan:** 2026-09-18
+
+**Open:**
+- phpstan-level-6 (#20)
+- coverage-floor (#21)
+
+**Out-of-scope:**
+- none
+
+## Guardrails
+
+**Cadence:** 60
+
+**Last scan:** 2026-07-01
+
+**Open:**
+- none
+
+**Out-of-scope:**
+- none
+
+## Housekeeping
+
+**Cadence:** 7
+
+**Last scan:** 2026-09-15
+
+## Investigation
+
+**Cadence:** continuous
+
+**Last scan:** 2026-09-10

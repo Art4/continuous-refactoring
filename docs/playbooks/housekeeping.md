@@ -19,7 +19,7 @@ cycle, work it, run the quality gate, deliver.
 
 Nothing to opt into — a fresh target already gets weekly Housekeeping (`Cadence: 7 days`) the first time
 the Track scheduler selects it, the same silent default `Safety Net`'s 90 days and `Guardrails`' 60 days
-already use. Read or change the interval directly in the Refactoring Notes' `bookkeeping.md`'s
+already use. Read or change the interval directly in the bookkeeping document's
 `## Housekeeping` section — hand-edit `Cadence` any time — a number with a unit (`12 hours`, `3 days`, `2 weeks`, `1 month`) or a fixed calendar day (`monthly on the 1st`) — or ask for a guided one-question prompt instead
 of a hand edit by running the Housekeeping Track's own cadence interview.
 
@@ -39,7 +39,7 @@ works for Safety Net, Guardrails, and Investigation.
 ## Reading a sweep
 
 Each due cycle is one issue, titled `Housekeeping — <date>`, its checklist assembled from whatever's
-accumulated in the Refactoring Notes' `housekeeping-template.md` plus one standing item (an
+accumulated in `docs/refactoring/housekeeping-template.md` plus one standing item (an
 AGENTS.md/skills/rules sync check, every cycle, tied to no single tool). Review it like any other merge
 request: CI green, the reported findings actually addressed or explicitly escalated back to you — not
 silently decided — for anything without a clean fix.

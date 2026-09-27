@@ -18,7 +18,7 @@ The Safety Net is fully closed (same shape as `php-guardrails-open-blocks-rescan
 `psalm-taint-analysis` rejected), so `php-safety-net` resolves and every Guardrails node is genuinely
 reachable. `phpmd` is still genuinely missing.
 
-`docs/refactoring/bookkeeping.md`:
+`.scratch/refactor/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-01` (18 days before this fixture's reference
   date of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. Not due; no blockade.

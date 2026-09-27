@@ -20,7 +20,7 @@ Same deterministic node inventory as `php-clean`/`php-scheduler-housekeeping-com
 **and** Guardrails both fully resolved at the filesystem level (`php-safety-net: true`, `next` holds
 nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run before trusting this file.
 
-`docs/refactoring/bookkeeping.md`:
+`.scratch/refactor/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18` (1 day before this fixture's reference date of
   2026-09-19 → `overdue_ratio ≈ 0.01`), `Open` list `- none`. **Just closed — this is the pass right after `Open`

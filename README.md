@@ -31,7 +31,7 @@ The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md);
 
 ## How it works
 
-A pass spends itself on exactly one of four **Tracks**. Each has its own cadence in the target's `bookkeeping.md` — an interval with a unit (`12 hours`, `7 days`, `2 weeks`, `1 month`) or a monthly calendar day (`monthly on the 1st`); the most overdue one wins.
+A pass spends itself on exactly one of four **Tracks**. Each has its own cadence in the bookkeeping document — an interval with a unit (`12 hours`, `7 days`, `2 weeks`, `1 month`) or a monthly calendar day (`monthly on the 1st`); the most overdue one wins.
 
 | Track | What it does | Default cadence |
 |---|---|---|
@@ -47,7 +47,7 @@ Tickets are created by the loop only — automatically, or after asking you (`Ti
 | Skill | Purpose |
 |---|---|
 | `continuous-refactoring` | The one entry point — a thin dispatcher: onboards a project that has never run the loop, otherwise selects the Track due this pass (cadence or on-demand) and hands it to that Track's skill |
-| `refactor-scan` | Propose every currently-unblocked tooling-tree node from `bookkeeping.md`; detect (never file) closed/merged issues and MRs |
+| `refactor-scan` | Propose every currently-unblocked tooling-tree node from the bookkeeping document; detect (never file) closed/merged issues and MRs |
 | `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects the concrete candidate; drafts the tickets the loop then creates |
 | `refactor-design` | Ground/grill the candidate → plan, written or commented onto its ticket |
 | `refactor-implement` | Execute the plan test-first, in slices, review included |
@@ -69,18 +69,20 @@ Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skill
 
 ## Quick start
 
-1. **Start the loop:** `/continuous-refactoring` — on a project that has never run it, this first invocation only **onboards**: a short config interview, then it writes `docs/refactoring/` and the other setup files, tells you what it did, and stops without scanning anything. Commit those files, then run `/continuous-refactoring` again — that second invocation starts the first real pass. The loop has no cadence of its own; trigger it however often fits (by hand, or your own scheduler such as `/schedule` or `/loop`). Each pass picks whichever of the four Tracks is most overdue and works that one — Housekeeping's weekly sweep needs no separate opt-in step.
+1. **Start the loop:** `/continuous-refactoring` — on a project that has never run it, this first invocation only **onboards**: a short config interview, then it writes your config file, the bookkeeping document (both under `.scratch/refactor/`) and the other setup files, tells you what it did, and stops without scanning anything. Commit what belongs in Git (the instruction-file section and `docs/agents/*`), then run `/continuous-refactoring` again — that second invocation starts the first real pass. The loop has no cadence of its own; trigger it however often fits (by hand, or your own scheduler such as `/schedule` or `/loop`). Each pass picks whichever of the four Tracks is most overdue and works that one — Housekeeping's weekly sweep needs no separate opt-in step.
 2. **Optional — force a specific Track:** name one directly when invoking `/continuous-refactoring` (e.g. "run the Housekeeping Track") to bypass the scheduler's own staleness comparison for this pass.
 3. **Review and merge** the merge requests the loop opens. With two already open, a pass ends without new work until you merge or close one.
 
 ## Loop state
 
-Everything lives in the target repo, not in the conversation:
+Everything lives in the target repo's working tree, not in the conversation. The suite writes these files and never commits them — whether they go into Git, and how they reach another machine, is up to you (the bookkeeping is meant for one person):
 
-- **Config + last run:** `docs/refactoring/bookkeeping.md` — `Ticket-create-mode`, `MR-create-mode`, focus areas, and each Track's cadence, last scan and open items
-- **Remembered merge requests:** open `refactor:candidate` issues with a linked pull request; `docs/refactoring/merge-requests.md` on trackers without native labels
+- **Your config:** `.scratch/refactor/config.md` — where the bookkeeping lives, `Ticket-create-mode` and `MR-create-mode`; per person and machine
+- **Last run:** `.scratch/refactor/bookkeeping.md` — each Track's cadence, last scan and open items
+- **Focus areas and refactoring goal:** two lines you add to `AGENTS.md` (or `CLAUDE.md`), any time
+- **Remembered merge requests:** open `refactor:candidate` issues with a linked pull request; `.scratch/refactor/merge-requests.md` on trackers without native labels
 - **Backlog:** `refactor:*` issues on the issue tracker
-- **Learned rejections:** `docs/refactoring/out-of-scope/`
+- **Learned rejections:** `.scratch/refactor/out-of-scope/`
 - **Domain language and decisions:** the target's own `CONTEXT.md` and ADR directory
 - **Housekeeping checklist** (only once some node has contributed to it): `docs/refactoring/housekeeping-template.md`
 
@@ -95,7 +97,7 @@ Everything lives in the target repo, not in the conversation:
 | [Architecture](docs/architecture.md) | Skill hierarchy, data flow, loop state, tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
 | [Known limitations](docs/known-limitations.md) | Setup gotchas without a suite-side fix, plus troubleshooting |
-| [Bookkeeping reference](skills/continuous-refactoring/references/refactoring-bookkeeping.md) | The `bookkeeping.md` config file in full |
+| [Bookkeeping reference](skills/continuous-refactoring/references/refactoring-bookkeeping.md) | The config file and the bookkeeping document in full |
 | [CONTEXT.md](CONTEXT.md) | The suite's vocabulary |
 
 ## Contributing

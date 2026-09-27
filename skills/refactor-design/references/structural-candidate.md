@@ -25,7 +25,7 @@ Run `/grilling` on the candidate, along these branches:
 - **The interface** — what does it expose, does it stay deep (implementation complexity > interface complexity)?
 - **Locality** — what moves together, what must *not* spread?
 - **Tests that survive** — which stay, which are rewritten, which new ones appear at the seam?
-- **Against the stated goal** — only when `bookkeeping.md` names a `Refactoring goal`: does the
+- **Against the stated goal** — only when the instruction file carries a `Refactoring goal` line: does the
   deepened module, as designed, actually move the code toward it? A design that satisfies every
   other branch but drifts away from (or simply ignores) a stated goal is worth reconsidering. No
   goal set → skip this branch, same as today.

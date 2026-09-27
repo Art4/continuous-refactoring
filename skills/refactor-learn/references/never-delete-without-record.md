@@ -1,9 +1,7 @@
 # Never let deleting a branch be the only record that something happened
 
-Rejecting a candidate mid-flight with no forge API access to formally close its merge request is not a license to delete the branch as "the practical equivalent" of closing it. A bookkeeping write not yet on the default branch (a ledger row, an out-of-scope entry) that exists only on a branch about to be deleted is destroyed with it — taking the only record that a real merge request ever existed.
+Rejecting a candidate mid-flight with no forge API access to formally close its merge request is not a license to delete the branch as "the practical equivalent" of closing it. Whatever is left of the candidate exists only on that branch and in the merge request, and deleting the branch destroys the only record that a real merge request ever existed.
 
-Before deleting or abandoning any such branch — ordinarily the candidate's own, or, on a target still carrying an unmerged bookkeeping branch stacked on it from before suite branches stopped stacking — land the record of the abandonment first, through an ordinary bookkeeping branch/MR **off the default branch, never one stacked on the branch about to be deleted**: at minimum an `out-of-scope/<node>.md` entry in the Refactoring Notes (structural candidate: a closing note on the issue instead) stating what was abandoned and why, written for the target repo's own reader (`../../continuous-refactoring/references/forge-facing-writing.md`).
+Before deleting or abandoning any such branch — ordinarily the candidate's own — record the abandonment first, in the Refactoring Notes, which the suite writes in place and never commits: at minimum an `out-of-scope/<node>.md` entry stating what was abandoned and why (structural candidate: a closing note on the issue instead), written for the target repo's own reader (`../../continuous-refactoring/references/forge-facing-writing.md`).
 
-If a bookkeeping write already sits on a branch stacked on the doomed candidate branch, cherry-pick that commit onto a fresh branch off the default branch before deleting anything beneath it.
-
-Only delete the branch(es) after that record has merged. No time to complete the merge right now? Leave the branch undeleted — a stale unmerged branch costs nothing; a silently vanished merge request does.
+Only delete the branch after that record is written. No time to complete it right now? Leave the branch undeleted — a stale unmerged branch costs nothing; a silently vanished merge request does.

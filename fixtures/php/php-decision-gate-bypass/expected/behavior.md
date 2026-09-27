@@ -35,7 +35,7 @@ Run `/refactor-design` against the issue. It should:
 
 ## Expected: `refactor-scan` pass (after the design pass above)
 
-With `docs/refactoring/bookkeeping.md`'s `Pending candidates` pointing at the issue, run
+With `.scratch/refactor/bookkeeping.md`'s `Pending candidates` pointing at the issue, run
 `/refactor-scan`. It should:
 
 1. Read the issue's `Labels:` line: `needs-info` present, `ready-for-agent` absent.

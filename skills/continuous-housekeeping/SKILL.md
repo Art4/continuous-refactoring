@@ -15,12 +15,12 @@ The Track's own reference files live beside this skill: `references/housekeeping
 
 ## Process
 
-**Report every step, before and after** — one sentence for what starts, one for its result, each write to the target (branch, commit, issue, merge request, bookkeeping merge request) on its own line, per `../continuous-refactoring/references/reporting-progress.md`. This skill runs in the human's conversation itself, so it reports directly; `refactor-learn` names its writes in its `## Output`.
+**Report every step, before and after** — one sentence for what starts, one for its result, each write to the target (branch, commit, issue, merge request) on its own line, per `../continuous-refactoring/references/reporting-progress.md`. This skill runs in the human's conversation itself, so it reports directly; `refactor-learn` names its writes in its `## Output`.
 
-0. **Onboarded target.** The Refactoring Notes' `bookkeeping.md` must exist (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. This skill doesn't go through `refactor-loop`, so it makes this check itself.
+0. **Onboarded target.** The Bookkeeping pointer must resolve to an existing `bookkeeping.md` (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. This skill doesn't go through `refactor-loop`, so it makes this check itself.
 
 1. **Housekeeping cycle.** Follow `references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, create this cycle's issue (per `../continuous-refactoring/references/filing-a-ticket.md`), work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run. The human declined to have this cycle's issue created (`Ticket-create-mode: ask-each-time`), or nobody was there to ask → the cycle doesn't run, this pass ends here without step 2, and the report says so.
-2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`../refactor-learn/references/housekeeping-write.md`) via `refactor-learn`'s ordinary dedicated bookkeeping branch. `refactor-learn` writes it only when the process was actually reached.
+2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`../refactor-learn/references/housekeeping-write.md`) (written in place, never committed). `refactor-learn` writes it only when the process was actually reached.
 
 ## Fallback
 

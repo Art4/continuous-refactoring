@@ -15,7 +15,7 @@ advisory way `safety-net-track`/`guardrails-track` already are. Run via
 `phpstan-level-0`, `test-runner-if-missing`, `ci-runner` are all genuinely missing. `static-code-analyzer`
 is also missing, which blocks `phpstan-level-0` (required parent per `php-tooling-tree.md`).
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01`, `Open` as a list:
+`.scratch/refactor/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01`, `Open` as a list:
 - `phpunit (#6)` — workable (no required parent blocking it)
 - `phpstan-level-0 (#7)` — blocked by `static-code-analyzer` (required parent not fulfilled)
 - `php-cs-fixer (#5)` — workable (recommended parent `editorconfig` not yet decided, but

@@ -45,7 +45,7 @@ targets and would permanently block this node rather than build gradual pressure
 starts at whatever the target's first real coverage run measures and only ever rises from there, via
 an ordinary human-reviewed commit — never a value this node's own CI writes back by itself, even when
 a run exceeds it. Coverage rising is simply what happens when someone adds or strengthens a test; that
-shouldn't also force a dedicated bookkeeping MR, but it also shouldn't happen silently outside version
+shouldn't also force a dedicated merge request of its own, but it also shouldn't happen silently outside version
 control — a normal commit bumping `.coverage-floor` (by hand, or by whatever local tooling a target
 sets up for itself) is exactly the right amount of ceremony, matching how `phpstan-baseline.neon` only
 ever shrinks through a real, committed code change, never a silent CI rewrite.

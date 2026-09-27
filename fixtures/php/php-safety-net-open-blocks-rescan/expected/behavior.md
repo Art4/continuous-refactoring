@@ -17,7 +17,7 @@ small namespaced project, same as `php-safety-net-purpose-recognition`), but `ph
 `test-runner-if-missing`, `phpstan-level-0`, and `ci-runner` are all still genuinely missing. If the
 Track's own scan actually re-ran this pass, it would find several of these unblocked and propose them.
 
-`docs/refactoring/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01` (far past the
+`.scratch/refactor/bookkeeping.md`'s `## Safety Net` section: `Last scan: 2026-01-01` (far past the
 default 90-day `Cadence` — deliberately, to make sure staleness alone never forces a rescan while `Open`
 holds something), `Open` as a list:
 - `php-cs-fixer (#5)`

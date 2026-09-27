@@ -25,11 +25,11 @@ What the human calls an issue on the project's tracker. The skills themselves sa
 _Avoid_: task, todo
 
 **Ticket-create-mode**:
-The `bookkeeping.md` setting for how a new **ticket** gets created: `autonomous` (the loop creates it) or `ask-each-time` (the loop asks first — once per pass for the tickets it would create up front, then for the ticket of the candidate it chose). Absent means `autonomous`. Only the loop creates tickets, as `skills/continuous-refactoring/references/filing-a-ticket.md` describes; with no human to ask, nothing is created and the pass reports that it waits for a confirmation. Decided once, during **Onboarding**.
+The **Config file** setting for how a new **ticket** gets created: `autonomous` (the loop creates it) or `ask-each-time` (the loop asks first — once per pass for the tickets it would create up front, then for the ticket of the candidate it chose). A value the file doesn't state reads as `ask-each-time`. Only the loop creates tickets, as `skills/continuous-refactoring/references/filing-a-ticket.md` describes; with no human to ask, nothing is created and the pass reports that it waits for a confirmation. Decided once, during **Onboarding**.
 _Avoid_: issue-create-mode, filing mode
 
 **MR-create-mode**:
-The `bookkeeping.md` setting for how a **merge request** gets opened: `autonomous` (the loop opens it), `ask-each-time` (the loop asks first), or `human-opens` (the loop prepares the branch, the human opens it). Decided once, during **Onboarding**. Formerly named `Create-mode`; an older `bookkeeping.md` still carrying that name is read as this field.
+The **Config file** setting for how a **merge request** gets opened: `autonomous` (the loop opens it), `ask-each-time` (the loop asks first), or `human-opens` (the loop prepares the branch, the human opens it). A value the file doesn't state reads as `human-opens`. Decided once, during **Onboarding**.
 _Avoid_: create-mode (unqualified — ambiguous next to **Ticket-create-mode**)
 
 **Tooling tree**:
@@ -41,7 +41,7 @@ One of four scheduled work modes a loop pass can spend itself on: **Safety Net**
 _Avoid_: wave (this concept's earlier name; retired once it started colliding with **Guardrails**' own former name, "Signal wave" — see that entry)
 
 **Onboarding**:
-The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is **step 0 of the dispatcher** — the first `/continuous-refactoring` on a target with no Refactoring Notes' `bookkeeping.md` runs a short interview inline, writes the setup files, and ends the invocation, with no issue, merge request or forge action (`skills/continuous-refactoring/references/onboarding-setup-interview.md`). Everything from the recognition gate onward is simply what the Safety Net **Track**'s very first run finds — the same mechanism as any later run, just with more to discover the first time.
+The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is **step 0 of the dispatcher** — the first `/continuous-refactoring` on a target whose **Bookkeeping pointer** names no existing `bookkeeping.md` runs a short interview inline, writes the setup files, and ends the invocation, with no issue, merge request or forge action (`skills/continuous-refactoring/references/onboarding-setup-interview.md`). Everything from the recognition gate onward is simply what the Safety Net **Track**'s very first run finds — the same mechanism as any later run, just with more to discover the first time.
 _Avoid_: baseline, bootstrap (see **Tooling tree**'s own `_Avoid_` list — those describe the never-ending tree; this term names only the bounded early phase within it)
 
 **Safety Net**:
@@ -65,8 +65,18 @@ The one file, if any, the target's own **Entry point**s mostly delegate to for w
 _Avoid_: bootstrap file (a file literally named `bootstrap.php` isn't necessarily filling this role), application root
 
 **Refactoring Notes**:
-The target repo's own folder holding the loop's state — `bookkeeping.md`, `merge-requests.md`, `out-of-scope/`, `housekeeping-template.md` (only once some tooling-tree node's own `Housekeeping` field has contributed at least one line — see the **Housekeeping** entry, below, and the **Tooling tree** entry above). Default `docs/refactoring/`; overridable per target, decided once during the **Onboarding** step's interview and recorded, by this name, in that target's `AGENTS.md`/`CLAUDE.md` (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — every other skill refers to it by this name, never by restating the concrete path.
+The folder holding the loop's state — the **Bookkeeping document** (`bookkeeping.md`), `merge-requests.md` and `out-of-scope/` — that the **Bookkeeping pointer** points into. Default `.scratch/refactor/`, next to the local Markdown tracker's own `issues/` folder. The suite writes these files in place and never commits them (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`) — every other skill refers to the folder by this name, never by restating the concrete path. Not part of it: `housekeeping-template.md`, which is shared and committed like code at `docs/refactoring/housekeeping-template.md` (only once some tooling-tree node's own `Housekeeping` field has contributed at least one line — see the **Housekeeping** entry, below, and the **Tooling tree** entry above).
 _Avoid_: suite folder, config folder, state folder
+
+**Bookkeeping document**:
+The loop's state — `Pending candidates`, `Secret history scan`, and each **Track**'s `Cadence`, `Last scan`, `Open` and `Out-of-scope` — and nothing personal. A single file, `bookkeeping.md`, in the **Refactoring Notes**, named by the **Bookkeeping pointer**. Onboarding writes it last, so its existence means "onboarding complete". `Focus areas` and `Refactoring goal` are not in it: they are lines in the instruction file (`AGENTS.md`, else `CLAUDE.md`), written only by humans.
+_Avoid_: bookkeeping file, state file
+
+**Bookkeeping pointer**:
+The path that names the **Bookkeeping document**. Read from the **Config file**'s `Bookkeeping:` field, or, when that has none, from a `Bookkeeping:` line in the instruction file — the shared fallback for a team using one common document. No pointer, or a pointer to a file that doesn't exist, means the target isn't onboarded yet.
+
+**Config file**:
+`.scratch/refactor/config.md`, at a fixed path, per person and machine: the **Bookkeeping pointer**, **Ticket-create-mode** and **MR-create-mode**. Values it doesn't state read as the safe ones (`ask-each-time`, `human-opens`). The suite writes it once, during **Onboarding**, and never after.
 
 **Housekeeping** (recurring maintenance):
 A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync. Also names the **Track** (above) that runs it, on its own configurable cadence (default `7 days`), scheduled alongside the other three Tracks rather than by a separate skill. Never a tooling-tree node: nothing about it is a one-time adoption with a stable Fulfilment check.

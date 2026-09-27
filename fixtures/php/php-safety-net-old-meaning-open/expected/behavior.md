@@ -22,7 +22,7 @@ The project matches `php-guardrails-old-schema`'s except PHPStan runs at **level
 so `phpstan-level-1` through `-5` are unresolved; `psalm-taint-analysis` is already rejected under
 `out-of-scope/`. Composer, PSR-4, PHP CS Fixer, PHPUnit, CI and the `rector-*` family are in place.
 
-`docs/refactoring/bookkeeping.md` is written under the old meaning:
+`.scratch/refactor/bookkeeping.md` is written under the old meaning:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-10` (`overdue_ratio ≈ 0.1`, not due). `Open`,
   as a list:

@@ -22,7 +22,7 @@ namespace), `ci-runner` (`.github/workflows/ci.yml`), `php-cs-fixer`, `phpunit` 
 `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`, `phpstan-level-6`,
 `phpstan-deprecation-rules`, `semgrep` are all genuinely missing.
 
-`docs/refactoring/bookkeeping.md`:
+`.scratch/refactor/bookkeeping.md`:
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-06-16` (95 days before this fixture's reference
   date of 2026-09-19 → `overdue_ratio ≈ 1.056`, just past due), `Open` list `- none`.

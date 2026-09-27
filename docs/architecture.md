@@ -18,10 +18,10 @@ How the suite is put together, for someone who wants to understand or extend it.
    └── /continuous-housekeeping    ← owns Housekeeping's own process; never calls refactor-loop
 ```
 
-- **`continuous-refactoring`** is a thin dispatcher. Step 0 is **onboarding**: when the target has no `bookkeeping.md` it runs a short interview inline, writes the setup files and ends the invocation (see [Loop state](#loop-state)). Otherwise it selects a [Track](playbooks/tracks.md), announces the choice in one sentence and invokes that Track's skill. It never runs the pass itself.
+- **`continuous-refactoring`** is a thin dispatcher. Step 0 is **onboarding**: when the target has no bookkeeping document it runs a short interview inline, writes the setup files and ends the invocation (see [Loop state](#loop-state)). Otherwise it selects a [Track](playbooks/tracks.md), announces the choice in one sentence and invokes that Track's skill. It never runs the pass itself.
 - **`continuous-safety-net` / `-guardrails` / `-investigation`** are internal. Each does nothing but name its Track and call `refactor-loop`.
-- **`continuous-housekeeping`** runs the Housekeeping Track's own reconcile → checklist → quality gate → deliver process, then records its `Last scan` through `refactor-learn`. It aborts, pointing at `/continuous-refactoring`, on a target with no `bookkeeping.md`.
-- **`refactor-loop`** requires a Track and an onboarded target (a `bookkeeping.md`) and aborts without either; it never guesses a Track from repo state and never branches on a Track's name itself.
+- **`continuous-housekeeping`** runs the Housekeeping Track's own reconcile → checklist → quality gate → deliver process, then records its `Last scan` through `refactor-learn`. It aborts, pointing at `/continuous-refactoring`, on a target with no bookkeeping document.
+- **`refactor-loop`** requires a Track and an onboarded target (a bookkeeping document) and aborts without either; it never guesses a Track from repo state and never branches on a Track's name itself.
 
 Only `continuous-refactoring` is meant to be typed by a human; the others are implementation detail, though invoking a `continuous-<track>` skill directly is a valid manual override.
 
@@ -42,11 +42,11 @@ Early exits are normal: no git repository ends the pass; a full backlog, a resum
 
 ### Only the loop creates tickets
 
-A subagent can't ask you a question, and creating a ticket is visible to everyone watching the tracker. So no lifecycle skill creates one: scan, prioritise and learn return **ticket drafts** (title, labels, body), and `refactor-loop` creates them — after reading `Ticket-create-mode` in `bookkeeping.md`: `autonomous` (the default when the field is missing) creates them as they arrive; `ask-each-time` asks first, once per pass for the batch of proposed tickets and then for the ticket of the candidate it chose. Comments, plan updates and label changes on an existing ticket stay with the skills. The Housekeeping Track, which runs in your conversation itself, follows the same rule for its cycle ticket. Merge requests have their own, separate setting, `MR-create-mode`.
+A subagent can't ask you a question, and creating a ticket is visible to everyone watching the tracker. So no lifecycle skill creates one: scan, prioritise and learn return **ticket drafts** (title, labels, body), and `refactor-loop` creates them — after reading `Ticket-create-mode` in your config file: `autonomous` (the default when the field is missing) creates them as they arrive; `ask-each-time` asks first, once per pass for the batch of proposed tickets and then for the ticket of the candidate it chose. Comments, plan updates and label changes on an existing ticket stay with the skills. The Housekeeping Track, which runs in your conversation itself, follows the same rule for its cycle ticket. Merge requests have their own, separate setting, `MR-create-mode`.
 
 ### Only `refactor-learn` writes bookkeeping
 
-`refactor-learn` is the suite's only dedicated writer: the ledger, `bookkeeping.md` Track sections, ADRs/`CONTEXT.md` in the target, issue status. The few other writes are the ones a step itself produces (a ticket created by the loop, a branch pushed) and the dispatcher's one-time onboarding files. This keeps "what changed the state" answerable by looking at one skill.
+`refactor-learn` is the suite's only dedicated writer: the ledger, the bookkeeping document's Track sections, ADRs/`CONTEXT.md` in the target, issue status. It writes them in place and never commits, branches or opens a merge request for them. The few other writes are the ones a step itself produces (a ticket created by the loop, a branch pushed) and the dispatcher's one-time onboarding files. This keeps "what changed the state" answerable by looking at one skill.
 
 ### Subagents and hand-back
 
@@ -71,18 +71,20 @@ Safety Net and Guardrails work through the **tooling tree**: a directed graph of
 
 ## Loop state
 
-State lives in the target repo, never in the conversation; every lifecycle skill reads it directly.
+State lives in the target repo's working tree, never in the conversation; every lifecycle skill reads it directly. The suite writes its own files there and never commits them.
 
 | What | Where |
 |---|---|
-| Config, `MR-create-mode`, focus areas, `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | Refactoring Notes' `bookkeeping.md` (default folder `docs/refactoring/`, overridable) — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
+| `Ticket-create-mode`, `MR-create-mode`, where the bookkeeping lives — per person and machine | `.scratch/refactor/config.md` — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
+| `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document (`bookkeeping.md`, default folder `.scratch/refactor/`, named by the pointer in the config file) |
+| Focus areas, refactoring goal | two lines in `AGENTS.md`/`CLAUDE.md`, written by you only |
 | Remembered merge requests | open `refactor:candidate` issues with a linked pull request (native-label trackers); `merge-requests.md` otherwise |
 | Backlog | `refactor:*` issues on the tracker named in `docs/agents/issue-tracker.md` |
 | Learned rejections | `out-of-scope/` |
-| Housekeeping checklist | `housekeeping-template.md` |
+| Housekeeping checklist | `docs/refactoring/housekeeping-template.md` — shared, reviewed like code |
 | Domain language, decisions | the target's `CONTEXT.md` and ADRs |
 
-`bookkeeping.md` doesn't exist on a fresh target. The dispatcher's onboarding step creates it: a short human interview (tracker, `Ticket-create-mode`, `MR-create-mode`, Refactoring Notes location — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete", suggests committing the new files and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
+Neither the config file nor `bookkeeping.md` exists on a fresh target. The dispatcher's onboarding step creates them: a short human interview (tracker, `Ticket-create-mode`, `MR-create-mode`, where the suite keeps its state — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete"; it suggests committing only what belongs in Git (the instruction-file section, `docs/agents/*`) and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
 
 ## Fallbacks and self-containment
 

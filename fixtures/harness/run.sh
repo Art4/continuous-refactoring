@@ -254,8 +254,8 @@ run_tier2() {
     done
 
     # Check expected docs
-    assert_file_exists "$FIXTURE_SRC/expected/docs/refactoring/bookkeeping.md"
-    assert_config_format "$FIXTURE_SRC/expected/docs/refactoring/bookkeeping.md"
+    assert_file_exists "$FIXTURE_SRC/expected/.scratch/refactor/bookkeeping.md"
+    assert_config_format "$FIXTURE_SRC/expected/.scratch/refactor/bookkeeping.md"
 }
 
 # Tier 3: Ground Truth Tests
@@ -368,7 +368,7 @@ under $REPO_DIR/skills/ — read each one when the orchestrator step tells you
 to run it.
 
 Run exactly one invocation. A sandbox with no Refactoring Notes
-(docs/refactoring/bookkeeping.md) is onboarded by that invocation, which then
+(.scratch/refactor/bookkeeping.md) is onboarded by that invocation, which then
 ends by itself with a closing text — that is the whole invocation, no scan
 follows. Once it has ended that way, commit the files it wrote to the default
 branch, then run the SKILL.md a second time as the next invocation: that one
@@ -389,9 +389,9 @@ EOF
     log_info "Prompt written: $prompt_file"
     log_info "Next step (manual — this script cannot spawn a Claude Code subagent itself):"
     log_info "  spawn an Agent-tool subagent with the contents of $prompt_file, let it run, then inspect"
-    log_info "  $FIXTURE_DST (git log, docs/refactoring/, .scratch/refactor/issues/) and $friction_file"
+    log_info "  $FIXTURE_DST (git log, .scratch/refactor/, .scratch/refactor/issues/) and $friction_file"
     log_info "Optional post-run structural check once the pass has run:"
-    log_info "  assert_config_format \"$FIXTURE_DST/docs/refactoring/bookkeeping.md\"  (source fixtures/harness/lib/assertions.sh first)"
+    log_info "  assert_config_format \"$FIXTURE_DST/.scratch/refactor/bookkeeping.md\"  (source fixtures/harness/lib/assertions.sh first)"
 }
 
 # Tier 4: Trigger/discoverability tests (ticket 27) — explicit + implicit
@@ -438,8 +438,8 @@ run_tier4() {
         else
             log_info "No-git negative control: expected wording not found in $out (advisory, non-blocking)"
         fi
-        if [[ -f "$no_git_dir/docs/refactoring/bookkeeping.md" ]]; then
-            log_fail "No-git negative control: docs/refactoring/bookkeeping.md was written despite no git repository"
+        if [[ -f "$no_git_dir/.scratch/refactor/bookkeeping.md" ]]; then
+            log_fail "No-git negative control: .scratch/refactor/bookkeeping.md was written despite no git repository"
         else
             log_pass "No-git negative control: no loop state written"
         fi
@@ -546,7 +546,7 @@ run_judge() {
     # $prompt as a positional parameter instead of interpolating it.
     local rubric_text
     rubric_text="$(cat "$rubric")"
-    local prompt="Grade this repo's refactoring-loop artifacts (docs/refactoring/, any filed issues, git log) against the rubric below. Give one score 1-5 per dimension plus a one-line justification each.
+    local prompt="Grade this repo's refactoring-loop artifacts (.scratch/refactor/, any filed issues, git log) against the rubric below. Give one score 1-5 per dimension plus a one-line justification each.
 
 ---
 $rubric_text
@@ -720,8 +720,8 @@ run_safety_net_track() {
             fi
             ;;
         php-safety-net-first-run)
-            _safety_net_scan_prompt "Run one full pass: /refactor-scan, then /refactor-learn's closing call, against this repo. Follow skills/refactor-scan/SKILL.md and skills/refactor-learn/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md and skills/refactor-learn/references/safety-net-write.md. This target's Safety Net Track nodes are already fully resolved — report explicitly what (if anything) got written to docs/refactoring/bookkeeping.md."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            _safety_net_scan_prompt "Run one full pass: /refactor-scan, then /refactor-learn's closing call, against this repo. Follow skills/refactor-scan/SKILL.md and skills/refactor-learn/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md and skills/refactor-learn/references/safety-net-write.md. This target's Safety Net Track nodes are already fully resolved — report explicitly what (if anything) got written to .scratch/refactor/bookkeeping.md."
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
             if grep -q "## Safety Net" "$bookkeeping" 2>/dev/null && grep -q "Last scan:" "$bookkeeping" 2>/dev/null; then
                 log_pass "bookkeeping.md now carries a ## Safety Net section with Last scan written"
             else
@@ -730,12 +730,12 @@ run_safety_net_track() {
             ;;
         php-safety-net-rejection-symmetry)
             _safety_net_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for php-cs-fixer (issue .scratch/refactor/issues/05-php-cs-fixer.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/safety-net-write.md. Report what you wrote."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            local oos="$FIXTURE_DST/docs/refactoring/out-of-scope/php-cs-fixer.md"
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
+            local oos="$FIXTURE_DST/.scratch/refactor/out-of-scope/php-cs-fixer.md"
             if [[ -f "$oos" ]]; then
                 log_pass "out-of-scope/php-cs-fixer.md written"
             else
-                log_fail "out-of-scope/php-cs-fixer.md missing after the run — see $bookkeeping and $FIXTURE_DST/docs/refactoring/out-of-scope/"
+                log_fail "out-of-scope/php-cs-fixer.md missing after the run — see $bookkeeping and $FIXTURE_DST/.scratch/refactor/out-of-scope/"
             fi
             if grep -qE "Out-of-scope:" "$bookkeeping" 2>/dev/null && grep -qE "^- php-cs-fixer" <(sed -n '/Out-of-scope:/,/^$/p' "$bookkeeping" 2>/dev/null); then
                 log_pass "## Safety Net's Out-of-scope list names php-cs-fixer"
@@ -749,8 +749,8 @@ run_safety_net_track() {
             fi
             ;;
         php-safety-net-old-schema)
-            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md. This repo's docs/refactoring/bookkeeping.md is still in the pre-existing shape (global Pending candidates, no Safety Net section). Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            _safety_net_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/safety-net-track.md. This repo's .scratch/refactor/bookkeeping.md is still in the pre-existing shape (global Pending candidates, no Safety Net section). Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
             if grep -q "Pending candidates" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing global Pending candidates field still present, untouched"
             else
@@ -765,8 +765,8 @@ run_safety_net_track() {
             ;;
         php-safety-net-rejection-cascade)
             _safety_net_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for phpstan-level-3 (issue .scratch/refactor/issues/12-phpstan-level-3.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/safety-net-write.md. Report what you wrote."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            local oosdir="$FIXTURE_DST/docs/refactoring/out-of-scope"
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
+            local oosdir="$FIXTURE_DST/.scratch/refactor/out-of-scope"
             if [[ -f "$oosdir/phpstan-level-3.md" ]]; then
                 log_pass "out-of-scope/phpstan-level-3.md written"
             else
@@ -795,8 +795,8 @@ run_safety_net_track() {
             _check_open_order "/tmp/safety-net-track-$FIXTURE-scan.log" phpstan-level-3 phpstan-level-4 phpstan-level-5
             ;;
         php-safety-net-old-meaning-open)
-            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's docs/refactoring/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            _safety_net_scan_prompt "Run the Safety Net Track — it is named explicitly for this pass (manual Track override) — against this repo: /refactor-scan with that Track. Follow skills/refactor-scan/SKILL.md and skills/refactor-scan/references/safety-net-track.md literally. This repo's .scratch/refactor/bookkeeping.md still has the old-meaning Open (only phpstan-level-1 (#7)) plus Focus areas residue. Report explicitly, as your final line: RESUMED (walked the existing Open entry phpstan-level-1 only) or RESCANNED (ran a fresh Track scan and recorded a new Open)."
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
             local out="/tmp/safety-net-track-$FIXTURE-scan.log"
             if grep -q "Focus areas" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing Focus areas residue still present, untouched"
@@ -896,43 +896,28 @@ run_guardrails_track() {
             fi
             ;;
         php-guardrails-first-run)
-            _guardrails_scan_prompt "Run one full pass: /refactor-scan, then /refactor-learn's closing call, against this repo. Follow skills/refactor-scan/SKILL.md and skills/refactor-learn/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md and skills/refactor-learn/references/guardrails-write.md. This target's Guardrails Track nodes are already fully resolved — report explicitly what (if anything) got written to docs/refactoring/bookkeeping.md."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            # refactor-learn/SKILL.md mandates a dedicated bookkeeping
-            # branch, never a direct commit to the checked-out default
-            # branch — this sandbox has no remote, so a correct run leaves
-            # that branch unmerged (opening-a-merge-request.md's "no
-            # forge/remote available" hand-off) rather than folding it back
-            # into the working tree itself. Check the working tree first,
-            # then every local branch, before concluding nothing was
-            # written.
+            _guardrails_scan_prompt "Run one full pass: /refactor-scan, then /refactor-learn's closing call, against this repo. Follow skills/refactor-scan/SKILL.md and skills/refactor-learn/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md and skills/refactor-learn/references/guardrails-write.md. This target's Guardrails Track nodes are already fully resolved — report explicitly what (if anything) got written to .scratch/refactor/bookkeeping.md."
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
+            # refactor-learn writes the bookkeeping document in place in the
+            # working tree and never commits or branches.
             local found=""
             if grep -q "## Guardrails" "$bookkeeping" 2>/dev/null && grep -q "Last scan:" "$bookkeeping" 2>/dev/null; then
                 found="working tree"
-            else
-                local br
-                for br in $(git -C "$FIXTURE_DST" branch --list --format='%(refname:short)' 2>/dev/null); do
-                    if git -C "$FIXTURE_DST" show "$br:docs/refactoring/bookkeeping.md" 2>/dev/null | grep -q "## Guardrails" \
-                        && git -C "$FIXTURE_DST" show "$br:docs/refactoring/bookkeeping.md" 2>/dev/null | grep -q "Last scan:"; then
-                        found="branch $br"
-                        break
-                    fi
-                done
             fi
             if [[ -n "$found" ]]; then
                 log_pass "bookkeeping.md carries a ## Guardrails section with Last scan written ($found)"
             else
-                log_fail "bookkeeping.md missing ## Guardrails / Last scan after the pass, on the working tree or any local branch — see $bookkeeping"
+                log_fail "bookkeeping.md missing ## Guardrails / Last scan after the pass — see $bookkeeping"
             fi
             ;;
         php-guardrails-rejection-symmetry)
             _guardrails_scan_prompt "Run /refactor-learn's early call against this repo, given this finding: the candidate MR for phpmd (issue .scratch/refactor/issues/05-phpmd.md) was closed without merge; the issue's own closing comment already gives a maintainer's structural reason. Follow skills/refactor-learn/SKILL.md literally, including skills/refactor-learn/references/guardrails-write.md. Report what you wrote."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
-            local oos="$FIXTURE_DST/docs/refactoring/out-of-scope/phpmd.md"
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
+            local oos="$FIXTURE_DST/.scratch/refactor/out-of-scope/phpmd.md"
             if [[ -f "$oos" ]]; then
                 log_pass "out-of-scope/phpmd.md written"
             else
-                log_fail "out-of-scope/phpmd.md missing after the run — see $bookkeeping and $FIXTURE_DST/docs/refactoring/out-of-scope/"
+                log_fail "out-of-scope/phpmd.md missing after the run — see $bookkeeping and $FIXTURE_DST/.scratch/refactor/out-of-scope/"
             fi
             if grep -qE "Out-of-scope:" "$bookkeeping" 2>/dev/null && grep -qE "^- phpmd" <(sed -n '/## Guardrails/,$p' "$bookkeeping" 2>/dev/null | sed -n '/Out-of-scope:/,/^$/p'); then
                 log_pass "## Guardrails's Out-of-scope list names phpmd"
@@ -957,8 +942,8 @@ run_guardrails_track() {
             fi
             ;;
         php-guardrails-old-schema)
-            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md. This repo's docs/refactoring/bookkeeping.md already has a closed ## Safety Net section but still carries old-style residue (global Pending candidates) and no ## Guardrails section. Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            _guardrails_scan_prompt "Run /refactor-scan against this repo. Follow skills/refactor-scan/SKILL.md literally, including skills/refactor-scan/references/guardrails-track.md. This repo's .scratch/refactor/bookkeeping.md already has a closed ## Safety Net section but still carries old-style residue (global Pending candidates) and no ## Guardrails section. Report explicitly: did the pass run normally, and did it error on or need to migrate the old fields?"
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
             if grep -q "## Safety Net" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing ## Safety Net section still present, untouched"
             else
@@ -1032,7 +1017,7 @@ run_housekeeping_track() {
             ;;
         php-housekeeping-old-schema)
             _housekeeping_scan_prompt "Run the Housekeeping Track process against this repo. Follow skills/continuous-housekeeping/references/housekeeping-track.md literally. This target's bookkeeping.md is still in the old shape (global Pending candidates, no ## Housekeeping section). The reconciliation should walk the tooling tree and judge fulfilment via agent judgement. Report explicitly: (1) did the pass run normally without erroring on the old-shape fields, (2) which nodes got their Housekeeping lines, and (3) was ## Housekeeping created."
-            local bookkeeping="$FIXTURE_DST/docs/refactoring/bookkeeping.md"
+            local bookkeeping="$FIXTURE_DST/.scratch/refactor/bookkeeping.md"
             if grep -q "Pending candidates" "$bookkeeping" 2>/dev/null; then
                 log_pass "Pre-existing global Pending candidates field still present, untouched"
             else
@@ -1092,7 +1077,7 @@ run_scheduler() {
 
     case "$FIXTURE" in
         php-scheduler-staleness-selection)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading docs/refactoring/bookkeeping.md's ## Safety Net and ## Guardrails sections. Compute each Track's overdue_ratio, then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including guardrails-track.md or safety-net-track.md as appropriate) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading .scratch/refactor/bookkeeping.md's ## Safety Net and ## Guardrails sections. Compute each Track's overdue_ratio, then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including guardrails-track.md or safety-net-track.md as appropriate) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Safety Net" "$out" 2>/dev/null; then
                 log_fail "Scheduler self-reports SELECTED: Safety Net — Guardrails (ratio 2.5) should have outranked Safety Net (ratio ~1.056) despite the fixed tie-break order — see $out"
@@ -1108,7 +1093,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-investigation-fallback)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, and ## Investigation sections. Compute (or, for Investigation, note the absence of) each Track's overdue_ratio, then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including skills/refactor-scan/references/investigation-track.md if Investigation wins) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, and ## Investigation sections. Compute (or, for Investigation, note the absence of) each Track's overdue_ratio, then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including skills/refactor-scan/references/investigation-track.md if Investigation wins) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Investigation — see $out"
@@ -1124,7 +1109,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-housekeeping-competes)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Compute (or, for Investigation, note the absence of) each Track's overdue_ratio. Report, as your final line before continuing: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process (it is not handed to refactor-scan) — reconcile, open this cycle's issue per docs/agents/issue-tracker.md, work the checklist from docs/refactoring/housekeeping-template.md plus the standing AGENTS.md/skills check, run the quality gate, then reach the Deliver step. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch — do not attempt to push or open a real merge request."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm, reading .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Compute (or, for Investigation, note the absence of) each Track's overdue_ratio. Report, as your final line before continuing: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process (it is not handed to refactor-scan) — reconcile, open this cycle's issue per docs/agents/issue-tracker.md, work the checklist from docs/refactoring/housekeeping-template.md plus the standing AGENTS.md/skills check, run the quality gate, then reach the Deliver step. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch — do not attempt to push or open a real merge request."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"
@@ -1145,7 +1130,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-bootstrap-investigation)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section), before any overdue_ratio/tie-break computation: read docs/refactoring/bookkeeping.md's ## Safety Net section and note whether Investigation/Guardrails/Housekeeping have each already had their own turn. Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including the matching Track's own reference file) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section), before any overdue_ratio/tie-break computation: read .scratch/refactor/bookkeeping.md's ## Safety Net section and note whether Investigation/Guardrails/Housekeeping have each already had their own turn. Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including the matching Track's own reference file) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Investigation — see $out"
@@ -1166,7 +1151,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-bootstrap-guardrails)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read docs/refactoring/bookkeeping.md's ## Safety Net and ## Investigation sections — Investigation already ran its own turn (section present, Pending candidates: none) — so its own condition should NOT match; check whether Guardrails still owes its turn instead. Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including guardrails-track.md) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net and ## Investigation sections — Investigation already ran its own turn (section present, Pending candidates: none) — so its own condition should NOT match; check whether Guardrails still owes its turn instead. Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including guardrails-track.md) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Guardrails" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Guardrails — see $out"
@@ -1184,7 +1169,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-bootstrap-housekeeping)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, and ## Investigation sections — both Investigation and Guardrails already ran their own turns (present, Investigation's Pending candidates: none) — so neither of their conditions should match; check whether Housekeeping still owes its turn instead. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process (it is not handed to refactor-scan) — reconcile, open this cycle's issue per docs/agents/issue-tracker.md, work the checklist from docs/refactoring/housekeeping-template.md plus the standing AGENTS.md/skills check, run the quality gate, then reach the Deliver step. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch — do not attempt to push or open a real merge request. Report, as your final line before continuing: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, and ## Investigation sections — both Investigation and Guardrails already ran their own turns (present, Investigation's Pending candidates: none) — so neither of their conditions should match; check whether Housekeeping still owes its turn instead. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process (it is not handed to refactor-scan) — reconcile, open this cycle's issue per docs/agents/issue-tracker.md, work the checklist from docs/refactoring/housekeeping-template.md plus the standing AGENTS.md/skills check, run the quality gate, then reach the Deliver step. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch — do not attempt to push or open a real merge request. Report, as your final line before continuing: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"
@@ -1207,7 +1192,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-bootstrap-resumes)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections — every one of Investigation/Guardrails/Housekeeping has already run at least once, and Investigation carries no in-flight Pending candidates, so the exception should NOT apply this pass. Then run ordinary overdue_ratio/tie-break selection instead. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections — every one of Investigation/Guardrails/Housekeeping has already run at least once, and Investigation carries no in-flight Pending candidates, so the exception should NOT apply this pass. Then run ordinary overdue_ratio/tie-break selection instead. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Guardrails" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Guardrails — see $out"
@@ -1225,7 +1210,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-safety-net-blockade)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read docs/refactoring/bookkeeping.md's ## Safety Net section — its Open is non-empty (phpstan-level-6, coverage-floor). The Safety Net blockade rule applies: while Safety Net Open is non-empty, it is selected and nothing else runs, even if no node is currently workable. Then hand Safety Net to refactor-scan (skills/refactor-scan/SKILL.md step 4, including safety-net-track.md) for one Open walk — stop there, do not continue past the walk (no design, no implement). Report, as your final line: SELECTED: Safety Net, and list any skipped non-workable nodes with their reasons."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read .scratch/refactor/bookkeeping.md's ## Safety Net section — its Open is non-empty (phpstan-level-6, coverage-floor). The Safety Net blockade rule applies: while Safety Net Open is non-empty, it is selected and nothing else runs, even if no node is currently workable. Then hand Safety Net to refactor-scan (skills/refactor-scan/SKILL.md step 4, including safety-net-track.md) for one Open walk — stop there, do not continue past the walk (no design, no implement). Report, as your final line: SELECTED: Safety Net, and list any skipped non-workable nodes with their reasons."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Safety Net" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Safety Net — see $out"
@@ -1241,7 +1226,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-guardrails-stalled)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Safety Net Open is empty (no blockade). Guardrails Open is non-empty (phpstan-level-6, coverage-floor) but both entries are non-workable (blocked or needs-info). Per the Eligibility rule, Guardrails with Open non-empty but nothing workable yields — it drops out of ratio comparison. Then pick the highest overdue_ratio among the remaining due-and-eligible Tracks. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Safety Net Open is empty (no blockade). Guardrails Open is non-empty (phpstan-level-6, coverage-floor) but both entries are non-workable (blocked or needs-info). Per the Eligibility rule, Guardrails with Open non-empty but nothing workable yields — it drops out of ratio comparison. Then pick the highest overdue_ratio among the remaining due-and-eligible Tracks. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out (Guardrails yielded, Housekeeping's ratio ~4.29 wins)"
@@ -1259,7 +1244,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-housekeeping-preempts-guardrails)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read docs/refactoring/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Safety Net Open is empty (no blockade). Guardrails Open is non-empty with workable entries (composer-audit, phpmd). Housekeeping is due at overdue_ratio ~4.29, Guardrails at ~1.33. Per the preemption rule, Housekeeping preempts Guardrails for one pass when due (overdue_ratio >= 1). Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections. Safety Net Open is empty (no blockade). Guardrails Open is non-empty with workable entries (composer-audit, phpmd). Housekeeping is due at overdue_ratio ~4.29, Guardrails at ~1.33. Per the preemption rule, Housekeeping preempts Guardrails for one pass when due (overdue_ratio >= 1). Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"
@@ -1282,7 +1267,7 @@ run_scheduler() {
             fi
             ;;
         php-scheduler-bootstrap-guardrails-open)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read docs/refactoring/bookkeeping.md's ## Safety Net, ## Investigation, ## Guardrails, and ## Housekeeping sections. Safety Net Open is empty (precondition met). Investigation is present (done, Pending candidates: none). Guardrails is present with a non-empty Open (phpstan-level-6, coverage-floor). Housekeeping is absent (never run). The one-time exception should advance to Housekeeping — it only checks whether each section exists, not Guardrails' Open state. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation."
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Investigation, ## Guardrails, and ## Housekeeping sections. Safety Net Open is empty (precondition met). Investigation is present (done, Pending candidates: none). Guardrails is present with a non-empty Open (phpstan-level-6, coverage-floor). Housekeeping is absent (never run). The one-time exception should advance to Housekeeping — it only checks whether each section exists, not Guardrails' Open state. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"

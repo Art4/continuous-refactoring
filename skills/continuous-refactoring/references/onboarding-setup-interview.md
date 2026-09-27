@@ -5,21 +5,21 @@ which fulfils the `onboarding-setup` node of the tooling tree
 (`../../refactor-scan/references/tooling-tree/onboarding-setup.md`) before any
 Track runs. Everywhere else, a tooling-tree node's plan is fixed text a human
 wrote once, for every target alike. Onboarding is different on purpose: which
-tracker to use, whether tickets and merge requests get created on their own or only after asking, and where the suite's own notes
-live are facts about *this* target and *this* human's preference — not
+tracker to use, whether tickets and merge requests get created on their own or only after asking, and where the suite's own state
+lives are facts about *this* target and *this* human's preference — not
 something a tree doc can get right for every target by guessing.
 
 It runs inline in the dispatcher (never in a subagent), once per target, and
 **ends the invocation** — no Track selection, no scan, no issue, no merge
 request, no branch, nothing created on the forge. It never runs again for a
-target whose Refactoring Notes already hold a `bookkeeping.md`.
+target whose Bookkeeping pointer already resolves to an existing `bookkeeping.md`.
 
 Parts, in order: **Explore**, **Setup gap** (only when the engineering-skills
 setup is incomplete), **Ask**, **Summarize**, **Record**, **Closing**.
 
 **The instruction file.** Wherever this reference says "the instruction file"
 it means `AGENTS.md` if it exists, otherwise `CLAUDE.md` — the same order the
-suite uses to resolve the Refactoring Notes
+suite uses to resolve the Bookkeeping pointer's shared fallback
 (`refactoring-bookkeeping.md`, *Where the
 Refactoring Notes live*). Neither exists → onboarding creates `AGENTS.md`
 (`## Record`), and never creates the other one when one exists.
@@ -42,13 +42,13 @@ Read-only. No writes, no questions yet.
   of the triage roles under a different spelling (e.g. `wont-fix` for
   `wontfix`). Unreachable → note that; it only softens the summary, never
   blocks.
-- **The instruction file.** Read it. Note whether it already names a
-  merge-request mode (`autonomous`, `ask-each-time`, `human-opens`, or an
-  unambiguous paraphrase) or ticket mode (`autonomous`, `ask-each-time`) — as a **finding**, never an auto-decision; suite
-  state is never inferred silently from it, only offered as a recommendation
-  the human still confirms. Note whether it already carries the suite's
+- **The instruction file.** Read it. Note whether it already carries the suite's
   `## Continuous-refactoring suite` section and what that names (see
-  `## Record`).
+  `## Record`), and whether it already names a `Bookkeeping:` line (a team's
+  shared document — then Q4 is answered).
+- **The config file.** Read `.scratch/refactor/config.md` if it exists: a
+  `Bookkeeping:` pointer, `Ticket-create-mode` and `MR-create-mode` it already
+  states are **on record**.
 - **Engineering-skills setup.** Read `docs/agents/issue-tracker.md` and
   `docs/agents/triage-labels.md` if they exist. **Both exist → set up**;
   anything less → not set up (a repo-based test — which skills are installed
@@ -57,25 +57,24 @@ Read-only. No writes, no questions yet.
   `GitLab` / `Local Markdown`, or a freeform description for anything else).
   Note the tracker's native-label status from it and whether
   `triage-labels.md` has a `done` row.
-- **Refactoring Notes.** The instruction file's `Refactoring Notes:` line
-  says where they live; none → the default `docs/refactoring/`.
-  `bookkeeping.md` is missing — that's why onboarding is running at all.
+- **Refactoring Notes.** The Bookkeeping pointer (`refactoring-bookkeeping.md`,
+  *Where the Refactoring Notes live*) says where they live; none → the default
+  `.scratch/refactor/`. `bookkeeping.md` is missing — that's why onboarding is
+  running at all.
 - **Partial state — resume.** An earlier onboarding may have been interrupted
   between writes. `## Record`'s order makes that recognisable: the suite's own
   `## Continuous-refactoring suite` section is written **first** (it exists
   only once an earlier onboarding got past its questions, including the
-  setup-gap question), `bookkeeping.md` **last** (the only file whose absence
-  means "not finished"). So the section already being in the instruction file
+  setup-gap question), then `config.md`, then `bookkeeping.md` **last** (the only
+  file whose absence means "not finished"). So the section already being in the instruction file
   means: **skip the setup-gap question** whatever files exist or are missing,
   treat what the files record — the tracker in `issue-tracker.md`, the
-  `Refactoring Notes:` line — as **on record** (don't re-ask it, confirm it in
+  `Bookkeeping:` pointer in `config.md` — as **on record** (don't re-ask it, confirm it in
   `## Summarize` as "already recorded"), and write only what is missing. A
   missing `issue-tracker.md` or `triage-labels.md` is then simply the next
   write, in the not-set-up form. `Ticket-create-mode` and `MR-create-mode`
-  are the answers an interruption can lose: their only home is `bookkeeping.md`
-  (the instruction file holds a pointer, never the value), so Q2 and Q3 are
-  asked again (the earlier answers are at most instruction-file findings,
-  recommendations only).
+  are on record only if `config.md` already states them; an interruption before
+  that write loses them, so Q2 and Q3 are then asked again.
   Nothing is overwritten silently.
 - **Was the setup missing?** Needed for `## Closing`. Not set up (above), or —
   on a resume — `triage-labels.md` lacks the `needs-triage` and
@@ -109,8 +108,7 @@ who wants it can add it any time.
 ## Ask
 
 Before asking anything, summarize `## Explore`'s findings in plain prose —
-what's already known (a matched remote or none; an instruction-file
-MR-create-mode finding, or none; whether the engineering-skills setup is
+what's already known (a matched remote or none; whether the engineering-skills setup is
 present; anything already on record) and, explicitly, which of Q1–Q4 below
 are still open. This comes first so the human isn't asked to re-derive
 context already gathered.
@@ -145,7 +143,8 @@ found, or when a match was a different/unrecognized host ("no built-in
 native handling for this host yet — Local Markdown works everywhere; pick
 'something else' if you'd rather describe a different convention").
 
-**Q2 — tickets: create automatically, or check with you first?**
+**Q2 — tickets: create automatically, or check with you first?** Skipped when
+`config.md` already states `Ticket-create-mode`.
 
 A ticket is the issue that states a candidate's plan. Creating one is visible
 to everyone who watches the tracker, so you can choose to be asked first.
@@ -157,11 +156,12 @@ to everyone who watches the tracker, so you can choose to be asked first.
   ticket of the candidate it chose. With nobody there to answer, it creates
   nothing and says it is waiting. (`Ticket-create-mode: ask-each-time`)
 
-Recommendation: whatever the instruction file already named, said explicitly
-("AGENTS.md already says ask-each-time"); neither names one → recommend
-**Autonomous**, the suite's default (and what a missing field means).
+Recommendation: **Autonomous** — the fewest interruptions. (A config file that
+doesn't state the field reads as `ask-each-time`; the answer is written down
+either way.)
 
 **Q3 — merge requests: open automatically, or check with you first?**
+Skipped when `config.md` already states `MR-create-mode`.
 
 Whichever mode is chosen, review still happens at the merge request, not
 the issue — the issue only states the plan; the merge request shows the
@@ -180,23 +180,22 @@ Recommendation: `## Explore` found no git remote at all → recommend
 **You open them** — `autonomous`/`ask-each-time` both mean "push and open a
 merge request," which has nowhere to go yet; naming this now avoids every
 future pass hitting `opening-a-merge-request.md`'s "No forge/remote
-available" as a surprise. A remote exists → whatever the instruction file
-already named, said explicitly ("AGENTS.md already says autonomous");
-neither names one → recommend **Autonomous**, the suite's existing default
-bias.
+available" as a surprise. A remote exists → recommend **Autonomous**, the
+suite's existing bias.
 
-**Q4 — where should the suite keep its own metadata?**
+**Q4 — where should the suite keep its own state?** Skipped when the
+instruction file already names a `Bookkeeping:` line.
 
-The suite needs a folder for the loop's own state: `bookkeeping.md` (this
-interview's own decisions), `merge-requests.md` (in-flight merge-request
-bookkeeping, only when the tracker has no native labels), and
+The suite needs a folder for the loop's own state: `bookkeeping.md` (each
+Track's cadence, last scan and open items), `merge-requests.md` (in-flight
+merge-request bookkeeping, only when the tracker has no native labels), and
 `out-of-scope/` (learned rejections) — together, the **Refactoring
-Notes**. It is committed to git, same as any other project file — that's what
-lets config/rejections survive across passes and stay visible to the whole
-team, and the only mode this suite supports. So the question is only *where*:
+Notes**. The suite writes these files and never commits them; whether they go
+into Git, and how they reach another machine, is the developer's job — this is
+for one person. So the question is only *where*:
 
-- **Default location (`docs/refactoring/`)** — recommended.
-- **A different location** — name the path.
+- **Default location (`.scratch/refactor/`)** — recommended.
+- **A different location** — name the path of the `bookkeeping.md`.
 
 Recommendation: always the default location. If the human refuses to store
 the Refactoring Notes at all, don't invent or wire up an alternative: say the
@@ -205,9 +204,9 @@ next `/continuous-refactoring` starts onboarding from scratch.
 
 **Not asked here: `Focus areas` or `Refactoring goal`.** Both free-form, no
 filesystem signal to recommend from, and piling on unanchored questions
-risks rubber-stamping the whole round. Both stay hand-editable any time,
-same as the two modes — natural additions for a later, focused pass, not
-folded in here.
+risks rubber-stamping the whole round. Both are lines in the instruction
+file that humans add any time — natural additions for a later, focused pass,
+not folded in here.
 
 ## Summarize
 
@@ -218,10 +217,10 @@ can end onboarding without writing.
 > Tracker: <GitHub | GitLab | Local Markdown | other, as named>.
 > Ticket-create-mode: <autonomous | ask-each-time>.
 > MR-create-mode: <autonomous | ask-each-time | human-opens>.
-> Refactoring Notes: `<path>`, to be recorded in the instruction file.
+> Bookkeeping: `<path>`, to be recorded in `.scratch/refactor/config.md`.
 > Files: <the files `## Record` will write — the instruction file's section,
 > `docs/agents/triage-labels.md` and `docs/agents/issue-tracker.md` when
-> missing, `<path>/bookkeeping.md`>.
+> missing, `.scratch/refactor/config.md`, `<path>`>.
 > Labels: `refactor:candidate` and `refactor:priority` are recorded in the
 > instruction file only — nothing is created on <the forge>[; label
 > overrides recorded (only when the label table is written now): <role →
@@ -237,27 +236,21 @@ Executed directly by the dispatcher — no plan is handed to another skill.
 Each write gets **one short status line** as it happens (e.g. "Wrote
 `docs/agents/issue-tracker.md`."), never running silently. **Order matters**:
 the instruction file's section goes first (the "onboarding started" marker
-`## Explore`'s resume check reads) and `bookkeeping.md` **last** (the
+`## Explore`'s resume check reads), `config.md` next to last and
+`bookkeeping.md` **last** (the
 "onboarding complete" marker every other skill reads). A file that already
 exists is never overwritten; add only what's missing (a missing section, a
 missing table row) and say so.
 
-1. **Refactoring Notes path and backlog labels** → written into the
-   instruction file, creating `AGENTS.md` only when neither file exists.
-   Appended under a new `## Continuous-refactoring suite` heading if not
-   already present; when the heading exists, add only the lines it lacks.
-   `<path>` is Q4's answer (default `docs/refactoring/`):
+1. **Backlog labels** → written into the instruction file, creating
+   `AGENTS.md` only when neither file exists. Appended under a new
+   `## Continuous-refactoring suite` heading if not already present; when the
+   heading exists, add only the lines it lacks. A `Bookkeeping:` line goes
+   here only when the human named one as a team's shared document (Q4); the
+   ordinary pointer is in `config.md` (step 4):
 
    ```markdown
    ## Continuous-refactoring suite
-
-   Refactoring Notes: `<path>` — the continuous-refactoring
-   suite's own config, in-flight merge-request bookkeeping, and
-   rejected-tooling records live here.
-
-   Ticket-create-mode and MR-create-mode: see the Refactoring Notes'
-   `bookkeeping.md` — that file is the sole authoritative value, this is a
-   pointer, not a copy.
 
    Backlog labels: `refactor:candidate` (proposed work) and
    `refactor:priority` (jumps the queue) — see `docs/agents/issue-tracker.md`.
@@ -265,7 +258,7 @@ missing table row) and say so.
 
    The text written here (like every file this interview writes) is
    self-contained: it never cites the suite's own skill files. Every other
-   skill in the suite refers to this folder by name — "the Refactoring
+   skill in the suite refers to that folder by name — "the Refactoring
    Notes" — never by restating the concrete path.
 2. **Triage labels** → `docs/agents/triage-labels.md`:
    - **File exists** → leave it. Local Markdown tracker and it has no `done`
@@ -292,16 +285,20 @@ missing table row) and say so.
    - **Something else:** same shape as the two cases above, from what the
      human described; no description given → fall through to Local
      Markdown.
-4. **Ticket-create-mode and MR-create-mode** → the Refactoring Notes'
-   `bookkeeping.md` — **last**, creating the folder if needed. It is the sole
-   write-authority for both; the instruction file (step 1) holds only a
-   pointer to them. The shape is `refactoring-bookkeeping.md`'s `## Structure`,
-   reduced to the title line (`# Refactoring Bookkeeping`) and the two mode
-   fields: no `Pending candidates` (nothing is pending), no Track sections (each appears when its Track first runs).
-   `Focus areas` only if the human named one unprompted.
+4. **Bookkeeping pointer and the two create-modes** → `.scratch/refactor/config.md`,
+   creating the folder if needed. The shape is `refactoring-bookkeeping.md`'s
+   *The config file*: the title line, `**Bookkeeping:**` (Q4's path, default
+   `.scratch/refactor/bookkeeping.md`), `**Ticket-create-mode:**` and
+   `**MR-create-mode:**`. A file that already exists keeps the values it has;
+   only missing fields are added.
+5. **The bookkeeping document** → `<path>/bookkeeping.md` — **last**, creating
+   the folder if needed. The shape is `refactoring-bookkeeping.md`'s
+   `## Structure`, reduced to the title line (`# Refactoring Bookkeeping`):
+   no `Pending candidates` (nothing is pending), no Track sections (each
+   appears when its Track first runs).
 
 No issue is filed, no branch or merge request is opened, no label is created
-on the forge, and nothing is committed — the human commits the files.
+on the forge, and nothing is committed.
 
 ## Closing
 
@@ -309,9 +306,12 @@ Ends the invocation. Tell the human, in plain prose:
 
 - **What was created** — each file, one line each (and what was already
   there and left alone).
-- **Commit them.** The new files should reach the default branch (commit and
-  merge them): candidate branches are based on it, so they only contain the
-  Refactoring Notes once it does. Not checked here — a reminder, not a gate.
+- **Commit what belongs in Git** — only when this run wrote something that
+  does: the instruction file's section, `docs/agents/triage-labels.md`,
+  `docs/agents/issue-tracker.md`. Everything under `.scratch/refactor/` is the
+  developer's own: the suite doesn't commit or ignore it, and whether it goes
+  into Git is their call. Nothing committable written → don't mention
+  committing at all. A reminder, not a gate.
 - **Run `/continuous-refactoring` again** to start the first scan —
   optionally naming a Track (e.g. `/continuous-refactoring guardrails`).
 - **The setup was missing** (`## Explore`'s "Was the setup missing?") → the

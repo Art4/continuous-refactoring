@@ -53,7 +53,7 @@ one, so merging them in any order is safe.
 
 ## Why does only the loop create tickets — and why would it ask?
 
-A ticket is visible to everyone watching the tracker, and it can be closed but not un-created. The steps that come up with candidates run in subagents, and a subagent can't ask you anything, so they hand back drafts and the loop — the one place that can ask — creates them. `Ticket-create-mode` decides how: `autonomous` (also what a missing field means) creates them as the pass needs them; `ask-each-time` asks once for the whole batch of tickets proposed up front and once more for the candidate the pass chose. It's separate from `MR-create-mode`, which is only about opening merge requests; you can be asked about one and not the other. If you decline the chosen candidate's ticket the pass ends without touching anything else, and you're offered to reject the node for good. With nobody there to answer, nothing is created and the pass says it is waiting — switching the field to `autonomous` in `bookkeeping.md` is the way to run unattended.
+A ticket is visible to everyone watching the tracker, and it can be closed but not un-created. The steps that come up with candidates run in subagents, and a subagent can't ask you anything, so they hand back drafts and the loop — the one place that can ask — creates them. `Ticket-create-mode` decides how: `autonomous` creates them as the pass needs them; `ask-each-time` asks once for the whole batch of tickets proposed up front and once more for the candidate the pass chose. It's separate from `MR-create-mode`, which is only about opening merge requests; you can be asked about one and not the other. If you decline the chosen candidate's ticket the pass ends without touching anything else, and you're offered to reject the node for good. With nobody there to answer, nothing is created and the pass says it is waiting — switching the field to `autonomous` in your config file is the way to run unattended. A config file that doesn't state the field reads as `ask-each-time`, so a fresh machine never creates tickets on its own.
 
 ## Why does the loop write everything through `refactor-learn`?
 
@@ -78,14 +78,24 @@ run the setup first (nothing is written) or to continue, in which case it writes
 file and label table itself. Running the setup later updates those files in place. Labels are only ever
 recorded in files — the suite never creates a label on GitHub or GitLab during onboarding.
 
+## Why doesn't the suite commit its own state?
+
+Because the state — each Track's last scan and open items, your create-modes — is bookkeeping about *your*
+runs, not part of the project. Committing it meant bookkeeping branches, extra merge requests and a
+review nobody wanted to give. The suite now writes those files in place under `.scratch/refactor/` and
+leaves Git alone: whether they are committed, ignored or copied to another machine is your decision. Your
+config (`Ticket-create-mode`, `MR-create-mode`) is a separate file precisely because it can differ per
+person and machine. The trade-off: this is meant for one person on one working tree, and a second
+machine only sees what you carry over.
+
 ## Why do I have to run `/continuous-refactoring` twice on a new project?
 
 Because setting up a project is a different job from refactoring it. The first invocation on a project with
-no `bookkeeping.md` only onboards: it asks a few questions, writes the setup files, tells you what it did
+no bookkeeping document only onboards: it asks a few questions, writes the setup files, tells you what it did
 and stops. That keeps one-time setup out of the scan-prioritise-design-implement pipeline — no issue, no
 merge request, no branch — and it means the very first thing you see is that onboarding is happening, not a
-scan starting in the background. Commit the new files to the default branch (candidate branches are based on
-it), then run `/continuous-refactoring` again: that invocation selects a Track and starts the first scan.
+scan starting in the background. Commit what belongs in Git (the instruction-file section, `docs/agents/*`; the
+files under `.scratch/refactor/` are yours to keep or not), then run `/continuous-refactoring` again: that invocation selects a Track and starts the first scan.
 Naming a Track on a project that was never onboarded still onboards first.
 
 ## How do I make the loop work on a specific Track?
