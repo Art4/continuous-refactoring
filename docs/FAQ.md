@@ -122,3 +122,14 @@ couldn't confirm.
 No. Fulfilment is judged by an agent against each node's purpose, so a tool you adopted by hand — or an
 equivalent under another name — counts, and the node leaves the open list without a merge request. The
 parser only computes the tree's graph logic.
+
+## I answered a flagged candidate's question — why is it still waiting on `needs-info`?
+
+It shouldn't be, past the next pass, if your answer was a plain "yes, proceed": the suite reads a flagged
+candidate's newest comment and, if it's a plain confirmation of the stated default, swaps the labels
+itself. You never had to remember to also flip `needs-info`/`ready-for-agent` by hand for that case.
+
+A comment that proposes something *other* than the stated default, or raises a further question, still
+leaves it flagged — the suite nudges once, but won't guess at a trade-off you didn't plainly settle. Swap
+the labels yourself once your answer is final. This is deliberately narrow: the suite transcribes a
+settled "yes," it never decides the actual decision on your behalf.

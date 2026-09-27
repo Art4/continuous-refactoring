@@ -185,9 +185,12 @@ all. The plan carries a proposed default plus an explicit open question on the i
 (`skills/refactor-design/references/decision-gate.md`); `ready-for-agent`
 (`docs/agents/triage-labels.md`) is actively removed if the issue already carried one, and
 `needs-info` is added in its place — the visible "waiting on you" signal — until a human confirms or
-overrides it by commenting, removing `needs-info`, and adding `ready-for-agent` back.
-`refactor-scan` treats a still-waiting one (`needs-info` present) as not resumable — it doesn't block
-the rest of the backlog — and picks it back up the moment `ready-for-agent` appears.
+overrides it. A plain confirming comment is enough on its own — `refactor-design` self-confirms it,
+swapping the labels itself (ADR-0066); anything else (a stated alternative, a further question) still
+needs the human to swap the labels by hand once satisfied.
+`refactor-scan` treats a still-waiting one (`needs-info` present, no newer human comment) as not
+resumable — it doesn't block the rest of the backlog — and picks it back up the moment `ready-for-agent`
+appears, whether a human set it or the self-confirmation above did.
 _Avoid_: blocked candidate, paused candidate
 
 **Decision trail**:
