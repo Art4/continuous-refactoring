@@ -22,14 +22,14 @@ both fully resolved at the filesystem level (`php-safety-net: true`, `next` hold
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Same as
   `php-scheduler-bootstrap-investigation` — still the same "just closed" state.
-- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`. **Present** (unlike
+- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`, `Open: - none`. **Present** (unlike
   `php-scheduler-bootstrap-investigation`, where it was absent) — Investigation's own scan already ran
-  once, this turn's first pass. Top-level `Pending candidates: none` — the one bootstrap candidate that
-  scan proposed is already fully delivered (design → implement → learn all complete), not just proposed.
-  This combination — section present *and* `Pending candidates: none` — is exactly what
-  `track-scheduler.md`'s own "One-time exception" section 1 requires to consider Investigation's turn
-  finished, distinct from a mid-flight candidate (section present but `Pending candidates` still naming
-  an issue), which would keep forcing Investigation selected instead.
+  once, this turn's first pass. `Open: none` — the one bootstrap candidate that scan proposed is already
+  fully delivered (design → implement → learn all complete), not just proposed. This combination —
+  section present *and* `Open: none` — is exactly what `track-scheduler.md`'s own "One-time exception"
+  section 1 requires to consider Investigation's turn finished, distinct from a mid-flight candidate
+  (section present but `Open` still naming an issue), which would keep forcing Investigation selected
+  instead.
 - No `## Guardrails` or `## Housekeeping` section at all — neither has run yet.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
@@ -40,8 +40,8 @@ should:
 
 1. Read `## Safety Net`; recognize its `Open` is currently empty — the exception's precondition still
    holds.
-2. Check the exception's three ordered conditions: `## Investigation` is present *and* `Pending
-   candidates` is `none` → **condition 1 does not match** (Investigation's own turn is done). Check
+2. Check the exception's three ordered conditions: `## Investigation` is present *and* `Open`
+   is `none` → **condition 1 does not match** (Investigation's own turn is done). Check
    condition 2: `## Guardrails` section absent → **matches** — select **Guardrails**, this pass,
    overriding ordinary ratio/tie-break, without ever re-selecting Investigation.
 3. Hand the Guardrails Track to `refactor-scan` as an explicit input; `refactor-scan` runs

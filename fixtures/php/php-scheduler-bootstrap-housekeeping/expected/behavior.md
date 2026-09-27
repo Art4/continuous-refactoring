@@ -23,9 +23,8 @@ Guardrails both fully resolved at the filesystem level.
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-09-18`, `Open` list `- none`. **Present** — Guardrails' own
   turn (from `php-scheduler-bootstrap-guardrails`) already ran and found nothing new to propose (this
   fixture's underlying project already fulfils every Guardrails node).
-- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`. Present, top-level `Pending
-  candidates: none` — Investigation's own turn (from `php-scheduler-bootstrap-investigation`) is fully
-  delivered.
+- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`, `Open: - none`. Present, `Open`
+  empty — Investigation's own turn (from `php-scheduler-bootstrap-investigation`) is fully delivered.
 - No `## Housekeeping` section at all — the only one of the four still never run.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
@@ -33,7 +32,7 @@ Guardrails both fully resolved at the filesystem level.
 Run the orchestrator's Track-selection step (step 1) — check the one-time exception first. It should:
 
 1. Read `## Safety Net`; `Open` is empty — precondition met.
-2. Check condition 1 (`## Investigation` absent or `Pending candidates` naming an issue) — false, both
+2. Check condition 1 (`## Investigation` absent or `Open` naming an issue) — false, both
    present and clear. Check condition 2 (`## Guardrails` absent) — false, present. Check condition 3
    (`## Housekeeping` absent) — **true** — select **Housekeeping**, this pass, overriding ratio/
    tie-break, without ever computing an `overdue_ratio` for any Track.

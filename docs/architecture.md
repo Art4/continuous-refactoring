@@ -92,7 +92,7 @@ Neither the config file nor `bookkeeping.md` exists on a fresh target. The dispa
 With the bookkeeping in an issue, the skills still read and write the same local files under `.scratch/refactor/`;
 that folder is a copy. The entry point (`refactor-loop`, `continuous-housekeeping`, the dispatcher's Track
 selection) loads the issue into it before anything is read, and every skill that wrote — `refactor-learn`,
-`refactor-design` for its `Pending candidates` — saves it back before returning. The issue body is the document;
+`refactor-design` for a resume-marker write — saves it back before returning. The issue body is the document;
 each learned rejection and each remembered merge request is a comment. The last write wins. An issue that can't be
 read stops the pass and nothing is created in its place; only onboarding, with you there, creates one.
 

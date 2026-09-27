@@ -167,14 +167,14 @@ _Avoid_: (none — use the term as-is)
 
 **Self-tracking** (hand-off marker):
 How `refactor-scan`'s Track `Open` walk (`skills/refactor-scan/references/track-open-processing.md`)
-hands its picked node to `refactor-design` — the same marker `refactor-prioritize`'s Select mode
-already puts on a structural/baseline-shrink candidate. `refactor-design` reads it as "this
-candidate's own resume marker lives elsewhere, don't set `Pending candidates`" and nothing more — it
-never learns what "elsewhere" is, keeping it free of any vocabulary for **Track**, **Safety Net**, or
-**Guardrails**. What "elsewhere" actually is stays known only to whoever set the marker and to
-`refactor-learn`'s own write files: `refactor-prioritize`'s own filing for a structural/
-baseline-shrink candidate, or a Track's own `Open` entry for an `Open`-walk node
-(`docs/adr/0060-track-open-entries-record-their-issue-number.md`).
+hands its picked Safety Net/Guardrails node to `refactor-design`. `refactor-design` reads it as "this
+candidate's own resume marker lives elsewhere, don't set the top-level `Pending candidates`" and nothing
+more — it never learns what "elsewhere" is, keeping it free of any vocabulary for **Track**, **Safety
+Net**, or **Guardrails**. What "elsewhere" actually is stays known only to whoever set the marker and to
+`refactor-learn`'s own write files: that Track's own `Open` entry for an `Open`-walk node
+(`docs/adr/0060-track-open-entries-record-their-issue-number.md`). A structural, baseline-shrink, or
+externally-labeled candidate isn't marked this way — `refactor-design` sets `## Investigation`'s own
+`Open` for those directly, unconditionally, on every tracker.
 _Avoid_: (none — use the term as-is)
 
 **Flagged candidate**:

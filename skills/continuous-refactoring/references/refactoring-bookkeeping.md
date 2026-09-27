@@ -139,6 +139,9 @@ tooling-tree node's Fulfilment check, and never by Rank mode. Omitted → no bia
 **Cadence:** continuous
 
 **Last scan:** 2026-09-10
+
+**Open:**
+- Shallow UserService (#101)
 ```
 
 `Pending candidates` sorts last, not alphabetically or by write-frequency. The `## Safety Net`, `## Guardrails`, `## Housekeeping`, and `## Investigation` sections (below) sit between `Pending candidates` and the end of the file, in that order — the same Safety Net > Guardrails > Housekeeping > Investigation priority the scheduling algorithm uses elsewhere (`CONTEXT.md`'s **Track** entry) — each is its own heading, not a top-level field, so none competes with that ordering rule.
@@ -168,9 +171,9 @@ Every Track's `Cadence` (except Investigation's literal `continuous`, below) is 
 | Field | Meaning | Written by |
 |---|---|---|
 | `Secret history scan` | Whether the one-time full git-history secret scan (`refactor-scan/SKILL.md` step 4c) has already run — absent until it has, `done (YYYY-MM-DD)` (the date the scan ran, purely for human-readable audit trail — nothing reads or compares it) once every finding from that run is filed. Read only by that step, to decide whether to run at all; gated on the `secret-detection` node itself being fulfilled first, so it's meaningless (and never written) on a target that hasn't adopted that node yet. | `refactor-learn`, early call, once, the pass the scan actually runs — never hand-edited (a target that genuinely wants the scan to run again removes the field by hand instead, the same escape hatch an `out-of-scope/` rejection uses) |
-| `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue most recently filed for this candidate, not yet delivered as a merge request. Written as a list purely for formatting consistency and easier diffing — it still holds at most one entry; the suite tracks exactly one thing in flight at a time (`refactor-scan`/`refactor-prioritize`), this is not a multi-pending queue. **No native-label tracker only** — on a native tracker, a tooling-tree node/externally-labeled candidate skips this write entirely (stays `none` there in the ordinary case); a structural/baseline-shrink candidate's issue (drafted by `refactor-prioritize`'s Select mode) has it written *even on a native tracker* — a narrow, deliberate exception, see below. | `refactor-design` sets it for a tooling-tree node/externally-labeled candidate once it has the issue (non-native tracker only) — except a Safety Net/Guardrails Track's `Open`-walk node, which `refactor-scan` hands to `refactor-design` already marked self-tracking, so this write is skipped for those the same way it's skipped for a structural/baseline-shrink candidate; `refactor-design` also sets it for a structural/baseline-shrink candidate, from the issue `refactor-loop` created out of `refactor-prioritize`'s Select-mode draft (always, native tracker included); `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the candidate is resolved another way |
+| `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue most recently filed for a **tooling-tree node's own first-ever proposal**, before its Track's own `## Safety Net`/`## Guardrails` section exists yet — the one pass where that node isn't already tracked by the Track's own `Open` (below). Narrow and short-lived: from the Track's next scan on, every node in its scope is tracked in that Track's own `Open` instead, and this field goes back to `none`. **Non-native tracker only** — on a native tracker this write is skipped entirely (stays `none`): a future pass's `refactor-scan` step 3 rediscovers the same still-open issue on its own. | `refactor-design` sets it for that narrow case only (non-native tracker); `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the Track's own `Open` takes over |
 
-`Pending candidates` exists so a pass interrupted mid-candidate doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass, resuming at whichever step is actually next (no plan comment on the issue yet → `refactor-design`; plan comment present → `refactor-implement` — `refactor-scan/SKILL.md` step 2). The native-tracker exception for a structural/baseline-shrink candidate's early filing exists for the same reason one level earlier: without it, a future pass's `refactor-scan` step 3b would rediscover the minimally-filed issue as an *externally-labeled* candidate and re-run candidate search on it from scratch — possibly picking a different one, exactly what this field prevents at the design→implement handoff already. **Never written for a Safety Net or Guardrails Track candidate** (below) — that candidate's in-flight issue lives in the relevant Track's own `Open` list instead, which can hold more than the one entry this field is limited to.
+`Pending candidates` exists so a pass interrupted mid-candidate doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass, resuming at whichever step is actually next (no plan comment on the issue yet → `refactor-design`; plan comment present → `refactor-implement` — `refactor-scan/SKILL.md` step 2). **Never written for a Safety Net or Guardrails Track candidate** once that Track's own section exists (below) — that candidate's in-flight issue lives in the relevant Track's own `Open` list instead, which can hold more than the one entry this field is limited to. **Never written for a structural, baseline-shrink, or externally-labeled candidate either** — those are `## Investigation`'s own business, tracked in its own `Open` (below), not here.
 
 ## `Safety Net` section
 
@@ -294,22 +297,26 @@ Guardrails`'s own).
 
 ## `Investigation` section
 
-Carries only what the Track scheduler needs to compete **Investigation** (`CONTEXT.md`) against the
-other Tracks — nothing else. Replaces nothing: Investigation never had a dedicated field of its own to
-begin with, and doesn't gain an `Open`/`Out-of-scope` list either —
-unlike `## Safety Net`/`## Guardrails` above, a structural candidate's own open/done/rejected state
-stays on the issue tracker / the Refactoring Notes' `merge-requests.md` exactly as today (`Pending
-candidates`, above, still tracks the one in-flight structural/baseline-shrink candidate exactly as it
-already did before this section existed). Full read/write mechanics:
+Carries what the Track scheduler needs to compete **Investigation** (`CONTEXT.md`) against the other
+Tracks, plus its own `Open` — a single-entry counterpart to `## Safety Net`'s/`## Guardrails`' own,
+holding the one candidate the Track is actively working (structural, PHPStan baseline-shrink, or an
+externally-labeled issue — everything `refactor-scan/SKILL.md` step 3b now routes to an Investigation
+pass only). No `Out-of-scope`: Investigation doesn't reject a fixed set of candidates the way the tree
+does, and every *other* open candidate — one Select mode drafted but didn't pick this pass, or a human's
+own untouched `refactor:candidate` issue — stays exactly what it already is, an ordinary open issue, not
+a tracked backlog entry: the tracker itself already shows it, cheaply and live, `refactor-scan` step 3b
+re-discovers it fresh every Investigation pass, and there's no un-filed-node concept here the way there
+is for the tree (a tree node can sit unblocked for passes with no issue at all; an Investigation
+candidate is always already an issue the moment it exists). Full read/write mechanics:
 `../../refactor-scan/references/investigation-track.md` (`refactor-scan`'s own scan step),
 `../../refactor-learn/references/investigation-write.md` (`refactor-learn`'s own write step),
 `track-scheduler.md` (the orchestrator's own Track-selection
-step — reads this section's `Cadence`/`Last scan` the same way it reads `## Safety Net`'s/`##
+step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads `## Safety Net`'s/`##
 Guardrails`'s own, with one difference, next; that file's own "One-time exception" also reads whether
-this section exists at all, and, once it does, whether the top-level `Pending candidates` field still
-names an issue — the load-bearing signal for "Investigation's one candidate from that exception hasn't
-been fully delivered yet," since this section's own `Last scan` gets written on that turn's very first
-pass, well before design/implement/learn actually finish it).
+this section exists at all, and, once it does, whether its own `Open` still names an issue — the
+load-bearing signal for "Investigation's one candidate from that exception hasn't been fully delivered
+yet," since this section's own `Last scan` gets written on that turn's very first pass, well before
+design/implement/learn actually finish it).
 
 ```markdown
 ## Investigation
@@ -317,6 +324,9 @@ pass, well before design/implement/learn actually finish it).
 **Cadence:** continuous
 
 **Last scan:** 2026-09-14
+
+**Open:**
+- none
 ```
 
 - **`Cadence`** — always the literal `continuous`, never an interval and never hand-edited (unlike
@@ -335,13 +345,30 @@ pass, well before design/implement/learn actually finish it).
   no `Cadence` to divide by, Investigation stays always due and always eligible regardless of `Last
   scan`'s own value; the field is a pure audit trail here ("did Investigation's scan run, and when"), not
   an input to its own due-check.
-- **No `Open`/`Out-of-scope`** — Investigation never blocks its own re-selection on in-flight work (no
-  "`Open` must be empty" precondition, unlike Safety Net/Guardrails): `structural-scan`'s own
-  resolved-edge gate (unchanged — every node with a `resolved` edge into it must itself be resolved,
-  fulfilled or explicitly rejected) already decides whether there's anything to propose once this
-  Track is selected, and any concrete structural candidate it does produce is an ordinary issue from
-  there — `Pending candidates` (above) tracks it in flight the same way it always has, unaffected by any
-  of this.
+- **`Open`** — at most one entry, `- <issue title> (#<issue>)`, `- none` when empty (unlike `## Safety
+  Net`'s/`## Guardrails`' own multi-entry backlog — see *Why single-entry*, above). Written on **every**
+  tracker, native-label ones included — unlike a tooling-tree node's top-level `Pending candidates`
+  (above), which native trackers skip: an Investigation candidate needs `refactor-scan` to resume
+  *exactly* this issue next pass rather than treat it as a fresh candidate and possibly pick a different
+  one via step 3b's ranking, regardless of whether the tracker also shows the issue open. `refactor-scan`
+  resumes it only when **Investigation is the Track selected this pass** (`track-scheduler.md`) — the
+  same "read this Track's own `Open` only when this Track runs" discipline `## Safety Net`/`##
+  Guardrails` already follow; a Guardrails or Safety Net pass never touches it. `refactor-learn` clears
+  it to `- none` once the candidate is merged, rejected, or closed as a design-time breaking-change
+  finding.
+- Investigation never blocks its own re-selection on `Open`'s own emptiness the way Guardrails/Safety Net
+  do (no "`Open` must be empty before a fresh scan" precondition): `structural-scan`'s own resolved-edge
+  gate (unchanged — every node with a `resolved` edge into it must itself be resolved, fulfilled or
+  explicitly rejected) already decides whether there's anything fresh to propose once this Track is
+  selected and its own `Open` is empty.
+
+**Why single-entry.** `refactor-prioritize`'s Select mode can draft more than one structural candidate's
+issue in a single pass, but only one is ever chosen to be designed and implemented this pass — the suite
+tracks exactly one thing in flight at a time, the same discipline the retired global `Pending candidates`
+field already held to. The others sit as ordinary open issues for a future pass
+(`../../refactor-prioritize/references/structural-candidate-search.md`) — `refactor-scan` step 3b
+re-discovers and re-ranks them fresh every Investigation pass, the same as any other candidate; nothing
+here privileges or queues them ahead of time.
 
 There is deliberately no `Cadence` field for the continuous-refactoring loop itself: it never triggers itself — you kick it off whenever it's due, whether that's you running `/continuous-refactoring` by hand or a scheduler you set up outside the suite. `## Housekeeping`'s own `Cadence` (above) doesn't contradict this — it belongs to one Track among the four this loop schedules internally once it does run, not to the loop's own outer trigger.
 
@@ -353,9 +380,9 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
   the rare target that genuinely wants the one-time scan to run again. The `## Safety Net`, `## Guardrails`,
   and `## Housekeeping` sections are the same: `refactor-learn`-written, never by hand, except each
   section's own `Cadence` — hand-editable any time (directly, or, for `## Housekeeping`, via the optional
-  `housekeeping-cadence-interview.md`). `## Investigation` is `refactor-learn`-written too, but unlike those
-  three, *nothing* in it is hand-editable — its `Cadence` is always the literal `continuous` (above), never
-  a number to tune.
+  `housekeeping-cadence-interview.md`). `## Investigation` is the same too — `refactor-design` sets its
+  `Open` entry, `refactor-learn` clears it and writes `Last scan` — but unlike those three, *nothing* in
+  it is hand-editable — its `Cadence` is always the literal `continuous` (above), never a number to tune.
 - The suite never commits this document, in either mode. Loop state does not live in the agent's own conversation but here (pending candidates, the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
 - If the Bookkeeping pointer is missing, or names a file that doesn't exist, the target isn't onboarded yet (an issue URL that can't be read is a different case — `issue-mode.md`, *Load*: the pass stops, and nothing is created in its place): the dispatcher's onboarding step runs before anything else, and every other skill that needs the document aborts (*Not onboarded yet*, below) rather than creating it.
 

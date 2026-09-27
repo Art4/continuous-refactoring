@@ -27,13 +27,15 @@ one-time exception's own three turns are all long finished):
   reused deliberately, so this fixture's ratio math is easy to cross-check.)
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (4 days before → `overdue_ratio ≈ 0.57`). **Not
   due.**
-- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-08-20`. Always due, always eligible — but,
-  per the fixed tie-break order (Safety Net > Guardrails > Housekeeping > Investigation), never wins
-  against a Track with a genuine `overdue_ratio >= 1` due this same pass.
-- Top-level `Pending candidates: none`.
+- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-08-20`, `Open: - none`. Always due, always
+  eligible (its own `Open` is empty) — but, per the fixed tie-break order (Safety Net > Guardrails >
+  Housekeeping > Investigation), never wins against a Track with a genuine `overdue_ratio >= 1` due this
+  same pass.
+- Top-level `Pending candidates: none` (unused here — this target's very first tooling-tree proposals
+  are long past).
 
 Every one of the one-time exception's three conditions (`track-scheduler.md`'s own "One-time exception"
-section) is false here: `## Investigation` is present with no in-flight `Pending candidates`, `##
+section) is false here: `## Investigation` is present with no in-flight `Open`, `##
 Guardrails` is present, `## Housekeeping` is present — condition 4 (the exception is permanently done)
 applies, and ordinary Eligibility/Selection runs unmodified.
 
