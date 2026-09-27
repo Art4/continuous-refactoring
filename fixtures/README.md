@@ -305,7 +305,7 @@ Same non-CI, local-only, advisory posture as the two fixtures above.
     would pick Guardrails; the one-time exception must instead pick **Investigation** — this ticket's own
     adversarial case, a more-overdue-by-the-ordinary-rules Track losing to the exception's own order.
   - **php-scheduler-bootstrap-guardrails** — same Safety Net state; `## Investigation` now present with
-    `Pending candidates: none` (its own turn already fully delivered, not just proposed); `##
+    `Open: none` (its own turn already fully delivered, not just proposed); `##
     Guardrails`/`## Housekeeping` still absent. Expects **Guardrails** selected, confirming the sequence
     advances instead of re-selecting Investigation — otherwise the scheduler's permanent fallback.
   - **php-scheduler-bootstrap-housekeeping** — `## Investigation` and `## Guardrails` both present (their

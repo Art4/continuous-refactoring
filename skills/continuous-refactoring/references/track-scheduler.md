@@ -19,9 +19,9 @@ Every Track whose own `Cadence`/`Last scan` bookkeeping section currently exists
 `bookkeeping.md` — right now: `## Safety Net`, `## Guardrails`, `## Housekeeping`, `## Investigation`,
 every one of the four currently-wired Tracks (`CONTEXT.md`'s **Track** entry). Nothing here
 special-cases any Track by name beyond the fixed tie-break order (below), which already names all
-four — including Investigation, whose own section carries only `Cadence`/`Last scan` and no `Open` at
-all (`refactoring-bookkeeping.md`'s own `## Investigation` section), and Housekeeping, whose own section
-carries the same two fields but, unlike Investigation, a real, unit-carrying `Cadence` that competes in ratio
+four — including Investigation, whose own section carries a single-entry `Open` alongside `Cadence`/`Last
+scan` (`refactoring-bookkeeping.md`'s own `## Investigation` section), and Housekeeping, whose own section
+carries only the latter two but, unlike Investigation, a real, unit-carrying `Cadence` that competes in ratio
 comparison exactly like Safety Net's/Guardrails' own (`refactoring-bookkeeping.md`'s own `##
 Housekeeping` section); see Eligibility and Selection below for exactly how each shape competes.
 
@@ -53,18 +53,16 @@ where skipping this check here loses ground to Safety Net's own in-flight work).
 
 With that precondition met, check the following three, in order, and stop at the first match:
 
-1. **`## Investigation` section absent, or present with `Pending candidates` currently naming an
+1. **`## Investigation` section absent, or present with `Open` currently naming an
    issue (not `none`)** → select **Investigation**, this pass, overriding ratio/tie-break entirely. The
-   `Pending candidates` half of this check is load-bearing, not redundant with "section absent": per
+   `Open` half of this check is load-bearing, not redundant with "section absent": per
    `../../refactor-learn/references/investigation-write.md`, `## Investigation`'s `Last scan` is written
    the moment the Track's *scan* step runs — the very first pass of this turn — long before its one
-   candidate is actually delivered (design → implement → learn can each take a further pass).
-   Investigation carries no `Open` list of its own to lean on the way Guardrails/Safety Net do for this
-   same "stay selected until done" job, so this check reads `Pending candidates` instead — the existing
-   field that already tracks exactly this one in-flight candidate
-   (`refactoring-bookkeeping.md`'s own `Pending candidates`
-   row) — keeping Investigation force-selected on every pass until it clears, matching "one candidate,
-   fully delivered," not just proposed.
+   candidate is actually delivered (design → implement → learn can each take a further pass). This
+   check reads Investigation's own `Open` exactly the way it would for Guardrails/Safety Net — the same
+   "stay selected while `Open` names something" job (`refactoring-bookkeeping.md`'s own `## Investigation`
+   `Open` row) — keeping Investigation force-selected on every pass until it clears, matching "one
+   candidate, fully delivered," not just proposed.
 2. Else, **`## Guardrails` section absent** → select **Guardrails**, this pass, overriding ratio/
    tie-break. Guardrails gets one turn; once its section exists, the ordinary eligibility rule below
    governs it like any other Track — there is no special mechanism that keeps it selected after its
@@ -75,7 +73,7 @@ With that precondition met, check the following three, in order, and stop at the
    (`../../continuous-housekeeping/references/housekeeping-track.md`), so — unlike Investigation's own
    turn above — there is no multi-pass in-flight state to keep re-selecting across; the section exists
    with `Last scan` written by the time that same pass's closing call finishes.
-4. Else (all three sections present, and `## Investigation` carries no in-flight `Pending candidates`)
+4. Else (all three sections present, and `## Investigation` carries no in-flight `Open`)
    → this exception is permanently done for this repo. Every later pass — including a later, ordinary
    Safety Net rescan (`Cadence: 90 days`) whose own `Open` goes non-empty then empty again — runs
    Eligibility/Selection below unmodified, forever. This is what makes the exception fire **exactly
@@ -114,19 +112,20 @@ ratio comparison when it is both **due** and **eligible** this pass:
   This is a different reason than "never run" (that one has no `Last scan` yet either; Investigation
   simply has no interval to measure staleness against, full stop, `Last scan` present or not) but the
   same practical outcome: always due.
-- **Eligible** — a Track that carries its own `Open` list (Safety Net, Guardrails today) is eligible
-  only when that `Open` is empty. Non-empty `Open` means the Track's existing entries get worked
-  (propose → design → implement → learn) instead of being rescanned this pass (each Track's own
+- **Eligible** — a Track that carries its own `Open` (Safety Net, Guardrails, Investigation today) is
+  eligible only when that `Open` is empty. Non-empty `Open` means the Track's existing entry/entries get
+  worked (propose → design → implement → learn) instead of being rescanned this pass (each Track's own
   reference file, "Is the Track due this pass?") — it drops out of ratio comparison entirely, whether
   or not it's numerically overdue; staleness stops mattering the moment there's already in-flight work
-  to finish. Guardrails follows this rule: with at least one workable `Open` node, it is selected ahead
-  of Investigation; with nothing workable, it yields. A Track with no `Open` concept at all
-  (Housekeeping, Investigation — neither ever carries one, per the spec's own bookkeeping schema) is
-  always eligible; a Housekeeping cycle already in progress is tracked by the tracker's own history
-  instead (`../../continuous-housekeeping/references/housekeeping-track.md`'s own *Resuming an
-  in-progress cycle* section), not by this eligibility rule. Investigation waits behind a Guardrails
-  backlog with workable nodes — Guardrails' workable nodes outrank Investigation's permanent fallback
-  status.
+  to finish. In practice this rule rarely has anything left to decide for Investigation by the time it's
+  reached: the one-time exception's own bullet 1 (above) already force-selects Investigation on every
+  pass its `Open` names an issue, so Eligibility only ever sees Investigation with an empty `Open`.
+  Guardrails follows this rule against Investigation's own permanent-fallback status: with at least one
+  workable `Open` node, Guardrails is selected ahead of Investigation; with nothing workable, it yields.
+  **Housekeeping** is the one Track with no `Open` concept at all (`refactoring-bookkeeping.md`'s own
+  `## Housekeeping` section) — always eligible the moment it's due; a cycle already in progress is
+  tracked by the tracker's own history instead (`../../continuous-housekeeping/references/housekeeping-track.md`'s
+  own *Resuming an in-progress cycle* section), not by this eligibility rule.
 
 ## Selection
 
@@ -156,13 +155,16 @@ The same fixed order also decides which Track's own `Open` work gets this pass's
 on the rare occasion more than one wired Track holds non-empty `Open` at the same time — Open-bearing
 Tracks resolve on this fixed order directly, never on staleness ratio, since ratio stopped applying to
 either of them the moment their own `Open` went non-empty. In practice this never actually happens with
-all four Tracks wired: only Safety Net and Guardrails carry an `Open` list at all (Housekeeping's own
-`## Housekeeping` section carries none either — `refactoring-bookkeeping.md`'s own `## Housekeeping`
-section, "swept content stays in `housekeeping-template.md`" instead — and Investigation never carries
-one), and a Guardrails node is never unblocked in the tree until Safety Net itself is fully resolved, so
-Safety Net's `Open` can't still be non-empty at the same moment Guardrails' is — `guardrails-track.md`'s
-own Scope section. The rule stays written anyway: it's still the correct fallback if a future Track ever
-gains its own `Open`-shaped in-flight state.
+all four Tracks wired: Safety Net, Guardrails, and Investigation carry an `Open` (Housekeeping's own
+`## Housekeeping` section carries none — `refactoring-bookkeeping.md`'s own `## Housekeeping`
+section, "swept content stays in `housekeeping-template.md`" instead), but the tree's own gating already
+keeps at most one of the three non-empty at once: a Guardrails node is never unblocked until Safety Net
+itself is fully resolved, so Safety Net's `Open` can't still be non-empty the moment Guardrails' is; and
+`structural-scan` — the only node feeding Investigation's own `Open` — carries a `resolved` edge from
+every Guardrails node (`guardrails-track.md`'s own Scope section: Guardrails' nodes are "required on
+`structural-scan`"), so Investigation's `Open` can't go non-empty until Guardrails' is permanently empty
+either. The rule stays written anyway: it's still the correct fallback if a future Track ever gains its
+own `Open`-shaped in-flight state that isn't gated this way.
 
 **No wired Track is both due and eligible** → nothing is selected; step 2 has nothing to dispatch and
 the pass ends with that reported (no Track skill, hence no `refactor-loop`, runs). **In practice unreachable now

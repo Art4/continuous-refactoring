@@ -23,9 +23,9 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 
 - `## Safety Net` — `Cadence: 90`, `Last scan: 2026-09-18`, `Open` list `- none`. Just closed — the one-time
   exception's precondition is met.
-- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`. **Present** — Investigation's
-  own scan already ran once this turn. `Pending candidates: none` — the bootstrap candidate is fully
-  delivered. Condition 1 does not match.
+- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-18`, `Open: - none`. **Present** —
+  Investigation's own scan already ran once this turn, and `Open` is empty — the bootstrap candidate is
+  fully delivered. Condition 1 does not match.
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-09-18`. **Present** — Guardrails' own scan already
   ran once this turn (the section exists, `Last scan` written). But its `Open` is **non-empty**:
   `phpstan-level-6 (#50), coverage-floor (#51)` — in-flight entries from that scan. Under ordinary
@@ -33,7 +33,6 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
   **But the one-time exception doesn't read Guardrails' `Open` — it only checks whether the section
   exists.** Condition 2 does not match (Guardrails is present, regardless of `Open` state).
 - `## Housekeeping` — **absent** (never run yet). **Condition 3 matches.**
-- Top-level `Pending candidates: none`.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 
@@ -43,7 +42,7 @@ any ratio/tie-break computation. It should:
 1. Read `## Safety Net`; recognize its `Open` is currently empty — the one-time exception's
    precondition.
 2. Check the exception's three ordered conditions:
-   - `## Investigation` is present *and* `Pending candidates` is `none` → condition 1 does not match
+   - `## Investigation` is present *and* `Open` is `none` → condition 1 does not match
      (Investigation's turn already done).
    - `## Guardrails` is **present** → condition 2 does **not** match (condition 2 requires Guardrails
      to be *absent*). **Critically, the exception does not check Guardrails' `Open` state — it only

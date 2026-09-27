@@ -35,8 +35,9 @@ Run `/refactor-design` against the issue. It should:
 
 ## Expected: `refactor-scan` pass (after the design pass above)
 
-With `.scratch/refactor/bookkeeping.md`'s `Pending candidates` pointing at the issue, run
-`/refactor-scan`. It should:
+With `.scratch/refactor/bookkeeping.md`'s `## Investigation` `Open` pointing at the issue (this is an
+externally-labeled, non-tooling-tree candidate — `refactor-scan/SKILL.md` step 3b), run `/refactor-scan`
+with Investigation as the selected Track. It should:
 
 1. Read the issue's `Labels:` line: `needs-info` present, `ready-for-agent` absent.
 2. Recognize this as "flagged and still waiting" (`refactor-scan/SKILL.md` step 2) — **not**

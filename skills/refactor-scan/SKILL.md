@@ -18,13 +18,30 @@ Whenever a precondition above stops the pass, tell the human right away, in one 
 
 ### 2. Resume pending work first
 
-Read the Refactoring Notes' `bookkeeping.md`'s `Pending candidates` field (`../continuous-refactoring/references/refactoring-bookkeeping.md`), **and** the `Open` list of whichever Track the orchestrator's own Track-selection step selected this pass (`../continuous-refactoring/references/track-scheduler.md`) — a non-empty Safety Net or Guardrails `Open` list isn't resumed entry-by-entry but walked, per `references/track-open-processing.md` (workability triage, the pick-up Fulfilment re-check, exactly one node worked per pass, its issue filed only then, by `refactor-design`, never by the walk), routed there by each Track's own reference file (`references/safety-net-track.md`, `references/guardrails-track.md`). A structural (Investigation Track) candidate has no `Open` list to check here at all — it resumes purely through `Pending candidates` above, exactly as before this Track existed (`references/investigation-track.md`). Only the selected Track's own `Open` list is ever relevant here in practice: a Guardrails node is never unblocked until the Safety Net has fully resolved, so the two Tracks' `Open` lists can't both be non-empty at once anyway (`guardrails-track.md`'s own Scope section) — `track-scheduler.md`'s fixed tie-break order exists for when Housekeeping, which carries no such gating relationship, eventually joins (Investigation, now wired, never carries `Open` at all, so it can never be one of the Tracks competing for this particular tie-break either). If any names an issue, a prior pass got partway through this candidate before being interrupted — finishing pending work comes before proposing fresh work. Read the issue for a plan (`refactor-design`'s output — a comment for most candidate types, the issue body itself for a tooling-tree node) to see how far it got:
+Read the Refactoring Notes' `bookkeeping.md`'s top-level `Pending candidates` field
+(`../continuous-refactoring/references/refactoring-bookkeeping.md`) — narrow, and unconditional
+regardless of which Track was selected: it only ever names a tooling-tree node's own first-ever
+proposal, before its Track's own `## Safety Net`/`## Guardrails` section exists yet. **And** the `Open`
+of whichever Track the orchestrator's own Track-selection step selected this pass
+(`../continuous-refactoring/references/track-scheduler.md`) — the only Track-scoped state this step
+reads, never another Track's: a non-empty Safety Net or Guardrails `Open` isn't resumed entry-by-entry
+but walked, per `references/track-open-processing.md` (workability triage, the pick-up Fulfilment
+re-check, exactly one node worked per pass, its issue filed only then, by `refactor-design`, never by
+the walk), routed there by each Track's own reference file (`references/safety-net-track.md`,
+`references/guardrails-track.md`); a non-empty **Investigation** `Open` names its one candidate directly,
+no walk (`references/investigation-track.md`) — read below exactly like a pending candidate always has
+been. Selected Track other than Investigation → its own `Open` is what's read here; `## Investigation`'s
+`Open` is left untouched and unread, whatever it names — resuming an Investigation candidate is that
+Track's own job, only when it's the one selected. If either field names an issue, a prior pass got
+partway through this candidate before being interrupted — finishing pending work comes before proposing
+fresh work. Read the issue for a plan (`refactor-design`'s output — a comment for most candidate types,
+the issue body itself for a tooling-tree node) to see how far it got:
 
 - **No plan yet** → straight to `refactor-design`, bypassing `refactor-prioritize` (re-running Select mode risks picking a different candidate — exactly what this field prevents).
 - **Plan present, `ready-for-agent` set** → straight to `refactor-implement`, bypassing `refactor-prioritize`/`refactor-design` both, same as a resume-candidate below. `refactor-design` itself keeps this label accurate in both directions once it finishes a candidate (`../refactor-design/references/decision-gate.md`), so presence alone is enough here — no separate flagged/unflagged tracking needed.
 - **Plan present, `ready-for-agent` absent, `needs-info` present** → flagged and still waiting (an open question on the issue — `../refactor-design/references/decision-gate.md`) → not resumable this pass.
-  - API access available (native-label tracker) → step 3b below can rediscover this same issue on any future pass regardless of `Pending candidates`. Leave the field as-is and continue below exactly as if it named nothing — a human hasn't cleared it yet, and it must not block the rest of the backlog from being worked.
-  - Git-only fallback → `Pending candidates` is the *only* record this candidate exists at all; nothing can rediscover it otherwise. Don't let anything overwrite that field this pass — stop the pass here instead, reporting that the issue is still waiting on `ready-for-agent`.
+  - API access available (native-label tracker) → step 3b below can rediscover this same issue on any future pass regardless of this field. Leave the field as-is and continue below exactly as if it named nothing — a human hasn't cleared it yet, and it must not block the rest of the backlog from being worked.
+  - Git-only fallback → this field is the *only* record this candidate exists at all; nothing can rediscover it otherwise. Don't let anything overwrite it this pass — stop the pass here instead, reporting that the issue is still waiting on `ready-for-agent`.
 - **Plan present, neither label set** → design wrote the plan but was interrupted before its own final labeling step (`refactor-design/SKILL.md` step 5's "Set `ready-for-agent`, last") — not a human waiting, a step design itself never finished. Straight to `refactor-design` again; its own idempotent checks (same step) mean it won't redo the plan itself, only complete what's missing.
 
 ### 3. Detect closed/merged remembered state

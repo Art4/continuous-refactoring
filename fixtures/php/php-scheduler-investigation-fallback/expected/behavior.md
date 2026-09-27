@@ -28,11 +28,11 @@ The Safety Net **and** the Guardrails are both fully closed — same determinist
   of 2026-09-19 → `overdue_ratio ≈ 0.2`), `Open` list `- none`. **Not due.**
 - `## Guardrails` — `Cadence: 60`, `Last scan: 2026-09-10` (9 days before → `overdue_ratio = 0.15`),
   `Open` list `- none`. **Not due.**
-- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-08-01`. No `Open` field at all (this
-  section never carries one). Per `track-scheduler.md`'s own Eligibility section, a `continuous` Cadence
-  carries no day-count to divide by — always due, no ratio to compute — and Investigation is always
-  eligible regardless (no `Open` precondition). `Last scan`'s own value is irrelevant to this due-check,
-  unlike the other two sections' own `Last scan`.
+- `## Investigation` — `Cadence: continuous`, `Last scan: 2026-08-01`, `Open: - none`. Per
+  `track-scheduler.md`'s own Eligibility section, a `continuous` Cadence carries no day-count to divide
+  by — always due, no ratio to compute — and Investigation is eligible because its own `Open` is empty,
+  the same rule Safety Net/Guardrails follow for theirs. `Last scan`'s own value is irrelevant to this
+  due-check, unlike the other two sections' own `Last scan`.
 
 Neither Safety Net nor Guardrails is due this pass — the *only* due-and-eligible Track is Investigation,
 which wins not by outranking either on staleness (it never produces a comparable ratio at all) but
@@ -49,7 +49,7 @@ only — stop there, don't continue through design/implement. It should:
 1. Read `## Safety Net`, `## Guardrails`, and `## Investigation`; compute (or, for Investigation, note the
    absence of) each `overdue_ratio`.
 2. Recognize Safety Net (`≈0.2`) and Guardrails (`≈0.15`) are both **not due** — neither reaches `>= 1`.
-3. Recognize Investigation is due (no numeric `Cadence`, always due) and eligible (no `Open` concept).
+3. Recognize Investigation is due (no numeric `Cadence`, always due) and eligible (its own `Open` is empty).
 4. **Select Investigation** — the only due-and-eligible Track this pass, not by winning a ratio
    comparison but because it's the scheduler's own permanent fallback.
 5. Hand the Investigation Track to `refactor-scan` as an explicit input; `refactor-scan` runs

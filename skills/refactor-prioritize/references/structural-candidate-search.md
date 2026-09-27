@@ -59,6 +59,6 @@ is `refactor-design`'s job afterward, added as a comment only on the one candida
 pursues.
 
 Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (the others sit as ordinary open issues
-for a future pass once `refactor-loop` has created them; `Pending candidates` is `refactor-design`'s write) —
+for a future pass once `refactor-loop` has created them; `## Investigation`'s `Open` is `refactor-design`'s write, once one of them is actually chosen) —
 no dedupe check here, unlike a baseline-shrink group: a structural candidate's Where/Problem/Signal
 has no deterministic title to dedupe against the way a fresh group's does.
