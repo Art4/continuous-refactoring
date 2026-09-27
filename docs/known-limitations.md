@@ -77,6 +77,7 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 |---|---|---|
 | No git repository | The loop's only hard requirement is missing | `git init` in the target, rerun |
 | Needs a Track / was given none | A Track skill was invoked without going through the loop, or the dispatcher didn't select one | Start from `/continuous-refactoring` |
+| N candidates wait for an Investigation pass | A Safety Net or Guardrails pass leaves structural candidates (and your own `refactor:candidate` issues) alone; they are worked in an Investigation pass | Wait for Investigation, name it (`/continuous-refactoring investigation`), or add `refactor:priority` to take one now |
 | Backlog full | Five or more open `refactor:candidate` issues (not counting `refactor:priority` ones) | Merge, close or finish existing candidates |
 | Two merge requests already open | The suite-wide cap | Review and merge or close one |
 | Candidate waiting on `ready-for-agent` | The design step left an open question (`needs-info`) | Answer it on the issue, then add `ready-for-agent` |

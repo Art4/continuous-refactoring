@@ -1,0 +1,1 @@
+A Safety Net or Guardrails pass no longer picks up structural candidates: an issue labelled `refactor:candidate` that isn't a tooling-tree node's is now worked only in an Investigation pass, and the closing report says how many are waiting. Candidates you label `refactor:priority` are still taken by any pass.
