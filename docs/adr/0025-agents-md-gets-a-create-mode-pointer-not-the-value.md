@@ -1,5 +1,7 @@
 # `AGENTS.md`/`CLAUDE.md` gets a Create-mode pointer, not the value itself
 
+> Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): `AGENTS.md`/`CLAUDE.md` carries `Bookkeeping:`, `Focus areas:` and `Refactoring goal:` lines instead of the Refactoring Notes path.
+
 > Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): the pointer line names `MR-create-mode` and gains a `Ticket-create-mode` line.
 
 > Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): the pointer section now records both backlog labels, `refactor:candidate` and `refactor:priority`.

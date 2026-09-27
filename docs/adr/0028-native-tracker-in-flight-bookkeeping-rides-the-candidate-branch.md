@@ -1,5 +1,7 @@
 # On a native-label tracker, in-flight bookkeeping rides the candidate's own branch
 
+> Superseded by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): no state is committed, so there is no fold-in.
+
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its core discipline —
 > bookkeeping writes always go out through a review, never a direct commit to the default branch —
 > is unchanged. What narrows is *which* review: on a native-label tracker, the closing call's

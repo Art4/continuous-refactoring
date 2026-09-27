@@ -1,5 +1,7 @@
 # Remembered merge requests follow the tracker when it supports labels natively
 
+> Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): the reasoning now covers all suite state, not only remembered merge requests.
+
 > Extends [ADR-0001](0001-backlog-in-issue-tracker.md): the same reasoning — reuse the tracker every contributor already reads, rather than duplicating it in a local file — now also covers which suite merge requests are currently in flight, not just the backlog.
 >
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its bookkeeping-branch/MR discipline no longer applies to `docs/refactoring/merge-requests.md` when the target's issue tracker natively supports labels — there is nothing to commit. It still governs `config.md`, ADRs, `CONTEXT.md`, and `merge-requests.md` itself when the target has no such tracker.

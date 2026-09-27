@@ -1,5 +1,7 @@
 # The loop creates tickets, gated by a `Ticket-create-mode`; `Create-mode` becomes `MR-create-mode`
 
+> Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): an absent `Ticket-create-mode` reads as `ask-each-time`, and the modes live in the per-person config file.
+
 > Amends [ADR-0010](0010-orchestrator-explicit-data-flow.md): `refactor-loop` stays a thin pipe for
 > everything except one write — creating a new ticket. It creates the ticket from a draft a lifecycle
 > skill hands back.
