@@ -43,7 +43,21 @@ For each proposal in that pool, assess:
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 
-**Draft as you read.** A tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → draft its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-loop` looks for before creating one, so whichever proposal later wins a ranking is recognized as already created, updated in place by `refactor-design` rather than duplicated. This skill never creates the issue itself — `refactor-loop` does, per `../continuous-refactoring/references/filing-a-ticket.md`, which also decides whether the human is asked first. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already drafts every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. Doesn't apply to a proposal that arrives already issue-backed (`refactor-scan` step 3b: an earlier pass's own filing, or a human-labeled issue) — nothing to file, rank it as-is — or to a gate name (`structural-scan`, a baseline-shrink family) — those stay names until Select mode's own exploration makes one concrete, exactly as today. **Does not apply to Track nodes** (Safety Net, Guardrails) — those are tracked in the Track's own `Open` list and their issues are created only when the node is worked via the `Open` walk (`../refactor-scan/references/track-open-processing.md`), not pre-filed here. A proposal drafted this way scores **Age** zero and carries no `refactor:priority` — both trivially true of an issue that has, at most, existed for the length of this same pass.
+**Draft as you read — three exclusions to check first, every time, before drafting anything:**
+
+- **A gate name** (`structural-scan`, a baseline-shrink family) → **never draft an issue for the gate
+  itself.** It stays a bare name — never `Tooling tree: Structural Scan`, never any issue at all — until
+  Select mode's own exploration turns it into one or more concrete candidates, each with its own title
+  (below). This is the one exclusion most easily missed, because a gate arrives here the same way any
+  other tooling-tree proposal does (by bare Name) — check for it *first*, before applying the mechanic
+  below to anything.
+- **A proposal that arrives already issue-backed** (`refactor-scan` step 3b: an earlier pass's own
+  filing, or a human-labeled issue) → nothing to file, rank it as-is.
+- **A Track node** (Safety Net, Guardrails) → never drafted here at all. Those are tracked in the Track's
+  own `Open` list and their issues are created only when the node is worked via the `Open` walk
+  (`../refactor-scan/references/track-open-processing.md`), not pre-filed.
+
+None of the three above → a tooling-tree proposal handed forward by bare Name (`refactor-scan/SKILL.md` step 4 — an ordinary node, not yet an issue) → draft its candidate issue now, right after reading its Purpose line above, titled exactly `Tooling tree: <Name>` (never the slug) — the same title `refactor-loop` looks for before creating one, so whichever proposal later wins a ranking is recognized as already created, updated in place by `refactor-design` rather than duplicated. This skill never creates the issue itself — `refactor-loop` does, per `../continuous-refactoring/references/filing-a-ticket.md`, which also decides whether the human is asked first. Minimal fields only: the title, label `refactor:candidate`, body = that same Purpose line. No plan — still `refactor-design`'s job, only once this candidate wins a ranking, possibly a later one. Mirrors `structural-scan`'s own Select mode, which already drafts every concrete finding it discovers, not only the winner — this is the same move for the proposals that arrive already concrete. A proposal drafted this way scores **Age** zero and carries no `refactor:priority` — both trivially true of an issue that has, at most, existed for the length of this same pass.
 
 Present the ranking as a short ordered list of Names only (never slugs) — save the rationale for the winner for step 3.
 
