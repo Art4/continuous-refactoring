@@ -92,9 +92,9 @@ Two sentences still claim a wider scope ("on every tracker, native-label ones in
 > `## Investigation` `Open` entry, which still needs it. (2) `refactor-learn/SKILL.md` still said a
 > freshly opened merge request clears Investigation's `Open` entry, contradicting
 > `investigation-write.md` and ADR-0068 (the entry leaves only on merge or rejection); the lines had
-> to be rewritten anyway and now follow the reference. Left alone: the same file's "clear it to
+> to be rewritten anyway and now follow the reference. The same file's "clear it to
 > `- none`" wording for a merged or rejected Investigation candidate, which predates the multi-entry
-> `Open` — a separate leftover. Old-schema fixtures, their harness checks and
+> `Open`, was fixed in the same PR afterwards (remove exactly that entry). Old-schema fixtures, their harness checks and
 > `OldSchemaPassThroughTests` keep the field on purpose; 30 current-schema fixture documents lost
 > their `- none` line. 235 unit tests, `validate_skills.py` (same 12 advisories as `main`) and
 > harness `tier2 php-project-with-candidates` pass; the agent-judged Track tiers (`--opencode`,

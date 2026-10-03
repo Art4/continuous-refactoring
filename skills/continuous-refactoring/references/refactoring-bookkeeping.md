@@ -379,8 +379,8 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
   the rare target that genuinely wants the one-time scan to run again. The `## Safety Net`, `## Guardrails`,
   and `## Housekeeping` sections are the same: `refactor-learn`-written, never by hand, except each
   section's own `Cadence` — hand-editable any time (directly, or, for `## Housekeeping`, via the optional
-  `housekeeping-cadence-interview.md`). `## Investigation` is the same too — `refactor-design` sets its
-  `Open` entry, `refactor-learn` clears it and writes `Last scan` — but unlike those three, *nothing* in
+  `housekeeping-cadence-interview.md`). `## Investigation` is the same too — `refactor-design` adds an
+  `Open` entry, `refactor-learn` removes it and writes `Last scan` — but unlike those three, *nothing* in
   it is hand-editable — its `Cadence` is always the literal `continuous` (above), never a number to tune.
 - The suite never commits this document, in either mode. Loop state does not live in the agent's own conversation but here (the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
 - If the Bookkeeping pointer is missing, or names a file that doesn't exist, the target isn't onboarded yet (an issue URL that can't be read is a different case — `issue-mode.md`, *Load*: the pass stops, and nothing is created in its place): the dispatcher's onboarding step runs before anything else, and every other skill that needs the document aborts (*Not onboarded yet*, below) rather than creating it.
