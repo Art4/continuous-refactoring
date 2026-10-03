@@ -2,7 +2,7 @@
 
 Provides load_tree, next_candidates, and graph-logic-only
 outputs (ordered backlog, workable nodes, withheld with reasons, closed by
-rejection, merge-request outlook) without invoking LLM or mutating repo.
+rejection, outlook comment) without invoking LLM or mutating repo.
 
 Seam: skills/refactor-scan/references/tooling_tree.py — used by refactor-scan.
 
@@ -787,8 +787,8 @@ def directly_unblocked_children(
     fulfilled: dict[str, bool] | None = None,
 ) -> list[dict]:
     """Every node this one candidate's fulfilment newly makes proposable —
-    the fan-out an MR's outlook diagram draws
-    (``opening-a-merge-request.md``).
+    the fan-out the outlook comment's diagram draws
+    (``refactor-implement/references/outlook-comment.md``).
 
     When *fulfilled* is provided, it is used instead of deriving from
     seed/bookkeeping — the seed-input contract.
