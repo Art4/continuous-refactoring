@@ -298,10 +298,10 @@ Guardrails`'s own).
 ## `Investigation` section
 
 Carries what the Track scheduler needs to compete **Investigation** (`CONTEXT.md`) against the other
-Tracks, plus its own `Open` — a single-entry counterpart to `## Safety Net`'s/`## Guardrails`' own,
-holding the one candidate the Track is actively working (structural, PHPStan baseline-shrink, or an
-externally-labeled issue — everything `refactor-scan/SKILL.md` step 3b now routes to an Investigation
-pass only). No `Out-of-scope`: Investigation doesn't reject a fixed set of candidates the way the tree
+Tracks, plus its own `Open` — a counterpart to `## Safety Net`'s/`## Guardrails`' own, holding whichever
+candidate(s) the Track is actively working (structural, PHPStan baseline-shrink, or an externally-labeled
+issue — everything `refactor-scan/SKILL.md` step 3b now routes to an Investigation pass only). No
+`Out-of-scope`: Investigation doesn't reject a fixed set of candidates the way the tree
 does, and every *other* open candidate — one Select mode drafted but didn't pick this pass, or a human's
 own untouched `refactor:candidate` issue — stays exactly what it already is, an ordinary open issue, not
 a tracked backlog entry: the tracker itself already shows it, cheaply and live, `refactor-scan` step 3b
@@ -345,27 +345,33 @@ design/implement/learn actually finish it).
   no `Cadence` to divide by, Investigation stays always due and always eligible regardless of `Last
   scan`'s own value; the field is a pure audit trail here ("did Investigation's scan run, and when"), not
   an input to its own due-check.
-- **`Open`** — at most one entry, `- <issue title> (#<issue>)`, `- none` when empty (unlike `## Safety
-  Net`'s/`## Guardrails`' own multi-entry backlog — see *Why single-entry*, above). Written on **every**
-  tracker, native-label ones included — unlike a tooling-tree node's top-level `Pending candidates`
-  (above), which native trackers skip: an Investigation candidate needs `refactor-scan` to resume
-  *exactly* this issue next pass rather than treat it as a fresh candidate and possibly pick a different
-  one via step 3b's ranking, regardless of whether the tracker also shows the issue open. `refactor-scan`
-  resumes it only when **Investigation is the Track selected this pass** (`track-scheduler.md`) — the
-  same "read this Track's own `Open` only when this Track runs" discipline `## Safety Net`/`##
-  Guardrails` already follow; a Guardrails or Safety Net pass never touches it. `refactor-learn` clears
-  it to `- none` once the candidate is merged, rejected, or closed as a design-time breaking-change
-  finding.
+- **`Open`** — one line per in-flight candidate, `- <issue title> (#<issue>)`, `- none` when empty (see
+  *Why more than one entry*, below). Written on **every** tracker, native-label ones included — unlike a
+  tooling-tree node's top-level `Pending candidates` (above), which native trackers skip: an Investigation
+  candidate needs `refactor-scan` to resume *exactly* this issue next pass rather than treat it as a fresh
+  candidate and possibly pick a different one via step 3b's ranking, regardless of whether the tracker
+  also shows the issue open. `refactor-scan` resumes it only when **Investigation is the Track selected
+  this pass** (`track-scheduler.md`) — the same "read this Track's own `Open` only when this Track runs"
+  discipline `## Safety Net`/`## Guardrails` already follow; a Guardrails or Safety Net pass never touches
+  it. `refactor-learn` removes exactly one candidate's own entry once it's merged, rejected, or closed as
+  a design-time breaking-change finding — any other entry stays.
 - Investigation never blocks its own re-selection on `Open`'s own emptiness the way Guardrails/Safety Net
   do (no "`Open` must be empty before a fresh scan" precondition): `structural-scan`'s own resolved-edge
   gate (unchanged — every node with a `resolved` edge into it must itself be resolved, fulfilled or
   explicitly rejected) already decides whether there's anything fresh to propose once this Track is
   selected and its own `Open` is empty.
 
-**Why single-entry.** `refactor-prioritize`'s Select mode can draft more than one structural candidate's
-issue in a single pass, but only one is ever chosen to be designed and implemented this pass — the suite
-tracks exactly one thing in flight at a time, the same discipline the retired global `Pending candidates`
-field already held to. The others sit as ordinary open issues for a future pass
+**Why more than one entry.** Observed live: the suite-wide two-merge-request cap
+(`../../refactor-loop/SKILL.md` step 5) already allows two candidates in flight at once, suite-wide — and
+nothing stops both from being Investigation's own. A single-entry field, once genuinely tried, either lost
+track of whichever candidate it didn't name or got a second bullet appended in violation of its own
+documented shape, depending on how it was written to. `Open` holds one line per candidate actually in
+flight instead — `refactor-design` appends an entry the moment it plans one, `refactor-learn` removes
+only that candidate's own entry once it resolves, and a resuming pass reads through every entry
+(`../../refactor-scan/references/investigation-track.md`), advancing at most one per pass, same as always.
+`refactor-prioritize`'s Select mode can still draft more than one structural candidate's issue in a single
+pass without every draft entering `Open` — only the one actually chosen to be designed this pass gets an
+entry; the others sit as ordinary open issues for a future pass
 (`../../refactor-prioritize/references/structural-candidate-search.md`) — `refactor-scan` step 3b
 re-discovers and re-ranks them fresh every Investigation pass, the same as any other candidate; nothing
 here privileges or queues them ahead of time.

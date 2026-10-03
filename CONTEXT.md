@@ -173,8 +173,8 @@ more — it never learns what "elsewhere" is, keeping it free of any vocabulary 
 Net**, or **Guardrails**. What "elsewhere" actually is stays known only to whoever set the marker and to
 `refactor-learn`'s own write files: that Track's own `Open` entry for an `Open`-walk node
 (`docs/adr/0060-track-open-entries-record-their-issue-number.md`). A structural, baseline-shrink, or
-externally-labeled candidate isn't marked this way — `refactor-design` sets `## Investigation`'s own
-`Open` for those directly, unconditionally, on every tracker.
+externally-labeled candidate isn't marked this way — `refactor-design` adds an entry to
+`## Investigation`'s own `Open` for those directly, unconditionally, on every tracker.
 _Avoid_: (none — use the term as-is)
 
 **Flagged candidate**:

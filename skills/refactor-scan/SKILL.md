@@ -28,14 +28,16 @@ reads, never another Track's: a non-empty Safety Net or Guardrails `Open` isn't 
 but walked, per `references/track-open-processing.md` (workability triage, the pick-up Fulfilment
 re-check, exactly one node worked per pass, its issue filed only then, by `refactor-design`, never by
 the walk), routed there by each Track's own reference file (`references/safety-net-track.md`,
-`references/guardrails-track.md`); a non-empty **Investigation** `Open` names its one candidate directly,
-no walk (`references/investigation-track.md`) — read below exactly like a pending candidate always has
-been. Selected Track other than Investigation → its own `Open` is what's read here; `## Investigation`'s
+`references/guardrails-track.md`); a non-empty **Investigation** `Open` is read entry-by-entry instead —
+no Fulfilment-based workability triage, since every entry already carries a plan by construction — per
+`references/investigation-track.md`, applying the per-entry logic below to whichever entry still has
+design/implement work outstanding. Selected Track other than Investigation → its own `Open` is what's read here; `## Investigation`'s
 `Open` is left untouched and unread, whatever it names — resuming an Investigation candidate is that
-Track's own job, only when it's the one selected. If either field names an issue, a prior pass got
-partway through this candidate before being interrupted — finishing pending work comes before proposing
-fresh work. Read the issue for a plan (`refactor-design`'s output — a comment for most candidate types,
-the issue body itself for a tooling-tree node) to see how far it got:
+Track's own job, only when it's the one selected. If either field names an issue (`Pending candidates`
+always one; `## Investigation`'s own `Open`, possibly several — apply what follows to each entry in
+turn), a prior pass got partway through before being interrupted — finishing pending work comes before
+proposing fresh work. Read the issue for a plan (`refactor-design`'s output — a comment for most
+candidate types, the issue body itself for a tooling-tree node) to see how far it got:
 
 - **No plan yet** → straight to `refactor-design`, bypassing `refactor-prioritize` (re-running Select mode risks picking a different candidate — exactly what this field prevents).
 - **Plan present, `ready-for-agent` set** → straight to `refactor-implement`, bypassing `refactor-prioritize`/`refactor-design` both, same as a resume-candidate below. `refactor-design` itself keeps this label accurate in both directions once it finishes a candidate (`../refactor-design/references/decision-gate.md`), so presence alone is enough here — no separate flagged/unflagged tracking needed.
