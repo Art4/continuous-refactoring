@@ -31,7 +31,7 @@ happens when this is discovered mid-design.
 
 **Priority:** medium.
 
-**Status:** ready-for-agent
+**Status:** done — PR #82
 
 Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, three rounds plus follow-ups):
 
@@ -85,3 +85,5 @@ write should live, genuinely separate from this ticket's scope. Noted for later,
 > Finding-based routing for that case respecting the single-bookkeeping-writer rule, label reuse, and
 > deliberately deferring the ADR/glossary work to implementation time. User confirmed shared
 > understanding ("Passt"). Ready to implement.
+
+> **2026-10-03:** Ticket hygiene — status was never updated after delivery. Landed as PR #82 (ADR-0050): `refactor-design/references/decision-gate.md` flags the decision with `needs-info`, and a breaking change goes to `refactor-learn`'s closing call as a finding. Later refined by ADR-0053 and ADR-0066.

@@ -7,7 +7,7 @@ dispatcher**: it asks the interview questions, writes the files, tells the human
 and ends the invocation — the next invocation starts the Safety Net scan. No issue, no merge request, no scan / prioritise /
 design / implement / learn. Rename the tooling-tree node `loop-config` to `onboarding-setup` (Name "Onboarding Setup").
 
-**Status:** done — PR pending
+**Status:** done — PR #117
 
 ## Decided behaviour (grilled with the maintainer)
 

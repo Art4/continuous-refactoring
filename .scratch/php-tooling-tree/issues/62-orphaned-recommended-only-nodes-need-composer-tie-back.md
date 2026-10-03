@@ -71,7 +71,7 @@ resolved itself, at the one-time cost of issue #4/MR !19), but a real, silent ga
 every future Composer-rejected PHP target and has no test coverage guarding against a third
 recurrence via some other future edge change.
 
-**Status:** done — PR pending
+**Status:** done — PR #81
 
 - [x] `php-tooling-tree.md`'s edge table: add `composer → rector-type-coverage (required)` and
   `composer → semgrep (required)` rows; update the diagram; update both nodes' own doc entries

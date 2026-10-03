@@ -25,15 +25,17 @@
 - `CONTEXT.md` — check whether `Skip streak`/`Signal` entries need wording updates (the `Signal` entry's own factor catalogue may list it).
 - A new ADR under `docs/adr/`, referencing ticket 32/ADR-0015 as the origin being reversed, and ADR-0047 as what makes the reversal safe.
 
-**Status:** ready-for-agent
+**Status:** done — PR #77
 
-- [ ] `Skip streak` removed: field, write step, ranking-factor row, all documentation mentions
-- [ ] `Age` factor added to `refactor-prioritize` Rank mode, scoped to tooling-tree proposals only
-- [ ] `refactor:priority` hard-override (pool restriction) wired into Rank mode
-- [ ] `Filed: YYYY-MM-DD` added to the Local Markdown issue-tracker template, one place
-- [ ] `refactor-scan` step 3b surfaces creation date + priority label alongside each issue-backed proposal
-- [ ] New ADR recording the reversal and its reasoning
+- [x] `Skip streak` removed: field, write step, ranking-factor row, all documentation mentions
+- [x] `Age` factor added to `refactor-prioritize` Rank mode, scoped to tooling-tree proposals only
+- [x] `refactor:priority` hard-override (pool restriction) wired into Rank mode
+- [x] `Filed: YYYY-MM-DD` added to the Local Markdown issue-tracker template, one place
+- [x] `refactor-scan` step 3b surfaces creation date + priority label alongside each issue-backed proposal
+- [x] New ADR recording the reversal and its reasoning
 
 ## Comments
 
 > **2026-09-12:** Grilled (`/grill-me`) as a follow-up to a "why do we still need Skip streak" investigation (no code changes) that traced it back to ticket 32/ADR-0015 and confirmed ADR-0047's pre-filing (PR #76, same day) removes most of Skip streak's original justification. All decisions above confirmed by the maintainer.
+
+> **2026-10-03:** Ticket hygiene — status and checkboxes were never updated after delivery. Landed as PR #77 (ADR-0048). Checked against the current files: no `Skip streak` mention is left in `skills/`, `CONTEXT.md`, `README.md` or `docs/` outside `docs/adr/`; `refactor-prioritize` carries the Age factor and the `refactor:priority` pool restriction; the Local Markdown template has the `Filed:` line; `refactor-scan` step 3b surfaces creation date and label.

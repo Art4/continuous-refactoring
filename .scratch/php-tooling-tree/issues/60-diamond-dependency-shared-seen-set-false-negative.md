@@ -48,7 +48,7 @@ live.
 reach `structural-scan` at all; the loop has zero proposable candidates with no way out short of a
 code fix.
 
-**Status:** done — PR pending
+**Status:** done — PR #79
 
 - [x] `_is_effectively_rejected()`: pass `set(_seen)` (not `_seen`) into each sibling's recursive call
   in both the `required_parents` `any(...)` and `required_any_parents` `all(...)` checks.

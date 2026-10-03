@@ -11,7 +11,7 @@ After extraction, the orchestrator reads as ~35 lines of pure delegation: step N
 
 **Blocked by:** 12 ✓ done — Deliver each candidate as a remembered merge request (ADR-0006 must land first; the deliver logic lives there currently).
 
-**Status:** ready-for-agent
+**Status:** wontfix — superseded by ADR-0010 and ADR-0057
 
 - [ ] `skills/refactor-learn/SKILL.md` written with frontmatter, process, fallback, completion criterion
 - [ ] `skills/refactor-deliver/SKILL.md` written with frontmatter, process, fallback, completion criterion
@@ -27,3 +27,5 @@ After extraction, the orchestrator reads as ~35 lines of pure delegation: step N
 
 > **2026-08-21:** Ticket hygiene — #12 is done (commit `2c4bb31`). This ticket is now unblocked.
 > **2026-08-23:** Ticket hygiene — normalized the `Blocked by` line to carry the `✓ done` marker (consistent with every other resolved-blocker reference in this tracker); it was left as plain prose after the 2026-08-21 unblock note above.
+
+> **2026-10-03:** Ticket hygiene — closed as superseded; the checkboxes stay unticked because the ticket was never worked as written. Its goal was reached another way: ADR-0010 (PR #9) extracted `refactor-learn` together with the other lifecycle skills, and ADR-0057 (PR #115) reduced `continuous-refactoring` to Track selection and dispatch. `refactor-deliver` was never built and is not planned: opening the merge request is `refactor-implement`'s own step, with its rules in `continuous-refactoring/references/opening-a-merge-request.md`. The merge-request stacking this ticket mentions was abolished by ADR-0049.
