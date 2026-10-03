@@ -54,7 +54,7 @@ re-open), but the node's exact Fulfilment-check/MR-scope prose (mirroring the de
 
 **Priority:** medium — fixes a real (if narrow) structural-scan gap, not just a design preference.
 
-**Status:** implemented (2026-08-30)
+**Status:** done — PR #28
 
 Already settled (confirmed during ticket 34's grilling — treat as decided, not open):
 
@@ -148,3 +148,5 @@ Resolved during this session's dedicated grilling (2026-08-30):
 > — confirmed as intended. Required regenerating four `expected/roadmap.json` fixture snapshots (a genuine
 > roadmap-order change, not drift) and extending two `RecommendedGateTests` cases. Recorded in ADR-0019's
 > new Part F.
+
+> **2026-10-03:** Ticket hygiene — normalized `implemented` to `done`. Merged as PR #28; every checkbox was already ticked.

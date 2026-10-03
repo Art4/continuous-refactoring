@@ -41,7 +41,7 @@ own new tests, indirectly — see Comments).
 rejected node now has no documented way to trust `next`/`withheld` for anything downstream, and will
 keep declining to act "since the shared script looks regressed," exactly the failure just observed.
 
-**Status:** done — PR pending
+**Status:** done — PR #80
 
 - [x] `CONTEXT.md`'s `Recommended edge` entry states the transitive-rejection clause inline, in the same
   words/spirit as ADR-0016's own Decision section — a recommended parent counts as decided-rejected

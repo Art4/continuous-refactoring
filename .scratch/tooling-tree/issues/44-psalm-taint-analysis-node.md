@@ -32,7 +32,7 @@ convention (see ticket 37 out of ticket 34 for the precedent).
 
 **Priority:** medium — a genuinely new capability, not a bug fix (contrast ticket 37).
 
-**Status:** implemented (2026-08-30, same session as ticket 37).
+**Status:** done — PR #28
 
 Already settled (this session's grilling, user-confirmed):
 
@@ -64,3 +64,5 @@ Already settled (this session's grilling, user-confirmed):
 > analysis` is now the fourteenth `php-structural-scan` resolved-leaf. Recorded in ADR-0019's new Part C,
 > alongside a paired correction to ticket 37 (`rector-php-set`'s `required-any` gate) found in the same
 > conversation.
+
+> **2026-10-03:** Ticket hygiene — normalized `implemented` to `done`. Merged as PR #28 together with ticket 37; every checkbox was already ticked.

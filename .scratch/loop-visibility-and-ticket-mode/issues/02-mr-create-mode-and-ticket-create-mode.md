@@ -2,7 +2,7 @@
 
 **What to build:** See ADR-0063 — the design is grilled and recorded there; this ticket is its implementation. Depends on 01 only for the "ticket created" report line.
 
-**Status:** done — PR pending
+**Status:** done — PR #124
 
 ## Scope
 

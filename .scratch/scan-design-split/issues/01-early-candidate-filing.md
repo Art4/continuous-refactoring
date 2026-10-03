@@ -19,7 +19,7 @@ transcript.
 
 **Priority:** medium.
 
-**Status:** ready-for-agent
+**Status:** done — PR #63
 
 Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, two rounds plus follow-ups):
 
@@ -88,3 +88,5 @@ Settled via `/grill-with-docs` (`grilling` + `domain-modeling`, two rounds plus 
 > selection logic already shares `refactor-prioritize`'s own four ranking factors), orchestrator
 > step-shape, resumability, glossary impact, and the ADR offer. User confirmed shared understanding
 > ("passt so."). Ready to implement.
+
+> **2026-10-03:** Ticket hygiene — status was never updated after delivery. Landed as PR #63 (ADR-0038): `refactor-prioritize`'s Select mode picks the concrete candidate in its own fresh dispatch and it is filed minimally before `refactor-design` adds the plan as a comment.

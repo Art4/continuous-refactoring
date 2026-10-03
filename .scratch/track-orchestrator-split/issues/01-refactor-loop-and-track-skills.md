@@ -9,7 +9,7 @@ delegate to `refactor-loop` (three of them) or own their existing standalone pro
 No user-visible behavior changes — `/continuous-refactoring`, with or without a Track name, still
 works exactly as documented in README today.
 
-**Status:** ready-for-agent
+**Status:** done — PR #115
 
 - [x] New skill `refactor-loop`: runs one pass (today's steps 1–6 — scan, learn-early, prioritize,
       design, implement, learn-closing) for a Track given as a **mandatory** input. Aborts with a clear
@@ -277,3 +277,5 @@ in README today.
   skill files and the cross-reference migration together (they're interdependent — `validate_skills.py`
   would flag orphaned references if done partially), then land the ADR in the same or an immediately
   following change.
+
+> **2026-10-03:** Ticket hygiene — status was never updated after delivery. Landed as PR #115 (ADR-0057): `refactor-loop`, `continuous-safety-net`, `continuous-guardrails`, `continuous-investigation` and `continuous-housekeeping` exist, and `continuous-refactoring` only selects a Track and dispatches.
