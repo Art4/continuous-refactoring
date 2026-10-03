@@ -76,7 +76,7 @@ State lives in the target repo's working tree, never in the conversation; every 
 | What | Where |
 |---|---|
 | `Ticket-create-mode`, `MR-create-mode`, where the bookkeeping lives — per person and machine | `.scratch/refactor/config.md` — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
-| `Pending candidates`, each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document: a file (`bookkeeping.md`, default folder `.scratch/refactor/`) or one tracker issue, named by the pointer in the config file |
+| Each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document: a file (`bookkeeping.md`, default folder `.scratch/refactor/`) or one tracker issue, named by the pointer in the config file |
 | Learned rejections, remembered merge requests (issue mode) | comments on that issue |
 | Focus areas, refactoring goal | two lines in `AGENTS.md`/`CLAUDE.md`, written by you only |
 | Remembered merge requests | open `refactor:candidate` issues with a linked pull request (native-label trackers); `merge-requests.md` otherwise |

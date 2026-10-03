@@ -15,7 +15,7 @@ advisory.
 2. The pass ends with the Guardrails Track's own outcome — `## Guardrails` written with `Last scan` and an empty `Open`
    (as in `php-guardrails-first-run`) — and the closing **Status** line names the waiting candidate count ("1 other candidate
    waits for an Investigation pass").
-3. The issue file is untouched: no plan, no label change, no `Pending candidates` entry.
+3. The issue file is untouched: no plan, no label change, no `Open` entry.
 
 ## Variants
 

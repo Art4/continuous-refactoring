@@ -42,8 +42,8 @@ authorizes only that one write; **or** `refactor-loop` reporting that every secr
 handed it to `refactor-design`/`refactor-implement` — named by `refactor-scan`'s own `## Output`,
 present whether or not `refactor-implement` also got as far as opening a merge request this same
 pass — it authorizes only that node's `Open`-entry issue-number write
-(`safety-net-write.md`/`guardrails-write.md`), not the general `Pending candidates`/`merge-requests.md`
-writes below, which stay gated on their own freshly-opened-MR case. This is step zero, before any other
+(`safety-net-write.md`/`guardrails-write.md`), not the general `merge-requests.md`
+write below, which stays gated on its own freshly-opened-MR case. This is step zero, before any other
 read — querying the tracker for open MRs, re-reading `bookkeeping.md`, scanning `merge-requests.md` to
 see whether a precondition might be satisfiable is exactly the detection work `refactor-scan`/
 `refactor-implement` already own; this skill only ever acts on what the pass that produced it named,
@@ -61,7 +61,7 @@ going to check for itself.
 Runs only when scan produced findings; the closing call still happens regardless, at the end.
 For each finding:
 
-- Merged → mark the candidate `done`, close the issue. Slug named in `bookkeeping.md`'s `## Safety Net` or `## Guardrails` section's `Open` list → also remove it from there (`references/safety-net-write.md`, `references/guardrails-write.md`); named in `## Investigation`'s own `Open` instead → clear it to `- none` (`references/investigation-write.md`) — either way, instead of anything below about the top-level `Pending candidates`.
+- Merged → mark the candidate `done`, close the issue. Slug named in `bookkeeping.md`'s `## Safety Net` or `## Guardrails` section's `Open` list → also remove it from there (`references/safety-net-write.md`, `references/guardrails-write.md`); named in `## Investigation`'s own `Open` instead → clear it to `- none` (`references/investigation-write.md`).
 - Closed without merge → closing comments support a structural rejection (a maintainer gave a load-bearing reason) → mark `wontfix`, close the issue, file a learned rejection under the Refactoring Notes' `out-of-scope/` — a human-readable entry, written per `../continuous-refactoring/references/forge-facing-writing.md`; otherwise ask the human before deciding. Load-bearing reason is a minimum PHP version the target doesn't meet → also record it machine-parseably (`**Blocked by:** PHP >= X.Y`) so a later pass detects the reversal automatically (`tooling_tree.py`'s `reversals` output, from `php_version_reversal_findings()`). Slug named in `## Safety Net`'s or `## Guardrails`'s `Open` → also remove it from there and add the `Out-of-scope` pointer (`safety-net-write.md`/`guardrails-write.md`), plus every node closed by that rejection (as reported by the script's `closed_by_rejection()`) also leaves `Open`, with no new files written for those downstream closures. Named in `## Investigation`'s own `Open` instead → clear it to `- none` (no `Out-of-scope` for Investigation — it doesn't reject a fixed set the way the tree does).
 - **Fulfilled at pick-up** (scan's Track `Open` walk, `../refactor-scan/references/track-open-processing.md` — its re-check ran a node's Fulfilment check right before working it and found the node already served, typically adopted by hand since the last scan) → remove that slug from its Track's `Open` (`safety-net-write.md`/`guardrails-write.md`): no merge request, no rejection, nothing filed — the node is genuinely fulfilled, the outcome its `Open` entry existed to reach. An issue already filed for it on an earlier pass (its `Open` entry carried `(#n)`) closes as `done`, with a one-line note naming the pick-up re-check as the reason; no issue was ever filed → nothing to close. Same detect-never-write split as every finding above: scan only reports it, this call performs the removal.
 - Tracked in the Refactoring Notes' `merge-requests.md` (`docs/agents/issue-tracker.md` names no native-label tracker) → drop the entry once resolved, either way. `docs/agents/issue-tracker.md` names a native-label tracker → nothing to remove there; closing the issue (above) already takes it out of the open-`refactor:candidate` remembered set `refactor-scan` reads.
@@ -80,23 +80,22 @@ candidate can't be done without changing behavior, so `refactor-implement` never
 Notes' `out-of-scope/<node>.md` for a tooling-tree candidate, a closing note on the issue itself for a
 structural/externally-labeled/baseline-shrink candidate — the same split the early call's own
 rejection handling above already uses. Either one lands on the target repo's own forge —
-`../continuous-refactoring/references/forge-facing-writing.md`. Clear the top-level `Pending candidates`
-if it named this candidate, or, for a Safety Net or Guardrails Track candidate, remove it from that
+`../continuous-refactoring/references/forge-facing-writing.md`. For a Safety Net or Guardrails Track candidate, remove it from that
 Track's own `Open` and add its `Out-of-scope` pointer instead (`safety-net-write.md`/`guardrails-write.md`)
 — plus every node closed by that rejection (as reported by the script's `closed_by_rejection()`) also
 leaves `Open`, with no new files written for those downstream closures — or, for a structural,
 baseline-shrink, or externally-labeled candidate (Investigation's own), clear `## Investigation`'s own
-`Open` to `- none` (`references/investigation-write.md`) — never more than one of these. No MR to
+`Open` to `- none` (`references/investigation-write.md`) — never both. No MR to
 remember, so skip straight to *Then...* below.
 
-**A rejection for good of a node whose issue the human declined** (`refactor-loop`, `filing-a-ticket.md` — the human refused to create its issue and confirmed they never want it proposed) → the same rejection record as the breaking-change case above, minus everything that needs an issue: a tooling-tree node's `out-of-scope/<node>.md` (a Safety Net or Guardrails Track node also leaves that Track's `Open` and gains its `Out-of-scope` pointer, with every node the rejection closes leaving too), no issue to close or comment on, no resume marker to clear — the issue was never created, so neither `Pending candidates` nor a Track's own `Open` was ever set for it. Then straight to *Then...* below.
+**A rejection for good of a node whose issue the human declined** (`refactor-loop`, `filing-a-ticket.md` — the human refused to create its issue and confirmed they never want it proposed) → the same rejection record as the breaking-change case above, minus everything that needs an issue: a tooling-tree node's `out-of-scope/<node>.md` (a Safety Net or Guardrails Track node also leaves that Track's `Open` and gains its `Out-of-scope` pointer, with every node the rejection closes leaving too), no issue to close or comment on — it was never created. Then straight to *Then...* below.
 
 **Secret history scan — `done`.** `refactor-loop` reports that every secret-history draft this pass's early call returned now has an issue (or that there were none) → write `Secret history scan` as the early-call bullet above describes. Not reported → nothing to write.
 
 Otherwise, given a freshly opened MR (from `refactor-implement`, if the pass got that far):
 
 - `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → nothing to remember here — `refactor-implement` step 5's `Closes #<n>` on the MR is already the durable record, the tracker's own native issue↔PR cross-reference; no label to apply. Otherwise remember it in the Refactoring Notes' `merge-requests.md`: URL, candidate issue, tooling-tree node name (blank for structural), base branch.
-- Clear the resume marker — this candidate now has an MR, so it no longer applies: the top-level `Pending candidates`, or, for a structural, baseline-shrink, or externally-labeled candidate, `## Investigation`'s own `Open` (`references/investigation-write.md`), to `- none` either way. A Safety Net or Guardrails Track candidate never set either field in the first place (its own `Open` entry only clears once the MR actually merges — `safety-net-write.md`/`guardrails-write.md`) — nothing to do here for one of those.
+- Leave the candidate's own `Open` entry (its Track's, or `## Investigation`'s) where it is — it only leaves once the MR actually merges (`safety-net-write.md`/`guardrails-write.md`/`references/investigation-write.md`).
 Then:
 
 - Record an ADR (`docs/adr/`) for any decision a future scan must not re-litigate (see `/domain-modeling`).
@@ -120,4 +119,4 @@ The writes this call made, named so the caller can report them: the Refactoring 
 
 **Early call, precondition met:** every finding is resolved (`done`, `wontfix` + out-of-scope entry, a fulfilled-at-pick-up slug removed from its Track's `Open`, a PHP-version reversal's file removed, every secret-history-scan finding returned as a `refactor:priority` draft for `refactor-loop` to create, or an explicit "asked the human, waiting"), and the remembered set reflects it before `refactor-prioritize` runs.
 
-**Closing call, precondition met:** a freshly delivered candidate is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) with its resume marker cleared (the top-level `Pending candidates`, or, for an Investigation-owned candidate, `## Investigation`'s own `Open`) — or, a design-time breaking-change finding is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and the same resume marker cleared — and every write is in place in the working tree, nothing committed.
+**Closing call, precondition met:** a freshly delivered candidate is remembered (its MR's `Closes #<n>` link, or the ledger, whichever applies) — or, a design-time breaking-change finding is closed out instead, with its rejection recorded (`wontfix`, closing note or `out-of-scope/` entry) and its own `Open` entry removed — and every write is in place in the working tree, nothing committed.

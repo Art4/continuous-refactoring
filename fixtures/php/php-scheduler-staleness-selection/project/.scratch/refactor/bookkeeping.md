@@ -1,8 +1,5 @@
 # Refactoring Bookkeeping
 
-**Pending candidates:**
-- none
-
 ## Safety Net
 
 **Cadence:** 90 days

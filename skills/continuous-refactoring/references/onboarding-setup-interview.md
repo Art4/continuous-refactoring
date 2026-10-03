@@ -337,7 +337,7 @@ missing table row) and say so.
    as `issue-mode.md`'s *Save* says) — **last**, creating the folder if needed. The shape is
    `refactoring-bookkeeping.md`'s `## Structure`, reduced to the title line
    (`# Refactoring Bookkeeping`) — or, after a move, what the old document
-   carried: no `Pending candidates` (nothing is pending), no Track sections
+   carried: no Track sections
    (each appears when its Track first runs).
 8. **Old files removed** — only when Q5 chose to remove them, and only after
    steps 5–7 are done: the old `bookkeeping.md`, `merge-requests.md`,

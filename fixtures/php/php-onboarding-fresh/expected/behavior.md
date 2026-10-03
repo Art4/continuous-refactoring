@@ -31,7 +31,7 @@ A minimal PHP project (`composer.json`, `src/Greeter.php`). No `docs/`, no `AGEN
    (the backlog labels line only), `docs/agents/triage-labels.md`
    (`needs-info`, `ready-for-agent`, `wontfix`, plus a `done` row — Local Markdown), `docs/agents/issue-tracker.md`
    (the Local Markdown template), then `.scratch/refactor/config.md` (the `Bookkeeping:` pointer, `Ticket-create-mode` and `MR-create-mode`), then
-   `.scratch/refactor/bookkeeping.md` **last**, holding only its title line — no create-modes, no `Pending candidates`.
+   `.scratch/refactor/bookkeeping.md` **last**, holding only its title line — no create-modes.
 6. A closing text: what was created; commit only the files that belong in Git (`AGENTS.md`, `docs/agents/*`) — nothing under
    `.scratch/refactor/`, which is the developer's own; run
    `/continuous-refactoring` again (optionally naming a Track); the engineering-skills setup can still be

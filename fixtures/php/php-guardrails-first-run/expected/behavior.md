@@ -42,8 +42,7 @@ Run `/refactor-scan`. It should:
 1. Create the `## Guardrails` section for the first time: `Cadence: 60`, `Last scan: <today's date>`,
    `Open` and `Out-of-scope` both `- none` — written **even though nothing was found missing**, purely
    to record that the scan ran.
-2. Nothing is written to `Pending candidates` on account of this Track's own
-   nodes — those fields, and `## Safety Net`'s own section, stay untouched by this write
+2. `## Safety Net`'s own section stays untouched by this write
    (`skills/refactor-learn/references/guardrails-write.md`).
 
 ## The behavior this regression-tests

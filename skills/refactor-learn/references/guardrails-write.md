@@ -5,7 +5,7 @@ call (a Guardrails Track candidate's fresh MR, or the scan itself completing wit
 — reached only once the call's own precondition already holds (a genuine event this pass). Applies
 only to a node in the Guardrails Track's own scope
 (`../../refactor-scan/references/guardrails-track.md`); every other node keeps writing whichever
-section already governs it (`## Safety Net`, `Pending candidates`/`out-of-scope/`).
+section already governs it (`## Safety Net`, `## Investigation`).
 
 The write mechanics below are identical to `safety-net-write.md`'s
 own — this file states the same rules, scoped to `## Guardrails` instead of `## Safety Net`, so both
@@ -54,13 +54,9 @@ and records the reopened nodes.
 The closing call's freshly-opened-MR handling doesn't itself remove anything from `Open` — a node only
 leaves `Open` once its delivering MR actually **merges** (the early call's own finding, above).
 
-**Never touches `Pending candidates`.** A Guardrails Track candidate's in-flight state lives entirely
-in `## Guardrails`'s own `Open` list
-(`../../continuous-refactoring/references/refactoring-bookkeeping.md`) — `refactor-design` skips
-writing that field for a candidate handed to it this way (marked self-tracking,
-`../../refactor-scan/references/track-open-processing.md`), so it's never even transiently set for
-one of these, and this call correspondingly never clears it on account of a Guardrails Track candidate
-resolving. Also never touches `## Safety Net`'s own `Open`/`Out-of-scope` —
+A Guardrails Track candidate's in-flight state lives entirely in `## Guardrails`'s own `Open` list
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`). This write never touches
+`## Safety Net`'s own `Open`/`Out-of-scope` —
 the two Tracks' sections are independent, each written only by its own Track's own candidates.
 
 ## Issue filed for the picked `Open` entry → record its number

@@ -4,7 +4,7 @@ The suite's state is split in two, and both are written by the onboarding interv
 (`onboarding-setup-interview.md`), which is why a fresh target has neither:
 
 - the **bookkeeping document** (`bookkeeping.md`, below) — the loop's state: each Track's `Cadence`, `Last scan`,
-  `Open` and `Out-of-scope`, `Pending candidates`, `Secret history scan`. Nothing personal.
+  `Open` and `Out-of-scope`, `Secret history scan`. Nothing personal.
 - the **config file** (`.scratch/refactor/config.md`, *The config file*, below) — per person and machine: the
   **Bookkeeping pointer**, `Ticket-create-mode` and `MR-create-mode`.
 
@@ -14,7 +14,7 @@ The suite's state is split in two, and both are written by the onboarding interv
 The document is written last of everything onboarding produces, so its existence means "onboarding completed" — the
 `onboarding-setup` node's Fulfilment check (`../../refactor-scan/references/tooling-tree.md`). A freshly
 onboarded document holds only the title line; every other field and section below joins the first time something
-needs it, and an absent field reads as unset (`Pending candidates` absent = `- none`).
+needs it, and an absent field reads as unset.
 
 The suite reads and writes the document as one local file, whichever of two places it really lives in:
 
@@ -101,9 +101,6 @@ tooling-tree node's Fulfilment check, and never by Rank mode. Omitted → no bia
 
 **Secret history scan:** done (2026-09-12)
 
-**Pending candidates:**
-- none
-
 ## Safety Net
 
 **Cadence:** 90 days
@@ -144,7 +141,7 @@ tooling-tree node's Fulfilment check, and never by Rank mode. Omitted → no bia
 - Shallow UserService (#101)
 ```
 
-`Pending candidates` sorts last, not alphabetically or by write-frequency. The `## Safety Net`, `## Guardrails`, `## Housekeeping`, and `## Investigation` sections (below) sit between `Pending candidates` and the end of the file, in that order — the same Safety Net > Guardrails > Housekeeping > Investigation priority the scheduling algorithm uses elsewhere (`CONTEXT.md`'s **Track** entry) — each is its own heading, not a top-level field, so none competes with that ordering rule.
+The `## Safety Net`, `## Guardrails`, `## Housekeeping`, and `## Investigation` sections (below) follow the top-level fields, in that order — the same Safety Net > Guardrails > Housekeeping > Investigation priority the scheduling algorithm uses elsewhere (`CONTEXT.md`'s **Track** entry) — each is its own heading, not a top-level field, so none competes with that ordering rule.
 
 ## Cadence values
 
@@ -171,13 +168,10 @@ Every Track's `Cadence` (except Investigation's literal `continuous`, below) is 
 | Field | Meaning | Written by |
 |---|---|---|
 | `Secret history scan` | Whether the one-time full git-history secret scan (`refactor-scan/SKILL.md` step 4c) has already run — absent until it has, `done (YYYY-MM-DD)` (the date the scan ran, purely for human-readable audit trail — nothing reads or compares it) once every finding from that run is filed. Read only by that step, to decide whether to run at all; gated on the `secret-detection` node itself being fulfilled first, so it's meaningless (and never written) on a target that hasn't adopted that node yet. | `refactor-learn`, early call, once, the pass the scan actually runs — never hand-edited (a target that genuinely wants the scan to run again removes the field by hand instead, the same escape hatch an `out-of-scope/` rejection uses) |
-| `Pending candidates` | A one-item list (a bullet under the header, `- none` when empty) holding the issue most recently filed for a **tooling-tree node's own first-ever proposal**, before its Track's own `## Safety Net`/`## Guardrails` section exists yet — the one pass where that node isn't already tracked by the Track's own `Open` (below). Narrow and short-lived: from the Track's next scan on, every node in its scope is tracked in that Track's own `Open` instead, and this field goes back to `none`. **Non-native tracker only** — on a native tracker this write is skipped entirely (stays `none`): a future pass's `refactor-scan` step 3 rediscovers the same still-open issue on its own. | `refactor-design` sets it for that narrow case only (non-native tracker); `refactor-learn` clears it once the merge request is remembered (`merge-requests.md`) or the Track's own `Open` takes over |
-
-`Pending candidates` exists so a pass interrupted mid-candidate doesn't get re-proposed as fresh work by the next `refactor-scan` — scan reads this field before walking the tree, and if it names an issue, that pending issue is the only thing it proposes this pass, resuming at whichever step is actually next (no plan comment on the issue yet → `refactor-design`; plan comment present → `refactor-implement` — `refactor-scan/SKILL.md` step 2). **Never written for a Safety Net or Guardrails Track candidate** once that Track's own section exists (below) — that candidate's in-flight issue lives in the relevant Track's own `Open` list instead, which can hold more than the one entry this field is limited to. **Never written for a structural, baseline-shrink, or externally-labeled candidate either** — those are `## Investigation`'s own business, tracked in its own `Open` (below), not here.
 
 ## `Safety Net` section
 
-Replaces the global `Pending candidates` for every node the **Safety Net Track** (`CONTEXT.md`)
+Holds every node the **Safety Net Track** (`CONTEXT.md`)
 works through — every tooling-tree node reachable before `structural-scan` opens, `git`/`onboarding-setup`/the
 language specialization's own recognition gate excepted (those stay outside every Track — `onboarding-setup`
 is fulfilled by the dispatcher's onboarding step and never proposed, `CONTEXT.md`'s **Onboarding** entry). Full read/write mechanics:
@@ -207,13 +201,13 @@ reports the wait.
 
 - **`Cadence`** — interval between scans (forms: *Cadence values*, above), `90 days` unless hand-edited. Never read to decide whether to scan when `Open` is non-empty (below).
 - **`Last scan`** — the date (`YYYY-MM-DD`) the Track's scan last completed, written even when it found nothing to do. **The whole section is absent until the Track's first scan completes** — absence means "never run," never "nothing found"; a Track with no section is always due, the same as one whose `Last scan` is more than `Cadence` days old.
-- **`Open`** — the complete, ordered backlog for this Track: every node of the Track's scope that is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per bulleted line, `- <slug> (#<issue>)` (issue # only while the node is being worked, omitted otherwise). `- none` when empty. **`Open` empty means the Track is done.** Non-empty `Open` means the Track is never rescanned this pass — its existing entries are worked through the ordinary propose → design → implement → learn pipeline first, the same "resume before propose fresh" discipline `Pending candidates` already applies, just scoped to this Track and able to hold more than one entry at a time. A scan runs only for a selected Track whose `Open` is empty (due by cadence, or named manually — naming a Track never forces a scan while `Open` has entries). Existing files under the old meaning (where `Open` listed only nodes with filed issues) are not migrated: such an `Open` is walked like any other, and the scan that runs once it empties records the complete backlog.
+- **`Open`** — the complete, ordered backlog for this Track: every node of the Track's scope that is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per bulleted line, `- <slug> (#<issue>)` (issue # only while the node is being worked, omitted otherwise). `- none` when empty. **`Open` empty means the Track is done.** Non-empty `Open` means the Track is never rescanned this pass — its existing entries are worked through the ordinary propose → design → implement → learn pipeline first: resume before proposing fresh. A scan runs only for a selected Track whose `Open` is empty (due by cadence, or named manually — naming a Track never forces a scan while `Open` has entries). Existing files under the old meaning (where `Open` listed only nodes with filed issues) are not migrated: such an `Open` is walked like any other, and the scan that runs once it empties records the complete backlog.
 - **`Out-of-scope`** — every Safety Net node rejected via this Track, one per bulleted line, `- <slug> — out-of-scope/<slug>.md` (the pointer, not a restatement — the entry's own reasoning lives in that file, format unchanged from every other `out-of-scope/` entry). Never removed except by the ordinary reversal path (the `out-of-scope/<slug>.md` file deleted by hand or by a PHP-version-reversal finding, `refactor-scan/SKILL.md` step 3) — this bulleted pointer and the file are added/removed together.
 - A slug **never appears in both `Open` and `Out-of-scope` at once** — the mutual-exclusion invariant, enforced within this section for a Safety Net Track node.
 
 ## `Guardrails` section
 
-Replaces the global `Pending candidates` for every node the **Guardrails Track** (`CONTEXT.md`)
+Holds every node the **Guardrails Track** (`CONTEXT.md`)
 works through — the nodes required on `structural-scan`/`php-safety-net` themselves, proposed only once
 the Safety Net has closed (PHP: `composer-audit`, `phpmd`, `coverage-floor`, `php-minimal-version`,
 `phpstan-level-6` and above, `phpstan-deprecation-rules`, `semgrep`). Same shape as `## Safety Net`
@@ -346,8 +340,7 @@ design/implement/learn actually finish it).
   scan`'s own value; the field is a pure audit trail here ("did Investigation's scan run, and when"), not
   an input to its own due-check.
 - **`Open`** — one line per in-flight candidate, `- <issue title> (#<issue>)`, `- none` when empty (see
-  *Why more than one entry*, below). Written on **every** tracker, native-label ones included — unlike a
-  tooling-tree node's top-level `Pending candidates` (above), which native trackers skip: an Investigation
+  *Why more than one entry*, below). Written on **every** tracker, native-label ones included: an Investigation
   candidate needs `refactor-scan` to resume *exactly* this issue next pass rather than treat it as a fresh
   candidate and possibly pick a different one via step 3b's ranking, regardless of whether the tracker
   also shows the issue open. `refactor-scan` resumes it only when **Investigation is the Track selected
@@ -380,8 +373,8 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
 
 ## Rules
 
-- **`Pending candidates` is `refactor-learn`-written — never by hand.** The config file and the project lines
-  (above) are the hand-edited part; this document is the suite's. `Secret history scan` is `refactor-learn`-written too (to
+- **This document is suite-written — never by hand.** The config file and the project lines
+  (above) are the hand-edited part. `Secret history scan` is `refactor-learn`-written (to
   `done (YYYY-MM-DD)`, once) — the one exception you *can* hand-edit, but only to remove it outright, on
   the rare target that genuinely wants the one-time scan to run again. The `## Safety Net`, `## Guardrails`,
   and `## Housekeeping` sections are the same: `refactor-learn`-written, never by hand, except each
@@ -389,10 +382,10 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
   `housekeeping-cadence-interview.md`). `## Investigation` is the same too — `refactor-design` sets its
   `Open` entry, `refactor-learn` clears it and writes `Last scan` — but unlike those three, *nothing* in
   it is hand-editable — its `Cadence` is always the literal `continuous` (above), never a number to tune.
-- The suite never commits this document, in either mode. Loop state does not live in the agent's own conversation but here (pending candidates, the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
+- The suite never commits this document, in either mode. Loop state does not live in the agent's own conversation but here (the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
 - If the Bookkeeping pointer is missing, or names a file that doesn't exist, the target isn't onboarded yet (an issue URL that can't be read is a different case — `issue-mode.md`, *Load*: the pass stops, and nothing is created in its place): the dispatcher's onboarding step runs before anything else, and every other skill that needs the document aborts (*Not onboarded yet*, below) rather than creating it.
 
 ## Not onboarded yet
 
 When `refactor-loop` or `continuous-housekeeping` finds no Bookkeeping pointer, or no `bookkeeping.md` where it points, it aborts before doing anything — nothing runs, nothing is announced, and it never creates the file or the issue. Report: "This repo isn't onboarded yet — there is no bookkeeping document. Run `/continuous-refactoring` first; its onboarding step sets the repo up, then rerun." This is the one place that text lives; both skills point here.
-- **Old-schema repos need no migration.** A `bookkeeping.md` predating any of these sections (no `## Safety Net`/`## Guardrails`/`## Housekeeping`/`## Investigation` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old `Pending candidates`/`Housekeeping cadence` fields already on the file blocks this — that last one is the standalone `continuous-housekeeping` skill's own now-retired field, superseded by `## Housekeeping`'s own `Cadence`, never read or migrated into it — and none of them needs to be understood, migrated, or removed for any Track's own first scan to proceed normally (`../../refactor-scan/references/safety-net-track.md`, `../../refactor-scan/references/guardrails-track.md`, `../../continuous-housekeeping/references/housekeeping-track.md`, `../../refactor-scan/references/investigation-track.md`). The four sections migrate independently, too — a target that's already run its first Safety Net Track scan (so `## Safety Net` exists) but never its first Guardrails Track scan (so `## Guardrails` doesn't yet) is an entirely ordinary, expected state, not a partial or inconsistent one; `## Housekeeping`/`## Investigation` join the same way, each on its own first scan, independent of the others.
+- **Old-schema repos need no migration.** A `bookkeeping.md` predating any of these sections (no `## Safety Net`/`## Guardrails`/`## Housekeeping`/`## Investigation` heading at all) is read exactly like any other repo whose Track has never run — absence means "never run," not an error; nothing about the old top-level `Pending candidates`/`Housekeeping cadence` fields already on the file blocks this — the first is a retired resume marker the suite no longer reads or writes, the second the standalone `continuous-housekeeping` skill's own now-retired field, superseded by `## Housekeeping`'s own `Cadence`, never read or migrated into it — and none of them needs to be understood, migrated, or removed for any Track's own first scan to proceed normally (`../../refactor-scan/references/safety-net-track.md`, `../../refactor-scan/references/guardrails-track.md`, `../../continuous-housekeeping/references/housekeeping-track.md`, `../../refactor-scan/references/investigation-track.md`). The four sections migrate independently, too — a target that's already run its first Safety Net Track scan (so `## Safety Net` exists) but never its first Guardrails Track scan (so `## Guardrails` doesn't yet) is an entirely ordinary, expected state, not a partial or inconsistent one; `## Housekeeping`/`## Investigation` join the same way, each on its own first scan, independent of the others.

@@ -53,7 +53,7 @@ suite's own, and ask otherwise.
 ## Save
 
 Every skill that wrote the working copy saves before it returns: `refactor-learn`, and `refactor-design` for its
-top-level `Pending candidates` write or its `## Investigation` `Open` write.
+`## Investigation` `Open` write.
 
 1. Body ← the two sentences, `---`, and the working copy's `bookkeeping.md`. **The last write wins**: the suite
    doesn't reload and merge, so a human edit made while a pass runs is overwritten.

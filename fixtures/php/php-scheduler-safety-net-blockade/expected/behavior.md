@@ -35,7 +35,6 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
   **Not due, and also blocked by the Safety Net blockade.**
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-10`. Always due, always eligible —
   but blocked by the Safety Net blockade.
-- Top-level `Pending candidates: none`.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 

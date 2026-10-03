@@ -5,8 +5,7 @@ has existing entries — dispatched from `refactor-loop`'s scan step
 (`../../refactor-loop/SKILL.md` step 1), which hands the selected Track down as input and
 routes the walk's outcome onward, but never walks or judges itself: `refactor-loop` is a thin data
 pipe, and the walk is scan's own work — `refactor-scan` is the skill that reads the tree and judges
-fulfilment. Replaces the earlier "resume the top entry" behavior for Track nodes — `Pending
-candidates` still resumes the same way as before, tracked separately.
+fulfilment. Replaces the earlier "resume the top entry" behavior for Track nodes.
 
 ## Workability
 
@@ -44,10 +43,7 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
      removal is `refactor-learn`'s write, the same detect-never-write split every other finding
      already follows.
    - **Not fulfilled** → this is the one node worked this pass. Hand it forward to `refactor-design` /
-     `refactor-implement` as usual, **marked self-tracking** — `refactor-design/SKILL.md` step 5
-     already skips `Pending candidates` for a candidate marked this way, without needing to know why;
-     this `Open` entry is this node's own resume marker instead, so the two must never both point at
-     the same candidate. The walk creates no issue itself (`refactor-scan` detects, never
+     `refactor-implement` as usual; this `Open` entry is this node's own resume marker. The walk creates no issue itself (`refactor-scan` detects, never
      writes): unless the node already has one, it returns a draft for it — title `Tooling tree: <Name>`, label
      `refactor:candidate`, body = the node's Purpose line — and `refactor-loop` creates it before design runs
      (`../../continuous-refactoring/references/filing-a-ticket.md`); `refactor-design` then writes the full plan onto it.

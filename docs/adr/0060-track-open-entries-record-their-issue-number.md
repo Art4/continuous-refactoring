@@ -1,5 +1,7 @@
 # A Track `Open` entry's issue number is written back once `refactor-design` files it
 
+> Amended by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the self-tracking hand-off marker is dropped together with the `Pending candidates` field it suppressed; the `Open` entry's issue number stays.
+
 > Amends [ADR-0051](0051-refactor-learn-requires-a-genuine-event.md): the closing call's precondition
 > gains a fourth case — a Safety Net or Guardrails Track's `Open` walk having picked a node this pass —
 > alongside the existing freshly-opened-MR, design-time breaking-change, and Track-scan-ran cases.

@@ -28,7 +28,7 @@ Two sentences still claim a wider scope ("on every tracker, native-label ones in
 
 **Priority:** low — internal simplification, no user-facing bug.
 
-**Status:** ready-for-agent
+**Status:** done — PR #136
 
 ## Decisions (confirmed by the maintainer, 2026-10-03)
 

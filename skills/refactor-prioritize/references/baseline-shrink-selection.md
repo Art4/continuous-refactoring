@@ -58,5 +58,5 @@ added as a comment only on the one group this pass actually pursues, including w
 a future pass if that group is larger than one MR covers.
 
 Continue at `refactor-prioritize/SKILL.md` step 4 for the rest (dedupe check already done above;
-`Pending candidates` is `refactor-design`'s write and names only the single recommended group — the
+the `## Investigation` `Open` entry is `refactor-design`'s write and names only the single recommended group — the
 others sit as ordinary open issues for a future pass once `refactor-loop` has created them).

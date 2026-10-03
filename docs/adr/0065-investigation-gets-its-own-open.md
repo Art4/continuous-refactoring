@@ -1,5 +1,7 @@
 # Investigation gets its own single-entry `Open`, replacing the global `Pending candidates` for its own candidates
 
+> Amended by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the top-level `Pending candidates` field this ADR narrowed to one remaining case is dropped.
+
 > Supersedes [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md)'s Investigation-section
 > decision: *"Investigation: no section content. The issue tracker / `merge-requests.md` stays
 > authoritative, as today."* Investigation now carries its own `Open`, single-entry.

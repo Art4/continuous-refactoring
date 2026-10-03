@@ -1,5 +1,7 @@
 # On a native-label tracker, `refactor-design` skips writing `Pending candidates`
 
+> Superseded by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the `Pending candidates` field is dropped entirely, so no write is left to skip.
+
 > Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): the per-tracker-kind special case for `Pending candidates` goes away; it stays an ordinary state field.
 
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): its core discipline —

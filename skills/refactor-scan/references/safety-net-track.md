@@ -111,9 +111,8 @@ The `Open` list is the complete, ordered backlog for this Track: every node of t
 is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per
 bulleted line, `- <slug> (#<issue>)` (issue # only while the node is being worked, omitted otherwise).
 `- none` when empty. Non-empty `Open` means the Track is never rescanned this pass — its existing
-entries are worked through the ordinary propose → design → implement → learn pipeline first, the same
-"resume before propose fresh" discipline `Pending candidates` already applies, just scoped to this Track
-and able to hold more than one entry at a time.
+entries are worked through the ordinary propose → design → implement → learn pipeline first: resume
+before proposing fresh.
 
 **Every node in scope resolved, nothing to propose** → still a completed scan: `refactor-learn`'s closing
 call writes `Last scan` and an empty `Open` regardless (`safety-net-write.md`), so a fully-compliant

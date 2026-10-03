@@ -38,8 +38,7 @@ assuming an outcome.
 ## Trackers without native labels use a ledger file
 
 Where the tracker isn't GitHub or GitLab, remembered merge requests are kept in the
-`merge-requests.md` ledger instead of being read from the tracker's own issue-to-pull-request linkage, and
-an in-flight candidate is tracked in `Pending candidates`. The loop works the same way, but the ledger is
+`merge-requests.md` ledger instead of being read from the tracker's own issue-to-pull-request linkage. The loop works the same way, but the ledger is
 only as current as the last pass that wrote it.
 
 ## Where the state lives decides what carries over

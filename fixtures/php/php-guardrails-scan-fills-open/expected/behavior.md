@@ -28,7 +28,6 @@ tree. All eleven Guardrails scope nodes are genuinely still missing.
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (`overdue_ratio ≈ 0.57`). Not due.
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-10`. All four sections present, so the
   one-time bootstrap exception is done.
-- Top-level `Pending candidates: none`.
 
 Seed the scan is expected to hand the script (every node fulfilled except the eleven Guardrails scope
 nodes, `structural-scan` (Investigation) and the rejected `psalm-taint-analysis`), and the script's
@@ -67,8 +66,8 @@ output for it (`python3 skills/refactor-scan/references/tooling_tree.py --seed <
      - `php-minimal-version`
      - `semgrep`
    - `Last scan` set to today's date.
-   - `Out-of-scope` left as it was (`- none`); `## Safety Net`, `## Housekeeping`, `## Investigation`
-     and `Pending candidates` untouched.
+   - `Out-of-scope` left as it was (`- none`); `## Safety Net`, `## Housekeeping` and `## Investigation`
+     untouched.
 4. No candidate issue is filed for any of the recorded nodes (Track nodes are no longer pre-filed).
 
 ## The behavior this regression-tests
