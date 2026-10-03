@@ -4,8 +4,8 @@ Part of `refactor-learn/SKILL.md`'s early call (a Safety Net Track candidate's f
 call (a Safety Net Track candidate's fresh MR, or the scan itself completing with nothing to propose) —
 reached only once the call's own precondition already holds (a genuine event this pass). Applies only to
 a node in the Safety Net Track's own scope
-(`../../refactor-scan/references/safety-net-track.md`); every other node keeps writing
-`Pending candidates`/`out-of-scope/` exactly as `refactor-learn/SKILL.md` already documents.
+(`../../refactor-scan/references/safety-net-track.md`); every other node keeps writing whichever
+section already governs it (`## Guardrails`, `## Investigation`).
 
 ## Merge → remove from `Open`
 
@@ -56,12 +56,8 @@ leaves `Open` once its delivering MR actually **merges** (the early call's own f
 *does* happen at this point, same as for any other node: the MR is remembered (`merge-requests.md` /
 the tracker's native link).
 
-**Never touches `Pending candidates`.** A Safety Net Track candidate's in-flight state lives entirely in
-`## Safety Net`'s own `Open` list (`../../continuous-refactoring/references/refactoring-bookkeeping.md`)
-— `refactor-design` skips writing that field for a candidate handed to it this way (marked
-self-tracking, `../../refactor-scan/references/track-open-processing.md`), so it's never even
-transiently set for one of these, and this call correspondingly never clears it on account of a Safety
-Net Track candidate resolving.
+A Safety Net Track candidate's in-flight state lives entirely in `## Safety Net`'s own `Open` list
+(`../../continuous-refactoring/references/refactoring-bookkeeping.md`).
 
 ## Issue filed for the picked `Open` entry → record its number
 

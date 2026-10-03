@@ -11,7 +11,7 @@ citation style leaks straight into forge-facing prose unless something switches 
   the reason for something. State the rule or finding itself, in plain words, instead of pointing at
   where it's written down.
 - **This suite's own controlled vocabulary.** Don't use a `CONTEXT.md` term scoped to this suite's own
-  bookkeeping — candidate, finding, tooling-tree node, gate, flagged candidate, pending candidate,
+  bookkeeping — candidate, finding, tooling-tree node, gate, flagged candidate,
   resume-candidate, fulfilled node, and the like — as if the reader already knows it. Describe the
   actual thing instead.
 

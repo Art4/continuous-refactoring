@@ -1,7 +1,7 @@
 # Expected behavior — the invocation after onboarding is an ordinary pass
 
 The state the onboarding leaves behind: `.scratch/refactor/config.md` (the `Bookkeeping:` pointer and the two create-modes) and `.scratch/refactor/bookkeeping.md` holding only its title line
-(no `Pending candidates`, no Track sections), `docs/agents/issue-tracker.md` (Local Markdown),
+(no Track sections), `docs/agents/issue-tracker.md` (Local Markdown),
 `docs/agents/triage-labels.md` and the suite's section in `AGENTS.md`. Not deterministically checkable; run via
 `fixtures/harness/run.sh agent-loop php-onboarding-second-invocation`, local-only and advisory.
 

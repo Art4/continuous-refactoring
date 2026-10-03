@@ -42,7 +42,6 @@ reachable. `phpmd` is still genuinely missing.
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-09-15` (`overdue_ratio ≈ 0.57`). Not due, so it
   does not preempt Guardrails.
 - `## Investigation` — `Cadence: continuous`. Always due, always eligible, lowest tie-break.
-- Top-level `Pending candidates: none`.
 
 `.scratch/refactor/issues/01-shallow-user-service.md` — carries `refactor:priority` and
 `ready-for-agent`, a structural candidate (not a Track node). A human-prioritized backlog item that

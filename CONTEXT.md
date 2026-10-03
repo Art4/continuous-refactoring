@@ -69,7 +69,7 @@ The folder holding the loop's state — the **Bookkeeping document** (`bookkeepi
 _Avoid_: suite folder, config folder, state folder
 
 **Bookkeeping document**:
-The loop's state — `Pending candidates`, `Secret history scan`, and each **Track**'s `Cadence`, `Last scan`, `Open` and `Out-of-scope` — and nothing personal. A single file, `bookkeeping.md`, in the **Refactoring Notes**, named by the **Bookkeeping pointer**. Onboarding writes it last, so its existence means "onboarding complete". `Focus areas` and `Refactoring goal` are not in it: they are lines in the instruction file (`AGENTS.md`, else `CLAUDE.md`), written only by humans.
+The loop's state — `Secret history scan`, and each **Track**'s `Cadence`, `Last scan`, `Open` and `Out-of-scope` — and nothing personal. A single file, `bookkeeping.md`, in the **Refactoring Notes**, named by the **Bookkeeping pointer**. Onboarding writes it last, so its existence means "onboarding complete". `Focus areas` and `Refactoring goal` are not in it: they are lines in the instruction file (`AGENTS.md`, else `CLAUDE.md`), written only by humans.
 _Avoid_: bookkeeping file, state file
 
 **Bookkeeping pointer**:
@@ -163,18 +163,6 @@ _Avoid_: events, notifications
 
 **Fulfilled at pick-up**:
 The finding `refactor-scan`'s Track `Open` walk (`skills/refactor-scan/references/track-open-processing.md`) reports when its re-check — re-running a node's **Fulfilment check** right before working it — finds the node already served, typically adopted by hand since the last scan. `refactor-learn`'s early call acts on it: the node leaves its Track's `Open` with no merge request and nothing filed — scan only reports the finding, `refactor-learn` performs the removal, the suite's ordinary detect-never-write split.
-_Avoid_: (none — use the term as-is)
-
-**Self-tracking** (hand-off marker):
-How `refactor-scan`'s Track `Open` walk (`skills/refactor-scan/references/track-open-processing.md`)
-hands its picked Safety Net/Guardrails node to `refactor-design`. `refactor-design` reads it as "this
-candidate's own resume marker lives elsewhere, don't set the top-level `Pending candidates`" and nothing
-more — it never learns what "elsewhere" is, keeping it free of any vocabulary for **Track**, **Safety
-Net**, or **Guardrails**. What "elsewhere" actually is stays known only to whoever set the marker and to
-`refactor-learn`'s own write files: that Track's own `Open` entry for an `Open`-walk node
-(`docs/adr/0060-track-open-entries-record-their-issue-number.md`). A structural, baseline-shrink, or
-externally-labeled candidate isn't marked this way — `refactor-design` adds an entry to
-`## Investigation`'s own `Open` for those directly, unconditionally, on every tracker.
 _Avoid_: (none — use the term as-is)
 
 **Flagged candidate**:

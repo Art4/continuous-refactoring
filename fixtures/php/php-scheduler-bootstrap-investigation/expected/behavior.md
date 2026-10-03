@@ -32,7 +32,6 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
   pick **Guardrails** — not Investigation. This is the fixture's deliberate adversarial setup: a
   more-overdue-by-the-ordinary-rules Track (Guardrails, tied for "never run" but ranked higher) must
   still lose to Investigation once the one-time exception applies.
-- Top-level `Pending candidates: none`.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 

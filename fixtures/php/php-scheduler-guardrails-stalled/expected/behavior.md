@@ -34,7 +34,6 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 - `## Housekeeping` — `Cadence: 7`, `Last scan: 2026-08-20` (30 days before → `overdue_ratio ≈ 4.29`).
   **Due at a materially higher ratio.**
 - `## Investigation` — `Cadence: continuous`, `Last scan: 2026-09-10`. Always due, always eligible.
-- Top-level `Pending candidates: none`.
 
 ## Expected: `continuous-refactoring` pass, Track-selection step
 

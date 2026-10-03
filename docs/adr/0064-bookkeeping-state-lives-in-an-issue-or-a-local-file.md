@@ -1,5 +1,7 @@
 # Bookkeeping state lives in an issue or a local file, never in a suite-managed commit; per-person config is its own file
 
+> Amended by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the `Pending candidates` field this ADR kept "for now" is dropped.
+
 > Supersedes [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md),
 > [ADR-0028](0028-native-tracker-in-flight-bookkeeping-rides-the-candidate-branch.md) and
 > [ADR-0031](0031-draft-candidate-mrs-until-fold-in-lands.md): the suite no longer commits its own

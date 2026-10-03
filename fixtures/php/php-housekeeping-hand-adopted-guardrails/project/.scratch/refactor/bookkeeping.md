@@ -1,8 +1,5 @@
 # Refactoring Bookkeeping
 
-**Pending candidates:**
-- none
-
 ## Guardrails
 
 **Cadence:** 60

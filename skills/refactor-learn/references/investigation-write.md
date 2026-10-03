@@ -5,7 +5,7 @@ externally-labeled candidate's finding) and closing call (that candidate's fresh
 completing with nothing to propose) — reached only once the call's own precondition already holds (a
 genuine event this pass). Applies only to a candidate `refactor-scan/SKILL.md` step 3b routes to an
 Investigation pass (`../../refactor-scan/references/investigation-track.md`); every other candidate
-keeps writing the top-level `Pending candidates`/`out-of-scope/` exactly as `refactor-learn/SKILL.md`
+keeps writing its own Track's section and `out-of-scope/` exactly as `refactor-learn/SKILL.md`
 already documents.
 
 ## Merge → remove that one entry from `Open`

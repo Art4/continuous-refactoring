@@ -23,7 +23,7 @@ Runs in one of two modes, both dispatched by `refactor-loop` — never one calli
 
 Get the remembered set of in-flight suite MRs: `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → every open `refactor:candidate` issue that carries a linked pull request (the tracker's native issue↔closing-PR cross-reference); otherwise the Refactoring Notes' `merge-requests.md` directly. Drop any proposal already in that set — it already has an open MR, so it isn't something to *start*. How many suite MRs are open is not this skill's concern: `refactor-loop` gates that once, right before implementation (its step 5), for new merge requests only.
 
-A `Pending candidates` entry never reaches this skill at all — `refactor-scan` step 2 routes it
+An in-flight `## Investigation` `Open` entry never reaches this skill at all — `refactor-scan` step 2 routes it
 straight to `refactor-design` (not yet planned) or `refactor-implement` (already planned), bypassing
 Rank and Select mode both; see `refactor-scan/SKILL.md` step 2 and `refactor-loop`'s own step 1.
 
@@ -86,7 +86,7 @@ into a **priority** or **capped** admission tier by its Signal
 (`references/signals.md`), and the single strongest is this pass's
 recommendation, carried forward.
 
-This mode writes no `Pending candidates` — it can't, the issue doesn't exist yet. `refactor-design` sets it for the recommended candidate as soon as `refactor-loop` hands it the created issue's number (its step 5), on every tracker, native-label ones included.
+This mode writes no `## Investigation` `Open` entry — it can't, the issue doesn't exist yet. `refactor-design` adds it for the recommended candidate as soon as `refactor-loop` hands it the created issue's number (its step 5), on every tracker, native-label ones included.
 
 ## Output
 

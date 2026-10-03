@@ -3,7 +3,7 @@
 Confirms the Safety Net Track's own `## Safety Net` bookkeeping (`skills/refactor-scan/references/
 safety-net-track.md`) never rescans the tree while it's still holding `Open` work, no matter how stale
 `Last scan` has become — the existing entry is worked through the ordinary propose → design → implement
-→ learn pipeline first, same as `Pending candidates` already does for the global case.
+→ learn pipeline first.
 
 Not deterministically checkable — pure skill process behavior, not something `tooling_tree.py` asserts
 on its own. Run via `fixtures/harness/run.sh safety-net-track php-safety-net-open-blocks-rescan
@@ -30,14 +30,13 @@ designed this candidate before being interrupted.
 
 Run `/refactor-scan`. It should:
 
-1. Read `## Safety Net`'s `Open` list, see `php-cs-fixer (#5)`, and treat it as resumable — same
-   resume-before-propose discipline `Pending candidates` already gets, scoped to this Track.
+1. Read `## Safety Net`'s `Open` list, see `php-cs-fixer (#5)`, and treat it as resumable —
+   resume before proposing fresh.
 2. **Not** run a fresh Safety Net Track walk this pass — `phpunit`, `test-runner-if-missing`,
    `phpstan-level-0`, `ci-runner` (all still genuinely missing) must **not** appear as newly proposed
    candidates this pass.
 3. Hand `php-cs-fixer` (#5) straight to `refactor-implement` — the issue already carries a plan and
-   `ready-for-agent`, so `refactor-prioritize`/`refactor-design` are bypassed the same way an ordinary
-   resumable `Pending candidates` entry already bypasses them.
+   `ready-for-agent`, so `refactor-prioritize`/`refactor-design` are bypassed.
 4. Leave `## Safety Net`'s `Last scan` untouched this pass — only a completed Track scan earns that
    write (`skills/refactor-learn/references/safety-net-write.md`), and this pass's scan didn't run.
 

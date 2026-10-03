@@ -31,8 +31,6 @@ one-time exception's own three turns are all long finished):
   eligible (its own `Open` is empty) — but, per the fixed tie-break order (Safety Net > Guardrails >
   Housekeeping > Investigation), never wins against a Track with a genuine `overdue_ratio >= 1` due this
   same pass.
-- Top-level `Pending candidates: none` (unused here — this target's very first tooling-tree proposals
-  are long past).
 
 Every one of the one-time exception's three conditions (`track-scheduler.md`'s own "One-time exception"
 section) is false here: `## Investigation` is present with no in-flight `Open`, `##
