@@ -65,7 +65,7 @@ Before implement would open a *new* merge request, the loop counts the suite's o
 Safety Net and Guardrails work through the **tooling tree**: a directed graph of adoption steps a target climbs — a language-neutral root ([tooling-tree.md](../skills/refactor-scan/references/tooling-tree.md)) with a specialization attached beneath (PHP: [php-tooling-tree.md](../skills/refactor-scan/references/php-tooling-tree.md)). Edges are *required* (gates the child until the parent is fulfilled or rejected) or *recommended* (advises only).
 
 - **Fulfilment is judged, not detected.** Each node has a Purpose and a Fulfilment check; an agent judges whether the target already satisfies it — so a tool adopted by hand, or a differently named equivalent, counts. There is no hardcoded list of dependency names.
-- **The parser only does graph logic.** `tooling_tree.py` takes a fulfilment state and computes the ordered `Open` backlog, workable and withheld nodes with reasons, rejection cascades and the merge-request outlook. It never inspects the target.
+- **The parser only does graph logic.** `tooling_tree.py` takes a fulfilment state and computes the ordered `Open` backlog, workable and withheld nodes with reasons, rejection cascades and what a landed node unlocks next. It never inspects the target.
 - **Rejections are remembered.** A node you decline is recorded under `out-of-scope/` and counts as resolved, so it isn't proposed again.
 - **A tooling-tree merge request is small and factual:** one node, its own fulfilment check as acceptance criterion, and a comment on the issue about what it unlocks next.
 
