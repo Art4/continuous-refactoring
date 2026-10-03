@@ -48,9 +48,8 @@ Two sentences still claim a wider scope ("on every tracker, native-label ones in
 
 ## Scope
 
-- **`refactor-scan`** — step 2 reads only the selected Track's `Open`; the field's read, its
-  "always one entry" wording and the git-only "this field is the only record, stop the pass" branch
-  go. Steps 3, 3b, 4 and `## Output` lose their "pending candidate" references (the per-entry resume
+- **`refactor-scan`** — step 2 reads only the selected Track's `Open`; the field's read and its
+  "always one entry" wording go. Steps 3, 3b, 4 and `## Output` lose their "pending candidate" references (the per-entry resume
   logic itself stays, for Investigation's `Open`). `track-open-processing.md`, `safety-net-track.md`.
 - **`refactor-design`** — the three-way paragraph (native tracker / self-tracking / write the field)
   and the field's mention under the reported writes.
@@ -86,3 +85,17 @@ Two sentences still claim a wider scope ("on every tracker, native-label ones in
 > write site in the six loop skills, the Track references, ADR-0029/0060/0064/0065 and the fixtures.
 > No grilling session: the three decisions above were the only open points and were confirmed as
 > recommended.
+
+> **2026-10-03 (implement):** Landed on the same branch (PR #136), ADR-0069. Two points turned out
+> differently from the scope as first filed. (1) The git-only "stop the pass, this is the only
+> record" branch in `refactor-scan` step 2 stays, reworded: it also covers a flagged
+> `## Investigation` `Open` entry, which still needs it. (2) `refactor-learn/SKILL.md` still said a
+> freshly opened merge request clears Investigation's `Open` entry, contradicting
+> `investigation-write.md` and ADR-0068 (the entry leaves only on merge or rejection); the lines had
+> to be rewritten anyway and now follow the reference. Left alone: the same file's "clear it to
+> `- none`" wording for a merged or rejected Investigation candidate, which predates the multi-entry
+> `Open` — a separate leftover. Old-schema fixtures, their harness checks and
+> `OldSchemaPassThroughTests` keep the field on purpose; 30 current-schema fixture documents lost
+> their `- none` line. 235 unit tests, `validate_skills.py` (same 12 advisories as `main`) and
+> harness `tier2 php-project-with-candidates` pass; the agent-judged Track tiers (`--opencode`,
+> local-only, advisory) were not run.
