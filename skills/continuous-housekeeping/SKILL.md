@@ -9,7 +9,7 @@ The **Housekeeping** Track (`CONTEXT.md`) as one loop pass. Unlike the other thr
 
 Invoked by `continuous-refactoring` once its Track scheduler selects Housekeeping. Not a user entry point — a human who wants this Track runs `/continuous-refactoring housekeeping`. Housekeeping's *trigger* stays centrally scheduled; only its process lives here.
 
-**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track, or typed directly — it runs the Housekeeping Track without consulting the scheduler, bypassing the Safety Net blockade and the one-time exception exactly as `../continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
+**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track, or typed directly — it runs the Housekeeping Track without consulting the scheduler, bypassing the Safety Net blockade exactly as `../continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
 
 The Track's own reference files live beside this skill: `references/housekeeping-track.md` (the process), `references/housekeeping-cadence-interview.md` (the human-run cadence interview), `references/housekeeping-template-file-format.md` (the checklist file's format).
 

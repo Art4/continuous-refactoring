@@ -1,5 +1,7 @@
 # Fulfilment checks move from `tooling_tree.py` to agent judgement against a node's Purpose; scanning reorganized into four scheduled Tracks
 
+> Amended by [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): the one-time bootstrap exception is removed; Track selection is one cascade with no special turn after Safety Net closes.
+
 > Amends [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md): **Signal wave** is renamed
 > **Guardrails**, for symmetry with **Safety Net** once both became **Track** names (below), and to stop
 > reading as an alternate spelling of the unrelated **Signal** field. **Onboarding** narrows: only

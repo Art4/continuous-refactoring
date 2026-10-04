@@ -40,20 +40,18 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 Run the orchestrator's Track-selection step (step 1) — it should:
 
 1. Read `## Safety Net`; its `Open` is empty — the Safety Net blockade does not fire.
-2. Check the one-time exception: all four sections present, Investigation has no in-flight `Pending
-   candidates` → the exception is permanently done.
-3. Compute every wired Track's `overdue_ratio`: Safety Net ≈0.2 (not due), Guardrails ≈1.33 (due),
+2. Compute every wired Track's `overdue_ratio`: Safety Net ≈0.2 (not due), Guardrails ≈1.33 (due),
    Housekeeping ≈4.29 (due), Investigation always due/eligible but no numeric ratio.
-4. Check Guardrails' eligibility: `Open` is non-empty, and the walk finds nothing workable (both
-   entries are blocked or flagged). Per the Eligibility rule, Guardrails with `Open` non-empty but
-   nothing workable **yields** — it drops out of ratio comparison entirely. Its `Open` stays as it is
+3. Check Guardrails' eligibility: `Open` is non-empty, and the walk finds nothing workable (both
+   entries are blocked or flagged). Guardrails with `Open` non-empty but
+   nothing workable **yields**. Its `Open` stays as it is
    (no node removed, no node worked).
-5. Among the remaining due-and-eligible Tracks (Housekeeping at ≈4.29, Investigation as fallback),
+4. Among the remaining due-and-eligible Tracks (Housekeeping at ≈4.29, Investigation as fallback),
    **select Housekeeping** — the highest `overdue_ratio` among the remaining Tracks.
-6. Run `housekeeping-track.md`'s own process directly (not handed to `refactor-scan`).
-7. The pass report must list every stalled Guardrails node with its reason (e.g. "Guardrails stalled:
+5. Run `housekeeping-track.md`'s own process directly (not handed to `refactor-scan`).
+6. The pass report must list every stalled Guardrails node with its reason (e.g. "Guardrails stalled:
    phpstan-level-6 blocked by phpstan-level-5, coverage-floor needs-info").
-8. `## Guardrails`'s `Open` is **not** modified this pass — no node was removed.
+7. `## Guardrails`'s `Open` is **not** modified this pass — no node was removed.
 
 ## The bug this regression-tests
 

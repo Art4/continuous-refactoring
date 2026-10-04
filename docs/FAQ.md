@@ -37,6 +37,14 @@ own cadence, and a pass runs whichever is most overdue. The order stays sensible
 Net must be in place before structural work opens, and Investigation, which is always due, only runs
 when nothing else needs the pass.
 
+## Why does the first structural refactoring come after the Guardrails tooling?
+
+Because the loop applies one order from the first pass on and makes no exception for a fresh project:
+tooling that is due comes first, then Guardrails' backlog, and Investigation takes whatever passes are
+left. You don't have to wait for it, though. Once the Safety Net is in place, the loop tells you that
+Guardrails, Housekeeping and Investigation can each be run directly — `/continuous-refactoring
+investigation` gives you a structural refactoring right away, and the scheduler carries on from there.
+
 ## Why is `continuous-refactoring` only a dispatcher?
 
 So the part that decides *what* to run is small enough to read in one sitting, separate from the part that

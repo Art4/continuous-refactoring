@@ -51,14 +51,10 @@ Examples:
     $(basename "$0") scheduler php-scheduler-staleness-selection --opencode
     $(basename "$0") scheduler php-scheduler-investigation-fallback --opencode
     $(basename "$0") scheduler php-scheduler-housekeeping-competes --opencode
-    $(basename "$0") scheduler php-scheduler-bootstrap-investigation --opencode
-    $(basename "$0") scheduler php-scheduler-bootstrap-guardrails --opencode
-    $(basename "$0") scheduler php-scheduler-bootstrap-housekeeping --opencode
-    $(basename "$0") scheduler php-scheduler-bootstrap-resumes --opencode
+    $(basename "$0") scheduler php-scheduler-never-run-tie-break --opencode
     $(basename "$0") scheduler php-scheduler-safety-net-blockade --opencode
     $(basename "$0") scheduler php-scheduler-guardrails-stalled --opencode
     $(basename "$0") scheduler php-scheduler-housekeeping-preempts-guardrails --opencode
-    $(basename "$0") scheduler php-scheduler-bootstrap-guardrails-open --opencode
 EOF
     exit 1
 }
@@ -1129,84 +1125,22 @@ run_scheduler() {
                 log_info "Scan output doesn't clearly mention a Housekeeping cycle issue/branch — check $out by hand (advisory, non-blocking; only expected when Housekeeping was selected)"
             fi
             ;;
-        php-scheduler-bootstrap-investigation)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section), before any overdue_ratio/tie-break computation: read .scratch/refactor/bookkeeping.md's ## Safety Net section and note whether Investigation/Guardrails/Housekeeping have each already had their own turn. Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including the matching Track's own reference file) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
-            local out="/tmp/scheduler-$FIXTURE-scan.log"
-            if grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
-                log_pass "Scheduler self-reports SELECTED: Investigation — see $out"
-            elif grep -qiE "^SELECTED: *Guardrails|^SELECTED: *Housekeeping|^SELECTED: *Safety Net" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports a Track other than Investigation — this is the pass right after Safety Net's Open first emptied, with Investigation/Guardrails/Housekeeping all never run; the one-time exception should select Investigation first, ahead of Guardrails even though ordinary never-run tie-break would rank Guardrails higher — see $out"
-            else
-                log_info "Scheduler output doesn't clearly self-report SELECTED — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "one-time exception|bootstrap|Investigation.*(first|before).*Guardrails|exception.*(fire|appl)" "$out" 2>/dev/null; then
-                log_pass "Scan output shows the one-time exception reasoning — advisory sign the check actually ran ahead of ratio/tie-break (see $out)"
-            else
-                log_info "Scan output doesn't clearly show the one-time exception reasoning — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "structural-scan" "$out" 2>/dev/null; then
-                log_pass "Scan output mentions structural-scan — advisory sign refactor-scan actually reached investigation-track.md's own proposal step (see $out)"
-            else
-                log_info "Scan output doesn't clearly mention structural-scan — check $out by hand (advisory, non-blocking)"
-            fi
-            ;;
-        php-scheduler-bootstrap-guardrails)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net and ## Investigation sections — Investigation already ran its own turn (section present, Open: none) — so its own condition should NOT match; check whether Guardrails still owes its turn instead. Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including guardrails-track.md) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
+        php-scheduler-never-run-tie-break)
+            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Read .scratch/refactor/bookkeeping.md: ## Safety Net exists with an empty Open; ## Guardrails, ## Housekeeping and ## Investigation are all absent (never run). Then hand the winner to refactor-scan (skills/refactor-scan/SKILL.md step 4, including the matching Track's own reference file) for one scan only — stop there, do not continue past refactor-scan's own proposals (no design, no implement). Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
             local out="/tmp/scheduler-$FIXTURE-scan.log"
             if grep -qiE "^SELECTED: *Guardrails" "$out" 2>/dev/null; then
                 log_pass "Scheduler self-reports SELECTED: Guardrails — see $out"
             elif grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports SELECTED: Investigation again — Investigation's own turn already completed (Open: none), the one-time exception should have advanced to Guardrails instead — see $out"
-            elif grep -qiE "^SELECTED: *Housekeeping|^SELECTED: *Safety Net" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports a Track other than Guardrails — Guardrails still owes its own one-time-exception turn (never run yet) and should have been selected next, ahead of Housekeeping — see $out"
-            else
-                log_info "Scheduler output doesn't clearly self-report SELECTED — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "one-time exception|Investigation.*(done|complete|already)|Guardrails.*(never run|absent|first)" "$out" 2>/dev/null; then
-                log_pass "Scan output shows the one-time exception reasoning (Investigation's turn already done, Guardrails' still owed) — advisory sign (see $out)"
-            else
-                log_info "Scan output doesn't clearly show the one-time exception reasoning — check $out by hand (advisory, non-blocking)"
-            fi
-            ;;
-        php-scheduler-bootstrap-housekeeping)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, and ## Investigation sections — both Investigation and Guardrails already ran their own turns (present, Investigation's Open: none) — so neither of their conditions should match; check whether Housekeeping still owes its turn instead. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process (it is not handed to refactor-scan) — reconcile, open this cycle's issue per docs/agents/issue-tracker.md, work the checklist from docs/refactoring/housekeeping-template.md plus the standing AGENTS.md/skills check, run the quality gate, then reach the Deliver step. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch — do not attempt to push or open a real merge request. Report, as your final line before continuing: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
-            local out="/tmp/scheduler-$FIXTURE-scan.log"
-            if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
-                log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"
-            elif grep -qiE "^SELECTED: *Investigation|^SELECTED: *Guardrails" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports Investigation/Guardrails again — both already had their own one-time-exception turn (sections present, Investigation's Open: none), the sequence should have advanced to Housekeeping instead — see $out"
-            elif grep -qiE "^SELECTED: *Safety Net" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports SELECTED: Safety Net — Housekeeping still owes its own one-time-exception turn (never run yet) and should have been selected — see $out"
-            else
-                log_info "Scheduler output doesn't clearly self-report SELECTED — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "one-time exception|Housekeeping.*(never run|absent|first|owed)|Investigation.*(done|complete)|Guardrails.*(done|complete|present)" "$out" 2>/dev/null; then
-                log_pass "Scan output shows the one-time exception reasoning (Investigation/Guardrails' turns already done, Housekeeping's still owed) — advisory sign (see $out)"
-            else
-                log_info "Scan output doesn't clearly show the one-time exception reasoning — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "Housekeeping — 20|housekeeping-template|chore/housekeeping" "$out" 2>/dev/null; then
-                log_pass "Scan output mentions the Housekeeping cycle's own issue/branch — advisory sign housekeeping-track.md's own process actually ran (see $out)"
-            else
-                log_info "Scan output doesn't clearly mention a Housekeeping cycle issue/branch — check $out by hand (advisory, non-blocking; only expected when Housekeeping was selected)"
-            fi
-            ;;
-        php-scheduler-bootstrap-resumes)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Guardrails, ## Housekeeping, and ## Investigation sections — every one of Investigation/Guardrails/Housekeeping has already run at least once, and Investigation's own Open carries no in-flight candidate, so the exception should NOT apply this pass. Then run ordinary overdue_ratio/tie-break selection instead. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation, naming whichever Track the scheduler actually selected."
-            local out="/tmp/scheduler-$FIXTURE-scan.log"
-            if grep -qiE "^SELECTED: *Guardrails" "$out" 2>/dev/null; then
-                log_pass "Scheduler self-reports SELECTED: Guardrails — see $out"
-            elif grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports SELECTED: Investigation — the one-time exception is permanently done here (all three Tracks already had their turn), and ordinary ratio scheduling should have picked Guardrails (overdue_ratio ~1.33), not Investigation 'by elimination' — see $out"
+                log_fail "Scheduler self-reports SELECTED: Investigation — no Track gets a special turn once Safety Net closes; Guardrails and Housekeeping are both never run and tie, the fixed order picks Guardrails, and Investigation is only the fallback — see $out"
             elif grep -qiE "^SELECTED: *Safety Net|^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports a Track other than Guardrails — Guardrails (overdue_ratio ~1.33) is the only genuinely due Track this pass; Safety Net (~0.2) and Housekeeping (~0.57) are both not due — see $out"
+                log_fail "Scheduler self-reports a Track other than Guardrails — Safety Net is not due (overdue_ratio ~0.01) and Guardrails outranks Housekeeping in the fixed order when both are never run — see $out"
             else
                 log_info "Scheduler output doesn't clearly self-report SELECTED — check $out by hand (advisory, non-blocking)"
             fi
-            if grep -qiE "1\.33|80 */ *60|exception.*(done|retired|no longer|doesn.t apply)|ordinary.*(ratio|selection)" "$out" 2>/dev/null; then
-                log_pass "Scan output shows the ratio reasoning and/or confirms the one-time exception no longer applies — advisory sign (see $out)"
+            if grep -qiE "never run|never-run|tie|fixed order|absent" "$out" 2>/dev/null; then
+                log_pass "Scan output shows the never-run tie-break reasoning — advisory sign (see $out)"
             else
-                log_info "Scan output doesn't clearly show the ratio/exception-retired reasoning — check $out by hand (advisory, non-blocking)"
+                log_info "Scan output doesn't clearly show the never-run tie-break reasoning — check $out by hand (advisory, non-blocking)"
             fi
             ;;
         php-scheduler-safety-net-blockade)
@@ -1259,31 +1193,6 @@ run_scheduler() {
                 log_pass "Scan output shows the preemption reasoning — advisory sign the preemption rule actually ran (see $out)"
             else
                 log_info "Scan output doesn't clearly show the preemption reasoning — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "Housekeeping — 20|housekeeping-template|chore/housekeeping" "$out" 2>/dev/null; then
-                log_pass "Scan output mentions the Housekeeping cycle's own issue/branch — advisory sign housekeeping-track.md's own process actually ran (see $out)"
-            else
-                log_info "Scan output doesn't clearly mention a Housekeeping cycle issue/branch — check $out by hand (advisory, non-blocking; only expected when Housekeeping was selected)"
-            fi
-            ;;
-        php-scheduler-bootstrap-guardrails-open)
-            _scheduler_scan_prompt "Run the orchestrator's own Track-selection step against this repo — follow skills/continuous-refactoring/SKILL.md step 1 literally, including skills/continuous-refactoring/references/track-scheduler.md for the full algorithm. Check the one-time exception FIRST (track-scheduler.md's own 'One-time exception' section): read .scratch/refactor/bookkeeping.md's ## Safety Net, ## Investigation, ## Guardrails, and ## Housekeeping sections. Safety Net Open is empty (precondition met). Investigation is present (done, Open: none). Guardrails is present with a non-empty Open (phpstan-level-6, coverage-floor). Housekeeping is absent (never run). The one-time exception should advance to Housekeeping — it only checks whether each section exists, not Guardrails' Open state. Then, only if Housekeeping was selected, run skills/continuous-refactoring/SKILL.md step 2: follow skills/continuous-housekeeping/references/housekeeping-track.md's own process. This sandbox has no git remote, so stop once you reach opening-a-merge-request.md's own 'no forge/remote available' branch. Report, as your final line: SELECTED: Safety Net or SELECTED: Guardrails or SELECTED: Housekeeping or SELECTED: Investigation."
-            local out="/tmp/scheduler-$FIXTURE-scan.log"
-            if grep -qiE "^SELECTED: *Housekeeping" "$out" 2>/dev/null; then
-                log_pass "Scheduler self-reports SELECTED: Housekeeping — see $out"
-            elif grep -qiE "^SELECTED: *Guardrails" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports SELECTED: Guardrails — Guardrails is already present (section exists), condition 2 requires it to be absent; the exception should have advanced to Housekeeping instead — see $out"
-            elif grep -qiE "^SELECTED: *Investigation" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports SELECTED: Investigation — Investigation is already present (done), condition 1 should not match — see $out"
-            elif grep -qiE "^SELECTED: *Safety Net" "$out" 2>/dev/null; then
-                log_fail "Scheduler self-reports SELECTED: Safety Net — the one-time exception should fire (Housekeeping absent) — see $out"
-            else
-                log_info "Scheduler output doesn't clearly self-report SELECTED — check $out by hand (advisory, non-blocking)"
-            fi
-            if grep -qiE "one-time exception|bootstrap|exception.*(fire|appl)|Housekeeping.*(never run|absent|first|owed)|Guardrails.*(present|Open)" "$out" 2>/dev/null; then
-                log_pass "Scan output shows the one-time exception reasoning (advancing past Guardrails' non-empty Open) — advisory sign (see $out)"
-            else
-                log_info "Scan output doesn't clearly show the one-time exception reasoning — check $out by hand (advisory, non-blocking)"
             fi
             if grep -qiE "Housekeeping — 20|housekeeping-template|chore/housekeeping" "$out" 2>/dev/null; then
                 log_pass "Scan output mentions the Housekeeping cycle's own issue/branch — advisory sign housekeeping-track.md's own process actually ran (see $out)"

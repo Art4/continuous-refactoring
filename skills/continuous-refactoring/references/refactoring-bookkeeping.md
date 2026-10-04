@@ -179,9 +179,7 @@ is fulfilled by the dispatcher's onboarding step and never proposed, `CONTEXT.md
 `../../refactor-learn/references/safety-net-write.md` (`refactor-learn`'s own write step),
 `track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan`/`Open` to decide whether this Track even runs this
-pass, competing against every other currently-wired Track; this section's `Open` field is also what that
-file's own "One-time exception" reads to decide whether Investigation/Guardrails/Housekeeping each still
-owe their one turn — `Open` currently empty is that check's entire precondition). While Safety Net `Open`
+pass, competing against every other currently-wired Track). While Safety Net `Open`
 is non-empty, it is selected and nothing else runs, even if no node is currently workable; the scheduler
 reports the wait.
 
@@ -306,11 +304,8 @@ candidate is always already an issue the moment it exists). Full read/write mech
 `../../refactor-learn/references/investigation-write.md` (`refactor-learn`'s own write step),
 `track-scheduler.md` (the orchestrator's own Track-selection
 step — reads this section's `Cadence`/`Last scan`/`Open` the same way it reads `## Safety Net`'s/`##
-Guardrails`'s own, with one difference, next; that file's own "One-time exception" also reads whether
-this section exists at all, and, once it does, whether its own `Open` still names an issue — the
-load-bearing signal for "Investigation's one candidate from that exception hasn't been fully delivered
-yet," since this section's own `Last scan` gets written on that turn's very first pass, well before
-design/implement/learn actually finish it).
+Guardrails`'s own, with one difference, next; this section's own `Open` never decides whether
+Investigation is selected, only whether the selected pass resumes or scans).
 
 ```markdown
 ## Investigation

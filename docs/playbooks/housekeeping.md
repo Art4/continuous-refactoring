@@ -25,10 +25,10 @@ of a hand edit by running the Housekeeping Track's own cadence interview.
 
 ## When its first cycle runs
 
-Once Safety Net's open items are all done, a target gets one dedicated turn each for Investigation, then
-Guardrails, then Housekeeping before ordinary cadence-based scheduling takes over — so Housekeeping's
-first cycle can arrive earlier than its 7-day interval alone would suggest. After that, it's scheduled by
-cadence like any other Track.
+A Track that has never run counts as due, so Housekeeping's first cycle comes soon after Safety Net's
+open items are all done: Guardrails' first scan takes one pass, Housekeeping's first cycle the next.
+After that, it's scheduled by cadence like any other Track. To run it sooner, name it:
+`/continuous-refactoring housekeeping`.
 
 ## Invoking it manually
 

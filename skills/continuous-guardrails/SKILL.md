@@ -9,7 +9,7 @@ The **Guardrails** Track (`CONTEXT.md`) as one loop pass. Works through the Guar
 
 Invoked by `continuous-refactoring` once its Track scheduler selects Guardrails. Not a user entry point — a human who wants this Track runs `/continuous-refactoring guardrails`.
 
-**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track (`/continuous-refactoring guardrails`), or typed directly — it runs the Guardrails Track without consulting the scheduler, bypassing the Safety Net blockade and the one-time exception exactly as `../continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
+**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track (`/continuous-refactoring guardrails`), or typed directly — it runs the Guardrails Track without consulting the scheduler, bypassing the Safety Net blockade exactly as `../continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
 
 ## Process
 

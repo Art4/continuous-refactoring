@@ -26,21 +26,18 @@ Before any of this, a project that has never run the loop (no bookkeeping docume
 The `/continuous-refactoring` skill then decides one thing per pass — which Track — and hands it to that Track's own skill. It applies these rules in order:
 
 1. **You named a Track** ("run the Guardrails Track", or you invoked `/continuous-guardrails` directly) → that Track runs, no computation. See *Overrides* below.
-2. **The one-time exception**, once per repo — see below.
-3. **Safety Net blockade:** while Safety Net's `Open` is non-empty, Safety Net runs and nothing else does — even on a pass where no node is currently workable (the loop then reports what it is waiting for).
-4. **Otherwise the most overdue Track wins.** A Track is *due* when it has never run or `(today − Last scan) / Cadence >= 1`; the highest ratio is selected. A Track whose `Open` is non-empty drops out of this comparison — its existing work is finished instead of rescanned. Ties, and Tracks that never ran, fall back to the fixed order **Safety Net > Guardrails > Housekeeping > Investigation**.
+2. **Safety Net blockade:** while Safety Net's `Open` is non-empty, Safety Net runs and nothing else does — even on a pass where no node is currently workable (the loop then reports what it is waiting for).
+3. **A due Track with nothing in flight:** among Safety Net, Guardrails and Housekeeping, a Track is *due* when it has never run or `(today − Last scan) / Cadence >= 1`; the highest ratio is selected. A Track whose `Open` is non-empty drops out of this comparison — its existing work is finished instead of rescanned. Ties, and Tracks that never ran, fall back to the fixed order **Safety Net > Guardrails > Housekeeping > Investigation**. A due Housekeeping therefore takes one pass even while Guardrails has a backlog.
+4. **Guardrails' backlog:** when its `Open` holds a node that can be worked right now, Guardrails runs. With nothing workable it yields, and the report lists what each node is waiting for.
+5. **Otherwise Investigation.** It has no interval to measure staleness against, so it is always due — but it is last in line and only gets a pass when nothing above matched. A pass it gets either continues a candidate already in flight or, with none, scans for a new one.
 
-Investigation has no interval to measure staleness against, so it is always due — but it is last in the fixed order, so it only wins a pass when nothing else does. It also owns the structural candidates: an issue labelled `refactor:candidate` that isn't a tooling-tree node's is picked up only in an Investigation pass (a Safety Net or Guardrails pass leaves it and reports how many are waiting), except one you labelled `refactor:priority`, which any pass takes. A Guardrails Track with workable `Open` nodes is selected ahead of it; with nothing workable, it yields.
+Investigation also owns the structural candidates: an issue labelled `refactor:candidate` that isn't a tooling-tree node's is picked up only in an Investigation pass (a Safety Net or Guardrails pass leaves it and reports how many are waiting), except one you labelled `refactor:priority`, which any pass takes.
 
-## The one-time exception
+## Once the Safety Net is in place
 
-Once Safety Net's `Open` is empty, the target has its foundation — and before ordinary scheduling takes over, it gets one dedicated turn each, in this order:
+Nothing special happens: the same rules apply from the first pass on. Left alone, the loop runs Guardrails' first scan, then Housekeeping's first cycle, then works through Guardrails' backlog one node per pass (with Housekeeping taking a pass whenever it is due) — the first structural refactoring comes once that backlog is done or waiting on you.
 
-1. **Investigation** — one candidate, delivered end to end, so you see real refactoring value early;
-2. **Guardrails** — its first scan-and-clear cycle;
-3. **Housekeeping** — its first cycle.
-
-Ordinary scheduling resumes for good after that, including later, rarer Safety Net rescans. No flag is stored: the loop derives it from which Track sections already exist in `bookkeeping.md`. Only naming a Track yourself outranks it.
+If you'd rather see structural work earlier, name the Track: `/continuous-refactoring investigation`. The Safety Net pass that leaves its `Open` empty reminds you that all three other Tracks can now be run this way, in any order you like.
 
 ## Working a Track's open items
 
@@ -57,7 +54,7 @@ A Track with an empty `Open` is *scanned* instead: fulfilment of every node is j
 
 ## Overrides
 
-- **Name the Track:** `/continuous-refactoring` with a Track name ("run the Housekeeping Track") bypasses selection *and* the one-time exception for this pass.
+- **Name the Track:** `/continuous-refactoring` with a Track name ("run the Housekeeping Track") bypasses selection for this pass, the Safety Net blockade included.
 - **Invoke the Track skill directly** (`/continuous-safety-net`, …): the same override — but a project that was never onboarded is refused with a pointer to `/continuous-refactoring`, which onboards it first.
 - A named Track still respects its own `Open`: naming Safety Net while its `Open` is non-empty means working that entry, never a fresh rescan.
 - **Change a cadence:** hand-edit `Cadence` in that Track's section of `bookkeeping.md` (Housekeeping also offers a one-question interview). Investigation's `Cadence` is fixed.

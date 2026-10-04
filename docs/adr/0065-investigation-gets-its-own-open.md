@@ -2,6 +2,8 @@
 
 > Amended by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the top-level `Pending candidates` field this ADR narrowed to one remaining case is dropped.
 
+> Amended by [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): Investigation's `Open` no longer decides whether Investigation is selected, only whether its pass resumes or scans; the claim that Guardrails' nodes are parents of `structural-scan` (so at most one `Open` is non-empty at a time) was wrong and is withdrawn.
+
 > Supersedes [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md)'s Investigation-section
 > decision: *"Investigation: no section content. The issue tracker / `merge-requests.md` stays
 > authoritative, as today."* Investigation now carries its own `Open`, single-entry.
