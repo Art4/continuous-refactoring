@@ -293,35 +293,13 @@ Same non-CI, local-only, advisory posture as the fixture above.
 
 Same non-CI, local-only, advisory posture as the two fixtures above.
 
-- **php-scheduler-bootstrap-investigation** / **php-scheduler-bootstrap-guardrails** /
-  **php-scheduler-bootstrap-housekeeping** / **php-scheduler-bootstrap-resumes** (ticket 07, the one-time
-  exception that overrides ordinary ratio/tie-break selection for exactly three turns right after Safety
-  Net's own `Open` first empties). Each exercises one turn of the sequence Investigation → Guardrails →
-  Housekeeping, plus the "retired permanently afterward" case — see each fixture's own
-  `expected/behavior.md` for the full seeded state and reasoning.
-  - **php-scheduler-bootstrap-investigation** — `## Safety Net` just closed (`Open` list `- none`, `Last scan`
-    one day old); `## Guardrails`/`## Housekeeping`/`## Investigation` all absent (never run). Under
-    *ordinary* selection alone this would tie all three as "never run" and the fixed tie-break order
-    would pick Guardrails; the one-time exception must instead pick **Investigation** — this ticket's own
-    adversarial case, a more-overdue-by-the-ordinary-rules Track losing to the exception's own order.
-  - **php-scheduler-bootstrap-guardrails** — same Safety Net state; `## Investigation` now present with
-    `Open: none` (its own turn already fully delivered, not just proposed); `##
-    Guardrails`/`## Housekeeping` still absent. Expects **Guardrails** selected, confirming the sequence
-    advances instead of re-selecting Investigation — otherwise the scheduler's permanent fallback.
-  - **php-scheduler-bootstrap-housekeeping** — `## Investigation` and `## Guardrails` both present (their
-    own turns done); `## Housekeeping` still absent. Expects **Housekeeping** selected, the sequence's
-    third and final turn.
-  - **php-scheduler-bootstrap-resumes** — all four sections present (every one-time-exception turn long
-    finished); `## Guardrails` genuinely overdue (`overdue_ratio ≈ 1.33`), `## Safety Net`/`##
-    Housekeeping` not due. Expects **Guardrails** selected via ordinary ratio comparison, confirming the
-    exception is permanently retired — not re-triggered by Investigation being technically due "by
-    elimination," and not re-triggered by Safety Net's `Open` still reading empty.
+- **php-scheduler-never-run-tie-break** (no special turn once Safety Net closes). `## Safety Net` just
+  closed (`Open` list `- none`, `Last scan` one day old); `## Guardrails`/`## Housekeeping`/`##
+  Investigation` all absent (never run). Guardrails and Housekeeping tie as never run and the fixed
+  order picks **Guardrails**; Investigation is only the fallback and must not be selected.
 
 ```bash
-./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-investigation --opencode
-./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-guardrails --opencode
-./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-housekeeping --opencode
-./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-resumes --opencode
+./fixtures/harness/run.sh scheduler php-scheduler-never-run-tie-break --opencode
 ```
 
 Same non-CI, local-only, advisory posture as the three fixtures above.
@@ -335,8 +313,8 @@ Same non-CI, local-only, advisory posture as the three fixtures above.
 
 - **php-scheduler-guardrails-stalled** (ticket 08, Guardrails yields when nothing workable). `##
   Guardrails` `Open` is non-empty (`phpstan-level-6`, `coverage-floor`) but both entries are
-  non-workable (blocked or `needs-info`). Per the Eligibility rule, Guardrails with `Open` non-empty but
-  nothing workable yields — it drops out of ratio comparison. Expects **Housekeeping** selected (ratio
+  non-workable (blocked or `needs-info`). Guardrails with `Open` non-empty but
+  nothing workable yields. Expects **Housekeeping** selected (ratio
   ≈4.29, the highest among remaining due Tracks). Guardrails' `Open` stays as it is; no node is removed.
 
 - **php-scheduler-housekeeping-preempts-guardrails** (ticket 08, Housekeeping preempts Guardrails
@@ -345,18 +323,10 @@ Same non-CI, local-only, advisory posture as the three fixtures above.
   rule fires: Housekeeping preempts Guardrails for one pass when due (`overdue_ratio >= 1`), even though
   Guardrails has higher tie-break priority. Guardrails resumes afterwards.
 
-- **php-scheduler-bootstrap-guardrails-open** (ticket 08, bootstrap exception advances past Guardrails'
-  non-empty `Open`). `## Guardrails` is present with non-empty `Open` (`phpstan-level-6`,
-  `coverage-floor`) from its own bootstrap scan; `## Housekeeping` is absent. The one-time exception's
-  condition 3 fires (Housekeeping absent) — it reads only section *existence*, not `Open` *emptiness*.
-  Expects **Housekeeping** selected, confirming the bootstrap sequence advances regardless of Guardrails'
-  `Open` state.
-
 ```bash
 ./fixtures/harness/run.sh scheduler php-scheduler-safety-net-blockade --opencode
 ./fixtures/harness/run.sh scheduler php-scheduler-guardrails-stalled --opencode
 ./fixtures/harness/run.sh scheduler php-scheduler-housekeeping-preempts-guardrails --opencode
-./fixtures/harness/run.sh scheduler php-scheduler-bootstrap-guardrails-open --opencode
 ```
 
 ### php-track-open-* (Track Open walk, ticket 07)

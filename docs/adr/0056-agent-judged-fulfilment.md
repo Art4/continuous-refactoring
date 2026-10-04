@@ -1,5 +1,7 @@
 # Agent-judged fulfilment: `Open` as complete backlog, scheduler rules, `Fulfilled nodes` retired
 
+> Amended by [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): the one-time bootstrap exception this ADR corrected is removed altogether.
+
 > Amends [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): `Open` in each Track's
 > `bookkeeping.md` section is redefined as the complete, ordered backlog for that Track — every
 > unresolved node of the Track's scope, blocked ones included, in script order, hand-reorderable,

@@ -10,7 +10,7 @@ The state the onboarding leaves behind: `.scratch/refactor/config.md` (the `Book
 1. **No onboarding text** — step 0 resolves the pointer, finds `bookkeeping.md` and skips straight to Track selection, without
    saying anything about onboarding (not even that it is complete).
 2. No `## Safety Net` section exists, so the Safety Net Track is treated as never run and selected (it wins its own
-   ratio comparison; the one-time exception needs an existing `## Safety Net`). The dispatcher says so in one
+   ratio comparison). The dispatcher says so in one
    sentence and invokes `/continuous-safety-net`.
 3. `refactor-loop` announces the pass and starts the scan in a subagent ("Starting a fresh scan in a subagent") —
    no abort for a missing `bookkeeping.md`.

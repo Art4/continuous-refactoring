@@ -55,8 +55,8 @@ a previous pass that designed this candidate.
 
 Run the orchestrator through Track selection and the scan step. It should:
 
-1. Select **Guardrails** — the one-time exception is done (all four sections present), Guardrails is
-   the due-and-eligible Track with a workable `Open` node, ahead of Investigation; Housekeeping is
+1. Select **Guardrails** — Guardrails is
+   the Track with a workable `Open` node, ahead of Investigation; Housekeeping is
    not due.
 2. `refactor-scan`'s `Open` walk processes `phpmd (#5)` — workable, not fulfilled → hand it forward
    (its issue is already filed; the walk itself files nothing), work it via

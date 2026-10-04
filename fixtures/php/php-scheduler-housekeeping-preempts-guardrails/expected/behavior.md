@@ -38,18 +38,16 @@ nothing but `structural-scan`) — confirmed via a direct `tooling_tree.py` run 
 Run the orchestrator's Track-selection step (step 1) — it should:
 
 1. Read `## Safety Net`; its `Open` is empty — the Safety Net blockade does not fire.
-2. Check the one-time exception: all four sections present, Investigation has no in-flight `Pending
-   candidates` → the exception is permanently done.
-3. Compute every wired Track's `overdue_ratio`: Safety Net ≈0.2 (not due), Guardrails ≈1.33 (due),
+2. Compute every wired Track's `overdue_ratio`: Safety Net ≈0.2 (not due), Guardrails ≈1.33 (due),
    Housekeeping ≈4.29 (due), Investigation always due/eligible but no numeric ratio.
-4. Apply the preemption rule: Housekeeping (`overdue_ratio >= 1`) preempts Guardrails for this single
+3. Apply the preemption rule: Housekeeping (`overdue_ratio >= 1`) preempts Guardrails for this single
    pass — Housekeeping is selected over Guardrails even though Guardrails has higher tie-break priority
    and has workable `Open` entries.
-5. **Select Housekeeping** — the preemption rule overrides Guardrails' higher tie-break priority.
-6. Run `housekeeping-track.md`'s own process directly (not handed to `refactor-scan`).
-7. `## Guardrails`'s `Open` is **not** modified this pass — no Guardrails node was worked. Guardrails
+4. **Select Housekeeping** — the preemption rule overrides Guardrails' higher tie-break priority.
+5. Run `housekeeping-track.md`'s own process directly (not handed to `refactor-scan`).
+6. `## Guardrails`'s `Open` is **not** modified this pass — no Guardrails node was worked. Guardrails
    resumes on a future pass when it is selected again.
-8. The pass report should note that Housekeeping preempted Guardrails.
+7. The pass report should note that Housekeeping preempted Guardrails.
 
 ## The bug this regression-tests
 

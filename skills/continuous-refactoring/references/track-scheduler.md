@@ -9,9 +9,7 @@ each file's own "Is the Track due this pass?" section; and, for Housekeeping, th
 now-retired standalone `continuous-housekeeping` skill's own tracker-history due-check, replaced by
 `../../continuous-housekeeping/references/housekeeping-track.md`'s own same-named section) — that check
 answered the question alone because, when it was written, no other Track existed yet to compete with.
-This file is the real competition those sections deferred — plus the one-time exception (below) that
-overrides that competition's outcome for exactly three turns per repo, right after Safety Net's
-foundation is first fully in place.
+This file is the real competition those sections deferred.
 
 ## Which Tracks compete
 
@@ -37,91 +35,23 @@ currently workable — the scheduler reports the wait. This is stronger than the
 system-wide blockade, not just a self-exclusion. Guardrails, Housekeeping, and Investigation all yield
 until Safety Net `Open` empties.
 
-## One-time exception
-
-Checked first, every pass, **before** Eligibility/Selection below ever run — a target that just finished
-its Safety Net foundation gets one dedicated turn each for Investigation, then Guardrails, then
-Housekeeping, in that order, before ordinary ratio/tie-break selection gets a vote at all (`CONTEXT.md`'s
-**Track** entry: "one deliberate exception, per target, one time only"). Only a manual override (below)
-outranks this check; nothing else does.
-
-**Precondition, all three turns:** `## Safety Net` exists and its `Open` is currently empty. Absent
-either half of that — the section doesn't exist yet, or `Open` is still non-empty — this whole section
-is skipped this pass and Eligibility/Selection runs unmodified (a non-empty Safety Net `Open` already
-forces Safety Net's own selection anyway, via the ordinary Eligibility rule below — there is no case
-where skipping this check here loses ground to Safety Net's own in-flight work).
-
-With that precondition met, check the following three, in order, and stop at the first match:
-
-1. **`## Investigation` section absent, or present with `Open` currently naming an
-   issue (not `none`)** → select **Investigation**, this pass, overriding ratio/tie-break entirely. The
-   `Open` half of this check is load-bearing, not redundant with "section absent": per
-   `../../refactor-learn/references/investigation-write.md`, `## Investigation`'s `Last scan` is written
-   the moment the Track's *scan* step runs — the very first pass of this turn — long before its one
-   candidate is actually delivered (design → implement → learn can each take a further pass). This
-   check reads Investigation's own `Open` exactly the way it would for Guardrails/Safety Net — the same
-   "stay selected while `Open` names something" job (`refactoring-bookkeeping.md`'s own `## Investigation`
-   `Open` row) — keeping Investigation force-selected on every pass until it clears, matching "one
-   candidate, fully delivered," not just proposed.
-2. Else, **`## Guardrails` section absent** → select **Guardrails**, this pass, overriding ratio/
-   tie-break. Guardrails gets one turn; once its section exists, the ordinary eligibility rule below
-   governs it like any other Track — there is no special mechanism that keeps it selected after its
-   first scan.
-3. Else, **`## Housekeeping` section absent** → select **Housekeeping**, this pass, overriding ratio/
-   tie-break. Housekeeping's entire cycle — reconcile, open this cycle's issue, work the checklist,
-   quality gate, deliver — runs to completion inside the single pass `SKILL.md` step 2 dispatches (to `continuous-housekeeping`)
-   (`../../continuous-housekeeping/references/housekeeping-track.md`), so — unlike Investigation's own
-   turn above — there is no multi-pass in-flight state to keep re-selecting across; the section exists
-   with `Last scan` written by the time that same pass's closing call finishes.
-4. Else (all three sections present, and `## Investigation` carries no in-flight `Open`)
-   → this exception is permanently done for this repo. Every later pass — including a later, ordinary
-   Safety Net rescan (`Cadence: 90 days`) whose own `Open` goes non-empty then empty again — runs
-   Eligibility/Selection below unmodified, forever. This is what makes the exception fire **exactly
-   once**: the trigger above never reads Safety Net's `Open` transition itself (this file has no history
-   to diff against, only the current `bookkeeping.md` snapshot — see the note below), only each of
-   Investigation's/Guardrails'/Housekeeping's own permanent, one-way "have I ever run" state, which the
-   suite already keeps as ordinary staleness bookkeeping and never clears. Reusing it here needs no new
-   stored flag, and each of the three conditions above can only ever be true once per Track, per repo.
-
-**Open state irrelevant during the one-time exception:** the exception runs before Eligibility/Selection
-below, so the `Open`-non-empty eligibility rule never fires during one of its turns. Guardrails' `Open`
-being non-empty (e.g. from its own scan filling it with in-flight entries) does not block the sequence
-from advancing to the next Track — the exception reads only whether each section *exists*, not whether
-its `Open` is empty. This matches the design intent: the one-time exception runs exactly once per Track,
-in order, regardless of in-flight state, then permanently retires.
-
-**What this can't distinguish, by construction:** with no per-pass history file to diff against — only
-`bookkeeping.md`'s current snapshot — this check cannot tell "Safety Net's `Open` just emptied for the
-first time" apart from "Safety Net's `Open` has simply always been empty" (a trivial tree with nothing to
-propose on its very first scan). Both look identical in a snapshot, and both are treated the same way:
-if Investigation/Guardrails/Housekeeping have never run yet, this exception still fires. This matches its
-own spirit either way — a repo with no residual Safety Net work in flight is exactly the state it exists
-to react to, regardless of how it got there.
-
 ## Eligibility
 
-Reached only once the one-time exception (above) didn't apply this pass. A Track only enters
-ratio comparison when it is both **due** and **eligible** this pass:
+A Track only enters ratio comparison when it is both **due** and **eligible** this pass:
 
 - **Due** — the section is absent (never run, see above); or
   `overdue_ratio(track) >= 1`, where `overdue_ratio` is computed from the Track's `Cadence` and `Last scan`
   per `refactoring-bookkeeping.md`'s *Cadence values* (an interval in hours/days/weeks/months:
   `(today − Last scan) / interval`; a `monthly on the <N>th` anchor: due once such a day has passed since
-  `Last scan`, ratio `max(1, elapsed / 30)`); or the Track's own `Cadence` carries no interval at all — Investigation's literal `continuous`, `refactoring-bookkeeping.md`'s own
-  `## Investigation` section — in which case it's always due, contributing no ratio to compute at all.
-  This is a different reason than "never run" (that one has no `Last scan` yet either; Investigation
-  simply has no interval to measure staleness against, full stop, `Last scan` present or not) but the
-  same practical outcome: always due.
-- **Eligible** — a Track that carries its own `Open` (Safety Net, Guardrails, Investigation today) is
-  eligible only when that `Open` is empty. Non-empty `Open` means the Track's existing entry/entries get
-  worked (propose → design → implement → learn) instead of being rescanned this pass (each Track's own
-  reference file, "Is the Track due this pass?") — it drops out of ratio comparison entirely, whether
-  or not it's numerically overdue; staleness stops mattering the moment there's already in-flight work
-  to finish. In practice this rule rarely has anything left to decide for Investigation by the time it's
-  reached: the one-time exception's own bullet 1 (above) already force-selects Investigation on every
-  pass its `Open` names an issue, so Eligibility only ever sees Investigation with an empty `Open`.
-  Guardrails follows this rule against Investigation's own permanent-fallback status: with at least one
-  workable `Open` node, Guardrails is selected ahead of Investigation; with nothing workable, it yields.
+  `Last scan`, ratio `max(1, elapsed / 30)`). Investigation's `Cadence` carries no interval at all — the
+  literal `continuous`, `refactoring-bookkeeping.md`'s own `## Investigation` section — so it is always
+  due and contributes no ratio; it never enters ratio comparison and is selected only as the fallback
+  (Selection, step 4).
+- **Eligible** — a Track that carries its own `Open` (Safety Net, Guardrails) is eligible for ratio
+  comparison only when that `Open` is empty. Non-empty `Open` means the Track's existing entries get
+  worked (propose → design → implement → learn) instead of being rescanned (each Track's own reference
+  file, "Is the Track due this pass?") — staleness stops mattering the moment there's already in-flight
+  work to finish; Selection's steps 1 and 3 decide when that work gets a pass.
   **Housekeeping** is the one Track with no `Open` concept at all (`refactoring-bookkeeping.md`'s own
   `## Housekeeping` section) — always eligible the moment it's due; a cycle already in progress is
   tracked by the tracker's own history instead (`../../continuous-housekeeping/references/housekeeping-track.md`'s
@@ -129,57 +59,52 @@ ratio comparison when it is both **due** and **eligible** this pass:
 
 ## Selection
 
-Among the Tracks that are due and eligible, pick the one with the highest `overdue_ratio`. **Ties** —
-including two Tracks that are each "never run," and **Investigation, which never produces a numeric
-`overdue_ratio` at all** (no `Cadence` interval to divide by, above) — fall back to the fixed order:
+Four checks, in order; the first that matches selects this pass's Track. The fixed order **Safety Net >
+Guardrails > Housekeeping > Investigation** (`CONTEXT.md`'s **Track** entry) is what the cascade
+implements, and what breaks every tie.
 
-**Safety Net > Guardrails > Housekeeping > Investigation**
+1. **Safety Net's `Open` is non-empty** → **Safety Net** (the blockade, above).
+2. **Safety Net, Guardrails or Housekeeping is due and eligible** → the one with the highest
+   `overdue_ratio`. Ties — including two Tracks that are each "never run" — fall back to the fixed
+   order. This is where **Housekeeping preemption** happens: a due Housekeeping takes the pass even
+   while Guardrails holds workable `Open` nodes, for that one pass — its own `Last scan` is written by
+   the end of it, so the next pass falls through to step 3 again. A due Safety Net rescan takes the pass
+   the same way.
+3. **Guardrails' `Open` holds at least one workable node**
+   (`../../refactor-scan/references/track-open-processing.md`) → **Guardrails**, working that `Open`.
+   With `Open` non-empty but nothing workable, Guardrails **yields**: its `Open` stays as it is, the
+   stalled nodes are reported with their reasons, and the cascade moves on.
+4. **Otherwise** → **Investigation**, the permanent fallback: always due, never out-competing another
+   Track's genuine ratio or Guardrails' workable backlog. Its own `Open` decides only what that pass
+   does, never whether it is selected — non-empty `Open` resumes the in-flight candidate(s), empty `Open`
+   scans (`../../refactor-scan/references/investigation-track.md`).
 
-(`CONTEXT.md`'s **Track** entry). Investigation sitting last here is what makes it the scheduler's
-permanent fallback in practice, per the spec's own "always eligible, lowest tie-break priority": it's
-always due and always eligible (above), but it only actually wins a given pass the moment nothing else
-does — any other wired Track that's due and eligible this pass, at any real ratio `>= 1`, outranks it,
-and a never-run Track (maximally overdue, above) outranks it too. Investigation is selected only when
-every other wired Track is, this pass, either not due, not eligible (non-empty `Open`), or itself absent
-with nothing else changing that — never by out-competing another Track's genuine ratio.
+**A fresh target, right after Safety Net first closes** (`## Guardrails`, `## Housekeeping` and
+`## Investigation` all still absent) gets no special treatment: step 2 ties Guardrails and Housekeeping
+as never run and picks Guardrails for its first scan, then Housekeeping for its first cycle, then step 3
+works Guardrails' backlog; Investigation's first pass comes once that backlog is done or stalled. A
+human who wants structural work — or any other Track — sooner names that Track (Manual override, below);
+`continuous-safety-net`'s closing report says so the moment Safety Net's `Open` is empty.
 
-**Housekeeping preemption:** Housekeeping can preempt Guardrails for one pass when due (its
-`overdue_ratio >= 1`). This means Housekeeping is selected over Guardrails for that single pass,
-even though Guardrails has higher tie-break priority. After that one pass, ordinary selection resumes.
+**More than one `Open` can be non-empty at once.** Guardrails' and Investigation's `Open` are not
+mutually exclusive — Guardrails' nodes hang beneath `php-safety-net`, they are not parents of
+`structural-scan` — so an Investigation candidate can be in flight while Guardrails still holds a backlog
+(e.g. Guardrails stalled, Investigation scanned, a Guardrails node became workable again). The cascade
+already resolves it: Guardrails' workable `Open` (step 3) goes first, and Investigation resumes its own
+`Open` on the next pass that reaches step 4.
 
-**At most one Track is selected per pass.** Each pass runs exactly one Track's process (or no Track
-at all, if nothing was due and eligible). This keeps each pass focused and avoids interleaving
-different Tracks' work within a single pass.
+**At most one Track is selected per pass.** Each pass runs exactly one Track's process. This keeps each
+pass focused and avoids interleaving different Tracks' work within a single pass.
 
-The same fixed order also decides which Track's own `Open` work gets this pass's design/implement effort
-on the rare occasion more than one wired Track holds non-empty `Open` at the same time — Open-bearing
-Tracks resolve on this fixed order directly, never on staleness ratio, since ratio stopped applying to
-either of them the moment their own `Open` went non-empty. In practice this never actually happens with
-all four Tracks wired: Safety Net, Guardrails, and Investigation carry an `Open` (Housekeeping's own
-`## Housekeeping` section carries none — `refactoring-bookkeeping.md`'s own `## Housekeeping`
-section, "swept content stays in `housekeeping-template.md`" instead), but the tree's own gating already
-keeps at most one of the three non-empty at once: a Guardrails node is never unblocked until Safety Net
-itself is fully resolved, so Safety Net's `Open` can't still be non-empty the moment Guardrails' is; and
-`structural-scan` — the only node feeding Investigation's own `Open` — carries a `resolved` edge from
-every Guardrails node (`guardrails-track.md`'s own Scope section: Guardrails' nodes are "required on
-`structural-scan`"), so Investigation's `Open` can't go non-empty until Guardrails' is permanently empty
-either. The rule stays written anyway: it's still the correct fallback if a future Track ever gains its
-own `Open`-shaped in-flight state that isn't gated this way.
-
-**No wired Track is both due and eligible** → nothing is selected; step 2 has nothing to dispatch and
-the pass ends with that reported (no Track skill, hence no `refactor-loop`, runs). **In practice unreachable now
-that Investigation is wired** — Investigation is always due and always eligible in every case above
-(section absent, a real `overdue_ratio >= 1`, or its own no-interval `Cadence` — it always matches at
-least the last), so it always fills this slot itself at minimum. Documented anyway: it's still the
-correct answer for a target with no wired Tracks at all, and stays correct if a future Track is ever
-added that, unlike Investigation, genuinely can go both not-due and not-eligible at once.
+**No Track selected** is unreachable while Investigation is wired — step 4 always matches. It stays the
+correct answer for a target with no wired Tracks at all: nothing is selected, step 2 of `../SKILL.md`
+has nothing to dispatch, and the pass ends with that reported.
 
 ## Manual override
 
 The human invoking this pass may name a specific Track directly instead of letting the ratio/tie-break
 computation above run at all — this pass runs that named Track's own process unconditionally, bypassing
-the one-time exception (above) exactly the same way it bypasses ordinary Eligibility/Selection; naming a
-Track is the one thing that outranks the one-time exception. The
+Eligibility/Selection, the Safety Net blockade included. The
 `Open`-non-empty eligibility rule still applies to a manually-named Track exactly as it would to one the
 scheduler picked itself. The rule for when a scan runs is the same either way: **a selected Track with
 no `Open` entries is scanned; a selected Track with a non-empty `Open` works its `Open` walk.** Naming
