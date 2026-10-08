@@ -447,7 +447,8 @@ deterministic given its inputs:
   as a seed file (the `--seed` argument or the Refactoring Notes' `fulfilled-set.json`, a
   `{node_slug: true/false}` JSON: the scan pass's agent judgement as a file — the agent judges,
   the script orders) or, when no seed is given, derived from `bookkeeping.md`'s Track sections (a
-  scope node neither in `Open` nor in `Out-of-scope` is fulfilled).
+  scope node neither in `Open` nor in `Out-of-scope` is fulfilled; a Track whose section is missing
+  never ran, so none of its nodes is).
 - **Output** (JSON): `backlog` — the ordered `Open` a scan should record: every unresolved node of
   the Track's scope in tree order, blocked ones included; `next` — the currently-workable nodes;
   `withheld`/`withheld_with_reasons` — nodes held back, with the reasons the stalled report needs;

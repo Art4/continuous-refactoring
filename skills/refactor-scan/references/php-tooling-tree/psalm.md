@@ -11,7 +11,7 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
   recognition Pest gets for `phpunit`).
 - **Fulfilment check:** `vimeo/psalm` present as a dependency (dev or prod) with a committed
   `psalm.xml`/`psalm.xml.dist`, and `vendor/bin/psalm` exits without errors.
-- **MR scope:** none — never proposed as a candidate by `next_candidates()`/`roadmap()`; recognized only
+- **MR scope:** none — never proposed as a candidate; recognized only
   when already present. Adopting Psalm from scratch is a decision made outside this tree's proposal flow,
   same as choosing Pest over PHPUnit.
 - **Mutual exclusion:** the first scan pass that recognizes this node fulfilled while real
@@ -65,8 +65,8 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
   `composer require --dev vimeo/psalm` and commits a `psalm.xml` (reused for taint-checking only, not as a
   competing general analyzer) alongside the CI wiring.
 - **Co-presence caveat:** adopting this node on the PHPStan path installs `vimeo/psalm` + `psalm.xml`
-  purely for taint scanning, which incidentally makes the `psalm` node's own live-detected `fulfilled` flag
-  read `true` too. This is harmless: `psalm` isn't a `php-safety-net` leaf (see that node's entry
+  purely for taint scanning, which incidentally makes the `psalm` node's own Fulfilment check
+  read fulfilled too. This is harmless: `psalm` isn't a `php-safety-net` leaf (see that node's entry
   above), so there's no resolved-leaf state to disturb; `rector-php-set`'s (`rector.md`)
   `required-any(phpstan-level-0, psalm)` gate stays satisfied regardless either way on the PHPStan
   path (already unlocked via `phpstan-level-0`); and the PHPStan/Psalm choice itself was never

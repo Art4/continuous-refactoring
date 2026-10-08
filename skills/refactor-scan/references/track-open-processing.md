@@ -33,7 +33,7 @@ When a Track (Safety Net or Guardrails) is selected and its `Open` is non-empty:
    `PHP floor unverified`) for the pass report. Move to the next entry.
 4. If workable → re-run that one node's Fulfilment check (`safety-net-track.md` /
    `guardrails-track.md`, each file's own "Judging fulfilment" section — the same judgement
-   discipline that file already documents, never a parser verdict):
+   discipline that file already documents):
    - **Now fulfilled** → report a **fulfilled at pick-up** finding — the node was adopted,
      typically by hand, since the last scan, and the re-check this walk exists to perform caught
      it — and hand it to `refactor-learn`'s early call, which removes the node from `Open`

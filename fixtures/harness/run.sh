@@ -672,8 +672,8 @@ _check_open_order() {
 # skills/refactor-learn/references/safety-net-write.md). Local-only,
 # advisory, non-CI — the deliberate replacement for `tooling_tree.py`
 # ground-truth on a Safety Net Track node: the whole point under test is
-# that the deterministic parser's own dependency-name match isn't
-# authoritative here any more (fixtures/README.md's "safety-net-track"
+# that a raw dependency-name match isn't
+# authoritative here (fixtures/README.md's "safety-net-track"
 # section). Each `php-safety-net-*` fixture exercises one distinct
 # checklist item; dispatches by fixture name to the matching check below.
 # Real, deterministic greps against the fixture's own post-run files where

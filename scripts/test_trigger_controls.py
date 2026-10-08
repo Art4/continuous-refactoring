@@ -22,7 +22,7 @@ deterministic parser decides:
 Both of those, plus "explicit + implicit invocation per skill", are exercised
 end-to-end via `fixtures/harness/run.sh tier4` (opencode-based, local/
 advisory — see fixtures/README.md's "Tier 4" section, same non-CI posture as
-`roadmap --opencode` and `agent-loop`).
+`agent-loop`).
 
 The third control, "scan on clean repo reports clean", *is* fully
 deterministic: `fixtures/php/php-clean/` is a target where every deterministic

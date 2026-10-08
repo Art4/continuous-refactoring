@@ -64,6 +64,26 @@ def _load_fulfilled_seed(seed_path: pathlib.Path) -> dict[str, bool]:
 _TRACK_SECTION_HEADINGS = ("## Safety Net", "## Guardrails")
 
 
+def _guardrails_scope(tree: dict) -> set[str]:
+    """Nodes of the Guardrails Track: every node with a required (or
+    required-any) ancestor that is itself resolved-gated (PHP:
+    ``php-safety-net``) — proposable only once the Safety Net has closed.
+    Every other node's state lives in the ``## Safety Net`` section."""
+    gates = {n for n, parents in tree["resolved_parents"].items() if parents}
+    scope: set[str] = set()
+    changed = True
+    while changed:
+        changed = False
+        for node in tree["nodes"]:
+            if node in scope:
+                continue
+            parents = tree["required_parents"].get(node, []) + tree["required_any_parents"].get(node, [])
+            if any(parent in gates or parent in scope for parent in parents):
+                scope.add(node)
+                changed = True
+    return scope
+
+
 def _derive_fulfilled_from_bookkeeping(
     repo: pathlib.Path, tree: dict
 ) -> dict[str, bool] | None:
@@ -74,8 +94,10 @@ def _derive_fulfilled_from_bookkeeping(
     (the documented schema, written by
     skills/refactor-learn/references/safety-net-write.md and
     guardrails-write.md).  A scope node that is neither in ``Open`` nor
-    in ``Out-of-scope`` is fulfilled.  Other fields (e.g. ``Last scan``)
-    are ignored, not migrated.  Returns
+    in ``Out-of-scope`` is fulfilled — but only when its own Track's
+    section carries that state: a missing section means the Track was
+    never run, so none of its nodes is fulfilled.  Other fields (e.g.
+    ``Last scan``) are ignored, not migrated.  Returns
     ``None`` when no bookkeeping document or no Track-section state exists
     (the caller returns ``{}`` — there is no detection fallback; scan
     passes require a seed).
@@ -90,23 +112,25 @@ def _derive_fulfilled_from_bookkeeping(
 
     open_nodes: set[str] = set()
     out_of_scope_nodes: set[str] = set()
-    in_track_section = False
+    track_section: str | None = None
     collecting: str | None = None
-    saw_track_state = False
+    tracks_with_state: set[str] = set()
 
     for line in text.splitlines():
         stripped = line.strip()
         if stripped.startswith("#"):
-            in_track_section = stripped.startswith(_TRACK_SECTION_HEADINGS)
+            track_section = next(
+                (h for h in _TRACK_SECTION_HEADINGS if stripped.startswith(h)), None
+            )
             collecting = None
             continue
-        if in_track_section and stripped.startswith("**Open:**"):
+        if track_section and stripped.startswith("**Open:**"):
             collecting = "open"
-            saw_track_state = True
+            tracks_with_state.add(track_section)
             continue
-        if in_track_section and stripped.startswith("**Out-of-scope:**"):
+        if track_section and stripped.startswith("**Out-of-scope:**"):
             collecting = "out-of-scope"
-            saw_track_state = True
+            tracks_with_state.add(track_section)
             continue
         if stripped.startswith("**"):
             collecting = None  # any other field (e.g. Last scan) ends the list
@@ -120,15 +144,18 @@ def _derive_fulfilled_from_bookkeeping(
             if slug and slug != "none":
                 out_of_scope_nodes.add(slug)
 
-    if not saw_track_state:
+    if not tracks_with_state:
         return None
 
+    guardrails = _guardrails_scope(tree)
     result: dict[str, bool] = {}
     for node in tree["nodes"]:
-        if node in open_nodes or node in out_of_scope_nodes:
-            result[node] = False
-        else:
-            result[node] = True
+        track = "## Guardrails" if node in guardrails else "## Safety Net"
+        result[node] = (
+            track in tracks_with_state
+            and node not in open_nodes
+            and node not in out_of_scope_nodes
+        )
     return result
 
 
@@ -930,10 +957,10 @@ def detect_and_roadmap(
 if __name__ == "__main__":
     import argparse
 
-    ap = argparse.ArgumentParser(description="Detect tooling tree and propose next MRs (dry-run, no mutation)")
+    ap = argparse.ArgumentParser(description="Compute the tooling tree's graph outputs from a fulfilled set (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to fixture/repo (default: .)")
     ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree)")
-    ap.add_argument("--seed", type=str, default=None, help="path to a fulfilled-set JSON file (node_slug: true/false) — when provided, graph outputs are computed from it instead of detection")
+    ap.add_argument("--seed", type=str, default=None, help="path to a fulfilled-set JSON file (node_slug: true/false) — when provided, graph outputs are computed from it instead of the bookkeeping state")
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
     ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (outlook diagram)")
     args = ap.parse_args()

@@ -15,7 +15,7 @@
 > when the node is actually worked via the Track's `Open` walk, never pre-filed at proposal time.
 > ADR-0047's pre-filing rule stands unchanged for every non-Track tooling-tree proposal.
 >
-> Replaces the earlier, unnumbered decision that shipped the parser with detection under
+> Amends [ADR-0014](0014-tooling-tree-parser-ships-under-refactor-scan.md), the decision that shipped the parser with detection under
 > `refactor-scan` — that parser's role as ground truth for fulfilment is superseded by agent judgement
 > against each node's Purpose statement (ADR-0055), and its `Fulfilled nodes` cache is now ignored.
 

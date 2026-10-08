@@ -1,6 +1,6 @@
 """Tests for deterministic tooling tree parser (skills/refactor-scan/references/tooling_tree.py)
 
-TDD: verify tree parsing, detection, and 10-step roadmap generation against fixtures.
+Verify tree parsing and the graph outputs computed from a fulfilled set (seed or bookkeeping).
 """
 
 import importlib.util
@@ -1592,6 +1592,57 @@ class SeedInputTests(unittest.TestCase):
             # other node fulfilled.
             self.assertTrue(derived["phpunit"])
             self.assertTrue(derived["composer"])
+        finally:
+            tmp.cleanup()
+
+    def test_bookkeeping_derivation_missing_guardrails_section_means_never_run(self):
+        # A missing Track section means that Track was never run: none of
+        # its nodes is fulfilled, however empty the other Track's `Open` is.
+        tmp, root = self._make_repo({
+            ".scratch/refactor/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "## Safety Net\n\n"
+                "**Open:**\n"
+                "- none\n\n"
+                "**Out-of-scope:**\n"
+                "- none\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertTrue(derived["composer"])
+            self.assertTrue(derived["phpstan-level-5"])
+            for node in (
+                "composer-audit", "phpmd", "coverage-floor", "php-minimal-version",
+                "phpstan-level-6", "phpstan-level-10", "phpstan-deprecation-rules",
+                "semgrep", "secret-detection",
+            ):
+                self.assertFalse(derived[node], node)
+            backlog = tooling_tree.detect_and_roadmap(root)["backlog"]
+            self.assertIn("composer-audit", backlog)
+            self.assertIn("phpstan-level-7", backlog)
+            self.assertNotIn("composer", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_bookkeeping_derivation_missing_safety_net_section_means_never_run(self):
+        tmp, root = self._make_repo({
+            ".scratch/refactor/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "## Guardrails\n\n"
+                "**Open:**\n"
+                "- none\n\n"
+                "**Out-of-scope:**\n"
+                "- none\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertFalse(derived["composer"])
+            self.assertFalse(derived["phpunit"])
+            self.assertTrue(derived["composer-audit"])
         finally:
             tmp.cleanup()
 
