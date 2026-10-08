@@ -60,3 +60,8 @@ Not covered (open items, see the unticked boxes):
   and ADR-0056.
 
 Checks: validation and unit suite pass on the branch head (item 5).
+
+> **2026-10-08:** PR #139 covers part of item 3: steps 4b/4c read the fulfilled set the scan worked
+> with (the seed, or `bookkeeping.md`'s Track sections) instead of the script's `detected` map, and
+> `phpstan.md` no longer says "the parser treats them as blocked". Still open: item 2's level
+> predicate, and `structural-scan.md`'s Fulfilment check.

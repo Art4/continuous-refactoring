@@ -6,12 +6,12 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 10 (Drift check and a detection-free test suite).
 
-**Status:** implemented — PR #113, open items listed in Comments
+**Status:** done — PRs #113, #139
 
 - [x] Every detection function and helper predicate is removed, along with the tests that only exercised them; shared helpers used by the PHP-floor logic stay.
 - [x] The script no longer runs detection when no seed is given: scan passes require the seed, other passes derive state from the bookkeeping.
-- [ ] No skill, reference, harness script or documentation still refers to a removed function, output field or detection behavior.
-- [ ] The earlier decision record is marked as replaced by the new ADR and the new ADR reads consistently with the final state.
+- [x] No skill, reference, harness script or documentation still refers to a removed function, output field or detection behavior.
+- [x] The earlier decision record is marked as replaced by the new ADR and the new ADR reads consistently with the final state.
 - [x] The full deterministic test suite and the static validation tiers pass in CI.
 
 ## Comments
@@ -42,3 +42,7 @@ Spec: `agent-judged-fulfilment`.
   shipped the parser with its docs under `refactor-scan`, carries no note that ADR-0056 replaces it. ADR-0056
   calls it "the earlier, unnumbered decision" and links nothing. ADR-0047 and ADR-0055 do carry reciprocal
   "Amended by ADR-0056" notes. Apart from that, ADR-0056 reads consistently with the final state.
+
+> **2026-10-08:** PR #139 closes items 3 and 4: every listed text hit is reworded, ADR-0014 carries an
+> "Amended by ADR-0056" note and ADR-0056 links ADR-0014. Still as noted above and not blocking: the
+> entry point's name `detect_and_roadmap`, its unused `steps` parameter and the JSON key `detected`.
