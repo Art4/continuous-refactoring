@@ -42,17 +42,36 @@ _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "ha
 # ---------------------------------------------------------------------------
 
 
-def _load_fulfilled_seed(seed_path: pathlib.Path) -> dict[str, bool]:
+class SeedError(ValueError):
+    """An explicitly handed-over seed could not be used as given."""
+
+
+def _load_fulfilled_seed(seed_path: pathlib.Path, strict: bool = False) -> dict[str, bool]:
     """Load a fulfilled-set file: JSON ``{node_slug: true/false}``.
 
     Nodes missing from the file are treated as not fulfilled.
     Returns ``{node: bool}`` — simple, no reason/details metadata needed
     for graph-logic-only computation.
+
+    *strict* is for a seed the caller named explicitly (``--seed``): an
+    unreadable file, invalid JSON, a non-object or a non-boolean value
+    raises ``SeedError`` instead of being skipped — a caller who handed
+    over a judgement must never get outputs computed from something else.
     """
     try:
         data = json.loads(seed_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError):
+    except (OSError, json.JSONDecodeError) as exc:
+        if strict:
+            raise SeedError(f"seed file {seed_path} could not be read as JSON: {exc}") from exc
         return {}
+    if not isinstance(data, dict):
+        if strict:
+            raise SeedError(f"seed file {seed_path} must hold a JSON object {{node_slug: true/false}}")
+        return {}
+    if strict:
+        bad = sorted(k for k, v in data.items() if not isinstance(v, bool))
+        if bad:
+            raise SeedError(f"seed file {seed_path} has non-boolean values for: {', '.join(bad)}")
     return {k: bool(v) for k, v in data.items() if isinstance(v, bool)}
 
 
@@ -921,14 +940,16 @@ def detect_and_roadmap(
 ) -> dict:
     """Main entry point: compute graph outputs from fulfilled state.
 
-    When *seed_path* is provided, it takes priority over *fulfilled*.
-    When neither is given, the script derives state from bookkeeping.
+    When *seed_path* is provided, it takes priority over *fulfilled* and
+    must be usable as given — otherwise ``SeedError`` is raised, never a
+    silent fall back to bookkeeping.  When neither is given, the script
+    derives state from bookkeeping.
     """
     tree = load_tree(tree_md=tree_md)
     repo = pathlib.Path(repo)
     # Resolve fulfilled state: seed_path > fulfilled param > bookkeeping
-    if seed_path is not None and seed_path.exists():
-        resolved_fulfilled = _load_fulfilled_seed(seed_path)
+    if seed_path is not None:
+        resolved_fulfilled = _load_fulfilled_seed(pathlib.Path(seed_path), strict=True)
     else:
         resolved_fulfilled = fulfilled
     resolved = _resolve_fulfilled(repo, tree, resolved_fulfilled)
@@ -967,7 +988,10 @@ if __name__ == "__main__":
     repo = pathlib.Path(args.repo)
     tree_md = pathlib.Path(args.tree) if args.tree else None
     seed_path = pathlib.Path(args.seed) if args.seed else None
-    data = detect_and_roadmap(repo, tree_md=tree_md, seed_path=seed_path)
+    try:
+        data = detect_and_roadmap(repo, tree_md=tree_md, seed_path=seed_path)
+    except SeedError as exc:
+        ap.exit(2, f"error: {exc}\n")
     if args.unblocked_by:
         tree = load_tree(tree_md=tree_md)
         data["unblocked_by"] = directly_unblocked_children(repo, args.unblocked_by, tree=tree)

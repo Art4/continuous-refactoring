@@ -92,7 +92,7 @@ Skip if step 2 already handed an `Open` entry forward.
 2. **Write the seed**: a JSON file `{"<slug>": true|false}` in a temporary location outside the target repo. A node left out counts as not fulfilled.
    - A node in the selected Track's scope, or outside every Track (`is-php-project`, `onboarding-setup`) → your judgement from 1.
    - A node in the other Track's scope → `true` when that Track's `bookkeeping.md` section exists and lists the node under neither `Open` nor `Out-of-scope`; otherwise `false` — a missing section means that Track never ran.
-3. **Run** `python3 references/tooling_tree.py --seed <seed-file> <target-repo>` and read from its JSON:
+3. **Run** `python3 references/tooling_tree.py --seed <seed-file> <target-repo>` — a seed it cannot read ends in an error, never in an answer from some other state: fix the file and rerun — and read from its JSON:
    - `next` — the currently-unblocked set, rejected nodes (an entry in the Refactoring Notes' `out-of-scope/<node>.md`) already excluded; take it as-is, however many entries it holds.
    - `withheld` — nodes that would be in `next` but wait on an undecided recommended parent; each entry names which parent(s).
    - `backlog` — every unresolved node in tree order, blocked ones included. Its entries inside the selected Track's scope, order kept, are that Track's new `Open` (`## Output`).

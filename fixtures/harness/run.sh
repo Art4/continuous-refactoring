@@ -36,6 +36,12 @@ Options:
                             Model is pinned via \$OPENCODE_MODEL (default: opencode/muse-spark-1.2-contributor-free)
                             Per-call timeout via \$OPENCODE_TIMEOUT (default: 60s — raise for a slower model)
 
+Exit codes:
+    0   every assertion passed
+    1   at least one assertion failed
+    3   an agent run did not complete (model not served, opencode error, timeout,
+        empty output) — nothing was verified, whatever the assertion summary says
+
 Examples:
     $(basename "$0") tier2 php-project-with-candidates
     $(basename "$0") tier3 php-project-with-candidates --php-version 8.2
@@ -170,6 +176,46 @@ resolve_opencode_bin() {
     return 1
 }
 
+# Exit code for "an agent run did not complete": distinct from 1 (an
+# assertion failed), because assertions that run against a fixture no agent
+# ever touched say nothing — a dead run must not read as a green tier.
+EXIT_AGENT_RUN_FAILED=3
+AGENT_RUN_FAILED=false
+OPENCODE_MODEL_CHECKED=false
+
+# Abort before any agent call when $OPENCODE_MODEL is not among the models
+# opencode serves — a retired model otherwise fails every single run with
+# an opaque server error. $1 is the resolved opencode command prefix. Skips
+# the check (and lets the run itself decide) when the list can't be fetched.
+preflight_opencode_model() {
+    local opencode_bin="$1" models
+    [[ "$OPENCODE_MODEL_CHECKED" == true ]] && return 0
+    OPENCODE_MODEL_CHECKED=true
+    if ! models="$($opencode_bin models 2>/dev/null)" || [[ -z "$models" ]]; then
+        log_info "Could not list opencode models — skipping the model preflight"
+        return 0
+    fi
+    if ! grep -qxF "$OPENCODE_MODEL" <<<"$models"; then
+        echo -e "${RED}✗ ABORT${NC}: opencode does not serve model '$OPENCODE_MODEL' — set \$OPENCODE_MODEL to one listed by '$opencode_bin models'. Nothing was run." >&2
+        exit "$EXIT_AGENT_RUN_FAILED"
+    fi
+}
+
+# True when an agent run's log shows the run did not complete: missing or
+# empty output. Callers combine it with the command's own exit status.
+agent_log_is_empty() {
+    [[ ! -s "$1" ]]
+}
+
+# An agent run did not complete and file-level assertions would follow:
+# stop the tier here instead of asserting against untouched fixture state.
+# $1 is the log file to point at.
+abort_agent_run_failed() {
+    rm -rf "$FIXTURE_DST/.agents"
+    echo -e "${RED}✗ ABORT${NC}: opencode run failed, timed out or produced no output — see $1. No assertion after this point was run; nothing was verified." >&2
+    exit "$EXIT_AGENT_RUN_FAILED"
+}
+
 # Run one opencode prompt, isolated (only skills/ from this repo, via a
 # .agents/skills symlink — no global ~/.config/opencode/skills), as a
 # subprocess against $1's working directory. $2 is the prompt, $3 the log
@@ -177,12 +223,13 @@ resolve_opencode_bin() {
 # "false" to skip the skills symlink entirely (used by `lift`'s
 # without-skill baseline — everything else about the invocation stays
 # identical, so that run is a fair comparison against the with-skill one).
-# Never fails the caller — advisory only; check the log file / grep it
-# yourself.
+# Returns nonzero when the run did not complete (callers skip their own
+# checks then) and records it, so the tier still ends with exit code 3.
 run_opencode_advisory() {
     local workdir="$1" prompt="$2" out_file="$3" timeout_s="${4:-$OPENCODE_TIMEOUT}" mount_skills="${5:-true}"
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 1
+    preflight_opencode_model "$opencode_bin"
     if [[ "$mount_skills" == true ]]; then
         mkdir -p "$workdir/.agents"
         ln -sfn "$REPO_DIR/skills" "$workdir/.agents/skills"
@@ -192,11 +239,12 @@ run_opencode_advisory() {
     # interpolated into the script text — a prompt containing shell
     # metacharacters (backticks, $, quotes — e.g. `judge`'s rubric text)
     # would otherwise be re-parsed as shell syntax by this inner bash -c.
-    if timeout "$timeout_s" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' "$2"' _ "$workdir" "$prompt" > "$out_file" 2>&1; then
+    if timeout "$timeout_s" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' "$2"' _ "$workdir" "$prompt" > "$out_file" 2>&1 && ! agent_log_is_empty "$out_file"; then
         [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
         return 0
     else
-        log_info "Opencode run failed or timed out — see $out_file (advisory, not failing test)"
+        log_info "Opencode run failed, timed out or produced no output — see $out_file (its checks are skipped; the tier exits $EXIT_AGENT_RUN_FAILED)"
+        AGENT_RUN_FAILED=true
         [[ "$mount_skills" == true ]] && rm -rf "$workdir/.agents"
         return 1
     fi
@@ -601,6 +649,7 @@ run_decision_gate_bypass() {
     log_info "=== Decision-gate ready-for-agent bypass regression — fixture: $FIXTURE ==="
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 0
+    preflight_opencode_model "$opencode_bin"
 
     local issue="$FIXTURE_DST/.scratch/refactor/issues/01-unify-retry-logic.md"
     if [[ ! -f "$issue" ]]; then
@@ -615,10 +664,8 @@ run_decision_gate_bypass() {
 
     local design_out="/tmp/decision-gate-bypass-$FIXTURE-design.log"
     local design_prompt="Run /refactor-design against issue .scratch/refactor/issues/01-unify-retry-logic.md in this repo. Follow skills/refactor-design/SKILL.md literally, step by step, including its decision gate (skills/refactor-design/references/decision-gate.md). This is an unattended pass — no human is present to answer questions live, follow the skill's own unattended-mode instructions. Report what you wrote to the issue file and which labels you changed, if any."
-    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$design_prompt" > "$design_out" 2>&1; then
-        log_info "Opencode design run failed or timed out — see $design_out (advisory, not failing test)"
-        rm -rf "$FIXTURE_DST/.agents"
-        return 0
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$design_prompt" > "$design_out" 2>&1 || agent_log_is_empty "$design_out"; then
+        abort_agent_run_failed "$design_out"
     fi
 
     local labels_line
@@ -632,14 +679,14 @@ run_decision_gate_bypass() {
 
     local scan_out="/tmp/decision-gate-bypass-$FIXTURE-scan.log"
     local scan_prompt="Run /refactor-scan against this repo with Investigation as the selected Track. Follow skills/refactor-scan/SKILL.md literally, step by step, starting with its resume check against .scratch/refactor/bookkeeping.md's ## Investigation Open field. Report explicitly: did it route the pending candidate to refactor-implement, or hold it back? Why?"
-    if timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$scan_prompt" > "$scan_out" 2>&1; then
+    if timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$scan_prompt" > "$scan_out" 2>&1 && ! agent_log_is_empty "$scan_out"; then
         if grep -qiE "held back|not routed|does not route|not resumable" "$scan_out"; then
             log_pass "refactor-scan (advisory) reports holding the candidate back — see $scan_out"
         else
             log_info "refactor-scan output doesn't clearly confirm hold-back — check $scan_out by hand (advisory, non-blocking)"
         fi
     else
-        log_info "Opencode scan run failed or timed out — see $scan_out (advisory, not failing test)"
+        abort_agent_run_failed "$scan_out"
     fi
 
     rm -rf "$FIXTURE_DST/.agents"
@@ -683,6 +730,7 @@ run_safety_net_track() {
     log_info "=== Safety Net Track behavior — fixture: $FIXTURE ==="
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 0
+    preflight_opencode_model "$opencode_bin"
 
     mkdir -p "$FIXTURE_DST/.agents"
     ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
@@ -829,13 +877,13 @@ run_safety_net_track() {
 # prompt with --auto (this scenario's broader, unattended-mode prompts were
 # observed elsewhere in this file to need it — decision-gate-bypass's own
 # troubleshooting note) against $FIXTURE_DST, logging to
-# /tmp/safety-net-track-$FIXTURE-scan.log. Advisory only — never fails the
-# caller.
+# /tmp/safety-net-track-$FIXTURE-scan.log. A run that does not complete
+# aborts the tier (abort_agent_run_failed).
 _safety_net_scan_prompt() {
     local prompt="$1"
     local out="/tmp/safety-net-track-$FIXTURE-scan.log"
-    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
-        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1 || agent_log_is_empty "$out"; then
+        abort_agent_run_failed "$out"
     fi
 }
 
@@ -854,6 +902,7 @@ run_guardrails_track() {
     log_info "=== Guardrails Track behavior — fixture: $FIXTURE ==="
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 0
+    preflight_opencode_model "$opencode_bin"
 
     mkdir -p "$FIXTURE_DST/.agents"
     ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
@@ -972,14 +1021,14 @@ run_guardrails_track() {
 
 # Shared helper for run_guardrails_track's cases above: run one opencode
 # prompt with --auto against $FIXTURE_DST, logging to
-# /tmp/guardrails-track-$FIXTURE-scan.log. Advisory only — never fails the
-# caller. Mirrors _safety_net_scan_prompt exactly, own log prefix so the two
+# /tmp/guardrails-track-$FIXTURE-scan.log. A run that does not complete aborts the tier.
+# Mirrors _safety_net_scan_prompt exactly, own log prefix so the two
 # Tracks' runs never clobber each other's transcript.
 _guardrails_scan_prompt() {
     local prompt="$1"
     local out="/tmp/guardrails-track-$FIXTURE-scan.log"
-    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
-        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1 || agent_log_is_empty "$out"; then
+        abort_agent_run_failed "$out"
     fi
 }
 
@@ -997,6 +1046,7 @@ run_housekeeping_track() {
     log_info "=== Housekeeping Track behavior — fixture: $FIXTURE ==="
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 0
+    preflight_opencode_model "$opencode_bin"
 
     mkdir -p "$FIXTURE_DST/.agents"
     ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
@@ -1042,14 +1092,14 @@ run_housekeeping_track() {
 
 # Shared helper for run_housekeeping_track's cases above: run one opencode
 # prompt with --auto against $FIXTURE_DST, logging to
-# /tmp/housekeeping-track-$FIXTURE-scan.log. Advisory only — never fails the
-# caller. Mirrors _safety_net_scan_prompt / _guardrails_scan_prompt exactly,
+# /tmp/housekeeping-track-$FIXTURE-scan.log. A run that does not complete aborts the tier.
+# Mirrors _safety_net_scan_prompt / _guardrails_scan_prompt exactly,
 # own log prefix so no tier's transcript ever clobbers another's.
 _housekeeping_scan_prompt() {
     local prompt="$1"
     local out="/tmp/housekeeping-track-$FIXTURE-scan.log"
-    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
-        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1 || agent_log_is_empty "$out"; then
+        abort_agent_run_failed "$out"
     fi
 }
 
@@ -1067,6 +1117,7 @@ run_scheduler() {
     log_info "=== Track scheduler behavior — fixture: $FIXTURE ==="
     local opencode_bin
     opencode_bin="$(resolve_opencode_bin)" || return 0
+    preflight_opencode_model "$opencode_bin"
 
     mkdir -p "$FIXTURE_DST/.agents"
     ln -sfn "$REPO_DIR/skills" "$FIXTURE_DST/.agents/skills"
@@ -1210,14 +1261,14 @@ run_scheduler() {
 
 # Shared helper for run_scheduler's cases above: run one opencode prompt with
 # --auto against $FIXTURE_DST, logging to /tmp/scheduler-$FIXTURE-scan.log.
-# Advisory only — never fails the caller. Mirrors _safety_net_scan_prompt /
+# A run that does not complete aborts the tier. Mirrors _safety_net_scan_prompt /
 # _guardrails_scan_prompt exactly, own log prefix so no tier's transcript
 # ever clobbers another's.
 _scheduler_scan_prompt() {
     local prompt="$1"
     local out="/tmp/scheduler-$FIXTURE-scan.log"
-    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1; then
-        log_info "Opencode run failed or timed out — see $out (advisory, not failing test)"
+    if ! timeout "$OPENCODE_TIMEOUT" bash -c 'cd "$1" && '"$opencode_bin"' run -m '"$OPENCODE_MODEL"' --auto "$2"' _ "$FIXTURE_DST" "$prompt" > "$out" 2>&1 || agent_log_is_empty "$out"; then
+        abort_agent_run_failed "$out"
     fi
 }
 
@@ -1267,6 +1318,12 @@ main() {
     esac
 
     print_summary
+    local rc=$?
+    if [[ "$AGENT_RUN_FAILED" == true ]]; then
+        echo -e "${RED}✗ INCOMPLETE${NC}: at least one opencode run did not complete — its checks were skipped, so the summary above is not a full result." >&2
+        exit "$EXIT_AGENT_RUN_FAILED"
+    fi
+    return $rc
 }
 
 main

@@ -1536,6 +1536,40 @@ class SeedInputTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_explicit_seed_that_cannot_be_used_raises(self):
+        # A seed named explicitly is the caller's judgement: when it can't
+        # be used as given, fail loudly instead of falling back to
+        # bookkeeping and answering from a different state.
+        tmp, root = self._make_repo({
+            "broken.json": "{not json",
+            "list.json": "[]",
+            "non-bool.json": '{"composer": "yes"}',
+            ".scratch/refactor/bookkeeping.md": (
+                "## Safety Net\n\n**Open:**\n- none\n\n**Out-of-scope:**\n- none\n"
+            ),
+        })
+        try:
+            for name in ("missing.json", "broken.json", "list.json", "non-bool.json"):
+                with self.assertRaises(tooling_tree.SeedError, msg=name):
+                    tooling_tree.detect_and_roadmap(root, seed_path=root / name)
+        finally:
+            tmp.cleanup()
+
+    def test_cli_exits_nonzero_on_unusable_seed(self):
+        import subprocess
+        import sys
+        tmp, root = self._make_repo({})
+        try:
+            proc = subprocess.run(
+                [sys.executable, tooling_tree.__file__, "--seed", str(root / "missing.json"), str(root)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(proc.returncode, 2)
+            self.assertEqual(proc.stdout, "")
+            self.assertIn("missing.json", proc.stderr)
+        finally:
+            tmp.cleanup()
+
     def test_bookkeeping_derivation(self):
         tmp, root = self._make_repo({
             ".scratch/refactor/bookkeeping.md": (
