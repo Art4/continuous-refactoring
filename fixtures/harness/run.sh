@@ -33,7 +33,7 @@ Options:
     --php-version VERSION   PHP version for Docker (default: 8.3)
     --verbose               Enable verbose output
     --opencode              Also run opencode isolated as subprocess (advisory, needs opencode binary)
-                            Model is pinned via \$OPENCODE_MODEL (default: opencode/muse-spark-1.2-contributor-free)
+                            Model is pinned via \$OPENCODE_MODEL (default: opencode/muse-spark-1.3-contributor-free)
                             Per-call timeout via \$OPENCODE_TIMEOUT (default: 60s — raise for a slower model)
 
 Examples:
@@ -68,7 +68,7 @@ WITH_OPENCODE=false
 # that just hangs to timeout with zero output). fixtures/README.md's manual
 # instructions already assume this exact model; override via env var if a
 # different one is set up locally.
-OPENCODE_MODEL="${OPENCODE_MODEL:-opencode/muse-spark-1.2-contributor-free}"
+OPENCODE_MODEL="${OPENCODE_MODEL:-opencode/muse-spark-1.3-contributor-free}"
 # Per-call default for run_opencode_advisory's internal `timeout` — callers
 # can still pass their own timeout_s explicitly (e.g. tier4's shorter
 # per-skill checks); this only changes the *default* a caller gets when it
