@@ -6,12 +6,12 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 01 (Stop-conditions become recognition-only gate nodes), 04 (`Open` as the complete backlog).
 
-**Status:** implemented — PR #107, open items listed in Comments
+**Status:** done — PRs #107, #139
 
 - [x] The script accepts a fulfilled-set file and produces its graph outputs from it, including the recognition-only gate nodes; nodes missing from the file are treated as not fulfilled. The exact file format is fixed here and documented.
-- [ ] Without a seed and with a bookkeeping file that has Track sections, the script derives node state from `Open` and `Out-of-scope` as described; a missing section means the Track was never run.
+- [x] Without a seed and with a bookkeeping file that has Track sections, the script derives node state from `Open` and `Out-of-scope` as described; a missing section means the Track was never run.
 - [x] The script outputs the ordered backlog, the list closed by rejection, and the withheld list with a reason per node; the merge-request outlook view is unchanged in behavior.
-- [ ] The roadmap simulation, its fixtures and its harness view are removed, and no documentation still points at them.
+- [x] The roadmap simulation, its fixtures and its harness view are removed, and no documentation still points at them.
 - [x] Fixtures supply a seed and a bookkeeping file; deterministic tests assert the script's output contract (workable, ordered backlog, withheld with reasons, closed by rejection, outlook) on those seeds. Existing graph-behavior tests (edge types, gating, rejection cascade, resolved gates, PHP floor) pass, taking the fulfilled set as input.
 - [x] Nothing in this ticket removes detection code.
 
@@ -38,3 +38,10 @@ Spec: `agent-judged-fulfilment`.
   `php-tooling-tree/psalm.md` and `php-tooling-tree/php-safety-net.md` (`next_candidates()`/`roadmap()`),
   `scripts/test_tooling_tree.py` and `scripts/test_trigger_controls.py` docstrings, and
   `.github/workflows/test-harness.yml` comments (historical). See ticket 11 item 3.
+
+> **2026-10-08:** PR #139 closes the two open items. Item 2: `_derive_fulfilled_from_bookkeeping` now
+> decides per Track — a node is fulfilled only when its own Track's section carries state and lists it
+> under neither `Open` nor `Out-of-scope`; a missing section means never run (two new tests in
+> `SeedInputTests`). Item 4: the pointers at `roadmap` in `refactor-scan/SKILL.md`, `psalm.md`,
+> `php-safety-net.md` and the two test docstrings are removed; `fixtures/README.md` and the workflow
+> comment still mention it only to say it is gone.

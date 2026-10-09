@@ -46,25 +46,24 @@ closed yet simply finds every Guardrails node still blocked when this Track's sc
 
 ## Judging fulfilment
 
-Run `python3 references/tooling_tree.py <target-repo>` once, same as `refactor-scan/SKILL.md` step 4
-already does — its `detected` map is a first signal, not the verdict, for every node in this Track's
-scope. **Don't take a Guardrails node's `fulfilled` value at face value** — the exact same discipline
-`safety-net-track.md` already applies, generalized here to this Track's own seven nodes: read the
-node's own Purpose line — its tree-doc entry, found via `php-tooling-tree.md`'s own per-node *Full
+Whether a node is fulfilled is the agent's judgement, for every node in this Track's scope — the
+script detects nothing and only receives the result (`refactor-scan/SKILL.md` step 4). **Judge by
+Purpose, not by name** — the exact same discipline `safety-net-track.md` already applies, here for
+this Track's own nodes: read the node's own Fulfilment check and Purpose line — its tree-doc entry, found via `php-tooling-tree.md`'s own per-node *Full
 definition* pointer, not always one-file-per-node — then judge the actual repo against it — does a
 real, working tool genuinely serve that Purpose, under any name, not only the one the node's own `Tool`
 line happens to mention.
 
-- **The parser's own signal still counts.** `fulfilled: true` from the parser is never wrong to trust
-  outright. Judgement only has work to do when the parser reports `false`.
+- **Direct evidence settles it.** The Fulfilment check's own named evidence present → fulfilled. Only
+  when it is absent does the Purpose question open.
 - **A working example**: `composer-audit`'s Purpose is "dependency vulnerability visibility, enforced
   as a CI gate," its own Fulfilment check reads for a CI job whose text literally invokes
   `composer audit`. A target that instead defines a `composer.json` script (e.g.
   `"scripts": {"security-check": "composer audit"}`) and invokes that script from CI (`composer run
-  security-check`) never matches the parser's literal substring check — it reports `fulfilled: false`
-  — but genuinely runs the same underlying command, gated the same way, on every pipeline run. Judged
-  against the Purpose line instead: the CI gate is real, just invoked through a level of indirection
-  the parser's own text match doesn't follow. Never propose `composer-audit` here.
+  security-check`) has no CI job text that literally says `composer audit` — the named evidence is
+  absent — but genuinely runs the same underlying command, gated the same way, on every pipeline run.
+  Judged against the Purpose line instead: the CI gate is real, just invoked through a level of
+  indirection a literal text match doesn't follow. Never propose `composer-audit` here.
 - **Genuinely ambiguous** — two plausible tools present at once, or real uncertainty about whether one
   actually serves the Purpose — routes through the existing Flagged-candidate mechanism (`needs-info`,
   `../../refactor-design/references/decision-gate.md`), unchanged.
@@ -81,9 +80,9 @@ line happens to mention.
 Every node in scope still unresolved (neither fulfilled by judgement above, nor already rejected under
 `out-of-scope/`) and currently unblocked (`php-safety-net` resolved, plus its own domain-specific
 required parent already fulfilled, per the tree's ordinary edge semantics) → propose it by Name, same
-as `refactor-scan/SKILL.md` step 4 already does for any other node. Its slug is added to `##
-Guardrails`'s `Open` list — `refactor-learn`'s own side of this,
-`../../refactor-learn/references/guardrails-write.md`. **No candidate issue is created at this
+as `refactor-scan/SKILL.md` step 4 already does for any other node. These are the script's `next`
+entries inside this Track's scope — what this pass can work; what gets recorded into `Open` is the
+wider set below. **No candidate issue is created at this
 point** — the node's issue is created only when it is actually worked via the `Open` walk
 (`track-open-processing.md`), not pre-filed during the
 scan.
@@ -91,11 +90,11 @@ scan.
 ## Filling `Open`
 
 A scan that runs this Track evaluates every node of the scope by agent judgement (all Fulfilment checks,
-including gate nodes), hands that fulfilled set to the script as a seed file (the `--seed` argument or
-the Refactoring Notes' `fulfilled-set.json`), and records every unresolved node of the scope into
-`## Guardrails`'s `Open` in the script's order, blocked nodes included. The seed file ensures the
-script's graph logic (dependency edges, rejection cascades) computes the same backlog the agent's
-judgement already decided — the agent judges, the script orders.
+including gate nodes) and hands that fulfilled set to the script as a seed file
+(`refactor-scan/SKILL.md` step 4). The script's `backlog` entries inside this Track's scope — every
+unresolved node, in the script's order, blocked nodes included — go to `refactor-learn`'s closing call,
+which writes them as `## Guardrails`'s `Open` (`../../refactor-learn/references/guardrails-write.md`).
+The agent judges, the script orders.
 
 The `Open` list is the complete, ordered backlog for this Track: every node of the Track's scope that
 is neither fulfilled nor out-of-scope, in script order, hand-reorderable, blocked ones included. One per

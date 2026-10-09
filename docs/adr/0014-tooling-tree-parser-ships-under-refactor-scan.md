@@ -1,5 +1,7 @@
 # The tooling-tree parser and its two tree docs ship together under `skills/refactor-scan/references/`
 
+> Amended by [ADR-0056](0056-agent-judged-fulfilment.md): the script still ships here with its tree docs, but it no longer detects anything — fulfilment is judged by the agent and handed to it; the script keeps only the tree's graph logic.
+
 > Extends [ADR-0013](0013-skill-reference-docs-live-under-skills.md): the same "if a `SKILL.md` instructs the agent to consult it, it lives under `skills/<owning-skill>/references/`" rule, now applied to an executable script and the data it loads at runtime, not just a markdown reference doc.
 
 The same manual testing that found ADR-0013's gap surfaced a second, worse instance: `refactor-scan` and `continuous-refactoring` shell out to `scripts/lib/tooling_tree.py` by its suite-repo path, and `refactor-prioritize`/`refactor-design` separately cite `docs/tooling-tree.md`/`docs/php-tooling-tree.md` as material to read — none of which ships. Worse than a plain doc citation: the script itself loaded its two tree docs relative to the suite's own repo root (`Path(__file__).resolve().parents[2]`), so even copying the script alone into a skill's directory wouldn't have worked — its dependency on the two docs was invisible until traced.

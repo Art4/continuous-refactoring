@@ -46,8 +46,8 @@ existing `out-of-scope/<slug>.md` naming a now-satisfied `Blocked by: PHP >= X.Y
 today, and also removes that slug's `Out-of-scope` pointer line here — the node goes back to being
 proposable (not thereby fulfilled), so nothing about it belongs in either list until a future scan
 resolves it again. Reversing a rejection makes the next scan bring those nodes back into `Open` — the
-next scan's own `ordered_backlog()` re-evaluates the fulfilled set (now without the rejected ancestor)
-and records the reopened nodes.
+next scan judges the fulfilled set afresh, and with the rejected ancestor gone the script's `backlog`
+carries the reopened nodes again.
 
 ## Fresh MR → remove from `Open` (redundant with merge, kept for symmetry)
 
@@ -71,6 +71,13 @@ already existed) before `refactor-design` ran — the closing call's own precond
 documents this as `Open`'s target shape) — the entry's only change; it stays in `Open` exactly where it
 was, not touched by any of the removal cases above. Already carries `(#<issue>)` (a prior pass got this
 far and was interrupted before its own closing call ran) → nothing to write, this case is idempotent.
+
+## Scan completed → write `Open`
+
+The Track's own scan ran this pass (`../../refactor-scan/references/guardrails-track.md`, reached only
+with an empty `Open`) → write the list scan handed over — the script's `backlog` entries inside this
+Track's scope — as `## Guardrails`'s `Open`, in the order received, blocked nodes included, one bare
+`- <slug>` per line; `- none` when scan handed over an empty list. Scan never writes this itself.
 
 ## `Last scan` — written every time the Track's scan actually ran this pass
 

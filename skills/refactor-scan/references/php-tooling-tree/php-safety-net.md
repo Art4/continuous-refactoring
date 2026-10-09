@@ -27,4 +27,4 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   existing required parent and additionally require this node; `semgrep` requires this node alone (its one
   full-replacement case). See each node's own entry for its exact edge shape, and `CONTEXT.md`'s **Signal
   wave** entry for the vocabulary.
-- **MR scope:** none — never proposed, never an MR. There is no real-world action to take *as* `php-safety-net`; the nine leaves above are where the real work happens. `refactor-scan`/`next_candidates()`/`roadmap()` must never surface this node as a candidate — it exists only so `structural-scan`'s own gate can read one edge instead of nine (plus every Signal wave node's own required edge, above).
+- **MR scope:** none — never proposed, never an MR. There is no real-world action to take *as* `php-safety-net`; the nine leaves above are where the real work happens. `refactor-scan` must never surface this node as a candidate — it exists only so `structural-scan`'s own gate can read one edge instead of nine (plus every Signal wave node's own required edge, above).

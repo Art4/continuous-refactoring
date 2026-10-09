@@ -447,7 +447,10 @@ deterministic given its inputs:
   as a seed file (the `--seed` argument or the Refactoring Notes' `fulfilled-set.json`, a
   `{node_slug: true/false}` JSON: the scan pass's agent judgement as a file — the agent judges,
   the script orders) or, when no seed is given, derived from `bookkeeping.md`'s Track sections (a
-  scope node neither in `Open` nor in `Out-of-scope` is fulfilled).
+  scope node neither in `Open` nor in `Out-of-scope` is fulfilled; a Track whose section is missing
+  never ran, so none of its nodes is). A seed named with `--seed` must be usable as given:
+  a missing file, invalid JSON or a non-boolean value ends the script with exit code 2 and an
+  error on stderr, never with outputs computed from the bookkeeping instead.
 - **Output** (JSON): `backlog` — the ordered `Open` a scan should record: every unresolved node of
   the Track's scope in tree order, blocked ones included; `next` — the currently-workable nodes;
   `withheld`/`withheld_with_reasons` — nodes held back, with the reasons the stalled report needs;
@@ -506,8 +509,16 @@ Every `--opencode` tier documents its own run command in its own section above; 
 `.agents/skills` symlink — no `~/.config/opencode/skills`) and its degrade-gracefully behavior: no
 `opencode` binary found → one info line, exit clean, nothing fails.
 
+A binary that is there but a run that does not complete is a different case, and it is never
+green: before the first agent call the harness checks that `$OPENCODE_MODEL` is among the models
+`opencode models` lists, and a run that errors, times out or writes no output ends the tier with
+**exit code 3** — the checks that would have read that run's results are skipped. Exit code 1
+still means an assertion failed; 3 means nothing was verified.
+
 Troubleshooting:
 
+* `ABORT: opencode does not serve model …` (exit 3) → the pinned model was retired; pick a current one from `opencode models` and pass it as `OPENCODE_MODEL=…`.
+* `ABORT: opencode run failed, timed out or produced no output` (exit 3) → read the named log; a slow model usually needs a higher `OPENCODE_TIMEOUT`.
 * `opencode binary not found` → `npm i -g opencode` or use `npx --yes opencode`.
 * `permission requested: external_directory … auto-rejecting` → add `--auto` (the harness does this).
 * Long runtime → harness uses `timeout 60`; increase if model is slow.

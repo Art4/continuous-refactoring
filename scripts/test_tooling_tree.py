@@ -1,6 +1,6 @@
 """Tests for deterministic tooling tree parser (skills/refactor-scan/references/tooling_tree.py)
 
-TDD: verify tree parsing, detection, and 10-step roadmap generation against fixtures.
+Verify tree parsing and the graph outputs computed from a fulfilled set (seed or bookkeeping).
 """
 
 import importlib.util
@@ -1536,6 +1536,40 @@ class SeedInputTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
+    def test_explicit_seed_that_cannot_be_used_raises(self):
+        # A seed named explicitly is the caller's judgement: when it can't
+        # be used as given, fail loudly instead of falling back to
+        # bookkeeping and answering from a different state.
+        tmp, root = self._make_repo({
+            "broken.json": "{not json",
+            "list.json": "[]",
+            "non-bool.json": '{"composer": "yes"}',
+            ".scratch/refactor/bookkeeping.md": (
+                "## Safety Net\n\n**Open:**\n- none\n\n**Out-of-scope:**\n- none\n"
+            ),
+        })
+        try:
+            for name in ("missing.json", "broken.json", "list.json", "non-bool.json"):
+                with self.assertRaises(tooling_tree.SeedError, msg=name):
+                    tooling_tree.detect_and_roadmap(root, seed_path=root / name)
+        finally:
+            tmp.cleanup()
+
+    def test_cli_exits_nonzero_on_unusable_seed(self):
+        import subprocess
+        import sys
+        tmp, root = self._make_repo({})
+        try:
+            proc = subprocess.run(
+                [sys.executable, tooling_tree.__file__, "--seed", str(root / "missing.json"), str(root)],
+                capture_output=True, text=True,
+            )
+            self.assertEqual(proc.returncode, 2)
+            self.assertEqual(proc.stdout, "")
+            self.assertIn("missing.json", proc.stderr)
+        finally:
+            tmp.cleanup()
+
     def test_bookkeeping_derivation(self):
         tmp, root = self._make_repo({
             ".scratch/refactor/bookkeeping.md": (
@@ -1592,6 +1626,57 @@ class SeedInputTests(unittest.TestCase):
             # other node fulfilled.
             self.assertTrue(derived["phpunit"])
             self.assertTrue(derived["composer"])
+        finally:
+            tmp.cleanup()
+
+    def test_bookkeeping_derivation_missing_guardrails_section_means_never_run(self):
+        # A missing Track section means that Track was never run: none of
+        # its nodes is fulfilled, however empty the other Track's `Open` is.
+        tmp, root = self._make_repo({
+            ".scratch/refactor/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "## Safety Net\n\n"
+                "**Open:**\n"
+                "- none\n\n"
+                "**Out-of-scope:**\n"
+                "- none\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertTrue(derived["composer"])
+            self.assertTrue(derived["phpstan-level-5"])
+            for node in (
+                "composer-audit", "phpmd", "coverage-floor", "php-minimal-version",
+                "phpstan-level-6", "phpstan-level-10", "phpstan-deprecation-rules",
+                "semgrep", "secret-detection",
+            ):
+                self.assertFalse(derived[node], node)
+            backlog = tooling_tree.detect_and_roadmap(root)["backlog"]
+            self.assertIn("composer-audit", backlog)
+            self.assertIn("phpstan-level-7", backlog)
+            self.assertNotIn("composer", backlog)
+        finally:
+            tmp.cleanup()
+
+    def test_bookkeeping_derivation_missing_safety_net_section_means_never_run(self):
+        tmp, root = self._make_repo({
+            ".scratch/refactor/bookkeeping.md": (
+                "# Bookkeeping\n\n"
+                "## Guardrails\n\n"
+                "**Open:**\n"
+                "- none\n\n"
+                "**Out-of-scope:**\n"
+                "- none\n"
+            ),
+        })
+        try:
+            tree = load_tree()
+            derived = _derive_fulfilled_from_bookkeeping(root, tree)
+            self.assertFalse(derived["composer"])
+            self.assertFalse(derived["phpunit"])
+            self.assertTrue(derived["composer-audit"])
         finally:
             tmp.cleanup()
 

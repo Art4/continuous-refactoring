@@ -6,9 +6,9 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 02 (Prose audit — Safety Net nodes), 03 (Prose audit — Guardrails nodes and gates), 04 (`Open` as the complete backlog), 05 (Script reduced to graph logic).
 
-**Status:** implemented — PR #108, open items listed in Comments
+**Status:** done — PRs #108, #139
 
-- [ ] A scan of a Track writes `Open` containing every unresolved scope node in the script's order (blocked ones included), leaves `Out-of-scope` as recorded, and writes `Last scan`.
+- [x] A scan of a Track writes `Open` containing every unresolved scope node in the script's order (blocked ones included), leaves `Out-of-scope` as recorded, and writes `Last scan`.
 - [x] A scan that finds every scope node resolved writes `Last scan` and an empty `Open`.
 - [x] Merge of a Track candidate removes its entry from `Open`.
 - [x] Rejection removes the entry, writes the recorded rejection and the `Out-of-scope` pointer, and removes every node closed by that rejection without writing further files.
@@ -36,3 +36,9 @@ Spec: `agent-judged-fulfilment`.
     Track derives every node as fulfilled (see ticket 05 item 2).
   - `safety-net-write.md`/`guardrails-write.md` state the merge/rejection/reversal/`Last scan` writes but
     never instruct `refactor-learn` to write the script's `backlog` into `Open` after a scan.
+
+> **2026-10-08:** PR #139 closes item 1. `refactor-scan/SKILL.md` step 4 now tells a Safety Net or
+> Guardrails scan to judge, write the seed, run the script with `--seed` and hand the `backlog` entries
+> of the Track's scope onward; both Track files' "Judging fulfilment" and "Proposing and recording"
+> no longer refer to a parser signal; `safety-net-write.md`/`guardrails-write.md` gain "Scan completed
+> → write `Open`". The agent fixtures were not re-run.
