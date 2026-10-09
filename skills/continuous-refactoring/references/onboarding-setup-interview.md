@@ -12,7 +12,7 @@ something a tree doc can get right for every target by guessing.
 It runs inline in the dispatcher (never in a subagent), once per target, and
 **ends the invocation** — no Track selection, no scan, no candidate issue, no
 merge request, no branch, nothing created on the forge — except the one
-bookkeeping issue, when the human chose to keep the state in one (Q4).
+place for remote bookkeeping, when the human chose that (Q4).
 
 Parts, in order: **Explore**, **Setup gap** (only when the engineering-skills
 setup is incomplete), **Ask**, **Summarize**, **Record**, **Closing**.
@@ -239,15 +239,23 @@ they reach another machine depends on where they live:
 - **Local files (`.scratch/refactor/`)** — recommended. Nothing else to set
   up; whether they go into Git, and how they reach another machine, is up to
   you, and this is meant for one person.
-- **A new issue on the tracker** — only offered for GitHub or GitLab, and only
-  when Explore found the forge reachable. The state lives in the issue, so any
-  machine can pick it up; this interview creates the issue (the one thing it
-  creates on the forge).
-- **One that already exists** — name the file's path or the issue's URL, e.g.
-  to continue on a second machine. It must exist and be readable.
+- **A new issue on the tracker** — only offered when the GitHub or GitLab
+  template is the tracker's, and only when Explore found the forge reachable.
+  The state lives in the issue, so any machine can pick it up; this interview
+  creates the issue (the one thing it creates on the forge).
+- **As this project describes it** — remote bookkeeping somewhere the project
+  names: a ticket, a wiki page. Offered when `## Refactoring operations`
+  already has a **Bookkeeping** bullet, or when the human wants to name a
+  place. No bullet yet → propose one from what the target's own files say
+  about reaching that place (where it lives, what the pointer's value is, how
+  it is fetched and stored); the human confirms or changes it, and `## Record`
+  writes it. The bullet says how the place is created → this interview
+  creates it; otherwise the human names one that exists.
+- **One that already exists** — name the file's path, or the pointer value of
+  remote bookkeeping, e.g. to continue on a second machine.
 
 Recommendation: **Local files**, unless the human said they work from more
-than one machine, then the issue. If the human refuses to store the state at
+than one machine, then remote bookkeeping. If the human refuses to store the state at
 all, don't invent or wire up an alternative: say the suite can't run without
 it, write nothing, and end the invocation — the next `/continuous-refactoring`
 starts onboarding from scratch.
@@ -280,7 +288,8 @@ can end onboarding without writing.
 > `<file>`" for one that wasn't asked> (only for a tracker without a template).
 > Ticket-create-mode: <autonomous | ask-each-time>.
 > MR-create-mode: <autonomous | ask-each-time | human-opens>.
-> Bookkeeping: `<path or issue URL>`, to be recorded in `.scratch/refactor/config.md` (a new issue is created for it — only when Q4 chose one).
+> Bookkeeping: `<path or pointer value>`, to be recorded in `.scratch/refactor/config.md` (a place is created for it — only when Q4 chose a new one).
+> Bookkeeping bullet: <how it is fetched and stored, one line> (only when Q4 wrote one).
 > Earlier state: <moved and removed | moved, kept | not moved | none found>.
 > Files: <the files `## Record` will write — the instruction file's section,
 > `docs/agents/triage-labels.md` and `docs/agents/issue-tracker.md` when
@@ -350,16 +359,14 @@ missing table row) and say so.
 
    In every case the **Merge requests** bullet states the forge Explore read
    from the Git remote.
-4. **The bookkeeping issue** — only when Q4 chose a new one. Look for an
-   open issue titled `Continuous Refactoring` first: found → ask whether to
-   adopt it instead of creating a second one. Otherwise create it as
-   `issue-mode.md` describes (`gh issue create` / `glab issue create`): title
-   `Continuous Refactoring`, body the two plain sentences, `---` and the
-   document, with no labels. Its URL becomes the Bookkeeping pointer.
+4. **Remote bookkeeping** — only when Q4 chose it. A **Bookkeeping** bullet
+   the human confirmed in Q4 is added to `## Refactoring operations` first. A
+   new place is created the way the bullet says; what names it becomes the
+   Bookkeeping pointer. An existing place → the value the human gave.
 5. **Earlier state, moved** — only when Q5 chose to move it. The old
    `bookkeeping.md` minus the fields that go elsewhere becomes the new
    document; `out-of-scope/` and `merge-requests.md` come across as they are
-   (in issue mode, `issue-mode.md`'s *Save* turns them into comments); a
+   (with remote bookkeeping they are stored with it, `remote-bookkeeping.md`); a
    `housekeeping-template.md` inside a custom old folder moves to
    `docs/refactoring/housekeeping-template.md`. `Focus areas` and `Refactoring
    goal` (when not `none`) are added as lines to the instruction file's
@@ -367,33 +374,33 @@ missing table row) and say so.
    named the create-modes are removed from it.
 6. **Bookkeeping pointer and the two create-modes** → `.scratch/refactor/config.md`,
    creating the folder if needed. The shape is `refactoring-bookkeeping.md`'s
-   *The config file*: the title line, `**Bookkeeping:**` (Q4's path or URL,
+   *The config file*: the title line, `**Bookkeeping:**` (Q4's path or pointer value,
    default `.scratch/refactor/bookkeeping.md`), `**Ticket-create-mode:**` and
    `**MR-create-mode:**` (Q2/Q3, or the values moved from earlier state). A
    file that already exists keeps the values it has; only missing fields are
    added.
-7. **The bookkeeping document** → `<path>/bookkeeping.md` (in issue mode, the
-   working copy under `.scratch/refactor/`, which is then saved to the issue
-   as `issue-mode.md`'s *Save* says) — **last**, creating the folder if needed. The shape is
+7. **The bookkeeping document** → `<path>/bookkeeping.md` (with remote bookkeeping, the
+   working copy under `.scratch/refactor/`, which is then stored as
+   `remote-bookkeeping.md` says) — **last**, creating the folder if needed. The shape is
    `refactoring-bookkeeping.md`'s `## Structure`, reduced to the title line
    (`# Refactoring Bookkeeping`) — or, after a move, what the old document
    carried: no Track sections
    (each appears when its Track first runs).
 8. **Old files removed** — only when Q5 chose to remove them, and only after
    steps 5–7 are done: the old `bookkeeping.md`, `merge-requests.md`,
-   `out-of-scope/`, `fulfilled-set.json` (in file mode it moves with the
+   `out-of-scope/`, `fulfilled-set.json` (with local bookkeeping it moves with the
    folder instead) and then the old folder, if empty. They stay in Git
    history if they were ever committed.
 
 No candidate issue is filed, no branch or merge request is opened, no label is
-created on the forge, and nothing is committed. The bookkeeping issue (step 4)
+created on the forge, and nothing is committed. The place for remote bookkeeping (step 4)
 is not a ticket: `Ticket-create-mode` doesn't govern it.
 
 ## Closing
 
 Ends the invocation. Tell the human, in plain prose:
 
-- **What was created** — each file, one line each, and the bookkeeping issue
+- **What was created** — each file, one line each, and the place for remote bookkeeping
   with its link (and what was already there and left alone). After a move:
   what was moved and what was removed.
 - **Commit what belongs in Git** — only when this run wrote something that
@@ -438,8 +445,8 @@ Two distinct cases:
   confirmed — that's exactly what this design exists to stop. Take every
   recommended answer as *proposed, not decided* — the setup-gap question
   defaults to **Continue**, a Q1 follow-up nobody can answer makes Q1
-  **Local Markdown**, Q4 stays local files at the default location and Q5 becomes *don't move it* — no issue is
-  created and nothing is removed with nobody there to confirm; never invent a
+  **Local Markdown**, Q4 stays local files at the default location and Q5 becomes *don't move it* — no place for remote
+  bookkeeping is created and nothing is removed with nobody there to confirm; never invent a
   custom path with nobody to name one — record it exactly as `## Record`
   describes, but flag every one in the closing text as "recommended, not
   confirmed by a human — first thing to double-check." The human reading
