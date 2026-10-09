@@ -20,6 +20,17 @@ _Avoid_: session, sprint
 The forge reviewable that delivers a completed candidate. Skills always use this term; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
+**Issue tracker**:
+Where a project's tickets live — described, not named: `docs/agents/issue-tracker.md` says how an agent reaches it, and its `## Refactoring operations` section holds the **Refactoring operations**. May be a different system than the **forge**.
+_Avoid_: native-label tracker (the suite no longer sorts trackers by name or by label support)
+
+**Forge**:
+The system that hosts the repository and its **merge requests** (GitHub, GitLab, another host), read from the Git remote. The same system as the **issue tracker** on a GitHub or GitLab project; a different one where tickets live elsewhere (Redmine, Jira, local files).
+_Avoid_: tracker (for where merge requests live)
+
+**Refactoring operations**:
+The named operations the suite needs from an **issue tracker**, one bullet each in that file's `## Refactoring operations` section: **Candidate**, **Priority**, **Done**, **Filed date** and **Merge requests** always; **Linked merge request**, **Comment author and time** and **Claim** where the tracker has them. A missing optional operation means the capability is absent and the skill takes its fallback (`skills/continuous-refactoring/references/refactoring-operations.md`).
+
 **Ticket**:
 What the human calls an issue on the project's tracker. The skills themselves say "issue" (`refactor:candidate` issues, "file an issue"); "ticket" is the word the human-facing settings and questions use, because it is the wording of the engineering skills the suite builds on. Not a synonym for **Candidate**: a candidate is a ticket with a role in the loop, not every ticket is one. A skill that would create a ticket returns a draft instead; the loop creates it.
 _Avoid_: task, todo

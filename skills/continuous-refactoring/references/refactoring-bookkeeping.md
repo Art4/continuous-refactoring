@@ -20,7 +20,7 @@ The suite reads and writes the document as one local file, whichever of two plac
 
 - **File mode** — the pointer is a path. The file is the document: the suite writes it and never commits,
   branches or ignores anything; whether it goes into Git, and how it reaches another machine, is the developer's
-  job, and this mode is meant for one person. Always the mode with the local Markdown tracker.
+  job, and this mode is meant for one person. Always the mode on a tracker other than GitHub or GitLab.
 - **Issue mode** — the pointer is the URL of a tracker issue. The issue body is the document, and the local file
   is a copy the suite loads before a pass and saves after every write, so the state can be picked up from any
   machine without a commit (`issue-mode.md`).
@@ -31,11 +31,11 @@ Either way every skill and the parser read and write the same local files; only 
 
 The **Refactoring Notes** are the folder holding the loop's state — the bookkeeping document (`bookkeeping.md`,
 this file), `merge-requests.md`, `out-of-scope/`. It is the folder the Bookkeeping pointer points into. The default
-is `.scratch/refactor/`, next to the local Markdown tracker's own `issues/` folder.
+is `.scratch/refactor/`, next to the Local Markdown tracker's own `issues/` folder.
 
 **Resolution rule**, followed independently by every lifecycle skill (and by the deterministic parser,
 `../../refactor-scan/references/tooling_tree.py`) wherever it needs the Refactoring Notes, the same way the suite
-already resolves "does the tracker support native labels" from `docs/agents/issue-tracker.md` — not a value
+already reads the tracker's operations from `docs/agents/issue-tracker.md` — not a value
 threaded through the orchestrator's carried-data chain. The **Bookkeeping pointer** is, in this order:
 
 1. the config file's `**Bookkeeping:**` field — the path of the bookkeeping document, or the URL of its issue;
@@ -335,7 +335,7 @@ Investigation is selected, only whether the selected pass resumes or scans).
   scan`'s own value; the field is a pure audit trail here ("did Investigation's scan run, and when"), not
   an input to its own due-check.
 - **`Open`** — one line per in-flight candidate, `- <issue title> (#<issue>)`, `- none` when empty (see
-  *Why more than one entry*, below). Written on **every** tracker, native-label ones included: an Investigation
+  *Why more than one entry*, below). Written on **every** tracker, whatever its operations: an Investigation
   candidate needs `refactor-scan` to resume *exactly* this issue next pass rather than treat it as a fresh
   candidate and possibly pick a different one via step 3b's ranking, regardless of whether the tracker
   also shows the issue open. `refactor-scan` resumes it only when **Investigation is the Track selected
@@ -377,7 +377,7 @@ There is deliberately no `Cadence` field for the continuous-refactoring loop its
   `housekeeping-cadence-interview.md`). `## Investigation` is the same too — `refactor-design` adds an
   `Open` entry, `refactor-learn` removes it and writes `Last scan` — but unlike those three, *nothing* in
   it is hand-editable — its `Cadence` is always the literal `continuous` (above), never a number to tune.
-- The suite never commits this document, in either mode. Loop state does not live in the agent's own conversation but here (the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` names no native-label tracker; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own native link to its delivering pull request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
+- The suite never commits this document, in either mode. Loop state does not live in the agent's own conversation but here (the Safety Net, Guardrails, Housekeeping, and Investigation sections), in the issue tracker (backlog), in the Refactoring Notes' `merge-requests.md` (open suite merge requests — only when `docs/agents/issue-tracker.md` has no **Linked merge request** operation; otherwise that state lives directly on the tracker, as every open `refactor:candidate` issue's own link to its delivering merge request), and in the Refactoring Notes' `out-of-scope/` (learned rejections). A branch can therefore only see the state of the working tree it runs in.
 - If the Bookkeeping pointer is missing, or names a file that doesn't exist, the target isn't onboarded yet (an issue URL that can't be read is a different case — `issue-mode.md`, *Load*: the pass stops, and nothing is created in its place): the dispatcher's onboarding step runs before anything else, and every other skill that needs the document aborts (*Not onboarded yet*, below) rather than creating it.
 
 ## Not onboarded yet

@@ -12,8 +12,7 @@ something a tree doc can get right for every target by guessing.
 It runs inline in the dispatcher (never in a subagent), once per target, and
 **ends the invocation** — no Track selection, no scan, no candidate issue, no
 merge request, no branch, nothing created on the forge — except the one
-bookkeeping issue, when the human chose to keep the state in one (Q4). It never runs again for a
-target whose Bookkeeping pointer already resolves to an existing `bookkeeping.md`.
+bookkeeping issue, when the human chose to keep the state in one (Q4).
 
 Parts, in order: **Explore**, **Setup gap** (only when the engineering-skills
 setup is incomplete), **Ask**, **Summarize**, **Record**, **Closing**.
@@ -53,11 +52,20 @@ Read-only. No writes, no questions yet.
 - **Engineering-skills setup.** Read `docs/agents/issue-tracker.md` and
   `docs/agents/triage-labels.md` if they exist. **Both exist → set up**;
   anything less → not set up (a repo-based test — which skills are installed
-  on this machine is never consulted). An existing `issue-tracker.md` also
-  answers Q1 below: its title names the tracker (`# Issue tracker: GitHub` /
-  `GitLab` / `Local Markdown`, or a freeform description for anything else).
-  Note the tracker's native-label status from it and whether
-  `triage-labels.md` has a `done` row.
+  on this machine is never consulted). Note whether `triage-labels.md` has a
+  `done` row.
+- **The tracker.** What `issue-tracker.md` says decides Q1 below
+  (`refactoring-operations.md` names the operations and holds the templates):
+  - It carries `## Refactoring operations` → the tracker is **on record**.
+  - No such section, title `# Issue tracker: GitHub` / `GitLab` /
+    `Local Markdown` → on record too; the section is the next write, from
+    that template.
+  - No such section, and the file describes another tracker → **described**:
+    note its name, and which operations the file and the repo's own docs
+    (`CONTRIBUTING.md`, the instruction file) already answer.
+  - No file → note any sign that a tracker other than the forge is in use
+    (the instruction file or `CONTRIBUTING.md` names one, ticket numbers in
+    commit messages that match no forge issue).
 - **Refactoring Notes.** The Bookkeeping pointer (`refactoring-bookkeeping.md`,
   *Where the Refactoring Notes live*) says where they live; none → the default
   `.scratch/refactor/`. `bookkeeping.md` is missing — that's why onboarding is
@@ -79,7 +87,8 @@ Read-only. No writes, no questions yet.
   treat what the files record — the tracker in `issue-tracker.md`, the
   `Bookkeeping:` pointer in `config.md` — as **on record** (don't re-ask it, confirm it in
   `## Summarize` as "already recorded"), and write only what is missing. A
-  missing `issue-tracker.md` or `triage-labels.md` is then simply the next
+  missing `issue-tracker.md` or `triage-labels.md`, or an `issue-tracker.md`
+  without its `## Refactoring operations` section, is then simply the next
   write, in the not-set-up form. `Ticket-create-mode` and `MR-create-mode`
   are on record only if `config.md` already states them; an interruption before
   that write loses them, so Q2 and Q3 are then asked again.
@@ -99,7 +108,9 @@ the answer decides whether the rest is worth asking at all:
 `❓ **Q0** - **Engineering-skills setup is incomplete**: <which of the two
 files is missing>. The engineering skills (issue-tracker config, triage
 labels) set the repo's issue-tracking vocabulary; this suite reads the same
-files.`
+files.` When `## Explore` found signs of another tracker and no
+`issue-tracker.md`, add that the setup can describe that tracker, and that
+continuing means describing it here (Q1).
 
 - **Abort** — nothing is written. Point the human at the
   `setup-matt-pocock-skills` setup skill, to run first; the next
@@ -132,24 +143,49 @@ that), or the same numbered-prose shape otherwise — wait for the reply,
 then ask Q2, wait, then Q3, wait, then Q4, wait, then Q5 if it applies, wait. Skip any question `## Explore` found
 already on record.
 
-**Q1 — where do issues and merge requests live?** Skipped when
-`docs/agents/issue-tracker.md` exists — its title already answers it.
+**Q1 — where do issues live?** Skipped when `## Explore` found the tracker
+on record. Merge requests are not part of this question: they live on the
+forge, read from the Git remote (`refactoring-operations.md`, **Merge
+requests**).
 
 - **GitHub** — only offered when Explore found a `github.com` match.
 - **GitLab** — only offered when Explore found a `gitlab.com` match.
+- **<Name>, as `docs/agents/issue-tracker.md` describes it** — only offered
+  when Explore found a described tracker (e.g. "Redmine, as
+  `docs/agents/issue-tracker.md` describes it").
+- **Another tracker, described here** — only offered when there is no
+  `issue-tracker.md`: the human names the tracker and how an agent reaches it.
 - **Local Markdown** — always offered, regardless of what else was found:
-  issues and merge requests tracked as files inside this repo, no forge
-  involved.
-- **Something else** — the human names a different tracker. Note what they
-  named; fall through to the Local Markdown template for the actual
-  mechanics unless they describe a different concrete convention — this
-  suite ships native handling for GitHub and GitLab only.
+  refactoring issues tracked as files inside this repo. An existing
+  `issue-tracker.md` stays as it is; only the suite's own issues are local.
 
-Recommendation: the matched GitHub/GitLab option (worded with the
-reachability finding) when one exists; **Local Markdown** when no match was
-found, or when a match was a different/unrecognized host ("no built-in
-native handling for this host yet — Local Markdown works everywhere; pick
-'something else' if you'd rather describe a different convention").
+Recommendation, first match: the described tracker; another tracker
+described here, when Explore found signs of one; the matched GitHub/GitLab
+option (worded with the reachability finding); **Local Markdown**.
+
+**Q1 follow-ups — the operations.** Only for a described tracker or one
+described here; GitHub, GitLab and Local Markdown take their template. One
+question at a time, each with a recommendation drawn from what the file and
+the repo's docs already state. An operation those already answer is not
+asked — it goes into `## Summarize` as read from there.
+
+- **The basics** — only for a tracker described here: how an agent creates,
+  reads, lists, comments on and closes an issue. One question, one paragraph
+  or a command each.
+- **Marking** — how an issue is marked a refactoring candidate, and how a
+  priority one (**Candidate**, **Priority**). Labels where the tracker has
+  them; otherwise the human names the mechanism (a custom field, a subject
+  prefix, child issues of one collecting issue). When `triage-labels.md` is
+  missing, the same question covers the three triage roles `needs-info`,
+  `ready-for-agent` and `wontfix`.
+- **Done** and **Filed date** — recommended from the file: closing an issue
+  finishes it, its creation timestamp is the date.
+- **Linked merge request** — whether the repo has a convention for how a
+  merge request refers to its issue and how to find one from the other. None
+  → the bullet is left out.
+- **Comment author and time**, **Claim** — recommended from the file when it
+  shows comments carrying author and timestamp, and an assignee field. Not
+  available → the bullet is left out.
 
 **Q2 — tickets: create automatically, or check with you first?** Skipped when
 `config.md`, or the earlier state's `bookkeeping.md`, already states `Ticket-create-mode`.
@@ -196,7 +232,7 @@ instruction file already names a `Bookkeeping:` line.
 
 The suite needs somewhere for the loop's own state: each Track's cadence, last
 scan and open items, plus the learned rejections and, on a tracker without
-native labels, the merge-request ledger — together, the **bookkeeping
+a **Linked merge request** operation, the merge-request ledger — together, the **bookkeeping
 document** and the **Refactoring Notes**. The suite never commits them; how
 they reach another machine depends on where they live:
 
@@ -239,6 +275,9 @@ there is no approval gate**; the setup-gap question is the only choice that
 can end onboarding without writing.
 
 > Tracker: <GitHub | GitLab | Local Markdown | other, as named>.
+> Merge requests: <the forge and its tool | none — you land the prepared branch>.
+> Operations: <each `## Refactoring operations` bullet, one line; "read from
+> `<file>`" for one that wasn't asked> (only for a tracker without a template).
 > Ticket-create-mode: <autonomous | ask-each-time>.
 > MR-create-mode: <autonomous | ask-each-time | human-opens>.
 > Bookkeeping: `<path or issue URL>`, to be recorded in `.scratch/refactor/config.md` (a new issue is created for it — only when Q4 chose one).
@@ -286,30 +325,31 @@ missing table row) and say so.
    skill in the suite refers to that folder by name — "the Refactoring
    Notes" — never by restating the concrete path.
 2. **Triage labels** → `docs/agents/triage-labels.md`:
-   - **File exists** → leave it. Local Markdown tracker and it has no `done`
+   - **File exists** → leave it. The tracker's **Done** names a `done`
+     marker (the Local Markdown template does) and the table has no `done`
      row → append that one row. Otherwise nothing.
    - Absent → write
      `triage-labels-template.md`'s
      content (its `## Variants` say when the `done` row is dropped and how
      forge overrides apply) — don't restate it here.
-3. **Tracker choice** → `docs/agents/issue-tracker.md`, only when absent:
-   - **GitHub or GitLab:** title names which (`# Issue tracker: GitHub` /
-     `GitLab`) — the one signal every lifecycle skill reads instead of
-     re-probing `gh`/`glab` independently. Below the title: which remote,
-     that labels are native (`refactor:candidate`, `refactor:priority`, and
-     the triage roles from `docs/agents/triage-labels.md` apply directly, no
-     local mirror — no `refactor:delivered` or other in-flight label; a
-     candidate's linked pull request, native to the tracker, is what's in
-     flight; a closed issue is a done one, no `done` label), and the two
-     operations every skill needs ("file an issue": `gh`/`glab issue create`
-     or the forge UI on `origin`; "check the external tracker": query the
-     forge directly).
-   - **Local Markdown:** write
-     `local-issue-tracker-template.md`'s
-     content verbatim — don't restate it here, avoid two drifting copies.
-   - **Something else:** same shape as the two cases above, from what the
-     human described; no description given → fall through to Local
-     Markdown.
+3. **Tracker choice** → `docs/agents/issue-tracker.md`. The part every
+   tracker gets is the `## Refactoring operations` section, appended when the
+   file lacks it; nothing else in an existing file changes. Its content is
+   `refactoring-operations.md`'s — don't restate it here.
+   - **GitHub or GitLab:** file absent → write the title
+     (`# Issue tracker: GitHub` / `GitLab`), one sentence naming the remote,
+     and that template's section. File present → append the section.
+   - **Local Markdown:** file absent → write
+     `local-issue-tracker-template.md`'s content. File present (it describes
+     another tracker) → append the Local Markdown section only.
+   - **A described tracker:** append the section, built from the Q1
+     follow-ups.
+   - **A tracker described here:** write the title (`# Issue tracker:
+     <Name>`), a `## Conventions` list from the basics the human gave, and
+     the section.
+
+   In every case the **Merge requests** bullet states the forge Explore read
+   from the Git remote.
 4. **The bookkeeping issue** — only when Q4 chose a new one. Look for an
    open issue titled `Continuous Refactoring` first: found → ask whether to
    adopt it instead of creating a second one. Otherwise create it as
@@ -380,7 +420,7 @@ Ends the invocation. Tell the human, in plain prose:
   ```
 
   GitLab needs nothing: creating an issue with a label that doesn't exist
-  yet creates that project label. Local Markdown needs nothing.
+  yet creates that project label. Every other tracker needs nothing.
 - **Proposed, not decided** — when no human was present (below), name each
   answer that was taken as a recommendation.
 
@@ -397,7 +437,8 @@ Two distinct cases:
   run with only a log file as output). Don't guess and proceed as if
   confirmed — that's exactly what this design exists to stop. Take every
   recommended answer as *proposed, not decided* — the setup-gap question
-  defaults to **Continue**, Q4 stays local files at the default location and Q5 becomes *don't move it* — no issue is
+  defaults to **Continue**, a Q1 follow-up nobody can answer makes Q1
+  **Local Markdown**, Q4 stays local files at the default location and Q5 becomes *don't move it* — no issue is
   created and nothing is removed with nobody there to confirm; never invent a
   custom path with nobody to name one — record it exactly as `## Record`
   describes, but flag every one in the closing text as "recommended, not

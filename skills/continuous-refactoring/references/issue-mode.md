@@ -20,7 +20,7 @@ Markdown tracker never has a URL pointer — it is always file mode.
 - **Comments** hold the two things that don't fit a body. One comment per learned rejection, whose first line
   is `<!-- refactor:out-of-scope <slug> -->`, followed by the entry's text — the content of what would be
   `out-of-scope/<slug>.md` in file mode. One comment per remembered merge request (only when the tracker has no
-  native labels), whose first line is `<!-- refactor:merge-request -->`, followed by its fields. Any other
+  **Linked merge request** operation), whose first line is `<!-- refactor:merge-request -->`, followed by its fields. Any other
   comment is a human talking and is ignored.
 - The issue has no label of its own, and the Track sections' `Out-of-scope` lists in the body keep pointing at
   `out-of-scope/<slug>.md` exactly as in file mode — the entry simply comes from a comment.

@@ -67,6 +67,8 @@ Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skill
 
 > **Recommended, not required — the engineering-skills setup.** `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)) configures the issue tracker, triage labels and domain docs the suite reads. Run it first if you can. Without it the first `/continuous-refactoring` notices, asks whether to stop and set it up or to continue, and writes a minimal issue-tracker file and label table itself; running the setup later updates those files in place.
 
+**Any issue tracker works** that `docs/agents/issue-tracker.md` describes. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the loop's few operations work there (how a ticket is marked a refactoring candidate, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
+
 ## Quick start
 
 1. **Start the loop:** `/continuous-refactoring` — on a project that has never run it, this first invocation only **onboards**: a short config interview, then it writes your config file, the bookkeeping document (both under `.scratch/refactor/`) and the other setup files, tells you what it did, and stops without scanning anything. Commit what belongs in Git (the instruction-file section and `docs/agents/*`), then run `/continuous-refactoring` again — that second invocation starts the first real pass. The loop has no cadence of its own; trigger it however often fits (by hand, or your own scheduler such as `/schedule` or `/loop`). Each pass picks whichever of the four Tracks is most overdue and works that one — Housekeeping's weekly sweep needs no separate opt-in step.
@@ -80,7 +82,7 @@ Everything lives in the target repo's working tree, not in the conversation. The
 - **Your config:** `.scratch/refactor/config.md` — where the bookkeeping lives, `Ticket-create-mode` and `MR-create-mode`; per person and machine
 - **Last run:** `.scratch/refactor/bookkeeping.md`, or one tracker issue if you chose that during onboarding — each Track's cadence, last scan and open items
 - **Focus areas and refactoring goal:** two lines you add to `AGENTS.md` (or `CLAUDE.md`), any time
-- **Remembered merge requests:** open `refactor:candidate` issues with a linked pull request; `.scratch/refactor/merge-requests.md` on trackers without native labels
+- **Remembered merge requests:** open `refactor:candidate` issues with a linked merge request; `.scratch/refactor/merge-requests.md` where the tracker can't lead from an issue to its merge request
 - **Backlog:** `refactor:*` issues on the issue tracker
 - **Learned rejections:** `.scratch/refactor/out-of-scope/`
 - **Domain language and decisions:** the target's own `CONTEXT.md` and ADR directory

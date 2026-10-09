@@ -14,7 +14,7 @@ The early call's "Merged" finding, for a candidate named among `## Investigation
 (`refactor-scan/SKILL.md` step 3 handed it forward as a resumable candidate) → remove *exactly that
 entry*, leaving any other entry untouched; `Open` reads `- none` only once the last entry is gone.
 Nothing else about the early call's merge handling changes (mark the candidate `done`, close the issue,
-drop the `merge-requests.md` entry if non-native-tracker — `refactor-learn/SKILL.md`'s own `## Process`).
+drop the `merge-requests.md` entry if there is one — `refactor-learn/SKILL.md`'s own `## Process`).
 
 ## Rejection → remove that one entry from `Open` (no `out-of-scope/` — Investigation carries none)
 
@@ -30,7 +30,7 @@ declined candidate's own closing note on the issue
 The closing call's freshly-opened-MR handling doesn't itself touch `Open` — a candidate only leaves
 `Open` once its own delivering MR actually **merges** (above), and only its own entry leaves; any other
 entry already there is unaffected either way. What *does* happen at this point, same as for any other
-candidate: the MR is remembered (`merge-requests.md` / the tracker's native link).
+candidate: the MR is remembered (`merge-requests.md` / the tracker's **Linked merge request**).
 
 ## `refactor-design` adds an entry to `Open` — this call never does
 
@@ -38,7 +38,7 @@ Unlike `## Safety Net`'s/`## Guardrails`' own `Open`, which starts as a bare slu
 issue number once one is filed, an `## Investigation` `Open` entry is only ever written once its
 candidate already has an issue — `refactor-design` appends it directly, `- <issue title> (#<issue>)`,
 the moment it writes that candidate's plan (`../../refactor-design/SKILL.md`) — on every tracker,
-native-label ones included, alongside any entry already there (more than one candidate can be in flight
+alongside any entry already there (more than one candidate can be in flight
 at once, bounded by the suite-wide two-merge-request cap, `../../continuous-refactoring/references/refactoring-bookkeeping.md`'s *Why more than one entry*). This call only ever *removes* an
 entry (above); it never adds or rewrites one itself.
 

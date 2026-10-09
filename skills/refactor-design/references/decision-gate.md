@@ -33,10 +33,10 @@ The issue stays open, `refactor:candidate` unchanged — only its triage labels,
 `refactor-implement` may run against it this pass. `refactor-loop`
 (`../../refactor-loop/SKILL.md` step 5) skips implementation for a flagged candidate still
 missing `ready-for-agent`. How a later pass treats it meanwhile depends on the tracker
-(`refactor-scan/SKILL.md` steps 2 and 3b): a native-label tracker can always rediscover it later, so
-scan looks for other work instead of waiting on it; a git-only tracker has no such rediscovery, so the
-pass stops there rather than risk losing track of it. A native-label tracker also checks the issue for a
-human's own answer each time it's rediscovered — see "A flagged candidate's human answer arrives" below.
+(`refactor-scan/SKILL.md` steps 2 and 3b): with API access the tracker can always rediscover it later, so
+scan looks for other work instead of waiting on it; with only git to go on there is no such rediscovery, so the
+pass stops there rather than risk losing track of it. A tracker with a **Comment author and time** operation
+is also checked for a human's own answer each time the issue is rediscovered — see "A flagged candidate's human answer arrives" below.
 
 ## A flagged candidate's human answer arrives
 

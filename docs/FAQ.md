@@ -86,6 +86,26 @@ run the setup first (nothing is written) or to continue, in which case it writes
 file and label table itself. Running the setup later updates those files in place. Labels are only ever
 recorded in files — the suite never creates a label on GitHub or GitLab during onboarding.
 
+## Which issue trackers work?
+
+Any tracker an agent can reach, as long as `docs/agents/issue-tracker.md` describes it. GitHub, GitLab and local
+Markdown files come with a template, so onboarding asks nothing about them. For another tracker onboarding
+offers three ways: use it as that file already describes it, describe it right there in the interview, or keep
+refactoring tickets as local Markdown files while everything else stays where it is. The engineering-skills
+setup can write the description for you, but it isn't required.
+
+The suite asks for a handful of operations instead of knowing each tracker by name, because that is all it
+needs: how a ticket is marked a candidate, how a finished one is recognised, where merge requests live. On a
+tracker without labels you say how tickets are marked — a custom field, a subject prefix, child tickets of one
+collecting ticket. Tickets and merge requests may also live in two systems; the loop then keeps its own list
+of which merge request belongs to which ticket.
+
+## Can I run the onboarding again?
+
+Yes — tell `/continuous-refactoring` to run the onboarding again. What is already recorded stays and isn't
+asked again; only what is missing gets written, and nothing is overwritten. That is how a project onboarded
+earlier gets the `## Refactoring operations` section in its issue-tracker file.
+
 ## Why doesn't the suite commit its own state?
 
 Because the state — each Track's last scan and open items, your create-modes — is bookkeeping about *your*

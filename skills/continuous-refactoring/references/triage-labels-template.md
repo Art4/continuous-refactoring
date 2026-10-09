@@ -27,8 +27,11 @@ Edit the right-hand column to match whatever vocabulary you actually use.
 
 ## Variants
 
-- **`done` row: Local Markdown tracker only.** On GitHub/GitLab a closed issue is done, so drop that row. An existing
-  table on a Local Markdown tracker that lacks it gets just that one row appended.
+- **`done` row: only where the tracker's **Done** operation names a `done` marker** (the Local Markdown template
+  does). Where a closed issue is done, drop that row. An existing table that lacks a needed `done` row gets just
+  that one row appended.
+- **A tracker without labels.** The right-hand column holds what the human named for each role in the interview's
+  marking question, and its heading says what that is (a field's value, a subject prefix).
 - **Overrides.** A role whose label already exists on the forge under a different spelling (e.g. `wont-fix`) gets
   that spelling in the right-hand column. Only when this template is written — an existing table is never edited
   for overrides.
