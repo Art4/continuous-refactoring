@@ -21,12 +21,17 @@ it (`onboarding-setup-interview.md`).
 | **Linked merge request** | How a merge request refers to its issue, and how to get from an issue to its merge request | Remembered merge requests live in the Refactoring Notes' `merge-requests.md`; the merge request names its issue in plain words |
 | **Comment author and time** | How to read who wrote a comment, and when | A flagged candidate is never re-checked for a human's answer |
 | **Claim** | How an issue is assigned to whoever works on it | Nothing is assigned |
+| **Bookkeeping** | Where the suite's own state lives when not in local files, what the Bookkeeping pointer's value means there, how it is fetched and stored, and — where the suite may create that place — how | The bookkeeping lives in local files |
 
 Skills keep saying `refactor:candidate` and `refactor:priority`. On a tracker whose **Candidate** and
 **Priority** name something other than a label, those two words mean whatever the section says.
 
 Where the section states where the suite's issues live, that wins over the rest of the file for the suite's
 own issues — the case of a target that tracks its work elsewhere and keeps refactoring issues as local files.
+
+**Bookkeeping** has one requirement: what was stored comes back unchanged at the next fetch — the bookkeeping
+document, every learned rejection, and the merge-request ledger where the tracker has no **Linked merge
+request**. How that is achieved is the target's (`remote-bookkeeping.md` holds the suite's side).
 
 **Merge requests** names the **forge** (`CONTEXT.md`), which is read from the Git remote and may be a
 different system than the tracker. Its three shapes:
@@ -54,6 +59,7 @@ Used by `/continuous-refactoring`.
 - **Linked merge request**: the pull request's description carries `Closes #<issue>`. From the issue: `gh issue view <n> --json closedByPullRequestsReferences`.
 - **Comment author and time**: `author` and `createdAt` of each entry in `gh issue view <n> --json comments`.
 - **Claim**: `gh issue edit <n> --add-assignee @me`.
+- **Bookkeeping**: one issue of this repository; the pointer is its URL. Its body is two plain sentences for a human who lands there (what the issue holds, that editing it changes what the loop does), a line `---`, then the bookkeeping document from its `# Refactoring Bookkeeping` title on. Each learned rejection is one comment whose first line is `<!-- refactor:out-of-scope <slug> -->`; any other comment is a human talking. Fetch: `gh issue view <n> --json state,body,comments`; a closed issue still counts, say so in the closing report. Store: replace the body, add a comment for a new entry, edit one whose text differs, delete one whose entry is gone. Create: look for an open issue titled `Continuous Refactoring` first and ask whether to adopt it; otherwise `gh issue create` with that title, the body above and no labels.
 ```
 
 ### GitLab
@@ -71,6 +77,7 @@ Used by `/continuous-refactoring`.
 - **Linked merge request**: the merge request's description carries `Closes #<issue>`. From the issue: `glab api projects/:id/issues/<n>/closed_by`.
 - **Comment author and time**: `author` and `created_at` of each entry in `glab api projects/:id/issues/<n>/notes`.
 - **Claim**: `glab issue update <n> --assignee @me`.
+- **Bookkeeping**: one issue of this project; the pointer is its URL. Its body is two plain sentences for a human who lands there (what the issue holds, that editing it changes what the loop does), a line `---`, then the bookkeeping document from its `# Refactoring Bookkeeping` title on. Each learned rejection is one comment whose first line is `<!-- refactor:out-of-scope <slug> -->`; any other comment is a human talking. Fetch: `glab issue view <n> --comments -F json`; a closed issue still counts, say so in the closing report. Store: replace the body, add a comment for a new entry, edit one whose text differs, delete one whose entry is gone. Create: look for an open issue titled `Continuous Refactoring` first and ask whether to adopt it; otherwise `glab issue create` with that title, the body above and no labels.
 ```
 
 ### Local Markdown
