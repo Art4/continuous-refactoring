@@ -495,10 +495,10 @@ npm i -g opencode              # or: pnpm add -g opencode / bun add -g opencode
 opencode --help | head -n 5
 # alternative without global install: npx --yes opencode --help
 
-# 3. Model opencode/muse-spark-1.2-contributor-free (used in this repo)
-opencode models | grep -i "muse-spark"   # should list muse-spark-1.2-contributor-free
+# 3. Model opencode/muse-spark-1.3-contributor-free (used in this repo)
+opencode models | grep -i "muse-spark"   # should list muse-spark-1.3-contributor-free
 # If not authenticated: opencode auth  (or set OPENCODE_API_KEY / provider credentials)
-opencode run -m opencode/muse-spark-1.2-contributor-free --help | head -n 5
+opencode run -m opencode/muse-spark-1.3-contributor-free --help | head -n 5
 ```
 
 Every `--opencode` tier documents its own run command in its own section above; all of them share
