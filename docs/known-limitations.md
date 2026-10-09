@@ -47,10 +47,9 @@ only as current as the last pass that wrote it.
 With local files, the config file and the bookkeeping document under `.scratch/refactor/` are never committed by
 the suite: nothing carries them to another machine or teammate for you, and two people running the loop each
 keep their own cadence and open items — so each runs Housekeeping on their own schedule, too. Copy or commit the
-files yourself when you switch machines. With a bookkeeping issue, any machine that has `gh` / `glab` access to it
-picks the state up, but the last write wins (an edit you make during a pass can be overwritten) and an issue that
-can't be read — deleted, no access, no CLI — stops the pass rather than creating a new one; a closed issue is
-still used, and the report says so. The Housekeeping checklist (`docs/refactoring/housekeeping-template.md`) is
+files yourself when you switch machines. With remote bookkeeping, any machine that can reach the place
+picks the state up, but the last write wins (an edit you make during a pass can be overwritten) and bookkeeping
+that can't be fetched — deleted, no access, no CLI — stops the pass rather than creating a new place. The Housekeeping checklist (`docs/refactoring/housekeeping-template.md`) is
 the exception in both cases: it is shared, committed like code.
 
 ## Create-modes default to the safe values
@@ -84,7 +83,7 @@ The closing report's **Status** line (or, for onboarding, its closing text) alwa
 | Safety Net walk: nodes skipped | Blocked by an unfulfilled parent, `needs-info`, or an unverified PHP floor | Read each reason; adopt the parent, answer the question, or reject the node |
 | Waiting for a confirmation to create a ticket | `Ticket-create-mode` is `ask-each-time` and nobody was there to answer — or you declined the ticket for the candidate the pass chose | Rerun and answer; or set `Ticket-create-mode` to `autonomous` in your config file if nobody will be there. Declined for good? Say so when offered and the node stops being proposed |
 | Onboarding wrote setup files and stopped | The project had no bookkeeping document, so this invocation only onboarded it | Commit what belongs in Git (the instruction-file section, `docs/agents/*`), rerun `/continuous-refactoring` |
-| Bookkeeping issue can't be read | The pointer names an issue that was deleted, is out of reach (no access, no `gh`/`glab`), or the forge is down | Restore access or point the config file at another issue; the loop never creates a replacement. Onboarding again only after removing the pointer |
+| Bookkeeping can't be fetched | The pointer names a place that was deleted, is out of reach (no access, no CLI), or is down — or nothing in the project says what the pointer means | Restore access, describe the place under **Bookkeeping** in `docs/agents/issue-tracker.md`, or point the config file elsewhere; the loop never creates a replacement. Onboarding again only after removing the pointer |
 | The Refactoring operations section is missing | `docs/agents/issue-tracker.md` has no `## Refactoring operations` section: the project was onboarded before the suite read its tracker that way, or the section was removed | Run the onboarding again; it adds the section and leaves everything else as it is |
 | Not onboarded yet | A Track skill or the Housekeeping skill was invoked directly on a project with no bookkeeping document | Run `/continuous-refactoring` first |
 | Housekeeping: nothing registered to check | No node has contributed a housekeeping check yet | Expected on a young target |
@@ -103,10 +102,12 @@ text lists ready-to-copy `gh label create` commands for both; run them once befo
 first pass. GitLab creates a missing project label when an issue is filed with it, so nothing is needed there.
 Every other tracker needs nothing: its marking is whatever you named during onboarding.
 
-## Bookkeeping in a ticket: GitHub and GitLab only
+## Remote bookkeeping is only as reliable as your project's description of it
 
-Keeping the suite's state in one tracker ticket instead of local files is offered only when the tracker is GitHub
-or GitLab. On any other tracker the state lives in local files under `.scratch/refactor/`.
+Outside GitHub and GitLab the suite has no procedure of its own for keeping its state in a ticket or on a page:
+your project describes how the bookkeeping is fetched and stored, and the suite follows that without testing it.
+What was stored has to come back unchanged at the next fetch. A place that rewrites text (markup conversion), or
+a procedure that can't remove an entry again, loses state without the loop noticing.
 
 ## The suite follows your tracker's conventions, it doesn't set them
 

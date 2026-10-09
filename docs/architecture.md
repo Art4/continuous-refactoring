@@ -71,18 +71,18 @@ Safety Net and Guardrails work through the **tooling tree**: a directed graph of
 
 ## Loop state
 
-State lives in the target repo's working tree, never in the conversation; every lifecycle skill reads it directly. The suite never commits its own state: it writes local files, or keeps the bookkeeping in one tracker issue.
+State lives in the target repo's working tree, never in the conversation; every lifecycle skill reads it directly. The suite never commits its own state: it writes local files, or keeps the bookkeeping somewhere your project names — a tracker issue, a wiki page.
 
 | What | Where |
 |---|---|
 | `Ticket-create-mode`, `MR-create-mode`, where the bookkeeping lives — per person and machine | `.scratch/refactor/config.md` — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
-| Each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document: a file (`bookkeeping.md`, default folder `.scratch/refactor/`) or one tracker issue, named by the pointer in the config file |
-| Learned rejections, remembered merge requests (issue mode) | comments on that issue |
+| Each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document: a file (`bookkeeping.md`, default folder `.scratch/refactor/`) or a remote place, named by the pointer in the config file |
+| Learned rejections, remembered merge requests (remote bookkeeping) | stored with the bookkeeping, the way your project describes |
 | Focus areas, refactoring goal | two lines in `AGENTS.md`/`CLAUDE.md`, written by you only |
 | Remembered merge requests | open `refactor:candidate` issues with a linked merge request, where the tracker can lead from an issue to its merge request; `merge-requests.md` otherwise |
 | Backlog | `refactor:*` issues on the tracker described in `docs/agents/issue-tracker.md` |
 | How the tracker is reached | the `## Refactoring operations` section of `docs/agents/issue-tracker.md` |
-| Learned rejections | `out-of-scope/` (a comment each, in issue mode) |
+| Learned rejections | `out-of-scope/` |
 | Housekeeping checklist | `docs/refactoring/housekeeping-template.md` — shared, reviewed like code |
 | Domain language, decisions | the target's `CONTEXT.md` and ADRs |
 
@@ -94,14 +94,19 @@ The suite never asks which tracker a project uses. It reads a handful of named o
 
 The tracker and the **forge** — the system that hosts the repository and its merge requests — are two things. They are the same system on a GitHub or GitLab project, and different ones where tickets live in Redmine and the code on GitLab. Onboarding writes the section: from a template for GitHub, GitLab and local Markdown files, from your answers for anything else. The dispatcher checks the section before every pass and stops when it is missing.
 
-### Issue mode
+### Remote bookkeeping
 
-With the bookkeeping in an issue, the skills still read and write the same local files under `.scratch/refactor/`;
-that folder is a copy. The entry point (`refactor-loop`, `continuous-housekeeping`, the dispatcher's Track
-selection) loads the issue into it before anything is read, and every skill that wrote — `refactor-learn`,
-`refactor-design` for a resume-marker write — saves it back before returning. The issue body is the document;
-each learned rejection and each remembered merge request is a comment. The last write wins. An issue that can't be
-read stops the pass and nothing is created in its place; only onboarding, with you there, creates one.
+With the bookkeeping kept outside the working tree, the skills still read and write the same local files under
+`.scratch/refactor/`; that folder is a working copy. The entry point (`refactor-loop`, `continuous-housekeeping`,
+the dispatcher's Track selection) fetches the bookkeeping into it before anything is read, and every skill that
+wrote — `refactor-learn`, `refactor-design` for a resume-marker write — stores it before returning. The last
+write wins. Bookkeeping that can't be fetched stops the pass and nothing is created in its place; only
+onboarding, with you there, creates its place.
+
+That is all the suite knows about it. Where the bookkeeping lives, what the pointer in your config file means and
+how fetching and storing are done there are described by your project, normally in the **Bookkeeping** entry of
+the `## Refactoring operations` section. The GitHub and GitLab templates bring one — an issue whose body is the
+document, with one comment per learned rejection.
 
 ## Fallbacks and self-containment
 
