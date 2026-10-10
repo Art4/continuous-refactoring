@@ -40,6 +40,15 @@ scan is ticket 06. The Housekeeping Track is the reference `housekeeping-track.m
       before the hand-over, and a fulfilled node's ticket is closed with a note
 - [ ] Declining a node records a rejection where **Rejected** says, or proposes a place; dependents are a
       decision point following the kind of edge
+- [ ] "Safety Net is fulfilled" is read from the gate, never judged: the parser's computed state of
+      `structural-scan` (ticket 10). The per-Track `fulfilled` flag is a different question and decides
+      neither the autonomous stop nor moving on to the next Track
+- [ ] A node below the target's PHP floor is laid out with the recommendation to record a rejection
+      carrying that PHP version as its blocker, so the gate is not held shut and the parser offers the
+      reversal once the floor rises
+- [ ] `CONTEXT.md` gains an entry for the aggregation node (state computed from its leaves, never handed
+      in, never a ticket), and **Recognition-only gate node** no longer gives `structural-scan` as an
+      agent-judged example
 - [ ] No cap on open merge requests or open candidates appears anywhere
 - [ ] Nothing reads or writes a bookkeeping document, a config file or a cadence
 - [ ] Text to the human says "skill suite" and "run"
