@@ -1,13 +1,13 @@
 """Deterministic graph-logic parser for the tooling tree.
 
-Provides load_tree, next_candidates, and graph-logic-only
-outputs (ordered backlog, workable nodes, withheld with reasons, closed by
-rejection, outlook comment) without invoking LLM or mutating repo.
-
-Seam: skills/refactor-scan/references/tooling_tree.py — used by refactor-scan.
+Reads the tree docs and the target repository; the node state (which nodes
+are fulfilled, which rejected) is handed in by the caller. Emits, per
+Track, the nodes with name and tool, the ordered backlog (blocked nodes
+included) and why a node is withheld — without invoking an LLM, keeping a
+file of its own, or mutating the repo.
 
 Docs: tooling-tree.md and php-tooling-tree.md (siblings to this file) are
-machine-readable (edges table), CONTEXT.md vocabulary.
+machine-readable (edges table, node sections), CONTEXT.md vocabulary.
 """
 
 from __future__ import annotations
@@ -22,6 +22,10 @@ TREE_MD = _HERE / "php-tooling-tree.md"
 # tree leaves point into via `resolved` edges.
 GENERIC_TREE_MD = _HERE / "tooling-tree.md"
 
+# The target's tracker file; its `## Refactoring operations` section is what
+# onboarding leaves behind.
+TRACKER_FILE = pathlib.PurePosixPath("docs/agents/issue-tracker.md")
+
 _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 
 # Ordinary required-gated nodes that must never be surfaced as a proposable
@@ -29,65 +33,80 @@ _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 # `static-code-analyzer` (pure plumbing), `psalm` (recognition-only — same
 # fait-accompli shape Pest already gets for `phpunit`), `is-php-project`
 # (recognition-only gate for the whole PHP specialization — rejecting a
-# required parent never unblocks its children, so a human filing an
-# out-of-scope entry for it would never accomplish anything leaving it
-# unfulfilled doesn't already). Resolved-gated aggregation nodes
+# required parent never unblocks its children, so rejecting it would never
+# accomplish anything leaving it unfulfilled doesn't already). Resolved-gated aggregation nodes
 # (`php-safety-net`) are excluded separately via
 # `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
 # required-gated nodes instead.
 _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "has-real-dependency", "phpstan-baseline-empty", "phpstan-not-psalm"}
 
 # ---------------------------------------------------------------------------
-# Seed input: fulfilled-set file (agent-judged fulfilment)
+# Node state: handed in by the caller, never looked up
 # ---------------------------------------------------------------------------
 
 
 class SeedError(ValueError):
-    """An explicitly handed-over seed could not be used as given."""
+    """A handed-over seed file could not be used as given."""
 
 
-def _load_fulfilled_seed(seed_path: pathlib.Path, strict: bool = False) -> dict[str, bool]:
-    """Load a fulfilled-set file: JSON ``{node_slug: true/false}``.
+def load_seed(seed_path: pathlib.Path, tree: dict) -> tuple[dict[str, bool], dict[str, dict | None]]:
+    """Load a seed file — the node state as a caller hands it in on the
+    command line — and return ``(fulfilled, rejected)`` in the shape the
+    functions here take::
 
-    Nodes missing from the file are treated as not fulfilled.
-    Returns ``{node: bool}`` — simple, no reason/details metadata needed
-    for graph-logic-only computation.
+        {"fulfilled": ["composer", "phpunit"],
+         "rejected": {"phpmd": null, "phpstan-level-0": {"php": "7.1"}}}
 
-    *strict* is for a seed the caller named explicitly (``--seed``): an
-    unreadable file, invalid JSON, a non-object or a non-boolean value
-    raises ``SeedError`` instead of being skipped — a caller who handed
-    over a judgement must never get outputs computed from something else.
+    ``rejected`` maps each rejected node to its blocker: ``null``, or the
+    minimum PHP version whose arrival lifts the rejection. A plain list of
+    slugs works where no rejection carries a blocker. A node named in
+    neither is undecided.
+
+    Anything else raises ``SeedError`` — a caller who handed over a
+    judgement must never get outputs computed from something else. That
+    includes a slug the tree doesn't know: a typo would otherwise turn a
+    decided node silently into an undecided one.
     """
+    seed_path = pathlib.Path(seed_path)
+
+    def fail(problem: str) -> SeedError:
+        return SeedError(f"seed file {seed_path} {problem}")
+
     try:
         data = json.loads(seed_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        if strict:
-            raise SeedError(f"seed file {seed_path} could not be read as JSON: {exc}") from exc
-        return {}
-    if not isinstance(data, dict):
-        if strict:
-            raise SeedError(f"seed file {seed_path} must hold a JSON object {{node_slug: true/false}}")
-        return {}
-    if strict:
-        bad = sorted(k for k, v in data.items() if not isinstance(v, bool))
-        if bad:
-            raise SeedError(f"seed file {seed_path} has non-boolean values for: {', '.join(bad)}")
-    return {k: bool(v) for k, v in data.items() if isinstance(v, bool)}
+        raise fail(f"could not be read as JSON: {exc}") from exc
+    shape = 'must hold a JSON object {"fulfilled": [slug, ...], "rejected": {slug: null | {"php": "X.Y"}}}'
+    if not isinstance(data, dict) or set(data) - {"fulfilled", "rejected"}:
+        raise fail(shape)
 
+    fulfilled = data.get("fulfilled", [])
+    if not isinstance(fulfilled, list) or not all(isinstance(n, str) for n in fulfilled):
+        raise fail(f'{shape} — "fulfilled" is not a list of slugs')
 
-# The Track sections whose ``**Open:**``/``**Out-of-scope:**`` fields
-# carry node state (skills/continuous-refactoring/references/
-# refactoring-bookkeeping.md). `## Housekeeping`/`## Investigation` carry
-# only Cadence/Last scan — no node state — so they are not section states
-# here; any heading still ends the collecting state like every other one.
-_TRACK_SECTION_HEADINGS = ("## Safety Net", "## Guardrails")
+    rejected = data.get("rejected", {})
+    if isinstance(rejected, list) and all(isinstance(n, str) for n in rejected):
+        rejected = {n: None for n in rejected}
+    if not isinstance(rejected, dict):
+        raise fail(f'{shape} — "rejected" is neither an object nor a list of slugs')
+    for node, blocker in rejected.items():
+        if blocker is not None and _blocked_by_php(blocker) is None:
+            raise fail(f'has no usable blocker for {node}: expected null or {{"php": "X.Y"}}')
+
+    unknown = sorted((set(fulfilled) | set(rejected)) - set(tree["nodes"]))
+    if unknown:
+        raise fail(f"names nodes the tree doesn't have: {', '.join(unknown)}")
+    both = sorted(set(fulfilled) & set(rejected))
+    if both:
+        raise fail(f"names nodes as both fulfilled and rejected: {', '.join(both)}")
+    return {n: True for n in fulfilled}, rejected
 
 
 def _guardrails_scope(tree: dict) -> set[str]:
     """Nodes of the Guardrails Track: every node with a required (or
     required-any) ancestor that is itself resolved-gated (PHP:
     ``php-safety-net``) — proposable only once the Safety Net has closed.
-    Every other node's state lives in the ``## Safety Net`` section."""
+    Every other node belongs to the Safety Net Track."""
     gates = {n for n, parents in tree["resolved_parents"].items() if parents}
     scope: set[str] = set()
     changed = True
@@ -103,105 +122,41 @@ def _guardrails_scope(tree: dict) -> set[str]:
     return scope
 
 
-def _derive_fulfilled_from_bookkeeping(
-    repo: pathlib.Path, tree: dict
-) -> dict[str, bool] | None:
-    """Derive node fulfilled state from bookkeeping.md's Track sections.
+def _node_state(repo: pathlib.Path, fulfilled, rejected) -> tuple[dict[str, bool], set[str]]:
+    """The node state every output is computed from: what the caller handed
+    in. A node named in neither *fulfilled* nor *rejected* is undecided.
+    Two nodes the parser settles itself: ``git`` always counts as
+    fulfilled, and ``onboarding-setup`` does once the target's tracker
+    file carries its ``## Refactoring operations`` section."""
+    state = dict(fulfilled or {})
+    state["git"] = True
+    if _has_refactoring_operations(repo):
+        state["onboarding-setup"] = True
+    return state, set(rejected or ())
 
-    Collects the bullets under the ``**Open:**``/``**Out-of-scope:**``
-    field lines inside the ``## Safety Net``/``## Guardrails`` sections
-    (the documented schema, written by
-    skills/refactor-learn/references/safety-net-write.md and
-    guardrails-write.md).  A scope node that is neither in ``Open`` nor
-    in ``Out-of-scope`` is fulfilled — but only when its own Track's
-    section carries that state: a missing section means the Track was
-    never run, so none of its nodes is fulfilled.  Other fields (e.g.
-    ``Last scan``) are ignored, not migrated.  Returns
-    ``None`` when no bookkeeping document or no Track-section state exists
-    (the caller returns ``{}`` — there is no detection fallback; scan
-    passes require a seed).
-    """
-    bookkeeping = _resolve_refactoring_notes_dir(repo) / "bookkeeping.md"
-    if not bookkeeping.exists():
-        return None
+
+def _has_refactoring_operations(repo: pathlib.Path) -> bool:
     try:
-        text = bookkeeping.read_text(encoding="utf-8")
+        text = (pathlib.Path(repo) / TRACKER_FILE).read_text(encoding="utf-8")
     except OSError:
-        return None
+        return False
+    return re.search(r"^## Refactoring operations\s*$", text, re.MULTILINE) is not None
 
-    open_nodes: set[str] = set()
-    out_of_scope_nodes: set[str] = set()
-    track_section: str | None = None
-    collecting: str | None = None
-    tracks_with_state: set[str] = set()
 
-    for line in text.splitlines():
-        stripped = line.strip()
-        if stripped.startswith("#"):
-            track_section = next(
-                (h for h in _TRACK_SECTION_HEADINGS if stripped.startswith(h)), None
-            )
-            collecting = None
-            continue
-        if track_section and stripped.startswith("**Open:**"):
-            collecting = "open"
-            tracks_with_state.add(track_section)
-            continue
-        if track_section and stripped.startswith("**Out-of-scope:**"):
-            collecting = "out-of-scope"
-            tracks_with_state.add(track_section)
-            continue
-        if stripped.startswith("**"):
-            collecting = None  # any other field (e.g. Last scan) ends the list
-            continue
-        if collecting == "open" and stripped.startswith("- "):
-            slug = stripped[2:].split()[0].strip("`").strip()
-            if slug and slug != "none":
-                open_nodes.add(slug)
-        elif collecting == "out-of-scope" and stripped.startswith("- "):
-            slug = stripped[2:].split()[0].strip("`").strip()
-            if slug and slug != "none":
-                out_of_scope_nodes.add(slug)
-
-    if not tracks_with_state:
-        return None
-
+def track_nodes(tree: dict) -> dict[str, list[dict]]:
+    """Per Track, its nodes in tree order, each with the ``name`` and
+    ``tool`` its node section gives (None where the tree doc has no
+    section for it). Membership is derived from the edges, see
+    ``_guardrails_scope``."""
     guardrails = _guardrails_scope(tree)
-    result: dict[str, bool] = {}
-    for node in tree["nodes"]:
-        track = "## Guardrails" if node in guardrails else "## Safety Net"
-        result[node] = (
-            track in tracks_with_state
-            and node not in open_nodes
-            and node not in out_of_scope_nodes
+    sections = tree.get("sections", {})
+    tracks: dict[str, list[dict]] = {"Safety Net": [], "Guardrails": []}
+    for node in tree["order"]:
+        section = sections.get(node, {})
+        tracks["Guardrails" if node in guardrails else "Safety Net"].append(
+            {"node": node, "name": section.get("name"), "tool": section.get("tool")}
         )
-    return result
-
-
-def _resolve_fulfilled(
-    repo: pathlib.Path,
-    tree: dict,
-    fulfilled: dict[str, bool] | None = None,
-) -> dict[str, bool]:
-    """Resolve the fulfilled set from the highest-priority source.
-
-    Priority: explicit ``fulfilled`` parameter > seed file >
-    bookkeeping derivation.  When none is available, returns ``{}``
-    (no detection fallback — scan passes require the seed; other passes
-    derive state from bookkeeping).
-    """
-    if fulfilled is not None:
-        return fulfilled
-    # Check for seed file in Refactoring Notes
-    notes_dir = _resolve_refactoring_notes_dir(repo)
-    seed_path = notes_dir / "fulfilled-set.json"
-    if seed_path.exists():
-        return _load_fulfilled_seed(seed_path)
-    # Try bookkeeping derivation
-    derived = _derive_fulfilled_from_bookkeeping(repo, tree)
-    if derived is not None:
-        return derived
-    return {}
+    return tracks
 
 
 def closed_by_rejection(tree: dict, rejected: set[str]) -> list[str]:
@@ -220,9 +175,10 @@ def _withheld_guard_cascade(
     repo: pathlib.Path,
     tree: dict | None = None,
     fulfilled: dict[str, bool] | None = None,
+    rejected=None,
 ):
     """The guard cascade withheld_with_reasons() and withheld_candidates()
-    share: resolves fulfilled state, then yields ``(node, blocked_reason,
+    share: takes the handed-in node state, then yields ``(node, blocked_reason,
     undecided_parents)`` for every node that survives the common guards
     (not never-proposed, not resolved-gated, not fulfilled, not rejected,
     not PHP-floor-blocked, recommended gate not moot) and is either
@@ -233,10 +189,8 @@ def _withheld_guard_cascade(
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    resolved = _resolve_fulfilled(repo, tree, fulfilled)
-    resolved["git"] = True
-    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
-    rejected = _rejected_nodes(repo)
+    state, rejected = _node_state(repo, fulfilled, rejected)
+    detected = {n: {"fulfilled": v} for n, v in state.items()}
     php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
     for node in tree["order"]:
         if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
@@ -260,11 +214,12 @@ def withheld_with_reasons(
     repo: pathlib.Path,
     tree: dict | None = None,
     fulfilled: dict[str, bool] | None = None,
+    rejected=None,
 ) -> list[dict]:
     """Withheld nodes with reasons: rejected required ancestors or
     undecided recommended parents."""
     result: list[dict] = []
-    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled):
+    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled, rejected):
         if why is not None:
             result.append({"node": node, "reason": why})
         else:
@@ -276,14 +231,15 @@ def ordered_backlog(
     repo: pathlib.Path,
     tree: dict | None = None,
     fulfilled: dict[str, bool] | None = None,
+    rejected=None,
 ) -> list[str]:
-    """Complete ordered list of unresolved scope nodes in tree order,
-    blocked nodes included — the list a scan records into ``Open``."""
+    """Complete ordered list of the nodes that are neither fulfilled nor
+    rejected, in tree order, blocked nodes included — the nodes a scan
+    offers tickets for."""
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    resolved = _resolve_fulfilled(repo, tree, fulfilled)
-    rejected = _rejected_nodes(repo)
+    resolved, rejected = _node_state(repo, fulfilled, rejected)
     closed = set(closed_by_rejection(tree, rejected))
     backlog = []
     for node in tree["order"]:
@@ -322,8 +278,66 @@ def _parse_edges(path: pathlib.Path) -> list[dict]:
     return edges
 
 
+_SECTION_HEADING = re.compile(r"^### `([^`]+)`(?: through `([^`]+)`)?\s*$")
+_SECTION_FIELD = re.compile(r"^- \*\*(Names?|Tool):\*\*\s*(.*)$")
+_TRAILING_NUMBER = re.compile(r"^(.*?)(\d+)$")
+
+
+def _section_slugs(heading: str) -> tuple[list[str], dict[str, str]]:
+    """The slugs a heading line opens a node section for, plus — for a
+    numbered run — each slug's number. No node section: ``([], {})``."""
+    match = _SECTION_HEADING.match(heading)
+    if not match:
+        return [], {}
+    first, last = match.group(1), match.group(2)
+    lo, hi = _TRAILING_NUMBER.match(first), _TRAILING_NUMBER.match(last or "")
+    if lo and hi and lo.group(1) == hi.group(1):
+        numbers = {f"{lo.group(1)}{n}": str(n) for n in range(int(lo.group(2)), int(hi.group(2)) + 1)}
+        return list(numbers), numbers
+    return [first], {}
+
+
+def _parse_node_sections(path: pathlib.Path) -> dict[str, dict]:
+    """Each node section's ``**Name:**`` and ``**Tool:**`` fields, keyed by
+    slug: ``{slug: {"name": ..., "tool": ...}}``, the field text as written
+    (None for a field the section lacks).
+
+    A section heading is ``### `slug```. One heading may cover a numbered
+    run of nodes (``### `x-1` through `x-10```); its ``**Names:**`` field
+    then holds a quoted template with ``N`` standing for the number."""
+    sections: dict[str, dict] = {}
+    slugs: list[str] = []
+    numbers: dict[str, str] = {}
+    fields: dict[str, str] = {}
+    field: str | None = None
+
+    def close_section() -> None:
+        for slug in slugs:
+            name = fields.get("name")
+            template = re.search(r'"([^"]*\bN\b[^"]*)"', name or "") if slug in numbers else None
+            if template:
+                name = re.sub(r"\bN\b", numbers[slug], template.group(1))
+            sections[slug] = {"name": name, "tool": fields.get("tool")}
+
+    for line in path.read_text(encoding="utf-8").splitlines():
+        if line.startswith("#"):
+            close_section()
+            (slugs, numbers), fields, field = _section_slugs(line), {}, None
+            continue
+        match = _SECTION_FIELD.match(line)
+        if match:
+            field = "tool" if match.group(1) == "Tool" else "name"
+            fields[field] = match.group(2).strip()
+        elif field and line[:1].isspace() and line.strip():
+            fields[field] += " " + line.strip()  # a field wrapped onto the next line
+        else:
+            field = None
+    close_section()
+    return sections
+
+
 def load_tree(tree_md: pathlib.Path | None = None) -> dict:
-    """Load the tree's edges.
+    """Load the tree's edges and node sections.
 
     With an explicit ``tree_md``, loads only that one file (single-file mode,
     useful for isolated parser tests). With none, loads the generic root
@@ -336,9 +350,11 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
     else:
         paths = [GENERIC_TREE_MD, TREE_MD]
     edges: list[dict] = []
+    sections: dict[str, dict] = {}
     for path in paths:
         if path.exists():
             edges.extend(_parse_edges(path))
+            sections.update(_parse_node_sections(path))
     # nodes are distinct names from edges
     nodes = sorted({e["from"] for e in edges} | {e["to"] for e in edges})
     # Build parent maps
@@ -394,6 +410,7 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
         "recommended_parents": recommended_parents,
         "resolved_parents": resolved_parents,
         "exposed_resolved_gate_nodes": exposed_resolved_gate_nodes,
+        "sections": {n: sections[n] for n in nodes if n in sections},
     }
 
 
@@ -405,40 +422,6 @@ def _read_composer(repo: pathlib.Path) -> dict | None:
             except Exception:
                 return None
     return None
-
-
-def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
-    """Where the suite keeps its own state in this target repo — the
-    Refactoring Notes, the folder the Bookkeeping pointer points into.
-    The pointer is the `**Bookkeeping:** <path>` field of
-    `.scratch/refactor/config.md`, else a `Bookkeeping: `<path>`` line in the
-    target's AGENTS.md or CLAUDE.md (the shared fallback); the folder is that
-    path's parent. No pointer (an un-onboarded target, which this parser has no
-    notion of) → the default `.scratch/refactor/`. A pointer that isn't the
-    path of a `bookkeeping.md` is remote bookkeeping, whose working copy is
-    that same default — see
-    skills/continuous-refactoring/references/refactoring-bookkeeping.md for the
-    exact formats this parses."""
-    default = repo / ".scratch" / "refactor"
-    config = repo / ".scratch" / "refactor" / "config.md"
-    candidates: list[tuple[pathlib.Path, str]] = [
-        (config, r"^\*\*Bookkeeping:\*\*\s*(\S+)\s*$"),
-        (repo / "AGENTS.md", r"^Bookkeeping:\s*`([^`]+)`"),
-        (repo / "CLAUDE.md", r"^Bookkeeping:\s*`([^`]+)`"),
-    ]
-    for p, pattern in candidates:
-        if not p.exists():
-            continue
-        try:
-            txt = p.read_text(encoding="utf-8")
-        except OSError:
-            continue
-        m = re.search(pattern, txt, re.MULTILINE)
-        if m and "://" not in m.group(1):
-            pointed = repo / m.group(1).strip()
-            if pointed.name == "bookkeeping.md":
-                return pointed.parent
-    return default
 
 
 def _parse_min_version(constraint: str) -> tuple[int, ...] | None:
@@ -466,23 +449,6 @@ def _current_php_floor(composer: dict | None) -> tuple[int, ...] | None:
     if v:
         return v
     return _parse_min_version(composer.get("require", {}).get("php"))
-
-
-def _out_of_scope_blocked_by_php(repo: pathlib.Path, node: str) -> tuple[int, ...] | None:
-    """Parse `**Blocked by:** PHP >= X.Y` from a node's out-of-scope entry,
-    if the entry has one (php-tooling-tree.md's mechanical-reversal design;
-    only PHP-version rejections are ever auto-detected this way)."""
-    p = _resolve_refactoring_notes_dir(repo) / "out-of-scope" / f"{node}.md"
-    if not p.exists():
-        return None
-    try:
-        txt = p.read_text(encoding="utf-8")
-    except OSError:
-        return None
-    m = re.search(r"\*\*Blocked by:\*\*\s*PHP\s*>=\s*([\d.]+)", txt)
-    if not m:
-        return None
-    return _parse_min_version(m.group(1))
 
 
 # The oldest PHP version each of the five deterministic PHP tooling leaves
@@ -520,14 +486,12 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     and `detect_and_roadmap()` surfaces the list so a caller can report the
     fact in one pass instead of it silently vanishing.
 
-    Design decision: skip silently, no `<Refactoring Notes>/out-of-scope/`
-    entry written for a blocked leaf. The check is cheap and re-derived
-    fully from `composer.json` every pass, so nothing is lost by not
-    persisting it — and that directory otherwise records a genuine human/
-    agent rejection decision (a mechanical-reversal design), not a
+    Design decision: skip silently, a blocked leaf is not a rejection.
+    The check is cheap and re-derived fully from `composer.json` every
+    call — a rejection records a genuine human/agent decision, not a
     mechanical fact already on disk. Once the target's PHP floor rises, a
-    previously-blocked leaf is simply unblocked next pass; there is nothing
-    to reverse. The one consequence worth naming: `phpunit` is the only one
+    previously-blocked leaf is simply unblocked; there is nothing to
+    reverse. The one consequence worth naming: `phpunit` is the only one
     of these five nodes that's still a `php-safety-net` leaf (php-tooling-
     tree.md's `resolved` edges) — while blocked here, it counts as neither
     fulfilled nor rejected, so `structural-scan` stays genuinely closed
@@ -537,7 +501,7 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     instead) — like
     `php-cs-fixer`/`test-runner-if-missing`, a floor block on it now only
     delays its own adoption. A human who wants `structural-scan` to open
-    anyway despite the floor can still file the out-of-scope entries by
+    anyway despite the floor can still reject those leaves by
     hand — this precheck doesn't do it for them.
 
     Returns `[]` when the target's PHP floor can't be determined (no
@@ -562,18 +526,25 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     return blocked
 
 
-def php_version_reversal_findings(repo: pathlib.Path) -> list[dict]:
-    """Rejected nodes whose recorded `Blocked by: PHP >= X.Y` condition the
-    target now satisfies — findings for `refactor-learn` to act on
-    (removing the out-of-scope entry); this function only detects, per the
-    suite's detect-never-write split (`refactor-scan`/`refactor-learn`)."""
+def _blocked_by_php(blocker) -> tuple[int, ...] | None:
+    """The minimum PHP version a rejection's blocker names
+    (``{"php": "8.1"}``), or None when the rejection carries none."""
+    if not isinstance(blocker, dict) or set(blocker) != {"php"}:
+        return None
+    return _parse_min_version(str(blocker["php"]))
+
+
+def php_version_reversal_findings(repo: pathlib.Path, rejected=None) -> list[dict]:
+    """Rejected nodes whose handed-in blocker (``{node: {"php": "X.Y"}}``)
+    the target's PHP floor now satisfies — findings the caller offers for
+    reversal; the node stays rejected until the caller reverses it."""
     repo = pathlib.Path(repo)
     current = _current_php_floor(_read_composer(repo))
-    if current is None:
+    if current is None or not isinstance(rejected, dict):
         return []
     findings = []
-    for node in sorted(_rejected_nodes(repo)):
-        blocked_by = _out_of_scope_blocked_by_php(repo, node)
+    for node in sorted(rejected):
+        blocked_by = _blocked_by_php(rejected[node])
         if blocked_by is not None and current >= blocked_by:
             findings.append({
                 "node": node,
@@ -686,23 +657,6 @@ def _recommended_gate_moot(node: str, tree: dict, detected: dict) -> bool:
     return bool(parents) and all(_is_permanently_gated(p, tree, detected) for p in parents)
 
 
-def _rejected_nodes(repo: pathlib.Path) -> set[str]:
-    """Tooling-tree nodes recorded as out-of-scope for this target repo.
-
-    Convention: one file per rejected node at
-    ``<Refactoring Notes>/out-of-scope/<node>.md`` (default
-    ``<Refactoring Notes>/out-of-scope/<node>.md`` — see
-    _resolve_refactoring_notes_dir). This is the minimal convention needed
-    for structural-scan's `resolved` gate — it does not parse
-    structural-candidate rejections, which are keyed by issue number, not
-    node name.
-    """
-    d = _resolve_refactoring_notes_dir(repo) / "out-of-scope"
-    if not d.is_dir():
-        return set()
-    return {p.stem for p in d.glob("*.md")}
-
-
 def _resolved_gate_status(
     tree: dict, fulfilled_lookup, rejected: set[str]
 ) -> dict[str, tuple[bool, list[str]]]:
@@ -770,9 +724,10 @@ def next_candidates(
     tree: dict | None = None,
     limit: int | None = None,
     fulfilled: dict[str, bool] | None = None,
+    rejected=None,
 ) -> list[dict]:
     """Return every node that is *really* unblocked and unfulfilled right now
-    (or, with an explicit `limit`, at most that many — `refactor-scan` itself
+    (or, with an explicit `limit`, at most that many — a scan itself
     never passes one: more than five nodes can be genuinely unblocked at
     once, so this is never capped by default).
 
@@ -785,18 +740,22 @@ def next_candidates(
     entirely rather than merely ranked lower — see ``withheld_candidates()``
     for the matching "waiting on" list.
 
-    When *fulfilled* is provided (a ``{node: bool}`` mapping), it is used
-    instead of deriving from seed/bookkeeping — the seed-input contract that
-    lets the script run graph-logic-only.
+    *fulfilled* (a ``{node: bool}`` mapping) and *rejected* (the rejected
+    nodes' slugs) are the node state the caller hands in; a node named in
+    neither is undecided.
     """
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    resolved = _resolve_fulfilled(repo, tree, fulfilled)
-    resolved["git"] = True  # never proposed
-    # Build the detected-like dict expected by graph helpers
-    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
-    rejected = _rejected_nodes(repo)
+    state, rejected = _node_state(repo, fulfilled, rejected)
+    detected = {n: {"fulfilled": v} for n, v in state.items()}
+    return _next_candidates(repo, tree, detected, rejected, limit)
+
+
+def _next_candidates(
+    repo: pathlib.Path, tree: dict, detected: dict, rejected: set[str], limit: int | None = None
+) -> list[dict]:
+    """next_candidates() over an already-resolved node state."""
     php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
 
     result: list[dict] = []
@@ -834,13 +793,14 @@ def directly_unblocked_children(
     landed_node: str,
     tree: dict | None = None,
     fulfilled: dict[str, bool] | None = None,
+    rejected=None,
 ) -> list[dict]:
     """Every node this one candidate's fulfilment newly makes proposable —
     the fan-out the outlook comment's diagram draws
     (``refactor-implement/references/outlook-comment.md``).
 
-    When *fulfilled* is provided, it is used instead of deriving from
-    seed/bookkeeping — the seed-input contract.
+    *fulfilled* and *rejected* are the handed-in node state, as for
+    ``next_candidates()``.
     """
     repo = pathlib.Path(repo)
     if tree is None:
@@ -848,10 +808,8 @@ def directly_unblocked_children(
     if landed_node not in tree["nodes"]:
         return []
 
-    resolved = _resolve_fulfilled(repo, tree, fulfilled)
-    resolved["git"] = True
-    detected = {n: {"fulfilled": v} for n, v in resolved.items()}
-    rejected = _rejected_nodes(repo)
+    state, rejected = _node_state(repo, fulfilled, rejected)
+    detected = {n: {"fulfilled": v} for n, v in state.items()}
 
     # Counterfactual snapshot: landed_node never happened.
     # static-code-analyzer's own fulfilled flag is hardcoded to mirror
@@ -867,11 +825,8 @@ def directly_unblocked_children(
 
     gate_now = _resolved_gate_status(tree, lambda n: detected.get(n, {}).get("fulfilled", False), rejected)
     gate_without = _resolved_gate_status(tree, lambda n: detected_without.get(n, {}).get("fulfilled", False), rejected)
-    # Build fulfilled dicts for next_candidates calls
-    fulfilled_now = {n: v.get("fulfilled", False) for n, v in detected.items()}
-    fulfilled_without = {n: v.get("fulfilled", False) for n, v in detected_without.items()}
-    next_now = {c["node"] for c in next_candidates(repo, tree=tree, fulfilled=fulfilled_now)}
-    next_without = {c["node"] for c in next_candidates(repo, tree=tree, fulfilled=fulfilled_without)}
+    next_now = {c["node"] for c in _next_candidates(repo, tree, detected, rejected)}
+    next_without = {c["node"] for c in _next_candidates(repo, tree, detected_without, rejected)}
 
     children_of: dict[str, list[dict]] = {}
     for e in tree["edges"]:
@@ -917,17 +872,18 @@ def withheld_candidates(
     repo: pathlib.Path,
     tree: dict | None = None,
     fulfilled: dict[str, bool] | None = None,
+    rejected=None,
 ) -> list[dict]:
     """Nodes that would otherwise be in ``next_candidates()`` (required
     parents fulfilled, not rejected, not yet fulfilled) but stay withheld
     because one or more ``recommended`` parents haven't reached a decided
     state yet.
 
-    When *fulfilled* is provided, it is used instead of deriving from
-    seed/bookkeeping — the seed-input contract.
+    *fulfilled* and *rejected* are the handed-in node state, as for
+    ``next_candidates()``.
     """
     result: list[dict] = []
-    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled):
+    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled, rejected):
         if why is not None:
             continue  # blocked on a required parent — not the recommended-gate withholding this list reports
         result.append({"node": node, "waiting_on": undecided})
@@ -940,40 +896,39 @@ def detect_and_roadmap(
     tree_md: pathlib.Path | None = None,
     fulfilled: dict[str, bool] | None = None,
     seed_path: pathlib.Path | None = None,
+    rejected=None,
 ) -> dict:
-    """Main entry point: compute graph outputs from fulfilled state.
+    """Main entry point: compute graph outputs from the handed-in node state.
 
-    When *seed_path* is provided, it takes priority over *fulfilled* and
-    must be usable as given — otherwise ``SeedError`` is raised, never a
-    silent fall back to bookkeeping.  When neither is given, the script
-    derives state from bookkeeping.
+    The state comes from *seed_path* (see ``load_seed``; it must be usable
+    as given, otherwise ``SeedError`` is raised) or from
+    *fulfilled*/*rejected*. With none of them, every node is undecided.
     """
     tree = load_tree(tree_md=tree_md)
     repo = pathlib.Path(repo)
-    # Resolve fulfilled state: seed_path > fulfilled param > bookkeeping
     if seed_path is not None:
-        resolved_fulfilled = _load_fulfilled_seed(pathlib.Path(seed_path), strict=True)
-    else:
-        resolved_fulfilled = fulfilled
-    resolved = _resolve_fulfilled(repo, tree, resolved_fulfilled)
-    detected = {n: {"fulfilled": v, "reason": "", "details": {}} for n, v in resolved.items()}
-    nxt = next_candidates(repo, tree=tree, fulfilled=resolved_fulfilled)
-    withheld = withheld_candidates(repo, tree=tree, fulfilled=resolved_fulfilled)
-    reversals = php_version_reversal_findings(repo)
-    php_floor_blocked = php_floor_precheck(repo)
-    rejected = _rejected_nodes(repo)
-    backlog = ordered_backlog(repo, tree=tree, fulfilled=resolved_fulfilled)
-    closed = closed_by_rejection(tree, rejected)
-    withheld_reasons = withheld_with_reasons(repo, tree=tree, fulfilled=resolved_fulfilled)
+        fulfilled, rejected = load_seed(seed_path, tree)
+    state, rejected_nodes = _node_state(repo, fulfilled, rejected)
+    backlog = ordered_backlog(repo, tree=tree, fulfilled=fulfilled, rejected=rejected)
+    withheld_reasons = withheld_with_reasons(repo, tree=tree, fulfilled=fulfilled, rejected=rejected)
+    tracks = {}
+    for track, nodes in track_nodes(tree).items():
+        members = {n["node"] for n in nodes}
+        tracks[track] = {
+            "nodes": nodes,
+            "backlog": [n for n in backlog if n in members],
+            "withheld": [w for w in withheld_reasons if w["node"] in members],
+        }
     return {
-        "detected": detected,
-        "next": nxt,
-        "withheld": withheld,
+        "detected": {n: {"fulfilled": v, "reason": "", "details": {}} for n, v in state.items()},
+        "tracks": tracks,
+        "next": next_candidates(repo, tree=tree, fulfilled=fulfilled, rejected=rejected),
+        "withheld": withheld_candidates(repo, tree=tree, fulfilled=fulfilled, rejected=rejected),
         "withheld_with_reasons": withheld_reasons,
-        "reversals": reversals,
-        "php_floor_blocked": php_floor_blocked,
+        "reversals": php_version_reversal_findings(repo, rejected),
+        "php_floor_blocked": php_floor_precheck(repo),
         "backlog": backlog,
-        "closed_by_rejection": closed,
+        "closed_by_rejection": closed_by_rejection(tree, rejected_nodes),
         "tree": {"edges": tree["edges"]},
     }
 
@@ -981,21 +936,23 @@ def detect_and_roadmap(
 if __name__ == "__main__":
     import argparse
 
-    ap = argparse.ArgumentParser(description="Compute the tooling tree's graph outputs from a fulfilled set (dry-run, no mutation)")
+    ap = argparse.ArgumentParser(description="Compute the tooling tree's graph outputs from a handed-in node state (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to fixture/repo (default: .)")
     ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree)")
-    ap.add_argument("--seed", type=str, default=None, help="path to a fulfilled-set JSON file (node_slug: true/false) — when provided, graph outputs are computed from it instead of the bookkeeping state")
+    ap.add_argument("--seed", type=str, default=None, help='path to a JSON file holding the node state: {"fulfilled": [slug, ...], "rejected": {slug: null | {"php": "X.Y"}}} — without it, every node is undecided')
     ap.add_argument("--json", action="store_true", help="output JSON (default)")
     ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable (outlook diagram)")
     args = ap.parse_args()
     repo = pathlib.Path(args.repo)
     tree_md = pathlib.Path(args.tree) if args.tree else None
-    seed_path = pathlib.Path(args.seed) if args.seed else None
-    try:
-        data = detect_and_roadmap(repo, tree_md=tree_md, seed_path=seed_path)
-    except SeedError as exc:
-        ap.exit(2, f"error: {exc}\n")
+    tree = load_tree(tree_md=tree_md)
+    fulfilled = rejected = None
+    if args.seed:
+        try:
+            fulfilled, rejected = load_seed(pathlib.Path(args.seed), tree)
+        except SeedError as exc:
+            ap.exit(2, f"error: {exc}\n")
+    data = detect_and_roadmap(repo, tree_md=tree_md, fulfilled=fulfilled, rejected=rejected)
     if args.unblocked_by:
-        tree = load_tree(tree_md=tree_md)
-        data["unblocked_by"] = directly_unblocked_children(repo, args.unblocked_by, tree=tree)
+        data["unblocked_by"] = directly_unblocked_children(repo, args.unblocked_by, tree=tree, fulfilled=fulfilled, rejected=rejected)
     print(json.dumps(data, indent=2))
