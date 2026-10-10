@@ -35,7 +35,7 @@ it computes from their leaves. A seed it cannot use ends in exit code 2: correct
 | `detected` | `{slug: {fulfilled}}` for the nodes handed in as fulfilled and the four the parser settles |
 | `next` | `{node, reason}` for the backlog nodes nothing holds back |
 | `php_floor_blocked` | `{node, reason}` for each node whose tool needs a newer PHP than the target declares, a rejected one included; the reason names the minimum |
-| `closed_by_rejection` | nodes closed because a required parent is rejected |
+| `closed_by_rejection` | nodes closed because a required parent is rejected or closed, or because a rejection leaves their `required-any` group with no member that could be fulfilled |
 | `reversals` | rejections whose `php` blocker the target now meets |
 | `tree.edges` | every edge as `{from, to, type}`; the types are `required`, `required-any`, `recommended`, `resolved` |
 
@@ -59,7 +59,10 @@ rejection as `rejected` and every Safety Net and recognition-only node without a
 Work the same answers out by hand from the two edge tables, in table order, with these rules:
 
 - `required` — the child waits until the parent is fulfilled; a rejected parent closes the child.
-- `required-any` — the child waits until one parent of that group is fulfilled.
+- `required-any` — the child waits until one parent of that group is fulfilled. A rejection closes it
+  once no parent of the group could be fulfilled any more: each one is rejected, closed by a rejection, or
+  a recognition-only node that is not fulfilled. Without a rejected or closed parent in the group nothing
+  is closed.
 - `recommended` — the child waits until the parent is decided: fulfilled, rejected, or closed by a
   rejection.
 - `resolved` — the child is an aggregation node, fulfilled once every such parent is fulfilled, rejected,

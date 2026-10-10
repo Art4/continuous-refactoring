@@ -34,10 +34,6 @@ declared PHP version and whose blocker is the minimum the parser's reason names:
 The node then counts as decided, and the parser reports the reversal once the target's floor reaches that
 version.
 
-Run the parser again with the rejection in the seed. A node still in the backlog whose `withheld` reason
-names the rejected node, with no other parent of that group left to fulfil, is stranded behind it: the
-same decision records it as rejected with the same blocker, so it returns together with its parent.
-
 ## What depends on a rejected node
 
 After recording a rejection of a node, run the parser with it in the seed (`tooling-tree-parser.md`) and
@@ -46,8 +42,8 @@ lay out one more decision point about the tickets that named the node as a block
 
 | The dependent hangs on the rejected node by | Recommendation |
 | --- | --- |
-| a `required` edge, or a `required-any` group with no other member left — it is in `closed_by_rejection` | close its ticket, the reason being "depends on <Name>, which was declined" |
-| a `recommended` edge, a `resolved` edge through an aggregation node, or a `required-any` group with another member left | remove the blocker from its ticket; the ticket stays |
+| a `required` edge, or a `required-any` group with no member left that could be fulfilled — it is in `closed_by_rejection` | close its ticket, the reason being "depends on <Name>, which was declined" |
+| a `recommended` edge, a `resolved` edge through an aggregation node, or a `required-any` group with a member left that could be fulfilled | remove the blocker from its ticket; the ticket stays |
 
 A dependent without a ticket needs nothing. Options: as recommended, the other way for a ticket the human
 names, or leave the tickets as they are.

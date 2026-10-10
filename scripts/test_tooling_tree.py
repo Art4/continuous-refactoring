@@ -398,19 +398,24 @@ class AggregationStateTests(unittest.TestCase):
 
 
 class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
-    """Ticket 53: `_is_effectively_rejected` must treat a `required-any`
-    parent group the same way `_is_permanently_gated` already treats it for
-    its own, unrelated gate condition -- closed only once *every* option in
-    the group is (recursively) effectively rejected, never on a single
-    option alone, since any of the others fulfilling it still would. Unit
+    """Ticket 53: `_is_effectively_rejected` closes the child of a
+    `required-any` parent group only once no option in the group could
+    still fulfil it, never on a single rejected option alone while another
+    could (`StrandedRequiredAnyTests` has the option that is a
+    recognition-only node). Unit
     tests directly against the function (same precedent as `_is_unblocked`
     being called directly elsewhere in this file) -- `rector-php-set`'s real
     `required-any(phpstan-level-0, psalm)` gate is the concrete case."""
 
     def test_single_required_any_option_rejected_does_not_close(self):
         tree = load_tree()
+        # the other option can still fulfil it: psalm is in use (see
+        # StrandedRequiredAnyTests for the target without psalm)
         rejected = {"phpstan-level-0"}
-        self.assertFalse(tooling_tree._is_effectively_rejected("rector-php-set", tree, rejected))
+        self.assertFalse(tooling_tree._is_effectively_rejected(
+            "rector-php-set", tree, rejected, fulfilled_lookup={"psalm": True}.get,
+        ))
+        self.assertFalse(tooling_tree._is_effectively_rejected("rector-php-set", tree, {"psalm"}))
 
     def test_all_required_any_options_rejected_does_close(self):
         tree = load_tree()
@@ -1383,6 +1388,106 @@ class RejectionCascadeTests(unittest.TestCase):
         self.assertIn("phpunit", backlog)
         self.assertIn("psr-4", backlog)
         self.assertIn("phpstan-level-1", backlog)
+
+
+class StrandedRequiredAnyTests(unittest.TestCase):
+    """A node whose whole `required-any` group is out of reach — each
+    member rejected, closed by a rejection, or a recognition-only node that
+    is not fulfilled — is closed by the rejection, like the child of a
+    rejected required parent. `rector-php-set` hangs on `phpstan-level-0`
+    or the recognition-only `psalm`, `psalm-taint-analysis` on
+    `phpstan-level-4` or `psalm`."""
+
+    BASE = {"is-php-project": True, "composer": True, "static-code-analyzer": True}
+    STRANDED = ("rector-php-set", "psalm-taint-analysis")
+
+    def _data(self, php=None, **state):
+        files = {"composer.json": json.dumps({"require": {"php": php}})} if php else None
+        tmp, root = make_repo(files)
+        self.addCleanup(tmp.cleanup)
+        return tooling_tree.detect_and_roadmap(root, **state)
+
+    def test_group_out_of_reach_closes_the_node(self):
+        data = self._data(fulfilled=self.BASE, rejected={"phpstan-level-0"})
+        for node in self.STRANDED:
+            self.assertIn(node, data["closed_by_rejection"])
+            self.assertNotIn(node, data["backlog"])
+            self.assertNotIn(node, data["tracks"]["Safety Net"]["backlog"])
+        # and what requires a node closed this way is closed with it
+        self.assertIn("rector-dead-code", data["closed_by_rejection"])
+        self.assertNotIn("rector-dead-code", data["backlog"])
+
+    def test_closed_node_counts_as_decided_for_its_aggregation_node(self):
+        others = {"psr-4": True, "phpunit": True, "rector-type-coverage": True, "rector-phpunit-set": True}
+        data = self._data(fulfilled={**self.BASE, **others}, rejected={"phpstan-level-0"})
+        self.assertTrue(data["detected"]["php-safety-net"]["fulfilled"])
+
+    def test_recognition_only_member_handed_in_as_fulfilled_closes_nothing(self):
+        data = self._data(fulfilled={**self.BASE, "psalm": True}, rejected={"phpstan-level-0"})
+        for node in self.STRANDED:
+            self.assertNotIn(node, data["closed_by_rejection"])
+            self.assertIn(node, data["backlog"])
+
+    def test_member_still_open_closes_nothing(self):
+        # psalm declined, phpstan-level-0 still to be set up
+        data = self._data(fulfilled=self.BASE, rejected={"psalm"})
+        self.assertEqual(data["closed_by_rejection"], [])
+        for node in self.STRANDED:
+            self.assertIn(node, data["backlog"])
+
+    def test_unfulfilled_recognition_only_member_alone_closes_nothing(self):
+        data = self._data(fulfilled=self.BASE)
+        self.assertEqual(data["closed_by_rejection"], [])
+        for node in self.STRANDED:
+            self.assertIn(node, data["backlog"])
+
+    def test_group_without_any_rejection_closes_nothing(self):
+        # a group of recognition-only nodes alone: nothing was rejected, so
+        # nothing is closed by a rejection
+        tree = {
+            "required_parents": {},
+            "required_any_parents": {"child": ["psalm", "static-code-analyzer"], "other": ["psalm", "declined"]},
+        }
+        self.assertFalse(tooling_tree._is_effectively_rejected("child", tree, set()))
+        self.assertFalse(tooling_tree._is_effectively_rejected("other", tree, set()))
+        self.assertTrue(tooling_tree._is_effectively_rejected("other", tree, {"declined"}))
+
+    def test_closure_follows_the_rejection(self):
+        rejected = {"phpstan-level-0": {"php": "7.0"}}
+        data = self._data(php=">=7.4", fulfilled=self.BASE, rejected=rejected)
+        self.assertEqual([f["node"] for f in data["reversals"]], ["phpstan-level-0"])
+        # still closed until the caller reverses the rejection
+        for node in self.STRANDED:
+            self.assertNotIn(node, data["backlog"])
+        data = self._data(php=">=7.4", fulfilled=self.BASE, rejected={})
+        self.assertEqual(data["closed_by_rejection"], [])
+        for node in ("phpstan-level-0", *self.STRANDED):
+            self.assertIn(node, data["backlog"])
+
+    def test_php_floor_rejection_alone_opens_the_gate(self):
+        """A PHP 5.6 target: `phpstan-level-0` is below its floor and
+        rejected with that blocker, `psalm` is not fulfilled."""
+        done = {
+            "psr-4": True, "phpunit": True, "rector-type-coverage": True, "rector-phpunit-set": True,
+            "editorconfig": True, "ci-runner": True,
+        }
+        data = self._data(php=">=5.6", fulfilled={**self.BASE, **done}, rejected={"phpstan-level-0": {"php": "7.0"}})
+        self.assertTrue(data["detected"]["structural-scan"]["fulfilled"])
+        self.assertEqual(data["reversals"], [])
+        data = self._data(php=">=5.6", fulfilled={**self.BASE, **done})
+        self.assertFalse(data["detected"]["structural-scan"]["fulfilled"])
+
+    def test_functions_agree_with_the_output(self):
+        tmp, root = make_repo()
+        self.addCleanup(tmp.cleanup)
+        tree = load_tree()
+        closed = closed_by_rejection(tree, {"phpstan-level-0"}, fulfilled=self.BASE)
+        backlog = ordered_backlog(root, fulfilled=self.BASE, rejected={"phpstan-level-0"})
+        for node in self.STRANDED:
+            self.assertIn(node, closed)
+            self.assertNotIn(node, backlog)
+        closed = closed_by_rejection(tree, {"phpstan-level-0"}, fulfilled={**self.BASE, "psalm": True})
+        self.assertNotIn("rector-php-set", closed)
 
 
 class HandedInStateTests(unittest.TestCase):

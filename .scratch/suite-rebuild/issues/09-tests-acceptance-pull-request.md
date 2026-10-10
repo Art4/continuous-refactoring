@@ -85,3 +85,28 @@ blockade); `php-safety-net-old-meaning-open` cites its *Manual override* section
 (ticket 08's).
 
 Not red, but now untrue: `AGENTS.md` line 44 still names `references/track-scheduler.md` (ticket 08).
+
+### Red after ticket 11 (parser closes a node whose whole required-any group is out of reach)
+
+Nothing is newly red. Unit tests (`python3 -m unittest discover -s scripts -p 'test_*.py'`): the same two
+fail (`test_trigger_controls…test_next_holds_only_structural_scan`,
+`test_validate_skills…test_real_repo_passes`); 248 of 250 green, the parser's own file 106 of 106.
+`scripts/drift_check.py`: unchanged, 7 failures and 1 error. `python3 scripts/validate_skills.py .`:
+output identical to before the ticket, still exit 1.
+
+Not run here: the `fixtures/harness/run.sh` tiers. `changelog-fragment.yml` — `skills/**` changed again
+without a `.changelog.d/` fragment.
+
+Not red, but now untrue (texts ticket 11 was told not to touch) — each still describes the closure as
+"a required or required-any ancestor is rejected", without the recognition-only member that is not
+fulfilled:
+
+- `CONTEXT.md`, entry **Aggregation node**: "fulfilled, rejected, or closed by a rejected required
+  parent". The entry **Recognition-only gate node** uses "out of reach" for the node waiting behind an
+  unfulfilled recognition-only node; the parser now closes such a node when a rejection takes the rest of
+  its group.
+- `skills/refactor-scan/references/tree-walk-prompt.md` (the `Open` paragraph),
+  `skills/refactor-learn/references/safety-net-write.md` and
+  `skills/refactor-learn/references/guardrails-write.md` (old skills, going with ticket 08).
+- `fixtures/README.md` and `fixtures/php/php-safety-net-rejection-cascade/expected/behavior.md` name
+  `closed_by_rejection` with the old meaning.

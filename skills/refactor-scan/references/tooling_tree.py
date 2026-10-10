@@ -202,14 +202,19 @@ def _plain(field: str | None) -> str | None:
     return field.replace("`", "").strip() or None
 
 
-def closed_by_rejection(tree: dict, rejected: set[str]) -> list[str]:
-    """Nodes whose required (or required-any) ancestor is rejected —
-    permanently closed for good, unlike merely unfulfilled nodes."""
+def closed_by_rejection(tree: dict, rejected: set[str], fulfilled: dict[str, bool] | None = None) -> list[str]:
+    """Nodes closed by a rejection — permanently closed for good, unlike
+    merely unfulfilled nodes: a required ancestor is rejected, or a
+    rejection leaves no member of a required-any group that could still be
+    fulfilled (see ``_is_effectively_rejected``). *fulfilled* is the
+    handed-in node state; it says which recognition-only nodes are
+    fulfilled."""
+    state = fulfilled or {}
     result = []
     for node in tree["order"]:
         if node in rejected:
             continue
-        if _is_effectively_rejected(node, tree, rejected):
+        if _is_effectively_rejected(node, tree, rejected, fulfilled_lookup=lambda n: state.get(n, False)):
             result.append(node)
     return result
 
@@ -284,7 +289,7 @@ def ordered_backlog(
     if tree is None:
         tree = load_tree()
     resolved, rejected = _node_state(repo, tree, fulfilled, rejected)
-    closed = set(closed_by_rejection(tree, rejected))
+    closed = set(closed_by_rejection(tree, rejected, resolved))
     backlog = []
     for node in tree["order"]:
         if not _gets_ticket(node, tree):
@@ -588,7 +593,9 @@ def php_version_reversal_findings(repo: pathlib.Path, rejected=None) -> list[dic
     return findings
 
 
-def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: set[str] | None = None) -> bool:
+def _is_effectively_rejected(
+    node: str, tree: dict, rejected: set[str], _seen: set[str] | None = None, fulfilled_lookup=None
+) -> bool:
     """True if `node` is rejected outright, or permanently closed because a
     `required` ancestor is (recursively) effectively rejected — the same
     closure a `required` edge already causes for proposability, made
@@ -601,11 +608,16 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     rejected `phpstan-level-2`) must still count as resolved, the same as a
     directly-rejected leaf already does.
 
-    A `required-any` parent only closes this way once *every* one of its
-    options is effectively rejected — rejecting just one of several
-    required-any options must not close the child, since any of the others
-    fulfilling it still would (mirrors `_is_permanently_gated`'s identical
-    required-any handling for its own, unrelated gate condition).
+    A `required-any` group only closes this way once *no* option is left
+    that could be fulfilled: each one effectively rejected, or a
+    recognition-only node (`_NEVER_PROPOSED`) that is not fulfilled — no
+    ticket is ever filed for such a node, so nothing a run does fulfils it
+    (e.g. `rector-php-set` behind a rejected `phpstan-level-0` on a target
+    without `psalm`). Rejecting just one of several options must not close
+    the child while another could still fulfil it, and without any
+    rejection in the group nothing is closed: the closure follows the
+    rejection and is gone with it. ``fulfilled_lookup(name) -> bool``
+    supplies the handed-in state; without it no node is fulfilled.
 
     Each sibling call below gets its own *copy* of `_seen`, not the same
     mutable set — two required(-any) siblings can legitimately re-converge
@@ -622,21 +634,29 @@ def _is_effectively_rejected(node: str, tree: dict, rejected: set[str], _seen: s
     if node in rejected:
         return True
     if any(
-        _is_effectively_rejected(p, tree, rejected, set(_seen))
+        _is_effectively_rejected(p, tree, rejected, set(_seen), fulfilled_lookup)
         for p in tree["required_parents"].get(node, [])
     ):
         return True
     req_any = tree["required_any_parents"].get(node, [])
-    if req_any and all(_is_effectively_rejected(p, tree, rejected, set(_seen)) for p in req_any):
-        return True
-    return False
+    rejected_options = {
+        p for p in req_any if _is_effectively_rejected(p, tree, rejected, set(_seen), fulfilled_lookup)
+    }
+    never_fulfilled = {
+        p for p in req_any
+        if p in _NEVER_PROPOSED and not (fulfilled_lookup is not None and fulfilled_lookup(p))
+    }
+    return bool(rejected_options) and rejected_options | never_fulfilled == set(req_any)
 
 
 def _is_decided(node: str, tree: dict, detected: dict, rejected: set[str]) -> bool:
     """True once `node` has reached a final state for `recommended`-edge
     gating purposes (CONTEXT.md's Recommended edge): fulfilled, or
     effectively rejected (see above) — not merely "not yet reached"."""
-    return detected.get(node, {}).get("fulfilled", False) or _is_effectively_rejected(node, tree, rejected)
+    def is_fulfilled(name: str) -> bool:
+        return detected.get(name, {}).get("fulfilled", False)
+
+    return is_fulfilled(node) or _is_effectively_rejected(node, tree, rejected, fulfilled_lookup=is_fulfilled)
 
 
 def _undecided_recommended_parents(node: str, tree: dict, detected: dict, rejected: set[str]) -> list[str]:
@@ -698,8 +718,9 @@ def _resolved_gate_status(
     feeding it), not hardcoded to one node name. A node is resolved
     once every one of its resolved-parent leaves is itself fulfilled,
     recorded as rejected, or effectively rejected (``_is_effectively_rejected``
-    — closed for good because a required ancestor of the leaf is rejected,
-    even though the leaf itself was never explicitly rejected) — unlike a
+    — closed for good because a required ancestor of the leaf is rejected or
+    its whole required-any group is out of reach, even though the leaf
+    itself was never explicitly rejected) — unlike a
     required parent, a rejected resolved parent still counts as resolved.
 
     Computed in dependency order so an aggregation node (whose own
@@ -724,7 +745,7 @@ def _resolved_gate_status(
                 leaf for leaf in leaves
                 if not (
                     (computed[leaf][0] if leaf in computed else fulfilled_lookup(leaf))
-                    or _is_effectively_rejected(leaf, tree, rejected)
+                    or _is_effectively_rejected(leaf, tree, rejected, fulfilled_lookup=fulfilled_lookup)
                 )
             ]
             computed[node] = (not unresolved, unresolved)
@@ -942,7 +963,7 @@ def detect_and_roadmap(
         "reversals": php_version_reversal_findings(repo, rejected),
         "php_floor_blocked": php_floor_precheck(repo),
         "backlog": backlog,
-        "closed_by_rejection": closed_by_rejection(tree, rejected_nodes),
+        "closed_by_rejection": closed_by_rejection(tree, rejected_nodes, state),
         "tree": {"edges": tree["edges"]},
     }
 
