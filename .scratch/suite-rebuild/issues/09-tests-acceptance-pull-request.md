@@ -338,3 +338,22 @@ reading:
   have no ticket. Read from the texts, not tried in a run.
 - A Psalm-only target: the PHPStan levels above 0 are out of reach in a scan; no rejection of
   `phpstan-level-5` is written any more.
+
+### Decision about the tests (2026-10-10)
+
+Taken with the full list above in view. Carried out after the acceptance run, because fixes from that run
+would touch the validator again.
+
+1. **Parser tests and trigger-control tests: adapted.** The parser's new path; the one trigger test that
+   expects the old behaviour (a seed picked up from the fixture, `structural-scan` as a candidate) is
+   rewritten to what the parser does now, or deleted where nothing is left to assert.
+2. **Validator: kept and cut to the two skills.** Its general checks stay — references that do not
+   exist, glossary use, avoid-terms, duplication, ticket numbers in prose. The checks of the old skill
+   shape go: the required sections, the contract and exemption tables, the foundational-rules check
+   against two removed skills. What it reports rightly is fixed in the texts or the glossary.
+3. **`scripts/drift_check.py`: deleted.** Not run in CI; the parser's tests cover it.
+4. **Fixture harness: the agent tiers and the fixtures' old state are removed; the PHP sample projects
+   stay.** A harness for the rebuilt suite is work of its own after 0.7.0, once the acceptance run has
+   shown what is worth asserting.
+
+Order: acceptance first, then the four points, then the pull request.
