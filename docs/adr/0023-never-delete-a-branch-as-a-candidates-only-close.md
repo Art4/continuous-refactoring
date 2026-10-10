@@ -1,5 +1,9 @@
 # Never delete a branch as the only record that a candidate was closed
 
+> Superseded in part by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no
+> bookkeeping write and no out-of-scope file of the suite's own to protect. The rule itself stands —
+> never delete a branch that holds the only record of a decision.
+
 > Amends [ADR-0011](0011-bookkeeping-goes-through-its-own-merge-request.md): the dedicated bookkeeping
 > branch/MR discipline decided there stays exactly as decided — this ADR adds a rule for what must happen
 > *before* any branch carrying an unmerged bookkeeping write gets deleted or abandoned.

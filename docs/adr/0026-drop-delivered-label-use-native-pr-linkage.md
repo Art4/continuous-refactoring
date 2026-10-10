@@ -1,5 +1,9 @@
 # Drop the `refactor:delivered` label — reconcile via the tracker's native PR linkage instead
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): a ticket's merge request
+> is found by search; the suite keeps no remembered set and requires no `refactor:candidate` label to
+> build one.
+
 > Amends [ADR-0009](0009-merge-request-outlook-and-delivered-label.md): its actual reasoning
 > stands unchanged — the in-flight state must never reuse `ready-for-human` (that label already
 > means something else under `triage`). What changes is the mechanism: no dedicated label at all,

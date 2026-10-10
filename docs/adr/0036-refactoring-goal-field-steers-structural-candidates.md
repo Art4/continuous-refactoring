@@ -1,5 +1,9 @@
 # A `Refactoring goal` field lets a human state the target shape structural work should converge toward
 
+> Amended by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no `bookkeeping.md`
+> for the field to live in. `Refactoring goal` is a human-written project line and still steers the
+> recommendations.
+
 The suite had no way to record a general "convert this app to OOP"-style intent (ticket 54, raised by
 the user directly, grilled 2026-09-05). `bookkeeping.md`'s existing `Focus areas` field only answers
 *where* a scan should look first (`skills/continuous-refactoring/references/refactoring-bookkeeping.md`);

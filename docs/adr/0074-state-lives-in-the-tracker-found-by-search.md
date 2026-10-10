@@ -6,7 +6,8 @@
 > Supersedes [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md) and
 > [ADR-0072](0072-remote-bookkeeping-belongs-to-the-target.md) (the bookkeeping document, its pointer, the
 > config file, local and remote bookkeeping), [ADR-0012](0012-remembered-merge-requests-follow-the-tracker.md)
-> (remembered merge requests), [ADR-0034](0034-bookkeeping-write-reads-fresh-origin-main.md),
+> and [ADR-0026](0026-drop-delivered-label-use-native-pr-linkage.md) (remembered merge requests),
+> [ADR-0034](0034-bookkeeping-write-reads-fresh-origin-main.md),
 > [ADR-0060](0060-track-open-entries-record-their-issue-number.md),
 > [ADR-0062](0062-fulfilled-nodes-field-removed-from-the-schema.md),
 > [ADR-0065](0065-investigation-gets-its-own-open.md),
@@ -23,10 +24,14 @@
 > [ADR-0024](0024-loop-config-interview-decides-tracker-create-mode-storage.md) and
 > [ADR-0025](0025-agents-md-gets-a-create-mode-pointer-not-the-value.md) (the storage question and the
 > `Bookkeeping:` line; `Focus areas` and `Refactoring goal` stay human-written lines), and
-> [ADR-0058](0058-onboarding-is-a-dispatcher-step.md) (what triggers onboarding).
+> [ADR-0058](0058-onboarding-is-a-dispatcher-step.md) (what triggers onboarding), and
+> [ADR-0023](0023-never-delete-a-branch-as-a-candidates-only-close.md) (the bookkeeping cases it names;
+> never deleting a branch that holds the only record of a decision stands).
 >
 > Amends [ADR-0071](0071-tracker-through-operations-tracker-and-forge-apart.md): the cut of the
-> operations changes, the idea does not.
+> operations changes, the idea does not. Amends
+> [ADR-0036](0036-refactoring-goal-field-steers-structural-candidates.md): `Refactoring goal` is a
+> human-written project line, not a field of a bookkeeping document.
 
 The suite kept its own record of which nodes were open, when a Track last ran, what was rejected and
 which merge request belonged to which ticket — a bookkeeping document, a pointer to it, a config file, a
@@ -65,7 +70,8 @@ optional: **Candidate** and **Priority** (now hints for search and order), **Lin
 ticket; without **Rejected** the suite proposes a place when the first rejection is recorded.
 
 Onboarding asks where the tickets live and how the operations work there, and nothing else. A target is
-onboarded when its tracker file has a `## Refactoring operations` section with **Search**.
+onboarded when its tracker file has a `## Refactoring operations` section; a section without **Search**
+gets it added by onboarding.
 
 There is no migration. Files under the suite's old scratch folder are no longer read; a developer who
 wants old rejections kept where they are names that place under **Rejected**.

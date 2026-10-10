@@ -1,8 +1,10 @@
 # A run is a chain of decision points, with an interactive and an autonomous mode and no caps
 
 > Supersedes [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md),
-> [ADR-0059](0059-cadence-carries-a-unit.md) and
-> [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): there is no `Ticket-create-mode`, no
+> [ADR-0059](0059-cadence-carries-a-unit.md),
+> [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md), and
+> [ADR-0067](0067-tooling-tree-default-never-tilts-against-an-issue-backed-candidate.md) (a ranking that
+> no longer exists): there is no `Ticket-create-mode`, no
 > `MR-create-mode`, no `Cadence` and no scheduler cascade. How much the suite does without asking is said
 > per call, and the Track is a decision point with a recommendation in a fixed order.
 >
