@@ -1,6 +1,6 @@
 # 02: Remote bookkeeping anywhere the target describes
 
-**Status:** ready-for-agent
+**Status:** done — PR #142
 
 **What to build:** Issue mode is written against GitHub and GitLab: the pointer must match one of their issue URLs, and the suite spells out the body, the marked comments and the `gh`/`glab` commands. A project with Redmine tickets cannot keep its bookkeeping there. Make where the bookkeeping lives, and how it gets there, the target's.
 
