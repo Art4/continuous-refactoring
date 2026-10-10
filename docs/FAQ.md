@@ -86,22 +86,44 @@ run the setup first (nothing is written) or to continue, in which case it writes
 file and label table itself. Running the setup later updates those files in place. Labels are only ever
 recorded in files — the suite never creates a label on GitHub or GitLab during onboarding.
 
+## Which issue trackers work?
+
+Any tracker an agent can reach, as long as `docs/agents/issue-tracker.md` describes it. GitHub, GitLab and local
+Markdown files come with a template, so onboarding asks nothing about them. For another tracker onboarding
+offers three ways: use it as that file already describes it, describe it right there in the interview, or keep
+refactoring tickets as local Markdown files while everything else stays where it is. The engineering-skills
+setup can write the description for you, but it isn't required.
+
+The suite asks for a handful of operations instead of knowing each tracker by name, because that is all it
+needs: how a ticket is marked a candidate, how a finished one is recognised, where merge requests live. On a
+tracker without labels you say how tickets are marked — a custom field, a subject prefix, child tickets of one
+collecting ticket. Tickets and merge requests may also live in two systems; the loop then keeps its own list
+of which merge request belongs to which ticket.
+
+## Can I run the onboarding again?
+
+Yes — tell `/continuous-refactoring` to run the onboarding again. What is already recorded stays and isn't
+asked again; only what is missing gets written, and nothing is overwritten. That is how a project onboarded
+earlier gets the `## Refactoring operations` section in its issue-tracker file.
+
 ## Why doesn't the suite commit its own state?
 
 Because the state — each Track's last scan and open items, your create-modes — is bookkeeping about *your*
 runs, not part of the project. Committing it meant bookkeeping branches, extra merge requests and a
 review nobody wanted to give. The suite now keeps it in one of two places and leaves Git alone. **Local files**
 under `.scratch/refactor/` are the default: whether they are committed, ignored or copied to another machine is
-your decision, and this is meant for one person on one working tree. Or **one tracker issue** (GitHub or GitLab),
-created during onboarding: the suite loads it before a pass and saves after each write, so you can run the loop
-from another machine without carrying files around. Your config (`Ticket-create-mode`, `MR-create-mode`, the
+your decision, and this is meant for one person on one working tree. Or **somewhere remote** — one tracker issue
+on GitHub or GitLab, or a place your project describes (a ticket in another tracker, a wiki page): the suite
+fetches the bookkeeping before a pass and stores it after each write, so you can run the loop from another
+machine without carrying files around. How fetching and storing work there is written down in your project, not
+in the suite. Your config (`Ticket-create-mode`, `MR-create-mode`, the
 pointer to the bookkeeping) is a separate file either way, because it can differ per person and machine.
 
-## What happens if two people edit the bookkeeping issue at once?
+## What happens if two people edit remote bookkeeping at once?
 
-The last write wins. The suite doesn't reload and merge before saving, so an edit you make in the issue while a
-pass is running can be overwritten by that pass. The loop is meant to run on one machine at a time; edit the
-issue between passes.
+The last write wins. The suite doesn't fetch and merge before storing, so an edit you make there while a
+pass is running can be overwritten by that pass. The loop is meant to run on one machine at a time; edit
+between passes.
 
 ## Why do I have to run `/continuous-refactoring` twice on a new project?
 

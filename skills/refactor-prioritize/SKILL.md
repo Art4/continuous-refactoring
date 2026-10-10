@@ -21,7 +21,7 @@ Runs in one of two modes, both dispatched by `refactor-loop` — never one calli
 
 ### 1. Check whether anything should start at all
 
-Get the remembered set of in-flight suite MRs: `docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab) → every open `refactor:candidate` issue that carries a linked pull request (the tracker's native issue↔closing-PR cross-reference); otherwise the Refactoring Notes' `merge-requests.md` directly. Drop any proposal already in that set — it already has an open MR, so it isn't something to *start*. How many suite MRs are open is not this skill's concern: `refactor-loop` gates that once, right before implementation (its step 5), for new merge requests only.
+Get the remembered set of in-flight suite MRs: `docs/agents/issue-tracker.md` has a **Linked merge request** operation → every open `refactor:candidate` issue that carries one; otherwise the Refactoring Notes' `merge-requests.md` directly. Drop any proposal already in that set — it already has an open MR, so it isn't something to *start*. How many suite MRs are open is not this skill's concern: `refactor-loop` gates that once, right before implementation (its step 5), for new merge requests only.
 
 An in-flight `## Investigation` `Open` entry never reaches this skill at all — `refactor-scan` step 2 routes it
 straight to `refactor-design` (not yet planned) or `refactor-implement` (already planned), bypassing
@@ -39,7 +39,7 @@ For each proposal in that pool, assess:
 | **Leverage** | How much future change does deepening this module unlock? A module many others call is high-leverage; an uncalled leaf is not. |
 | **Tooling pressure** | Is the fulfilled tooling (PHPStan, Rector, style) actively flagging it? If so it's re-failing every CI run until fixed. |
 | **Risk** | How hard to reverse, how wide the blast radius? Prefer reversible, low-risk refactors early while the habit is forming. |
-| **Age** | Tooling-tree proposals only (`refactor-scan/SKILL.md` step 3b surfaces each one's own issue creation date alongside it — native tracker: `created_at`; Local Markdown: its `Filed:` line). How long has it sat open without being chosen, relative to how often this loop actually runs? The longer, the more it weighs toward choosing it now, so a proposal that never wins on the other four alone doesn't sit forever — one factor among five, not a forced pick. A gate name or externally-labeled candidate carries no age here; their own tiering (Select mode, below) already covers this. |
+| **Age** | Tooling-tree proposals only (`refactor-scan/SKILL.md` step 3b surfaces each one's own issue creation date alongside it, the tracker's **Filed date**). How long has it sat open without being chosen, relative to how often this loop actually runs? The longer, the more it weighs toward choosing it now, so a proposal that never wins on the other four alone doesn't sit forever — one factor among five, not a forced pick. A gate name or externally-labeled candidate carries no age here; their own tiering (Select mode, below) already covers this. |
 
 Tooling-tree node: read its Purpose in the tree doc to reason about what it unlocks — node-detail data beyond that Purpose line isn't a maintained source yet.
 
@@ -86,7 +86,7 @@ into a **priority** or **capped** admission tier by its Signal
 (`references/signals.md`), and the single strongest is this pass's
 recommendation, carried forward.
 
-This mode writes no `## Investigation` `Open` entry — it can't, the issue doesn't exist yet. `refactor-design` adds it for the recommended candidate as soon as `refactor-loop` hands it the created issue's number (its step 5), on every tracker, native-label ones included.
+This mode writes no `## Investigation` `Open` entry — it can't, the issue doesn't exist yet. `refactor-design` adds it for the recommended candidate as soon as `refactor-loop` hands it the created issue's number (its step 5), on every tracker.
 
 ## Output
 

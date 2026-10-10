@@ -12,7 +12,7 @@ section already governs it (`## Guardrails`, `## Investigation`).
 The early call's "Merged" finding, for a slug listed in `## Safety Net`'s `Open` (`skills/refactor-scan/
 references/safety-net-track.md` handed it forward as a resumable candidate) → remove that entry from
 `Open`. Nothing else about the early call's merge handling changes (mark the candidate `done`, close the
-issue, drop the `merge-requests.md` entry if non-native-tracker — `refactor-learn/SKILL.md`'s own
+issue, drop the `merge-requests.md` entry if there is one — `refactor-learn/SKILL.md`'s own
 `## Process`).
 
 ## Fulfilled at pick-up → remove from `Open`
@@ -54,7 +54,7 @@ rejected ancestor gone the script's `backlog` carries the reopened nodes again.
 The closing call's freshly-opened-MR handling doesn't itself remove anything from `Open` — a node only
 leaves `Open` once its delivering MR actually **merges** (the early call's own finding, above). What
 *does* happen at this point, same as for any other node: the MR is remembered (`merge-requests.md` /
-the tracker's native link).
+the tracker's **Linked merge request**).
 
 A Safety Net Track candidate's in-flight state lives entirely in `## Safety Net`'s own `Open` list
 (`../../continuous-refactoring/references/refactoring-bookkeeping.md`).

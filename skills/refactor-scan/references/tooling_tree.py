@@ -414,8 +414,9 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
     `.scratch/refactor/config.md`, else a `Bookkeeping: `<path>`` line in the
     target's AGENTS.md or CLAUDE.md (the shared fallback); the folder is that
     path's parent. No pointer (an un-onboarded target, which this parser has no
-    notion of) → the default `.scratch/refactor/`. A URL pointer isn't a path
-    and is skipped — see
+    notion of) → the default `.scratch/refactor/`. A pointer that isn't the
+    path of a `bookkeeping.md` is remote bookkeeping, whose working copy is
+    that same default — see
     skills/continuous-refactoring/references/refactoring-bookkeeping.md for the
     exact formats this parses."""
     default = repo / ".scratch" / "refactor"
@@ -434,7 +435,9 @@ def _resolve_refactoring_notes_dir(repo: pathlib.Path) -> pathlib.Path:
             continue
         m = re.search(pattern, txt, re.MULTILINE)
         if m and "://" not in m.group(1):
-            return (repo / m.group(1).strip()).parent
+            pointed = repo / m.group(1).strip()
+            if pointed.name == "bookkeeping.md":
+                return pointed.parent
     return default
 
 

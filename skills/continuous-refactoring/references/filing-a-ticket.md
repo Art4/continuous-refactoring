@@ -8,7 +8,7 @@ Only *creating* moves here. A skill still comments on, updates the body of, and 
 
 A draft is what a skill returns instead of creating: the title, the labels, the body, and — for the loop to recognise an issue that already exists — the title as the key (`Tooling tree: <Name>`, `PHPStan Level N: baseline shrink — <group>`), or Where/Problem for a structural candidate, which has no fixed title. A skill lists its drafts under its own output, next to the writes it made (`reporting-progress.md`).
 
-**Creating one.** For every draft: look for an open issue that already carries that title (or the same Where) → that issue is the ticket, nothing is created and nobody is asked. Otherwise create it per `docs/agents/issue-tracker.md` (`gh`/`glab issue create`, or a new file on Local Markdown), report it as its own line, and hand its number to whoever needs it next — `refactor-design` for the chosen candidate, `refactor-learn`'s closing call for a Track `Open` entry's issue number.
+**Creating one.** For every draft: look for an open issue that already carries that title (or the same Where) → that issue is the ticket, nothing is created and nobody is asked. Otherwise create it per `docs/agents/issue-tracker.md`, report it as its own line, and hand its number to whoever needs it next — `refactor-design` for the chosen candidate, `refactor-learn`'s closing call for a Track `Open` entry's issue number.
 
 **`autonomous`** → create every draft as it arrives.
 

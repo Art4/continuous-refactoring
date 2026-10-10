@@ -20,6 +20,17 @@ _Avoid_: session, sprint
 The forge reviewable that delivers a completed candidate. Skills always use this term; conversation with the human uses the forge's native word (pull request on GitHub, merge request on GitLab).
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
+**Issue tracker**:
+Where a project's tickets live — described, not named: `docs/agents/issue-tracker.md` says how an agent reaches it, and its `## Refactoring operations` section holds the **Refactoring operations**. May be a different system than the **forge**.
+_Avoid_: native-label tracker (the suite no longer sorts trackers by name or by label support)
+
+**Forge**:
+The system that hosts the repository and its **merge requests** (GitHub, GitLab, another host), read from the Git remote. The same system as the **issue tracker** on a GitHub or GitLab project; a different one where tickets live elsewhere (Redmine, Jira, local files).
+_Avoid_: tracker (for where merge requests live)
+
+**Refactoring operations**:
+The named operations the suite needs from an **issue tracker**, one bullet each in that file's `## Refactoring operations` section: **Candidate**, **Priority**, **Done**, **Filed date** and **Merge requests** always; **Linked merge request**, **Comment author and time**, **Claim** and **Bookkeeping** where the target has them. A missing optional operation means the capability is absent and the skill takes its fallback (`skills/continuous-refactoring/references/refactoring-operations.md`).
+
 **Ticket**:
 What the human calls an issue on the project's tracker. The skills themselves say "issue" (`refactor:candidate` issues, "file an issue"); "ticket" is the word the human-facing settings and questions use, because it is the wording of the engineering skills the suite builds on. Not a synonym for **Candidate**: a candidate is a ticket with a role in the loop, not every ticket is one. A skill that would create a ticket returns a draft instead; the loop creates it.
 _Avoid_: task, todo
@@ -41,7 +52,7 @@ One of four scheduled work modes a loop pass can spend itself on: **Safety Net**
 _Avoid_: wave (this concept's earlier name; retired once it started colliding with **Guardrails**' own former name, "Signal wave" — see that entry)
 
 **Onboarding**:
-The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is **step 0 of the dispatcher** — the first `/continuous-refactoring` on a target whose **Bookkeeping pointer** names no existing `bookkeeping.md` runs a short interview inline, writes the setup files, and ends the invocation, with no candidate issue, merge request or forge action — bar the one bookkeeping issue when the human chose that (see **Issue mode**) — (`skills/continuous-refactoring/references/onboarding-setup-interview.md`). Everything from the recognition gate onward is simply what the Safety Net **Track**'s very first run finds — the same mechanism as any later run, just with more to discover the first time.
+The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is **step 0 of the dispatcher** — the first `/continuous-refactoring` on a target whose **Bookkeeping pointer** names no existing `bookkeeping.md` runs a short interview inline, writes the setup files, and ends the invocation, with no candidate issue, merge request or forge action — bar the one place for **remote bookkeeping** when the human chose that — (`skills/continuous-refactoring/references/onboarding-setup-interview.md`). Everything from the recognition gate onward is simply what the Safety Net **Track**'s very first run finds — the same mechanism as any later run, just with more to discover the first time.
 _Avoid_: baseline, bootstrap (see **Tooling tree**'s own `_Avoid_` list — those describe the never-ending tree; this term names only the bounded early phase within it)
 
 **Safety Net**:
@@ -73,10 +84,11 @@ The loop's state — `Secret history scan`, and each **Track**'s `Cadence`, `Las
 _Avoid_: bookkeeping file, state file
 
 **Bookkeeping pointer**:
-The path or issue URL that names the **Bookkeeping document**. Read from the **Config file**'s `Bookkeeping:` field, or, when that has none, from a `Bookkeeping:` line in the instruction file — the shared fallback for a team using one common document. No pointer, or a pointer to a file that doesn't exist, means the target isn't onboarded yet.
+The value that names where the **Bookkeeping document** lives: the path of a local `bookkeeping.md`, or anything else the target's own files explain (an issue URL, a ticket number, a page name). Read from the **Config file**'s `Bookkeeping:` field, or, when that has none, from a `Bookkeeping:` line in the instruction file — the shared fallback for a team using one common document. No pointer, or a pointer to a `bookkeeping.md` that doesn't exist, means the target isn't onboarded yet.
 
-**Issue mode** / **File mode**:
-Where the **Bookkeeping document** really lives. **File mode:** the pointer is a path, the file is the document, and the suite leaves branch, commit, ignore rules and the move to another machine to the developer — meant for one person, and always the mode with the local Markdown tracker. **Issue mode:** the pointer is a tracker issue's URL, the issue body is the document, each learned rejection and (on a tracker without native labels) each remembered merge request is a comment on it, and the local copy under `.scratch/refactor/` is loaded before a pass and saved after every write (`skills/continuous-refactoring/references/issue-mode.md`) — so the state can be picked up from any machine without a commit. The last write wins; an issue that can't be read stops the pass, and only **Onboarding** ever creates one.
+**Local bookkeeping** / **Remote bookkeeping**:
+Where the **Bookkeeping document** really lives. **Local bookkeeping:** the pointer is the path of a `bookkeeping.md`, the file is the document, and the suite leaves branch, commit, ignore rules and the move to another machine to the developer — meant for one person. **Remote bookkeeping:** the pointer names anything else — a tracker issue, a wiki page — and the local files under `.scratch/refactor/` are a working copy: the suite **fetches** the bookkeeping before a pass and **stores** it after every write (`skills/continuous-refactoring/references/remote-bookkeeping.md`), so the state can be picked up from any machine without a commit. Where it lives and how fetching and storing are done there belong to the target, normally as the **Bookkeeping** bullet of its **Refactoring operations**. The last write wins; bookkeeping that can't be fetched stops the pass, and only **Onboarding** ever creates its place.
+_Avoid_: issue mode, file mode (earlier names, from when the remote place had to be a GitHub or GitLab issue); load, save (say fetch, store)
 
 **Config file**:
 `.scratch/refactor/config.md`, at a fixed path, per person and machine: the **Bookkeeping pointer**, **Ticket-create-mode** and **MR-create-mode**. Values it doesn't state read as the safe ones (`ask-each-time`, `human-opens`). The suite writes it once, during **Onboarding**, and never after.

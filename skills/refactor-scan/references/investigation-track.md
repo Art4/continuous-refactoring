@@ -66,7 +66,7 @@ The actual codebase walk that turns this gate name into one concrete candidate i
 changes here. Once filed, the concrete candidate's own open/done/rejected state lives entirely on the
 issue tracker / `merge-requests.md`; in flight, it's tracked in `## Investigation`'s own `Open`
 (`refactoring-bookkeeping.md`) — `refactor-design` adds an entry for it the moment the candidate has an
-issue, on every tracker, native-label ones included, alongside any other entry already there
+issue, on every tracker, alongside any other entry already there
 (`../../refactor-design/SKILL.md`).
 
 `structural-scan` still gate-blocked (its own resolved-parents not yet all resolved — typically because
