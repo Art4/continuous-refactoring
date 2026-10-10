@@ -7,7 +7,7 @@ Names the Track this run works, or ends the run. Reads the worklist (`worklist.m
 
 | Track | It has something when |
 | --- | --- |
-| Safety Net, Guardrails | it has a workable ticket; or it has no open ticket at all, which makes its scan due |
+| Safety Net, Guardrails | it has a workable ticket; or it has no trace yet, which makes its scan due (`worklist.md`, *A Track's trace*) |
 | Housekeeping | its open ticket's stated due date is reached; or its mechanism is missing: no **Housekeeping** operation, no template, or no open ticket |
 | Investigation | always — with open tickets it works them, without it explores |
 

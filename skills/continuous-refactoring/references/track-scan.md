@@ -2,7 +2,8 @@
 
 The scan of Safety Net or Guardrails: judge the Track's nodes against the target, let the parser order
 them, and turn every node that is neither fulfilled nor rejected into a **proposal** for a ticket. It runs
-when the Track has no open ticket or the call asked for it. The scan reads; its proposals reach the
+when the Track has no trace yet (`worklist.md`, *A Track's trace*), when the call asked for it, or as the
+Housekeeping task that re-checks the tooling Tracks. The scan reads; its proposals reach the
 tracker through the filing step.
 
 ## 1. Scope

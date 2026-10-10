@@ -227,3 +227,14 @@ Step 10 points to the existing `opening-a-merge-request.md`, which still reads `
 
 No unit test is newly red (the same two as before). The validator has new errors; they are listed in a
 comment on ticket 09.
+
+### Changed after review
+
+- **When a scan is due.** A tooling Track is scanned by itself only while it has no trace in the
+  tracker — no ticket of its nodes, open or closed, and no recorded rejection. With a trace, a node
+  without an open ticket counts as done and the gate is computed on that, with nothing judged.
+  Re-checking the tooling Tracks is a task of the Housekeeping template (ticket 07). This replaces "a
+  Track whose tickets are all done is scanned on every run" and the second step of reading the gate.
+- **Finding the tooling tickets.** With a **Candidate** operation the marked open tickets are the list;
+  one **Search** per node only without it.
+- **Stranded nodes** behind a rejected `required-any` member are the parser's to close: ticket 11.

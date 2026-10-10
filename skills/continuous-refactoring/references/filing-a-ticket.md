@@ -29,7 +29,9 @@ and settle on one:
 - **Recommendation:** file every proposal that carries no open question; record the proposed rejections;
   close the tickets whose node is fulfilled. A proposal with an open question is filed once a human
   answered it; an autonomous run leaves it unfiled and carries the question into the closing report.
-- A proposal neither filed nor declined is not stored anywhere; the next scan offers it again.
+- A proposal neither filed nor declined is not stored anywhere. Say so before the answer is taken: its
+  node counts as done from now on, until a scan the call asks for or Housekeeping's re-check offers it
+  again.
 
 ## 3. Write
 

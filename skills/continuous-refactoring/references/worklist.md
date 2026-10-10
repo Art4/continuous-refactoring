@@ -8,10 +8,11 @@ in place. Every command comes from the target's `## Refactoring operations` sect
 
 Run the parser without a seed (`tooling-tree-parser.md`) and take every node of `tracks`.
 
-- **Tooling tickets.** For each node, run **Search** with the node's Name, narrowed to the open tickets.
+- **With a Candidate operation** → list the open tickets it marks. The tooling tickets are among them:
+  filing sets that mark.
+- **Without one** → for each node, run **Search** with the node's Name, narrowed to the open tickets.
   Where one listing of all open tickets is short enough to read — a local folder, a small tracker — read
   that listing once instead.
-- **Marked tickets.** With a **Candidate** operation, list the open tickets it marks.
 - **Housekeeping tickets.** With a **Housekeeping** operation, find the open ones the way it says.
 - **The ticket the call names**, whatever it carries.
 
@@ -42,6 +43,18 @@ The first row that applies:
 
 A restriction in the call removes every ticket and every node it does not cover, before any later step
 counts them.
+
+## A Track's trace
+
+A tooling Track has a **trace** once the tracker shows it was scanned before: a ticket of one of its
+nodes in any state, or a recorded rejection of one (`rejection.md`, *Finding rejections*). Asked only of a
+Track with no open ticket: run **Search** over open and closed tickets with the Names of the Track's
+nodes, and stop at the first hit.
+
+- **No trace** → the Track's scan is due.
+- **A trace** → the Track is not scanned again by itself. A node of it without an open ticket counts as
+  done; a tool that went missing since, or a node the tree gained, is found by a scan the call asks for
+  or by the Housekeeping task that re-checks the tooling Tracks.
 
 ## A ticket's merge request
 

@@ -29,6 +29,9 @@ lands on Housekeeping.
       after the human allowed it, and, with two open, to let the human choose with the younger recommended
 - [ ] The secret scan over history is a template task: whole history the first time, afterwards the
       commits since the last Housekeeping ticket
+- [ ] The template the suite proposes carries the task "re-check the tooling Tracks": a scan of Safety Net
+      and Guardrails as the scan reference of `continuous-refactoring` describes it, so a tool that went
+      missing or a node the tree gained is found; its proposals go through the filing decision point
 - [ ] Tooling-tree nodes still contribute their Housekeeping line to the template through their own merge
       request, and a fulfilled node whose line is missing gets it added
 - [ ] The target's quality checks pass before the merge request opens; a cycle without changes closes its

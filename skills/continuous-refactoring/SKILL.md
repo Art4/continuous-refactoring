@@ -75,7 +75,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 
    *Done when* a Track is named or the run has ended.
 
-5. **Scan** — only when the Track has no open ticket, or the call asked for a scan. Follow
+5. **Scan** — only when the Track has no trace yet (`references/worklist.md`, *A Track's trace*), or the
+   call asked for a scan. Follow
    `references/track-scan.md`.
    *Done when* that reference's last step is.
 

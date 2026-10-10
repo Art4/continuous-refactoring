@@ -86,7 +86,8 @@ everything else is a reference one of them loads when a run reaches it.
     be able to override that myself, so that the foundations come first unless I say otherwise.
 16. As a developer, I want a Track with nothing workable to be skipped within the same run once Safety Net
     is fulfilled, so that a call does not end empty when another Track has work.
-17. As a developer, I want a scan only when a Track has no tickets, when all of them are done, or when I
+17. As a developer, I want a scan only when a Track has no trace yet in my tracker — no ticket of its
+    nodes, open or closed, and no recorded rejection —, as a recurring Housekeeping task, or when I
     ask for one, so that a run does not repeat work the tickets already record.
 18. As a developer, I want the scan to offer a ticket for every node that is neither fulfilled nor
     rejected, blocked ones included and marked as blocked, so that the whole way ahead is visible in my
@@ -231,7 +232,10 @@ everything else is a reference one of them loads when a run reaches it.
 ### Tickets as the worklist
 
 - "Workable" means: an open ticket whose blockers are all done.
-- A Track scan runs when the Track has no tickets, when all are done, or on request. It runs the fulfilment
+- A Track scan runs when the Track has no trace yet (no ticket of its nodes, open or closed, and no
+  recorded rejection) or on request. With a trace, a node without an open ticket counts as done, the gate
+  is computed on that, and re-checking the tooling Tracks is a task of the Housekeeping template. A scan
+  runs the fulfilment
   checks, and offers a ticket for every node neither fulfilled nor rejected, blocked ones included.
 - Before a ticket is worked, its node's fulfilment check runs again; a fulfilled node's ticket is closed
   with a note.

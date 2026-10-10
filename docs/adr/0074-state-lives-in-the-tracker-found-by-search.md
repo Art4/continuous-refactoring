@@ -48,7 +48,9 @@ The suite reads and writes the tracker and the forge, and nothing of its own.
   Track: a ticket matching a node belongs to that node's Track, the open Housekeeping ticket to
   Housekeeping, everything else to Investigation. *Workable* means an open ticket whose blockers are all
   done.
-- **A scan runs only when a Track has no tickets, when all of them are done, or on request.** It runs the
+- **A scan runs only when a Track has no trace yet — no ticket of its nodes, open or closed, and no
+  recorded rejection — or on request.** With a trace, a node without an open ticket counts as done;
+  re-checking the tooling Tracks is a recurring Housekeeping task. A scan runs the
   fulfilment checks and offers a ticket for every node neither fulfilled nor rejected, blocked ones
   included and marked as blocked. Before a ticket is worked, its node's fulfilment check runs again; a
   fulfilled node's ticket is closed with a note.
