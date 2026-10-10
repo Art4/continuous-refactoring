@@ -1,25 +1,20 @@
-# Reference: local Markdown issue-tracker template
+# Reference: Local Markdown issue-tracker template
 
-The exact content written to a target repo's `docs/agents/issue-tracker.md`
-when the onboarding interview
-(`onboarding-setup-interview.md`)
-records "Local Markdown" as the tracker choice and the file doesn't exist
-yet — copy it verbatim, don't restate or paraphrase it (this file is the one
-place it's defined, to avoid two independently-drifting copies of the same
-convention). The section it ends on is `refactoring-operations.md`'s Local
-Markdown template, which holds the issue-file convention.
+The content of a target's `docs/agents/issue-tracker.md` when the onboarding interview
+(`onboarding-setup-interview.md`) records Local Markdown as the tracker and the file does not exist yet.
+Copy it as it stands, with the Local Markdown template of `refactoring-operations.md` in place of the last
+line; that template holds the ticket-file convention.
 
 ```markdown
 # Issue tracker: Local Markdown
 
-## When a skill says "file an issue"
+## When a skill says "publish to the issue tracker"
 
-Create a new file as `## Refactoring operations` describes, its `Filed:`
-line set to today's date.
+Create a new file as `## Refactoring operations` describes.
 
-## When a skill says "check the external tracker"
+## When a skill says "fetch the relevant ticket"
 
-Read the files under `.scratch/refactor/issues/` directly.
+Read the file at the referenced path under `.scratch/refactor/issues/`.
 
 <the Local Markdown `## Refactoring operations` section>
 ```
