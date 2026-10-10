@@ -60,10 +60,11 @@ Check both as soon as planning is over, whoever planned.
 does; this ticket would change it. Lay it out as a decision point — findings: what would change for whom,
 and why no behaviour-keeping way exists. Options:
 
-- **Record a rejection** with that finding as the reason (`rejection.md`) — the recommendation. The
-  ticket's subject is declined as refactoring; the reason says it is feature work.
-- **Leave the decision to a human**: post the finding as an open question (*Open questions*) asking
-  whether the ticket becomes feature work. The ticket waits until someone replies.
+- **Leave the decision to a human** — the recommendation: post the finding as an open question (*Open
+  questions*) asking whether the ticket is declined as refactoring or becomes feature work. The ticket
+  waits until someone replies. An autonomous run takes this option, so a rejection is always a human's.
+- **Record a rejection** with that finding as the reason (`rejection.md`): the ticket's subject is
+  declined as refactoring; the reason says it is feature work.
 
 A branch that already holds work for the ticket is named in the record or the comment, and stays until
 that is written. Act on the answer; the run ends with the finding named. No plan is written.
@@ -144,9 +145,10 @@ request after another. Each run plans the next **part**.
 
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies: the baseline cannot become
-empty, so the level above cannot be raised. The rejection recorded is that of the next level's node,
-with this as its reason (`rejection.md` then deals with the levels above it), and the baseline ticket is
-closed with a note pointing to it.
+empty, so the level above cannot be raised. The open question names what follows from each answer. Where a
+human then chooses the rejection, it is that of the next level's node, with this as its reason
+(`rejection.md` then deals with the levels above it), and the baseline ticket is closed with a note
+pointing to it.
 
 ## Planning any other ticket
 

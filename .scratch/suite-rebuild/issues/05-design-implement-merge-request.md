@@ -168,3 +168,11 @@ Reviewed on two axes before the commit. Taken over: one owner for ADR and glossa
 the checks), the baseline ticket's part merge requests found by search, branch names per part, the
 bounded smell loop, the waiting ticket in an autonomous call, completion criteria per step. Left open on
 purpose: the meaning of the waiting rule also stands in the **Flagged candidate** glossary entry.
+
+### Changed after review
+
+- **A behaviour-change finding is left to a human.** The recommendation at that decision point is now the
+  open question; recording a rejection is the option a human may choose. An autonomous run therefore
+  never rejects by its own judgement — on a baseline ticket that would have closed every level above.
+- **Comment author and time** is read by nothing since this ticket; ticket 07 says whether Housekeeping
+  needs it, ticket 08 removes it otherwise.

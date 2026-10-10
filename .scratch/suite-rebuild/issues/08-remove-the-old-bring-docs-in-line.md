@@ -17,6 +17,8 @@ Spec: `../spec.md` (sections *Shape of the suite*, *Onboarding and existing targ
       remains
 - [ ] No remaining skill text or reference points to a removed file, to bookkeeping, a config file, a
       cadence or a cap
+- [ ] The **Comment author and time** operation is removed from the operations reference, its templates,
+      the onboarding interview and the glossary, unless ticket 07's comments say Housekeeping reads it
 - [ ] `README.md`, `docs/architecture.md`, `docs/playbooks/`, `docs/FAQ.md`, `docs/known-limitations.md`
       and `CONTRIBUTING.md` read true against the rebuilt suite, in their own words, citing no ADR, ticket
       or scratch path

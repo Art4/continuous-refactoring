@@ -36,5 +36,8 @@ lands on Housekeeping.
       request, and a fulfilled node whose line is missing gets it added
 - [ ] The target's quality checks pass before the merge request opens; a cycle without changes closes its
       ticket with a comment
+- [ ] The ticket's comments say whether Housekeeping needs the **Comment author and time** operation to
+      work the proposals left as comments; nothing else in the suite reads it any more (ticket 05), and
+      ticket 08 removes it unless this ticket uses it
 - [ ] No cadence, `Last scan` or bookkeeping is read or written
 - [ ] No test is written or changed
