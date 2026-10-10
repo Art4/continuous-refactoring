@@ -6,18 +6,76 @@ subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries a
 
 ## [0.6.0] - 2026-10-10
 
-- **Breaking:** the loop's state no longer lives in a committed `docs/refactoring/` folder. Your create-modes (`Ticket-create-mode`, `MR-create-mode`) and the pointer to the bookkeeping now sit in `.scratch/refactor/config.md`, and the bookkeeping itself in `.scratch/refactor/bookkeeping.md` — files the suite writes but never commits, branches or opens a merge request for (whether they go into Git, and how they reach another machine, is up to you). Focus areas and refactoring goal are now two lines you add to `AGENTS.md`. A create-mode the config doesn't state reads as the safe value (`ask-each-time`, `human-opens`), and candidate merge requests are no longer opened as drafts. Existing projects re-onboard; a migration step for the old folder follows. The Housekeeping checklist stays at `docs/refactoring/housekeeping-template.md`.
-- You can now keep the loop's bookkeeping in a tracker issue instead of local files: onboarding offers to create one (or adopt an existing one), and any machine with access to it picks the state up without a commit. Learned rejections and remembered merge requests are comments on that issue. The last write wins, an unreadable issue stops the pass and is never replaced on its own. Onboarding also moves the state of an earlier version (`docs/refactoring/`) into the new layout and, after you confirm, removes the old files.
-- A Safety Net or Guardrails pass no longer picks up structural candidates: an issue labelled `refactor:candidate` that isn't a tooling-tree node's is now worked only in an Investigation pass, and the closing report says how many are waiting. Candidates you label `refactor:priority` are still taken by any pass.
-- The Investigation Track's own in-flight candidate (structural, PHPStan baseline-shrink, or externally-labeled) now lives in `## Investigation`'s own `Open` field, the same shape Safety Net's and Guardrails' own `Open` already use, instead of the global `Pending candidates` field. It's also now resumed only during an Investigation pass, never mid a Safety Net or Guardrails one.
-- A flagged candidate (`needs-info`) now self-confirms when a human's newest comment on the issue plainly agrees with the stated default: the suite swaps the labels itself instead of waiting for you to also flip `needs-info`/`ready-for-agent` by hand. A comment proposing something else, or raising a further question, still leaves it flagged — the suite nudges once instead of skipping silently forever, but never applies an alternative on its own.
-- `refactor-prioritize`'s "a proposable tooling-tree node is a strong default recommendation" now applies only when every proposal in the pool is itself a tooling-tree node. The moment an issue-backed candidate (structural, PHPStan baseline-shrink, or externally-labeled) is ranked alongside a gate like `structural-scan`, no default applies to either side — both compete purely on Heat, Leverage, Tooling pressure, and Risk. Previously the default let a permanently-or-long-proposable gate out-rank an already-filed candidate indefinitely, regardless of the candidate's real merit.
-- `## Investigation`'s `Open` bookkeeping field is no longer restricted to one entry. The suite-wide two-merge-request cap already allowed two candidates in flight at once, and nothing stopped both from being Investigation's own — a single-entry field either lost track of the second one or grew an undocumented extra line, depending on how it was written to. `refactor-design` now appends its own entry per candidate; `refactor-learn` removes only the entry for whichever candidate resolves, leaving any other in-flight candidate's entry untouched.
-- The bookkeeping document's top-level `Pending candidates` field is gone. Every candidate in flight is tracked in its own Track's `Open` list, so the field had nothing left to record; `refactor-scan` now resumes from the selected Track's `Open` alone, and `refactor-design` writes no bookkeeping for a tooling-tree node. An existing document that still carries the field needs no change — the line is ignored. One edge changes: on a tracker without native labels, a hand-filed `Tooling tree: <Name>` issue interrupted between design and implementation is ranked again on the next pass instead of being resumed unconditionally.
-- The one-time exception in Track selection is gone: once the Safety Net is in place, no Track gets a forced turn any more. The scheduler goes straight to its ordinary order — Guardrails' first scan, Housekeeping's first cycle, Guardrails' backlog, then Investigation — and the Safety Net pass that finishes the foundation tells you that Guardrails, Housekeeping and Investigation can now each be run directly by naming the Track (e.g. `/continuous-refactoring investigation`). An Investigation candidate already in flight no longer takes passes away from a due Housekeeping or a workable Guardrails node.
-- A Safety Net or Guardrails scan now hands its own fulfilment judgement to the tooling-tree script and records the script's complete ordered list — blocked nodes included — as the Track's `Open`, instead of reading a state the script no longer detects. Fixed alongside: a target whose `bookkeeping.md` had a `## Safety Net` section but no `## Guardrails` section yet was read as having every Guardrails node already in place; a missing Track section now means that Track never ran. A seed file the script cannot read now stops it with an error instead of being silently replaced by the bookkeeping state.
-- The suite now works with any issue tracker that `docs/agents/issue-tracker.md` describes, not only GitHub, GitLab and local Markdown files. Skills read a handful of named operations from a new `## Refactoring operations` section in that file instead of deciding by the tracker's name, and tickets and merge requests may live in different systems (for example Redmine tickets with GitLab merge requests). Onboarding offers a tracker the file already describes as its own answer, lets you describe another one in the interview, and no longer falls back to local files silently. **Projects onboarded earlier need the new section:** `/continuous-refactoring` stops with a message until you run the onboarding again, which adds the section and changes nothing else. The suite no longer prescribes `Closes #<n>` itself — the GitHub and GitLab templates carry it.
-- The suite's own state can now live anywhere your project describes, not only in local files or a GitHub/GitLab issue. "Issue mode" is now **remote bookkeeping**: the suite fetches the bookkeeping before a pass and stores it after every write, and where it lives and how that is done is written in your project, as a **Bookkeeping** entry under `## Refactoring operations` in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates bring that entry with the procedure used so far, so an existing bookkeeping issue keeps working once the onboarding has been run again. Onboarding offers "as this project describes it" as a place for the state and proposes a description from your project's own files.
+- **Breaking:** the suite's state no longer lives in a committed `docs/refactoring/` folder. Your
+  create-modes (`Ticket-create-mode`, `MR-create-mode`) and the pointer to the bookkeeping now sit
+  in `.scratch/refactor/config.md`, and by default the bookkeeping itself in
+  `.scratch/refactor/bookkeeping.md` — files the suite writes but never commits, branches or opens a
+  merge request for (whether they go into Git, and how they reach another machine, is up to you).
+  Focus areas and refactoring goal are now two lines you add to `AGENTS.md`. A create-mode the
+  config doesn't state reads as the safe value (`ask-each-time`, `human-opens`), and candidate merge
+  requests are no longer opened as drafts. An existing project runs the onboarding again: it moves
+  the state from `docs/refactoring/` into the new layout and, after you confirm, removes the old
+  files. The Housekeeping checklist stays at `docs/refactoring/housekeeping-template.md`.
+- The suite now works with any issue tracker that `docs/agents/issue-tracker.md` describes, not only
+  GitHub, GitLab and local Markdown files. Skills read a handful of named operations from a new `##
+  Refactoring operations` section in that file instead of deciding by the tracker's name, and
+  tickets and merge requests may live in different systems (for example Redmine tickets with GitLab
+  merge requests). Onboarding offers a tracker the file already describes as its own answer, lets
+  you describe another one in the interview, and no longer falls back to local files silently. **A
+  project onboarded earlier needs the new section:** `/continuous-refactoring` stops with a message
+  until the onboarding has been run again, which adds it. The suite no longer prescribes `Closes
+  #<n>` itself — the GitHub and GitLab templates carry it.
+- New: **remote bookkeeping**. Instead of local files, the bookkeeping can live in a tracker issue
+  or anywhere else your project describes, and any machine with access to it picks the state up
+  without a commit. The suite fetches the bookkeeping before a pass and stores it after every write;
+  where it lives and how that is done is written in your project, as a **Bookkeeping** entry under
+  `## Refactoring operations` in `docs/agents/issue-tracker.md`. The GitHub and GitLab templates
+  bring that entry: an issue whose body is the bookkeeping, with learned rejections as comments on
+  it. Onboarding offers to create such an issue, to adopt an existing one, or "as this project
+  describes it", for which it proposes a description from your project's own files. The last write
+  wins; bookkeeping that can't be fetched stops the pass and is never replaced on its own.
+- A Safety Net or Guardrails pass no longer picks up structural candidates: an issue labelled
+  `refactor:candidate` that isn't a tooling-tree node's is now worked only in an Investigation pass,
+  and the closing report says how many are waiting. Candidates you label `refactor:priority` are
+  still taken by any pass.
+- The bookkeeping document's top-level `Pending candidates` field is gone: every candidate in flight
+  is now tracked in its own Track's `Open` list. `## Investigation` gains an `Open` field for that,
+  the same shape Safety Net's and Guardrails' already use, holding one entry per in-flight candidate
+  of its own (structural, PHPStan baseline-shrink, or externally-labeled) — up to two, as the
+  suite-wide two-merge-request cap allows. `refactor-design` appends the entry, `refactor-learn`
+  removes only the one for the candidate that resolves, and `refactor-design` writes no bookkeeping
+  for a tooling-tree node. `refactor-scan` resumes from the selected Track's `Open` alone, so an
+  Investigation candidate is resumed only during an Investigation pass, never mid a Safety Net or
+  Guardrails one. An existing document that still carries `Pending candidates` needs no change — the
+  line is ignored. One edge changes: on a tracker without native labels, a hand-filed `Tooling tree:
+  <Name>` issue interrupted between design and implementation is ranked again on the next pass
+  instead of being resumed unconditionally.
+- A flagged candidate (`needs-info`) now self-confirms when a human's newest comment on the issue
+  plainly agrees with the stated default: the suite swaps the labels itself instead of waiting for
+  you to also flip `needs-info`/`ready-for-agent` by hand. A comment proposing something else, or
+  raising a further question, still leaves it flagged — the suite nudges once instead of skipping
+  silently forever, but never applies an alternative on its own.
+- `refactor-prioritize`'s "a proposable tooling-tree node is a strong default recommendation" now
+  applies only when every proposal in the pool is itself a tooling-tree node. The moment an
+  issue-backed candidate (structural, PHPStan baseline-shrink, or externally-labeled) is ranked
+  alongside a gate like `structural-scan`, no default applies to either side — both compete purely
+  on Heat, Leverage, Tooling pressure, and Risk. Previously the default let a
+  permanently-or-long-proposable gate out-rank an already-filed candidate indefinitely, regardless
+  of the candidate's real merit.
+- The one-time exception in Track selection is gone: once the Safety Net is in place, no Track gets
+  a forced turn any more. The scheduler goes straight to its ordinary order — Guardrails' first
+  scan, Housekeeping's first cycle, Guardrails' backlog, then Investigation — and the Safety Net
+  pass that finishes the foundation tells you that Guardrails, Housekeeping and Investigation can
+  now each be run directly by naming the Track (e.g. `/continuous-refactoring investigation`). An
+  Investigation candidate already in flight no longer takes passes away from a due Housekeeping or a
+  workable Guardrails node.
+- A Safety Net or Guardrails scan now hands its own fulfilment judgement to the tooling-tree script
+  and records the script's complete ordered list — blocked nodes included — as the Track's `Open`,
+  instead of reading a state the script no longer detects. Fixed alongside: a target whose
+  `bookkeeping.md` had a `## Safety Net` section but no `## Guardrails` section yet was read as
+  having every Guardrails node already in place; a missing Track section now means that Track never
+  ran. A seed file the script cannot read now stops it with an error instead of being silently
+  replaced by the bookkeeping state.
 
 ## [0.5.0] - 2026-09-24
 
