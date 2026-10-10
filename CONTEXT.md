@@ -13,7 +13,7 @@ The ordered list of a **Track**'s tooling-tree nodes that are neither fulfilled 
 _Avoid_: debt list, todo list
 
 **Run**:
-One call of the suite, from its first **decision point** to its end: reconcile → **Track** choice → scan (only when the Track needs one) → file tickets → select → design → implement → **merge request**. A run ends when the merge request is open, when the design cannot proceed without a human answer, or when nothing is workable; more work is another call, not a longer run. Nothing limits how many merge requests or candidates are open at once. The call takes free text the suite interprets — a Track, a restriction ("only the Rector nodes"), a ticket, the mode. Text addressed to the human says "run" and "skill suite".
+One call of the suite, from its first **decision point** to its end: reconcile → **Track** choice → scan (only when the Track needs one) → file tickets → select → design → implement → **merge request**. A run ends when the merge request is open, when the design cannot proceed without a human answer or finds that the ticket would change behavior, or when nothing is workable; more work is another call, not a longer run. Nothing limits how many merge requests or candidates are open at once. The call takes free text the suite interprets — a Track, a restriction ("only the Rector nodes"), a ticket, the mode. Text addressed to the human says "run" and "skill suite".
 _Avoid_: loop pass, session, sprint
 
 **Decision point**:
@@ -156,7 +156,7 @@ What moves together, and what must not spread? The degree to which related code 
 _Avoid_: (none — use the term as-is)
 
 **Plan**:
-The concrete refactoring plan a **run**'s design point ends with — produced by the target's own planning skill where it has one, else by the suite's fallback: the deepened module, its seam, the interface, and the surviving tests — written on the candidate's ticket so the refactor is delegable.
+The concrete refactoring plan a **run**'s design point ends with — produced by the target's own planning skill where it has one, else by the suite's fallback: what changes and where, the slices in the order they are built, and the commands that show the work is done — for a structural candidate also the deepened module, its seam, the interface, and the surviving tests. Written on the candidate's ticket so the refactor is delegable; a plan the suite wrote is a comment opening with the word `Plan`.
 _Avoid_: design doc
 
 **Proposals**:
@@ -180,21 +180,18 @@ A candidate whose **plan** is already written, but whose design also surfaced a 
 the ADR bar (hard to reverse, surprising without context, a real trade-off) while staying
 behavior-preserving — distinct from a **Finding**'s breaking-change case, which never gets a plan at
 all. In an interactive run the human answers at the design point. An autonomous run does not guess:
-it leaves a proposed default plus an explicit open question on the ticket and ends with a message
-naming that question; `ready-for-agent` (`docs/agents/triage-labels.md`) is actively removed if the
-ticket already carried one, and `needs-info` is added in its place — the visible "waiting on you"
-signal — until a human confirms or overrides it. A plain confirming comment is enough on its own —
-the suite self-confirms it, swapping the labels itself (ADR-0066); anything else (a stated
-alternative, a further question) still needs the human to swap the labels by hand once satisfied.
-A still-waiting one (`needs-info` present, no newer human comment) is not workable — it doesn't
-block the rest of the worklist — and becomes workable the moment `ready-for-agent` appears, whether
-a human set it or the self-confirmation above did.
+its plan takes a default, the question is left on the ticket as a comment opening with the words
+`Open question`, and the run ends with a message naming it. The ticket is _waiting_ — not workable,
+and not in the way of the rest of the **worklist** — while that comment is its newest one. Any newer
+comment ends the wait: the next run's design point reads it, and lets the plan stand, plans again with
+the way it names, or asks once more. No label is set or removed for any of this, so it works in a
+target without triage labels.
 _Avoid_: blocked candidate, paused candidate
 
 **Decision trail**:
-A bundled comment posted on the ticket once grilling at the design point settles (structural
-candidates and tickets a human wrote only), naming every question that met the ADR bar and the answer
-reached live with the human — distinct from a **Flagged candidate**'s open question, which is
-unresolved and blocks `ready-for-agent`. Purely a record; it never blocks anything. No qualifying
-question in that run → no comment.
+The `Decisions` part of a **plan**: every question of the design that met the ADR bar, with the answer
+reached — distinct from a **Flagged candidate**'s open question, which is unresolved. Purely a
+record; it never blocks anything. Where the target's domain docs say ADRs are kept, each such decision
+also becomes an ADR on the candidate's branch, travelling in its **merge request**. No qualifying
+question → no `Decisions` part.
 _Avoid_: grilling log, design notes

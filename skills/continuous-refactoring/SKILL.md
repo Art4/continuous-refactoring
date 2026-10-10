@@ -88,7 +88,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
    Track marked as tried.
 
 8. **Design.** Hand the selected ticket to `references/design-point.md`.
-   *Done when* the ticket carries an implementable plan, or the run has ended with the open question named.
+   *Done when* the ticket carries an implementable plan, or the run has ended with the open question or
+   the finding named.
 
 9. **Implement.** Hand the planned ticket to `references/implement-point.md`.
    *Done when* a branch holds the change and its checks are green.
@@ -98,8 +99,9 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 
 ## The end of a run
 
-A run ends when its merge request is open, when the design cannot proceed without a human answer, when
-nothing is workable, or at a decision point nobody answered.
+A run ends when its merge request is open or its branch is handed to the human, when the design cannot
+proceed without a human answer or finds that the ticket is no refactoring, when nothing is workable, or
+at a decision point nobody answered.
 
 Close with two lines, each claim confirmed during this run:
 

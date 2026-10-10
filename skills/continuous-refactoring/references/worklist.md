@@ -36,7 +36,7 @@ The first row that applies:
 | --- | --- |
 | **in review** | has an open merge request (below) |
 | **blocked** | names a blocker that is not done, or one that has no ticket yet: per **Blocked by**, or, without that operation, in the sentence `Blocked by: …` in its text |
-| **waiting** | carries a question no human has answered: one the design point left on it, or reconcile's about its closed merge request |
+| **waiting** | its newest comment is an open question (`design-point.md`, *Open questions*); or, for this run, reconcile's question about its closed merge request went unanswered |
 | **workable** | none of the above |
 
 ## 4. Apply the restriction
@@ -58,10 +58,12 @@ nodes, and stop at the first hit.
 
 ## A ticket's merge request
 
-Found the first way that applies; where a ticket has several, the newest counts.
+Where a ticket has several, the newest counts.
 
 - With **Linked merge request** → the way it says.
-- Without → search the forge's merge requests, in every state, for the ticket's reference or title, with
-  the tool **Merge requests** names.
+- Without it, and always for a baseline ticket, whose merge requests deliver a part and carry no closing
+  reference → search the forge's merge requests, in every state, for the ticket's reference or title,
+  with the tool **Merge requests** names.
 - **Merge requests** says `none` → the branch the ticket's comments name stands in: merged when
-  `git merge-base --is-ancestor <branch> <default branch>` succeeds, open otherwise.
+  `git merge-base --is-ancestor <branch> <default branch>` succeeds or the branch is gone, open
+  otherwise. Of several branches named, the newest comment's counts.

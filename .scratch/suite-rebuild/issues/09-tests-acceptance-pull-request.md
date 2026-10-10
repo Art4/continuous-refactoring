@@ -110,3 +110,41 @@ fulfilled:
   `skills/refactor-learn/references/guardrails-write.md` (old skills, going with ticket 08).
 - `fixtures/README.md` and `fixtures/php/php-safety-net-rejection-cascade/expected/behavior.md` name
   `closed_by_rejection` with the old meaning.
+
+### Red after ticket 05 (design point, implement point, merge request)
+
+Unit tests (`python3 -m unittest discover -s scripts -p 'test_*.py'`): unchanged, the same two fail; 248
+of 250 green. `scripts/drift_check.py`: unchanged, 7 failures and 1 error.
+
+`python3 scripts/validate_skills.py .` — still exits 1. New errors, all "domain term used in 2 skills but
+missing from glossary", each because a new reference and an old skill share a word:
+
+- `'spec'` and `'standards'` (the two review axes: `reviewing-a-change.md` and `refactor-implement`)
+- `'tautological'` (`reviewing-a-change.md` and `refactor-implement`)
+- `'tests that survive'` (`design-point.md` and `refactor-design`)
+
+They go away when ticket 08 removes the old skills, unless the validator then still wants the words as
+glossary entries.
+
+Gone: the two "local reference does not exist" errors for `references/design-point.md` and
+`references/implement-point.md`, and the orphan advisory for `triage-labels-template.md` (file deleted).
+
+Not run here: the `fixtures/harness/run.sh` tiers. `changelog-fragment.yml` — `skills/**` and
+`CONTEXT.md` changed again without a `.changelog.d/` fragment.
+
+Not red, but now untrue:
+
+- `fixtures/README.md` (line 88) and a comment in `fixtures/harness/run.sh` (line 372) name the deleted
+  `triage-labels-template.md`; `fixtures/README.md` (line 285) describes the old "no forge/remote
+  available" branch of `opening-a-merge-request.md`.
+- `skills/continuous-housekeeping/references/housekeeping-track.md` (line 128) cites
+  `opening-a-merge-request.md` for "MR-create-mode, basing" — rules that file no longer has (ticket 07).
+- `docs/FAQ.md`, `docs/known-limitations.md`, `docs/playbooks/loop.md` and `docs/playbooks/tracks.md`
+  still describe the `needs-info` / `ready-for-agent` labels of a flagged candidate (ticket 08).
+- The PHP tree doc `php-tooling-tree/phpstan.md` (*Stop conditions*) still sends the baseline work to
+  `refactor-scan` step 4b and `refactor-design`'s `phpstan-baseline-shrink.md`; node docs with a
+  **Housekeeping** field (`composer-audit.md`) still name `docs/refactoring/housekeeping-template.md`
+  as the fixed place and create it fresh, where `implement-point.md` now follows the **Housekeeping**
+  operation.
+- `scripts/validate_skills.py` (line 815) and the parser's `directly_unblocked_children` with its tests
+  serve the Outlook comment, which the rebuilt suite no longer posts.
