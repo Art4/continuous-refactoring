@@ -77,3 +77,9 @@ and 10.
 ### Red afterwards
 
 Nothing newly red; the list of texts that are now untrue is in a comment on ticket 09.
+
+### Changed after review
+
+- **The seed read from a Track's trace judges the recognition-only nodes** instead of assuming them
+  fulfilled (`tooling-tree-parser.md`, *The seed from the trace*). With `psalm` judged, this ticket's
+  rule also holds where no scan ran: at the gate question and after a rejection recorded at selection.

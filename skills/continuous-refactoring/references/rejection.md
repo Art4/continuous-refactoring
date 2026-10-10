@@ -36,7 +36,8 @@ version.
 
 ## What depends on a rejected node
 
-After recording a rejection of a node, run the parser with it in the seed (`tooling-tree-parser.md`) and
+After recording a rejection of a node, run the parser with it in the seed — this run's scan seed, or the
+seed from the trace (`tooling-tree-parser.md`) where no scan ran — and
 lay out one more decision point about the tickets that named the node as a blocker. The kind of edge, from
 `tree.edges`, gives the recommendation:
 

@@ -49,10 +49,22 @@ Nodes the tree holds that are in no Track's `nodes` and are not one of the four 
 The answer is `detected["structural-scan"]["fulfilled"]`, the computed state of the aggregation node
 every Safety Net leaf feeds. `tracks["Safety Net"]["fulfilled"]` answers another question — whether every Safety Net node is done — and decides nothing in a run.
 
-Within one run a node is judged once, and the result is reused. Where this run's Safety Net scan judged the whole Track, read the answer from that call. Otherwise the Track has a trace
-(`worklist.md`, *A Track's trace*), and its tickets are the state: write a seed with every recorded
-rejection as `rejected` and every Safety Net and recognition-only node without an open ticket as
-`fulfilled`, and read the answer from that call. Nothing is judged for it.
+Within one run a node is judged once, and the result is reused. Where this run's Safety Net scan judged
+the whole Track, read the answer from that call. Otherwise the Track has a trace (`worklist.md`, *A
+Track's trace*): read the answer from a call with the seed from the trace.
+
+## The seed from the trace
+
+For a tooling Track that has a trace, its tickets are the state. The seed holds:
+
+- every recorded rejection as `rejected`, with its blocker (`rejection.md`, *Finding rejections*);
+- every node of the Track without an open ticket as `fulfilled`, taken as done and not judged;
+- the recognition-only nodes as judged (`track-scan.md`, *Judging a node*). No ticket ever stands for
+  them, so the tracker says nothing about them, and whether one is fulfilled decides which nodes a
+  rejection closes.
+
+Every step that calls the parser outside a scan uses this seed: the gate question above, and the calls
+that follow a rejection (`rejection.md`).
 
 ## Without `python3`
 
