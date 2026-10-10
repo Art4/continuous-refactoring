@@ -26,5 +26,10 @@ review, the forge-facing writing rules, never deleting a branch that holds the o
       domain docs say ADRs are kept
 - [ ] A design that finds the candidate cannot be done without changing behaviour ends as a decision
       point, not as a silent stop
+- [ ] A **Flagged candidate** works in a target that has no `docs/agents/triage-labels.md`: onboarding no
+      longer writes that file (ticket 02), so the "waiting on you" and "ready" states are either expressed
+      without triage labels or the design point proposes setting them up at a decision point; the
+      glossary entry and the now unreferenced `triage-labels-template.md` are brought in line with
+      whichever is chosen
 - [ ] No ticket mode or merge-request mode is read; the run's mode decides whether the suite asks
 - [ ] No test is written or changed
