@@ -4,8 +4,8 @@ The parser holds the tooling tree's graph logic. It is handed which nodes are fu
 rejected, and answers what that state means: the nodes per Track, their order, what blocks each, and
 whether the aggregation nodes are fulfilled. It reads the tree docs and the target repository, and writes nothing.
 
-- **Script:** `../../refactor-scan/references/tooling_tree.py`, relative to this file.
-- **Tree docs:** beside the script — `tooling-tree.md` (the generic root) and `php-tooling-tree.md`, each
+- **Script:** `tooling_tree.py`, beside this file.
+- **Tree docs:** beside it too — `tooling-tree.md` (the generic root) and `php-tooling-tree.md`, each
   with its edge table and, per node, Name, Tool, Purpose and a pointer to the file holding the node's
   **Fulfilment check** and **MR scope**.
 

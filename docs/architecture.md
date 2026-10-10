@@ -1,116 +1,102 @@
 # Architecture
 
-How the suite is put together, for someone who wants to understand or extend it. For steering a run as a user, see the [loop playbook](playbooks/loop.md); for the vocabulary, [CONTEXT.md](../CONTEXT.md).
+How the suite is put together, for someone who wants to understand or extend it. For steering a run as a user, see the [run playbook](playbooks/run.md); for the vocabulary, [CONTEXT.md](../CONTEXT.md).
 
-## Skill hierarchy
+## Two skills, everything else a reference
 
 ```
-/continuous-refactoring            ← the only user entry point; onboards a new project, otherwise picks a Track
-   ├── /continuous-safety-net      ┐
-   ├── /continuous-guardrails      ├─ each names its Track and delegates to ↓
-   ├── /continuous-investigation   ┘
-   │        └── refactor-loop      ← one track-agnostic pass
-   │               ├── refactor-scan
-   │               ├── refactor-prioritize
-   │               ├── refactor-design
-   │               ├── refactor-implement
-   │               └── refactor-learn
-   └── /continuous-housekeeping    ← owns Housekeeping's own process; never calls refactor-loop
+/continuous-refactoring            ← one run: from the open tickets to an opened merge request
+   └── references/
+         ├── onboarding, the operations and their templates
+         ├── worklist, reconcile, Track choice
+         ├── scanning a tooling Track, filing tickets, selection, rejections
+         ├── the Investigation Track, the signals, the search for structural candidates
+         ├── design point, implement point, review, opening the merge request
+         └── the tooling tree: its parser, the tree docs, one file per node
+
+/continuous-housekeeping           ← the Housekeeping Track alone, no Track choice
+   └── references/
+         ├── the Housekeeping Track
+         └── setting Housekeeping up
 ```
 
-- **`continuous-refactoring`** is a thin dispatcher. Step 0 is **onboarding**: when the target has no bookkeeping document it runs a short interview inline, writes the setup files and ends the invocation (see [Loop state](#loop-state)). Otherwise it selects a [Track](playbooks/tracks.md), announces the choice in one sentence and invokes that Track's skill. It never runs the pass itself.
-- **`continuous-safety-net` / `-guardrails` / `-investigation`** are internal. Each does nothing but name its Track and call `refactor-loop`.
-- **`continuous-housekeeping`** runs the Housekeeping Track's own reconcile → checklist → quality gate → deliver process, then records its `Last scan` through `refactor-learn`. It aborts, pointing at `/continuous-refactoring`, on a target with no bookkeeping document.
-- **`refactor-loop`** requires a Track and an onboarded target (a bookkeeping document) and aborts without either; it never guesses a Track from repo state and never branches on a Track's name itself.
+- **`continuous-refactoring`** holds the run: how the call is read, the rules of a decision point, the ten steps, and how a run ends. Each step points to the reference that carries its detail, so a run loads only what it reaches.
+- **`continuous-housekeeping`** is a second entry point for one Track. It needs no Track choice, which is what makes it fit for a schedule. A run of `continuous-refactoring` that chooses Housekeeping reads the same Housekeeping reference, so there is one description of the process.
 
-Only `continuous-refactoring` is meant to be typed by a human; the others are implementation detail, though invoking a `continuous-<track>` skill directly is a valid manual override.
+Both are typed by a human; neither is picked by the agent on its own. A step that only reads and judges — the fulfilment judgements of a scan, the exploration for structural candidates, a review — may be handed to a subagent together with its reference, so its reasoning stays out of the main conversation. A subagent asks nothing and writes nothing; every decision point stays in the conversation with you.
 
-## One pass, step by step
+## One run, step by step
 
-`refactor-loop` is a **thin data pipe**: it calls each lifecycle skill in order and carries that skill's output to the next skill's input. It decides nothing a lifecycle skill could decide, and no skill re-derives context from shared state (except `refactor-scan`'s own detection).
+| Step | What happens | Ends when |
+|---|---|---|
+| 1 Ready | No Git repository ends the run. A tracker file without the suite's section, or with a required operation missing, leads into the onboarding interview | the section carries the three required operations |
+| 2 Worklist | The open tickets are searched, each sorted into a Track and given a state: workable, in review, blocked, waiting | every ticket found has both |
+| 3 Reconcile | Merge requests that were merged or closed since, and declined work whose stated blocker is now met, are laid out with what follows | every finding is acted on or left as decided |
+| 4 Track choice | One Track is recommended in the fixed order; the run may end here | a Track is named |
+| 5 Scan | Only for a tooling Track that was never scanned, or when the call asks: each tool is judged against the project, the tree is ordered | every tool is fulfilled, declined, proposed, or named as out of reach |
+| 6 File tickets | The scan's proposals become tickets, after a search for existing ones | each proposal has a ticket or was left by decision |
+| 7 Select | The first workable ticket in the Track's order; its tool is judged once more | one ticket that still needs its work is handed on |
+| 8 Design | A plan is written onto the ticket | the ticket carries an implementable plan |
+| 9 Implement | The plan is built on a branch of its own | the branch's checks are green |
+| 10 Merge request | The branch is pushed and the merge request opened | it is open, or the branch is handed to you |
 
-| Step | Skill | Job | Writes? |
-|---|---|---|---|
-| 1 | `refactor-scan` | Check preconditions (git, backlog size), resume pending work, walk the Track's `Open` list or scan the tooling tree, detect merged/closed merge requests | never |
-| 2 | `refactor-learn` (early call) | Record what scan found — only if it found something — so ranking sees a current ledger | yes |
-| 3 | `refactor-prioritize` | Rank the proposals; for a gate-shaped winner (structural work, PHPStan baseline shrink), select the concrete candidate. Returns minimal ticket drafts; the loop creates them right after | never (the loop creates the tickets) |
-| 4 | `refactor-design` | Ground and grill the candidate into a plan; write it onto the ticket the loop created (or add it as a comment) | updates/comments on the ticket |
-| 5 | `refactor-implement` | Branch, execute the plan test-first, review the diff (standards and spec, separately), open the merge request | branch, commits, merge request |
-| 6 | `refactor-learn` (closing call) | Record the outcome — always, even when nothing past step 3 ran | yes |
+Housekeeping and Investigation replace steps 5 to 7 with their own way to a ticket; from the design point on Investigation rejoins the chain, and Housekeeping delivers through the same merge-request step.
 
-Early exits are normal: no git repository ends the pass; a full backlog, a resumable candidate or a candidate still waiting for an answer skip ahead. Whenever a step stops the pass early, the human is told why immediately, and the closing report is always two lines (**Status**, **Next**).
+### Decision points and the two modes
 
-### Only the loop creates tickets
+Every write to your tracker, your forge or your files follows from a **decision point**: findings, options, one recommendation. Everything before the first one is read-only.
 
-A subagent can't ask you a question, and creating a ticket is visible to everyone watching the tracker. So no lifecycle skill creates one: scan, prioritise and learn return **ticket drafts** (title, labels, body), and `refactor-loop` creates them — after reading `Ticket-create-mode` in your config file: `autonomous` (the default when the field is missing) creates them as they arrive; `ask-each-time` asks first, once per pass for the batch of proposed tickets and then for the ticket of the candidate it chose. Comments, plan updates and label changes on an existing ticket stay with the skills. The Housekeeping Track, which runs in your conversation itself, follows the same rule for its cycle ticket. Merge requests have their own, separate setting, `MR-create-mode`.
+- **Interactive**, the default: the suite asks and waits.
+- **Autonomous**, said in the call or mid-run: the suite takes its recommendation and says so in a sentence.
 
-### Only `refactor-learn` writes bookkeeping
+Autonomous is the same chain with the recommendation taken, so there is one path to maintain and nothing to configure. The mode is never stored. An interactive run that nobody answers ends at that decision point; its report is the decision point itself, and nothing was written. One write waits for a human in every mode: a change to the project's `AGENTS.md`.
 
-`refactor-learn` is the suite's only dedicated writer: the ledger, the bookkeeping document's Track sections, ADRs/`CONTEXT.md` in the target, issue status. It writes them in place and never commits, branches or opens a merge request for them. The few other writes are the ones a step itself produces (a ticket created by the loop, a branch pushed) and the dispatcher's one-time onboarding files. This keeps "what changed the state" answerable by looking at one skill.
+### The project's own skills first
 
-### Subagents and hand-back
+At the design point and at the implement point the suite looks at the skills on offer in the conversation and at what the project's `AGENTS.md` says about planning and implementing. It recommends what `AGENTS.md` names, else a fitting skill of the project, else a fitting skill from elsewhere, and only then its own procedure. The choice is a decision point and is made again on every run, so installing a skill tomorrow changes the recommendation tomorrow.
 
-`refactor-loop` runs the scan step and the implement step in fresh subagents, so their reasoning stays in their own context and only their stated output comes back. A subagent can't ask you a question or reliably reach the forge, so it hands back instead of stalling: it reports the branch and commits plus whatever it couldn't do (seams awaiting your confirmation, an MR-create-mode that asks you, a failed push or merge request, an unreadable CI status). The loop then finishes that part in its own context. Without a subagent mechanism, the steps run inline.
+The suite expects two things back: from planning, a ticket that carries an implementable plan; from implementing, a branch whose checks are green. It opens the merge request itself unless one is already open, so a run ends the same way whoever built the change. A decision worth recording becomes an ADR on the same branch — only where the project's domain docs say where ADRs are kept.
 
-### What the loop reports
+### What the suite reports
 
-A subagent has no channel to you, so each lifecycle skill's output names the writes it made — issues filed, a branch pushed, a merge request opened, bookkeeping written. The loop turns that into a sentence before and after every step and one line per write, so nothing changes in your repository without being announced. Housekeeping, which runs in your conversation itself, reports the same way.
+One sentence when a step starts and one with its result; one line per write, as it happens, naming the thing and where it lives. A run closes with two lines: **Status** — what it did and where it ended — and **Next** — what you can do now. A claim that something is open, fixed or green is read from the forge after the last push.
 
-### The two-merge-request cap
+## No state of its own
 
-Before implement would open a *new* merge request, the loop counts the suite's open ones. Two or more → the candidate keeps its plan, stays pending, and the pass ends with a note naming the waiting merge requests. Continuing an already-open merge request is never gated. Merge requests always branch off the default branch — never off each other.
-
-## The tooling tree
-
-Safety Net and Guardrails work through the **tooling tree**: a directed graph of adoption steps a target climbs — a language-neutral root ([tooling-tree.md](../skills/refactor-scan/references/tooling-tree.md)) with a specialization attached beneath (PHP: [php-tooling-tree.md](../skills/refactor-scan/references/php-tooling-tree.md)). Edges are *required* (gates the child until the parent is fulfilled or rejected) or *recommended* (advises only).
-
-- **Fulfilment is judged, not detected.** Each node has a Purpose and a Fulfilment check; an agent judges whether the target already satisfies it — so a tool adopted by hand, or a differently named equivalent, counts. There is no hardcoded list of dependency names.
-- **The parser only does graph logic.** `tooling_tree.py` takes a fulfilment state and computes the ordered `Open` backlog, workable and withheld nodes with reasons, rejection cascades and what a landed node unlocks next. It never inspects the target.
-- **Rejections are remembered.** A node you decline is recorded under `out-of-scope/` and counts as resolved, so it isn't proposed again.
-- **A tooling-tree merge request is small and factual:** one node, its own fulfilment check as acceptance criterion, and a comment on the issue about what it unlocks next.
-
-## Loop state
-
-State lives in the target repo's working tree, never in the conversation; every lifecycle skill reads it directly. The suite never commits its own state: it writes local files, or keeps the bookkeeping somewhere your project names — a tracker issue, a wiki page.
-
-| What | Where |
+| What | Where it is found |
 |---|---|
-| `Ticket-create-mode`, `MR-create-mode`, where the bookkeeping lives — per person and machine | `.scratch/refactor/config.md` — [full reference](../skills/continuous-refactoring/references/refactoring-bookkeeping.md) |
-| Each Track's `Cadence` / `Last scan` / `Open` / `Out-of-scope` | the bookkeeping document: a file (`bookkeeping.md`, default folder `.scratch/refactor/`) or a remote place, named by the pointer in the config file |
-| Learned rejections, remembered merge requests (remote bookkeeping) | stored with the bookkeeping, the way your project describes |
+| Work to do | open tickets, found by searching the tracker |
+| A ticket's Track | the tool or subject its title and text name |
+| What blocks a ticket | the tracker's own blocking mechanism, or a `Blocked by:` sentence in the ticket |
+| Work in review | the ticket's merge request, found through the tracker's link or by searching the forge |
+| A ticket waiting for your answer | its newest comment is an open question |
+| Declined work | a closed ticket or a file with the reason, where the project's operations say |
+| Housekeeping: when due, what is done, how far the history was scanned | the Housekeeping tickets |
 | Focus areas, refactoring goal | two lines in `AGENTS.md`/`CLAUDE.md`, written by you only |
-| Remembered merge requests | open `refactor:candidate` issues with a linked merge request, where the tracker can lead from an issue to its merge request; `merge-requests.md` otherwise |
-| Backlog | `refactor:*` issues on the tracker described in `docs/agents/issue-tracker.md` |
-| How the tracker is reached | the `## Refactoring operations` section of `docs/agents/issue-tracker.md` |
-| Learned rejections | `out-of-scope/` |
-| Housekeeping checklist | `docs/refactoring/housekeeping-template.md` — shared, reviewed like code |
-| Domain language, decisions | the target's `CONTEXT.md` and ADRs |
+| Domain language, decisions | the project's own glossary and ADRs |
 
-Neither the config file nor `bookkeeping.md` exists on a fresh target. The dispatcher's onboarding step creates them: a short human interview (tracker, `Ticket-create-mode`, `MR-create-mode`, where the suite keeps its state — plus a one-time abort-or-continue question when the engineering skills' issue-tracker and label files are missing) whose answers are decided once. Onboarding writes `bookkeeping.md` last, so its existence means "onboarding complete"; it suggests committing only what belongs in Git (the instruction-file section, `docs/agents/*`) and ends the invocation — no issue, merge request, branch or scan, and nothing is created on GitHub or GitLab. The next invocation selects a Track and scans. The tooling tree keeps a root node for this (`onboarding-setup`, "Onboarding Setup"); the onboarding step fulfils it before any scan, so it is never proposed as a candidate.
+A ticket the suite files names its subject in plain words — the tool's name — in title and text, so that a later search finds it. There is no hidden marker and no fixed title. Before filing, the suite searches for an existing ticket on the subject, open or closed, and continues on yours instead of filing a duplicate.
 
 ### Tracker and forge
 
-The suite never asks which tracker a project uses. It reads a handful of named operations from the `## Refactoring operations` section of `docs/agents/issue-tracker.md`: how a ticket is marked a candidate or a priority one, how a finished ticket is recognised, where its filing date comes from, and where merge requests live. Three more are optional — how a merge request and its ticket refer to each other, who wrote a comment and when, and how a ticket is assigned. A project whose tracker lacks one simply leaves it out, and the loop takes the plainer route: without the link between ticket and merge request it keeps its own ledger, `merge-requests.md`.
+The suite never asks which tracker a project uses. It reads named operations from the `## Refactoring operations` section of `docs/agents/issue-tracker.md`. Three are required: how tickets are searched, how a finished one is recognised, and where merge requests live. The others are optional — how refactoring tickets and priority ones are marked, how a merge request and its ticket refer to each other, how a ticket is assigned, how declined work is recorded, how a ticket states what blocks it, and where the Housekeeping template lives. A project whose tracker lacks one leaves it out and the suite takes the plainer route; for some of them it proposes an answer at the moment it is first needed and writes it into the section.
 
-The tracker and the **forge** — the system that hosts the repository and its merge requests — are two things. They are the same system on a GitHub or GitLab project, and different ones where tickets live in Redmine and the code on GitLab. Onboarding writes the section: from a template for GitHub, GitLab and local Markdown files, from your answers for anything else. The dispatcher checks the section before every pass and stops when it is missing.
+The tracker and the **forge** — the system that hosts the repository and its merge requests — are two things. They are the same system on a GitHub or GitLab project, and different ones where tickets live in Redmine and the code on GitLab. Onboarding writes the section: from a template for GitHub, GitLab and local Markdown files, from your answers for anything else.
 
-### Remote bookkeeping
+## The tooling tree
 
-With the bookkeeping kept outside the working tree, the skills still read and write the same local files under
-`.scratch/refactor/`; that folder is a working copy. The entry point (`refactor-loop`, `continuous-housekeeping`,
-the dispatcher's Track selection) fetches the bookkeeping into it before anything is read, and every skill that
-wrote — `refactor-learn`, `refactor-design` for a resume-marker write — stores it before returning. The last
-write wins. Bookkeeping that can't be fetched stops the pass and nothing is created in its place; only
-onboarding, with you there, creates its place.
+Safety Net and Guardrails work through the **tooling tree**: a directed graph of adoption steps a project climbs — a language-neutral root ([tooling-tree.md](../skills/continuous-refactoring/references/tooling-tree.md)) with a specialization attached beneath (PHP: [php-tooling-tree.md](../skills/continuous-refactoring/references/php-tooling-tree.md)). An edge is *required* (the child waits until the parent is fulfilled), *recommended* (the child waits until the parent is decided — fulfilled or declined), or one of two variants the tree docs explain.
 
-That is all the suite knows about it. Where the bookkeeping lives, what the pointer in your config file means and
-how fetching and storing are done there are described by your project, normally in the **Bookkeeping** entry of
-the `## Refactoring operations` section. The GitHub and GitLab templates bring one — an issue whose body is the
-document, with one comment per learned rejection.
+- **Fulfilment is judged, not detected.** Each node has a Purpose and a Fulfilment check; an agent judges whether the project already serves the Purpose — so a tool set up by hand, or an equivalent under another name, counts. There is no list of dependency names.
+- **The parser only does graph logic.** `tooling_tree.py` is handed which nodes are fulfilled and which declined, and answers what that means: the nodes per Track, their order, what holds each one back, which nodes a rejection closes, and which declined node can come back because its PHP version is now reached. It reads the tree docs and the project, and keeps no file.
+- **Safety Net has a gate.** A handful of nodes aggregate others; their state is computed, never judged. "Is Safety Net fulfilled?" is the state of one of them, and that answer decides whether an autonomous run stops at Safety Net.
+- **A tooling merge request is small and factual:** one node, and its own Fulfilment check says when it is done.
 
-## Fallbacks and self-containment
+The parser and the tree docs ship together inside `continuous-refactoring`, so a copied or symlinked skill is complete.
 
-The suite must keep working in a target with none of the engineering skills installed. Every reference from a suite skill to a global skill (`/tdd`, `/grilling`, `/domain-modeling`, …) carries a fallback — either *crash-safe* (skip with a note; the step's core is already inline) or *self-sufficient* (the fallback inlines the part it needs). Likewise, no forge or remote is not an error: the branch is prepared and handed to you.
+## Self-containment
+
+The suite works in a project with none of the engineering skills installed: planning, test-first implementation and review each have a procedure of the suite's own, used when the project offers nothing fitting. Likewise, no forge or remote is not an error: the branch is prepared, named in a comment on its ticket, and handed to you.
 
 ## Where things live in this repo
 

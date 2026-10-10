@@ -31,8 +31,8 @@ where external reports go.)
 
 If your change touches the skills themselves (`skills/**`), skim
 [AGENTS.md](AGENTS.md), [CONTEXT.md](CONTEXT.md) and [docs/architecture.md](docs/architecture.md) first —
-they define the vocabulary and the data-flow rules (`refactor-loop` carries each skill's output to the
-next) that every skill follows. The `docs/adr/` directory
+they define the vocabulary and the shape of the suite: two skills, a run as a chain of decision points,
+and everything else a reference one of them loads. The `docs/adr/` directory
 records why past design decisions were made; check it before re-litigating one.
 
 ## Changelog

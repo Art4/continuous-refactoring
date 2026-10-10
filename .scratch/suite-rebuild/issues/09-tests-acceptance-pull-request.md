@@ -218,3 +218,123 @@ Not red, but now untrue:
   describe the old Housekeeping (ticket 08).
 - For acceptance: the Housekeeping run should cover the setup with the first cycle in one run, and a
   second call before that merge request is merged (it should report that the setup waits).
+
+### Red after ticket 08 (remove the old, bring the docs in line) — the full list
+
+This list replaces the ones above: it is the state of `suite-rebuild` after the last build ticket.
+
+**Unit tests** — `python3 -m unittest discover -s scripts -p 'test_*.py'`: 141 tests run, 1 failure,
+2 errors.
+
+- `scripts/test_tooling_tree.py` — error at import: it loads the parser from
+  `skills/refactor-scan/references/tooling_tree.py`, and the parser now lives in
+  `skills/continuous-refactoring/references/`. In a scratch copy with only that path changed, all 106
+  tests pass.
+- `scripts/test_trigger_controls.py` — error at import, for the same path. With the path changed, 4 of
+  5 pass and `CleanRepoReportsCleanTests.test_next_holds_only_structural_scan` fails: it expects the
+  parser to pick up `fulfilled-set.json` from the fixture's old scratch folder by itself and to offer
+  `structural-scan` as a candidate.
+- `scripts/test_validate_skills.py` — `EndToEndTests.test_real_repo_passes` fails because the validator
+  reports errors on the real repository (next item). Its other tests pass; they build their own
+  miniature suites out of the old skill names.
+- `scripts/test_check_changelog_fragment.py` — green.
+
+**Validator** — `python3 scripts/validate_skills.py .`: exit 1, 21 errors, 3 warnings.
+
+- 5 × `ADR-0004: rule keyword … not found in refactor-design or refactor-implement` — the validator
+  looks for the foundational rules in two skills that no longer exist; the rules are in
+  `continuous-refactoring/references/foundational-refactoring-rules.md`.
+- `continuous-refactoring: missing required '## Completion criterion' section` and `orchestrator skill
+  must have a '## The pass' section` — the skill has "The run" and a completion criterion per step.
+- `continuous-housekeeping: missing required '## Process' section` and `'## Completion criterion'
+  section` — the same shape as the entry skill.
+- 3 × `domain term … used in 2 skills but missing from glossary` (`decision points`, `housekeeping
+  line`, `none`) — bold words both skills use that are no glossary entries of their own.
+- `glossary term 'Flagged candidate' is defined but never used in the suite` — the design point
+  describes the case without the term.
+- 7 × `glossary avoid-term … used`: `task` (four times: the Housekeeping tasks of a template, where
+  the glossary lists the word as avoided for **Candidate**), `todo` (twice: the package name
+  `art4/legacy-todo` in the tree docs, whose exemption is keyed to the removed `refactor-scan`),
+  `bookkeeping` (once: the interview names the old **Bookkeeping** bullet it removes).
+- `reporting-progress.md: skill prose references 'pull request #34'` — an example sentence to the human,
+  not a maintainer reference.
+- Warnings: three duplication advisories between a node file and its tree doc (`psalm.md`,
+  `ci-runner.md`, `is-php-project.md`); the tree doc repeats Name, Tool and Purpose by design.
+- Beyond what it reports: its contract table (`scan` → `refactor-scan`, …), its exemption table and the
+  two tree-doc paths in it (lines 96–125, 447–451) name removed skills and the old location.
+
+**`scripts/drift_check.py`** (not run in CI) — does not start: it loads the parser from the old path.
+With only the path changed, 31 tests run with 7 failures and 1 error, the same eight as before this
+ticket:
+
+- `test_backlog_excludes_rejected_nodes`, `test_recommended_parent_rejected_releases_child`,
+  `test_rejected_node_excluded_from_workable`,
+  `SeedFixtureConsistencyTests.test_rejected_node_excluded_from_backlog_and_workable` — they write
+  rejections as files in the old out-of-scope folder, which the parser no longer reads.
+- `test_onboarding_setup_fulfilled_unblocks_editorconfig` — hands `onboarding-setup` in as fulfilled
+  without a tracker file; the parser settles that node itself.
+- `test_empty_repo_workable_starts_with_onboarding_setup` (error), `test_php_safety_net_resolved_gate`,
+  `SeedFixtureConsistencyTests.test_fully_resolved_seed_only_structural_scan_workable` — they expect
+  `onboarding-setup` or `structural-scan` among the candidates; neither is listed any more.
+
+**Changelog check** — `changelog-fragment.yml` / `scripts/check_changelog_fragment.py`: green.
+`.changelog.d/suite-rebuild.md` exists (run here over the files changed against `main`).
+
+**CI workflows as they stand**
+
+- `skills-validation.yml` — red at both steps (unit tests, validator).
+- `test-harness.yml` — tier 1 red (the validator); tier 4 red (`scripts.test_trigger_controls` fails
+  at import); tier 2 depends on tier 1 and does not run.
+- `changelog-fragment.yml` — green.
+
+**Fixture harness** — `fixtures/harness/run.sh`, not run here (it needs Docker and an agent); by
+reading:
+
+- `tier2` (the one CI runs, on `php-project-with-candidates`) — would pass, but what it asserts is the
+  old suite: the fixture's own `expected/` holds `config.md` and `bookkeeping.md`, and issues with the
+  label `refactor:candidate`.
+- `tier3` — counts ticket files under the old scratch folder against planted candidates; it compares
+  numbers only and stays as it is, but nothing files tickets there by a fixed convention any more.
+- `tier4` (local part) — asks an agent to run `/refactor-scan` and checks that the five removed
+  lifecycle skills are discoverable; none exists.
+- `agent-loop` — its prompt sends the agent from `continuous-refactoring/SKILL.md` to the five removed
+  lifecycle skills and to a "no human is present" section the skill no longer has; a comment names the
+  deleted `triage-labels-template.md`.
+- `judge` — `rubric.md` grades against `refactor-implement`, `refactor-prioritize` and the consistency
+  of `bookkeeping.md` and `merge-requests.md`.
+- `decision-gate-bypass` — runs `/refactor-design` and `/refactor-scan` and expects the `needs-info` /
+  `ready-for-agent` labels; the design point uses neither.
+- `safety-net-track`, `guardrails-track` — every prompt runs `/refactor-scan` and `/refactor-learn` with
+  `safety-net-track.md`, `guardrails-track.md`, `safety-net-write.md`, `guardrails-write.md`, and checks
+  the `Open` list in `bookkeeping.md`; all of it is removed.
+- `housekeeping-track` — expects the old process: cadence, `Last scan`, one dated issue per cycle, the
+  fixed template path.
+- `scheduler` — every prompt follows `track-scheduler.md` (cadence, overdue ratio, the blockade), which
+  is deleted.
+- `lift` — independent of the suite's shape; unaffected.
+- Fixtures: every `php-*` fixture carries the old scratch folder (`bookkeeping.md`, `config.md`,
+  `out-of-scope/`, `fulfilled-set.json`) and an `expected/behavior.md` in the old words; the
+  `php-onboarding-*`, `php-issue-mode-unreadable` and `php-ticket-create-mode-ask` fixtures describe
+  the old interview, `php-scheduler-*` the old Track selection, `php-*-old-schema` and
+  `php-safety-net-old-meaning-open` a migration that no longer exists. `fixtures/README.md` describes
+  all of this the old way.
+
+**Not red, but worth knowing for the decision**
+
+- `scripts/validate_skills.py` line 86 and `scripts/test_validate_skills.py` line 217 name
+  `docs/refactoring/housekeeping-template.md` as a fixed shared path; it is now the path the setup
+  recommends.
+- The parser's `directly_unblocked_children` / `--unblocked-by` and their tests serve the Outlook
+  comment, which the suite no longer posts.
+- `docs/agents/skill-references.md`, the ledger the validator reads, now states that no suite skill
+  names a global skill.
+
+**For the acceptance run**
+
+- A target that is not a PHP project: a scan leaves Safety Net unfulfilled, the seed from the trace
+  counts it as fulfilled once the two language-neutral tickets are closed (tried against the parser;
+  ticket 08's comments). Then a Guardrails scan judges the PHP Safety Net nodes for real, so the one
+  language-neutral Guardrails proposal, the secret scanner, would be filed as blocked by PHP tools that
+  have no ticket. Read from the texts, not tried in a run.
+- A Psalm-only target: the PHPStan levels above 0 are out of reach in a scan; no rejection of
+  `phpstan-level-5` is written any more.

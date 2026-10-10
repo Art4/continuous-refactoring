@@ -9,97 +9,126 @@
 🌐 [continuous-refactoring.de](https://continuous-refactoring.de/)
 
 A portable agent-skill suite for [Claude Code](https://claude.com/claude-code) that keeps a
-software project under **continuous refactoring**: scan, prioritise, design, implement, learn —
-on repeat, as a stateful, repeatable loop instead of a one-shot action.
+software project under **continuous refactoring**. Each call is one **run**: it leads from the
+project's open refactoring tickets to one opened merge request, and stops there. You get more work
+done by calling again.
 
 ```mermaid
 flowchart LR
-    Select[Select a Track] --> Track[Track skill]
-    Track --> Scan[Scan]
-    Scan --> Prioritize[Prioritize]
-    Prioritize --> Design[Design]
-    Design --> Implement[Implement]
-    Implement --> Learn[Learn]
-    Learn -.-> Select
-    Select -. Housekeeping .-> HK[Housekeeping sweep]
-    HK --> Learn
+    Reconcile --> Track[Choose a Track]
+    Track --> Scan
+    Scan --> File[File tickets]
+    File --> Select[Select a ticket]
+    Select --> Design
+    Design --> Implement
+    Implement --> MR[Merge request]
 ```
 
-Each invocation is one **loop pass**: pick the Track that is due, run it, record what was learned. The very first invocation on a project is the exception: it only **onboards** the project (a short interview, a few setup files) and stops. A thin data pipe carries each skill's output to the next skill's input — no skill re-derives its own context from shared state.
+Every link of that chain is a **decision point**: the suite shows what it found, the options, and
+the one it recommends. By default you decide each time. Say in the call that it should do the run
+itself, and it takes its own recommendation at every point instead.
 
-The core is [language-neutral](skills/refactor-scan/references/tooling-tree.md); the first specialization is a **[general PHP project](skills/refactor-scan/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
+The suite keeps **no state of its own**. Your open tickets are the worklist; merge requests,
+declined work and the standing Housekeeping ticket are found by searching your tracker and your
+forge on every run. What you change there by hand is simply what the next run finds.
+
+The core is [language-neutral](skills/continuous-refactoring/references/tooling-tree.md); the first specialization is a **[general PHP project](skills/continuous-refactoring/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
 
 ## How it works
 
-A pass spends itself on exactly one of four **Tracks**. Each has its own cadence in the bookkeeping document — an interval with a unit (`12 hours`, `7 days`, `2 weeks`, `1 month`) or a monthly calendar day (`monthly on the 1st`); the most overdue one wins.
+A run spends itself on one of four **Tracks**. The suite sorts your open tickets into them and
+recommends the first one, in this fixed order, that has something to work on:
 
-| Track | What it does | Default cadence |
+| Track | What it does | Recommended when |
 |---|---|---|
-| **Safety Net** | Adopts the deterministic checks (test runner, coding standards, static analysis, CI) that catch a regression before an agent's own judgement has to | 90 days |
-| **Guardrails** | Adds further quality and security tooling once the Safety Net is in place (dependency audit, coverage floor, mess detection, …) | 60 days |
-| **Housekeeping** | Recurring maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync | 7 days |
-| **Investigation** | Finds and delivers one structural refactoring candidate (hot spots, deepening opportunities) at a time | always due, lowest priority |
+| **Safety Net** | Sets up the deterministic checks (test runner, coding standards, static analysis, CI) that catch a regression before an agent's own judgement has to | one of its tickets can be worked, or the Track was never scanned |
+| **Guardrails** | Adds further quality and security tooling once the Safety Net is in place (dependency audit, coverage floor, mess detection, …) | the same, once Safety Net is fulfilled |
+| **Housekeeping** | Recurring maintenance — dependency currency, tooling-deprecation cleanup, a secret scan over the Git history — plus the small refactoring ideas left as comments on its ticket | its open ticket is due, or it is not set up yet |
+| **Investigation** | Structural refactoring: works the tickets that ask for one, or explores the code for hot spots and deepening opportunities and proposes tickets | nothing above has work |
 
-Tickets are created by the loop only — automatically, or after asking you (`Ticket-create-mode`). While a pass runs, the loop tells you what it is doing — a sentence before and after every step, and one line per change to your repository (issue, branch, merge request). Tracks that adopt tooling work through their open items one node per pass, top to bottom; a Track that still has open work is finished before it is rescanned. Structural work only opens once the Safety Net is in place. At most two suite merge requests are open at any time. Details: [Track playbook](docs/playbooks/tracks.md) and [Architecture](docs/architecture.md).
+Each of the two tooling Tracks is scanned once. From then on its tickets are the record: a tool without an open ticket
+counts as done, and a recurring Housekeeping task re-checks whether a tool went missing. Before a
+ticket is worked the suite checks again whether the work is still needed — a tool you set up by hand
+closes its ticket instead of being set up twice.
+
+While a run is going, the suite tells you what it is doing: a sentence before and after every step,
+and one line for every change to your tracker, your forge or your repository. Details:
+[Run playbook](docs/playbooks/run.md), [Track playbook](docs/playbooks/tracks.md),
+[Architecture](docs/architecture.md).
 
 ## Skills
 
 | Skill | Purpose |
 |---|---|
-| `continuous-refactoring` | The one entry point — a thin dispatcher: onboards a project that has never run the loop, otherwise selects the Track due this pass (cadence or on-demand) and hands it to that Track's skill |
-| `refactor-scan` | Propose every currently-unblocked tooling-tree node from the bookkeeping document; detect (never file) closed/merged issues and MRs |
-| `refactor-prioritize` | Rank the proposals, recommend the next one — for a gate-shaped winner, also selects the concrete candidate; drafts the tickets the loop then creates |
-| `refactor-design` | Ground/grill the candidate → plan, written or commented onto its ticket |
-| `refactor-implement` | Execute the plan test-first, in slices, review included |
-| `refactor-learn` | The suite's only writer — ledger, ADR/CONTEXT.md, issue status |
+| `continuous-refactoring` | One run, from the open tickets to an opened merge request |
+| `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule |
 
-Internally, `continuous-refactoring` dispatches to a per-Track skill — `continuous-safety-net`, `continuous-guardrails`, `continuous-investigation` (all three delegate to the track-agnostic `refactor-loop`, which runs scan → prioritise → design → implement → learn) and `continuous-housekeeping` (owns Housekeeping's own process). They are implementation detail, not entry points — invoke `/continuous-refactoring`.
+Everything else — choosing a Track, scanning, selecting, planning, implementing, onboarding — is
+reference material these two load when a run reaches it. Where your project has its own skills for
+planning and implementing, the suite recommends those and uses its own procedures only as a
+fallback.
 
 ## Installing in a target project
 
-The suite makes no assumptions about the target repo beyond the issue-tracker convention. Install via symlink:
+Two symlinks, side by side in the target's skills folder:
 
 ```bash
-ln -s /path/to/continuous-refactoring/skills/* <target>/.agents/skills/
+mkdir -p <target>/.agents/skills
+ln -s /path/to/continuous-refactoring/skills/continuous-refactoring <target>/.agents/skills/
+ln -s /path/to/continuous-refactoring/skills/continuous-housekeeping <target>/.agents/skills/
 ```
 
-Or copy. To make the suite globally available (e.g. in `~/.config/opencode/skills/`), a symlink on the `skills/` directories there is enough.
+Or copy the two folders. To make the suite available everywhere, link both into your agent's global
+skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong together:
+`continuous-housekeeping` reads files of `continuous-refactoring`.
 
-> **Recommended, not required — the engineering-skills setup.** `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)) configures the issue tracker, triage labels and domain docs the suite reads. Run it first if you can. Without it the first `/continuous-refactoring` notices, asks whether to stop and set it up or to continue, and writes a minimal issue-tracker file and label table itself; running the setup later updates those files in place.
+> **Recommended, not required — the engineering skills.** `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)) writes the issue-tracker file and the domain docs the suite reads, and brings skills for planning and implementing that a run will offer to use. Without them the first `/continuous-refactoring` writes the issue-tracker file itself, and plans and implements its own way.
 
-**Any issue tracker works** that `docs/agents/issue-tracker.md` describes. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the loop's few operations work there (how a ticket is marked a refactoring candidate, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
+**Any issue tracker works** that `docs/agents/issue-tracker.md` describes. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the suite's few operations work there (how tickets are searched, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
 
 ## Quick start
 
-1. **Start the loop:** `/continuous-refactoring` — on a project that has never run it, this first invocation only **onboards**: a short config interview, then it writes your config file, the bookkeeping document (both under `.scratch/refactor/`) and the other setup files, tells you what it did, and stops without scanning anything. Commit what belongs in Git (the instruction-file section and `docs/agents/*`), then run `/continuous-refactoring` again — that second invocation starts the first real pass. The loop has no cadence of its own; trigger it however often fits (by hand, or your own scheduler such as `/schedule` or `/loop`). Each pass picks whichever of the four Tracks is most overdue and works that one — Housekeeping's weekly sweep needs no separate opt-in step.
-2. **Optional — force a specific Track:** name one directly when invoking `/continuous-refactoring` (e.g. "run the Housekeeping Track") to bypass the scheduler's own staleness comparison for this pass.
-3. **Review and merge** the merge requests the loop opens. With two already open, a pass ends without new work until you merge or close one.
+1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into `docs/agents/issue-tracker.md` — commit that file. Then it offers to go on with the run.
+2. **Answer the decision points.** Each comes with a recommendation, so "yes" moves on. Say "carry on yourself from here" at any point and the rest of the run takes its own recommendations.
+3. **Or let it run by itself:** `/continuous-refactoring do it yourself`. One call then takes a ticket from selection to an opened merge request.
+4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), a ticket ("ticket 42").
+5. **Review and merge** what the suite opens. Nothing limits how many merge requests are open at once; how much runs in parallel is your decision.
+6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at either command.
 
-## Loop state
+## Moving over from 0.6.0
 
-Everything lives in the target repo's working tree, not in the conversation. The suite never commits its own state. By default it is written as local files — whether they go into Git, and how they reach another machine, is up to you (meant for one person); or you keep the bookkeeping somewhere remote — a tracker issue, or any place your project describes — which any machine can pick up:
+The rebuild is a breaking change. Three steps per project:
 
-- **Your config:** `.scratch/refactor/config.md` — where the bookkeeping lives, `Ticket-create-mode` and `MR-create-mode`; per person and machine
-- **Last run:** `.scratch/refactor/bookkeeping.md`, or a remote place if you chose that during onboarding — each Track's cadence, last scan and open items
+1. **Run the onboarding again** — call `/continuous-refactoring`; it notices what the tracker section lacks and adds it.
+2. **Delete the suite's old state** in its scratch folder: the files `config.md`, `bookkeeping.md` and `merge-requests.md` and the folder `out-of-scope/`. They are no longer read. A folder of local tickets next to them is still in use and stays. To keep old rejections where they are, name that folder under **Rejected** in the tracker section instead of deleting it.
+3. **Remove the symlinks of the removed skills** — everything except `continuous-refactoring` and `continuous-housekeeping`.
+
+Nothing is migrated: the first scan of each Track rebuilds the worklist as tickets.
+
+## Where things live
+
+Everything is in your project, your tracker and your forge — nothing in the conversation, nothing in files of the suite.
+
+- **Work to do:** open tickets on your tracker
+- **Work in review:** open merge requests on your forge, found from their tickets
+- **Declined work:** a closed ticket or a file with the reason, in the place your tracker section names under **Rejected**
+- **Recurring maintenance:** the Housekeeping template, a file in your repository, and the one open Housekeeping ticket made from it
+- **How the tracker is reached:** the `## Refactoring operations` section of `docs/agents/issue-tracker.md`
 - **Focus areas and refactoring goal:** two lines you add to `AGENTS.md` (or `CLAUDE.md`), any time
-- **Remembered merge requests:** open `refactor:candidate` issues with a linked merge request; `.scratch/refactor/merge-requests.md` where the tracker can't lead from an issue to its merge request
-- **Backlog:** `refactor:*` issues on the issue tracker
-- **Learned rejections:** `.scratch/refactor/out-of-scope/`
-- **Domain language and decisions:** the target's own `CONTEXT.md` and ADR directory
-- **Housekeeping checklist** (only once some node has contributed to it): `docs/refactoring/housekeeping-template.md`
+- **Domain language and decisions:** your own glossary and ADR directory, where your project keeps them
 
 ## Documentation
 
 | Doc | For |
 |---|---|
-| [Loop playbook](docs/playbooks/loop.md) | Steering the loop as a human — triggers, what you decide each pass |
-| [Track playbook](docs/playbooks/tracks.md) | How the four Tracks are scheduled, worked and overridden |
-| [Housekeeping playbook](docs/playbooks/housekeeping.md) | The maintenance Track — cadence, reading a sweep |
+| [Run playbook](docs/playbooks/run.md) | Steering a run as a human — the call, the decision points, how a run ends |
+| [Track playbook](docs/playbooks/tracks.md) | How the four Tracks are chosen, scanned and worked |
+| [Housekeeping playbook](docs/playbooks/housekeeping.md) | The maintenance Track — template, standing ticket, rhythm |
 | [Reviewer-loop playbook](docs/playbooks/reviewer-loop.md) | Observing a run from a separate reviewer agent |
-| [Architecture](docs/architecture.md) | Skill hierarchy, data flow, loop state, tooling tree |
+| [Architecture](docs/architecture.md) | The two skills, their references, the tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
-| [Known limitations](docs/known-limitations.md) | Setup gotchas without a suite-side fix, plus troubleshooting |
-| [Bookkeeping reference](skills/continuous-refactoring/references/refactoring-bookkeeping.md) | The config file and the bookkeeping document in full |
+| [Known limitations](docs/known-limitations.md) | Limits without a suite-side fix, plus troubleshooting |
+| [Operations reference](skills/continuous-refactoring/references/refactoring-operations.md) | The operations the suite needs from a tracker, with the templates |
 | [CONTEXT.md](CONTEXT.md) | The suite's vocabulary |
 
 ## Contributing

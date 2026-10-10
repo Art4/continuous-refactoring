@@ -5,7 +5,7 @@ continuous-refactoring skill suite against a target repo — reviewing its issue
 human reviewer would, merging or rejecting them, and keeping a findings log — without touching the
 running agent's own session. Useful whenever you want a live, forge-only trust boundary between "the
 agent doing the work" and "the reviewer deciding what lands," e.g. while dry-running a new agent setup
-against a real repo, or keeping an eye on an autonomous pass you aren't watching live yourself.
+against a real repo, or keeping an eye on an autonomous run you aren't watching live yourself.
 
 This playbook is **repo-agnostic and persona-agnostic** — every run picks its own target and its own
 reviewer stance; nothing here defaults to a specific project or a fixed way of judging merge requests.

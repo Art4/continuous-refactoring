@@ -29,9 +29,9 @@ for the fragment convention and the release recipe that consolidates them into `
 
 A change to a skill's behaviour is done only when every human-facing doc that describes it reads true against the change — in the same PR. `grep` the changed skill, Track, or term across `README.md` and `docs/` (outside `docs/adr/`) and update each hit:
 
-- Skill roster, Track selection, cadence, hand-offs → `README.md` (skills table, "How it works"), `docs/architecture.md`, `docs/playbooks/tracks.md`, `docs/playbooks/loop.md`
+- Skill roster, the run and its decision points, Track choice → `README.md` (skills table, "How it works"), `docs/architecture.md`, `docs/playbooks/tracks.md`, `docs/playbooks/run.md`
 - A Track's own process → its playbook (`docs/playbooks/housekeeping.md`)
-- New limits, fallbacks, or reasons a pass ends early → `docs/known-limitations.md` (troubleshooting table)
+- New limits, fallbacks, or reasons a run ends early → `docs/known-limitations.md` (troubleshooting table)
 - A design choice a user would ask "why?" about → `docs/FAQ.md`
 - New or changed vocabulary → `CONTEXT.md`
 
@@ -39,15 +39,11 @@ A change to a skill's behaviour is done only when every human-facing doc that de
 
 ## The continuous-refactoring suite
 
-This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking them into a target repo's `.agents/skills/` (see `README.md`):
+This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking both into a target repo's `.agents/skills/` (see `README.md`):
 
-- `continuous-refactoring` — the single entry point: selects a Track (`references/track-scheduler.md`) and dispatches to that Track's skill (ADR-0057)
-- `refactor-loop` — internal, track-agnostic: one loop pass (scan → prioritise → design → implement → learn), a thin data pipe between the lifecycle skills (ADR-0010); takes a mandatory Track
-- `continuous-safety-net` / `continuous-guardrails` / `continuous-investigation` — internal, name their Track and delegate to `refactor-loop`; `continuous-housekeeping` — internal, owns Housekeeping's own process
-- `refactor-scan` — propose every currently-unblocked tooling-tree node, detect (never act on) closed/merged issues and MRs
-- `refactor-prioritize` — rank the proposals, recommend next; for a gate-shaped winner, also selects and minimally files the concrete candidate
-- `refactor-design` — grounds and grills a candidate into a plan, filing it (or adding the plan as a comment on an already-filed one)
-- `refactor-implement` — execute the plan test-first, review included
-- `refactor-learn` — the suite's only writer: ledger, ADR/CONTEXT.md, issue status
+- `continuous-refactoring` — one run: a chain of decision points from the target's open tickets to an opened merge request. Its `SKILL.md` holds the call, the decision-point rules and the steps; each step's detail is a file under its `references/`, where the tooling-tree parser and the tree docs live too.
+- `continuous-housekeeping` — the Housekeeping Track alone, with no Track choice; `continuous-refactoring` reads the same `references/housekeeping-track.md` when its Track choice lands on Housekeeping.
 
-Loop vocabulary lives in `CONTEXT.md` (candidate, backlog, tooling tree, merge request, cadence, hot spot, deepening, seam, deletion test, proposals, findings). Human-facing docs live in `docs/playbooks/`. A reference doc a skill actually needs at runtime lives under `skills/<owning-skill>/references/` instead — `docs/playbooks/`, like `docs/adr/` and `docs/agents/`, never ships with the skills (ADR-0013).
+Both are user-invocable. The suite keeps no state of its own: tickets, merge requests and rejections are found by searching the target's tracker and forge.
+
+The suite's vocabulary lives in `CONTEXT.md` (run, decision point, worklist, candidate, tooling tree, Track, merge request, signal, proposals, findings). Human-facing docs live in `docs/playbooks/`. A reference doc a skill needs at runtime lives under `skills/<owning-skill>/references/` instead — `docs/playbooks/`, like `docs/adr/` and `docs/agents/`, never ships with the skills.

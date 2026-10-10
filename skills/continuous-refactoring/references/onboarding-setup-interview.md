@@ -73,7 +73,7 @@ signs of one; the matched forge, worded with the reachability finding; Local Mar
 
 **How do the operations work there?** GitHub, GitLab and Local Markdown take their template, and this
 question is answered. For any other tracker, go through **Search**, **Done**, **Linked merge request**,
-**Comment author and time**, **Claim** and **Blocked by**, in that order. An operation the tracker file or
+**Claim** and **Blocked by**, in that order. An operation the tracker file or
 the repository's own docs already answer is on record. Each remaining one is one question, its
 recommendation drawn from what those files say about the tracker; for an optional operation "not
 available" is an answer, and its bullet is left out.
@@ -98,7 +98,7 @@ A **decision point**. Lay out:
 > Operations: <one line per bullet, each with its source: template, read from `<file>`, your answer, or
 > already recorded>.
 > Left out: <each absent optional operation and what the skill suite does without it>.
-> Removed: <**Bookkeeping**, **Filed date** — only where an existing section carries them>.
+> Removed: <**Bookkeeping**, **Filed date**, **Comment author and time** — only where an existing section carries them>.
 > File: `docs/agents/issue-tracker.md`, <created | section appended | section completed>.
 
 Options: **write it** (recommended), **change an answer** (back to that question, then this summary
@@ -122,10 +122,10 @@ One file, `docs/agents/issue-tracker.md`; say one status line when it is written
 | No file, Local Markdown | The content of `local-issue-tracker-template.md` |
 | No file, a tracker described here | The title (`# Issue tracker: <Name>`), a `## Conventions` list from what the human said about creating, reading, commenting on and closing a ticket, and the section built from the answers |
 | File without the section | The section, appended; the rest of the file stays as it is |
-| **Incomplete** | The missing required bullets, placed in the reference's order; the **Bookkeeping** and **Filed date** bullets removed; every other bullet left as written |
+| **Incomplete** | The missing required bullets, placed in the reference's order; the **Bookkeeping**, **Filed date** and **Comment author and time** bullets removed; every other bullet left as written |
 
-Step 4 is done when the section carries **Search**, **Done** and **Merge requests**, and neither
-**Bookkeeping** nor **Filed date**.
+Step 4 is done when the section carries **Search**, **Done** and **Merge requests**, and none of
+**Bookkeeping**, **Filed date** and **Comment author and time**.
 
 ## 5. Verify
 

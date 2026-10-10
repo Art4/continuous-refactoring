@@ -37,7 +37,6 @@ column.
 | **Candidate** | How a ticket is marked as refactoring work, and how the open ones so marked are listed — a hint that narrows **Search** | A ticket is recognised by its subject alone; one a human wrote freely is worked only when the call names it |
 | **Priority** | How a ticket is marked to come first, and how those are listed — a hint for the order | The order is the Track's own; no ticket comes first |
 | **Linked merge request** | How a merge request refers to its ticket, and how to get from a ticket to its merge request | The merge request names its ticket in plain words and is found by searching the forge's merge requests for it |
-| **Comment author and time** | How to read who wrote a comment, and when | Comments are read in the order the tracker shows them, and whoever wrote one, it counts as a human's |
 | **Claim** | How a ticket is assigned to whoever works on it | Nothing is assigned |
 | **Rejected** | How a rejection is recorded with its reason and found again: a closed ticket or a file, and where | At the decision point that records the first rejection the suite proposes a place, and writes the bullet from the answer |
 | **Blocked by** | How a ticket states which tickets block it, and when it counts as unblocked | The suite writes the dependency as a sentence in the ticket's text and reads it there |
@@ -60,7 +59,6 @@ Used by `/continuous-refactoring`.
 - **Done**: an issue closed as completed: `gh api repos/{owner}/{repo}/issues/<n> --jq .state_reason` gives `completed`. Mark one finished with `gh issue close <n> --reason completed`.
 - **Merge requests**: pull requests on this GitHub repository, via `gh pr`.
 - **Linked merge request**: the pull request's description carries `Closes #<issue>`. From the issue: `gh issue view <n> --json closedByPullRequestsReferences`.
-- **Comment author and time**: `author` and `createdAt` of each entry in `gh issue view <n> --json comments`.
 - **Claim**: `gh issue edit <n> --add-assignee @me`.
 - **Rejected**: an issue closed as not planned, the reason in its closing comment: `gh issue close <n> --reason "not planned" --comment "<reason>"`. Found again with **Search**, its query extended by `reason:"not planned"`.
 - **Blocked by**: a line `Blocked by: #<n>, #<n>` in the issue's description. The issue is unblocked when every issue on that line is done.
@@ -77,7 +75,6 @@ Used by `/continuous-refactoring`.
 - **Done**: a closed issue is done. Mark one finished with `glab issue close <n>`.
 - **Merge requests**: merge requests on this GitLab project, via `glab mr`.
 - **Linked merge request**: the merge request's description carries `Closes #<issue>`. From the issue: `glab api projects/:id/issues/<n>/closed_by`.
-- **Comment author and time**: `author` and `created_at` of each entry in `glab api projects/:id/issues/<n>/notes`.
 - **Claim**: `glab issue update <n> --assignee @me`.
 - **Blocked by**: a line `Blocked by: #<n>, #<n>` in the issue's description. The issue is unblocked when every issue on that line is done.
 ```
