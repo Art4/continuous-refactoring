@@ -125,14 +125,14 @@ def _guardrails_scope(tree: dict) -> set[str]:
 def _node_state(repo: pathlib.Path, fulfilled, rejected) -> tuple[dict[str, bool], set[str]]:
     """The node state every output is computed from: what the caller handed
     in. A node named in neither *fulfilled* nor *rejected* is undecided.
-    Two nodes the parser settles itself: ``git`` always counts as
-    fulfilled, and ``onboarding-setup`` does once the target's tracker
-    file carries its ``## Refactoring operations`` section."""
+    Two nodes the parser settles itself, whatever was handed in for them:
+    ``git`` is fulfilled, and ``onboarding-setup`` is fulfilled exactly
+    when the target's tracker file carries its ``## Refactoring
+    operations`` section."""
     state = dict(fulfilled or {})
     state["git"] = True
-    if _has_refactoring_operations(repo):
-        state["onboarding-setup"] = True
-    return state, set(rejected or ())
+    state["onboarding-setup"] = _has_refactoring_operations(repo)
+    return state, set(rejected or ()) - {"git", "onboarding-setup"}
 
 
 def _has_refactoring_operations(repo: pathlib.Path) -> bool:
@@ -181,23 +181,23 @@ def _withheld_guard_cascade(
     share: takes the handed-in node state, then yields ``(node, blocked_reason,
     undecided_parents)`` for every node that survives the common guards
     (not never-proposed, not resolved-gated, not fulfilled, not rejected,
-    not PHP-floor-blocked, recommended gate not moot) and is either
-    blocked on a required parent (``blocked_reason`` set,
-    ``undecided_parents`` None — never computed, the node never gets that
-    far) or waiting on undecided recommended parents (``blocked_reason``
-    None)."""
+    recommended gate not moot) and is either blocked — below its PHP floor
+    or on a required parent (``blocked_reason`` set, ``undecided_parents``
+    None — never computed, the node never gets that far) — or waiting on
+    undecided recommended parents (``blocked_reason`` None)."""
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
     state, rejected = _node_state(repo, fulfilled, rejected)
     detected = {n: {"fulfilled": v} for n, v in state.items()}
-    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
+    php_floor_blocked = {b["node"]: b["reason"] for b in php_floor_precheck(repo)}
     for node in tree["order"]:
         if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
             continue
         if detected.get(node, {}).get("fulfilled", False) or node in rejected:
             continue
         if node in php_floor_blocked:
+            yield node, php_floor_blocked[node], None
             continue
         if _recommended_gate_moot(node, tree, detected):
             continue
@@ -216,8 +216,9 @@ def withheld_with_reasons(
     fulfilled: dict[str, bool] | None = None,
     rejected=None,
 ) -> list[dict]:
-    """Withheld nodes with reasons: rejected required ancestors or
-    undecided recommended parents."""
+    """Withheld nodes with reasons: below the PHP floor, blocked by an
+    unfulfilled required parent, or waiting on undecided recommended
+    parents."""
     result: list[dict] = []
     for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled, rejected):
         if why is not None:
@@ -484,7 +485,7 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
     Returns the leaves whose minimum isn't met yet, each with a
     human-readable reason — `next_candidates()` skips these,
     and `detect_and_roadmap()` surfaces the list so a caller can report the
-    fact in one pass instead of it silently vanishing.
+    fact at once instead of it silently vanishing.
 
     Design decision: skip silently, a blocked leaf is not a rejection.
     The check is cheap and re-derived fully from `composer.json` every
@@ -529,9 +530,9 @@ def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
 def _blocked_by_php(blocker) -> tuple[int, ...] | None:
     """The minimum PHP version a rejection's blocker names
     (``{"php": "8.1"}``), or None when the rejection carries none."""
-    if not isinstance(blocker, dict) or set(blocker) != {"php"}:
+    if not isinstance(blocker, dict) or set(blocker) != {"php"} or not isinstance(blocker["php"], str):
         return None
-    return _parse_min_version(str(blocker["php"]))
+    return _parse_min_version(blocker["php"])
 
 
 def php_version_reversal_findings(repo: pathlib.Path, rejected=None) -> list[dict]:
@@ -885,7 +886,7 @@ def withheld_candidates(
     result: list[dict] = []
     for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled, rejected):
         if why is not None:
-            continue  # blocked on a required parent — not the recommended-gate withholding this list reports
+            continue  # blocked outright — not the recommended-gate withholding this list reports
         result.append({"node": node, "waiting_on": undecided})
     return result
 

@@ -28,11 +28,19 @@ withheld_with_reasons = tooling_tree.withheld_with_reasons
 ordered_backlog = tooling_tree.ordered_backlog
 
 
-def make_repo(files: dict | None = None):
-    """A throwaway target repository holding *files* (relative path -> content)."""
+TRACKER_FILE = "docs/agents/issue-tracker.md"
+
+
+def make_repo(files: dict | None = None, onboarded: bool = True):
+    """A throwaway target repository holding *files* (relative path ->
+    content). Onboarded unless told otherwise: its tracker file carries
+    the `## Refactoring operations` section."""
+    files = dict(files or {})
+    if onboarded:
+        files.setdefault(TRACKER_FILE, "# Issue tracker\n\n## Refactoring operations\n\n- **Search:** `gh issue list`\n")
     tmp = tempfile.TemporaryDirectory()
     root = pathlib.Path(tmp.name)
-    for rel, content in (files or {}).items():
+    for rel, content in files.items():
         p = root / rel
         p.parent.mkdir(parents=True, exist_ok=True)
         p.write_text(content)
@@ -902,7 +910,9 @@ class OrderedBacklogTests(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
 
     def test_empty_repo_backlog_starts_with_onboarding_setup(self):
-        backlog = ordered_backlog(self.root)
+        tmp, root = make_repo(onboarded=False)
+        self.addCleanup(tmp.cleanup)
+        backlog = ordered_backlog(root)
         self.assertEqual(backlog[0], "onboarding-setup")
         self.assertNotIn("git", backlog)
 
@@ -941,6 +951,19 @@ class WithheldWithReasonsTests(unittest.TestCase):
     def test_blocked_node_names_its_required_parent(self):
         reasons = {w["node"]: w["reason"] for w in withheld_with_reasons(self.root, fulfilled=self.FULFILLED)}
         self.assertEqual(reasons["phpstan-level-2"], "blocked by required parent phpstan-level-1")
+
+    def test_node_below_its_php_floor_names_the_floor(self):
+        tmp, root = make_repo({"composer.json": json.dumps({"require": {"php": ">=5.6"}})})
+        self.addCleanup(tmp.cleanup)
+        data = tooling_tree.detect_and_roadmap(root, fulfilled=self.FULFILLED | {"phpstan-level-0": False})
+        self.assertIn("phpstan-level-0", data["backlog"])
+        self.assertIn(
+            {"node": "phpstan-level-0", "reason": "PHP floor 5.6 below phpstan-level-0's minimum PHP >= 7.0"},
+            data["tracks"]["Safety Net"]["withheld"],
+        )
+        # still not a candidate, and not "waiting on" a recommended parent
+        self.assertNotIn("phpstan-level-0", [c["node"] for c in data["next"]])
+        self.assertNotIn("phpstan-level-0", [w["node"] for w in data["withheld"]])
 
     def test_rejected_recommended_parent_no_longer_withholds(self):
         withheld = withheld_with_reasons(self.root, fulfilled=self.FULFILLED, rejected={"php-cs-fixer"})
@@ -1007,7 +1030,7 @@ class SeedFileTests(unittest.TestCase):
         self.assertNotIn("composer", data["backlog"])
 
     def test_without_a_seed_every_node_is_undecided(self):
-        tmp, root = make_repo({".scratch/refactor/fulfilled-set.json": json.dumps({"onboarding-setup": True})})
+        tmp, root = make_repo({".scratch/refactor/fulfilled-set.json": json.dumps({"onboarding-setup": True})}, onboarded=False)
         self.addCleanup(tmp.cleanup)
         proc = self._run(root)
         self.assertEqual(proc.returncode, 0, proc.stderr)
@@ -1036,6 +1059,7 @@ class SeedFileTests(unittest.TestCase):
             "fulfilled-not-a-list.json": '{"fulfilled": {"composer": true}}',
             "blocker-not-an-object.json": '{"rejected": {"phpmd": "PHP 8.1"}}',
             "blocker-without-version.json": '{"rejected": {"phpmd": {"php": "newer"}}}',
+            "blocker-a-number.json": '{"rejected": {"phpmd": {"php": 8.10}}}',
             "both.json": '{"fulfilled": ["phpmd"], "rejected": ["phpmd"]}',
             "unknown-node.json": '{"fulfilled": ["phpunti"]}',
         }
@@ -1165,12 +1189,12 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
     def test_no_children_when_nothing_new(self):
         # Empty repo: onboarding-setup isn't fulfilled, so forcing it "unfulfilled"
         # in the counterfactual changes nothing real -- no children to report.
-        tmp, root = make_repo({})
+        tmp, root = make_repo(onboarded=False)
         try:
             self.assertEqual(directly_unblocked_children(root, "onboarding-setup"), [])
         finally:
             tmp.cleanup()
-class TrackOpenFillingTests(unittest.TestCase):
+class BacklogOrderTests(unittest.TestCase):
     """The backlog is complete and ordered: blocked nodes included, in
     tree order."""
 
@@ -1178,7 +1202,7 @@ class TrackOpenFillingTests(unittest.TestCase):
         tmp, self.root = make_repo()
         self.addCleanup(tmp.cleanup)
 
-    def test_open_includes_blocked_nodes_in_order(self):
+    def test_backlog_includes_blocked_nodes_in_order(self):
         backlog = ordered_backlog(self.root, fulfilled={
             "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "static-code-analyzer": True,
@@ -1191,7 +1215,7 @@ class TrackOpenFillingTests(unittest.TestCase):
         # listed, after phpunit as in the tree's edge order.
         self.assertLess(backlog.index("phpunit"), backlog.index("rector-dead-code"))
 
-    def test_seed_drives_backlog_order(self):
+    def test_handed_in_fulfilment_drives_the_backlog(self):
         seed = {
             "git": True, "onboarding-setup": True, "is-php-project": True,
             "composer": True, "editorconfig": True,
@@ -1270,7 +1294,7 @@ class HandedInStateTests(unittest.TestCase):
             "notes/bookkeeping.md": "## Safety Net\n\n**Open:**\n- none\n\n**Out-of-scope:**\n- none\n",
             "notes/out-of-scope/ci-runner.md": "rejected\n",
             "AGENTS.md": "Bookkeeping: `notes/bookkeeping.md`\n",
-        })
+        }, onboarded=False)
         try:
             data = tooling_tree.detect_and_roadmap(root)
             self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
@@ -1286,15 +1310,13 @@ class OnboardingSetupTests(unittest.TestCase):
     fulfilled when the target's tracker file carries a
     `## Refactoring operations` section."""
 
-    TRACKER = "docs/agents/issue-tracker.md"
-
-    def _data(self, files):
-        tmp, root = make_repo(files)
+    def _data(self, files, **state):
+        tmp, root = make_repo(files, onboarded=False)
         self.addCleanup(tmp.cleanup)
-        return tooling_tree.detect_and_roadmap(root)
+        return tooling_tree.detect_and_roadmap(root, **state)
 
     def test_fulfilled_when_the_tracker_file_has_the_operations_section(self):
-        data = self._data({self.TRACKER: "# Issue tracker\n\nGitHub.\n\n## Refactoring operations\n\n- **Search:** `gh issue list`\n"})
+        data = self._data({TRACKER_FILE: "# Issue tracker\n\nGitHub.\n\n## Refactoring operations\n\n- **Search:** `gh issue list`\n"})
         self.assertNotIn("onboarding-setup", data["backlog"])
         self.assertTrue(data["detected"]["onboarding-setup"]["fulfilled"])
         self.assertEqual(
@@ -1306,8 +1328,17 @@ class OnboardingSetupTests(unittest.TestCase):
         data = self._data({})
         self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
 
+    def test_the_caller_cannot_decide_it(self):
+        data = self._data({}, fulfilled={"onboarding-setup": True})
+        self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
+        self.assertFalse(data["detected"]["onboarding-setup"]["fulfilled"])
+        section = {TRACKER_FILE: "## Refactoring operations\n"}
+        data = self._data(section, fulfilled={"onboarding-setup": False}, rejected={"onboarding-setup", "git"})
+        self.assertEqual([c["node"] for c in data["next"]], ["ci-runner", "editorconfig"])
+        self.assertEqual(data["closed_by_rejection"], [])
+
     def test_not_fulfilled_when_the_tracker_file_lacks_the_section(self):
-        data = self._data({self.TRACKER: "# Issue tracker\n\nGitHub. See Refactoring operations elsewhere.\n\n### Refactoring operations draft\n"})
+        data = self._data({TRACKER_FILE: "# Issue tracker\n\nGitHub. See Refactoring operations elsewhere.\n\n### Refactoring operations draft\n"})
         self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
 
 
