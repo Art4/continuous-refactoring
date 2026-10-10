@@ -1,36 +1,106 @@
 ---
 name: continuous-refactoring
-description: Run one pass of the continuous refactoring loop — onboard a repo that has never run it (one short interview, then stop), otherwise pick the Track due this pass (Safety Net, Guardrails, Housekeeping, Investigation) and run it. Use to keep a codebase under continuous refactoring, on demand or via your own recurring trigger.
+description: One run of the skill suite — from the open refactoring tickets to an opened merge request. Asks you at every decision, or decides by itself when you say so in the call.
 disable-model-invocation: true
 ---
 
 # Continuous Refactoring
 
-One **loop pass**: first **onboards** a target that has never run the loop (step 0 below — a short interview, then the invocation ends); otherwise picks the **Track** (`CONTEXT.md`) this pass spends itself on and hands it to that Track's own skill, which does only the work due since the last pass and records what it learned so the next pass starts from state, not from zero.
+One **run**: a chain of **decision points** that leads from the target's open tickets to one opened merge
+request. The suite keeps no state of its own. Tickets, merge requests and rejections are found by searching
+the target's tracker and forge on every run, through the **Refactoring operations** in the target's
+`docs/agents/issue-tracker.md` (`references/refactoring-operations.md`).
 
-This skill decides one thing on an onboarded target — *which* Track — and nothing else. It never runs the pass itself: `refactor-loop` (via `continuous-safety-net`, `continuous-guardrails`, `continuous-investigation`) runs the generic pass — scan → prioritise → design → implement → learn — and `continuous-housekeeping` runs Housekeeping's own process. Git is the only hard requirement of a pass.
+## The call
 
-Run this on demand, or via your own recurring trigger — the loop has no schedule of its own.
+The call's free text may state any of these; read it before step 1 and say back in one sentence what was
+understood.
 
-## The pass
+| The call states | Effect |
+| --- | --- |
+| the **autonomous** mode ("do it yourself", "without asking") | every decision point takes its recommendation |
+| a **Track** | the Track choice is answered; the run stays in that Track and ends when it has nothing workable |
+| a **ticket** | Track and ticket are chosen: the run works that ticket, and ends if it turns out not to need work |
+| a **restriction** ("only the Rector nodes") | the worklist, the scan, the filing and the selection hold only what it covers |
 
-Step 0 onboards an un-onboarded target and ends the invocation; on an onboarded target, two steps follow: select a Track, then dispatch to its skill.
+Nothing stated → the run is **interactive** and unrestricted.
 
-0. **Onboarding.** Resolve the Bookkeeping pointer (`references/refactoring-bookkeeping.md`, *Where the Refactoring Notes live*) and check that it names an existing `bookkeeping.md` — with remote bookkeeping, fetch it first (`references/remote-bookkeeping.md`; bookkeeping that can't be fetched stops the invocation with that message, it doesn't onboard). **Exists → nothing to onboard: say nothing about onboarding, and check that `docs/agents/issue-tracker.md` carries a `## Refactoring operations` section (`references/refactoring-operations.md`). It does → go straight to step 1. It doesn't → end the invocation with one sentence: the section is missing, and onboarding adds it.** **No pointer, or the file is missing → this invocation onboards, and nothing else** — every invocation, including one where the human named a Track (no Track runs without a bookkeeping document). First tell the human, in one sentence, that this repo hasn't been set up for the loop yet and onboarding is starting (e.g. "This repo has no bookkeeping yet — starting onboarding: a few questions, then I write the setup files."). Then run the interview in `references/onboarding-setup-interview.md` in full — **inline, never in a subagent** (it asks the human questions): explore, the one-time setup-gap question when the engineering-skills setup is incomplete, the questions one at a time, an informational summary, the writes (one status line each, `config.md` and then `bookkeeping.md` last), the closing text. Then **stop**: no Track selection, no dispatch, no scan, no candidate issue, no merge request, no forge action (bar the one place for remote bookkeeping, when the human chose that) — the closing text names what to commit, if anything, and tells the human to run `/continuous-refactoring` again, optionally naming a Track. This is the `onboarding-setup` node of the tooling tree being fulfilled before any Track exists to work it.
+## Decision points
 
-1. **Track selection.** Decide which **Track** (`CONTEXT.md`) this pass spends itself on — real competition between every currently-wired Track (today: **Safety Net**, **Guardrails**, **Housekeeping**, **Investigation**), replacing each Track's own earlier standalone "is my Track due?" check with one shared decision. Full algorithm — the Safety Net blockade, `overdue_ratio` staleness comparison, the `Open`-non-empty eligibility rule, the fixed tie-break order, manual override — lives in `references/track-scheduler.md`; read it in full before implementing this step. In short, the first match wins: Safety Net's `Open` is non-empty → Safety Net; else, among Safety Net, Guardrails and Housekeeping, whichever is due and eligible with the highest `(today − Last scan) / Cadence` (a tie, or two Tracks both never-run, falls back to the fixed order Safety Net > Guardrails > Housekeeping > Investigation); else Guardrails, when its `Open` holds a workable node; else Investigation — the scheduler's permanent fallback: always due, always last in line. The human invoking this pass may instead name a specific Track directly (e.g. "run the Guardrails Track"), bypassing this whole computation — the named Track still respects the `Open`-non-empty rule in `track-scheduler.md`. Invoking a `continuous-<track>` skill directly is the same override.
+A decision point lays out three things, in this order: the **findings**, the **options**, and **one
+recommendation** with its reason in a few words. Every write to the target's tracker, forge or files
+follows from one; everything before the run's first decision point is read-only.
 
-2. **Dispatch.** First tell the human, in one sentence, which Track was selected and is being started now (e.g. "Selected the Guardrails Track — starting it."; say so too when they named it themselves). Then invoke the selected Track's skill via the Skill tool, with no other input — each one names its own Track:
+- **Interactive** → ask and wait: one `AskUserQuestion` call where that tool exists, the same content as
+  numbered prose otherwise, the recommendation first.
+- **Autonomous** → take the recommendation, and say in one sentence that it was taken.
+- **Switching** → the human saying mid-run that the suite should carry on by itself makes the run
+  autonomous from the next decision point on.
+- **Nobody answers** — the run is interactive and the question cannot be put to a human or comes back
+  unanswered → the run ends here. Its report is the decision point itself: findings, options,
+  recommendation. Nothing is written.
+- **A change to the target's `AGENTS.md`** is asked of a human in an autonomous run too; unanswered, it
+  stays undone and the report says so.
 
-    | Selected Track | Skill |
-    |---|---|
-    | Safety Net | `/continuous-safety-net` |
-    | Guardrails | `/continuous-guardrails` |
-    | Housekeeping | `/continuous-housekeeping` |
-    | Investigation | `/continuous-investigation` |
+What the call already states is the human's answer to the choice it addresses. A write that choice did
+not cover — closing a named ticket found fulfilled — is still laid out.
 
-    Then stop: the invoked skill runs the entire pass, records what it learned, and gives the closing report — relay it unchanged. No wired Track is both due and eligible → nothing to dispatch; report that and end the pass (in practice unreachable now that Investigation is wired — see `track-scheduler.md`'s own Selection section).
+Decision points happen in this conversation. A step that only reads and judges may run in a subagent,
+handed its reference and returning its result; the subagent asks nothing and writes nothing.
 
-## Completion criterion
+## The run
 
-Either the target was un-onboarded and onboarding ran to its closing text (files written, nothing else touched), or a Track was selected (or named by the human) and its skill ran to completion, or no Track was due and that was reported. Track selection itself writes nothing.
+Read `references/reporting-progress.md` before the first sentence to the human.
+
+1. **Ready.** No Git repository → the run ends with that message. Read `docs/agents/issue-tracker.md`:
+   the `## Refactoring operations` section is missing, or lacks **Search**, **Done** or **Merge
+   requests** → run `references/onboarding-setup-interview.md` inline. Its summary is this run's first
+   decision point. The interview wrote the section and verified **Search** → one more decision point:
+   go on with the run now (recommended), or end here. Anything else → the run ends with the interview's
+   report.
+   *Done when* the section carries the three required operations.
+
+2. **Worklist.** Build the worklist per `references/worklist.md`.
+   *Done when* every open ticket found has a Track and a state.
+
+3. **Reconcile.** Follow `references/reconcile.md`.
+   *Done when* every finding is acted on or left as decided, or there was none.
+
+4. **Track choice.** Follow `references/track-choice.md`. It ends the run, or names one Track:
+   - **Safety Net** or **Guardrails** → step 5.
+   - **Housekeeping** → the run continues in `../continuous-housekeeping/references/housekeeping-track.md`
+     and ends where that reference ends.
+   - **Investigation** → the run continues in `references/investigation-track.md`, which hands a selected
+     ticket to step 8.
+
+   *Done when* a Track is named or the run has ended.
+
+5. **Scan** — only when the Track has no open ticket, or the call asked for a scan. Follow
+   `references/track-scan.md`.
+   *Done when* that reference's last step is.
+
+6. **File tickets** — only when step 5 left proposals. Follow `references/filing-a-ticket.md`.
+   *Done when* that reference's last step is.
+
+7. **Select.** Follow `references/selection.md`.
+   *Done when* one ticket that still needs its work is handed on, or the run is back at step 4 with the
+   Track marked as tried.
+
+8. **Design.** Hand the selected ticket to `references/design-point.md`.
+   *Done when* the ticket carries an implementable plan, or the run has ended with the open question named.
+
+9. **Implement.** Hand the planned ticket to `references/implement-point.md`.
+   *Done when* a branch holds the change and its checks are green.
+
+10. **Merge request.** Follow `references/opening-a-merge-request.md`.
+    *Done when* the merge request is open, or the prepared branch is handed to the human.
+
+## The end of a run
+
+A run ends when its merge request is open, when the design cannot proceed without a human answer, when
+nothing is workable, or at a decision point nobody answered.
+
+Close with two lines, each claim confirmed during this run:
+
+- **Status:** what the run did and where it ended.
+- **Next:** what the human can do now — review and merge, answer the open question, or call again.

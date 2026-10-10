@@ -1,23 +1,52 @@
-# Filing a ticket
+# Reference: filing tickets
 
-Rules for creating a new issue on the target's tracker. Only two places create one: `refactor-loop` (for every loop Track) and the Housekeeping Track's own process (`continuous-housekeeping`), because they are the only places that can ask the human — a lifecycle skill runs in a subagent and can't. Every other skill **hands back a draft** and the loop creates it. `opening-a-merge-request.md` is the counterpart for merge requests.
+Turns proposals into tickets on the target's tracker, through one decision point. A ticket is found again
+by its subject, so the subject is written in plain words; the suite sets no marker of its own. Commands
+come from the target's tracker file; the wording follows `forge-facing-writing.md`.
 
-Only *creating* moves here. A skill still comments on, updates the body of, and labels an issue that already exists.
+## 1. Search first
 
-**Ticket-create-mode.** Read the `Ticket-create-mode` field of the config file (`.scratch/refactor/config.md`): `autonomous` or `ask-each-time`. A field the file doesn't state, or no config file at all → `ask-each-time`, and the closing report says the default applied. Decided once, per person and machine, during the dispatcher's onboarding step (`onboarding-setup-interview.md`), hand-editable afterwards. It never governs merge requests — that is `MR-create-mode`.
+For every proposal, run **Search** over open and closed tickets with the node's `search` words — for a
+proposal without a node, with the words that name its subject. Keep every hit that is about the subject,
+and settle on one:
 
-A draft is what a skill returns instead of creating: the title, the labels, the body, and — for the loop to recognise an issue that already exists — the title as the key (`Tooling tree: <Name>`, `PHPStan Level N: baseline shrink — <group>`), or Where/Problem for a structural candidate, which has no fixed title. A skill lists its drafts under its own output, next to the writes it made (`reporting-progress.md`).
+| The hits | The proposal |
+| --- | --- |
+| an open ticket on the subject | continues on that ticket; nothing is filed |
+| a recorded rejection of the subject | is dropped: the node is rejected (`rejection.md`) |
+| only tickets closed as done, while the node is not fulfilled | is filed new, and its text names the earlier ticket |
+| several of these | all are shown; recommended is the open one, else the newest |
+| none | is filed new |
 
-**Creating one.** For every draft: look for an open issue that already carries that title (or the same Where) → that issue is the ticket, nothing is created and nobody is asked. Otherwise create it per `docs/agents/issue-tracker.md`, report it as its own line, and hand its number to whoever needs it next — `refactor-design` for the chosen candidate, `refactor-learn`'s closing call for a Track `Open` entry's issue number.
+## 2. The decision point
 
-**`autonomous`** → create every draft as it arrives.
+- **Findings:** the proposals in the order they were handed in, each with its Name, its Purpose in one
+  line, what blocks it, and its hits from step 1. Then what the scan laid out for this step: nodes below
+  the PHP floor, with the rejection proposed for each; open tickets whose node is already fulfilled, to
+  be closed with a note; the question on a node whose judgement stayed open.
+- **Options:** **as recommended**, **file some** — the human names which —, **file none**. Per proposal
+  the human may instead **decline the node**, which records a rejection (`rejection.md`).
+- **Recommendation:** file every proposal that carries no open question; record the proposed rejections;
+  close the tickets whose node is fulfilled. A proposal with an open question is filed once a human
+  answered it; an autonomous run leaves it unfiled and carries the question into the closing report.
+- A proposal neither filed nor declined is not stored anywhere; the next scan offers it again.
 
-**`ask-each-time`** → two kinds of question, both asked by the loop itself:
-- **The up-front batch** — the drafts a step returns for candidates that were only *proposed* (every unblocked tooling-tree node's minimal issue; every candidate a Select-mode dispatch found; every secret-history finding). One question per batch: "Create issues for these N?", listing them by Name. **Yes** → create all of them. **No** → create none of them; the chosen candidate is still asked about, below.
-- **The chosen candidate** — the ticket the pass is about to work on. Asked before it is created, unless a batch *yes* already created it.
+## 3. Write
 
-**A refused ticket for the chosen candidate.** The pass ends there with a report — the node stays a proposal, nothing else was written, and the next pass proposes it again. Offer once, in the same message, to reject it for good instead: yes → hand a rejection to `refactor-learn`'s closing call (an `out-of-scope/` entry for a tooling-tree node; there is no issue to close), so it is not asked about every pass. A `Housekeeping` cycle refused the same way simply doesn't run this pass; its `Last scan` stays, so it is due again.
+In the order handed in, so that a ticket's blockers exist before it does:
 
-**No human present to ask** (an unattended run) with `ask-each-time`. Nothing is created. The pass ends with a report that it waits for a confirmation, and adds that `Ticket-create-mode` can be set to `autonomous` in the config file if nobody will be there to answer. Never take a recommendation as an answer — an issue is visible to everyone watching the tracker and can be closed but not un-created.
+- **Title** — what gets done, with the node's Name in it: "Introduce PHPStan Level 0", "Raise to PHPStan
+  Level 3", "PHPStan Level 2: shrink the baseline".
+- **Text** — for a reader who does not know the skill suite: what the tool is and what the project gains
+  (the node's Purpose), what the merge request will contain (its MR scope), and both of its `search` words
+  written out.
+- **Blockers** — the tickets of the nodes that block it, the way **Blocked by** says; without that
+  operation as one sentence in the text, `Blocked by: <ticket>, <ticket>`. A blocking node that has no ticket is named in that sentence by its
+  Name, in both cases, so the ticket reads as blocked. A blocker out of a `required-any` group adds that
+  one of them is enough.
+- **Marks** — the **Candidate** mark, where the target has that operation.
 
-**Secret-history findings.** `refactor-learn`'s early call returns them as drafts (`refactor:priority`, the secret's value redacted); the loop creates them per the mode. The `Secret history scan` field is written `done` only once every draft has a ticket (zero findings counts) — declined or unattended → it stays absent, and the next pass runs the scan again.
+Create each ticket the way the tracker file says, report it by itself, and add it to the worklist.
+
+Filing is done when every proposal has a ticket, continues on an existing one, or was declined or left
+unfiled by decision.

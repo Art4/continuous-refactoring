@@ -108,8 +108,12 @@ Two or more sibling nodes under a shared required parent where adopting one make
 _Avoid_: XOR, either-or
 
 **Recognition-only gate node**:
-A tooling-tree node that never gets a ticket itself — it exists only as a required parent whose fulfilment gates other nodes. It is recognized (judged fulfilled or not by an agent) but never adopted through a run's design and implementation. Its fulfilment is a prerequisite for downstream nodes, not work the suite performs. Example: `structural-scan` itself, which gates Investigation but is not itself a Track node.
+A tooling-tree node that never gets a ticket itself — it exists only as a required parent whose fulfilment gates other nodes. It is recognized (judged fulfilled or not by an agent, and handed to the parser like any other node's state) but never adopted through a run's design and implementation. Its fulfilment is a prerequisite for downstream nodes, not work the suite performs. Example: `is-php-project`, which holds the PHP tree closed until the target uses PHP. A node waiting behind an unfulfilled one is out of reach: no ticket could unblock it, so a scan offers none for it.
 _Avoid_: gate node (too broad — a gate node that also gets a ticket is just a normal node)
+
+**Aggregation node**:
+A tooling-tree node others reach through `resolved` edges: `structural-scan`, and one per language specialization (PHP: `php-safety-net`). Its state is computed by the tree's parser from its leaves — fulfilled once every leaf is fulfilled, rejected, or closed by a rejected required parent — never handed in, never judged by an agent, and never a ticket. "Is **Safety Net** fulfilled?" is the computed state of `structural-scan`: it alone decides whether an autonomous run stops at Safety Net and whether a run moves on to the next **Track**. Whether every Safety Net node is done is a different question, and decides neither.
+_Avoid_: resolved gate, plumbing node
 
 **Floor correction**:
 Bringing `composer.json`'s declared PHP floor (`require.php`) in line with what the codebase's own source already demonstrably requires — behavior-preserving, since nothing observable changes, only the metadata now tells the truth. The only node that produces this: `php-minimal-version` (the PHP tree), triggered once `rector-php-set` has fully applied a PHP-version rule set.
