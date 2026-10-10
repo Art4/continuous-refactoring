@@ -12,7 +12,8 @@ Run the parser without a seed (`tooling-tree-parser.md`) and take every node of 
   filing sets that mark.
 - **Without one** → for each node, run **Search** with the node's Name, narrowed to the open tickets.
   Where one listing of all open tickets is short enough to read — a local folder, a small tracker — read
-  that listing once instead.
+  that listing once instead. A place the section gives to the suite's tickets alone counts whole; from
+  any other listing keep the tickets that match a node.
 - **Housekeeping tickets.** With a **Housekeeping** operation, find the open ones the way it says.
 - **The ticket the call names**, whatever it carries.
 

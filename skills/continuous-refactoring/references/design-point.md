@@ -159,8 +159,8 @@ moves together and what must stay put), and the **tests that survive** (which st
 which are new at the seam).
 
 1. **Ground.** Read the code the ticket names, the target's glossary and the ADRs of that area, and the
-   `Refactoring goal` line in the target's `AGENTS.md` where it has one. *Done when* you can say in two
-   sentences why this spot causes friction.
+   target's `Refactoring goal` line where it has one (`structural-candidate-search.md`, step 1). *Done
+   when* you can say in two sentences why this spot causes friction.
 2. **Settle the five, in rounds.** Open are the questions whose prerequisites are settled. Find facts in
    the code yourself; put each decision with its alternatives and one recommendation — interactive: all
    open ones of a round to the human in one message, numbered; autonomous: take the recommendation,

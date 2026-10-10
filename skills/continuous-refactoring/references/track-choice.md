@@ -40,7 +40,8 @@ and lay out nothing.
 
 ## Coming back here
 
-Steps 5 and 7 return here when the chosen Track turned out to have nothing workable. Mark it as tried.
+Steps 5 and 7 and the Investigation Track return here when the chosen Track turned out to have nothing
+workable. Mark it as tried.
 
 - **The call named the Track or the ticket** → the run ends: nothing is workable in what was asked for.
 - **Otherwise** → decide again by the same rules: with Safety Net fulfilled the next Track in the order is

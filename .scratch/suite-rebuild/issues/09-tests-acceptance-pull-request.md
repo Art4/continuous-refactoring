@@ -148,3 +148,34 @@ Not red, but now untrue:
   operation.
 - `scripts/validate_skills.py` (line 815) and the parser's `directly_unblocked_children` with its tests
   serve the Outlook comment, which the rebuilt suite no longer posts.
+
+### Red after ticket 06 (Investigation in the run)
+
+Unit tests (`python3 -m unittest discover -s scripts -p 'test_*.py'`): unchanged, the same two fail; 248
+of 250 green. `scripts/drift_check.py`: unchanged, 7 failures and 1 error.
+
+`python3 scripts/validate_skills.py .` — still exits 1. New errors, all "domain term used in 2 skills
+(continuous-refactoring, refactor-prioritize) but missing from glossary", because the carried-over
+`signals.md` and `structural-candidate-search.md` share their bold words with the old copies:
+
+- the signal names: `'blast radius of inaction'`, `'defect density'`, `'low leverage'`, `'missing
+  locality'`, `'observability'`, `'security'`, `'tightly-coupled seams'`, `'understandability'`
+- the ranking word `'heat'`, and `'generic'`
+- the ticket parts `'where'`, `'problem'`
+
+They go away when ticket 08 removes `refactor-prioritize`, unless the validator then still wants the
+words as glossary entries.
+
+New warning: a duplication advisory on `skills/refactor-prioritize/references/signals.md` (a sentence of
+the catalogue reads the same in the new `continuous-refactoring/references/signals.md`); gone with
+ticket 08 as well.
+
+Gone: "local reference 'references/investigation-track.md' does not exist".
+
+Not run here: the `fixtures/harness/run.sh` tiers. `changelog-fragment.yml` — `skills/**` changed again
+without a `.changelog.d/` fragment.
+
+Not red, but now untrue: the **Signal** fields in the tree docs (`tooling-tree/secret-detection.md`,
+`php-tooling-tree/phpmd.md`, `semgrep.md`, `coverage-floor.md`, and both tree files) point to
+`refactor-prioritize/references/signals.md` and name "Select mode"; the catalogue the run reads is now
+`continuous-refactoring/references/signals.md` (ticket 08).
