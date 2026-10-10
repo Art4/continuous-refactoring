@@ -1,1 +1,0 @@
-The Investigation Track's own in-flight candidate (structural, PHPStan baseline-shrink, or externally-labeled) now lives in `## Investigation`'s own `Open` field, the same shape Safety Net's and Guardrails' own `Open` already use, instead of the global `Pending candidates` field. It's also now resumed only during an Investigation pass, never mid a Safety Net or Guardrails one.
