@@ -37,7 +37,7 @@ At each link of the chain the suite lays out three things: what it **found**, th
 
 - In an **interactive** run you answer. "Yes" takes the recommendation.
 - Say "carry on yourself from here" at any point and the run is autonomous from the next decision on. That is the way to attend only the decisions you care about.
-- In an **autonomous** run the suite takes each recommendation and tells you in a sentence that it did.
+- In an **autonomous** run the suite still writes down what it found at each decision, then names the recommendation it took. Nothing is asked, but the conversation reads the same as an interactive run — so you can see afterwards why it went the way it did.
 - If a run was started without the autonomous hint and nobody answers, it ends at that decision point. What you find afterwards is the report — findings, options, recommendation — and nothing was written. An unattended call is therefore safe by default; say "do it yourself" in the call to let it work.
 
 One change always waits for you, in an autonomous run too: an edit to your project's `AGENTS.md`.
