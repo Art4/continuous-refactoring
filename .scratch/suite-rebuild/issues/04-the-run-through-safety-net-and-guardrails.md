@@ -14,7 +14,7 @@ Design and implement are named here as hand-over points; ticket 05 writes them. 
 scan is ticket 06. The Housekeeping Track is the reference `housekeeping-track.md` of
 `continuous-housekeeping`, written by ticket 07; this ticket points to it by that name.
 
-**Blocked by:** 01, 02, 03
+**Blocked by:** 01, 02, 03, 10
 
 **Status:** ready-for-agent
 
