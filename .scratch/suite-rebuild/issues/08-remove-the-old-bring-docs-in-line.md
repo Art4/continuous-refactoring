@@ -26,7 +26,10 @@ Spec: `../spec.md` (sections *Shape of the suite*, *Onboarding and existing targ
 - [ ] The known limitations state: a freely written ticket on a large tracker is found only through a
       **Candidate** hint or by being named; parallel merge requests may conflict and resolving that is the
       developer's; a target that is not a PHP project never gets a fulfilled Safety Net gate, so an
-      autonomous run stops there
+      autonomous run stops there; on a tracker strangers can write to, an autonomous Housekeeping run
+      weighs a stranger's comment as a proposal like anyone's, carries it out only as a behaviour-keeping
+      refactoring, and delivers it in a merge request a human reviews; with a daily rhythm the re-check
+      of the tooling Tracks runs daily unless the human moves that task into a rarer template
 - [ ] `AGENTS.md`'s description of the suite matches the two skills
 - [ ] A changelog fragment marks the rebuild as breaking for 0.7.0 and lists the steps for an onboarded
       target: run onboarding again, delete the old files under the suite's scratch folder (or name the old
