@@ -69,4 +69,4 @@ Investigation run with no open tickets shows everything it found and recommends 
 **Ticket-create-mode** and **MR-create-mode** leave it. Text addressed to the human says "skill suite" and
 "run". Repeated calls on Safety Net end at "every workable node has a ticket and an open merge request" —
 the next step is the developer's: review and merge. Parallel merge requests may conflict; resolving that
-is the developer's too. No tests were written or changed.
+is the developer's too.

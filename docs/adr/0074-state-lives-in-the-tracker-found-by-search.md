@@ -92,5 +92,4 @@ wants old rejections kept where they are names that place under **Rejected**.
 writes goes with the document it protected ([ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md)).
 A known limit: on a large tracker a freely written ticket is found only through a **Candidate** hint or by
 being named in the call. Moving a target over from 0.6.0 is a breaking change — run onboarding again,
-delete the old files, remove the old symlinks. No tests were written or changed; the parser's tests change
-with the parser.
+delete the old files, remove the old symlinks.

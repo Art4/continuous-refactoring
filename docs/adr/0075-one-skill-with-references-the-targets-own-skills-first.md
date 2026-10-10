@@ -61,6 +61,4 @@ docs say ADRs are kept.
 ## Consequences
 
 Installing the suite is two symlinks; a target moving over from 0.6.0 removes the symlinks of the removed
-skills. The flow texts are written new from the spec instead of being transformed from the old skills. No
-tests were written or changed; the validator, the trigger-control tests and the fixture harness are left
-red where the rebuild breaks them until the decision about tests.
+skills. The flow texts are written new from the spec instead of being transformed from the old skills.

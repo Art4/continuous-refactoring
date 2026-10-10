@@ -54,4 +54,4 @@ The Track is recommended when its open ticket's due date is reached, or when the
 ## Consequences
 
 `CONTEXT.md` gains **Housekeeping ticket** and **Housekeeping template**; the **Housekeeping** entry loses
-its cadence. A cycle without changes closes its ticket with a comment. No tests were written or changed.
+its cadence. A cycle without changes closes its ticket with a comment.
