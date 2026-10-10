@@ -69,7 +69,7 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 4. **Track choice.** Follow `references/track-choice.md`. It ends the run, or names one Track:
    - **Safety Net** or **Guardrails** → step 5.
    - **Housekeeping** → the run continues in `../continuous-housekeeping/references/housekeeping-track.md`
-     and ends where that reference ends.
+     and ends where that reference ends, unless it comes back here with Housekeeping marked as tried.
    - **Investigation** → the run continues in `references/investigation-track.md`, which hands a selected
      ticket to step 8.
 

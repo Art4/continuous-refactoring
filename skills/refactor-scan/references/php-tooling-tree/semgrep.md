@@ -32,8 +32,7 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   registry config `p/owasp-top-ten`, inline in the CI invocation or inside a committed
   `.semgrep.yml`/`.semgrep.yaml`) — presence of the invocation, not proof it actually fails the
   pipeline on a finding, the same conservative approximation `composer-audit`'s own CI-gate check
-  already uses — **or** a line naming this node is already committed to the Refactoring Notes'
-  `housekeeping-template.md` (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`), no
+  already uses — **or** a line naming this node is already committed to the target's Housekeeping template, no
   proof of a completed run required, the same fallback `composer-audit.md` documents in full.
 - **MR scope:** Semgrep wired into CI (however it installs — pip, Docker, or a marketplace CI action;
   never a `composer.json` entry) with the OWASP Top 10 registry ruleset, plus one initial scan pass
@@ -41,9 +40,9 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   same note `phpmd`'s and `secret-detection`'s own MR scopes already carry). No separate "security
   checklist" document — the tool's own deterministic CI findings are the check; a parallel manual
   checklist covering the same ground would be duplicate upkeep for no real additional coverage. Also
-  contribute this node's `Housekeeping` line (below) to `docs/refactoring/housekeeping-template.md`,
-  creating that file fresh if it doesn't exist yet
-  (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`).
+  add this node's `Housekeeping` line (below) to the target's Housekeeping template
+  (`../../../continuous-refactoring/references/implement-point.md`, *Slices every kind of ticket
+  can have*).
 - **Housekeeping:** re-run Semgrep's OWASP Top 10 ruleset periodically and review new findings — a
   point-in-time scan whose value is in repetition, the same reasoning `composer-audit`'s own
   Housekeeping entry already states for CVE advisories.

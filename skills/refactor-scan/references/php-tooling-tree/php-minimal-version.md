@@ -35,12 +35,12 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
 - **MR scope:** narrow — a `composer.json` `require.php` edit, plus the CI job that tests the app
   itself if a single unified job exists. No added verification step beyond the loop's own ordinary CI
   gate — `rector-php-set`'s own fulfilment check already means "fully applied, no remaining findings".
-  Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
-  `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`). A node already
-  fulfilled the very first time it's evaluated never gets a delivering MR of its own; its line then
-  reaches the file through the Housekeeping Track's own reconciliation instead
-  (`../../../continuous-housekeeping/references/housekeeping-track.md`, *Reconcile*).
+  Also add this node's `Housekeeping` line (below) to the target's Housekeeping template
+  (`../../../continuous-refactoring/references/implement-point.md`, *Slices every kind of ticket
+  can have*). A node already
+  fulfilled the very first time it's evaluated never gets a merge request of its own; its line then
+  reaches the template through the Housekeeping Track
+  (`../../../continuous-housekeeping/references/housekeeping-track.md`, step 4).
 - **Housekeeping:** check whether a newer PHP patch/minor release exists for the declared floor
   (`_current_php_floor`) and update it if so — a distinct concern from this node's own Fulfilment check,
   which only asks whether the floor is *correct* (matches what `rector-php-set` has landed), not whether

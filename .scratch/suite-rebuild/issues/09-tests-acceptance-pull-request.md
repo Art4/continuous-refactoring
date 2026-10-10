@@ -179,3 +179,42 @@ Not red, but now untrue: the **Signal** fields in the tree docs (`tooling-tree/s
 `php-tooling-tree/phpmd.md`, `semgrep.md`, `coverage-floor.md`, and both tree files) point to
 `refactor-prioritize/references/signals.md` and name "Select mode"; the catalogue the run reads is now
 `continuous-refactoring/references/signals.md` (ticket 08).
+
+### Red after ticket 07 (Housekeeping)
+
+Unit tests (`python3 -m unittest discover -s scripts -p 'test_*.py'`): unchanged, the same two fail; 248
+of 250 green. `scripts/drift_check.py`: unchanged, 7 failures and 1 error.
+
+`python3 scripts/validate_skills.py .` — still exits 1, 61 errors before and after. New errors:
+
+- **Contract of the skill** — `continuous-housekeeping: missing required '## Process' section` and
+  `missing required '## Completion criterion' section`. The new `SKILL.md` has "The run" and a completion
+  criterion per step, like the entry skill.
+- **Glossary** — `domain term 'decision points' / 'none' / 'housekeeping line' used in 2 skills
+  (continuous-housekeeping, continuous-refactoring) but missing from glossary`, and `'status'`
+  (continuous-housekeeping, refactor-loop).
+- **A deleted reference still cited by an old skill** —
+  `refactor-learn/references/housekeeping-write.md` cites `housekeeping-cadence-interview.md`. Goes with
+  ticket 08.
+
+Gone: the four avoid-term errors of the old Housekeeping texts (`ask-each-time`, `bookkeeping`,
+`checklist file`, `loop pass`) and their three "local reference `track-scheduler.md` does not exist"
+errors.
+
+Not run here: the `fixtures/harness/run.sh` tiers. Red by reading: the `housekeeping-track` tier and its
+fixtures `php-housekeeping-hand-adopted-guardrails` and `php-housekeeping-old-schema`, and the two
+`php-scheduler-housekeeping-*` fixtures, expect the old process (cadence, `Last scan`, a dated issue per
+cycle, the fixed template path). `changelog-fragment.yml` — `skills/**` changed again without a
+`.changelog.d/` fragment.
+
+Not red, but now untrue:
+
+- `skills/continuous-refactoring/references/refactoring-bookkeeping.md` (old, going with ticket 08)
+  cites the deleted `housekeeping-cadence-interview.md` and sections of the old `housekeeping-track.md`.
+- `scripts/validate_skills.py` (line 86) and `scripts/test_validate_skills.py` (line 217) name
+  `docs/refactoring/housekeeping-template.md` as a fixed shared path; it is now only the path the setup
+  recommends.
+- `docs/playbooks/housekeeping.md`, `docs/architecture.md`, `docs/known-limitations.md` and `README.md`
+  describe the old Housekeeping (ticket 08).
+- For acceptance: the Housekeeping run should cover the setup with the first cycle in one run, and a
+  second call before that merge request is merged (it should report that the setup waits).

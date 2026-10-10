@@ -93,7 +93,8 @@ The plan lists them where they apply; they are built in step 3 like any slice, e
 - **Glossary** — where those docs name a glossary file: a term the work introduced, added as a definition
   and nothing else.
 - **Housekeeping line** — a node with a **Housekeeping** field adds that line, as a recurring task, to
-  the Housekeeping template the target's **Housekeeping** operation names. Where the target has no such
+  the Housekeeping template the target's **Housekeeping** operation names, the first where it names
+  several. Where the target has no such
   operation the line is left out, and the Housekeeping Track adds it once its mechanism exists.
 
 ## Hand on

@@ -1,38 +1,44 @@
 ---
 name: continuous-housekeeping
-description: Runs one Housekeeping Track cycle — reconcile, checklist, quality gate, deliver — then records its Last scan; aborts on a target that isn't onboarded. Internal — invoked by continuous-refactoring only, not a user entry point.
+description: One Housekeeping run of the skill suite — works the open Housekeeping ticket, its recurring tasks and the refactoring ideas left on it as comments, and offers to set the mechanism up where it is missing. Made to be scheduled.
+disable-model-invocation: true
 ---
 
 # Continuous Housekeeping
 
-The **Housekeeping** Track (`CONTEXT.md`) as one loop pass. Unlike the other three Tracks, Housekeeping isn't a tooling-tree scan: its own reconcile → checklist-assembly → quality-gate → deliver process is a complete pipeline in itself, in `references/housekeeping-track.md`. This skill runs it directly and never calls `refactor-loop` — the generic pass (scan → prioritise → design → implement) doesn't apply to it. Its own merge request (or, on a cycle with zero code changes, a direct issue close) is the pass's entire delivery.
+One **run** that works the Housekeeping Track alone: no worklist, no Track choice, no other ticket.
 
-Invoked by `continuous-refactoring` once its Track scheduler selects Housekeeping. Not a user entry point — a human who wants this Track runs `/continuous-refactoring housekeeping`. Housekeeping's *trigger* stays centrally scheduled; only its process lives here.
+The run is made of **decision points**, and it is **interactive** or **autonomous**. Both are defined in
+`../continuous-refactoring/SKILL.md` — how the call states the mode in *The call*, the rules in *Decision
+points* — and hold here as written; read those two sections before step 1.
 
-**Direct invocation is a full manual override.** However this skill is reached — by `continuous-refactoring`, by naming the Track, or typed directly — it runs the Housekeeping Track without consulting the scheduler, bypassing the Safety Net blockade exactly as `../continuous-refactoring/references/track-scheduler.md`'s *Manual override* section describes for a named Track. This skill knows only its own Track and never reads another Track's state.
+## The call
 
-The Track's own reference files live beside this skill: `references/housekeeping-track.md` (the process), `references/housekeeping-cadence-interview.md` (the human-run cadence interview), `references/housekeeping-template-file-format.md` (the checklist file's format).
+Beside the mode, the call's free text may state any of these; say back in one sentence what was
+understood.
 
-## Process
+| The call states | Effect |
+| --- | --- |
+| a **Housekeeping ticket** or a **template** | that ticket is the one worked, due or not |
+| **now** ("although it is not due") | the next ticket is worked before its date |
+| a **further template** ("a monthly one beside the weekly") | the run sets that template up |
+| the **line for `AGENTS.md`** that a setup left out | the cycle proposes it |
 
-**Report every step, before and after** — one sentence for what starts, one for its result, each write to the target (branch, commit, issue, merge request) on its own line, per `../continuous-refactoring/references/reporting-progress.md`. This skill runs in the human's conversation itself, so it reports directly; `refactor-learn` names its writes in its `## Output`.
+Nothing stated → the run works the ticket that is due.
 
-0. **Onboarded target.** The Bookkeeping pointer must resolve to an existing `bookkeeping.md` (remote bookkeeping is fetched first — `../continuous-refactoring/references/remote-bookkeeping.md`) (`../continuous-refactoring/references/refactoring-bookkeeping.md` says where the Refactoring Notes live). Missing → abort now: nothing runs, not even step 2. Report it as `refactoring-bookkeeping.md`'s *Not onboarded yet* section says. This skill doesn't go through `refactor-loop`, so it makes this check itself.
+## The run
 
-1. **Housekeeping cycle.** Follow `references/housekeeping-track.md` to completion — reconcile `housekeeping-template.md`, create this cycle's issue (per `../continuous-refactoring/references/filing-a-ticket.md`), work the checklist, run the quality gate, deliver. It resumes an in-progress cycle rather than opening a second one. Nothing registered to check yet → it reports that and stops; that still counts as this Track's process having run. The human declined to have this cycle's issue created (`Ticket-create-mode: ask-each-time`), or nobody was there to ask → the cycle doesn't run, this pass ends here without step 2, and the report says so.
-2. **Learn, closing call — always.** Run `/refactor-learn` with the Housekeeping Track's process having actually run this pass, whichever way it ended. Records `## Housekeeping`'s `Last scan` (`../refactor-learn/references/housekeeping-write.md`) (written in place, never committed). `refactor-learn` writes it only when the process was actually reached.
+Read `../continuous-refactoring/references/reporting-progress.md` before the first sentence to the human.
 
-## Fallback
+1. **Ready.** Carry out step 1 of *The run* in `../continuous-refactoring/SKILL.md`; its `references/`
+   folder is the one beside that file.
+   *Done when* the target's `## Refactoring operations` section carries the three required operations,
+   or the run has ended.
 
-The suite must keep working in a target repo with none of the global skills installed. `refactor-learn`'s own `## Fallback` covers step 2, and `housekeeping-track.md` names its own tool and forge fallbacks; this skill engages no global skill itself.
+2. **Housekeeping.** Follow `references/housekeeping-track.md`.
+   *Done when* that reference's last step is, or it has ended the run.
 
-## Closing report
+## The end of a run
 
-Wherever the pass ends, close with exactly two lines to the human:
-
-- **Status:** one line, what happened this pass, e.g. "Status: housekeeping sweep delivered (MR #7); ...". Every claim reflects state freshly confirmed this pass; when it can't be confirmed (no forge/remote, CI status unreadable), say so explicitly rather than reporting an assumed outcome.
-- **Next:** one line, what the human can or should do now.
-
-## Completion criterion
-
-One Housekeeping cycle's process ran per `housekeeping-track.md` — or its issue was declined and the report says so — and `refactor-learn`'s closing call recorded `## Housekeeping`'s `Last scan`, and the outcome is reported: a delivered merge request (or a direct issue close on a zero-change cycle), a cycle resumed, or "due, but nothing registered to check yet".
+Close as `../continuous-refactoring/SKILL.md`, *The end of a run*, says: the two lines **Status** and
+**Next**. A run that found nothing due names the date from which the next ticket is due.

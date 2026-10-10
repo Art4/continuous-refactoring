@@ -8,11 +8,11 @@ Names the Track this run works, or ends the run. Reads the worklist (`worklist.m
 | Track | It has something when |
 | --- | --- |
 | Safety Net, Guardrails | it has a workable ticket; or it has no trace yet, which makes its scan due (`worklist.md`, *A Track's trace*) |
-| Housekeeping | its open ticket's stated due date is reached; or its mechanism is missing: no **Housekeeping** operation, no template, or no open ticket |
+| Housekeeping | an open ticket of it that is not in review states a due date that is reached; or its mechanism is missing: no **Housekeeping** operation, no template, or no open ticket |
 | Investigation | always — with open tickets it works them, without it explores |
 
-A Track this run already **tried** — its scan left nothing to file, nothing was filed, or selection found
-nothing workable — has nothing for the rest of the run.
+A Track this run already **tried** — its scan left nothing to file, nothing was filed, selection found
+nothing workable, or Housekeeping had nothing to work — has nothing for the rest of the run.
 
 ## The recommendation
 
@@ -40,8 +40,8 @@ and lay out nothing.
 
 ## Coming back here
 
-Steps 5 and 7 and the Investigation Track return here when the chosen Track turned out to have nothing
-workable. Mark it as tried.
+Steps 5 and 7, the Investigation Track and the Housekeeping Track return here when the chosen Track
+turned out to have nothing workable. Mark it as tried.
 
 - **The call named the Track or the ticket** → the run ends: nothing is workable in what was asked for.
 - **Otherwise** → decide again by the same rules: with Safety Net fulfilled the next Track in the order is

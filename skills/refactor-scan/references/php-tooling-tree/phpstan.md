@@ -68,9 +68,9 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 - **Fulfilment check:** PHPStan's deprecation rules enabled (the bundled deprecation ruleset or equivalent
   extension) and the current `phpstan.neon` run green with them on.
 - **MR scope:** dependency/config addition enabling the ruleset, no production-code change beyond fixing
-  surfaced deprecations. Also contribute this node's `Housekeeping` line (below) to the Refactoring Notes'
-  `housekeeping-template.md`, creating that file fresh if it doesn't exist yet
-  (`../../../continuous-housekeeping/references/housekeeping-template-file-format.md`).
+  surfaced deprecations. Also add this node's `Housekeeping` line (below) to the target's Housekeeping
+  template (`../../../continuous-refactoring/references/implement-point.md`, *Slices every kind of ticket
+  can have*).
 - **Housekeeping:** after any dependency update, re-run PHPStan and check for newly-surfaced deprecation
   warnings (a dependency bump can start calling a now-deprecated API this ruleset didn't flag before);
   fix in scope.
