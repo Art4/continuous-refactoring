@@ -1,5 +1,8 @@
 # A Track's `Cadence` carries a unit, and may be a monthly calendar day
 
+> Superseded by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md): no Track carries a `Cadence`;
+> the Track is recommended in a fixed order from what is workable.
+
 > Amends [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): the per-Track `Cadence` there
 > was a bare number of days. The staleness ratio, the fixed tie-break order and the one-time bootstrap
 > exception are unchanged.

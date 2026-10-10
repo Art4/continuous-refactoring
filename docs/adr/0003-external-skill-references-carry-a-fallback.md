@@ -1,5 +1,9 @@
 # External skill references carry a fallback
 
+> Amended by [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): for design and
+> implementation the preferred skill is the target's own, looked up at the decision point, with the
+> suite's own reference as the fallback.
+
 Every suite skill that references a **global** skill (`/grilling`, `/tdd`, `/code-review`, `/codebase-design`, `/domain-modeling`) carries a `## Fallback` section. Suite-internal references are exempt — those skills ship together. The `/X` reference stays and means "use X if installed, else the inline fallback".
 
 Two fallback depths, chosen by the skill's role:

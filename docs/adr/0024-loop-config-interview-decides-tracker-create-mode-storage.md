@@ -1,5 +1,9 @@
 # `loop-config` runs a human interview instead of guessing tracker, create-mode, and storage
 
+> Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
+> [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the interview no longer asks for a
+> create-mode or for where state is stored. The tracker question stays.
+
 > Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): the create-modes move into the per-person config file.
 
 > Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): its `Create-mode` field is renamed `MR-create-mode`, and the interview gains a ticket-create-mode question.

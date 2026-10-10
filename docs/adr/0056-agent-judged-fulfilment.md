@@ -1,5 +1,11 @@
 # Agent-judged fulfilment: `Open` as complete backlog, scheduler rules, `Fulfilled nodes` retired
 
+> Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
+> [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): `Open` as a list in the bookkeeping
+> document and the scheduler rules built on it (blockade, yielding, preemption, one Track per pass) no
+> longer hold. Agent-judged fulfilment stands; so does the idea that a Track's whole unresolved scope is
+> visible, blocked nodes included — now as tickets.
+
 > Amended by [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): the one-time bootstrap exception this ADR corrected is removed altogether.
 
 > Amends [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): `Open` in each Track's

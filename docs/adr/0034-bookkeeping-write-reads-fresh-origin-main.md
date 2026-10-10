@@ -1,5 +1,8 @@
 # `refactor-learn`'s closing bookkeeping write reads fresh `origin/main`, not the candidate branch's own stale view
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no bookkeeping
+> write.
+
 A real gap observed live while reviewer-loop-watching `Art4/legacy-todo` (ticket 52): the closing
 call's `Fulfilled nodes`/`Skip streak` write (`skills/refactor-learn/references/fulfilled-nodes-write.md`)
 computed both fields against whatever the candidate branch's own local checkout happened to have, with

@@ -1,5 +1,8 @@
 # The retired `Fulfilled nodes` bookkeeping field is removed from the schema, not merely ignored
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the whole schema is gone
+> with the bookkeeping document.
+
 > Continues [ADR-0056](0056-agent-judged-fulfilment.md), which retired `Fulfilled nodes`: no skill
 > reads or writes it. This ADR finishes the job — the field is no longer part of the documented
 > schema, and no fixture, harness check or doc carries it.

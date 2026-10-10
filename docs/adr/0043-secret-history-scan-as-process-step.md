@@ -1,5 +1,9 @@
 # Retroactive secret-history scan is a `refactor-scan` process step, not a tooling-tree node
 
+> Superseded in part by [ADR-0076](0076-standing-housekeeping-ticket-from-a-template.md): the scan is a
+> recurring Housekeeping task, not a one-time scan step remembered by a flag. Reusing the target's
+> scanner and its own baseline stands.
+
 ## Context
 
 `secret-detection`'s own adoption MR (Signals ticket 2, ADR-0040) deliberately scoped itself to the

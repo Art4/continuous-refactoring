@@ -1,5 +1,9 @@
 # Select mode batch-files candidates; Security/Blast-Radius signals bypass the backlog cap
 
+> Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md): the backlog cap and its
+> two admission tiers are removed. The signals catalogue stands; a priority ticket comes first in the
+> order.
+
 > Amends [ADR-0038](0038-candidate-selection-moves-to-prioritize.md): Select mode's own decision to
 > "pick the single strongest, set the rest aside" is reversed — it now files every genuine candidate
 > found. ADR-0038's other decisions (the two-dispatch mechanism, minimal filing, `refactor-design`

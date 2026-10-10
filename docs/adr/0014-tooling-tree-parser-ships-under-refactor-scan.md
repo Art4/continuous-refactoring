@@ -1,5 +1,8 @@
 # The tooling-tree parser and its two tree docs ship together under `skills/refactor-scan/references/`
 
+> Amended by [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): `refactor-scan`
+> is no longer a skill; the parser and its tree docs still ship together under a skill that remains.
+
 > Amended by [ADR-0056](0056-agent-judged-fulfilment.md): the script still ships here with its tree docs, but it no longer detects anything — fulfilment is judged by the agent and handed to it; the script keeps only the tree's graph logic.
 
 > Extends [ADR-0013](0013-skill-reference-docs-live-under-skills.md): the same "if a `SKILL.md` instructs the agent to consult it, it lives under `skills/<owning-skill>/references/`" rule, now applied to an executable script and the data it loads at runtime, not just a markdown reference doc.

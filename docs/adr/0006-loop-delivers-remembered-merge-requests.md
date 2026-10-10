@@ -1,5 +1,10 @@
 # Loop delivers via remembered merge requests
 
+> Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
+> [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the limit of two open merge requests is
+> removed, and merge requests are found by search instead of remembered. A run still ends once the merge
+> request is open, without waiting for merge or review.
+
 > Amended by [ADR-0009](0009-merge-request-outlook-and-delivered-label.md): the description gains a plain-language opener and, for tooling-tree candidates, an outlook naming the next node (resolving half of ticket 19); the in-flight label is `refactor:delivered`, not `ready-for-human`.
 >
 > Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): the pass no longer starts from remembered merge-request state inline in the orchestrator — `refactor-scan` detects it, `refactor-learn` acts on it.

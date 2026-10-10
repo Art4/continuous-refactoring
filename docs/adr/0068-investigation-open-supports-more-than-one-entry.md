@@ -1,5 +1,8 @@
 # `## Investigation`'s `Open` supports more than one in-flight candidate
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no `Open` list;
+> the open tickets are the worklist.
+
 > Amends [ADR-0065](0065-investigation-gets-its-own-open.md): `Open` is no longer single-entry. Every
 > other decision in that ADR — a candidate's own entry set by `refactor-design`, cleared by
 > `refactor-learn`, read only when Investigation is the Track selected — is unchanged; only the

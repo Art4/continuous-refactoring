@@ -1,5 +1,9 @@
 # Onboarding is step 0 of the dispatcher, and the `loop-config` node becomes `onboarding-setup`
 
+> Superseded in part by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): onboarding is
+> triggered by a tracker file without a `## Refactoring operations` section (or one without **Search**),
+> and writes no config file and no bookkeeping document. It stays the entry skill's first check.
+
 > Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): onboarding is triggered by a missing Bookkeeping pointer rather than a missing `bookkeeping.md`.
 
 > Supersedes in part [ADR-0024](0024-loop-config-interview-decides-tracker-create-mode-storage.md) and

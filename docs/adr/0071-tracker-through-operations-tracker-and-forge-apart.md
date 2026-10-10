@@ -1,5 +1,9 @@
 # The tracker is reached through operations, and tracker and forge are two things
 
+> Amended by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): **Search**, **Rejected**,
+> **Blocked by** and **Housekeeping** join the operations; **Bookkeeping** and **Filed date** leave;
+> **Candidate** and **Priority** become optional hints.
+
 > Amends [ADR-0012](0012-remembered-merge-requests-follow-the-tracker.md): remembered merge requests
 > follow the tracker when it has a **Linked merge request** operation, not when it "supports labels
 > natively".

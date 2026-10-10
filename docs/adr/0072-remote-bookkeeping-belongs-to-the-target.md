@@ -1,5 +1,8 @@
 # Where remote bookkeeping lives, and how it gets there, belongs to the target
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no bookkeeping,
+> local or remote, and no **Bookkeeping** operation.
+
 > Amends [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): the place that is not a
 > local file no longer has to be a GitHub or GitLab issue, and the suite no longer describes how it is
 > read and written.

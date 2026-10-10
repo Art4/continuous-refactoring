@@ -1,5 +1,8 @@
 # The top-level `Pending candidates` field is dropped
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the document the field
+> lived in is gone.
+
 > Amends [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md) and
 > [ADR-0065](0065-investigation-gets-its-own-open.md): both kept the field "for now" and deferred
 > dropping it to a later change — this is that change. Supersedes
