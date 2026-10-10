@@ -9,13 +9,15 @@ and for a ticket in review its merge request with the review's comments. Every s
 
 Decided as `design-point.md` step 2 decides who plans, with two differences: a skill fits here when its
 description says it builds a planned ticket, and the `AGENTS.md` sentences that count are those on how
-work is implemented, tested and reviewed. The suite's own way is steps 3 to 5 below.
+work is implemented, tested and reviewed. It has no option for the human implementing: that choice was
+offered with the plan (`design-point.md`, step 5). An autonomous run implements the suite's own way,
+which is steps 3 to 5 below.
 
 *Done when* it is said who implements.
 
 ## 2. The branch
 
-The first row that applies:
+Check the working tree first (`../SKILL.md`, *A clean working tree*). Then the first row that applies:
 
 | Found | The branch |
 | --- | --- |

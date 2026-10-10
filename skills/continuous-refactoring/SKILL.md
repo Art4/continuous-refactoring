@@ -31,8 +31,10 @@ A decision point lays out three things, in this order: the **findings**, the **o
 recommendation** with its reason in a few words. Every write to the target's tracker, forge or files
 follows from one; everything before the run's first decision point is read-only.
 
-- **Interactive** → ask and wait: one `AskUserQuestion` call where that tool exists, the same content as
-  numbered prose otherwise, the recommendation first.
+- **Interactive** → first post the findings as a message in this conversation: a question dialog shows
+  the human only its own fields, so what is not in a message was not shown. Then ask and wait — the
+  options, the recommendation first, in one `AskUserQuestion` call where that tool exists, as numbered
+  prose otherwise. The question refers only to what the message before it shows.
 - **Autonomous** → take the recommendation, and say in one sentence that it was taken.
 - **Switching** → the human saying mid-run that the suite should carry on by itself makes the run
   autonomous from the next decision point on.
@@ -48,6 +50,22 @@ not cover — closing a named ticket found fulfilled — is still laid out.
 Decision points happen in this conversation. A step that only reads and judges may run in a subagent,
 handed its reference and returning its result; the subagent asks nothing and writes nothing.
 
+## A clean working tree
+
+A run works on a working tree that `git status --porcelain` shows as clean. Check it twice: after the
+onboarding interview wrote, and before the implement point checks out its branch. Files the target
+ignores do not show there and need nothing.
+
+Anything shown → a decision point. Findings: the files, and for each whether this run wrote it. Options:
+
+- **Deliver them first** (the recommendation, where this run wrote every one of them): commit them on a
+  branch of their own, open its merge request per `references/opening-a-merge-request.md`, and go on.
+- **The human tidies up**, and says when the run may go on.
+- **End the run.**
+
+A file this run did not write is the human's work in progress: the suite commits none of it, the
+recommendation is that the human tidies up, and an autonomous run ends here naming the files.
+
 ## The run
 
 Read `references/reporting-progress.md` before the first sentence to the human.
@@ -55,8 +73,9 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 1. **Ready.** No Git repository → the run ends with that message. Read `docs/agents/issue-tracker.md`:
    the `## Refactoring operations` section is missing, or lacks **Search**, **Done** or **Merge
    requests** → run `references/onboarding-setup-interview.md` inline. Its summary is this run's first
-   decision point. The interview wrote the section and verified **Search** → one more decision point:
-   go on with the run now (recommended), or end here. Anything else → the run ends with the interview's
+   decision point. The interview wrote the section and verified **Search** → check the working tree (*A
+   clean working tree*, above), then one more decision point: go on with the run now (recommended), or
+   end here. Anything else → the run ends with the interview's
    report.
    *Done when* the section carries the three required operations.
 

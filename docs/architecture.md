@@ -53,7 +53,7 @@ Autonomous is the same chain with the recommendation taken, so there is one path
 
 ### The project's own skills first
 
-At the design point and at the implement point the suite looks at the skills on offer in the conversation and at what the project's `AGENTS.md` says about planning and implementing. It recommends what `AGENTS.md` names, else a fitting skill of the project, else a fitting skill from elsewhere, and only then its own procedure. The choice is a decision point and is made again on every run, so installing a skill tomorrow changes the recommendation tomorrow.
+At the design point and at the implement point the suite looks at the skills on offer in the conversation and at what the project's `AGENTS.md` says about planning and implementing. It recommends what `AGENTS.md` names, else a fitting skill of the project, else a fitting skill from elsewhere, and only then its own procedure. The choice is a decision point and is made again on every run, so installing a skill tomorrow changes the recommendation tomorrow. An autonomous run uses the suite's own procedures. A skill that only you can call is not on offer to an agent; for that, a run lets you take the planning — and, once the plan is on the ticket, the implementation — into a session of your own, and ends there. A later run picks the ticket up from the plan, the branch or the merge request it finds.
 
 The suite expects two things back: from planning, a ticket that carries an implementable plan; from implementing, a branch whose checks are green. It opens the merge request itself unless one is already open, so a run ends the same way whoever built the change. A decision worth recording becomes an ADR on the same branch — only where the project's domain docs say where ADRs are kept.
 

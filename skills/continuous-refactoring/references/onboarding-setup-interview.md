@@ -47,7 +47,8 @@ Open with one sentence saying what happens, for example "This repository is not 
 yet. I have a few questions about where your tickets live, then I write one file." — or, for
 **Incomplete**, "The skill suite's section in your tracker file lacks **Search**. I'll add it."
 
-Then say in plain prose what Explore found and which questions remain. Ask those one at a time: a title,
+Then say in plain prose what Explore found and which questions remain — both sentences are messages in
+the conversation, posted before the first question. Ask the questions one at a time: a title,
 two to four concrete options, one recommendation drawn from Explore — a single-question `AskUserQuestion`
 call where that tool exists, the same content as numbered prose otherwise — and wait for the answer before
 the next. In an autonomous run each recommendation is taken as the answer, and a question that has none
@@ -91,7 +92,8 @@ from a template, or left out with its fallback noted.
 
 ## 3. Summarize
 
-A **decision point**. Lay out:
+A **decision point**. Post this summary as a message of its own, with the section as it would be written
+below it, before the question is asked:
 
 > Tracker: <GitHub | GitLab | Local Markdown | the name given>.
 > <Pull requests | Merge requests>: <the forge and its tool | none — you land the prepared branch>.

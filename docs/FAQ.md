@@ -78,6 +78,12 @@ discipline, same review. The suite looks at what is available at that moment and
 own procedures are the fallback for a project that has none. The choice is made on every run and
 stored nowhere, so a skill you install tomorrow is recommended tomorrow.
 
+Two limits. A run you asked to do everything itself uses the suite's own procedures. And a skill
+marked so that only you can call it is invisible to an agent: when you want to use one, choose "I plan
+this myself" at the design point, or "I implement this myself" when the plan is laid out. The run
+ends there and tells you which ticket to hand to your skill; a later run finds the plan, the branch or
+the merge request and continues from it.
+
 Whoever builds the change, the suite expects the same two results — a plan on the ticket, a branch
 with green checks — and opens the merge request itself, so a run always ends the same way.
 

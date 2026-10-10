@@ -44,7 +44,10 @@ available in the target and at what its `AGENTS.md` says, recommends the target'
 its own references. That choice is a decision point and is never stored: installing a skill tomorrow
 changes the recommendation tomorrow. The suite expects from a design skill a ticket carrying an
 implementable plan, and from an implement skill a branch with green checks. It opens the merge request
-itself unless one already exists, so a run always ends the same way.
+itself unless one already exists, so a run always ends the same way. An autonomous run uses the suite's
+own references. A skill only the human can call is not on offer to an agent: at the design point the
+human may take the planning, and with the plan the implementation, into a session of their own, and the
+run ends there.
 
 An ADR and a glossary change travel in the candidate's merge request, and only where the target's domain
 docs say ADRs are kept.

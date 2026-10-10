@@ -31,11 +31,15 @@ Look at two places: the skills on offer in this conversation apart from the suit
 the target's `AGENTS.md` says about how work is planned. A skill fits here when its description says it
 turns a piece of work into a plan or a specified ticket.
 
-- **A skill fits, or `AGENTS.md` names a way** → a decision point. Findings: each fitting skill with its
-  description in a few words, and the `AGENTS.md` sentence. Options: each of them, and the suite's own
-  planning. Recommendation: what `AGENTS.md` names; else the fitting skill installed in the target
-  itself; else the fitting skill that comes from elsewhere.
-- **Neither** → say in one sentence that the suite plans by itself; this is no decision point.
+- **Autonomous** → the suite plans by itself. Say so in one sentence; this is no decision point.
+- **Interactive** → a decision point, every time. Findings: each fitting skill with its description in a
+  few words, the `AGENTS.md` sentence, or that neither exists. Options: each of them; the suite's own
+  planning; **the human plans in a session of their own**. Recommendation: what `AGENTS.md` names; else
+  the fitting skill installed in the target itself; else the fitting skill that comes from elsewhere;
+  else the suite's own planning.
+- **The human plans** → the run ends. The closing report names the ticket, what a plan on it has to state
+  (step 1, *carries a plan*), and that a later run takes the ticket up from there. This is also the way
+  to a skill only the human can call: the conversation does not list it, so the suite cannot run it.
 
 The answer holds for this ticket in this run and is written nowhere: the next run looks again.
 
@@ -82,8 +86,11 @@ without its context, and a real trade-off between alternatives.
 ## 5. Put the plan on the ticket
 
 A plan the target's skill already wrote onto the ticket stands as it is. Otherwise the plan is this
-step's decision point — findings: the plan in full. Options: post it (the recommendation), change it, end
-the run. Post it as one comment that opens with the line `Plan`, holding:
+step's decision point — findings: the plan in full. Options: post it and go on to the implementation (the
+recommendation); post it and end the run, because the human implements it in a session of their own;
+change it; end the run. Where the human implements, the closing report names the ticket, the plan's
+comment and the branch name the implement point would use (`implement-point.md`, step 2), so that a later
+run finds the branch or its merge request and continues there. Post it as one comment that opens with the line `Plan`, holding:
 
 - **What changes and where** — files, modules, configuration, in the target's own names.
 - **Slices**, in the order they are built, each small enough for one commit or a few.

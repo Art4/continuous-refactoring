@@ -11,6 +11,21 @@ mark, or you name the ticket in the call.
 **What to do:** set a mark for refactoring tickets — the suite proposes one the first time it files a
 structural ticket on such a tracker — or name the ticket: `/continuous-refactoring ticket 42`.
 
+## The suite cannot run a skill that only you can call
+
+A skill marked for the human's use alone does not appear among the skills an agent sees, so a run can
+neither recommend nor start it. To plan or implement a ticket with such a skill, take that step into a
+session of your own: a run offers this at the design point and again when the plan is laid out, ends
+there, and a later run continues from the plan, the branch or the merge request it finds. An autonomous
+run always uses the suite's own procedures.
+
+## A run needs a clean working tree
+
+After the setup interview wrote its file, and before the implementation checks out its branch, the suite
+looks at `git status`. Changes it wrote itself it offers to deliver in a merge request of their own;
+changes it did not write it leaves alone and asks you to tidy up — an autonomous run ends there. Files
+your project ignores do not count.
+
 ## Parallel merge requests may conflict
 
 Nothing limits how many merge requests of the suite are open at once, and each one starts from the
