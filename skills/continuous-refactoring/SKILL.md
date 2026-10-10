@@ -35,7 +35,9 @@ follows from one; everything before the run's first decision point is read-only.
   the human only its own fields, so what is not in a message was not shown. Then ask and wait — the
   options, the recommendation first, in one `AskUserQuestion` call where that tool exists, as numbered
   prose otherwise. The question refers only to what the message before it shows.
-- **Autonomous** → take the recommendation, and say in one sentence that it was taken.
+- **Autonomous** → post the same findings message a human would get, then one sentence naming the
+  recommendation taken, and only then act on it. Nobody answers, so the message is the record: a reader
+  who comes later learns from it what was found and why the run went the way it did.
 - **Switching** → the human saying mid-run that the suite should carry on by itself makes the run
   autonomous from the next decision point on.
 - **Nobody answers** — the run is interactive and the question cannot be put to a human or comes back

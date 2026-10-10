@@ -5,6 +5,8 @@ changed, without opening anything.
 
 - **Words.** Say "skill suite" for what is running and "run" for one call of it. Name a tooling-tree node by
   its Name ("PHPStan Level 0"). Use the forge's own word for a merge request (pull request on GitHub).
+- **The same in both modes.** An autonomous run reports exactly as an interactive one does; it only
+  asks nothing. A step worked without a message to the human is a step left unreported.
 - **Each step: one sentence when it starts, one with its result** — what was found, what was chosen and
   why in a few words. A step that runs in a subagent is announced as such.
 - **Each write is reported by itself, as it happens**: a ticket filed, commented on or closed, a rejection
