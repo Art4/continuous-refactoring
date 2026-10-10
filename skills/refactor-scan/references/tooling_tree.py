@@ -1,10 +1,12 @@
 """Deterministic graph-logic parser for the tooling tree.
 
-Reads the tree docs and the target repository; the node state (which nodes
-are fulfilled, which rejected) is handed in by the caller. Emits, per
-Track, the nodes with name and tool, the ordered backlog (blocked nodes
-included) and why a node is withheld — without invoking an LLM, keeping a
-file of its own, or mutating the repo.
+Reads the tree docs and the target repository; the state of the nodes an
+agent can judge (which are fulfilled, which rejected) is handed in by the
+caller, the state of the aggregation nodes is computed from it. Emits, per
+Track, whether it is fulfilled, the nodes a ticket can be filed for with
+name, tool and search words, the ordered backlog (blocked nodes included)
+and why a node is withheld — without invoking an LLM, keeping a file of
+its own, or mutating the repo.
 
 Docs: tooling-tree.md and php-tooling-tree.md (siblings to this file) are
 machine-readable (edges table, node sections), CONTEXT.md vocabulary.
@@ -28,17 +30,17 @@ TRACKER_FILE = pathlib.PurePosixPath("docs/agents/issue-tracker.md")
 
 _VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
 
-# Ordinary required-gated nodes that must never be surfaced as a proposable
-# candidate, regardless of their own fulfilled state: `git` (never an MR),
-# `static-code-analyzer` (pure plumbing), `psalm` (recognition-only — same
-# fait-accompli shape Pest already gets for `phpunit`), `is-php-project`
-# (recognition-only gate for the whole PHP specialization — rejecting a
-# required parent never unblocks its children, so rejecting it would never
-# accomplish anything leaving it unfulfilled doesn't already). Resolved-gated aggregation nodes
-# (`php-safety-net`) are excluded separately via
-# `exposed_resolved_gate_nodes` in load_tree() — this set is for ordinary
-# required-gated nodes instead.
+# Recognition-only nodes: they say something about the target (or merely
+# organise the tree) and are never work to do, so no ticket is ever filed
+# for one — `git` (never an MR), `static-code-analyzer` (pure plumbing),
+# `psalm` (recognised when present, never suggested), `is-php-project` (the
+# gate of the whole PHP specialization), and the three gates in front of
+# `composer-audit` and the PHPStan level chain. The other two kinds of node
+# without a ticket are derived, see `_gets_ticket`.
 _NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "has-real-dependency", "phpstan-baseline-empty", "phpstan-not-psalm"}
+
+# The two nodes whose state the parser reads off the target itself.
+_OWN_NODES = {"git", "onboarding-setup"}
 
 # ---------------------------------------------------------------------------
 # Node state: handed in by the caller, never looked up
@@ -96,7 +98,8 @@ def load_seed(seed_path: pathlib.Path, tree: dict) -> tuple[dict[str, bool], dic
     unknown = sorted((set(fulfilled) | set(rejected)) - set(tree["nodes"]))
     if unknown:
         raise fail(f"names nodes the tree doesn't have: {', '.join(unknown)}")
-    both = sorted(set(fulfilled) & set(rejected))
+    # what is handed in for a node the parser settles itself is ignored anyway
+    both = sorted((set(fulfilled) & set(rejected)) - _OWN_NODES - _aggregation_nodes(tree))
     if both:
         raise fail(f"names nodes as both fulfilled and rejected: {', '.join(both)}")
     return {n: True for n in fulfilled}, rejected
@@ -107,7 +110,7 @@ def _guardrails_scope(tree: dict) -> set[str]:
     required-any) ancestor that is itself resolved-gated (PHP:
     ``php-safety-net``) — proposable only once the Safety Net has closed.
     Every other node belongs to the Safety Net Track."""
-    gates = {n for n, parents in tree["resolved_parents"].items() if parents}
+    gates = _aggregation_nodes(tree)
     scope: set[str] = set()
     changed = True
     while changed:
@@ -122,17 +125,40 @@ def _guardrails_scope(tree: dict) -> set[str]:
     return scope
 
 
-def _node_state(repo: pathlib.Path, fulfilled, rejected) -> tuple[dict[str, bool], set[str]]:
+def _aggregation_nodes(tree: dict) -> set[str]:
+    """The nodes others reach through ``resolved`` edges (PHP:
+    ``php-safety-net``, and ``structural-scan`` behind it)."""
+    return {n for n, parents in tree["resolved_parents"].items() if parents}
+
+
+def _gets_ticket(node: str, tree: dict) -> bool:
+    """Whether a ticket can be filed for *node*. Not for a recognition-only
+    node, not for one the parser settles itself, and not for an aggregation
+    node — its leaves are where the work is."""
+    return node not in _NEVER_PROPOSED and node not in _OWN_NODES and node not in _aggregation_nodes(tree)
+
+
+def _node_state(repo: pathlib.Path, tree: dict, fulfilled, rejected) -> tuple[dict[str, bool], set[str]]:
     """The node state every output is computed from: what the caller handed
     in. A node named in neither *fulfilled* nor *rejected* is undecided.
-    Two nodes the parser settles itself, whatever was handed in for them:
-    ``git`` is fulfilled, and ``onboarding-setup`` is fulfilled exactly
-    when the target's tracker file carries its ``## Refactoring
-    operations`` section."""
-    state = dict(fulfilled or {})
+    Some nodes the parser settles itself, whatever was handed in for them:
+    ``git`` is fulfilled, ``onboarding-setup`` is fulfilled exactly when
+    the target's tracker file carries its ``## Refactoring operations``
+    section, and an aggregation node is fulfilled once its leaves are
+    decided (see ``_with_aggregation_state``)."""
+    own = _OWN_NODES | _aggregation_nodes(tree)
+    state = {n: v for n, v in (fulfilled or {}).items() if n not in own}
     state["git"] = True
     state["onboarding-setup"] = _has_refactoring_operations(repo)
-    return state, set(rejected or ()) - {"git", "onboarding-setup"}
+    rejected = set(rejected or ()) - own
+    return _with_aggregation_state(tree, state, rejected), rejected
+
+
+def _with_aggregation_state(tree: dict, state: dict[str, bool], rejected: set[str]) -> dict[str, bool]:
+    """*state* with every aggregation node's fulfilment computed from its
+    leaves: fulfilled once each leaf is fulfilled or rejected."""
+    gates = _resolved_gate_status(tree, lambda n: state.get(n, False), rejected)
+    return {**state, **{node: resolved for node, (resolved, _) in gates.items()}}
 
 
 def _has_refactoring_operations(repo: pathlib.Path) -> bool:
@@ -144,19 +170,36 @@ def _has_refactoring_operations(repo: pathlib.Path) -> bool:
 
 
 def track_nodes(tree: dict) -> dict[str, list[dict]]:
-    """Per Track, its nodes in tree order, each with the ``name`` and
-    ``tool`` its node section gives (None where the tree doc has no
-    section for it). Membership is derived from the edges, see
+    """Per Track, the nodes a ticket can be filed for, in tree order, each
+    with the ``name`` and ``tool`` its node section gives as plain text
+    (None where the tree doc has no section for it, or names no tool) and
+    with ``search``, the words to look the node's ticket up by: name and
+    tool, each once. Membership is derived from the edges, see
     ``_guardrails_scope``."""
     guardrails = _guardrails_scope(tree)
     sections = tree.get("sections", {})
     tracks: dict[str, list[dict]] = {"Safety Net": [], "Guardrails": []}
     for node in tree["order"]:
+        if not _gets_ticket(node, tree):
+            continue
         section = sections.get(node, {})
+        name, tool = _plain(section.get("name")), _plain(section.get("tool"))
+        if tool == "none":
+            tool = None
+        search = [name] if name else []
+        if tool and tool.casefold() != (name or "").casefold():
+            search.append(tool)
         tracks["Guardrails" if node in guardrails else "Safety Net"].append(
-            {"node": node, "name": section.get("name"), "tool": section.get("tool")}
+            {"node": node, "name": name, "tool": tool, "search": search}
         )
     return tracks
+
+
+def _plain(field: str | None) -> str | None:
+    """A node section's field without its Markdown backticks."""
+    if field is None:
+        return None
+    return field.replace("`", "").strip() or None
 
 
 def closed_by_rejection(tree: dict, rejected: set[str]) -> list[str]:
@@ -180,7 +223,7 @@ def _withheld_guard_cascade(
     """The guard cascade withheld_with_reasons() and withheld_candidates()
     share: takes the handed-in node state, then yields ``(node, blocked_reason,
     undecided_parents)`` for every node that survives the common guards
-    (not never-proposed, not resolved-gated, not fulfilled, not rejected,
+    (gets a ticket, not fulfilled, not rejected,
     recommended gate not moot) and is either blocked — below its PHP floor
     or on a required parent (``blocked_reason`` set, ``undecided_parents``
     None — never computed, the node never gets that far) — or waiting on
@@ -188,11 +231,11 @@ def _withheld_guard_cascade(
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    state, rejected = _node_state(repo, fulfilled, rejected)
+    state, rejected = _node_state(repo, tree, fulfilled, rejected)
     detected = {n: {"fulfilled": v} for n, v in state.items()}
     php_floor_blocked = {b["node"]: b["reason"] for b in php_floor_precheck(repo)}
     for node in tree["order"]:
-        if node in _NEVER_PROPOSED or tree["resolved_parents"].get(node):
+        if not _gets_ticket(node, tree):
             continue
         if detected.get(node, {}).get("fulfilled", False) or node in rejected:
             continue
@@ -234,17 +277,17 @@ def ordered_backlog(
     fulfilled: dict[str, bool] | None = None,
     rejected=None,
 ) -> list[str]:
-    """Complete ordered list of the nodes that are neither fulfilled nor
-    rejected, in tree order, blocked nodes included — the nodes a scan
-    offers tickets for."""
+    """Complete ordered list of the nodes a ticket can be filed for that
+    are neither fulfilled nor rejected, in tree order, blocked nodes
+    included — the nodes a scan offers tickets for."""
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    resolved, rejected = _node_state(repo, fulfilled, rejected)
+    resolved, rejected = _node_state(repo, tree, fulfilled, rejected)
     closed = set(closed_by_rejection(tree, rejected))
     backlog = []
     for node in tree["order"]:
-        if node in _NEVER_PROPOSED:
+        if not _gets_ticket(node, tree):
             continue
         if resolved.get(node, False):
             continue
@@ -383,17 +426,6 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
             required_any_parents[e["to"]].append(e["from"])
         else:
             resolved_parents[e["to"]].append(e["from"])
-    # A resolved-gated node whose own resolved-ness only feeds *another*
-    # resolved-gated node's resolved_parents (an aggregation node — today:
-    # php-safety-net, feeding structural-scan) is never itself
-    # proposed. Derived from the edge table rather than a hardcoded name, so
-    # a future second aggregation node (e.g. js-structural-scan) needs no
-    # code change here.
-    _resolved_targets = {n for n, parents in resolved_parents.items() if parents}
-    _aggregated_away = {
-        p for n in _resolved_targets for p in resolved_parents[n] if p in _resolved_targets
-    }
-    exposed_resolved_gate_nodes = _resolved_targets - _aggregated_away
     # Preserve order as appear in file
     order = []
     seen = set()
@@ -410,7 +442,6 @@ def load_tree(tree_md: pathlib.Path | None = None) -> dict:
         "required_any_parents": required_any_parents,
         "recommended_parents": recommended_parents,
         "resolved_parents": resolved_parents,
-        "exposed_resolved_gate_nodes": exposed_resolved_gate_nodes,
         "sections": {n: sections[n] for n in nodes if n in sections},
     }
 
@@ -663,8 +694,8 @@ def _resolved_gate_status(
 ) -> dict[str, tuple[bool, list[str]]]:
     """Compute ``{node: (resolved, unresolved_leaves)}`` for every node with
     one or more `resolved` parents — generic over any such node (today:
-    ``structural-scan``, and PHP's own aggregation node ``php-structural-
-    scan`` feeding it), not hardcoded to one node name. A node is resolved
+    ``structural-scan``, and PHP's own aggregation node ``php-safety-net``
+    feeding it), not hardcoded to one node name. A node is resolved
     once every one of its resolved-parent leaves is itself fulfilled,
     recorded as rejected, or effectively rejected (``_is_effectively_rejected``
     — closed for good because a required ancestor of the leaf is rejected,
@@ -681,9 +712,8 @@ def _resolved_gate_status(
     fulfilled state — either the real fulfilled-set output, or
     a per-iteration simulated snapshot.
     """
-    resolved_gated = [n for n in tree["resolved_parents"] if tree["resolved_parents"][n]]
     computed: dict[str, tuple[bool, list[str]]] = {}
-    pending = set(resolved_gated)
+    pending = _aggregation_nodes(tree)
     while pending:
         progressed = False
         for node in list(pending):
@@ -727,15 +757,15 @@ def next_candidates(
     fulfilled: dict[str, bool] | None = None,
     rejected=None,
 ) -> list[dict]:
-    """Return every node that is *really* unblocked and unfulfilled right now
-    (or, with an explicit `limit`, at most that many — a scan itself
+    """Return every node a ticket can be filed for that is *really*
+    unblocked and unfulfilled right now (or, with an explicit `limit`, at most that many — a scan itself
     never passes one: more than five nodes can be genuinely unblocked at
     once, so this is never capped by default).
 
     Does not simulate — does not assume a returned node is already fulfilled
-    to compute what comes after it.  Only ``git``'s real ``.git`` check and
-    each node's real required/resolved parents decide what's in this list,
-    so entries here can be true siblings, not a serial lookahead.
+    to compute what comes after it.  Only each node's real required
+    parents decide what's in this list, so entries here can be true
+    siblings, not a serial lookahead.
 
     A node with an undecided `recommended` parent is withheld from this list
     entirely rather than merely ranked lower — see ``withheld_candidates()``
@@ -748,7 +778,7 @@ def next_candidates(
     repo = pathlib.Path(repo)
     if tree is None:
         tree = load_tree()
-    state, rejected = _node_state(repo, fulfilled, rejected)
+    state, rejected = _node_state(repo, tree, fulfilled, rejected)
     detected = {n: {"fulfilled": v} for n, v in state.items()}
     return _next_candidates(repo, tree, detected, rejected, limit)
 
@@ -761,29 +791,22 @@ def _next_candidates(
 
     result: list[dict] = []
     for node in tree["order"]:
-        if node in _NEVER_PROPOSED:
+        if not _gets_ticket(node, tree):
             continue
-        if tree["resolved_parents"].get(node):
-            if node not in tree["exposed_resolved_gate_nodes"]:
-                continue
-            if not detected.get(node, {}).get("fulfilled", False):
-                continue
-            result.append({"node": node, "reason": f"resolved gate open for {node}"})
-        else:
-            if detected.get(node, {}).get("fulfilled", False):
-                continue
-            if node in rejected:
-                continue
-            if node in php_floor_blocked:
-                continue
-            if _recommended_gate_moot(node, tree, detected):
-                continue
-            ok, why = _is_unblocked(node, tree, detected)
-            if not ok:
-                continue
-            if _undecided_recommended_parents(node, tree, detected, rejected):
-                continue
-            result.append({"node": node, "reason": why})
+        if detected.get(node, {}).get("fulfilled", False):
+            continue
+        if node in rejected:
+            continue
+        if node in php_floor_blocked:
+            continue
+        if _recommended_gate_moot(node, tree, detected):
+            continue
+        ok, why = _is_unblocked(node, tree, detected)
+        if not ok:
+            continue
+        if _undecided_recommended_parents(node, tree, detected, rejected):
+            continue
+        result.append({"node": node, "reason": why})
         if limit is not None and len(result) >= limit:
             break
     return result
@@ -798,7 +821,8 @@ def directly_unblocked_children(
 ) -> list[dict]:
     """Every node this one candidate's fulfilment newly makes proposable —
     the fan-out the outlook comment's diagram draws
-    (``refactor-implement/references/outlook-comment.md``).
+    (``refactor-implement/references/outlook-comment.md``). A node no
+    ticket is filed for is walked through to what it opens in turn.
 
     *fulfilled* and *rejected* are the handed-in node state, as for
     ``next_candidates()``.
@@ -809,7 +833,7 @@ def directly_unblocked_children(
     if landed_node not in tree["nodes"]:
         return []
 
-    state, rejected = _node_state(repo, fulfilled, rejected)
+    state, rejected = _node_state(repo, tree, fulfilled, rejected)
     detected = {n: {"fulfilled": v} for n, v in state.items()}
 
     # Counterfactual snapshot: landed_node never happened.
@@ -819,13 +843,12 @@ def directly_unblocked_children(
     # counterfactual would misreport composer's own downstream plumbing.
     if landed_node not in detected:
         return []
-    detected_without = {k: dict(v) for k, v in detected.items()}
-    detected_without[landed_node]["fulfilled"] = False
-    if "static-code-analyzer" in detected_without:
-        detected_without["static-code-analyzer"]["fulfilled"] = detected_without.get("composer", {}).get("fulfilled", False)
+    without = {**state, landed_node: False}
+    if "static-code-analyzer" in without:
+        without["static-code-analyzer"] = without.get("composer", False)
+    without = _with_aggregation_state(tree, without, rejected)
+    detected_without = {n: {"fulfilled": v} for n, v in without.items()}
 
-    gate_now = _resolved_gate_status(tree, lambda n: detected.get(n, {}).get("fulfilled", False), rejected)
-    gate_without = _resolved_gate_status(tree, lambda n: detected_without.get(n, {}).get("fulfilled", False), rejected)
     next_now = {c["node"] for c in _next_candidates(repo, tree, detected, rejected)}
     next_without = {c["node"] for c in _next_candidates(repo, tree, detected_without, rejected)}
 
@@ -842,27 +865,14 @@ def directly_unblocked_children(
             continue
         seen.add(child)
 
-        pass_through = child in _NEVER_PROPOSED or (
-            tree["resolved_parents"].get(child) and child not in tree["exposed_resolved_gate_nodes"]
-        )
-        if pass_through:
-            if tree["resolved_parents"].get(child):
-                fulfilled_now_gate = gate_now.get(child, (False, []))[0]
-            else:
-                fulfilled_now_gate = detected.get(child, {}).get("fulfilled", False)
-            if fulfilled_now_gate:
+        if not _gets_ticket(child, tree):
+            if detected.get(child, {}).get("fulfilled", False):
                 frontier.extend((e["to"], e["type"]) for e in children_of.get(child, []))
             continue
 
         if child not in next_now:
             continue  # not a real candidate right now — blocked by something else too
-
-        # Was this node already reachable before the landed node?
-        if tree["resolved_parents"].get(child):
-            already_before = gate_without.get(child, (False, []))[0]
-        else:
-            already_before = child in next_without
-        if already_before:
+        if child in next_without:
             continue  # reachable via some other already-fulfilled parent too — not new
 
         result.append({"node": child, "type": edge_type})
@@ -909,15 +919,18 @@ def detect_and_roadmap(
     repo = pathlib.Path(repo)
     if seed_path is not None:
         fulfilled, rejected = load_seed(seed_path, tree)
-    state, rejected_nodes = _node_state(repo, fulfilled, rejected)
+    state, rejected_nodes = _node_state(repo, tree, fulfilled, rejected)
     backlog = ordered_backlog(repo, tree=tree, fulfilled=fulfilled, rejected=rejected)
     withheld_reasons = withheld_with_reasons(repo, tree=tree, fulfilled=fulfilled, rejected=rejected)
     tracks = {}
     for track, nodes in track_nodes(tree).items():
         members = {n["node"] for n in nodes}
+        track_backlog = [n for n in backlog if n in members]
         tracks[track] = {
+            # every node of the Track is fulfilled or rejected
+            "fulfilled": not track_backlog,
             "nodes": nodes,
-            "backlog": [n for n in backlog if n in members],
+            "backlog": track_backlog,
             "withheld": [w for w in withheld_reasons if w["node"] in members],
         }
     return {

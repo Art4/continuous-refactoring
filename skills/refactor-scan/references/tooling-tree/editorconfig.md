@@ -3,7 +3,7 @@
 Node on the generic **tooling tree** (`../tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**).
 
 - **Name:** `.editorconfig`
-- **Tool:** none — plain-text convention file, read by any EditorConfig-aware editor, not a runnable tool.
+- **Tool:** EditorConfig
 - **Purpose:** settle the most basic formatting conventions (indentation, charset, line endings) before a
   language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
   exists so "later Rector output lands styled." Language-independent, so it lives at the generic root and
@@ -14,6 +14,7 @@ Node on the generic **tooling tree** (`../tooling-tree.md`); parents, edges, and
   `tooling-tree.md` too, since `structural-scan` is itself a generic-root node; only `editorconfig →
   php-cs-fixer` crosses into a language tree (`../php-tooling-tree.md`'s edge
   table: `editorconfig → php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
+  Not a runnable tool: a plain-text convention file, read by any EditorConfig-aware editor.
 - **Fulfilment check:** `.editorconfig` exists at the repo root. Pure presence check, no tool run, no
   equivalent-detection nuance.
 - **MR scope:** create a default `.editorconfig` when missing — one language-neutral `[*]` section, no

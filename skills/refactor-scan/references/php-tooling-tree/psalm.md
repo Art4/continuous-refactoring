@@ -47,11 +47,12 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 ### `psalm-taint-analysis`
 
 - **Name:** Psalm Taint Analysis
-- **Tool:** vimeo/psalm (`--taint-analysis`)
+- **Tool:** vimeo/psalm
 - **Purpose:** security-focused taint analysis (SQL injection, XSS, and similar tainted-data-flow bugs) —
   a distinct capability from Psalm's general static analysis, orthogonal to which general analyzer a
   target chose. Available once either general-analysis path has matured enough to be worth layering a
   security scan on top of, regardless of whether that path is PHPStan or Psalm.
+  Run as `vimeo/psalm --taint-analysis`.
 - **Required-any parents:** `phpstan-level-4` (`phpstan.md`), `psalm` (above) — a new edge type
   (`CONTEXT.md`: **required-any edge**) distinct from a `required` edge: this node is proposed once **at
   least one** of these is fulfilled, not both. Either a target that reached PHPStan level 4, or a target

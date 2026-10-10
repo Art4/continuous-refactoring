@@ -249,14 +249,6 @@ class LoadTreeTests(unittest.TestCase):
             {"rector-code-quality", "php-cs-fixer"},
         )
 
-    def test_php_safety_net_aggregated_away_not_exposed(self):
-        # ticket 42: php-safety-net (renamed from php-structural-scan,
-        # ticket 63) feeds structural-scan's own resolved gate, so it must
-        # never be exposed as a proposable candidate itself — only
-        # structural-scan is.
-        tree = load_tree()
-        self.assertEqual(tree["exposed_resolved_gate_nodes"], {"structural-scan"})
-
     def test_php_minimal_version_edges(self):
         # ticket 57: php-minimal-version's only required parent used to be
         # rector-php-set alone (reversed direction from ticket 35's original
@@ -332,51 +324,77 @@ class LoadTreeTests(unittest.TestCase):
         self.assertNotIn("psalm-taint-analysis", tree["recommended_parents"]["semgrep"])
 
 
-class PhpSafetyNetAggregationTests(unittest.TestCase):
-    """Ticket 42: `php-safety-net` (renamed from `php-structural-scan`,
-    ticket 63) aggregates the PHP tree's nine `resolved` leaves behind
-    one node, itself resolving into
-    `structural-scan` via a single `resolved` edge. Same `resolved`-edge
-    semantics as `structural-scan`'s own gate, one hop down — and, unlike
-    `structural-scan`, never itself a proposable candidate."""
+class AggregationStateTests(unittest.TestCase):
+    """An aggregation node — one others reach through `resolved` edges
+    (`php-safety-net`, `structural-scan`) — is fulfilled once every leaf
+    feeding it is fulfilled or rejected. The parser works that out; what
+    the caller hands in for such a node is ignored."""
 
-    def test_never_in_next_candidates(self):
-        # psalm-taint-analysis is the one php-safety-net leaf this target
-        # never adopted: rejected, which still resolves the gate.
-        rejected = {"psalm-taint-analysis"}
-        p0_fulfilled = {
-            "git": True, "onboarding-setup": True, "is-php-project": True,
-            "composer": True, "static-code-analyzer": True,
-            "phpstan-level-0": True, "rector-php-set": True,
-            "phpunit": True, "php-cs-fixer": True, "phpstan-level-5": True,
-            "rector-dead-code": True, "rector-type-coverage": True,
-            "rector-code-quality": True, "rector-phpunit-set": True,
-            "coverage-floor": True, "psr-4": True,
-            "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
-        }
-        tmp, root = make_repo()
-        try:
-            nodes = [c["node"] for c in next_candidates(root, limit=20, fulfilled=p0_fulfilled, rejected=rejected)]
-            self.assertNotIn("php-safety-net", nodes)
-            self.assertNotIn("structural-scan", nodes)
-        finally:
-            tmp.cleanup()
-        p0_fulfilled_with_editor = {**p0_fulfilled, "editorconfig": True, "ci-runner": True, "php-safety-net": True, "structural-scan": True}
-        tmp2, root2 = make_repo()
-        try:
-            nodes = [c["node"] for c in next_candidates(root2, limit=20, fulfilled=p0_fulfilled_with_editor, rejected=rejected)]
-            self.assertNotIn("php-safety-net", nodes)
-            self.assertIn("structural-scan", nodes)
-        finally:
-            tmp2.cleanup()
+    PHP_LEAVES = [
+        "psr-4", "phpunit", "phpstan-level-5", "rector-dead-code",
+        "rector-type-coverage", "rector-php-set", "rector-code-quality",
+        "rector-phpunit-set", "psalm-taint-analysis",
+    ]
+    BASE = {"is-php-project": True, "composer": True}
 
-    def test_never_in_withheld_candidates(self):
-        tmp, root = make_repo({})
-        try:
-            w = withheld_candidates(root)
-            self.assertNotIn("php-safety-net", [x["node"] for x in w])
-        finally:
-            tmp.cleanup()
+    def setUp(self):
+        tmp, self.root = make_repo()
+        self.addCleanup(tmp.cleanup)
+
+    def _fulfilled(self, **state):
+        data = tooling_tree.detect_and_roadmap(self.root, **state)
+        return {n: d["fulfilled"] for n, d in data["detected"].items()}
+
+    def test_fulfilled_once_every_leaf_is_fulfilled(self):
+        leaves = {leaf: True for leaf in self.PHP_LEAVES}
+        state = self._fulfilled(fulfilled={**self.BASE, **leaves, "phpunit": False})
+        self.assertFalse(state["php-safety-net"])
+        state = self._fulfilled(fulfilled={**self.BASE, **leaves})
+        self.assertTrue(state["php-safety-net"])
+        # structural-scan reads php-safety-net and its own two leaves
+        self.assertFalse(state["structural-scan"])
+        state = self._fulfilled(fulfilled={**self.BASE, **leaves, "editorconfig": True, "ci-runner": True})
+        self.assertTrue(state["structural-scan"])
+
+    def test_handed_in_state_of_an_aggregation_node_is_ignored(self):
+        state = self._fulfilled(fulfilled={**self.BASE, "php-safety-net": True, "structural-scan": True})
+        self.assertFalse(state["php-safety-net"])
+        self.assertFalse(state["structural-scan"])
+        leaves = {leaf: True for leaf in self.PHP_LEAVES}
+        data = tooling_tree.detect_and_roadmap(
+            self.root,
+            fulfilled={**self.BASE, **leaves, "php-safety-net": False},
+            rejected={"php-safety-net", "structural-scan"},
+        )
+        self.assertTrue(data["detected"]["php-safety-net"]["fulfilled"])
+        # a rejected required parent would have closed semgrep
+        self.assertEqual(data["closed_by_rejection"], [])
+        self.assertIn("semgrep", data["backlog"])
+
+    def test_a_rejected_leaf_counts_as_decided(self):
+        leaves = {leaf: True for leaf in self.PHP_LEAVES if leaf != "psalm-taint-analysis"}
+        state = self._fulfilled(fulfilled={**self.BASE, **leaves}, rejected={"psalm-taint-analysis"})
+        self.assertTrue(state["php-safety-net"])
+        state = self._fulfilled(
+            fulfilled={**self.BASE, **leaves, "editorconfig": True},
+            rejected={"psalm-taint-analysis", "ci-runner"},
+        )
+        self.assertTrue(state["structural-scan"])
+
+    def test_a_leaf_closed_by_a_rejected_required_parent_counts_as_decided(self):
+        # composer rejected: every PHP leaf sits behind it
+        state = self._fulfilled(fulfilled={"is-php-project": True}, rejected={"composer"})
+        self.assertTrue(state["php-safety-net"])
+
+    def test_computed_state_opens_the_nodes_behind_the_gate(self):
+        leaves = {leaf: True for leaf in self.PHP_LEAVES}
+        waiting = {**self.BASE, "ci-runner": True, "phpunit": False, **{leaf: True for leaf in self.PHP_LEAVES if leaf != "phpunit"}}
+        nodes = [c["node"] for c in next_candidates(self.root, fulfilled=waiting)]
+        self.assertNotIn("semgrep", nodes)
+        reasons = {w["node"]: w["reason"] for w in withheld_with_reasons(self.root, fulfilled=waiting)}
+        self.assertEqual(reasons["semgrep"], "blocked by required parent php-safety-net")
+        nodes = [c["node"] for c in next_candidates(self.root, fulfilled={**self.BASE, "ci-runner": True, **leaves})]
+        self.assertIn("semgrep", nodes)
 
 
 class EffectivelyRejectedRequiredAnyTests(unittest.TestCase):
@@ -700,10 +718,12 @@ class GateNodeContractTests(unittest.TestCase):
         # composer-audit's required parents: composer, php-safety-net,
         # has-real-dependency (ci-runner is its recommended parent, seeded
         # decided so it isn't the thing under test). With the first two
-        # fulfilled, the dependency gate seeded False is the sole blocker.
+        # fulfilled — php-safety-net through its leaves — the dependency
+        # gate seeded False is the sole blocker.
         seed = {
-            "composer": True, "php-safety-net": True, "ci-runner": True,
+            "composer": True, "ci-runner": True,
             "has-real-dependency": False,
+            **{leaf: True for leaf in AggregationStateTests.PHP_LEAVES},
         }
         tmp, root = make_repo({})
         try:
@@ -909,11 +929,12 @@ class OrderedBacklogTests(unittest.TestCase):
         tmp, self.root = make_repo()
         self.addCleanup(tmp.cleanup)
 
-    def test_empty_repo_backlog_starts_with_onboarding_setup(self):
+    def test_backlog_of_a_target_not_onboarded_holds_no_node_of_the_parsers_own(self):
         tmp, root = make_repo(onboarded=False)
         self.addCleanup(tmp.cleanup)
         backlog = ordered_backlog(root)
-        self.assertEqual(backlog[0], "onboarding-setup")
+        self.assertEqual(backlog[:2], ["ci-runner", "editorconfig"])
+        self.assertNotIn("onboarding-setup", backlog)
         self.assertNotIn("git", backlog)
 
     def test_backlog_excludes_fulfilled_nodes(self):
@@ -927,6 +948,95 @@ class OrderedBacklogTests(unittest.TestCase):
 
     def test_backlog_includes_blocked_nodes(self):
         self.assertIn("composer", ordered_backlog(self.root))
+
+
+class TicketableNodesTests(unittest.TestCase):
+    """Backlog, node lists and `next` hold only nodes a ticket can be filed
+    for. The nodes the parser settles itself, the recognition-only nodes
+    and the aggregation nodes are in none of them."""
+
+    NEVER_LISTED = {
+        "git", "onboarding-setup", "is-php-project", "structural-scan",
+        "php-safety-net", "static-code-analyzer", "psalm",
+        "has-real-dependency", "phpstan-baseline-empty", "phpstan-not-psalm",
+    }
+
+    def _listed(self, data):
+        listed = set(data["backlog"]) | {c["node"] for c in data["next"]}
+        for track in data["tracks"].values():
+            listed |= set(track["backlog"]) | {n["node"] for n in track["nodes"]}
+        return listed
+
+    def test_nothing_unticketable_is_listed_whatever_the_state(self):
+        leaves = {leaf: True for leaf in AggregationStateTests.PHP_LEAVES}
+        for onboarded, fulfilled in (
+            (False, None),
+            (True, None),
+            (True, {"is-php-project": True, "composer": True, "static-code-analyzer": True}),
+            # both gates fulfilled: structural-scan is still no candidate
+            (True, {"is-php-project": True, "composer": True, "editorconfig": True, "ci-runner": True, **leaves}),
+        ):
+            tmp, root = make_repo(onboarded=onboarded)
+            self.addCleanup(tmp.cleanup)
+            data = tooling_tree.detect_and_roadmap(root, fulfilled=fulfilled)
+            self.assertEqual(self._listed(data) & self.NEVER_LISTED, set(), fulfilled)
+
+    def test_every_other_node_is_listed_in_exactly_one_track_in_tree_order(self):
+        tree = load_tree()
+        tracks = tooling_tree.track_nodes(tree)
+        listed = [n["node"] for nodes in tracks.values() for n in nodes]
+        self.assertEqual(sorted(listed), sorted(set(tree["nodes"]) - self.NEVER_LISTED))
+        for nodes in tracks.values():
+            slugs = [n["node"] for n in nodes]
+            self.assertEqual(slugs, [n for n in tree["order"] if n in slugs])
+
+
+class TrackFulfilledTests(unittest.TestCase):
+    """The output says per Track whether it is fulfilled: every node of it
+    a ticket can be filed for is fulfilled or rejected."""
+
+    def setUp(self):
+        tmp, self.root = make_repo()
+        self.addCleanup(tmp.cleanup)
+        self.tracks = tooling_tree.track_nodes(load_tree())
+
+    def _fulfilled(self, **state):
+        data = tooling_tree.detect_and_roadmap(self.root, **state)
+        return {track: entry["fulfilled"] for track, entry in data["tracks"].items()}
+
+    def _all(self, track, but=()):
+        return {n["node"]: True for n in self.tracks[track] if n["node"] not in but}
+
+    def test_nothing_decided_means_no_track_fulfilled(self):
+        self.assertEqual(self._fulfilled(), {"Safety Net": False, "Guardrails": False})
+
+    def test_safety_net_fulfilled_once_each_of_its_nodes_is_fulfilled_or_rejected(self):
+        # nothing handed in for the gates or the recognition-only nodes
+        self.assertEqual(
+            self._fulfilled(fulfilled=self._all("Safety Net")),
+            {"Safety Net": True, "Guardrails": False},
+        )
+        one_open = self._all("Safety Net", but={"php-cs-fixer"})
+        self.assertFalse(self._fulfilled(fulfilled=one_open)["Safety Net"])
+        self.assertTrue(self._fulfilled(fulfilled=one_open, rejected={"php-cs-fixer"})["Safety Net"])
+
+    def test_a_node_closed_by_a_rejected_required_parent_counts_as_rejected(self):
+        # phpstan-level-0 rejected closes the level chain behind it
+        levels = {f"phpstan-level-{n}" for n in range(6)}
+        state = self._all("Safety Net", but=levels)
+        self.assertFalse(self._fulfilled(fulfilled=state)["Safety Net"])
+        self.assertTrue(self._fulfilled(fulfilled=state, rejected={"phpstan-level-0"})["Safety Net"])
+
+    def test_guardrails_fulfilled_independently(self):
+        state = {**self._all("Safety Net"), **self._all("Guardrails")}
+        self.assertEqual(self._fulfilled(fulfilled=state), {"Safety Net": True, "Guardrails": True})
+
+    def test_the_flag_is_in_the_command_line_output(self):
+        import subprocess
+        import sys
+        proc = subprocess.run([sys.executable, tooling_tree.__file__, str(self.root)], capture_output=True, text=True)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        self.assertIs(json.loads(proc.stdout)["tracks"]["Safety Net"]["fulfilled"], False)
 
 
 class WithheldWithReasonsTests(unittest.TestCase):
@@ -1020,7 +1130,10 @@ class SeedFileTests(unittest.TestCase):
             self.assertNotIn(gone, data["backlog"])
         self.assertIn("coverage-floor", data["closed_by_rejection"])  # requires the rejected phpunit
         self.assertEqual([f["node"] for f in data["reversals"]], ["phpunit"])
-        self.assertIn({"node": "php-cs-fixer", "name": "PHP CS Fixer", "tool": "php-cs-fixer"}, data["tracks"]["Safety Net"]["nodes"])
+        self.assertIn(
+            {"node": "php-cs-fixer", "name": "PHP CS Fixer", "tool": "php-cs-fixer", "search": ["PHP CS Fixer", "php-cs-fixer"]},
+            data["tracks"]["Safety Net"]["nodes"],
+        )
 
     def test_rejected_may_be_a_plain_list(self):
         tmp, root = make_repo({"state.json": json.dumps({"rejected": ["composer"]})})
@@ -1034,7 +1147,22 @@ class SeedFileTests(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         proc = self._run(root)
         self.assertEqual(proc.returncode, 0, proc.stderr)
-        self.assertEqual([c["node"] for c in json.loads(proc.stdout)["next"]], ["onboarding-setup"])
+        data = json.loads(proc.stdout)
+        self.assertEqual(data["next"], [])
+        self.assertFalse(data["detected"]["onboarding-setup"]["fulfilled"])
+        self.assertIn({"node": "ci-runner", "reason": "blocked by required parent onboarding-setup"}, data["withheld_with_reasons"])
+
+    def test_a_seed_may_say_anything_about_the_nodes_the_parser_settles_itself(self):
+        tmp, root = make_repo({"state.json": json.dumps({
+            "fulfilled": ["structural-scan", "php-safety-net", "git"],
+            "rejected": {"structural-scan": None, "php-safety-net": {"php": "8.1"}, "onboarding-setup": None},
+        })})
+        self.addCleanup(tmp.cleanup)
+        data = tooling_tree.detect_and_roadmap(root, seed_path=root / "state.json")
+        self.assertFalse(data["detected"]["structural-scan"]["fulfilled"])
+        self.assertFalse(data["detected"]["php-safety-net"]["fulfilled"])
+        self.assertTrue(data["detected"]["onboarding-setup"]["fulfilled"])
+        self.assertEqual(data["closed_by_rejection"], [])
 
     def test_unblocked_by_reads_the_seed(self):
         tmp, root = make_repo({"state.json": json.dumps({
@@ -1152,30 +1280,19 @@ class DirectlyUnblockedChildrenTests(unittest.TestCase):
         finally:
             tmp.cleanup()
 
-    def test_resolved_gate_walk_through_to_structural_scan(self):
-        # phpunit is the last of php-safety-net's leaves to resolve —
-        # landing it makes structural-scan newly proposable in the
-        # fulfilled-state the caller provides.
-        other_leaves = [
-            "psr-4", "composer-audit", "phpstan-level-5",
-            "phpstan-deprecation-rules", "rector-dead-code", "rector-type-coverage",
-            "rector-php-set", "rector-code-quality", "rector-phpunit-set",
-            "psalm-taint-analysis", "editorconfig", "ci-runner",
-            "coverage-floor",
-        ]
+    def test_walks_through_the_aggregation_nodes_to_what_they_open(self):
+        # phpunit is the last undecided leaf: landing it fulfils
+        # php-safety-net and, behind it, structural-scan. Neither is
+        # reported; the nodes waiting on them are.
+        others = [leaf for leaf in AggregationStateTests.PHP_LEAVES if leaf != "phpunit"]
         fulfilled = {
-            "git": True, "onboarding-setup": True, "is-php-project": True,
-            "composer": True, "static-code-analyzer": True,
-            "phpstan-level-0": True, "phpstan-level-5": True,
-            "phpstan-not-psalm": True, "phpstan-baseline-empty": True,
-            "php-cs-fixer": True, "rector-php-set": True, "editorconfig": True,
-            "ci-runner": True, "phpunit": True,
-            "php-safety-net": True, "structural-scan": True,
+            "is-php-project": True, "composer": True, "phpunit": True,
+            "editorconfig": True, "ci-runner": True,
         }
         tmp, root = make_repo()
         try:
-            nodes = [c["node"] for c in next_candidates(root, fulfilled=fulfilled, rejected=set(other_leaves))]
-            self.assertIn("structural-scan", nodes)
+            got = {c["node"] for c in directly_unblocked_children(root, "phpunit", fulfilled=fulfilled, rejected=set(others))}
+            self.assertEqual(got, {"phpmd", "coverage-floor", "semgrep", "secret-detection"})
         finally:
             tmp.cleanup()
 
@@ -1297,7 +1414,7 @@ class HandedInStateTests(unittest.TestCase):
         }, onboarded=False)
         try:
             data = tooling_tree.detect_and_roadmap(root)
-            self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
+            self.assertEqual(data["next"], [])
             self.assertIn("ci-runner", data["backlog"])
             self.assertIn("composer", data["backlog"])
             self.assertEqual(data["closed_by_rejection"], [])
@@ -1326,11 +1443,12 @@ class OnboardingSetupTests(unittest.TestCase):
 
     def test_not_fulfilled_without_a_tracker_file(self):
         data = self._data({})
-        self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
+        self.assertFalse(data["detected"]["onboarding-setup"]["fulfilled"])
+        self.assertEqual(data["next"], [])  # everything waits behind it
 
     def test_the_caller_cannot_decide_it(self):
         data = self._data({}, fulfilled={"onboarding-setup": True})
-        self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
+        self.assertEqual(data["next"], [])
         self.assertFalse(data["detected"]["onboarding-setup"]["fulfilled"])
         section = {TRACKER_FILE: "## Refactoring operations\n"}
         data = self._data(section, fulfilled={"onboarding-setup": False}, rejected={"onboarding-setup", "git"})
@@ -1339,7 +1457,8 @@ class OnboardingSetupTests(unittest.TestCase):
 
     def test_not_fulfilled_when_the_tracker_file_lacks_the_section(self):
         data = self._data({TRACKER_FILE: "# Issue tracker\n\nGitHub. See Refactoring operations elsewhere.\n\n### Refactoring operations draft\n"})
-        self.assertEqual([c["node"] for c in data["next"]], ["onboarding-setup"])
+        self.assertFalse(data["detected"]["onboarding-setup"]["fulfilled"])
+        self.assertEqual(data["next"], [])
 
 
 class TrackNodesTests(unittest.TestCase):
@@ -1352,28 +1471,58 @@ class TrackNodesTests(unittest.TestCase):
         self.assertEqual(list(tracks), ["Safety Net", "Guardrails"])
         safety_net = {n["node"]: n for n in tracks["Safety Net"]}
         guardrails = {n["node"]: n for n in tracks["Guardrails"]}
-        self.assertEqual(safety_net["phpunit"], {"node": "phpunit", "name": "PHPUnit", "tool": "PHPUnit"})
-        self.assertEqual(safety_net["php-cs-fixer"], {"node": "php-cs-fixer", "name": "PHP CS Fixer", "tool": "php-cs-fixer"})
-        self.assertEqual(guardrails["composer-audit"], {"node": "composer-audit", "name": "Composer Audit", "tool": "composer audit"})
+        self.assertEqual(safety_net["phpunit"]["name"], "PHPUnit")
+        self.assertEqual(safety_net["phpunit"]["tool"], "PHPUnit")
+        self.assertEqual(safety_net["php-cs-fixer"]["tool"], "php-cs-fixer")
+        self.assertEqual(guardrails["composer-audit"]["name"], "Composer Audit")
         # a section shared by a run of nodes names each of them
-        self.assertEqual(safety_net["phpstan-level-4"], {"node": "phpstan-level-4", "name": "PHPStan Level 4", "tool": "PHPStan"})
-        self.assertEqual(guardrails["phpstan-level-10"], {"node": "phpstan-level-10", "name": "PHPStan Level 10", "tool": "PHPStan"})
-        # a field wrapped over several lines comes back whole
-        tool = guardrails["secret-detection"]["tool"]
-        self.assertTrue(tool.startswith("any secret scanner — generic, like `test-runner-if-missing`'s own `any test runner` (`php-tooling-tree/"), tool)
-        self.assertTrue(tool.endswith("is decided at adoption time, not pinned here."), tool)
+        self.assertEqual(safety_net["phpstan-level-4"]["name"], "PHPStan Level 4")
+        self.assertEqual(guardrails["phpstan-level-10"]["name"], "PHPStan Level 10")
+        self.assertEqual(guardrails["phpstan-level-10"]["tool"], "PHPStan")
 
-    def test_every_node_is_in_exactly_one_track_in_tree_order(self):
-        tree = load_tree()
-        tracks = tooling_tree.track_nodes(tree)
-        listed = [n["node"] for nodes in tracks.values() for n in nodes]
-        self.assertEqual(sorted(listed), tree["nodes"])
-        for nodes in tracks.values():
-            slugs = [n["node"] for n in nodes]
-            self.assertEqual(slugs, [n for n in tree["order"] if n in slugs])
-            for n in nodes:
-                self.assertTrue(n["name"], n)
-                self.assertTrue(n["tool"], n)
+    def test_nodes_carry_search_words(self):
+        # name and tool, each once, as a tracker search would take them
+        tracks = tooling_tree.track_nodes(load_tree())
+        search = {n["node"]: n["search"] for nodes in tracks.values() for n in nodes}
+        self.assertEqual(search["php-cs-fixer"], ["PHP CS Fixer", "php-cs-fixer"])
+        self.assertEqual(search["phpunit"], ["PHPUnit"])
+        self.assertEqual(search["composer-audit"], ["Composer Audit"])
+        self.assertEqual(search["phpstan-level-0"], ["PHPStan Level 0", "PHPStan"])
+        self.assertEqual(search["rector-dead-code"], ["Rector: Dead Code Set", "Rector"])
+        self.assertEqual(search["editorconfig"], [".editorconfig", "EditorConfig"])
+        self.assertEqual(search["semgrep"], ["Semgrep (OWASP Top 10)", "Semgrep"])
+        # a node without a tool is searched by its name alone
+        self.assertEqual(search["psr-4"], ["PSR-4 Autoloading"])
+
+    def test_search_words_of_every_listed_node_are_short_and_plain(self):
+        tracks = tooling_tree.track_nodes(load_tree())
+        for node in (n for nodes in tracks.values() for n in nodes):
+            self.assertTrue(node["name"], node)
+            self.assertEqual(node["search"][0], node["name"], node)
+            for word in node["search"]:
+                self.assertNotRegex(word, r"[`—]|\.$", node)
+                self.assertLessEqual(len(word), 30, node)
+            if node["tool"] is not None:
+                self.assertNotRegex(node["tool"], r"[()]", node)
+
+    def test_fields_are_read_as_plain_text(self):
+        tmp, root = make_repo({"tree.md": (
+            "| from (parent) | to (child) | type |\n|---|---|---|\n"
+            "| `git` | `dotfile` | required |\n"
+            "| `git` | `convention` | required |\n"
+            "| `git` | `wrapped` | required |\n"
+            "| `git` | `bare` | required |\n"
+            "\n### `dotfile`\n\n- **Name:** `.dotfile`\n- **Tool:** `dot` `--check`\n- **Purpose:** x\n"
+            "\n### `convention`\n\n- **Name:** Convention\n- **Tool:** none\n"
+            "\n### `wrapped`\n\n- **Name:** A Name Wrapped\n  Onto Two Lines\n- **Tool:** tool\n\nProse.\n"
+        )})
+        self.addCleanup(tmp.cleanup)
+        nodes = {n["node"]: n for n in tooling_tree.track_nodes(load_tree(root / "tree.md"))["Safety Net"]}
+        self.assertEqual(nodes["dotfile"], {"node": "dotfile", "name": ".dotfile", "tool": "dot --check", "search": [".dotfile", "dot --check"]})
+        self.assertEqual(nodes["convention"], {"node": "convention", "name": "Convention", "tool": None, "search": ["Convention"]})
+        self.assertEqual(nodes["wrapped"]["name"], "A Name Wrapped Onto Two Lines")
+        # no node section in the tree doc
+        self.assertEqual(nodes["bare"], {"node": "bare", "name": None, "tool": None, "search": []})
 
     def test_membership_follows_the_edges(self):
         tmp, root = make_repo({"tree.md": (
@@ -1387,15 +1536,8 @@ class TrackNodesTests(unittest.TestCase):
         )})
         self.addCleanup(tmp.cleanup)
         tracks = tooling_tree.track_nodes(load_tree(root / "tree.md"))
-        self.assertEqual(
-            tracks["Safety Net"],
-            [
-                {"node": "git", "name": None, "tool": None},
-                {"node": "linter", "name": "Linter", "tool": "lint"},
-                {"node": "net", "name": None, "tool": None},
-                {"node": "reporter", "name": None, "tool": None},
-            ],
-        )
+        # `git` is the parser's own and `net` an aggregation node: not listed
+        self.assertEqual([n["node"] for n in tracks["Safety Net"]], ["linter", "reporter"])
         self.assertEqual([n["node"] for n in tracks["Guardrails"]], ["auditor", "strict-auditor"])
 
     def test_output_lists_nodes_backlog_and_withheld_reasons_per_track(self):
@@ -1408,14 +1550,14 @@ class TrackNodesTests(unittest.TestCase):
         )
         tracks = data["tracks"]
         self.assertEqual(list(tracks), ["Safety Net", "Guardrails"])
-        self.assertIn({"node": "composer", "name": "Composer", "tool": "Composer"}, tracks["Safety Net"]["nodes"])
-        self.assertIn({"node": "phpmd", "name": "PHPMD", "tool": "PHPMD"}, tracks["Guardrails"]["nodes"])
+        self.assertIn({"node": "composer", "name": "Composer", "tool": "Composer", "search": ["Composer"]}, tracks["Safety Net"]["nodes"])
+        self.assertIn({"node": "phpmd", "name": "PHPMD", "tool": "PHPMD", "search": ["PHPMD"]}, tracks["Guardrails"]["nodes"])
         # the two backlogs partition the overall one, order kept
         self.assertEqual(
             sorted(tracks["Safety Net"]["backlog"] + tracks["Guardrails"]["backlog"]),
             sorted(data["backlog"]),
         )
-        self.assertEqual(tracks["Safety Net"]["backlog"][:4], ["ci-runner", "editorconfig", "structural-scan", "psr-4"])
+        self.assertEqual(tracks["Safety Net"]["backlog"][:4], ["ci-runner", "editorconfig", "psr-4", "php-cs-fixer"])
         self.assertIn("composer-audit", tracks["Guardrails"]["backlog"])
         self.assertNotIn("phpmd", tracks["Guardrails"]["backlog"])
         self.assertNotIn("composer", tracks["Safety Net"]["backlog"])

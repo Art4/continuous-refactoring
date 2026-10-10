@@ -3,8 +3,7 @@
 Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **recommended edge**, **signal**, **Signal wave**).
 
 - **Name:** Semgrep (OWASP Top 10)
-- **Tool:** Semgrep — a standalone binary/Python/Docker tool, not a Composer dependency (unlike most
-  of this tree's other nodes).
+- **Tool:** Semgrep
 - **Purpose:** broad OWASP Top 10 static-analysis coverage for `refactor-prioritize`'s Select mode — a
   Signal-producing node, not a Safety Net one (no `resolved` edge anywhere). Complements
   `psalm-taint-analysis` rather than duplicating it: Psalm's taint analysis follows tainted data flow
@@ -12,6 +11,7 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   additionally catches pattern-matchable categories taint analysis doesn't reach on its own — crypto
   misuse (A02), misconfiguration (A05), logging gaps (A09). Also a **Signal wave** node — the one
   node among the nodes reclassified alongside it where full replacement, not addition, was correct.
+  A standalone binary/Python/Docker tool, not a Composer dependency (unlike most of this tree's other nodes).
 - **Required parent:** `php-safety-net` alone — fully replaces the old `composer` required parent
   (dropped, not kept alongside). Unlike every other node this ADR moved into the Signal wave, this
   replacement loses nothing: this node's own doc already states Semgrep needs no Composer at all, so the

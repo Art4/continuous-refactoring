@@ -97,7 +97,7 @@ Full definition (Fulfilment check, MR scope): `tooling-tree/ci-runner.md`.
 ### `editorconfig`
 
 - **Name:** `.editorconfig`
-- **Tool:** none — plain-text convention file, read by any EditorConfig-aware editor, not a runnable tool.
+- **Tool:** EditorConfig
 - **Purpose:** settle the most basic formatting conventions (indentation, charset, line endings) before a
   language specialization's own style tool introduces language-specific rules — the same way `php-cs-fixer`
   exists so "later Rector output lands styled." Language-independent, so it lives at the generic root and
@@ -106,15 +106,14 @@ Full definition (Fulfilment check, MR scope): `tooling-tree/ci-runner.md`.
   too, since `structural-scan` is itself a generic-root node; only `editorconfig → php-cs-fixer` crosses
   into a language tree (`php-tooling-tree.md`'s edge table: `editorconfig →
   php-cs-fixer` recommended), since `php-cs-fixer` is a PHP-tree node.
+  Not a runnable tool: a plain-text convention file, read by any EditorConfig-aware editor.
 
 Full definition (Fulfilment check, MR scope): `tooling-tree/editorconfig.md`.
 
 ### `secret-detection`
 
 - **Name:** Secret Detection
-- **Tool:** any secret scanner — generic, like `test-runner-if-missing`'s own `any test runner`
-  (`php-tooling-tree/test-runner-if-missing.md`); a concrete tool
-  (gitleaks, detect-secrets, trufflehog, …) is decided at adoption time, not pinned here.
+- **Tool:** any secret scanner
 - **Purpose:** CI-gated protection against committing secrets/credentials — a Signal-producing node
   for `refactor-prioritize`'s Select mode, not a Safety Net one. Deliberately carries **no** `resolved`
   edge into `structural-scan`, unlike its generic-root siblings `editorconfig`/`ci-runner` above:
@@ -125,6 +124,7 @@ Full definition (Fulfilment check, MR scope): `tooling-tree/editorconfig.md`.
   history/file contents directly), so it lives at the generic root rather than any language
   specialization's own tree — a future language specialization inherits it automatically, no
   re-declaration needed.
+  A generic node, like `test-runner-if-missing`'s own `any test runner` (`php-tooling-tree/test-runner-if-missing.md`); a concrete tool (gitleaks, detect-secrets, trufflehog, …) is decided at adoption time, not pinned here.
 - **Signal:** Security — `../../refactor-prioritize/references/signals.md`'s own entry. Once this
   node is fulfilled, `refactor-prioritize`'s Select mode prefers a clean CI-gated scan as positive
   evidence over the generic (reading-the-code) recognition method for this factor.

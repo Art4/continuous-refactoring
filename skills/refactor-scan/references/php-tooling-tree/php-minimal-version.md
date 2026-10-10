@@ -3,7 +3,7 @@
 Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **Floor correction**, **Floor raise**, **Breaking change**, **Signal wave**).
 
 - **Name:** PHP Minimum Version
-- **Tool:** none — the tree's own gap detection, not a third-party tool.
+- **Tool:** none
 - **Purpose:** a **Floor correction** only, never a **Floor raise** — `composer.json`'s declared PHP
   floor (`require.php`) genuinely understates what the codebase already contains once `rector-php-set`
   has landed a PHP-version rule set: the rewritten syntax needs that version to run, so declaring the
@@ -15,6 +15,7 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   actually running `composer install` to satisfy a dev tool, never the package's own declared floor —
   so neither "a leaf tool needs a newer PHP" nor "CI happens to run quality tooling under a newer PHP
   image" is ever a legitimate signal here, independent of the breaking-change question.
+  No third-party tool: the tree's own gap detection.
 - **Fulfilment check:** `composer.json`'s declared PHP floor (`_current_php_floor` — `config.platform.php`
   if pinned, else `require.php`'s lower bound) is at least the PHP-version level `rector-php-set`
   (`rector.md`) has itself applied. The applied level is read from Rector's config at the repo root

@@ -5,8 +5,8 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 ### `phpstan-level-0`
 
 - **Name:** PHPStan Level 0
-- **Tool:** PHPStan (`vimeo/psalm`, via the `psalm` node — see `php-tooling-tree.md` — fulfils as an equivalent — see *Equivalents* below).
-- **Purpose:** static analysis introduced green at level 0.
+- **Tool:** PHPStan
+- **Purpose:** static analysis introduced green at level 0. `vimeo/psalm`, via the `psalm` node — see `php-tooling-tree.md` — fulfils as an equivalent — see *Equivalents* below.
 - **Fulfilment check:** one of:
   - **PHPStan path (canonical):** `phpstan/phpstan` present as a dev dependency **— or installed ephemerally at CI-runtime only** (a CI job body containing both a `composer require[--dev] phpstan/phpstan` invocation and the `vendor/bin/phpstan analyse` invocation counts the same as a committed dependency; some targets deliberately keep the app's own manifest free of pure-analysis tooling), `phpstan.neon`/`phpstan.neon.dist` at the repo root declares a level (`level: 0` at introduce time — see *MR scope* below; **a project already advanced to level 1+ satisfies this too**, since every level-0 check is a strict subset of any higher level's, and this node is re-detected fresh from the current config on every scan rather than pinned to whatever level it was first delivered at), a committed baseline file exists at the fixed path `phpstan-baseline.neon` (repo root), `vendor/bin/phpstan analyse` (with the baseline included) exits 0 without errors, **and**, once `ci-runner` is fulfilled, a CI job actually invokes `vendor/bin/phpstan analyse` (self-wired CI gate — no CI yet still fulfils the node on local adoption alone; see `ci-runner`'s node prose). The CI check is level-independent, so it lives here and is not repeated on `phpstan-level-1..10`. `phpstan.neon` takes precedence when both files exist, matching PHPStan's own auto-discovery order (same "committed default, locally overridable" convention this tree already reads for `phpunit.xml.dist`/`psalm.xml.dist`/`phpmd.xml.dist`). OR
   - **Psalm path (equivalent):** the `psalm` node (`php-tooling-tree.md`) is fulfilled — then this node is considered fulfilled without PHPStan. Psalm's own strictness is tracked via its `errorLevel`, not via the PHPStan level chain. This bullet only states the equivalence; see `psalm`'s own entry for its fulfilment check, so the detection isn't duplicated here.
@@ -57,13 +57,14 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 ### `phpstan-deprecation-rules`
 
 - **Name:** PHPStan Deprecation Rules
-- **Tool:** PHPStan (deprecation rule set — bundled rules PHPStan reports independently of `level`)
+- **Tool:** PHPStan
 - **Purpose:** flag calls to deprecated APIs/functions, orthogonal to the level chain's strictness ladder —
   adopted once the codebase is far enough along the chain that deprecation noise isn't drowned out by
   lower-level findings. A **Signal wave** node — moved out of the Safety Net (it used to carry
   a `resolved` edge into `php-safety-net`): a deprecated-API call is a finding this ruleset itself
   produces, not something a structural refactor could introduce or collide with, unlike
   `psalm-taint-analysis`'s taint-flow findings, which stayed a leaf.
+  The tool is PHPStan's deprecation rule set — bundled rules PHPStan reports independently of `level`.
 - **Fulfilment check:** PHPStan's deprecation rules enabled (the bundled deprecation ruleset or equivalent
   extension) and the current `phpstan.neon` run green with them on.
 - **MR scope:** dependency/config addition enabling the ruleset, no production-code change beyond fixing

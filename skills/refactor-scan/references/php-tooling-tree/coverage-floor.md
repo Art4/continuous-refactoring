@@ -3,15 +3,14 @@
 Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
 
 - **Name:** Test Coverage Floor
-- **Tool:** PHPUnit's own coverage report — PCOV or Xdebug as the underlying driver, either works; a
-  concrete tool choice at adoption time, not pinned here, the same shape `secret-detection.md`'s `any
-  secret scanner` already uses.
+- **Tool:** PHPUnit
 - **Purpose:** a Signal-producing node for `refactor-prioritize`'s Select mode, not a Safety Net one
   (no `resolved` edge into `php-safety-net`/`structural-scan`). Turns test coverage from an
   assumption into measured evidence: a self-tightening floor (a ratchet — never a fixed percentage,
   see *Ratchet, not a fixed floor* below) that only ever climbs, plus real per-file numbers that
   strengthen the existing generic "Untested / hard-to-test" recognition cue instead of relying on
   reading the test suite by eye.
+  Measured with PHPUnit's own coverage report — PCOV or Xdebug as the underlying driver, either works; a concrete tool choice at adoption time, not pinned here, the same shape `secret-detection.md`'s `any secret scanner` already uses.
 - **Required parents:** `phpunit` — coverage is a report over an existing test suite, not a standalone
   concern; nothing to measure before a runner exists — and, additionally, `php-safety-net` — a
   **Signal wave** node: proposed only once the Safety Net has closed. Additive rather than replacing

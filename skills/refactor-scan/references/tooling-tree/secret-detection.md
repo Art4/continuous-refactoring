@@ -3,12 +3,12 @@
 Node on the generic **tooling tree** (`../tooling-tree.md`); parents, edges, and the diagram live there. Vocabulary: `CONTEXT.md` (**node**, **required edge**, **signal**, **Signal wave**).
 
 - **Name:** Secret Detection
-- **Tool:** any secret scanner — a generic, tool-agnostic node (like `test-runner-if-missing`'s own
-  `any test runner`); a concrete tool is chosen at adoption time.
+- **Tool:** any secret scanner
 - **Purpose:** CI-gated protection against committing secrets/credentials/tokens — a Signal-producing
   node, not a Safety Net one. Never gates `structural-scan`: adopting it enriches candidate selection
   (the Security signal), it doesn't hold up structural work the way the tree's deterministic-tooling
   leaves do. Proposed and ranked through the ordinary scan/prioritize cycle like any other node.
+  A generic, tool-agnostic node (like `test-runner-if-missing`'s own `any test runner`); a concrete tool is chosen at adoption time.
 - **Required parent:** `structural-scan` (`tooling-tree.md`'s own gate) — a **Signal wave** node
   (`CONTEXT.md`): proposed only once the Safety Net has closed, not from `onboarding-setup` directly, so a
   target's very first passes are never asked to wire up a secret scanner before the deterministic
