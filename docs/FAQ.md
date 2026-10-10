@@ -112,16 +112,18 @@ Because the state — each Track's last scan and open items, your create-modes �
 runs, not part of the project. Committing it meant bookkeeping branches, extra merge requests and a
 review nobody wanted to give. The suite now keeps it in one of two places and leaves Git alone. **Local files**
 under `.scratch/refactor/` are the default: whether they are committed, ignored or copied to another machine is
-your decision, and this is meant for one person on one working tree. Or **one tracker issue** (GitHub or GitLab),
-created during onboarding: the suite loads it before a pass and saves after each write, so you can run the loop
-from another machine without carrying files around. Your config (`Ticket-create-mode`, `MR-create-mode`, the
+your decision, and this is meant for one person on one working tree. Or **somewhere remote** — one tracker issue
+on GitHub or GitLab, or a place your project describes (a ticket in another tracker, a wiki page): the suite
+fetches the bookkeeping before a pass and stores it after each write, so you can run the loop from another
+machine without carrying files around. How fetching and storing work there is written down in your project, not
+in the suite. Your config (`Ticket-create-mode`, `MR-create-mode`, the
 pointer to the bookkeeping) is a separate file either way, because it can differ per person and machine.
 
-## What happens if two people edit the bookkeeping issue at once?
+## What happens if two people edit remote bookkeeping at once?
 
-The last write wins. The suite doesn't reload and merge before saving, so an edit you make in the issue while a
-pass is running can be overwritten by that pass. The loop is meant to run on one machine at a time; edit the
-issue between passes.
+The last write wins. The suite doesn't fetch and merge before storing, so an edit you make there while a
+pass is running can be overwritten by that pass. The loop is meant to run on one machine at a time; edit
+between passes.
 
 ## Why do I have to run `/continuous-refactoring` twice on a new project?
 

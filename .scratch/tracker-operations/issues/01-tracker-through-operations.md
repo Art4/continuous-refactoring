@@ -1,6 +1,6 @@
 # 01: Reach the issue tracker through operations, not by name
 
-**Status:** ready-for-agent
+**Status:** done — PR #141
 
 **What to build:** The skills decide tracker behaviour by name — "`docs/agents/issue-tracker.md` names a native-label tracker (GitHub, GitLab)" — and treat everything else as Local Markdown. Installing the suite in a project with Redmine tickets and GitLab merge requests showed two wrong assumptions: a tracker is one of three known names, and the tracker is also where merge requests live. Replace the name switch with named operations the target's `docs/agents/issue-tracker.md` describes, in a section `## Refactoring operations` shaped like the engineering skills' `## Wayfinding operations`.
 
