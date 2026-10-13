@@ -5,6 +5,10 @@ of the mechanism — the **Housekeeping template**, the **Housekeeping** operati
 ticket** — and with them the line in the target's instruction file, and writes what a decision point
 agreed to. A file named without a path lives in `../../continuous-refactoring/references/`.
 
+**Every decision point here** is laid out as `../../continuous-refactoring/SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## 1. Is a setup already on its way?
 
 Run **Search** over the open tickets with the word `Housekeeping`, and look at each hit's merge request
@@ -12,7 +16,11 @@ or branch (`worklist.md`, *A ticket's merge request*):
 
 - **It is open and adds a Housekeeping template** → the mechanism waits for that merge: name the ticket
   and its merge request; there is nothing to work (`housekeeping-track.md`).
-- **It was closed without a merge, or the ticket has none** → that ticket is the first ticket of step 4.
+- **It was closed without a merge, or the ticket has none, and the ticket lists recurring tasks to work**
+  → that ticket is the first ticket of step 4.
+- **The hit is something else** — a ticket about introducing Housekeeping, say → it is no first ticket.
+  Name it among the findings of step 3 with a proposal for it: close it with a note pointing to this
+  setup (the recommendation where the setup covers what it asks for), or leave it as it is.
 
 *Done when* the search is read: a setup waits, a first ticket exists, or neither.
 
@@ -31,9 +39,12 @@ or branch (`worklist.md`, *A ticket's merge request*):
 
 ## 3. The decision point
 
-- **Findings:** the template as it would be written, with its path, rhythm and tasks; the
-  **Housekeeping** bullet; the first ticket, due from today; the line for the instruction file.
-- **Options:** set it up as laid out (the recommendation); change the path, a task, or the rhythm —
+- **Findings:** the template in full, word for word as it will be written, with its path; the
+  **Housekeeping** bullet; the first ticket, due from today; the line for the instruction file; a ticket
+  step 1 found that is no first ticket, with the proposal for it. Shortened, the human would agree to a
+  text they have not read.
+- **Options:** set it up as laid out and work the first cycle in this run (the recommendation); set it
+  up and deliver the setup alone, the first cycle left for a later run; change the path, a task, or the rhythm —
   `daily`, `weekly`, `monthly`, or the human's own words (`every 3 days`, `monthly on the 1st`) —, then
   this decision point again; set it up without the line in the instruction file; not now.
 - **The line in the instruction file** changes `AGENTS.md`, so a human is asked in every mode.
@@ -51,8 +62,14 @@ or branch (`worklist.md`, *A ticket's merge request*):
    `## Refactoring operations` section.
 4. Where a human agreed to it, commit the line in the instruction file by itself.
 
-Then go on at `housekeeping-track.md`, step 4, with this ticket: its first cycle runs in this run, and
-its merge request carries the setup.
+Then, as decided in step 3:
+
+- **With the first cycle** → go on at `housekeeping-track.md`, step 4, with this ticket: its cycle runs in
+  this run, and its merge request carries the setup.
+- **The setup alone** → follow `opening-a-merge-request.md`, handing in this ticket, the branch and that
+  it delivers a **part**: the merge request names the ticket without a closing reference and says that
+  the first cycle is still to be worked. The run ends there; the ticket stays open, and a later run
+  works its cycle once the setup is merged.
 
 *Done when* the ticket exists and the branch holds the agreed commits.
 

@@ -3,6 +3,10 @@
 Picks the one ticket of a tooling Track this run works, and makes sure its node still needs the work.
 Reads the worklist (`worklist.md`) and the parser's seedless call (`tooling-tree-parser.md`).
 
+**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## 1. Order the workable tickets
 
 Take the Track's workable tickets, within the call's restriction.

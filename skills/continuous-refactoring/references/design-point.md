@@ -6,6 +6,10 @@ Track, the run's mode, the call's restriction, and for a tooling ticket the node
 Every plan keeps `foundational-refactoring-rules.md`; every text for the ticket follows
 `forge-facing-writing.md`.
 
+**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## 1. Read the ticket
 
 Read its text and all its comments, oldest first. The first row that applies:

@@ -4,6 +4,10 @@ Turns proposals into tickets on the target's tracker, through one decision point
 by its subject, so the subject is written in plain words; the suite sets no marker of its own. Commands
 come from the target's tracker file; the wording follows `forge-facing-writing.md`.
 
+**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## 1. Search first
 
 For every proposal, run **Search** over open and closed tickets with the node's `search` words — for a

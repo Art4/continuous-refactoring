@@ -3,6 +3,10 @@
 Names the Track this run works, or ends the run. Reads the worklist (`worklist.md`). The fixed order is
 **Safety Net, Guardrails, Housekeeping, Investigation**.
 
+**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## What a Track has to offer
 
 | Track | It has something when |

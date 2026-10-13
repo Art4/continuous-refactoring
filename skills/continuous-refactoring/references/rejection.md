@@ -4,6 +4,10 @@ A **rejection** is the target's record that something was declined, with the rea
 file, in the place the target's **Rejected** operation names. The suite and the human's own triage share
 it. Every write here follows from the decision point that led to it — filing, selection or reconcile.
 
+**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## Recording one
 
 The record names its subject in plain words — for a node its Name and its tool — so that a search finds

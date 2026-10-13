@@ -5,6 +5,10 @@ exploration, and tickets a human wrote. It ends by handing one ticket to the des
 returning to Track choice with Investigation marked as tried. Reads the worklist (`worklist.md`); the
 order everywhere is `signals.md`, *Order of signal*.
 
+**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## 1. The tickets
 
 Take the worklist's Investigation tickets — every open ticket found that matches no tooling-tree node and

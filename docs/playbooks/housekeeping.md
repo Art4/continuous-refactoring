@@ -27,7 +27,7 @@ The first call that finds no Housekeeping mechanism proposes one, as a single de
 - **the first ticket**, due today;
 - **one line for your `AGENTS.md`** (below). This one is asked of you in every mode; an autonomous run that gets no answer leaves it out and says so.
 
-What you agree to is committed on the first ticket's branch, the first cycle runs in the same call, and its merge request carries the setup. Until you merge it the mechanism is not on your default branch yet; a call in between tells you that the setup waits for that merge.
+What you agree to is committed on the first ticket's branch. You choose how it is delivered: with the first cycle, which then runs in the same call and whose merge request carries the setup — or the setup alone, in a merge request that names the ticket without closing it; the ticket stays open, and a later call works its first cycle once you merged the setup. The template is shown to you in full before you agree, and an older ticket about introducing Housekeeping that the search finds is named with a proposal for it. Until you merge it the mechanism is not on your default branch yet; a call in between tells you that the setup waits for that merge.
 
 An existing file that already lists recurring maintenance tasks is proposed as the template, its tasks kept.
 

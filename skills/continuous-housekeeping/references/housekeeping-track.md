@@ -15,6 +15,10 @@ scanned are read from Housekeeping tickets, found through the **Housekeeping** o
 **Nothing to work** — where a step says so: reached from `/continuous-housekeeping` the run ends; reached
 from Track choice, return there with Housekeeping marked as tried (`track-choice.md`, *Coming back here*).
 
+**Every decision point here** is laid out as `../../continuous-refactoring/SKILL.md`, *Decision points*, says: the findings go into the
+conversation as a message of their own, then the question — in an autonomous run, then the recommendation
+taken.
+
 ## 1. The mechanism
 
 The **mechanism** is three things: the **Housekeeping** operation, the template it names, and that
@@ -37,7 +41,8 @@ For every open Housekeeping ticket that has a merge request (`worklist.md`, *A t
 | The merge request | The ticket |
 | --- | --- |
 | open | is in review: named in one line with its merge request |
-| merged | is to be closed per **Done** |
+| merged, and every task of the ticket is ticked | is to be closed per **Done** |
+| merged, with tasks still unticked — the merge request delivered a part, the setup alone for one | stays open and is worked like any ticket without a merge request |
 | closed without a merge, its comments naming what was wrong with it | comes back from review (below) |
 | closed without a merge, for another reason or none | is to be closed per **Done**, with a note quoting the reason where one was given; its template's next ticket stands |
 
@@ -55,7 +60,7 @@ due. The first row that applies:
 | --- | --- |
 | the call names a ticket or a template | that ticket; one in review is worked as *A ticket that comes back from review* |
 | a ticket came back from review in step 2 | that ticket, worked as that section says |
-| tickets that are due and have no merge request | the one due the longest; the others are named in the closing report, each worked by a further call |
+| tickets that are due and not in review | the one due the longest; the others are named in the closing report, each worked by a further call |
 | tickets that are not yet due | a decision point. Findings: each ticket with its date. Options: nothing to work (the recommendation), or work the one due next now. A human who chose Housekeeping at Track choice, or a call that says "now", has answered it |
 | none of these | nothing to work: say what each template waits for — its merge request, or a ticket left uncreated |
 
