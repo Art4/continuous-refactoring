@@ -1,4 +1,4 @@
-"""Tests for deterministic tooling tree parser (skills/refactor-scan/references/tooling_tree.py)
+"""Tests for deterministic tooling tree parser (skills/continuous-refactoring/references/tooling_tree.py)
 
 Verify tree parsing and the graph outputs computed from the node state the caller hands in.
 """
@@ -10,9 +10,9 @@ import pathlib
 import tempfile
 import unittest
 
-# importlib, not a dotted import: "refactor-scan"'s hyphen makes
+# importlib, not a dotted import: "continuous-refactoring"'s hyphen makes
 # `skills.refactor_scan...` an invalid package path.
-_MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "skills" / "refactor-scan" / "references" / "tooling_tree.py"
+_MODULE_PATH = pathlib.Path(__file__).resolve().parents[1] / "skills" / "continuous-refactoring" / "references" / "tooling_tree.py"
 _spec = importlib.util.spec_from_file_location("tooling_tree", _MODULE_PATH)
 tooling_tree = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tooling_tree)
@@ -1213,9 +1213,9 @@ class SeedFileTests(unittest.TestCase):
 
 
 class PortabilityTests(unittest.TestCase):
-    """Guards the property the skills/refactor-scan/references/ move exists for:
+    """Guards the property that the parser ships inside a skill:
     the module finds its own tree docs as siblings, never via the suite
-    checkout's layout — so a shipped copy (skills/refactor-scan/ alone, no
+    checkout's layout — so a shipped copy (skills/continuous-refactoring/ alone, no
     scripts/ or docs/ around it) still works, under symlink or copy install.
     """
 
