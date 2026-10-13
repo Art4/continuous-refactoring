@@ -7,15 +7,15 @@ Spec: `../spec.md` (section *Testing Decisions*).
 
 **Blocked by:** 08
 
-**Status:** ready-for-human
+**Status:** done
 
-- [ ] The human decides, with the list of red checks from ticket 08 in view, what happens to the
+- [x] The human decides, with the list of red checks from ticket 08 in view, what happens to the
       validator's checks, the trigger-control tests and the fixture harness: deleted, adapted or rewritten
-- [ ] That decision is carried out and the pipeline is green
-- [ ] Acceptance from the `suite-rebuild` checkout in the target whose tracker and forge are different
+- [x] That decision is carried out and the pipeline is green
+- [x] Acceptance from the `suite-rebuild` checkout in the target whose tracker and forge are different
       systems: onboarding again, one interactive run, one autonomous run, one Housekeeping run; what was
       observed is noted here
-- [ ] The pull request from `suite-rebuild` to `main` is open
+- [x] The pull request from `suite-rebuild` to `main` is open
 
 ## Comments
 
@@ -357,3 +357,47 @@ would touch the validator again.
    shown what is worth asserting.
 
 Order: acceptance first, then the four points, then the pull request.
+
+### Acceptance in the target (2026-10-10 to 2026-10-13)
+
+Run from the `suite-rebuild` checkout in the target whose tracker (Redmine) and forge (GitLab) are
+different systems. What was observed, and what each observation changed:
+
+- **Onboarding.** Read the tracker and the forge from the target's files, asked four questions, wrote
+  one file, verified **Search** against the tracker. *First attempt:* the agent opened five question
+  dialogs without a single message, the last one asking to write "as summarized" a summary it had never
+  shown. *Changed:* a decision point posts its findings as a message before the question; every
+  reference with decision points says so at its head.
+- **Interactive run.** Scan of Safety Net (12 of 19 fulfilled), three tickets filed, three older tickets
+  a human had written found by the search before filing and continued instead of duplicated, one ticket
+  planned, built, reviewed (the review found a real defect) and delivered. *Observed:* the onboarding
+  left the tracker file uncommitted and recommended going on; the human had to stop the run. *Changed:*
+  a run checks for a clean working tree after onboarding wrote and before the implement point branches.
+  *Observed:* "who plans" never appeared, and the skills the human prefers for it can only be called by
+  a human. *Changed:* an autonomous run uses the suite's own references; an interactive run offers the
+  human to take planning or implementing into a session of their own.
+- **Autonomous run.** Chose the baseline ticket, tried the fix in a throwaway copy, found one spot that
+  needs a behaviour change, left plan and open question on the ticket and ended — no guess, no
+  rejection. After the human's reply it planned again, built the part and opened a merge request that
+  names the ticket without closing it. *Observed:* five minutes without a message. *Changed:* an
+  autonomous run reports like an interactive one. Confirmed in a fresh session, which also kept the
+  ticket open after the part was merged and took the next part.
+- **Housekeeping.** Found no mechanism, proposed template, weekly rhythm (66 commits in 90 days), first
+  ticket and the line for the instruction file, asked for that line separately. *Observed:* the template
+  was shown shortened; an older ticket about introducing Housekeeping was found and left without a
+  proposal; the cycle question came without findings; the human delivered the setup alone, which the
+  text did not provide for. *Changed:* all four. A full cycle with tasks, ideas and the next ticket was
+  not run.
+
+Not observed: a rejection recorded and reversed, a run in a target that is no PHP project, a target on
+GitHub, a Housekeeping cycle.
+
+### The decision about the tests, carried out
+
+- Parser tests and negative controls adapted; 235 unit tests green.
+- Validator cut to the two skills; it reports no error on this repository, two duplication advisories
+  for the sentence every reference with decision points opens with (deliberate).
+- `scripts/drift_check.py` deleted.
+- Fixtures: eight sample projects kept with their planted candidates; 37 scenario fixtures, the harness
+  with its agent tiers and every file of the old suite state removed. `test-harness.yml` keeps its two
+  jobs (validator, parser tests) and loses the harness tier.
