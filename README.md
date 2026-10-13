@@ -61,7 +61,7 @@ and one line for every change to your tracker, your forge or your repository. De
 | Skill | Purpose |
 |---|---|
 | `continuous-refactoring` | One run, from the open tickets to an opened merge request |
-| `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule |
+| `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule. An agent may start it by itself, for example from a scheduled job; `continuous-refactoring` is started by you |
 
 Everything else — choosing a Track, scanning, selecting, planning, implementing, onboarding — is
 reference material these two load when a run reaches it. Where your project has its own skills for

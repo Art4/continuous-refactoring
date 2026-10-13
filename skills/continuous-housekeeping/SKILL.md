@@ -1,14 +1,13 @@
 ---
 name: continuous-housekeeping
-description: One Housekeeping run of the skill suite — works the open Housekeeping ticket, its recurring tasks and the refactoring ideas left on it as comments, and offers to set the mechanism up where it is missing. Made to be scheduled.
-disable-model-invocation: true
+description: Housekeeping run of the continuous-refactoring skill suite — works the project's open Housekeeping ticket (recurring maintenance tasks, refactoring ideas left on it as comments), or sets Housekeeping up where it is missing. Use when asked to run or set up housekeeping or recurring maintenance, when a scheduled job calls for it, or when a Housekeeping ticket is due.
 ---
 
 # Continuous Housekeeping
 
 One **run** that works the Housekeeping Track alone: no worklist, no Track choice, no other ticket.
 
-The run is made of **decision points**, and it is **interactive** or **autonomous**. Both are defined in
+The run is made of decision points, and it is interactive or autonomous. Both are defined in
 `../continuous-refactoring/SKILL.md` — how the call states the mode in *The call*, the rules in *Decision
 points* — and hold here as written; read those two sections before step 1.
 
