@@ -7,15 +7,13 @@ which ships alongside it — deterministically and without an LLM:
 Tier 1 — structural:
 - frontmatter: valid YAML, ``name`` matches the directory (kebab-case, <= 64
   chars), ``description`` present and <= 1024 chars, only known fields
-- required sections: ``## Completion criterion`` everywhere, ``## Process`` on
-  the lifecycle skills (the orchestrator uses ``## The pass``), and
-  ``## Fallback`` on every skill whose reference-ledger row is shipped
-  (ADR-0003)
+- required section: ``## Fallback`` on every skill whose reference-ledger row
+  is shipped (ADR-0003)
 - global ``/X`` references: the set found in each skill body must equal the set
   recorded for that skill in ``docs/agents/skill-references.md``
 - local file references (``docs/...``, ``CONTEXT.md``, ``*.md``) resolve to real
   files; target-repo artifacts (``CODING_STANDARDS.md``, ``CONTRIBUTING.md``)
-  and target-repo suite state (``.scratch/refactor/**``, ``docs/refactoring/**``) are exempt
+  and the target-repo paths the texts name (``.scratch/refactor/**``, ``docs/refactoring/**``) are exempt
 - ADR references — the bare ``ADR-NNNN`` shorthand, or a backtick-quoted
   ``docs/adr/NNNN-slug.md`` path — are forbidden in skill prose and in
   ``references/*.md`` — the suite's own ADRs are internal maintainer docs that
@@ -30,10 +28,8 @@ Tier 1 — structural:
   prose uses, e.g. defining the seam or quoting a user's words)
 
 Tier 2 — semantic:
-- ADR-0004 rule propagation: every rule keyword from ADR-0004 appears in at
-  least one of ``refactor-design`` or ``refactor-implement``
-- Cross-skill contract consistency: the orchestrator's description of each
-  lifecycle step's output mentions that step's completion-criterion terms
+- ADR-0004 rule propagation: every rule keyword from ADR-0004 appears
+  somewhere in the suite's skill texts
 - Glossary reverse check: domain vocabulary used in 2+ skills but absent from
   ``CONTEXT.md`` is flagged
 - ADR staleness: ADRs containing ``retired``/``supersedes``/``amends`` are
@@ -67,8 +63,6 @@ from dataclasses import dataclass
 
 import yaml
 
-ORCHESTRATOR = "continuous-refactoring"
-
 ALLOWED_FRONTMATTER = {"name", "description", "disable-model-invocation", "allowed-tools"}
 MAX_NAME = 64
 MAX_DESC = 1024
@@ -82,32 +76,31 @@ EXEMPT_LOCAL_REFS = {
     "CONTRIBUTING.md": "target-repo artifact (optional)",
 }
 
-# Target-repo suite state lives under .scratch/refactor/ in the target repo (the
-# shared housekeeping-template.md under docs/refactoring/); the suite repo itself
-# never contains these files.
+# Paths in a target repository the skill texts name: the Local Markdown tracker's
+# tickets folder and the recommended place of the Housekeeping template. The suite
+# repo itself never contains these files.
 EXEMPT_LOCAL_PREFIXES = {
-    ".scratch/refactor/": "target-repo suite state",
+    ".scratch/refactor/": "target-repo local tickets folder",
     "docs/refactoring/": "target-repo shared housekeeping template",
 }
 
 # Glossary avoid-terms whose use in prose is legitimate. Keyed by (skill, term)
 # so a new occurrence anywhere else is still flagged.
 VOCAB_ALLOW = {
-    ("refactor-design", "boundary"): "defines the 'seam' term — 'public boundary' is the definition, not a synonym replacement",
-    ("refactor-scan", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
-    ("refactor-scan", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("refactor-scan", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
-    ("refactor-prioritize", "floor"): "coverage-floor's own ratchet threshold — a real technical term, not a synonym for 'tooling tree'",
-    ("refactor-scan", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
-    ("refactor-design", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("refactor-implement", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("refactor-prioritize", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("refactor-loop", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
+    ("continuous-refactoring", "boundary"): "defines the 'seam' term — 'public boundary' is the definition, not a synonym replacement",
+    ("continuous-refactoring", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
     ("continuous-refactoring", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("refactor-learn", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("refactor-loop", "floor"): "the `coverage-floor` tooling-tree node's own slug — a real node name, not a synonym for 'tooling tree'",
-    ("continuous-refactoring", "floor"): "the `coverage-floor` tooling-tree node's own slug — a real node name, not a synonym for 'tooling tree'",
+    ("continuous-housekeeping", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
+    ("continuous-refactoring", "floor"): "the target's declared minimum PHP version ('PHP floor') and the `coverage-floor` node — real technical terms, not synonyms for 'tooling tree'",
+    ("continuous-housekeeping", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
+    ("continuous-refactoring", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
+    ("continuous-refactoring", "bookkeeping"): "the onboarding interview names the old **Bookkeeping** bullet it removes from an existing section",
+    ("continuous-refactoring", "session"): "a conversation the human opens for themselves — not a second name for a run",
 }
+
+# glossary_reverse_issues() false positives: bold words both skills use as a
+# list label, not as a domain term.
+GLOSSARY_REVERSE_ALLOW = {"none"}
 
 # duplication_issues() false positives: a shared sentence between two paths
 # that's a deliberate, reviewed exception rather than accidental drift.
@@ -117,12 +110,16 @@ DUPLICATION_ALLOW = {
     # (tooling-tree.md) and its extracted file (tooling-tree.md's own ##
     # Nodes intro) — same convention php-tooling-tree.md established first.
     frozenset({
-        "skills/refactor-scan/references/tooling-tree.md",
-        "skills/refactor-scan/references/tooling-tree/ci-runner.md",
+        "skills/continuous-refactoring/references/tooling-tree.md",
+        "skills/continuous-refactoring/references/tooling-tree/ci-runner.md",
     }): "Purpose duplicated between stub and extracted node file, by design",
     frozenset({
-        "skills/refactor-scan/references/tooling-tree.md",
-        "skills/refactor-scan/references/tooling-tree/is-php-project.md",
+        "skills/continuous-refactoring/references/tooling-tree.md",
+        "skills/continuous-refactoring/references/tooling-tree/is-php-project.md",
+    }): "Purpose duplicated between stub and extracted node file, by design",
+    frozenset({
+        "skills/continuous-refactoring/references/php-tooling-tree.md",
+        "skills/continuous-refactoring/references/php-tooling-tree/psalm.md",
     }): "Purpose duplicated between stub and extracted node file, by design",
 }
 
@@ -190,16 +187,6 @@ def frontmatter_issues(text, dirname):
 def section_issues(text, skill, requires_fallback):
     issues = []
     headings = set(re.findall(r"^## (.+)$", text, re.M))
-
-    if skill == ORCHESTRATOR:
-        if "The pass" not in headings:
-            issues.append(Issue(skill, "orchestrator skill must have a '## The pass' section"))
-    elif "Process" not in headings:
-        issues.append(Issue(skill, "missing required '## Process' section"))
-
-    if "Completion criterion" not in headings:
-        issues.append(Issue(skill, "missing required '## Completion criterion' section"))
-
     if requires_fallback and "Fallback" not in headings:
         issues.append(Issue(skill, "missing '## Fallback' section — required by ADR-0003 for a shipped global reference"))
     return issues
@@ -416,138 +403,33 @@ ADR0004_KEYWORDS = [
 
 
 def adr0004_propagation_issues(skills_text):
-    """Check that every ADR-0004 rule keyword appears in at least one of
-    ``refactor-design`` or ``refactor-implement``."""
+    """Check that every ADR-0004 rule keyword appears somewhere in the suite's
+    skill texts (references included)."""
     issues = []
-    targets = {"refactor-design", "refactor-implement"}
-    combined = "\n".join(
-        skills_text.get(s, "") for s in targets if s in skills_text
-    )
+    combined = "\n".join(skills_text.values())
     for kw in ADR0004_KEYWORDS:
         if not re.search(re.escape(kw), combined, re.I):
             issues.append(
                 Issue(
                     "ADR-0004",
-                    f"rule keyword '{kw}' from ADR-0004 not found in "
-                    "refactor-design or refactor-implement",
+                    f"rule keyword '{kw}' from ADR-0004 not found in any skill text",
                 )
             )
     return issues
 
 
 # --------------------------------------------------------------------------
-# Tier 2 — Cross-skill contract consistency
+# Advisories
 # --------------------------------------------------------------------------
-
-# Maps orchestrator step labels to the lifecycle skill that owns them.
-# The orchestrator's text describes each step; the skill defines completion
-# criteria.  A mismatch means the orchestrator promises something the skill
-# doesn't deliver (or vice versa).
-ORCH_STEP_SKILL_MAP = {
-    "scan": "refactor-scan",
-    "prioritise": "refactor-prioritize",
-    "design": "refactor-design",
-    "implement": "refactor-implement",
-    "learn": "refactor-learn",
-}
-
-CONTRACT_COVERAGE_THRESHOLD = 0.2
-MAX_MISSING_TERMS = 5
-ADVISORY_PREFIX = "contract advisory"
 
 
 def is_advisory(issue):
-    """True for any advisory-only issue — contract/size/orphan/duplication/
+    """True for any advisory-only issue — size/orphan/duplication/
     clarity — that a caller (main(), a test) should exclude from a hard
     failure. Every advisory check's message names its category ending in
     the word "advisory"; one shared test instead of a growing list of
     per-category prefixes to keep in sync."""
     return "advisory" in issue.message
-
-# Words too common to carry contract signal.
-_ORCH_STOP = frozenset({
-    "the", "a", "an", "of", "and", "or", "in", "on", "to", "for", "is",
-    "that", "this", "it", "as", "by", "with", "from", "at", "if", "so",
-    "its", "be", "do", "not", "but", "can", "will", "may", "shall",
-    "must", "are", "was", "were", "been", "has", "have", "had", "each",
-    "see", "run", "use", "via", "also", "into", "than", "then", "them",
-    "they", "their", "there", "these", "those", "other", "more", "most",
-    "some", "any", "all", "both", "very", "own", "same", "such",
-    "just", "only", "even", "still", "already", "back", "here", "well",
-    "now", "new", "old", "next", "first", "last", "long", "great",
-    "little", "right", "high", "small", "large", "young", "few",
-    "many", "much", "like", "about", "over", "after", "before",
-    "between", "under", "until", "while", "where", "which", "whose",
-    "don", "doesn", "didn", "won", "wouldn", "couldn", "shouldn",
-    "block", "call", "flag", "come", "keep", "make", "take",
-})
-
-
-def _extract_keywords(text):
-    """Extract significant lowercase words from text."""
-    words = set(re.findall(r"[a-z]{4,}", text.lower()))
-    return words - _ORCH_STOP
-
-
-def _orchestrator_step_text(orch_text, step_label):
-    """Return the text block for one numbered step in the orchestrator."""
-    # Matches both "**Step.**" and "**Step**." (period inside or outside bold)
-    pattern = re.compile(
-        r"\d+\.\s+\*\*" + re.escape(step_label)
-        + r"(?:\.\*\*|\*\*\.?)\s*(.*?)(?=\n\s*\d+\.|\n## |\Z)",
-        re.S | re.I,
-    )
-    m = pattern.search(orch_text)
-    return m.group(1) if m else ""
-
-
-def _completion_keywords(skill_text):
-    """Extract keywords from a skill's ``## Completion criterion`` section."""
-    m = re.search(r"## Completion criterion\n(.*?)(?=\n## |\Z)", skill_text, re.S)
-    return _extract_keywords(m.group(1)) if m else set()
-
-
-def contract_consistency_issues(orch_text, skills_text):
-    """Flag mismatches between the orchestrator's step descriptions and each
-    skill's completion criterion keywords.
-
-    Checks that the orchestrator's step description uses at least some of the
-    same domain terms as the skill's completion criterion.  Only flags when
-    fewer than 20 % of the completion-criterion keywords appear in the
-    orchestrator step — a significant conceptual gap.
-
-    Note: the orchestrator step descriptions are intentionally brief; some
-    false positives are expected.  These issues are advisory.
-    """
-    issues = []
-    for step_label, skill_name in ORCH_STEP_SKILL_MAP.items():
-        step_text = _orchestrator_step_text(orch_text, step_label)
-        if not step_text:
-            continue
-        orch_kw = _extract_keywords(step_text)
-        skill_kw = _completion_keywords(skills_text.get(skill_name, ""))
-        if not skill_kw:
-            continue
-        overlap = orch_kw & skill_kw
-        coverage = len(overlap) / len(skill_kw)
-        if coverage < CONTRACT_COVERAGE_THRESHOLD:
-            missing_in_orch = skill_kw - orch_kw
-            # Only flag when there are terms the orchestrator should mention
-            # but doesn't — not when the orchestrator uses extra terms.
-            uncovered_terms = missing_in_orch - {
-                "every", "candidate", "refactor", "skill", "issue",
-            }
-            if uncovered_terms:
-                issues.append(
-                    Issue(
-                        skill_name,
-                        f"{ADVISORY_PREFIX}: orchestrator '{step_label}' step "
-                        f"does not mention completion-criterion terms "
-                        f"({', '.join(sorted(uncovered_terms)[:MAX_MISSING_TERMS])})",
-                    )
-                )
-    return issues
-
 
 # --------------------------------------------------------------------------
 # Tier 2 — Glossary reverse check
@@ -581,7 +463,7 @@ def glossary_reverse_issues(skills_text, context_text):
             glossary_terms.add(m.group(1).lower().strip())
 
     for term, users in sorted(term_usage.items()):
-        if len(users) >= 2 and term not in glossary_terms:
+        if len(users) >= 2 and term not in glossary_terms and term not in GLOSSARY_REVERSE_ALLOW:
             user_list = ", ".join(sorted(users))
             issues.append(
                 Issue(
@@ -805,36 +687,6 @@ def completion_clarity_issues(skills_text):
 # Whole-repo orchestration
 # --------------------------------------------------------------------------
 
-_CROSS_SKILL_REF_RE = re.compile(r"(?:\.\./)+([a-z0-9_-]+)/(references/[a-zA-Z0-9_./-]+\.(?:md|py))")
-
-
-def _augment_with_cross_skill_refs(skills_text_full, repo_root):
-    """A skill's own text may point at a reference file shipped under a
-    *different* skill's directory — e.g. ``refactor-design`` and
-    ``refactor-implement`` both point at
-    ``continuous-refactoring``'s own ``references/foundational-refactoring-rules.md``
-    rather than each restating the rules inline. Pull such a file's content
-    into the pointing skill's full text too, one hop deep, so a semantic
-    check reading "this skill's full text" sees what the skill actually
-    directs a reader to, not just what ships in its own ``references/``.
-    Citations are skill-relative (ADR-0061), so the leading ``../`` count
-    varies with the citing file's own depth — matched loosely (one or more)
-    and resolved via ``repo_root/skills/<cited skill>/...`` directly rather
-    than by literally walking that many levels up."""
-    augmented = dict(skills_text_full)
-    for name, text in skills_text_full.items():
-        extra = []
-        for cited_skill, rest in sorted(set(_CROSS_SKILL_REF_RE.findall(text))):
-            if cited_skill == name:
-                continue  # already included via this skill's own references/ scan
-            f = repo_root / "skills" / cited_skill / rest
-            if f.is_file():
-                extra.append(f.read_text())
-        if extra:
-            augmented[name] = text + "\n" + "\n".join(extra)
-    return augmented
-
-
 def validate_repo(repo_root):
     repo_root = pathlib.Path(repo_root)
     issues = []
@@ -860,7 +712,7 @@ def validate_repo(repo_root):
     # references/, concatenated. Progressive disclosure moved a lot of a
     # skill's actual content out of SKILL.md and behind a pointer (see
     # writing-for-agents): the semantic checks below (glossary usage, ADR-0004
-    # propagation, cross-skill contract terms) are about what the *skill*
+    # propagation) are about what the *skill*
     # says, not what its entry-point file happens to say directly, so they
     # read this instead of skills_text.
     skills_text_full = {}
@@ -936,23 +788,7 @@ def validate_repo(repo_root):
 
     # --- Tier 2: semantic checks ---
     adr_dir = repo_root / "docs" / "adr"
-    # ADR-0004 propagation alone reads cross-skill pointers too: its rules
-    # now live in a shared continuous-refactoring reference both
-    # refactor-design and refactor-implement point at instead of each
-    # restating them. The other checks below want a skill's *own*
-    # vocabulary and stay on the un-augmented text — augmenting generally
-    # would pull an entire pointed-at file's unrelated prose into every
-    # skill that names it for one narrow reason (e.g. refactor-implement
-    # citing one section of php-tooling-tree/phpunit.md).
-    adr0004_targets = {"refactor-design", "refactor-implement"}
-    adr0004_text = _augment_with_cross_skill_refs(
-        {k: v for k, v in skills_text_full.items() if k in adr0004_targets}, repo_root
-    )
-    issues += adr0004_propagation_issues(adr0004_text)
-
-    orchestrator_text = skills_text_full.get(ORCHESTRATOR, "")
-    if orchestrator_text:
-        issues += contract_consistency_issues(orchestrator_text, skills_text_full)
+    issues += adr0004_propagation_issues(skills_text_full)
 
     if context_text:
         issues += glossary_reverse_issues(skills_text_full, context_text)
@@ -973,8 +809,8 @@ def main(argv=None):
     ap = argparse.ArgumentParser(
         description="Static validation of the skill suite (Tier 1 + Tier 2)",
         epilog=(
-            "Tier 2 checks: ADR-0004 rule propagation, cross-skill contract "
-            "consistency, glossary reverse check, ADR staleness detection"
+            "Tier 2 checks: ADR-0004 rule propagation, glossary reverse check, "
+            "ADR staleness detection"
         ),
     )
     ap.add_argument("root", nargs="?", default=".", help="suite repo root (default: current directory)")

@@ -6,7 +6,7 @@ The vocabulary of a portable agent-skill suite that keeps a software project und
 
 **Candidate**:
 A **ticket** the suite works as refactoring: the adoption of a **tooling tree** node, a structural deepening, or a ticket a human wrote. Recognised by its subject, named in plain words in title and text — never by a fixed marker. A ticket a human wrote is picked up when the target's **Candidate** operation says how such tickets are marked, or when the call names it.
-_Avoid_: task, todo
+_Avoid_: todo
 
 **Backlog**:
 The ordered list of a **Track**'s tooling-tree nodes that are neither fulfilled nor rejected, blocked ones included — what the tree's parser emits and what a scan offers tickets for. Once the tickets exist, the **Worklist** is what a run works from.
@@ -45,7 +45,7 @@ The named operations the suite needs from an **issue tracker**, one bullet each 
 
 **Ticket**:
 An issue on the project's tracker — the word the suite uses, in its own texts and towards the human, because it is the wording of the engineering skills the suite builds on. Not a synonym for **Candidate**: a candidate is a ticket the suite works as refactoring, not every ticket is one. A ticket the suite files names its subject in plain words in title and text (the tool's name), so a later search finds it; before filing, the suite searches for an existing ticket on the subject, open or closed.
-_Avoid_: task, todo
+_Avoid_: todo
 
 **Tooling tree**:
 The directed graph of adoption steps a target repo climbs — a generic root (the tooling-tree doc: `git`, `onboarding-setup`) that every language specialization's tree (PHP: the PHP tooling-tree doc) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry. Each node also carries a human-facing **Name** (the tree doc's `**Name:**` field), used instead of the slug anywhere a human reads it — ticket titles, merge requests, a run's reports; the tree's own internals (the edges table, the parser's input and output) stay keyed by the slug. A node may also carry a **Housekeeping** field — a recurring-maintenance line contributed to the **Housekeeping template** (below), ordinarily through the node's own merge request, or added by a **Housekeeping** run for a fulfilled node whose line is missing; unrelated to the node's own one-time Fulfilment check. A node may also carry a **Signal** field, naming which signals-catalogue factor its tool output feeds once the node is adopted — see the **Signal** entry below for the full picture across both usages. Deliberately not every node produces one: a node can gate `structural-scan` without producing a Signal, and vice versa — a Signal-producing node like `phpmd` or `secret-detection` carries no `resolved` edge into `structural-scan` at all (see those nodes' own entries in the tree docs).
@@ -86,6 +86,14 @@ _Avoid_: housekeeping issue (dated, one per due cycle — the earlier shape), ch
 **Housekeeping template**:
 The file in the target a **Housekeeping ticket** is made from: the recurring tasks, the rhythm, and as its last item "create the next Housekeeping ticket". Where it lives and how the next ticket is made from it are the target's, written as the **Housekeeping** operation. Shared and committed like code. The rhythm is chosen by the human when Housekeeping is first set up, with a recommendation drawn from the target; several templates with different rhythms may exist side by side, each with its own open ticket. **Tooling tree** nodes contribute their Housekeeping line to it.
 _Avoid_: checklist file, cadence (the rhythm is a line of the template, not a setting of the suite)
+
+**Housekeeping line**:
+The recurring task a **tooling tree** node contributes to the **Housekeeping template**: its **Housekeeping** field, reworded for the template's reader. It arrives through the node's own merge request; for a tool set up by hand, a Housekeeping run adds it.
+_Avoid_: checklist line
+
+**Part**:
+What one merge request delivers of a **ticket** that takes several: one group of a PHPStan baseline's entries, or a Housekeeping setup without its first cycle. Its merge request names the ticket without a closing reference and says what stays; the ticket stays open and is worked again.
+_Avoid_: partial fix, chunk
 
 **Housekeeping** (recurring maintenance):
 A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync, the secret scan over the Git history (the whole history the first time, afterwards the commits since the last **Housekeeping ticket**). Also names the **Track** (above) that runs it, by working the open **Housekeeping ticket**; `/continuous-housekeeping` runs that Track alone, with no Track choice, so it can be scheduled. Where the mechanism is missing, the Track proposes to set it up: the **Housekeeping template**, the first ticket, the `AGENTS.md` line. Never a tooling-tree node: nothing about it is a one-time adoption with a stable Fulfilment check.

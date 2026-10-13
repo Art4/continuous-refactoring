@@ -5,7 +5,7 @@ of the mechanism — the **Housekeeping template**, the **Housekeeping** operati
 ticket** — and with them the line in the target's instruction file, and writes what a decision point
 agreed to. A file named without a path lives in `../../continuous-refactoring/references/`.
 
-**Every decision point here** is laid out as `../../continuous-refactoring/SKILL.md`, *Decision points*, says: the findings go into the
+Every decision point here is laid out as `../../continuous-refactoring/SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
 taken.
 

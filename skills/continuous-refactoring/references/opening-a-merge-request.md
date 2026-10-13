@@ -6,7 +6,7 @@ branch, its commits, the checks that ran, and whether the branch delivers the wh
 Commands come from the tool the target's **Merge requests** operation names; the description follows
 `forge-facing-writing.md`. Towards the human, say the forge's own word (pull request on GitHub).
 
-**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
 taken.
 

@@ -15,7 +15,7 @@ scanned are read from Housekeeping tickets, found through the **Housekeeping** o
 **Nothing to work** — where a step says so: reached from `/continuous-housekeeping` the run ends; reached
 from Track choice, return there with Housekeeping marked as tried (`track-choice.md`, *Coming back here*).
 
-**Every decision point here** is laid out as `../../continuous-refactoring/SKILL.md`, *Decision points*, says: the findings go into the
+Every decision point here is laid out as `../../continuous-refactoring/SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
 taken.
 

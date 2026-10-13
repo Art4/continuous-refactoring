@@ -17,6 +17,6 @@ changed, without opening anything.
 - **Only this conversation reports.** A subagent returns its result; the sentence to the human is written
   here, from what the result names.
 
-Examples of the sentence after a step: "Reconcile: pull request #34 was merged; I recommend closing its
+Examples of the sentence after a step: "Reconcile: the pull request for PHPStan Level 0 was merged; I recommend closing its
 ticket #12." · "Scan: 4 of 19 Safety Net tools are missing; 2 of them wait for others." · "Selected
 ticket #15, PHPStan Level 1 — next in the tree, nothing blocks it."

@@ -6,7 +6,7 @@ Track, the run's mode, the call's restriction, and for a tooling ticket the node
 Every plan keeps `foundational-refactoring-rules.md`; every text for the ticket follows
 `forge-facing-writing.md`.
 
-**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
 taken.
 
@@ -78,7 +78,8 @@ A branch that already holds work for the ticket is named in the record or the co
 that is written. Act on the answer; the run ends with the finding named. No plan is written.
 
 **A decision meets the ADR bar** while the work stays behaviour-keeping: it is hard to reverse, surprising
-without its context, and a real trade-off between alternatives.
+without its context, and a real trade-off between alternatives. A ticket whose plan carries such a
+decision unanswered is a **flagged candidate**.
 
 - **Interactive** → a decision point: the question, the alternatives, the one recommended. The answer goes
   into the plan under `Decisions`.

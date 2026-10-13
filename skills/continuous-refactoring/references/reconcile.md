@@ -3,7 +3,7 @@
 Brings tracker and forge into agreement before anything new starts. Reads the worklist (`worklist.md`);
 Housekeeping tickets are left to the Housekeeping reference.
 
-**Every decision point here** is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
+Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
 taken.
 
