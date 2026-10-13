@@ -102,4 +102,4 @@ The suite works in a project with none of the engineering skills installed: plan
 
 - `skills/<skill>/SKILL.md` — the skill itself, kept short; detail lives in `skills/<skill>/references/`.
 - Anything a skill needs at runtime lives under its own `references/`. `docs/` (playbooks, this file) is for humans and never ships with the skills.
-- `fixtures/` and `scripts/` — the test harness for the tooling-tree parser and the skill-validation checks ([fixtures/README.md](../fixtures/README.md), [CONTRIBUTING.md](../CONTRIBUTING.md)).
+- `fixtures/` and `scripts/` — sample projects to try the suite against, the tests of the tooling-tree parser, and the skill-validation checks ([fixtures/README.md](../fixtures/README.md), [CONTRIBUTING.md](../CONTRIBUTING.md)).

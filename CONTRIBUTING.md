@@ -20,8 +20,8 @@ where external reports go.)
      python3 -m unittest discover -s scripts -p 'test_*.py'
      python3 scripts/validate_skills.py .
      ```
-   - A change touching the tooling-tree parser or `fixtures/`: additionally run the relevant
-     `fixtures/harness/run.sh` tier (see [fixtures/README.md](fixtures/README.md)).
+     The first command includes the tooling-tree parser's tests. No automated check runs an agent
+     against a sample project; see [fixtures/README.md](fixtures/README.md).
 
    See [AGENTS.md](AGENTS.md) for the full policy — pushing untested and iterating on red CI is
    not an acceptable substitute for running it yourself first.
