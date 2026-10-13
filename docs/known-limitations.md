@@ -21,8 +21,7 @@ run always uses the suite's own procedures.
 
 ## A run needs a clean working tree
 
-After the setup interview wrote its file, and before the implementation checks out its branch, the suite
-looks at `git status`. Changes it wrote itself it offers to deliver in a merge request of their own;
+Before the implementation checks out its branch the suite looks at `git status`. Changes it wrote itself it offers to deliver in a merge request of their own;
 changes it did not write it leaves alone and asks you to tidy up — an autonomous run ends there. Files
 your project ignores do not count.
 
@@ -126,7 +125,7 @@ The closing report's **Status** line always says why. The usual reasons:
 | Status says | Cause | What to do |
 |---|---|---|
 | No Git repository | The suite's only hard requirement is missing | `git init` in the target, call again |
-| The onboarding ran and ended | The tracker file had no section for the suite, or lacked a required operation; you stopped the interview, or a required answer was missing | Call again and answer; commit `docs/agents/issue-tracker.md` once it is written |
+| The onboarding ran and ended | The tracker file had no section for the suite, or lacked a required operation; you stopped the interview, or a required answer was missing | Call again and answer; commit `docs/agents/issue-tracker.md` once it is written, then call again to start a run |
 | A decision point is laid out and nothing was written | The run was interactive and nobody answered | Call again and answer, or say "do it yourself" in the call |
 | Safety Net is waiting for merges | An autonomous run found nothing workable in Safety Net while it is unfinished | Review and merge what the report lists, or name another Track |
 | Nothing is workable | Every open ticket is in review, blocked or waiting | Merge, answer the open questions, or ask for a scan |

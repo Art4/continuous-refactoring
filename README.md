@@ -88,7 +88,7 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong t
 
 ## Quick start
 
-1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into `docs/agents/issue-tracker.md` — commit that file. Then it offers to go on with the run.
+1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into `docs/agents/issue-tracker.md` — commit that file. The run ends there; commit, then call it again.
 2. **Answer the decision points.** Each comes with a recommendation, so "yes" moves on. Say "carry on yourself from here" at any point and the rest of the run takes its own recommendations.
 3. **Or let it run by itself:** `/continuous-refactoring do it yourself`. One call then takes a ticket from selection to an opened merge request.
 4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), a ticket ("ticket 42").

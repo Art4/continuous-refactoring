@@ -54,9 +54,8 @@ handed its reference and returning its result; the subagent asks nothing and wri
 
 ## A clean working tree
 
-A run works on a working tree that `git status --porcelain` shows as clean. Check it twice: after the
-onboarding interview wrote, and before the implement point checks out its branch. Files the target
-ignores do not show there and need nothing.
+A run works on a working tree that `git status --porcelain` shows as clean. Check it before the implement
+point checks out its branch. Files the target ignores do not show there and need nothing.
 
 Anything shown → a decision point. Findings: the files, and for each whether this run wrote it. Options:
 
@@ -75,10 +74,10 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 1. **Ready.** No Git repository → the run ends with that message. Read `docs/agents/issue-tracker.md`:
    the `## Refactoring operations` section is missing, or lacks **Search**, **Done** or **Merge
    requests** → run `references/onboarding-setup-interview.md` inline. Its summary is this run's first
-   decision point. The interview wrote the section and verified **Search** → check the working tree (*A
-   clean working tree*, above), then one more decision point: go on with the run now (recommended), or
-   end here. Anything else → the run ends with the interview's
-   report.
+   decision point. The run ends after the interview whatever its outcome — it does not go on to the
+   worklist, and it does not ask who commits what. The final report says the onboarding is complete (or
+   what ended it), names the files the interview wrote and any other change in the working tree, and
+   recommends committing them and then calling the skill again.
    *Done when* the section carries the three required operations.
 
 2. **Worklist.** Build the worklist per `references/worklist.md`.

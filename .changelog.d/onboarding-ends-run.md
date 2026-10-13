@@ -1,0 +1,1 @@
+The onboarding now ends the run. Instead of offering to go on in the same call, `/continuous-refactoring` reports the onboarding as complete, points out the changes it left in the working tree (the tracker file) and recommends committing them and calling the skill again.

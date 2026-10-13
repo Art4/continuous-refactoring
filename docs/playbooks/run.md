@@ -14,7 +14,7 @@ A run ends when the merge request is open. More work is another call, not a long
 
 The suite keeps nothing between runs. Each one searches your tracker and your forge afresh: what is open, what is in review, what was merged, what you declined. If you closed a ticket by hand, merged something outside the suite or set a tool up yourself, the next run simply finds it that way.
 
-On a project the suite has not seen, the run begins with a short **onboarding**: where your tickets live and how a few operations work there. The answer is written as one section into `docs/agents/issue-tracker.md`; commit that file. The suite then offers to go on with the run in the same call.
+On a project the suite has not seen, the run begins with a short **onboarding**: where your tickets live and how a few operations work there. The answer is written as one section into `docs/agents/issue-tracker.md`; commit that file. The run ends there: it reports the onboarding as complete, points out the changes in your working tree and recommends committing them and calling the skill again.
 
 ## The call
 

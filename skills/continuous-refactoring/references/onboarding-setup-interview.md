@@ -155,5 +155,7 @@ Tell the human, in plain prose:
 - **Taken as recommended, not confirmed by you** — in an autonomous run, every answer that was a
   recommendation.
 
-The interview ends with this report, and step 6 is done when every bullet that applies is in it. What the
-run does next is the caller's.
+The interview ends with this report, and step 6 is done when every bullet that applies is in it. The run
+ends here: the report says the onboarding is complete, names the changes in the working tree
+(`git status --porcelain`) and recommends committing them and calling the skill again. It offers no
+choice about the working tree and does not go on.
