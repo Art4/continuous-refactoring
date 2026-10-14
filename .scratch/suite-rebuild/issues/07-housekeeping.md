@@ -95,7 +95,7 @@ behaviour-keeping refactoring and arrives in a merge request a human reviews.
 
 - `/continuous-housekeeping` runs the Ready step (onboarding where the operations are missing) and the
   Track; it builds no worklist and runs no general reconcile. The Track reconciles its own tickets.
-- A ticket states its date as a line `Due from: YYYY-MM-DD`; one without a date is due. Not due → the
+- A ticket states the date it is due from in a line of its own; one without a date is due. Not due → the
   recommendation is "nothing to work", so a daily scheduled autonomous call on a weekly rhythm ends
   without writing. "Now" in the call, a named ticket, or a human choosing Housekeeping at Track choice
   works it early.
@@ -151,8 +151,10 @@ behaviour-keeping refactoring and arrives in a merge request a human reviews.
   daily, 30 to 300 → weekly, fewer → monthly. The rhythm is a free line of the template.
 - Recommended path `docs/refactoring/housekeeping-template.md` (where 0.6.0 put it, so an existing file
   is found and kept); an existing file listing recurring tasks is proposed as the template.
-- Ticket shape, as the proposed bullet states it: title `Housekeeping, due from <date>`, the lines
-  `Due from:` and `Template:`, the tasks as a checklist. It is the target's and can be changed there.
+- Ticket shape, as the proposed bullet states it: a title naming Housekeeping and the date, a
+  line with the date, a line naming the template, the tasks as a checklist. The skill gives these by
+  meaning, with no fixed label or wording, so a run does not copy one verbatim; the agent words them, in
+  the language the human or the target uses. It is the target's and can be changed there.
 - The proposed template's tasks are written for a reader who does not know the suite; a node's
   Housekeeping field is reworded for it.
 - The `AGENTS.md` line is proposed once, at setup. Left out, every later closing report says it is

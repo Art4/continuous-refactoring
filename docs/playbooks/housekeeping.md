@@ -33,7 +33,7 @@ An existing file that already lists recurring maintenance tasks is proposed as t
 
 ## Rhythm and due date
 
-Each ticket states its date as a line `Due from: YYYY-MM-DD`. A call before that date finds nothing to work and ends, naming the date — so a daily scheduled call on a weekly rhythm is harmless. To work a ticket early, say "now" in the call or name the ticket.
+Each ticket states the date it is due from, in a line of its own. A call before that date finds nothing to work and ends, naming the date — so a daily scheduled call on a weekly rhythm is harmless. To work a ticket early, say "now" in the call or name the ticket.
 
 The next ticket is due one rhythm after the day the cycle was worked, not after the old due date. Change the rhythm by editing the line in the template; the next ticket made from it follows.
 
