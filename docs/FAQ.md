@@ -152,12 +152,12 @@ part of it that must be settled before structural work starts — deterministic 
 runner and static analysis — and also names the Track that sets them up. Guardrails is the part that comes
 after. One is the map, the other names regions of it.
 
-## Do I need other engineering skills?
+## Is it compatible with other engineering skills?
 
-No. The suite is compatible with them, for example those of [mattpocock/skills](https://github.com/mattpocock/skills):
-a run recommends a project's own skills for planning and implementing over its own procedures, and
-reads an issue-tracker file they wrote. Without any, the first `/continuous-refactoring` writes that
-file itself.
+Yes, and it is better with them. A run recommends a project's own skills for planning and implementing,
+such as those of [mattpocock/skills](https://github.com/mattpocock/skills), over its own procedures, and
+reads an issue-tracker file they wrote. Use the skills you already trust. None is needed: without any,
+the first `/continuous-refactoring` writes that file itself and the run plans and implements its own way.
 
 ## Which issue trackers work?
 
