@@ -40,7 +40,7 @@ or branch (`worklist.md`, *A ticket's merge request*):
 ## 3. The decision point
 
 - **Findings:** the template in full, word for word as it will be written, with its path; the
-  **Housekeeping** bullet; the first ticket, due from today; the line for the instruction file; a ticket
+  **Housekeeping** bullet; the first ticket, due today; the line for the instruction file; a ticket
   step 1 found that is no first ticket, with the proposal for it. Shortened, the human would agree to a
   text they have not read.
 - **Options:** set it up as laid out and work the first cycle in this run (the recommendation); set it
@@ -55,7 +55,7 @@ or branch (`worklist.md`, *A ticket's merge request*):
 
 ## 4. Write
 
-1. Create the first ticket as the agreed bullet says, due from today, unless step 1 found it. Report it,
+1. Create the first ticket as the agreed bullet says, due today, unless step 1 found it. Report it,
    and assign it per **Claim**, where the target has that operation.
 2. Check out its branch per `implement-point.md`, step 2.
 3. Commit the template together with the **Housekeeping** bullet in the tracker file's
@@ -99,7 +99,7 @@ below. Ideas for a refactoring are left on it as comments. A new task goes above
 ## The Housekeeping bullet
 
 ```markdown
-- **Housekeeping**: the template is `<path>`. The next ticket is made with `<the tracker's command to create a ticket>`: the title `Housekeeping, due from <YYYY-MM-DD>`, the text a line `Due from: <YYYY-MM-DD>`, a line `Template: <path>`, and the template's tasks as a checklist. The open ones are listed with `<Search for "Housekeeping" in the title, narrowed to the open tickets>`.
+- **Housekeeping**: the template is `<path>`. The next ticket is made with `<the tracker's command to create a ticket>`: a title that names Housekeeping and the date the ticket is due from, a line in the text with that date, a line naming the template `<path>`, and the template's tasks as a checklist. The open ones are listed with `<Search for the title's Housekeeping term, narrowed to the open tickets>`.
 ```
 
 ## The line in the instruction file
@@ -113,7 +113,7 @@ of `housekeeping-track.md`, step 4, and committed by itself.
 
 ## A template without an open ticket
 
-One decision point: create the ticket from that template, due from today (the recommendation), or leave
+One decision point: create the ticket from that template, due today (the recommendation), or leave
 the template without one. Created → report it.
 
 ## A further template
@@ -123,5 +123,5 @@ A human who asks for a second rhythm ("a monthly one beside the weekly") gets st
 - **The template** — a path of its own, its rhythm, the tasks the human names, and the last task. The
   secret scan, the re-check and the tools' Housekeeping lines stay in the first template alone.
 - **The bullet** — extended: it names each template's path, the first one first, and each title carries
-  its template's rhythm: `Housekeeping (monthly), due from <YYYY-MM-DD>`.
+  its template's rhythm, as in the title of a monthly one: Housekeeping, monthly, the date.
 - **The line in the instruction file** stays as it is.

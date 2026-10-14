@@ -53,8 +53,8 @@ without one.
 
 ## 3. Which ticket
 
-A ticket is **due** when the date it states as `Due from:` is today or past; one that states no date is
-due. The first row that applies:
+A ticket is **due** when the date it states as its due date — in the line the **Housekeeping** operation
+has it carry — is today or past; one that states no date is due. The first row that applies:
 
 | Found | Then |
 | --- | --- |
@@ -210,7 +210,7 @@ A task is one of these by what it asks, in whatever words the template puts it.
    task whose result names the commit it scanned up to.
    - **None does** → the whole history: every commit of every branch and tag.
    - **One does** → the commits the default branch gained since that commit. Where the repository no
-     longer knows the commit, the commits since that ticket's `Due from:` date.
+     longer knows the commit, the commits since that ticket's due date.
 3. **Result** — tick the task with `scanned up to <commit> (<date>)`, the commit being the default
    branch's tip, and the number of findings.
 4. **Findings** — each goes to step 6: where is the commit, the file and the line; what was found is the
