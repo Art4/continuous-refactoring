@@ -1,5 +1,8 @@
 # `continuous-refactoring` splits into a thin dispatcher, a track-agnostic `refactor-loop`, and four per-Track skills
 
+> Superseded by [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): the suite is
+> two skills a human calls; `refactor-loop` and the per-Track skills become references.
+
 > Superseded in part by [ADR-0058](0058-onboarding-is-a-dispatcher-step.md): `continuous-refactoring/SKILL.md` no longer does Track selection and dispatch only — it also onboards a target with no `bookkeeping.md` as step 0 before selecting a Track.
 >
 > Amends [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): "The scheduler lives in

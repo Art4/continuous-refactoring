@@ -1,5 +1,9 @@
 # Tooling-tree proposals are pre-filed as candidate issues before ranking, not only the winner
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): a scan offers a ticket
+> for every node neither fulfilled nor rejected, blocked ones included; there is no ranking step to
+> pre-file for.
+
 > Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): the pre-filing is now done by the loop from `refactor-prioritize`'s drafts, and under `ticket-create-mode: ask-each-time` it happens only after one batched question.
 
 > Amended by [ADR-0056](0056-agent-judged-fulfilment.md): pre-filing no longer applies to Track nodes

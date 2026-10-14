@@ -1,5 +1,8 @@
 # Investigation gets its own single-entry `Open`, replacing the global `Pending candidates` for its own candidates
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no `Open` list;
+> the open tickets are the worklist.
+
 > Amended by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the top-level `Pending candidates` field this ADR narrowed to one remaining case is dropped.
 
 > Amended by [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): Investigation's `Open` no longer decides whether Investigation is selected, only whether its pass resumes or scans; the claim that Guardrails' nodes are parents of `structural-scan` (so at most one `Open` is non-empty at a time) was wrong and is withdrawn.

@@ -1,5 +1,8 @@
 # A Track `Open` entry's issue number is written back once `refactor-design` files it
 
+> Superseded by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): there is no `Open` list;
+> the open tickets are the worklist.
+
 > Amended by [ADR-0069](0069-drop-the-top-level-pending-candidates-field.md): the self-tracking hand-off marker is dropped together with the `Pending candidates` field it suppressed; the `Open` entry's issue number stays.
 
 > Amends [ADR-0051](0051-refactor-learn-requires-a-genuine-event.md): the closing call's precondition

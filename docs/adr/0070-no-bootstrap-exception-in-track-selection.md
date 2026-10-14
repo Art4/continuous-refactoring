@@ -1,5 +1,8 @@
 # Track selection is one cascade — the one-time bootstrap exception is removed
 
+> Superseded by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md): Track selection is a decision
+> point with a recommendation in a fixed order, not a cascade over stored state.
+
 > Amends [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md) and
 > [ADR-0056](0056-agent-judged-fulfilment.md): the one-time bootstrap exception (Investigation, then
 > Guardrails, then Housekeeping, one forced turn each once Safety Net's `Open` first empties) is removed.

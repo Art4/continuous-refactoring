@@ -1,5 +1,9 @@
 # Candidate selection moves to `refactor-prioritize`, filed before the plan exists
 
+> Superseded by [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md):
+> `refactor-prioritize` and `refactor-design` are no longer skills; selection is a decision point of the
+> run ([ADR-0073](0073-a-run-is-a-chain-of-decision-points.md)).
+
 > Amended by [ADR-0039](0039-batch-filing-and-priority-backlog-admission.md): Select mode no longer
 > picks a single strongest candidate and sets the rest aside — it files every genuine candidate found,
 > sorted into a priority or capped admission tier. Everything else here (the two-dispatch mechanism,

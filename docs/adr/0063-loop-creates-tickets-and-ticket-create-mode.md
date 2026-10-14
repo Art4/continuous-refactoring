@@ -1,5 +1,8 @@
 # The loop creates tickets, gated by a `Ticket-create-mode`; `Create-mode` becomes `MR-create-mode`
 
+> Superseded by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md): there is no `Ticket-create-mode`
+> and no `MR-create-mode`; whether the suite asks is the run's mode, said per call.
+
 > Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): an absent `Ticket-create-mode` reads as `ask-each-time`, and the modes live in the per-person config file.
 
 > Amends [ADR-0010](0010-orchestrator-explicit-data-flow.md): `refactor-loop` stays a thin pipe for

@@ -77,39 +77,17 @@ class FrontmatterTests(unittest.TestCase):
 
 
 class SectionTests(unittest.TestCase):
-    ORCH = vs.ORCHESTRATOR
-
-    def test_standard_skill_ok(self):
-        text = "## Process\n...\n## Fallback\n...\n## Completion criterion\n..."
-        self.assertEqual(vs.section_issues(text, "refactor-scan", requires_fallback=True), [])
-
-    def test_missing_completion_criterion(self):
-        text = "## Process\n..."
-        issues = vs.section_issues(text, "refactor-scan", requires_fallback=False)
-        self.assertTrue(any("Completion criterion" in i.message for i in issues))
-
-    def test_missing_process(self):
-        text = "## Other\n## Completion criterion\n"
-        issues = vs.section_issues(text, "refactor-scan", requires_fallback=False)
-        self.assertTrue(any("Process" in i.message for i in issues))
-
-    def test_orchestrator_uses_the_pass(self):
-        text = "## The pass\n## Completion criterion\n"
-        self.assertEqual(vs.section_issues(text, self.ORCH, requires_fallback=False), [])
-
-    def test_orchestrator_missing_the_pass(self):
-        text = "## Process\n## Completion criterion\n"
-        issues = vs.section_issues(text, self.ORCH, requires_fallback=False)
-        self.assertTrue(any("The pass" in i.message for i in issues))
-
     def test_fallback_required(self):
-        text = "## Process\n## Completion criterion\n"
-        issues = vs.section_issues(text, "refactor-scan", requires_fallback=True)
+        text = "## The run\n"
+        issues = vs.section_issues(text, "a-skill", requires_fallback=True)
         self.assertTrue(any("Fallback" in i.message for i in issues))
 
-    def test_fallback_not_required_ok_without(self):
-        text = "## Process\n## Completion criterion\n"
-        self.assertEqual(vs.section_issues(text, "test-skill-fixture", requires_fallback=False), [])
+    def test_fallback_present_ok(self):
+        text = "## The run\n...\n## Fallback\n..."
+        self.assertEqual(vs.section_issues(text, "a-skill", requires_fallback=True), [])
+
+    def test_no_section_is_required_without_a_shipped_reference(self):
+        self.assertEqual(vs.section_issues("# A skill\n", "a-skill", requires_fallback=False), [])
 
 
 class LedgerTests(unittest.TestCase):
@@ -415,153 +393,29 @@ class VocabTests(unittest.TestCase):
 
 
 class ADR0004PropagationTests(unittest.TestCase):
+    ALL = "behavior-preserving, Strangler Fig, Kent Beck, deterministic tools, own branch"
+
     def test_all_keywords_present(self):
-        skills = {
-            "refactor-design": "behavior-preserving, Strangler Fig, Kent Beck, deterministic tools, own branch",
-            "refactor-implement": "",
-        }
-        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
+        self.assertEqual(vs.adr0004_propagation_issues({"a-skill": self.ALL}), [])
 
     def test_split_across_skills(self):
         skills = {
-            "refactor-design": "behavior-preserving, Strangler Fig",
-            "refactor-implement": "Kent Beck, deterministic tools, own branch",
+            "a-skill": "behavior-preserving, Strangler Fig",
+            "b-skill": "Kent Beck, deterministic tools, own branch",
         }
         self.assertEqual(vs.adr0004_propagation_issues(skills), [])
 
     def test_missing_keyword_flagged(self):
-        skills = {
-            "refactor-design": "behavior-preserving, Strangler Fig, Kent Beck",
-            "refactor-implement": "deterministic tools",
-        }
+        skills = {"a-skill": "behavior-preserving, Strangler Fig, Kent Beck", "b-skill": "deterministic tools"}
         issues = vs.adr0004_propagation_issues(skills)
         self.assertEqual(len(issues), 1)
         self.assertIn("own branch", issues[0].message)
 
     def test_case_insensitive(self):
-        skills = {
-            "refactor-design": "BEHAVIOR-PRESERVING, strangler fig, kent beck, DETERMINISTIC TOOLS, own branch",
-            "refactor-implement": "",
-        }
-        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
+        self.assertEqual(vs.adr0004_propagation_issues({"a-skill": self.ALL.upper()}), [])
 
-    def test_missing_skill_flagged(self):
-        skills = {"refactor-design": "behavior-preserving Strangler Fig Kent Beck deterministic tools own branch"}
-        self.assertEqual(vs.adr0004_propagation_issues(skills), [])
-
-    def test_multiple_missing(self):
-        skills = {"refactor-design": "", "refactor-implement": ""}
-        issues = vs.adr0004_propagation_issues(skills)
-        self.assertEqual(len(issues), 5)
-
-
-class CrossSkillRefAugmentTests(unittest.TestCase):
-    def _repo(self):
-        tmp = tempfile.TemporaryDirectory()
-        root = pathlib.Path(tmp.name)
-        write_tree(root, {
-            "skills/continuous-refactoring/references/shared.md": "the shared rule text",
-        })
-        return tmp, root
-
-    def test_relative_cross_skill_ref_pulled_in(self):
-        # A one-``../`` citation (from a top-level SKILL.md) is pulled in...
-        tmp, root = self._repo()
-        try:
-            skills_text = {
-                "refactor-design": "See `../continuous-refactoring/references/shared.md`.",
-            }
-            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
-            self.assertIn("the shared rule text", augmented["refactor-design"])
-        finally:
-            tmp.cleanup()
-
-    def test_deeper_relative_cross_skill_ref_pulled_in(self):
-        # ...and so is a deeper one (from a nested references/ file) — the
-        # dotdot count is matched loosely, not walked literally.
-        tmp, root = self._repo()
-        try:
-            skills_text = {
-                "refactor-design": "See `../../continuous-refactoring/references/shared.md`.",
-            }
-            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
-            self.assertIn("the shared rule text", augmented["refactor-design"])
-        finally:
-            tmp.cleanup()
-
-    def test_same_skill_ref_not_duplicated(self):
-        # A skill's own reference file is already in its full text via the
-        # ordinary references/ scan — this augmentation must not re-pull it.
-        tmp, root = self._repo()
-        try:
-            skills_text = {
-                "continuous-refactoring": "See `../continuous-refactoring/references/shared.md`.",
-            }
-            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
-            self.assertEqual(augmented["continuous-refactoring"], skills_text["continuous-refactoring"])
-        finally:
-            tmp.cleanup()
-
-    def test_missing_cross_skill_ref_skipped_silently(self):
-        # This function only augments text for other checks to read — a
-        # dangling ref is local_ref_issues's job to flag, not this one's.
-        tmp, root = self._repo()
-        try:
-            skills_text = {
-                "refactor-design": "See `../continuous-refactoring/references/missing.md`.",
-            }
-            augmented = vs._augment_with_cross_skill_refs(skills_text, root)
-            self.assertEqual(augmented["refactor-design"], skills_text["refactor-design"])
-        finally:
-            tmp.cleanup()
-
-
-class ContractConsistencyTests(unittest.TestCase):
-    ORCH = (
-        "## The pass\n"
-        "1. **Scan.** Run the scan to file candidates.\n"
-        "2. **Prioritise.** Rank the backlog.\n"
-        "3. **Design.** Grill the candidate into a plan.\n"
-        "4. **Implement.** Execute the plan slice by slice.\n"
-        "5. **Review.** Verify tooling green and report findings.\n"
-    )
-
-    def test_matching_contracts(self):
-        skills = {
-            "refactor-scan": "## Completion criterion\nEvery candidate filed.",
-            "refactor-prioritize": "## Completion criterion\nBacklog ranked.",
-            "refactor-design": "## Completion criterion\nPlan written.",
-            "refactor-implement": "## Completion criterion\nSlices done, green.",
-            "refactor-review": "## Completion criterion\nTooling green, findings reported.",
-        }
-        issues = vs.contract_consistency_issues(self.ORCH, skills)
-        # All five steps produce advisory issues (orchestrator is brief);
-        # verify no hard errors.
-        self.assertTrue(len(issues) > 0, "expected advisory issues for brief orchestrator steps")
-        for i in issues:
-            self.assertIn("advisory", i.message)
-
-    def test_mismatch_flagged(self):
-        skills = {
-            "refactor-scan": "## Completion criterion\nNothing relevant at all.",
-            "refactor-prioritize": "## Completion criterion\nBacklog ranked.",
-            "refactor-design": "## Completion criterion\nPlan written.",
-            "refactor-implement": "## Completion criterion\nSlices done, green.",
-            "refactor-review": "## Completion criterion\nTooling green, findings reported.",
-        }
-        issues = vs.contract_consistency_issues(self.ORCH, skills)
-        scan_issues = [i for i in issues if "scan" in i.skill]
-        self.assertTrue(len(scan_issues) > 0)
-
-    def test_missing_step_skipped(self):
-        skills = {}
-        issues = vs.contract_consistency_issues(self.ORCH, skills)
-        self.assertEqual(issues, [])
-
-    def test_empty_orchestrator(self):
-        skills = {"refactor-scan": "## Completion criterion\nDone."}
-        issues = vs.contract_consistency_issues("", skills)
-        self.assertEqual(issues, [])
+    def test_no_skill_text_flags_every_keyword(self):
+        self.assertEqual(len(vs.adr0004_propagation_issues({})), 5)
 
 
 class GlossaryReverseTests(unittest.TestCase):

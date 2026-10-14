@@ -1,5 +1,10 @@
 # Orchestrator passes explicit data between skills; scan detects, design searches, learn writes
 
+> Superseded by [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): the lifecycle
+> skills this data flow connected become references of one skill. The rule that only one skill writes
+> goes with the bookkeeping it protected
+> ([ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md)).
+
 > Amended by [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): the orchestrator is no longer a pure data pipe — it creates new tickets from the drafts the lifecycle skills hand it.
 
 > Amends [ADR-0005](0005-tooling-tree-not-baseline-skill.md): "Scan files missing-tool and structural candidates together" no longer holds — `refactor-scan` files nothing at all; it proposes tree nodes, and issues for a chosen node are filed by `refactor-design`.

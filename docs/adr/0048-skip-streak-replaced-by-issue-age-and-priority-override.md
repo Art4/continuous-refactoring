@@ -1,5 +1,8 @@
 # `Skip streak` replaced by issue age and a `refactor:priority` hard override
 
+> Superseded in part by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the age factor
+> and the `Filed` line are removed. A ticket a human marked as priority still comes first.
+
 > At the time this ADR was written, amended [ADR-0015](0015-suite-merge-requests-always-stack.md)
 > only incidentally: `Skip streak`'s removal changed nothing about whether suite branches stack,
 > since `Fulfilled nodes` alone already needed that protection, independent of `Skip streak`'s fate.

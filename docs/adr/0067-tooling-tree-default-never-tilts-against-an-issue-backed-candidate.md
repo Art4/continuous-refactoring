@@ -1,5 +1,9 @@
 # The tooling-tree default ranking bias never tilts against an issue-backed candidate
 
+> Superseded by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md): there is no Rank mode and no
+> ranking of a tooling-tree node against a ticket. The Track is chosen first, in a fixed order; within
+> Investigation the order follows the signals.
+
 > Narrows [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md)'s Investigation Track:
 > `structural-scan` (and a PHPStan baseline-shrink family) keep their own unchanged Fulfilment gates,
 > but no longer inherit the ordinary tooling-tree node's ranking preference once ranked alongside an

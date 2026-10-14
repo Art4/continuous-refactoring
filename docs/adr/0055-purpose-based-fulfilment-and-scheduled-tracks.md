@@ -1,5 +1,11 @@
 # Fulfilment checks move from `tooling_tree.py` to agent judgement against a node's Purpose; scanning reorganized into four scheduled Tracks
 
+> Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md),
+> [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md) and
+> [ADR-0076](0076-standing-housekeeping-ticket-from-a-template.md): scheduling by cadence, the per-Track
+> bookkeeping sections and the retirement of `continuous-housekeeping` as an entry point no longer hold.
+> Agent-judged fulfilment against a node's Purpose, the four Tracks and their fixed order stand.
+
 > Amended by [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md): the one-time bootstrap exception is removed; Track selection is one cascade with no special turn after Safety Net closes.
 
 > Amends [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md): **Signal wave** is renamed
