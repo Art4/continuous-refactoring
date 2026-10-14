@@ -152,12 +152,12 @@ part of it that must be settled before structural work starts — deterministic 
 runner and static analysis — and also names the Track that sets them up. Guardrails is the part that comes
 after. One is the map, the other names regions of it.
 
-## Do I need the matt-pocock skills?
+## Do I need other engineering skills?
 
-No, but they help. `setup-matt-pocock-skills` (from [mattpocock/skills](https://github.com/mattpocock/skills))
-writes the issue-tracker file the suite reads, and its skills for planning and implementing are the
-kind a run recommends over its own procedures. Without them the first `/continuous-refactoring`
-writes the issue-tracker file itself; running the setup later extends that file in place.
+No. The suite is compatible with them, for example those of [mattpocock/skills](https://github.com/mattpocock/skills):
+a run recommends a project's own skills for planning and implementing over its own procedures, and
+reads an issue-tracker file they wrote. Without any, the first `/continuous-refactoring` writes that
+file itself.
 
 ## Which issue trackers work?
 

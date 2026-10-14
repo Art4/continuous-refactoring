@@ -1,5 +1,8 @@
 # The decision gate actively manages `ready-for-agent` and `needs-info`, not just withholds one
 
+> Superseded by [ADR-0077](0077-waiting-and-workability-live-in-comments-never-in-labels.md): the suite
+> sets and reads no triage label.
+
 > Amends [ADR-0050](0050-pre-implementation-decision-gate.md): the same gate, the same two labels,
 > now actively set/cleared instead of one being passively withheld.
 

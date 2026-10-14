@@ -1,5 +1,8 @@
 # A flagged candidate self-confirms from a plain human comment, instead of waiting on a manual label swap
 
+> Superseded by [ADR-0077](0077-waiting-and-workability-live-in-comments-never-in-labels.md): the plain
+> comment stands as the answer, and no label is swapped.
+
 > Extends [ADR-0053](0053-decision-gate-actively-manages-both-triage-labels.md)'s "actively manage both
 > labels" discipline to the return trip: confirming a flagged candidate now gets the same active
 > handling filing one already gets, instead of leaving the label swap entirely to the human.

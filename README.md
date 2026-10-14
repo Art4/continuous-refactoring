@@ -82,7 +82,7 @@ Or copy the two folders. To make the suite available everywhere, link both into 
 skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong together:
 `continuous-housekeeping` reads files of `continuous-refactoring`.
 
-> **Recommended, not required — the engineering skills.** `setup-matt-pocock-skills` from [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)) writes the issue-tracker file and the domain docs the suite reads, and brings skills for planning and implementing that a run will offer to use. Without them the first `/continuous-refactoring` writes the issue-tracker file itself, and plans and implements its own way.
+> **Works with other skills, needs none.** The suite is compatible with engineering skills such as [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)): where a project has skills for planning or implementing, a run offers to use them. Without any, the first `/continuous-refactoring` writes the issue-tracker file itself, and plans and implements its own way.
 
 **Any issue tracker works** that `docs/agents/issue-tracker.md` describes. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the suite's few operations work there (how tickets are searched, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
 
