@@ -107,7 +107,8 @@ request once a forge exists. Until the branch is merged, later runs treat the ti
 ## Merge requests are read through the tool your tracker file names
 
 Reconciling merged and closed merge requests, and telling which tickets are in review, goes through
-the tool named under **Merge requests** (`gh`, `glab`). Onboarding checks once that it answers.
+the tool named under **Merge requests** (`gh`, `glab`). Onboarding checks once that it answers, before
+it shows you the summary to confirm.
 
 **Fix:** keep that tool installed and authenticated for the target.
 
@@ -125,7 +126,7 @@ The closing report's **Status** line always says why. The usual reasons:
 | Status says | Cause | What to do |
 |---|---|---|
 | No Git repository | The suite's only hard requirement is missing | `git init` in the target, call again |
-| The onboarding ran and ended | The tracker file had no section for the suite, or lacked a required operation; you stopped the interview, or a required answer was missing | Call again and answer; commit `docs/agents/issue-tracker.md` once it is written, then call again to start a run |
+| The onboarding ran and ended | The tracker file had no section for the suite, or lacked a required operation; you stopped the interview, or a required answer was missing — in a run on its own also a **Search** or merge-request command that failed with no working variant found | Call again and answer; commit `docs/agents/issue-tracker.md` once it is written, then call again to start a run |
 | A decision point is laid out and nothing was written | The run was interactive and nobody answered | Call again and answer, or say "do it yourself" in the call |
 | Safety Net is waiting for merges | An autonomous run found nothing workable in Safety Net while it is unfinished | Review and merge what the report lists, or name another Track |
 | Nothing is workable | Every open ticket is in review, blocked or waiting | Merge, answer the open questions, or ask for a scan |

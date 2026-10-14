@@ -46,7 +46,7 @@ One change always waits for you, in an autonomous run too: an edit to your proje
 
 | Decision point | What is laid out | Recommended |
 |---|---|---|
-| Onboarding (only when the tracker section is missing or incomplete) | the tracker, where merge requests live, each operation and where its answer came from | write the section |
+| Onboarding (only when the tracker section is missing or incomplete) | the tracker, where merge requests live, each operation and where its answer came from, and whether its search and merge-request commands answered | write the section |
 | Reconcile | merge requests of open tickets that were merged or closed, and declined work whose blocker is now met | close the ticket of a merged one; record a rejection where the comments say the change is not wanted; keep the ticket where they name a defect; ask you where a merge request was closed without a reason |
 | Track choice | per Track how many tickets are workable, in review, blocked, waiting | the first Track in the fixed order with something to work on ([Track playbook](tracks.md)) |
 | File tickets (after a scan) | one proposal per tool that is neither in place nor declined, blocked ones included, each with existing tickets on the subject | file them all; you may file some, none, or decline a tool for good |
