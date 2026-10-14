@@ -5,8 +5,9 @@ as the `## Refactoring operations` section of the target's `docs/agents/issue-tr
 interview's only write. `refactoring-operations.md` names the operations, their fallbacks and the
 templates; read it before step 1.
 
-Run the interview inline, where the human can answer. Six steps, in order: Explore, Ask, Summarize, Write,
-Verify, Report.
+Run the interview inline, where the human can answer. Six steps, in order: Explore, Ask, Check, Summarize,
+Write, Report. The commands are checked before the summary, so the one confirmation covers a section that
+works.
 
 **Speaking to the human.** Call what is being set up the "skill suite" and one call of it a "run"; use the
 forge's own word for a merge request (pull request on GitHub).
@@ -90,7 +91,24 @@ Recommendation: take what is in use. A mark Explore did not find is left out wit
 Step 2 is done when every operation in the reference is in one of four states: answered, on record, taken
 from a template, or left out with its fallback noted.
 
-## 3. Summarize
+## 3. Check
+
+Run **Search** once, exactly as its bullet would be written, with any word. The tracker answering counts,
+with zero hits too; on Local Markdown that includes `grep` ending without a match and a tickets folder
+that does not exist yet. Where **Merge requests** names a tool, list one merge request with it
+(`gh pr list --limit 1`, `glab mr list --per-page 1`).
+
+A command that fails → look for a variant that answers, for example from the installed tool's own `--help`,
+and run it. Then show the human the error and ask, the way step 2 asks: **the variant that answered**
+(recommended, when one was found), **a corrected bullet** from the human (checked the same way), or **keep it
+as written** (it goes into the summary and the report as "not verified").
+
+- Autonomous run → a variant that answered is taken. Without one, the operation counts as unanswered,
+  which step 4 handles.
+
+Step 3 is done when each command answered, or each failure has one of the three answers or none.
+
+## 4. Summarize
 
 A **decision point**. Post this summary as a message of its own, with the section as it would be written
 below it, before the question is asked:
@@ -99,21 +117,23 @@ below it, before the question is asked:
 > <Pull requests | Merge requests>: <the forge and its tool | none — you land the prepared branch>.
 > Operations: <one line per bullet, each with its source: template, read from `<file>`, your answer, or
 > already recorded>.
+> Checked: <each command of step 3 — answered, answered after a correction, or not verified with its
+> error>.
 > Left out: <each absent optional operation and what the skill suite does without it>.
 > Removed: <**Bookkeeping**, **Filed date**, **Comment author and time** — only where an existing section carries them>.
 > File: `docs/agents/issue-tracker.md`, <created | section appended | section completed>.
 
-Options: **write it** (recommended), **change an answer** (back to that question, then this summary
-again), **stop** (nothing is written).
+Options: **write it** (recommended), **change an answer** (back to that question, through step 3 again
+when it touches **Search** or **Merge requests**, then this summary again), **stop** (nothing is written).
 
 - Autonomous run → the recommendation is taken when every required operation has an answer. A required
   operation without one ends the interview with a report naming the open question, and nothing is written.
-- Nobody answers, here or at a question of step 2, and the run is not autonomous → the interview ends with
+- Nobody answers, here or at a question of step 2 or 3, and the run is not autonomous → the interview ends with
   this summary as its report, and nothing is written.
 
-Step 3 is done when one of the three options is chosen, or the interview has ended.
+Step 4 is done when one of the three options is chosen, or the interview has ended.
 
-## 4. Write
+## 5. Write
 
 One file, `docs/agents/issue-tracker.md`; say one status line when it is written. In every case the
 **Merge requests** bullet states the forge Explore read from the remote.
@@ -126,21 +146,9 @@ One file, `docs/agents/issue-tracker.md`; say one status line when it is written
 | File without the section | The section, appended; the rest of the file stays as it is |
 | **Incomplete** | The missing required bullets, placed in the reference's order; the **Bookkeeping**, **Filed date** and **Comment author and time** bullets removed; every other bullet left as written |
 
-Step 4 is done when the section carries **Search**, **Done** and **Merge requests**, and none of
-**Bookkeeping**, **Filed date** and **Comment author and time**.
-
-## 5. Verify
-
-Run **Search** once, exactly as the section now states it, with any word. The tracker answering counts,
-with zero hits too; on Local Markdown that includes `grep` ending without a match and a tickets folder
-that does not exist yet. Where **Merge requests** names a tool, list one merge request with it
-(`gh pr list --limit 1`, `glab mr list --per-page 1`).
-
-A command that fails → show the human the error and ask for the corrected bullet, write it, and run this
-step again. In an autonomous run the failure goes into the report as "not verified", and the section stays
-as written.
-
-Step 5 is done when each command got its answer, or each failure is carried into the report.
+Read the file back. Step 5 is done when the section carries **Search**, **Done** and **Merge requests**
+exactly as the summary showed them, and none of **Bookkeeping**, **Filed date** and **Comment author and
+time**.
 
 ## 6. Report
 
@@ -151,7 +159,7 @@ Tell the human, in plain prose:
 - **Commit it.** The tracker file is shared like code. It is left uncommitted in the working tree for the
   human to commit.
 - **What the skill suite does without** each operation that was left out, one line each.
-- **Not verified** — each command of step 5 that failed, with its error.
+- **Not verified** — each command of step 3 that failed and was kept as written, with its error.
 - **Taken as recommended, not confirmed by you** — in an autonomous run, every answer that was a
   recommendation.
 
