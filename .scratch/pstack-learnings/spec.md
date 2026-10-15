@@ -21,6 +21,17 @@ The user's priority order, most important first: 1, 2, 5, 6, 8, 9, 10, 13, 3, 7,
 | 7 | Review-bot comments: assess each on its merits, fix / dismiss with concrete reason / ask; do not churn code for noise | `references/bugbot-triage.md` | issues/10 |
 | 12 | Same rule violated twice → encode as a check (`validate_skills.py`), not another paragraph | `principle-encode-lessons-in-structure` | issues/11 |
 
+## Where each item helps
+
+- **Working in the target repo** (changes what a run does there): 1, 2, 3, 4, 5, 6, 7, 9, 10. Of these, 3, 4 and 7 shape what the target's humans read (MR description, findings, catch-up report), so they follow the forge-facing writing rule.
+- **Improving this repo** (changes how the suite itself is built and kept honest): 12, 13.
+- **Both:** 12 can also surface as a candidate in a target (a rule that lives only as a comment becomes a type, lint rule or check); 2 adds a principles reference to this repo whose content then steers target runs.
+
+## Tooling-tree table
+
+Independent of the table, but 1 and 5 make the decoupling of Tracks safer (see their tickets) and 11
+covers the table's own consistency check. Build 1 and 5 before or with the table.
+
 Also worth a look (not ticketed): rename spot-check — renames miss usages in strings, prose and
 back-references, so verify each rename against the real files (`refactoring.md` step 5).
 
