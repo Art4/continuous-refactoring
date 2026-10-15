@@ -68,7 +68,7 @@ Right before a tooling ticket is worked, its tool is judged once more. If you se
 
 ### A PHPStan baseline
 
-A PHPStan level whose baseline still holds findings does not block the suite silently. The scan proposes one ticket, "PHPStan Level N: shrink the baseline", and the next level's ticket is blocked by it. That ticket takes one merge request after another, each removing one group of findings at their cause, and closes with the one that empties the baseline.
+A PHPStan level whose baseline still holds findings does not block the suite silently. The scan proposes one ticket, "PHPStan Level N: shrink the baseline", and the next level's ticket is blocked by it. That ticket takes one merge request after another, each removing one group of findings at their cause, and closes with the one that empties the baseline. A merge request may add a new baseline entry when the baseline still gets shorter overall, and names it. A finding that should stay ignored, or a baseline that would not get shorter, becomes an ignore rule in `phpstan.neon` — only once you have allowed it.
 
 ## Investigation without tickets
 

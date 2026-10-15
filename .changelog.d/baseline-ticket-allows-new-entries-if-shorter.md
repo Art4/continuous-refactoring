@@ -1,0 +1,1 @@
+A PHPStan baseline ticket's merge request may now add a new baseline entry as long as the baseline gets shorter overall, and names it; a finding to ignore for good, or a baseline that would not get shorter, becomes an ignore rule in `phpstan.neon` only after the human allows it.

@@ -152,8 +152,13 @@ request after another. Each run plans the next **part**.
    request is cut by file, and the plan names the files of this part.
 4. Read every file of the part and plan the fix that removes the finding at its cause. Entries are
    removed by fixing code; an `ignoreErrors` entry moved elsewhere or an inline ignore is no fix.
-5. `Done when`: the baseline, regenerated, no longer holds the part's entries and holds no new one, and
-   the test suite is green. `This merge request` names the part and counts the entries that stay.
+5. `Done when`: the baseline, regenerated, no longer holds the part's entries, is shorter than before,
+   and the test suite is green. `This merge request` names the part and counts the entries that stay.
+
+The regenerated baseline may hold a new entry — a finding the fix surfaced and cannot remove — as long as
+it is shorter overall. The merge request names each new entry and its reason. When the baseline would not
+become shorter, or a finding is to be ignored for good, the ignore rule goes into `phpstan.neon` instead,
+and only after the human allows it: that is an open question, and the run ends with it named.
 
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies: the baseline cannot become
