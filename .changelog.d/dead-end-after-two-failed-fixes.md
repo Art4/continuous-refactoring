@@ -1,0 +1,1 @@
+A run now stops when the same failing check or review finding survives two fix attempts: the branch stays local, the ticket gets an open question in plain words, and no check is deleted, loosened or ignored to get green.

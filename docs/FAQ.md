@@ -156,6 +156,14 @@ whether a change makes the code easier to follow. An agent weighs it and says in
 which one changed a decision. Treating such calls as rules produces changes that are correct and make
 nothing better, which is why a change that makes the code no easier to follow is taken off.
 
+## Why does a run give up after the same failure comes back, not after a number of tries?
+
+A fixed number of rounds is arbitrary: two might be too few for a hard bug and too many for a dead end.
+What shows that a run is stuck is that the same check stays red, or the same review finding returns, after
+a fix and then after a second attempt. At that point the suite stops, keeps the branch to itself without
+pushing it, leaves a plain-words account on the ticket and waits for your answer. It never turns a check
+green by deleting or loosening it.
+
 ## I answered an open question on a ticket — what happens now?
 
 Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your
