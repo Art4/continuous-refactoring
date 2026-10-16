@@ -147,6 +147,15 @@ nothing. A type check or a linter is no substitute. A tooling or baseline ticket
 code, and your existing test suite is what notices a difference, so it adds none. Where a test cannot be
 written at a reasonable cost, the suite asks you instead of restructuring unchecked.
 
+## Why are some things rules and others only principles?
+
+A rule is what a run must hold to without exception, and can be checked: a refactoring keeps behaviour, a
+tool does what a tool can do, work happens on its own branch, a test pins behaviour first. A principle
+helps with a call that depends on the code — whether a migration needs the old and new side by side,
+whether a change makes the code easier to follow. An agent weighs it and says in the plan or the review
+which one changed a decision. Treating such calls as rules produces changes that are correct and make
+nothing better, which is why a change that makes the code no easier to follow is taken off.
+
 ## I answered an open question on a ticket — what happens now?
 
 Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your

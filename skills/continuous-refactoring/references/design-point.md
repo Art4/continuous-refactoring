@@ -3,7 +3,7 @@
 Ends with an **implementable plan** on the selected ticket: what changes, where, in which order, and the
 check that shows the work is done — enough for someone who has only the ticket. Handed in: the ticket, its
 Track, the run's mode, the call's restriction, and for a tooling ticket the node's slug and tree-doc file.
-Every plan keeps `foundational-refactoring-rules.md`; every text for the ticket follows
+Every plan keeps `foundational-refactoring-rules.md` and weighs `principles.md`; every text for the ticket follows
 `forge-facing-writing.md`.
 
 Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
@@ -101,7 +101,7 @@ run finds the branch or its merge request and continues there. Post it as one co
 - **Slices**, in the order they are built, each small enough for one commit or a few.
 - **Done when** — the commands that must pass.
 - **Decisions** — every question of this design that met the ADR bar, with its answer: the ticket's
-  **decision trail**. Where the target keeps ADRs or a glossary (`implement-point.md`, *Slices every
+  **decision trail**; it also names each principle (`principles.md`) that changed a decision. Where the target keeps ADRs or a glossary (`implement-point.md`, *Slices every
   kind of ticket can have*), each decision that belongs there is also a slice.
 - **This merge request** — only when the plan covers a part of the ticket: which part, and what stays.
 
@@ -180,7 +180,8 @@ slices touch, the pin is those tests, named; otherwise it is new and is the plan
 
 1. **Ground.** Read the code the ticket names, the target's glossary and the ADRs of that area, and the
    target's `Refactoring goal` line where it has one (`structural-candidate-search.md`, step 1). *Done
-   when* you can say in two sentences why this spot causes friction.
+   when* you can say in two sentences why this spot causes friction; the review later measures reader load
+   against those sentences.
 2. **Settle the six, in rounds.** Open are the questions whose prerequisites are settled. Find facts in
    the code yourself; put each decision with its alternatives and one recommendation — interactive: all
    open ones of a round to the human in one message, numbered; autonomous: take the recommendation,
@@ -193,4 +194,4 @@ slices touch, the pin is those tests, named; otherwise it is new and is the plan
    plan says why it does not.
 
 *Done when* all six are named, no question is open, and the slices follow the moves of
-`foundational-refactoring-rules.md`.
+`principles.md`, *Technique vocabulary*.

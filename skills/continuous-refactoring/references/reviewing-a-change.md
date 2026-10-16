@@ -17,6 +17,11 @@ does is always a finding, whatever the plan says.
 Does the diff follow what the target documents — its `AGENTS.md`, `CONTRIBUTING.md`, coding standards,
 domain docs? What a tool of the target already enforces is left to that tool.
 
+For a structural ticket, **reader load** (`principles.md`): each slice must lower it somewhere, judged
+against the friction the plan's *Ground* named. A slice that lowers it nowhere is a finding, and the way
+out is to take it off, not to rework it. It stands above the smell table below: a smell whose way out
+does not lower reader load is no finding.
+
 On top of the documented standards, look for these **smells** in the lines the diff adds. Each is a
 judgement, reported as "possible <smell>"; a documented standard of the target that endorses the pattern
 wins. A smell is a finding when its way out stays within the plan's slices; one that would need more is

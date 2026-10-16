@@ -151,6 +151,14 @@ _Avoid_: incompatible change
 A test written before a structural change that holds the code's current behaviour at its **seam** and passes on the code as it stands — Feathers' characterization test; a snapshot (golden master) or an equivalence script serves too. A type check or a linter is none. The first commit of a structural ticket; not asked of a tooling or baseline ticket.
 _Avoid_: safety test, regression test (a regression test guards a fixed defect)
 
+**Reader load**:
+The work a reader must do to follow code: the layers between a question and its answer, and the state they must hold in mind. A refactoring lowers only the part that does not come from the problem itself. A structural slice that lowers it nowhere is taken off.
+_Avoid_: (none — use the term as-is)
+
+**Principle**:
+An aid to judgement in the suite's `principles.md`: it names when it applies, says what to weigh, and shows how it fails. Unlike a foundational rule it does not bind; departing from one needs its reason in the plan or the review.
+_Avoid_: (none — use the term as-is)
+
 **Seam**:
 The public boundary at which a module is tested — where tests observe behaviour without reaching inside.
 _Avoid_: boundary, internal hook
