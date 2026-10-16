@@ -183,7 +183,9 @@ slices touch, the pin is those tests, named; otherwise it is new and is the plan
    when* you can say in two sentences why this spot causes friction; the review later measures reader load
    against those sentences.
 2. **Settle the six, in rounds.** Open are the questions whose prerequisites are settled. Find facts in
-   the code yourself; put each decision with its alternatives and one recommendation — interactive: all
+   the code yourself, and a fact that shows only when something runs — behaviour, output, timing — by
+   running something that changes nothing in the target (its tests, a command, a throwaway script outside
+   the tree), not by asking; put each decision with its alternatives and one recommendation — interactive: all
    open ones of a round to the human in one message, numbered; autonomous: take the recommendation,
    unless the question meets the ADR bar (*Two findings*). An answer may open further questions: next round.
 3. **A pin that costs too much.** Where the behaviour cannot be held at the seam at a reasonable cost, no

@@ -13,3 +13,7 @@ See `../spec.md` for the source and the full list.
 ### 2026-10-16 — gap check against `skills/`: mostly covered
 
 `SKILL.md` *The end of a run* (Status/Next), `reporting-progress.md`, and the "nobody answers" report. Missing: the opening sentence saying how many things need the human, and per action item what happens if unanswered.
+
+### 2026-10-16 — built
+
+Built with 06 in the same PR: the closing report's Status opens with how many things wait for the human (or none); Next gives each waiting thing its recommendation and what happens if nobody answers. The two-line shape and the under-150-words idea were left to the existing plain-words rule; no word limit added. No grilling.

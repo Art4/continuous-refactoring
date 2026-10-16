@@ -77,7 +77,7 @@ A ticket waits while that comment is its newest one. **Answer by commenting on t
 - **"Safety Net is waiting for merges"** — an autonomous run found nothing workable in Safety Net while Safety Net is unfinished. The report lists what is in review. Merge, or name another Track.
 - **Nobody answered** a decision point of an interactive run.
 
-Every run closes with two lines. **Status** says what happened and where it ended; **Next** says what you can do now. Where a claim could not be confirmed — CI still running, checks unreadable — the report says so.
+Every run closes with two lines. **Status** opens with how many things wait for you, or that none does, and says what happened and where it ended; **Next** says what you can do now, and for each thing that waits what the suite recommends and what happens if you do not answer. Where a claim could not be confirmed — CI still running, checks unreadable — the report says so.
 
 ## Running it regularly
 

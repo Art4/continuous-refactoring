@@ -13,3 +13,7 @@ See `../spec.md` for the source and the full list.
 ### 2026-10-16 — gap check against `skills/`: mostly covered
 
 `design-point.md` step 2 of *Planning any other ticket*: "Find facts in the code yourself". Missing only: a fact that needs *running* something (behaviour, output, timing) is observed, not asked.
+
+### 2026-10-16 — built
+
+Built with 07 in PR "Observe first, close short": the design point settles a question about behaviour, output or timing by running something that changes nothing in the target (tests, a command, a throwaway script outside the tree) instead of asking. No grilling — one sentence.
