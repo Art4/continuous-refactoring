@@ -33,7 +33,7 @@ ticket builds on: a forge closes a merge request whose base branch is deleted.
 ## 3. Build
 
 **The target's skill** → run it with this brief: the ticket and its plan, the branch, the review's
-comments where the ticket came with them, `foundational-refactoring-rules.md`, and the outcome wanted —
+comments where the ticket came with them, `foundational-refactoring-rules.md`, `principles.md` as guidance, and the outcome wanted —
 the plan's slices committed on this branch, its `Done when` commands passing. Whether it also opens the
 merge request is its own matter. Then go to step 4.
 
@@ -83,7 +83,10 @@ work.
 
 The diff of the branch against the default branch is reviewed on two axes, per `reviewing-a-change.md`.
 The review may run in a subagent handed that reference, the diff and the plan; it returns findings.
-A finding → back to step 3 for it, then steps 4 and 5 again.
+A finding → back to step 3 for it, then steps 4 and 5 again. A slice that lowers reader load nowhere is
+not reworked: it is taken off the branch. When no slice is left, the run ends without a merge request;
+a comment on the ticket names what the review found, and no rejection is recorded — that stays with a
+human.
 
 A target's skill that built the branch has reviewed it its own way. The suite then reads the diff once
 against the plan; a slice found missing is built the suite's own way (step 3) and checked (step 4).

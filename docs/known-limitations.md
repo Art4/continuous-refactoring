@@ -133,6 +133,7 @@ The closing report's **Status** line always says why. The usual reasons:
 | Nothing is workable in what was asked for | The Track or ticket you named has nothing to work on; a run that was told where to work does not move on | Call without naming it, or name another |
 | An open question is on the ticket | The design met a decision it does not make alone, or found that the work would change behaviour | Reply as a comment on the ticket; the next run reads it |
 | An open question says behaviour cannot be held in a test | The design found no way to pin down what a structural ticket must keep, at a reasonable cost | Reply on the ticket: name another seam, accept a coarser test, or decline the ticket |
+| A run ended with no merge request after the review | The review found that no change made the code easier to follow, so the run took them all off | Read the ticket's comment; decline the ticket, or reword what it asks for |
 | A branch was handed over | No forge, or you chose to push yourself | Merge it, or push and open the merge request |
 | Tools named as out of reach | They wait behind something no ticket can change: a PHP version your project does not allow yet, or a project that is not PHP | Raise the PHP version, or record the rejection the suite proposes |
 | Housekeeping: nothing due | The open ticket's date is not reached | Wait for the date the report names, or say "now" |

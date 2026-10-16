@@ -98,6 +98,10 @@ The parser and the tree docs ship together inside `continuous-refactoring`, so a
 
 The suite works in a project with none of the engineering skills installed: planning, test-first implementation (a test that holds today's behaviour comes before any restructuring) and review each have a procedure of the suite's own, used when the project offers nothing fitting. Likewise, no forge or remote is not an error: the branch is prepared, named in a comment on its ticket, and handed to you.
 
+## Rules and principles
+
+What binds a run without exception is short and checkable. What helps judgement — when a migration needs the old and new side by side, whether a change makes the code easier to follow — is a principle: the suite weighs it, names it in the plan and may depart from it with a reason.
+
 ## Where things live in this repo
 
 - `skills/<skill>/SKILL.md` — the skill itself, kept short; detail lives in `skills/<skill>/references/`.

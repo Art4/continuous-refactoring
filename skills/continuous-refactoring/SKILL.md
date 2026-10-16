@@ -119,7 +119,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 
 ## The end of a run
 
-A run ends when its merge request is open or its branch is handed to the human, when the design cannot
+A run ends when its merge request is open or its branch is handed to the human, when the review leaves no slice
+that makes the code easier to follow, when the design cannot
 proceed without a human answer or finds that the ticket is no refactoring, when nothing is workable, or
 at a decision point nobody answered.
 

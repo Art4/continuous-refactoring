@@ -1,0 +1,1 @@
+A structural refactoring now has to make the code easier to follow: the review takes off any change that lowers the reader's effort nowhere, and the run ends without a merge request when none is left. Judgement aids — reader load, the Strangler Fig, the technique vocabulary — now live in their own principles reference, apart from the few binding rules.
