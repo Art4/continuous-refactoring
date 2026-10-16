@@ -9,3 +9,7 @@ First compare against the current skills: if already covered, close with a note 
 See `../spec.md` for the source and the full list.
 
 ## Comments
+
+### 2026-10-16 — gap check against `skills/`: missing
+
+`reviewing-a-change.md` has a smell table (Speculative Generality → delete) but no "does this diff lower reader load, else revert" test. `foundational-refactoring-rules.md` is five bullets without a "when it applies" trigger, and no report names which principle shaped which decision.
