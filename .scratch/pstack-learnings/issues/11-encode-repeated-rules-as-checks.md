@@ -11,3 +11,7 @@ See `../spec.md` for the source and the full list.
 **Tooling-tree table:** the planned check that every `Requires` parent carries its child's Tracks is a case of this rule and belongs in the validator or parser, not in prose. A tooling node itself is the structured form of a lesson, which supports keeping tools as nodes rather than prose.
 
 ## Comments
+
+### 2026-10-16 — gap check against `skills/`: partial
+
+`scripts/validate_skills.py`, the changelog check and the trigger-control tests exist, and `foundational-refactoring-rules.md` already says "deterministic tools over agents". No habit or step that turns a repeated rule violation into a check.

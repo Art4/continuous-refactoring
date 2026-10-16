@@ -9,3 +9,7 @@ First compare against the current skills: if already covered, close with a note 
 See `../spec.md` for the source and the full list.
 
 ## Comments
+
+### 2026-10-16 — gap check against `skills/`: n/a
+
+Nothing in `skills/`; stays scratch-only research per the memory note.

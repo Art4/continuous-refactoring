@@ -21,6 +21,27 @@ The user's priority order, most important first: 1, 2, 5, 6, 8, 9, 10, 13, 3, 7,
 | 7 | Review-bot comments: assess each on its merits, fix / dismiss with concrete reason / ask; do not churn code for noise | `references/bugbot-triage.md` | issues/10 |
 | 12 | Same rule violated twice → encode as a check (`validate_skills.py`), not another paragraph | `principle-encode-lessons-in-structure` | issues/11 |
 
+## Gap check (2026-10-16)
+
+Read against `skills/continuous-refactoring/` as of `main` after #150; detail in each ticket's comments.
+
+| Ticket | Status |
+|---|---|
+| 01 | partial |
+| 02 | missing |
+| 03 | partial |
+| 04 | partial |
+| 05 | partial |
+| 06 | mostly covered |
+| 07 | mostly covered |
+| 08 | n/a |
+| 09 | conflict to decide |
+| 10 | missing |
+| 11 | partial |
+
+Nothing is fully built; 06 and 07 need only a sentence each. 09 needs a decision first, 04 a word that
+does not collide with **Finding**.
+
 ## Where each item helps
 
 - **Working in the target repo** (changes what a run does there): 1, 2, 3, 4, 5, 6, 7, 9, 10. Of these, 3, 4 and 7 shape what the target's humans read (MR description, findings, catch-up report), so they follow the forge-facing writing rule.

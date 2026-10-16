@@ -9,3 +9,7 @@ First compare against the current skills: if already covered, close with a note 
 See `../spec.md` for the source and the full list.
 
 ## Comments
+
+### 2026-10-16 — gap check against `skills/`: mostly covered
+
+`SKILL.md` *The end of a run* (Status/Next), `reporting-progress.md`, and the "nobody answers" report. Missing: the opening sentence saying how many things need the human, and per action item what happens if unanswered.

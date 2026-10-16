@@ -9,3 +9,7 @@ First compare against the current skills: if already covered, close with a note 
 See `../spec.md` for the source and the full list.
 
 ## Comments
+
+### 2026-10-16 — gap check against `skills/`: missing
+
+`implement-point.md` step 2 treats a merge request's review comments as findings for step 3, i.e. all get fixed. No assess-each, no dismiss-with-reason, no ask.

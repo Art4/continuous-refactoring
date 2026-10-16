@@ -9,3 +9,7 @@ First compare against the current skills: if already covered, close with a note 
 See `../spec.md` for the source and the full list.
 
 ## Comments
+
+### 2026-10-16 — gap check against `skills/`: partial
+
+`reviewing-a-change.md`: every finding is one line and sends the work back; only a smell whose way out exceeds the plan is "named in the MR description and left" (an informal *noted*). No dismissed-with-reason, no agreement signal. Caution: **Finding** in `CONTEXT.md` already means the breaking-change case, so the new buckets need a different word.
