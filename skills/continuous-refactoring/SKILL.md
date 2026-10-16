@@ -126,5 +126,7 @@ at a decision point nobody answered.
 
 Close with two lines, each claim confirmed during this run:
 
-- **Status:** what the run did and where it ended.
-- **Next:** what the human can do now — review and merge, answer the open question, or call again.
+- **Status:** opens with how many things wait for the human, or that none does; then what the run did and
+  where it ended.
+- **Next:** what the human can do now — review and merge, answer the open question, or call again. Each
+  thing that waits gets its recommendation and what happens if nobody answers.
