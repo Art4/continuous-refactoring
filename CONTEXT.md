@@ -147,6 +147,10 @@ _Avoid_: (none — use the term as-is)
 Any change to a target's observable behavior — never shipped under the refactor label; routes to the normal feature/bug path instead (`docs/adr/0004-foundational-refactoring-rules.md`). The suite's refactors are always behavior-preserving by definition; a **Floor raise** (above) is the canonical example of something that looks like tooling-tree housekeeping but is actually this.
 _Avoid_: incompatible change
 
+**Pinning Test** (a *pin*):
+A test written before a structural change that holds the code's current behaviour at its **seam** and passes on the code as it stands — Feathers' characterization test; a snapshot (golden master) or an equivalence script serves too. A type check or a linter is none. The first commit of a structural ticket; not asked of a tooling or baseline ticket.
+_Avoid_: safety test, regression test (a regression test guards a fixed defect)
+
 **Seam**:
 The public boundary at which a module is tested — where tests observe behaviour without reaching inside.
 _Avoid_: boundary, internal hook
@@ -164,7 +168,7 @@ What moves together, and what must not spread? The degree to which related code 
 _Avoid_: (none — use the term as-is)
 
 **Plan**:
-The concrete refactoring plan a **run**'s design point ends with — produced by the target's own planning skill where it has one, else by the suite's fallback: what changes and where, the slices in the order they are built, and the commands that show the work is done — for a structural candidate also the deepened module, its seam, the interface, and the surviving tests. Written on the candidate's ticket so the refactor is delegable; a plan the suite wrote is a comment opening with the word `Plan`.
+The concrete refactoring plan a **run**'s design point ends with — produced by the target's own planning skill where it has one, else by the suite's fallback: what changes and where, the slices in the order they are built, and the commands that show the work is done — for a structural candidate also the deepened module, its seam, the interface, the surviving tests, and the pin. Written on the candidate's ticket so the refactor is delegable; a plan the suite wrote is a comment opening with the word `Plan`.
 _Avoid_: design doc
 
 **Proposals**:

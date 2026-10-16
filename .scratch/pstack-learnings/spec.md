@@ -9,7 +9,7 @@ The user's priority order, most important first: 1, 2, 5, 6, 8, 9, 10, 13, 3, 7,
 
 | # | Idea | pstack source | Ticket |
 |---|------|---------------|--------|
-| 1 | Pin behavior before structure moves (characterization test / snapshot / equivalence harness); type check and lint are not a pin; no coverage → write the pin first | `playbooks/refactoring.md` steps 1, 6 | issues/01 |
+| 1 | Pin behavior before structure moves (characterization test / snapshot / equivalence harness); type check and lint are not a pin; no coverage → write the pin first | `playbooks/refactoring.md` steps 1, 6 | issues/01 (done in the Pinning Test PR), 12 |
 | 2 | Success measure is reduced reader load; a diff that lowers it nowhere is reverted; speculative cleanup is reverted. Includes 11: principles carry a "when it applies" trigger, the report names which principle shaped which decision | `principle-minimize-reader-load`, `refactoring.md` step 7 | issues/02 |
 | 5 | MR report names the one fact the change is safe because of, and how far it was proven (said → line cited → bad case excluded → ran it → reproduced) | `skills/blast-radius` | issues/03 |
 | 6 | Findings triaged into act on / consider / noted / dismissed, each with a reason; independent agreement is the strongest signal | `skills/interrogate` | issues/04 |
