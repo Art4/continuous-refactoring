@@ -64,6 +64,8 @@ Two findings at the design point stop a run instead of guessing:
 - **A decision that is hard to reverse and a real trade-off.** In an interactive run you are asked. An autonomous run plans with a default, leaves the question on the ticket as a comment that opens with `Open question`, and ends.
 - **The work cannot be done without changing behaviour.** A refactoring keeps what the application does. The suite leaves that finding on the ticket as an open question: decline it as refactoring, or turn it into feature work. An autonomous run never declines a ticket by its own judgement.
 
+A third thing leaves a ticket waiting: **a fix that does not hold** at the implementation. When the same failing check or review finding comes back after two attempts, the suite stops, keeps the branch to itself without pushing it, and leaves the account on the ticket in the same way.
+
 A ticket waits while that comment is its newest one. **Answer by commenting on the ticket** — any newer comment ends the wait, and the next run reads it: it lets the plan stand, plans again with the way you named, or asks once more. There is no label to set or remove.
 
 ## How a run ends

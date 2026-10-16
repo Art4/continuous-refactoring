@@ -73,7 +73,9 @@ Run all of these on the branch, after the last commit:
 - every tool the target already runs as a check — static analysis, code style, the ones its CI file
   calls — over the files this branch touched.
 
-A red check → fix it on the branch and run them all again. A check outside the plan's `Done when` that
+A red check → fix it on the branch and run them all again; the fix changes the code, never the check
+(`foundational-refactoring-rules.md`). The same check red again after a second attempt → *A fix that does
+not hold*. A check outside the plan's `Done when` that
 was already red on the default branch is named as such and left alone.
 
 *Done when* every command above ran after the last commit and passed, or is named as red before this
@@ -92,6 +94,24 @@ A target's skill that built the branch has reviewed it its own way. The suite th
 against the plan; a slice found missing is built the suite's own way (step 3) and checked (step 4).
 
 *Done when* the final diff holds every slice of the plan and no finding is left.
+
+## A fix that does not hold
+
+Reached from step 4 or step 5: the same red check, or the same finding, came back after a fix attempt and
+a second attempt did not hold either. No count decides it, only that the run is not getting further.
+
+The branch stays as it is, local: not pushed, no merge request. The run lays out a decision point.
+
+- **Findings:** what failed, what was tried twice, and why it did not hold.
+- **Options:** leave it as an open question on the ticket (the recommendation); the human takes over the
+  branch; end the run.
+- An autonomous run takes the recommendation. An interactive run waits for the answer.
+
+The open question (`design-point.md`, *Open questions*) names the branch and says in plain words what
+was tried and where it fails, then asks how to go on. The ticket waits until a human replies. The closing
+report names the branch and the comment.
+
+The run's checks stay what they were: nothing is deleted, loosened or ignored to turn them green.
 
 ## Slices every kind of ticket can have
 
