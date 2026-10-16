@@ -138,6 +138,15 @@ that way, there are two honest answers — decline it as refactoring, or make it
 which one is a product decision. The suite leaves the finding on the ticket as an open question and
 ends the run. Declining is an option you may choose.
 
+## Why does a structural ticket start with a test, and a tooling ticket does not?
+
+A refactoring promises that behaviour does not change, and that can only be checked against behaviour
+written down beforehand. So the first commit of a structural ticket is a test that holds what the code
+does today and passes before anything moves; written afterwards it would describe the new code and prove
+nothing. A type check or a linter is no substitute. A tooling or baseline ticket lets a tool change the
+code, and your existing test suite is what notices a difference, so it adds none. Where a test cannot be
+written at a reasonable cost, the suite asks you instead of restructuring unchecked.
+
 ## I answered an open question on a ticket — what happens now?
 
 Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your

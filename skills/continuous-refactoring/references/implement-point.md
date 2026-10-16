@@ -45,7 +45,9 @@ merge request is its own matter. Then go to step 4.
 - **A baseline ticket** → fix file by file, one commit per file, following the tool's diagnosis. Then
   regenerate the baseline with the command the plan names and commit it by itself. No test is written:
   the existing suite is what notices a behaviour change.
-- **Any other ticket** → slice by slice, test-first at the plan's seam: write one failing test through the
+- **Any other ticket** → first the pin: where the plan's pin is new, write it, run it on the code as it
+  stands and see it pass, and commit it before any commit moves structure; where it names existing tests,
+  run them the same way. Then slice by slice, test-first at the plan's seam: write one failing test through the
   seam's public interface, watch it fail for the expected reason, write the code that makes it pass,
   commit. Tests go where the target's `tests/README.md` puts them; where that file is missing, the
   target's language may have a layout among the tree docs (`tooling-tree-parser.md` says where they are;
@@ -55,7 +57,11 @@ merge request is its own matter. Then go to step 4.
 **The work turns out to need a behaviour change** → stop building. The branch stays as it is, and the run
 goes to `design-point.md`, the first of the *Two findings*.
 
-*Done when* every slice of the plan is committed on the branch.
+A pin that holds only internals and fails *Tests worth keeping* (`reviewing-a-change.md`) is removed in
+the branch's last commit; any other stays as a test of the target.
+
+*Done when* every slice of the plan is committed on the branch, and for any other ticket the pin's commit
+comes before the first one that moves structure.
 
 ## 4. Checks
 

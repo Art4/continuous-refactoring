@@ -45,7 +45,8 @@ Push the branch and open the merge request against the default branch.
    says, so that merging closes it; without that operation the ticket is named in plain words. A branch
    that delivers a **part** — a baseline ticket with entries left — names the ticket with the word "part"
    and uses no closing reference, and says what stays.
-3. What changed, which checks ran and passed, and for code changes which tests cover it.
+3. What changed, which checks ran and passed, and for code changes which tests cover it. For a structural
+   ticket: the pin, and that it passed before the change.
 4. Decisions of the plan, each in a sentence, with the ADR's path where one was committed.
 5. A recurring task this branch added to the Housekeeping template, in one line; where the branch created
    the template, say that too.

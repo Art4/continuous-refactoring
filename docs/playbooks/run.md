@@ -52,7 +52,7 @@ One change always waits for you, in an autonomous run too: an edit to your proje
 | File tickets (after a scan) | one proposal per tool that is neither in place nor declined, blocked ones included, each with existing tickets on the subject | file them all; you may file some, none, or decline a tool for good |
 | Select | tickets whose tool turned out to be in place already, tickets that cannot be worked and why, the rest in order | close the first group with a note, work the first of the rest |
 | Who plans, who implements | the skills your project offers for it | your project's own; the suite's procedure only as a fallback |
-| The plan | the plan in full: what changes, the slices, the commands that show it is done | post it on the ticket |
+| The plan | the plan in full: what changes, the slices, the commands that show it is done, and for a structural ticket the test that holds today's behaviour first | post it on the ticket |
 | The merge request | branch, commits, the checks that ran, title and description | push and open it |
 
 A decision point with nothing to decide is one sentence instead of a question.

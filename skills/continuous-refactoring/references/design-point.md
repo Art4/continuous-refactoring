@@ -169,21 +169,28 @@ pointing to it.
 
 ## Planning any other ticket
 
-A structural candidate or a ticket a human wrote. Its plan names five things: the **deepened module**
+A structural candidate or a ticket a human wrote. Its plan names six things: the **deepened module**
 (what it becomes, its one job, what disappears behind it), the **seam** (the public edge its tests
 observe through), the **interface** (what it exposes — smaller than what it hides), **locality** (what
-moves together and what must stay put), and the **tests that survive** (which stay, which are rewritten,
-which are new at the seam).
+moves together and what must stay put), the **tests that survive** (which stay, which are rewritten,
+which are new at the seam), and the **pin** (the Pinning Test that holds today's behaviour at the seam
+before structure moves: its kind — a characterization test, a snapshot or an equivalence script — and
+what it holds; a type check or a linter is none. Where the area already has tests that reach the code the
+slices touch, the pin is those tests, named; otherwise it is new and is the plan's first slice).
 
 1. **Ground.** Read the code the ticket names, the target's glossary and the ADRs of that area, and the
    target's `Refactoring goal` line where it has one (`structural-candidate-search.md`, step 1). *Done
    when* you can say in two sentences why this spot causes friction.
-2. **Settle the five, in rounds.** Open are the questions whose prerequisites are settled. Find facts in
+2. **Settle the six, in rounds.** Open are the questions whose prerequisites are settled. Find facts in
    the code yourself; put each decision with its alternatives and one recommendation — interactive: all
    open ones of a round to the human in one message, numbered; autonomous: take the recommendation,
    unless the question meets the ADR bar (*Two findings*). An answer may open further questions: next round.
-3. **Check against the goal.** With a `Refactoring goal`: the design moves the code towards it, or the
+3. **A pin that costs too much.** Where the behaviour cannot be held at the seam at a reasonable cost, no
+   plan is written for it: the pin's kind and the reason go under `Decisions`, and the question is an
+   open question (*Open questions*) — put to the human in an interactive run, left on the ticket in an
+   autonomous one. The agent judges the cost; there is no fixed threshold.
+4. **Check against the goal.** With a `Refactoring goal`: the design moves the code towards it, or the
    plan says why it does not.
 
-*Done when* all five are named, no question is open, and the slices follow the moves of
+*Done when* all six are named, no question is open, and the slices follow the moves of
 `foundational-refactoring-rules.md`.

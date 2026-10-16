@@ -8,7 +8,8 @@ and sends the work back to be fixed.
 
 Does the diff do what the plan on the ticket says? Go through the plan slice by slice and quote the line
 each finding is checked against. Three kinds of finding: a slice missing or half done; a change the plan
-does not ask for; a slice that looks done and does something else. A change in what the target observably
+does not ask for; a slice that looks done and does something else; for a structural ticket, a pin that
+is missing or whose commit comes after the first commit that moves structure (read the order from `git log`). A change in what the target observably
 does is always a finding, whatever the plan says.
 
 ## Standards

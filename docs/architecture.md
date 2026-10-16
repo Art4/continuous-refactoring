@@ -96,7 +96,7 @@ The parser and the tree docs ship together inside `continuous-refactoring`, so a
 
 ## Self-containment
 
-The suite works in a project with none of the engineering skills installed: planning, test-first implementation and review each have a procedure of the suite's own, used when the project offers nothing fitting. Likewise, no forge or remote is not an error: the branch is prepared, named in a comment on its ticket, and handed to you.
+The suite works in a project with none of the engineering skills installed: planning, test-first implementation (a test that holds today's behaviour comes before any restructuring) and review each have a procedure of the suite's own, used when the project offers nothing fitting. Likewise, no forge or remote is not an error: the branch is prepared, named in a comment on its ticket, and handed to you.
 
 ## Where things live in this repo
 
