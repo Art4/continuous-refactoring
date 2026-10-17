@@ -176,7 +176,12 @@ moves together and what must stay put), the **tests that survive** (which stay, 
 which are new at the seam), and the **pin** (the Pinning Test that holds today's behaviour at the seam
 before structure moves: its kind — a characterization test, a snapshot or an equivalence script — and
 what it holds; a type check or a linter is none. Where the area already has tests that reach the code the
-slices touch, the pin is those tests, named; otherwise it is new and is the plan's first slice).
+slices touch, the pin is those tests, named; otherwise it is new and is the plan's first slice). Where
+the seam gives an output that can be compared — text, a file, data — and the reshape reaches over several
+slices behind it, the pin is an equivalence script that runs the old and the new side on the target's own
+sample inputs (fixtures, example files, inputs of its tests; never production data) and compares the
+outputs; the plan says in one sentence why it chose it or why not. No threshold decides this, the agent
+judges it. Where the target has no usable input, the pin is of another kind.
 
 1. **Ground.** Read the code the ticket names, the target's glossary and the ADRs of that area, and the
    target's `Refactoring goal` line where it has one (`structural-candidate-search.md`, step 1). *Done

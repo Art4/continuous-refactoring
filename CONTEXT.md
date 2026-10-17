@@ -148,7 +148,7 @@ Any change to a target's observable behavior — never shipped under the refacto
 _Avoid_: incompatible change
 
 **Pinning Test** (a *pin*):
-A test written before a structural change that holds the code's current behaviour at its **seam** and passes on the code as it stands — Feathers' characterization test; a snapshot (golden master) or an equivalence script serves too. A type check or a linter is none. The first commit of a structural ticket; not asked of a tooling or baseline ticket.
+A test written before a structural change that holds the code's current behaviour at its **seam** and passes on the code as it stands — Feathers' characterization test; a snapshot (golden master) or an equivalence script serves too — the script runs the base commit and the branch on the target's own sample inputs and compares the outputs (back-to-back testing). A type check or a linter is none. The first commit of a structural ticket; not asked of a tooling or baseline ticket.
 _Avoid_: safety test, regression test (a regression test guards a fixed defect)
 
 **Reader load**:
