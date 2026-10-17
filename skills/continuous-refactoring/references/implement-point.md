@@ -52,7 +52,9 @@ merge request is its own matter. Then go to step 4.
   commit. Tests go where the target's `tests/README.md` puts them; where that file is missing, the
   target's language may have a layout among the tree docs (`tooling-tree-parser.md` says where they are;
   PHP: `phpunit.md`, *Test layout*). Which tests are kept: `reviewing-a-change.md`, *Tests worth
-  keeping*.
+  keeping*. After a rename or a move, search the whole repository for the old name — strings, docs,
+  configuration and tests too, not only the references a tool found; a hit is fixed, or named in the
+  merge request because it stays on purpose.
 
 **The work turns out to need a behaviour change** → stop building. The branch stays as it is, and the run
 goes to `design-point.md`, the first of the *Two findings*.
