@@ -21,7 +21,7 @@ Check the working tree first (`../SKILL.md`, *A clean working tree*). Then the f
 
 | Found | The branch |
 | --- | --- |
-| the ticket came with its merge request | that merge request's branch, checked out and up to date; the review's comments are findings for step 3 |
+| the ticket came with its merge request | that merge request's branch, checked out and up to date; the review's comments are triaged (*The review's comments*, below), and what is to be fixed becomes findings for step 3 |
 | a branch for this ticket — named in one of its comments, or carrying its reference — holds commits the default branch lacks, and no merge request ever came from it | that branch; read its commits before adding to them |
 | neither | a new one from the default branch's current tip, named by the target's convention, else `refactor/<ticket reference>-<subject in two or three words>`; for a baseline ticket the subject is the part's name |
 
@@ -114,6 +114,33 @@ was tried and where it fails, then asks how to go on. The ticket waits until a h
 report names the branch and the comment.
 
 The run's checks stay what they were: nothing is deleted, loosened or ignored to turn them green.
+
+## The review's comments
+
+A ticket that comes with its merge request brings the comments on it. They are not all findings. Read them
+with the tool the target's **Merge requests** operation names; where it cannot read them, the closing
+report says so and the run goes on with what it can see. The author type on the forge tells a bot from a
+person; when unsure, a comment counts as a person's.
+
+- **A person's comment** is fixed or answered in its thread, and asked about when it is unclear. The suite
+  never dismisses it on its own.
+- **A bot's comment** is first checked where that is cheap: when it cites a test or a command, run it. Then:
+  - **fix** — it names a plausible defect, a change in behaviour, or a real breach of the target's
+    standards;
+  - **dismiss** — it is wrong, noise, or contradicts the plan, the pin or a principle (a method to extract
+    that has one caller, against `principles.md`, *Reader load*). The reason is concrete;
+  - **ask** — it is new, serious, or unclear. In doubt, ask. Whatever touches security, privacy,
+    authentication, permissions, a migration, idempotency or concurrency is asked, never dismissed.
+
+The comments with their class are the decision point's findings; the options are to go on as classified
+(the recommendation), to change some, or to leave all to the human. An autonomous run may dismiss a bot's
+comment with its reason, and turns each *ask* into an open question on the ticket (`design-point.md`,
+*Open questions*).
+
+Under each comment handled, one short reply in plain words: for a fix the commit, for a dismissal the
+reason, following `forge-facing-writing.md`. The suite does not resolve threads; that stays with the
+reviewer. What the target wants kept as a standing pattern belongs in its own `AGENTS.md`, which the suite
+reads; it keeps no list of its own.
 
 ## Slices every kind of ticket can have
 
