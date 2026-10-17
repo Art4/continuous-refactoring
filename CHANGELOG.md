@@ -4,6 +4,21 @@ All notable changes to this project are documented here. Format inspired by
 [Keep a Changelog](https://keepachangelog.com/), kept flat (no `Added`/`Changed`/`Fixed`
 subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries are produced.
 
+## [0.8.0] - 2026-10-17
+
+- A structural refactoring ticket now starts with a Pinning Test — a test that holds today's behaviour and passes before any restructuring — which the plan names, the review checks, and the merge request reports; where none can be written at a reasonable cost, the run asks instead of restructuring unchecked.
+- For a restructuring that reaches over several steps behind one edge, the plan can pin the behaviour with a script that runs the old and the new code on the project's own sample inputs and compares the outputs; the merge request says on how many inputs they agreed.
+- A structural refactoring now has to make the code easier to follow: the review takes off any change that lowers the reader's effort nowhere, and the run ends without a merge request when none is left. Judgement aids — reader load, the Strangler Fig, the technique vocabulary — now live in their own principles reference, apart from the few binding rules.
+- Plans now tell apart an API someone outside depends on (replaced piece by piece, old and new side by side) from an internal one (all callers moved and the old API deleted in one step), remove dead code before reshaping, and every rename is searched for across strings, docs and configuration.
+- When a restructuring renames, moves or deletes something that can be referred to from outside the tested interface, the merge request now states the one fact the change is safe because of and how far it was proved — or that it is not proved.
+- A plan for a tooling ticket now estimates how big its merge request would be and, where a person could not review it, is cut into parts at a seam of kind or risk, each worth merging alone.
+- The suite's own review now sorts its findings into fix, note and dismiss: what the plan cannot fix is named in the merge request, a dismissal carries its reason in the closing report, and a finding against the plan is never dismissed.
+- When a run works a ticket that already has a merge request, it now sorts the review comments instead of fixing all of them: a bot's comment is checked and then fixed, dismissed with a reason, or asked about (security, data and permissions are always asked); a person's comment is fixed or answered, never dismissed; each handled comment gets a short reply, and threads are left for the reviewer to resolve.
+- A run now stops when the same failing check or review finding survives two fix attempts: the branch stays local, the ticket gets an open question in plain words, and no check is deleted, loosened or ignored to get green.
+- The design now settles a question about behaviour, output or timing by running something harmless instead of asking you, and a run's closing report opens with how many things wait for you and says what is recommended and what happens if you do not answer.
+- A PHPStan baseline ticket's merge request may now add a new baseline entry as long as the baseline gets shorter overall, and names it; a finding to ignore for good, or a baseline that would not get shorter, becomes an ignore rule in `phpstan.neon` only after the human allows it.
+- Contributors are told to turn a rule that is broken twice into a check, and the validator now checks that README and docs cite no ADR or PR numbers and no scratch files.
+
 ## [0.7.0] - 2026-10-14
 
 - **Breaking, for 0.7.0:** the suite is rebuilt around one **run** of decision points, with all state in your tracker and forge. `/continuous-refactoring` now leads from your open refactoring tickets to one opened merge request and, at every step — reconcile, Track choice, scan, filing tickets, selecting, design, implementation, merge request — shows what it found, the options and one recommendation. By default you decide each time; say in the call that it should do the run itself ("do it yourself"), or mid-run "carry on yourself from here", and it takes its own recommendations. The call also takes a Track, a ticket or a restriction ("only the Rector tools") in your own words. The suite keeps no state of its own any more: the config file, the bookkeeping document (local and remote), `Ticket-create-mode`, `MR-create-mode` and the Track cadences are gone, and so are the limits of two open merge requests and five open candidates. Tickets are found by their subject instead of a fixed label or title, a ticket you wrote yourself is picked up through a **Candidate** mark or by naming it, and a Track is scanned once — afterwards its tickets are the record. Where your project has its own skills for planning and implementing, a run recommends those and uses the suite's procedures as a fallback. Housekeeping is now one standing ticket made from a template in your repository, with a rhythm you choose, refactoring ideas left on it as comments, and its own command `/continuous-housekeeping` that can be scheduled and that an agent may start by itself. The suite is two skills, `continuous-refactoring` and `continuous-housekeeping`; the nine others are removed. The operations in `docs/agents/issue-tracker.md` change their cut: **Search** is new and required; **Rejected**, **Blocked by** and **Housekeeping** are new and optional; **Bookkeeping**, **Filed date** and **Comment author and time** are removed.
@@ -429,6 +444,7 @@ Initial release.
   (#33)
 - Repo prepared for going public. (#37)
 
+[0.8.0]: https://github.com/Art4/continuous-refactoring/compare/0.7.0...0.8.0
 [0.7.0]: https://github.com/Art4/continuous-refactoring/compare/0.6.0...0.7.0
 [0.6.0]: https://github.com/Art4/continuous-refactoring/compare/0.5.0...0.6.0
 [0.5.0]: https://github.com/Art4/continuous-refactoring/compare/0.4.0...0.5.0

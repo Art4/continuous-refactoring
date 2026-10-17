@@ -1,1 +1,0 @@
-Plans now tell apart an API someone outside depends on (replaced piece by piece, old and new side by side) from an internal one (all callers moved and the old API deleted in one step), remove dead code before reshaping, and every rename is searched for across strings, docs and configuration.

@@ -1,1 +1,0 @@
-A structural refactoring ticket now starts with a Pinning Test — a test that holds today's behaviour and passes before any restructuring — which the plan names, the review checks, and the merge request reports; where none can be written at a reasonable cost, the run asks instead of restructuring unchecked.
