@@ -164,6 +164,15 @@ a fix and then after a second attempt. At that point the suite stops, keeps the 
 pushing it, leaves a plain-words account on the ticket and waits for your answer. It never turns a check
 green by deleting or loosening it.
 
+## Why is the old API sometimes kept beside the new one and sometimes deleted at once?
+
+It depends on who else uses it. Where something outside the project depends on the old interface — a
+published library's public API, a documented contract — the suite replaces it piece by piece and keeps old
+and new side by side until the swap is done, because deleting it would break users. Where every caller is in
+the project and nothing outside relies on it, the suite moves all callers and deletes the old API in the
+same step, so no compatibility layer is left behind. When it cannot tell, it assumes someone depends on it.
+The plan says which case it found.
+
 ## I answered an open question on a ticket — what happens now?
 
 Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your

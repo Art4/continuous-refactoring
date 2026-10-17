@@ -24,13 +24,35 @@ two places and learned nothing.
 
 ## Strangler Fig
 
-**Applies when** a migration is too wide to replace in one reviewable step, or legacy code cannot be
-swapped at once.
+**Applies when** old and new have to live side by side: something outside this repository depends on the
+old API (a published library's public interface, a documented or marked-public contract), or the
+migration is too wide to replace in one reviewable step. When in doubt whether something outside depends
+on it, treat it as depended on.
 
 Replace the old piece by piece, old and new working side by side until the swap is complete — never a
 big-bang rewrite.
 
 *Fails when* a rewrite lands in one merge request nobody can review.
+
+## Migrate callers, then delete
+
+**Applies when** a new internal API replaces an old one, every caller of the old one is in this
+repository, and nothing outside depends on it. The plan records that call under `Decisions`.
+
+Move every caller to the new API and delete the old one in the same wave: no shim, no parallel old and
+new path. Tests that only protected the old implementation go with it; the pin at the seam stays.
+
+*Fails when* the "internal" API was in fact someone else's contract: deleting it breaks a user of the
+library, which no refactoring may do.
+
+## Subtract before you add
+
+**Applies when** a plan sequences a reshape, an addition or a rewrite.
+
+Remove what is dead first — unused code, a wrapper with one caller, a validator nobody needs — then
+reshape on the simpler base, then do the follow-up. After the pin, the commits run in that order.
+
+*Fails when* a new layer is built around dead code that would have been cheaper to delete.
 
 ## Technique vocabulary
 
