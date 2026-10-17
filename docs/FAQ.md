@@ -183,6 +183,15 @@ person is a different matter: it is fixed or answered, and the suite never dismi
 each comment it handles it leaves a short reply, and it does not mark threads as resolved — that is the
 reviewer's.
 
+## Why does a merge request say why a change is safe?
+
+The test that pins behaviour covers what a user of the code sees. A rename, a move or a deletion can still
+break something the test never reaches: a name in a string, a configuration file, a container entry, stored
+data. So where a change touches such a name, the description states the one fact it is safe because of and
+how far that was proved — read in the source, shown that the bad case cannot occur, run, or reproduced in
+the application. What could not be proved is said to be unproved, so the reviewer knows where to look.
+Other changes get no such paragraph.
+
 ## I answered an open question on a ticket — what happens now?
 
 Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your
