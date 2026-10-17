@@ -138,6 +138,16 @@ that way, there are two honest answers — decline it as refactoring, or make it
 which one is a product decision. The suite leaves the finding on the ticket as an open question and
 ends the run. Declining is an option you may choose.
 
+## Why does a plan cut a ticket into several merge requests?
+
+A merge request is only as good as the review it gets. A tool that rewrites two hundred files in one go is
+reviewable when every file changes the same way and unreviewable when the changes differ. So the plan
+estimates the size first and, where one merge request would be too much, cuts at the seam of kind or risk:
+rewrites that only restate the code on one side, rules that change what the code does on the other. Each
+part stands on its own, and the plan says in a sentence where it cuts and why. There is no file count,
+because the same count can be easy or hard. What the ticket's goal does not need is proposed as a ticket
+of its own instead of riding along.
+
 ## Why does a structural ticket start with a test, and a tooling ticket does not?
 
 A refactoring promises that behaviour does not change, and that can only be checked against behaviour
