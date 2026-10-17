@@ -34,7 +34,9 @@ what to look for? Where not, cut the work into parts at a seam of kind or risk: 
 the code apart from rules that change what it does (stricter tests, cases the plan had to skip); a rule
 that touches a large part of the code on its own; the switch to the tool's prepared set together with the
 configuration, last. Each part leaves the branch green and is worth merging without the others. The
-plan's *This merge request* names the part, what stays, and in one sentence why the cut is there. A node's
+plan's *This merge request* names the part, what stays, and in one sentence why the cut is there. Work the
+goal of the ticket does not need is proposed as a ticket of its own, through the usual finding at the
+design point, and does not ride along. A node's
 **MR scope** is the most one merge request holds, never the least.
 
 *Fails when* the parts are so small that a reviewer has to hold several to understand one, or a cut is made

@@ -66,6 +66,10 @@ Some tools can get no ticket at the moment: one that needs a newer PHP than your
 
 Right before a tooling ticket is worked, its tool is judged once more. If you set it up by hand since the ticket was filed, the ticket is closed with a note saying what serves it now, and selection moves on to the next. An Investigation ticket gets the same kind of check: does the module it names still exist, is the friction still there?
 
+### A tooling ticket that is too big for one merge request
+
+A tool's change can touch so many files that nobody could review it as one. The plan then estimates the size, cuts the work into parts where the kind or the risk of the change differs — rewrites that only restate the code apart from rules that change what it does — and names in a sentence why the cut is there. Each part is a merge request of its own that is worth merging without the others. The ticket stays open until the last part is merged. Work the tool does not need for its goal can become a ticket of its own, which the run proposes to you first.
+
 ### A PHPStan baseline
 
 A PHPStan level whose baseline still holds findings does not block the suite silently. The scan proposes one ticket, "PHPStan Level N: shrink the baseline", and the next level's ticket is blocked by it. That ticket takes one merge request after another, each removing one group of findings at their cause, and closes with the one that empties the baseline. A merge request may add a new baseline entry when the baseline still gets shorter overall, and names it. A finding that should stay ignored, or a baseline that would not get shorter, becomes an ignore rule in `phpstan.neon` — only once you have allowed it.

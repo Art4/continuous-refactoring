@@ -1,7 +1,7 @@
 # 13 — A merge request a person can review
 
 Type: task
-Status: open
+Status: done
 
 Found in a real run on a Rector ticket: a tooling ticket produced one merge request of 221 files and 69 commits, and a later plan for a similar ticket planned one merge request of about 144 files without weighing whether a person can review it. The node's MR scope ("adopted in levels, one MR per level") does not bound the size, and nothing in the skills asks the plan to estimate it or to cut it.
 
@@ -12,3 +12,13 @@ Add a principle (not a rule): estimate the size, cut at a seam of kind or risk, 
 ### 2026-10-17 — draft built, to be checked by a second planning run
 
 Built as a draft before grilling so a second plan run on the same ticket can compare against the first (which planned one merge request): `principles.md` (*A merge request a person can review*), `design-point.md` (*Planning a tooling ticket*: estimate, cut, parts listed in order, a later run takes the first part not yet on the default branch), `opening-a-merge-request.md` (a tooling ticket's part). Open for the grilling after the comparison: a number as anchor or none; whether the review should flag a branch that mixes kinds beyond the plan's cut; baseline tickets (already cut by part); structural tickets.
+
+### 2026-10-17 — checked in real runs; grilled; decisions
+
+- Real runs on two Rector tickets of a target: before the draft one merge request of about 144 files; after it both plans were cut by kind of change, with the cut and its reason stated (a ticket's own-goal-irrelevant work went to a ticket of its own through the design point's finding). The runs read the new text before planning.
+- A principle, no number as anchor; the question "can the reviewer say, for each commit, what to look for?" decides. A node's MR scope is the most one merge request holds.
+- No new review hint (the Spec axis already flags changes the plan does not ask for). The sentence on a single rule touching very many files stays as it is until another case calls for more.
+- Work the ticket's goal does not need is proposed as a ticket of its own through the usual finding.
+- Applies to planning a tooling ticket; baseline tickets cut by part already, structural tickets by slice, Housekeeping unchanged.
+- A plan that lists parts is built one part at a time: the first not yet on the default branch; a tooling ticket's part is named as such in its merge request.
+- Docs: FAQ entry, a section in the tracks playbook, changelog fragment. No ADR, no glossary word.

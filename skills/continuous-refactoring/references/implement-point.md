@@ -23,7 +23,10 @@ Check the working tree first (`../SKILL.md`, *A clean working tree*). Then the f
 | --- | --- |
 | the ticket came with its merge request | that merge request's branch, checked out and up to date; the review's comments are triaged (*The review's comments*, below), and what is to be fixed becomes findings for step 3 |
 | a branch for this ticket — named in one of its comments, or carrying its reference — holds commits the default branch lacks, and no merge request ever came from it | that branch; read its commits before adding to them |
-| neither | a new one from the default branch's current tip, named by the target's convention, else `refactor/<ticket reference>-<subject in two or three words>`; for a baseline ticket the subject is the part's name |
+| neither | a new one from the default branch's current tip, named by the target's convention, else `refactor/<ticket reference>-<subject in two or three words>`; for a baseline ticket, or a plan cut into parts, the subject is the part's name |
+
+A plan that lists parts is built one part at a time: the first part whose commits are not yet on the default
+branch.
 
 A new branch always starts from the default branch, also when another open merge request holds work this
 ticket builds on: a forge closes a merge request whose base branch is deleted.
