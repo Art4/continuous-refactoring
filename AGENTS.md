@@ -21,6 +21,10 @@ A noteworthy, user-visible change (`skills/**`, `docs/**`, `CONTEXT.md`, `README
 `.changelog.d/<slug>.md` fragment — CI enforces this. See `CONTRIBUTING.md`'s "Changelog" section
 for the fragment convention and the release recipe that consolidates them into `CHANGELOG.md`.
 
+### A rule broken twice becomes a check
+
+When a rule is violated a second time, add it to `scripts/validate_skills.py` with a unit test instead of restating it in prose (`CONTRIBUTING.md`). `validate_skills.py` already checks that `README.md` and `docs/**` cite no ADR or PR numbers and no `.scratch/` paths.
+
 ### Docs stay in sync
 
 A change to a skill's behaviour is done only when every human-facing doc that describes it reads true against the change — in the same PR. `grep` the changed skill, Track, or term across `README.md` and `docs/` (outside `docs/adr/`) and update each hit:

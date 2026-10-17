@@ -35,6 +35,10 @@ they define the vocabulary and the shape of the suite: two skills, a run as a ch
 and everything else a reference one of them loads. The `docs/adr/` directory
 records why past design decisions were made; check it before re-litigating one.
 
+**A rule broken twice becomes a check.** When the same rule is violated a second time, or a review
+raises it a second time, do not add another paragraph: encode it as a check in `scripts/validate_skills.py`
+(or a test beside it), with a unit test of its own. What no tool can decide stays a written rule.
+
 ## Changelog
 
 If your change has a noteworthy, user-visible effect — a new or changed skill capability, a
