@@ -343,6 +343,29 @@ class TicketRefTests(unittest.TestCase):
         self.assertEqual(vs.ticket_ref_issues("_Avoid_: task, ticket, todo"), [])
 
 
+class DocCitationTests(unittest.TestCase):
+    def test_adr_number_flagged(self):
+        self.assertEqual(len(vs.doc_citation_issues("Decided in ADR-0012.", "docs/x.md")), 1)
+
+    def test_adr_path_flagged(self):
+        self.assertEqual(len(vs.doc_citation_issues("See docs/adr/0012-foo.md.", "docs/x.md")), 1)
+
+    def test_pr_number_flagged(self):
+        self.assertEqual(len(vs.doc_citation_issues("Fixed in PR #12.", "docs/x.md")), 1)
+
+    def test_scratch_path_flagged(self):
+        self.assertEqual(len(vs.doc_citation_issues("See `.scratch/foo/a.md`.", "docs/x.md")), 1)
+
+    def test_scratch_path_allowed_where_exempt(self):
+        self.assertEqual(vs.doc_citation_issues("Log in `.scratch/x/findings.md`.", "docs/x.md", scratch_allowed=True), [])
+
+    def test_ticket_call_example_is_fine(self):
+        self.assertEqual(vs.doc_citation_issues('Name it in the call: "ticket 42".', "README.md"), [])
+
+    def test_directory_mention_is_fine(self):
+        self.assertEqual(vs.doc_citation_issues("Record an ADR in docs/adr/.", "docs/x.md"), [])
+
+
 class VocabTests(unittest.TestCase):
     def test_glossary_parsed(self):
         glossary = vs.parse_glossary(

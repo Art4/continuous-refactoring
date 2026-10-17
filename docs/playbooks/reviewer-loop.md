@@ -56,7 +56,8 @@ mid-run without the human explicitly changing it.
   itself runs from — a research/observation artifact, not a canonical doc. One entry per round with a
   timestamp, plus its own `### Finding …` / `## ⚠️ Auffälligkeit` sections for anything outside the
   normal rhythm. Delete or fold into a proper fix once a finding's learnings are actually acted on —
-  don't let it become a second, stale backlog.
+  don't let it become a second, stale backlog. A violation that stands in the log for the second time is
+  named to the maintainer as a check the suite's validator lacks.
 
 ## Loop mechanics
 

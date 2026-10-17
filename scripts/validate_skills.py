@@ -352,6 +352,33 @@ def scratch_ref_issues(text, skill=""):
     return issues
 
 
+
+# Human-facing docs: README.md and docs/** except the maintainer-only trees.
+DOC_CITATION_EXEMPT_DIRS = ("docs/adr/", "docs/agents/")
+# The one place a `.scratch/` path is the subject, not a citation.
+DOC_SCRATCH_ALLOW = frozenset({"docs/playbooks/reviewer-loop.md"})
+
+
+def doc_citation_issues(text, path, scratch_allowed=False):
+    """README.md and docs/** explain in their own words: no ADR number, no
+    ``docs/adr/NNNN-…`` path, no ``PR #N``, no ``.scratch/`` path. ``ticket 42``
+    stays legal there — it is the example of how to name a ticket in a call —
+    so ticket_ref_issues is not reused."""
+    issues = []
+    for m in re.finditer(r"ADR-\d{4}|docs/adr/\d{4}-|\bPR\s*#\d+\b|\bpull request\s*#\d+\b", text):
+        issues.append(Issue(
+            path,
+            f"human-facing doc cites '{m.group(0)}' — docs explain in their own words and "
+            "cite no ADR or PR numbers",
+        ))
+    if not scratch_allowed and ".scratch/" in text:
+        issues.append(Issue(
+            path,
+            "human-facing doc names a '.scratch/' path — docs cite no ticket or scratch files",
+        ))
+    return issues
+
+
 # --------------------------------------------------------------------------
 # Glossary vocabulary
 # --------------------------------------------------------------------------
@@ -785,6 +812,16 @@ def validate_repo(repo_root):
             issues += ticket_ref_issues(text, skill=rel)
             issues += adr_issues(text, skill=rel)
             issues += scratch_ref_issues(text, skill=rel)
+
+    # --- human-facing docs ---
+    doc_paths = [repo_root / "README.md"] + sorted((repo_root / "docs").rglob("*.md"))
+    for f in doc_paths:
+        if not f.is_file():
+            continue
+        rel = f.relative_to(repo_root).as_posix()
+        if rel.startswith(DOC_CITATION_EXEMPT_DIRS):
+            continue
+        issues += doc_citation_issues(f.read_text(), rel, scratch_allowed=rel in DOC_SCRATCH_ALLOW)
 
     # --- Tier 2: semantic checks ---
     adr_dir = repo_root / "docs" / "adr"
