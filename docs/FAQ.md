@@ -173,6 +173,16 @@ the project and nothing outside relies on it, the suite moves all callers and de
 same step, so no compatibility layer is left behind. When it cannot tell, it assumes someone depends on it.
 The plan says which case it found.
 
+## Why doesn't the suite just do what a review bot asks?
+
+A bot finds real defects and also files comments that are wrong or only noise, and acting on all of them
+makes changes that nobody wanted. So the suite checks each bot comment first, running the test or command it
+cites where that is cheap, and sorts it: fix it, dismiss it with a concrete reason, or ask you. Anything
+about security, data, permissions, migrations or concurrency is asked, never dismissed. A comment from a
+person is a different matter: it is fixed or answered, and the suite never dismisses it by itself. Under
+each comment it handles it leaves a short reply, and it does not mark threads as resolved — that is the
+reviewer's.
+
 ## I answered an open question on a ticket — what happens now?
 
 Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your
