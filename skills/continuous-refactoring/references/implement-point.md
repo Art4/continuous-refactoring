@@ -56,6 +56,11 @@ merge request is its own matter. Then go to step 4.
   configuration and tests too, not only the references a tool found; a hit is fixed, or named in the
   merge request because it stays on purpose.
 
+An equivalence script as pin runs the old side from the base commit, in a throwaway worktree outside the
+tree, and the new side from the branch, on the same inputs. The outputs are equal. It runs again with every
+pass of the checks (step 4); a difference is a red check, so the code is fixed, never the script. The script
+is thrown away unless it meets *Tests worth keeping*.
+
 **The work turns out to need a behaviour change** → stop building. The branch stays as it is, and the run
 goes to `design-point.md`, the first of the *Two findings*.
 

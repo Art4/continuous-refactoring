@@ -147,6 +147,16 @@ nothing. A type check or a linter is no substitute. A tooling or baseline ticket
 code, and your existing test suite is what notices a difference, so it adds none. Where a test cannot be
 written at a reasonable cost, the suite asks you instead of restructuring unchecked.
 
+## Why does the suite sometimes compare the old and the new code on real inputs?
+
+A test only covers the cases someone thought of. When a restructuring reaches over several steps behind
+one edge and the result is something comparable — text, a file, data — the first commit can be a script
+instead: it runs the code as it was and the code as it is now on the project's own sample inputs and
+compares what comes out. A difference is a mistake in the change, because a refactoring allows none.
+It uses only what the project already has — fixtures, example files, inputs of its tests — and never
+production data; without a usable input, an ordinary test holds the behaviour. The script is thrown away
+afterwards unless it would still be a good test.
+
 ## Why are some things rules and others only principles?
 
 A rule is what a run must hold to without exception, and can be checked: a refactoring keeps behaviour, a

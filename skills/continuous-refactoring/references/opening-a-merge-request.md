@@ -47,7 +47,8 @@ Push the branch and open the merge request against the default branch.
    that delivers a **part** — a baseline ticket with entries left — names the ticket with the word "part"
    and uses no closing reference, and says what stays.
 3. What changed, which checks ran and passed, and for code changes which tests cover it. For a structural
-   ticket: the pin, and that it passed before the change, and in plain words where the code became
+   ticket: the pin, and that it passed before the change (for an equivalence script: on how many inputs old
+   and new gave the same output, or that no usable input was found and another pin was used), and in plain words where the code became
    easier to follow. The review's notes, each in a sentence: what was seen and why it was left.
 4. Where the implement point named one: why the change is safe, in plain words — the one fact, and how
    far it was proved (read in the source, shown that the bad case cannot occur, run, reproduced), or that
