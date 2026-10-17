@@ -1,0 +1,1 @@
+The suite's own review now sorts its findings into fix, note and dismiss: what the plan cannot fix is named in the merge request, a dismissal carries its reason in the closing report, and a finding against the plan is never dismissed.

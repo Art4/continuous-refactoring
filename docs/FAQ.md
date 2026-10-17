@@ -156,6 +156,16 @@ whether a change makes the code easier to follow. An agent weighs it and says in
 which one changed a decision. Treating such calls as rules produces changes that are correct and make
 nothing better, which is why a change that makes the code no easier to follow is taken off.
 
+## Why are not all of the review's findings fixed?
+
+The suite's own review sorts what it finds. A finding that the plan's slices can fix goes back to be
+fixed. One that is right but needs more than the plan is named in the merge request and left, so the
+change stays the size you agreed to. One that turns out to be none, because your project's documented
+standard endorses the pattern, is dismissed with its reason in the closing report. What the plan did not
+ask for, or a change in what the application does, is never dismissed. The suite does not stop to ask
+about the grey cases, because an autonomous run could not answer; the closing report lists every
+dismissal, so you or the agent that started the run can overrule one.
+
 ## Why does a run give up after the same failure comes back, not after a number of tries?
 
 A fixed number of rounds is arbitrary: two might be too few for a hard bug and too many for a dead end.
