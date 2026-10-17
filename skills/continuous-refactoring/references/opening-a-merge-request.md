@@ -2,7 +2,8 @@
 
 The last link of a run: the branch with green checks becomes an open merge request, or is handed to the
 human where there is no forge. Used by the run and by the Housekeeping Track. Handed in: the ticket, the
-branch, its commits, the checks that ran, and whether the branch delivers the whole ticket or a part.
+branch, its commits, the checks that ran, whether the branch delivers the whole ticket or a part, and where there is one the fact the change is safe
+because of with how far it was proved.
 Commands come from the tool the target's **Merge requests** operation names; the description follows
 `forge-facing-writing.md`. Towards the human, say the forge's own word (pull request on GitHub).
 
@@ -48,8 +49,11 @@ Push the branch and open the merge request against the default branch.
 3. What changed, which checks ran and passed, and for code changes which tests cover it. For a structural
    ticket: the pin, and that it passed before the change, and in plain words where the code became
    easier to follow.
-4. Decisions of the plan, each in a sentence, with the ADR's path where one was committed.
-5. A recurring task this branch added to the Housekeeping template, in one line; where the branch created
+4. Where the implement point named one: why the change is safe, in plain words — the one fact, and how
+   far it was proved (read in the source, shown that the bad case cannot occur, run, reproduced), or that
+   it is not proved and what a reviewer should check.
+5. Decisions of the plan, each in a sentence, with the ADR's path where one was committed.
+6. A recurring task this branch added to the Housekeeping template, in one line; where the branch created
    the template, say that too.
 
 *Done when* the merge request is open and reported with its link.

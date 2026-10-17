@@ -1,0 +1,1 @@
+When a restructuring renames, moves or deletes something that can be referred to from outside the tested interface, the merge request now states the one fact the change is safe because of and how far it was proved — or that it is not proved.

@@ -80,8 +80,19 @@ A red check → fix it on the branch and run them all again; the fix changes the
 not hold*. A check outside the plan's `Done when` that
 was already red on the default branch is named as such and left alone.
 
+**The one fact.** For a structural ticket that renames, moves or deletes something that can be referred to
+from outside the seam — by a string, configuration, a container, serialisation, reflection, another
+language — name the one fact the change is safe because of, and prove it as far as is cheap, best with a
+small script or test that calls the real code. Three steps up from nothing: read in the source (file and
+line); shown that the bad case cannot occur; run. A fourth, reproduced in the running application, where
+that is cheap. "Said" is no step. What stays unproved is recorded as unproved. A script is thrown away
+unless it meets *Tests worth keeping* (`reviewing-a-change.md`), then it stays as a test. Where the fact
+touches security, privacy, authentication, permissions, a migration, idempotency or concurrency and stays
+unproved, the run asks (`design-point.md`, *Open questions*) instead of going on. Not asked of a tooling
+or baseline ticket.
+
 *Done when* every command above ran after the last commit and passed, or is named as red before this
-work.
+work, and where the paragraph above applies the fact is named with how far it was proved.
 
 ## 5. Review
 
@@ -159,7 +170,8 @@ The plan lists them where they apply; they are built in step 3 like any slice, e
 
 ## Hand on
 
-To the merge-request step, which names what it needs.
+To the merge-request step, which names what it needs: with the branch, the one fact and how far it was
+proved, where step 4 asked for one.
 
 The implement point is done when the branch holds every slice and step 4's checks are green on its last
 commit.

@@ -123,7 +123,9 @@ keeping.
 - **An idea** → one or more commits that hold this idea and nothing else, each a move of
   `foundational-refactoring-rules.md`; the target's tests are green before the first and after each, and one of them reaches the code the
   idea touches (the pin; none does → tick the task as not workable). A commit that makes the code no
-  easier to follow comes off the branch (`principles.md`, *Reader load*). An
+  easier to follow comes off the branch (`principles.md`, *Reader load*). An idea that renames, moves or
+  deletes something referred to from outside the seam names the one fact it is safe because of
+  (`implement-point.md`, step 4). An
   idea that turns out too big or no refactoring while it is built: take its commits off the branch, tick
   its task with that result, and class it anew for step 6.
 - **A task with no clean way through** — an advisory without a patched version, an update that cannot be
