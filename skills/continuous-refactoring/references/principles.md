@@ -22,6 +22,24 @@ two places and learned nothing.
 
 *Source:* Zakirullin, "Cognitive Load in Software Development" (https://minds.md/zakirullin/cognitive).
 
+## A merge request a person can review
+
+**Applies when** planning a tooling or baseline ticket, or any plan whose branch will touch many files.
+
+A reviewer reads every file, or can check that every file follows a pattern they have understood. What
+keeps a merge request reviewable is its kinds of change, not only its size: a tool run that rewrites many
+files the same way is reviewable at a large count, the same count of different changes is not. Estimate
+the size first (the tool's dry run, a count of the files) and ask: can the reviewer say, for each commit,
+what to look for? Where not, cut the work into parts at a seam of kind or risk: rules that only restate
+the code apart from rules that change what it does (stricter tests, cases the plan had to skip); a rule
+that touches a large part of the code on its own; the switch to the tool's prepared set together with the
+configuration, last. Each part leaves the branch green and is worth merging without the others. The
+plan's *This merge request* names the part, what stays, and in one sentence why the cut is there. A node's
+**MR scope** is the most one merge request holds, never the least.
+
+*Fails when* the parts are so small that a reviewer has to hold several to understand one, or a cut is made
+by file count alone, one merge request per rule.
+
 ## Strangler Fig
 
 **Applies when** old and new have to live side by side: something outside this repository depends on the

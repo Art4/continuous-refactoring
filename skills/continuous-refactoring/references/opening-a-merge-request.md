@@ -44,7 +44,8 @@ Push the branch and open the merge request against the default branch.
    the project gains.
 2. The ticket. A branch that delivers the **whole** ticket refers to it the way **Linked merge request**
    says, so that merging closes it; without that operation the ticket is named in plain words. A branch
-   that delivers a **part** — a baseline ticket with entries left — names the ticket with the word "part"
+   that delivers a **part** — a baseline ticket with entries left, or a tooling ticket whose plan was cut —
+   names the ticket with the word "part"
    and uses no closing reference, and says what stays.
 3. What changed, which checks ran and passed, and for code changes which tests cover it. For a structural
    ticket: the pin, and that it passed before the change (for an equivalence script: on how many inputs old

@@ -135,8 +135,13 @@ real paths, the existing CI file, the package manager's commands, the tool's cur
 a **Housekeeping** field gets one more slice for it (`implement-point.md`, *Slices every kind of ticket
 can have*).
 
-*Done when* every part of the MR scope is a slice and `Done when` repeats the Fulfilment check as
-commands.
+Before the slices, estimate the size of what the scope holds — the tool's dry run on the target, or a
+count of the files — and weigh it against `principles.md`, *A merge request a person can review*. Where
+one merge request is too much, the plan is cut into parts, listed in order, and *This merge request* names
+the first; a later run works the first part whose commits are not yet on the default branch.
+
+*Done when* every part of the MR scope is a slice (or belongs to a listed part), the size and the cut or
+its absence are stated in a sentence, and `Done when` repeats the Fulfilment check as commands.
 
 ## Planning a baseline ticket
 
