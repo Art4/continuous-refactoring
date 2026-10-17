@@ -1,1 +1,0 @@
-The design now settles a question about behaviour, output or timing by running something harmless instead of asking you, and a run's closing report opens with how many things wait for you and says what is recommended and what happens if you do not answer.

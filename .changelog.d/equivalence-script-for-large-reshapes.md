@@ -1,1 +1,0 @@
-For a restructuring that reaches over several steps behind one edge, the plan can pin the behaviour with a script that runs the old and the new code on the project's own sample inputs and compares the outputs; the merge request says on how many inputs they agreed.
