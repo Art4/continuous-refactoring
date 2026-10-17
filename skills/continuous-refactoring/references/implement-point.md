@@ -97,16 +97,18 @@ work, and where the paragraph above applies the fact is named with how far it wa
 ## 5. Review
 
 The diff of the branch against the default branch is reviewed on two axes, per `reviewing-a-change.md`.
-The review may run in a subagent handed that reference, the diff and the plan; it returns findings.
-A finding → back to step 3 for it, then steps 4 and 5 again. A slice that lowers reader load nowhere is
+The review may run in a subagent handed that reference, the diff and the plan; it returns its findings sorted per *Sorting the findings* there.
+A finding to fix → back to step 3 for it, then steps 4 and 5 again. A slice that lowers reader load nowhere is
 not reworked: it is taken off the branch. When no slice is left, the run ends without a merge request;
 a comment on the ticket names what the review found, and no rejection is recorded — that stays with a
 human.
 
+The notes are handed on to the merge request, the dismissals to the closing report.
+
 A target's skill that built the branch has reviewed it its own way. The suite then reads the diff once
 against the plan; a slice found missing is built the suite's own way (step 3) and checked (step 4).
 
-*Done when* the final diff holds every slice of the plan and no finding is left.
+*Done when* the final diff holds every slice of the plan and no finding to fix is left.
 
 ## A fix that does not hold
 
