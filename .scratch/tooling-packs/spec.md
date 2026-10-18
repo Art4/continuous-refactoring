@@ -222,6 +222,41 @@ Side finding: `php_floor_precheck`'s docstring says a blocked leaf is not a reje
 `tooling-tree-parser.md` and `php-tooling-tree.md` have the scan propose one with a blocker; the
 docstring is outdated and goes with the function in ticket 1.
 
+**Planning ticket 01 (2026-10-18)** — decisions made while planning; some correct earlier wording.
+
+- **D25 — The ticket is built in two parts.** Part 1: model, data and parser beside the old one (ADR,
+  `tooling-model.md`, schemas, `roles.json`, both Packs, `tooling_packs.py` with tests), no run uses it,
+  proved by an equivalence run against the old parser. Part 2: the references switch, the old parser, its
+  tests and the edge tables go, `tooling_packs.py` becomes `tooling_tree.py` and
+  `tooling-tree-parser.md` becomes `tooling-parser.md`, the superseded ADRs get their banners.
+- **D26 — One name space for rejections and the seed.** Slugs of Roles, Tools and Stages are unique across
+  all Packs; a Tool may share its slug with a Stage only when that is its only one, so rejecting either
+  means the same. The seed is `{"fulfilled": [stage], "rejected": {role|tool|stage: blocker|null},
+  "packs": [...], "not_applicable": [stage], "runtime": {"php": "7.4"}}`; no `packs` means all apply.
+  The Role `secret-scanning` is named so, since Tool and Stage `secret-detection` exist.
+- **D27 — Output keys.** Kept: `tracks` (`nodes`, `backlog`, `withheld`, `fulfilled`),
+  `closed_by_rejection`, `reversals`. New: `safety_net_fulfilled`, `runtime_blocked`, `tree.stages`,
+  `prerequisites`, `packs`, `roles`. Gone because no reference reads them: `detected`, `next`, `withheld`,
+  `withheld_with_reasons`, the top-level `backlog`, `unblocked_by`.
+- **D28 — The Roles** are editor-settings, continuous-integration, package-management, autoloading,
+  code-style, testing, test-coverage, static-analysis, taint-analysis, automated-refactoring,
+  code-smell-detection, dependency-audit, secret-scanning, static-security-analysis, runtime-floor.
+- **D29 — Track rule (corrects D19).** The check is not "every required parent carries its child's
+  Tracks": with D2 a Guardrails Stage may require a Safety Net Stage. The rule is that a Stage requires
+  only Stages of its own Track or an earlier one; the parser refuses a Pack that breaks it.
+- **D30 — One Track per Stage** (corrects D6's "Tracks"): with D2 and D29 nothing needs a list.
+- **D31 — Psalm** is its own Tool (recognized, one Stage `psalm`, Role Static Analysis); its taint analysis
+  is another Tool (`psalm-taint-analysis`, recommended). The agent hands in `psalm` as fulfilled on a
+  target that uses it, and `phpstan-level-0` only where PHPStan is there; the old "Psalm fulfils
+  `phpstan-level-0`" wording in `phpstan.md` goes with part 2.
+- **D32 — Withheld includes closed Stages** with what they hang on, as the parser's documentation always
+  said; the backlog does not.
+- **D33 — The parser reads only the tracker file of a target** (for `onboarding-setup`). D22's "reads no
+  target files any more" meant the PHP floor.
+
+**Equivalence run (part 1).** 1,864 comparisons over four worlds: no difference for a PHP project with a
+real dependency; every difference elsewhere is one of D3, D9, D23 or the removed gates (listed in the ADR).
+
 ## Open points
 
 In the order they depend on each other.

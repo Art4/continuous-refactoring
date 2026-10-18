@@ -1,0 +1,58 @@
+{
+  "$schema": "../../pack.schema.json",
+  "pack": "generic",
+  "applies_when": "Always.",
+  "tools": [
+    {
+      "tool": "ci-runner",
+      "name": "CI Runner",
+      "uses": "GitHub Actions / GitLab CI",
+      "roles": ["continuous-integration"],
+      "status": "recommended",
+      "details": "tooling-tree/ci-runner.md",
+      "stages": [
+        {
+          "slug": "ci-runner",
+          "name": "CI Runner",
+          "track": "Safety Net",
+          "requires": [],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "editorconfig",
+      "name": ".editorconfig",
+      "uses": "EditorConfig",
+      "roles": ["editor-settings"],
+      "status": "recommended",
+      "details": "tooling-tree/editorconfig.md",
+      "stages": [
+        {
+          "slug": "editorconfig",
+          "name": ".editorconfig",
+          "track": "Safety Net",
+          "requires": [],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "secret-detection",
+      "name": "Secret Detection",
+      "uses": "any secret scanner",
+      "roles": ["secret-scanning"],
+      "status": "recommended",
+      "details": "tooling-tree/secret-detection.md",
+      "stages": [
+        {
+          "slug": "secret-detection",
+          "name": "Secret Detection",
+          "track": "Guardrails",
+          "requires": [],
+          "after": []
+        }
+      ]
+    }
+  ]
+}

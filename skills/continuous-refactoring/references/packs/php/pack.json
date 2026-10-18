@@ -1,0 +1,346 @@
+{
+  "$schema": "../../pack.schema.json",
+  "pack": "php",
+  "applies_when": "The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/.",
+  "tools": [
+    {
+      "tool": "composer",
+      "name": "Composer",
+      "uses": "Composer",
+      "roles": ["package-management"],
+      "status": "recommended",
+      "details": "php-tooling-tree/composer.md",
+      "stages": [
+        {
+          "slug": "composer",
+          "name": "Composer",
+          "track": "Safety Net",
+          "requires": [],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "psr-4",
+      "name": "PSR-4 Autoloading",
+      "uses": null,
+      "roles": ["autoloading"],
+      "status": "recommended",
+      "details": "php-tooling-tree/psr-4.md",
+      "stages": [
+        {
+          "slug": "psr-4",
+          "name": "PSR-4 Autoloading",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "php-cs-fixer",
+      "name": "PHP CS Fixer",
+      "uses": "php-cs-fixer",
+      "roles": ["code-style"],
+      "status": "recommended",
+      "details": "php-tooling-tree/php-cs-fixer.md",
+      "min_runtime": {
+        "php": "5.3"
+      },
+      "stages": [
+        {
+          "slug": "php-cs-fixer",
+          "name": "PHP CS Fixer",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": ["editorconfig"]
+        }
+      ]
+    },
+    {
+      "tool": "phpmd",
+      "name": "PHPMD",
+      "uses": "PHPMD",
+      "roles": ["code-smell-detection"],
+      "status": "recommended",
+      "details": "php-tooling-tree/phpmd.md",
+      "stages": [
+        {
+          "slug": "phpmd",
+          "name": "PHPMD",
+          "track": "Guardrails",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "phpunit",
+      "name": "PHPUnit",
+      "uses": "PHPUnit",
+      "roles": ["testing"],
+      "status": "recommended",
+      "details": "php-tooling-tree/phpunit.md",
+      "min_runtime": {
+        "php": "5.3"
+      },
+      "stages": [
+        {
+          "slug": "phpunit",
+          "name": "PHPUnit",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "coverage-floor",
+      "name": "Test Coverage Floor",
+      "uses": "PHPUnit",
+      "roles": ["test-coverage"],
+      "status": "recommended",
+      "details": "php-tooling-tree/coverage-floor.md",
+      "stages": [
+        {
+          "slug": "coverage-floor",
+          "name": "Test Coverage Floor",
+          "track": "Guardrails",
+          "requires": ["phpunit"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "composer-audit",
+      "name": "Composer Audit",
+      "uses": "composer audit",
+      "roles": ["dependency-audit"],
+      "status": "recommended",
+      "details": "php-tooling-tree/composer-audit.md",
+      "min_runtime": {
+        "php": "7.2"
+      },
+      "stages": [
+        {
+          "slug": "composer-audit",
+          "name": "Composer Audit",
+          "track": "Guardrails",
+          "requires": ["composer"],
+          "after": ["ci-runner"],
+          "applies_when": "The repository's composer.json requires at least one real package; platform pseudo-packages (php, hhvm, ext-*, lib-*, composer-plugin-api, composer-runtime-api) do not count."
+        }
+      ]
+    },
+    {
+      "tool": "phpstan",
+      "name": "PHPStan",
+      "uses": "PHPStan",
+      "roles": ["static-analysis"],
+      "status": "recommended",
+      "details": "php-tooling-tree/phpstan.md",
+      "min_runtime": {
+        "php": "7.0"
+      },
+      "stages": [
+        {
+          "slug": "phpstan-level-0",
+          "name": "PHPStan Level 0",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-1",
+          "name": "PHPStan Level 1",
+          "track": "Safety Net",
+          "requires": ["phpstan-level-0"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-2",
+          "name": "PHPStan Level 2",
+          "track": "Safety Net",
+          "requires": ["phpstan-level-1"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-3",
+          "name": "PHPStan Level 3",
+          "track": "Safety Net",
+          "requires": ["phpstan-level-2"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-4",
+          "name": "PHPStan Level 4",
+          "track": "Safety Net",
+          "requires": ["phpstan-level-3"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-5",
+          "name": "PHPStan Level 5",
+          "track": "Safety Net",
+          "requires": ["phpstan-level-4"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-6",
+          "name": "PHPStan Level 6",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-5"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-7",
+          "name": "PHPStan Level 7",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-6"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-8",
+          "name": "PHPStan Level 8",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-7"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-9",
+          "name": "PHPStan Level 9",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-8"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-level-10",
+          "name": "PHPStan Level 10",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-9"],
+          "after": []
+        },
+        {
+          "slug": "phpstan-deprecation-rules",
+          "name": "PHPStan Deprecation Rules",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-5"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "psalm",
+      "name": "Psalm",
+      "uses": "vimeo/psalm",
+      "roles": ["static-analysis"],
+      "status": "recognized",
+      "details": "php-tooling-tree/psalm.md",
+      "stages": [
+        {
+          "slug": "psalm",
+          "name": "Psalm",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "rector",
+      "name": "Rector",
+      "uses": "Rector",
+      "roles": ["automated-refactoring"],
+      "status": "recommended",
+      "details": "php-tooling-tree/rector.md",
+      "stages": [
+        {
+          "slug": "rector-php-set",
+          "name": "Rector: PHP Set",
+          "track": "Safety Net",
+          "requires": ["static-analysis"],
+          "after": ["php-cs-fixer"]
+        },
+        {
+          "slug": "rector-dead-code",
+          "name": "Rector: Dead Code Set",
+          "track": "Safety Net",
+          "requires": ["rector-php-set"],
+          "after": ["php-cs-fixer"]
+        },
+        {
+          "slug": "rector-code-quality",
+          "name": "Rector: Code Quality Set",
+          "track": "Safety Net",
+          "requires": ["rector-php-set"],
+          "after": ["php-cs-fixer"]
+        },
+        {
+          "slug": "rector-phpunit-set",
+          "name": "Rector: PHPUnit Set",
+          "track": "Safety Net",
+          "requires": ["phpunit"],
+          "after": ["rector-code-quality", "php-cs-fixer"]
+        },
+        {
+          "slug": "rector-type-coverage",
+          "name": "Rector: Type Coverage Set",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": ["rector-dead-code", "rector-code-quality", "php-cs-fixer", "phpstan-level-3"]
+        }
+      ]
+    },
+    {
+      "tool": "php-minimal-version",
+      "name": "PHP Minimum Version",
+      "uses": null,
+      "roles": ["runtime-floor"],
+      "status": "recommended",
+      "details": "php-tooling-tree/php-minimal-version.md",
+      "stages": [
+        {
+          "slug": "php-minimal-version",
+          "name": "PHP Minimum Version",
+          "track": "Guardrails",
+          "requires": ["rector-php-set"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "psalm-taint-analysis",
+      "name": "Psalm Taint Analysis",
+      "uses": "vimeo/psalm",
+      "roles": ["taint-analysis"],
+      "status": "recommended",
+      "details": "php-tooling-tree/psalm.md",
+      "stages": [
+        {
+          "slug": "psalm-taint-analysis",
+          "name": "Psalm Taint Analysis",
+          "track": "Safety Net",
+          "requires": [["phpstan-level-4", "psalm"]],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "semgrep",
+      "name": "Semgrep (OWASP Top 10)",
+      "uses": "Semgrep",
+      "roles": ["static-security-analysis"],
+      "status": "recommended",
+      "details": "php-tooling-tree/semgrep.md",
+      "stages": [
+        {
+          "slug": "semgrep",
+          "name": "Semgrep (OWASP Top 10)",
+          "track": "Guardrails",
+          "requires": [],
+          "after": ["ci-runner"]
+        }
+      ]
+    }
+  ]
+}

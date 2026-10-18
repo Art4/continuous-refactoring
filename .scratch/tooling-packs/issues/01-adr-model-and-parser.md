@@ -1,7 +1,7 @@
 # 01 — ADR, model and parser on Packs
 
 Type: task
-Status: ready-for-agent
+Status: in-progress
 
 The tooling tree becomes Roles, Tools and Stages in Packs (`../spec.md`, D1–D24). This ticket brings the
 meaning: after it, runs compute from JSON Packs, not from the tree docs' edge tables.
@@ -47,3 +47,9 @@ can review* — for instance data, schemas and parser first, then the references
 names (D12).
 
 ## Comments
+
+### 2026-10-18 — plan, decisions D25–D33 in the spec
+
+Cut into two parts (D25). Part 1 (branch `tooling-packs-model-data-parser`): ADR, `tooling-model.md`, schemas,
+`roles.json`, `packs/generic` and `packs/php`, `tooling_packs.py` with tests, proved by an equivalence run
+(1,864 comparisons, differences listed in the ADR). Part 2: the references switch and the old goes.
