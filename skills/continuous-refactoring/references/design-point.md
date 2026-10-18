@@ -2,7 +2,7 @@
 
 Ends with an **implementable plan** on the selected ticket: what changes, where, in which order, and the
 check that shows the work is done — enough for someone who has only the ticket. Handed in: the ticket, its
-Track, the run's mode, the call's restriction, and for a tooling ticket the node's slug and tree-doc file.
+Track, the run's mode, the call's restriction, and for a tooling ticket the Stage's slug and its Tool's `details` file.
 Every plan keeps `foundational-refactoring-rules.md` and weighs `principles.md`; every text for the ticket follows
 `forge-facing-writing.md`.
 
@@ -51,8 +51,8 @@ The answer holds for this ticket in this run and is written nowhere: the next ru
 
 ## 3. Plan
 
-- **The target's skill** → run it with this brief: the ticket; for a tooling ticket the node's Purpose,
-  Fulfilment check and MR scope from its tree-doc file; `foundational-refactoring-rules.md`; and the
+- **The target's skill** → run it with this brief: the ticket; for a tooling ticket the Role's Purpose,
+  the Stage's Fulfilment check and MR scope from its Tool's `details` file; `foundational-refactoring-rules.md`; and the
   outcome wanted — the plan on the ticket. In an autonomous run the suite answers the skill's questions
   with its own recommendation; one that meets the bar of step 4 goes there instead.
 - **The suite's own** → the section below that names the ticket: *Planning a tooling ticket*, *Planning a
@@ -129,9 +129,9 @@ wait; nothing else is set or removed.
 
 ## Planning a tooling ticket
 
-The node's tree-doc file is the specification: **MR scope** says what the merge request holds, the
+The Stage's entry in its Tool's `details` file is the specification: **MR scope** says what the merge request holds, the
 **Fulfilment check** when it is done. Read both, then the target, and write the plan for this target: the
-real paths, the existing CI file, the package manager's commands, the tool's current version. A node with
+real paths, the existing CI file, the package manager's commands, the tool's current version. A Tool with
 a **Housekeeping** field gets one more slice for it (`implement-point.md`, *Slices every kind of ticket
 can have*).
 
@@ -168,7 +168,7 @@ and only after the human allows it: that is an open question, and the run ends w
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies: the baseline cannot become
 empty, so the level above cannot be raised. The open question names what follows from each answer. Where a
-human then chooses the rejection, it is that of the next level's node, with this as its reason
+human then chooses the rejection, it is that of the next level's Stage, with this as its reason
 (`rejection.md` then deals with the levels above it), and the baseline ticket is closed with a note
 pointing to it.
 

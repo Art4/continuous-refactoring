@@ -10,9 +10,9 @@ taken.
 
 ## Recording one
 
-The record names its subject in plain words — for a node its Name and its tool — so that a search finds
-it, then the reason as the human or the closed merge request gave it. A blocker a machine can read is one
-line of its own: `Blocker: PHP >= 7.4`.
+The record names its subject in plain words — for a Stage its Name and its tool, for a Tool or a Role the
+word and its Name ("Tool: PHPStan", "Role: Static Analysis") — so that a search finds it, then the reason as the human or the closed merge request gave it. A blocker a machine can read is one
+line of its own: `Blocker: PHP >= 7.4`, a runtime and a version.
 
 - **Rejected as a closed ticket** → the subject's open ticket is closed the way the operation says, the
   reason with it. No ticket yet → file one per `filing-a-ticket.md` step 3 and close it in the same move.
@@ -30,35 +30,41 @@ line of its own: `Blocker: PHP >= 7.4`.
 Write the answer as the **Rejected** bullet into the target's `## Refactoring operations` section, in
 the shape `refactoring-operations.md` gives under *Bullets the target chooses*, then record the rejection.
 
-## Below the PHP floor
+## Below the runtime floor
 
-A node in the parser's `php_floor_blocked` cannot be set up while the target allows the older PHP. Left
-undecided it would keep Safety Net from ever counting as fulfilled. The recommendation is a rejection whose reason is the target's
-declared PHP version and whose blocker is the minimum the parser's reason names: `Blocker: PHP >= 7.0`.
-The node then counts as decided, and the parser reports the reversal once the target's floor reaches that
-version.
+A Stage in the parser's `runtime_blocked` cannot be set up while the target allows the older runtime. Left
+undecided it would keep Safety Net from ever counting as fulfilled. The recommendation is a rejection whose
+reason is the target's declared version and whose blocker is the minimum the parser's reason names:
+`Blocker: PHP >= 7.0`. The Stage then counts as decided, and the parser reports the reversal once the
+target's floor reaches that version. Before the rejection is proposed, read the reason: it names both
+versions, and a comparison that went wrong shows there. It is then no proposal but a finding in the closing
+report.
 
-## What depends on a rejected node
+## What depends on a rejected subject
 
-After recording a rejection of a node, run the parser with it in the seed — this run's scan seed, or the
-seed from the trace (`tooling-tree-parser.md`) where no scan ran — and
-lay out one more decision point about the tickets that named the node as a blocker. The kind of edge, from
-`tree.edges`, gives the recommendation:
+After recording a rejection of a Stage, a Tool or a Role, run the parser with it in the seed — this run's
+scan seed, or the seed from the trace (`tooling-parser.md`) where no scan ran — and
+lay out one more decision point about the tickets that named the subject as a blocker, or whose Stage the
+rejection reaches. Where the dependent stands in `tree.stages` and `closed_by_rejection` gives the
+recommendation:
 
-| The dependent hangs on the rejected node by | Recommendation |
+| The dependent | Recommendation |
 | --- | --- |
-| a `required` edge, or a `required-any` group with no member left that could be fulfilled — it is in `closed_by_rejection` | close its ticket, the reason being "depends on <Name>, which was declined" |
-| a `recommended` edge, a `resolved` edge through an aggregation node, or a `required-any` group with a member left that could be fulfilled | remove the blocker from its ticket; the ticket stays |
+| is in `closed_by_rejection`: it belongs to the rejected Tool or Role, requires the rejected Stage, requires a Role nothing can fill any more, or lost every alternative of a group | close its ticket, the reason being "depends on <Name>, which was declined" |
+| only waits `after` the rejected Stage, or has a group of alternatives with a member left that could be fulfilled | remove the blocker from its ticket; the ticket stays |
 
 A dependent without a ticket needs nothing. Options: as recommended, the other way for a ticket the human
 names, or leave the tickets as they are.
 
 ## Finding rejections
 
-Read them the way **Rejected** says. Each one that names a node's subject is that node's rejection; its
-`Blocker:` line, where it has one, becomes the seed's blocker (`{"php": "7.4"}`), and without it `null`.
+Read them the way **Rejected** says. Each one that names a Stage's, a Tool's or a Role's subject is that
+subject's rejection, handed to the parser under its slug (`tree.stages`, `tools` and `roles` give the
+Names); its `Blocker:` line, where it has one, becomes the seed's blocker (`{"php": "7.4"}`), and without
+it `null`. A record that names a Tool whose only Stage shares its Name is read as the Tool's, which closes
+that Stage.
 
-A record whose only reason is its dependence on another declined node is not handed to the parser: the
+A record whose only reason is its dependence on another declined subject is not handed to the parser: the
 parser derives that closure from the parent.
 
 Without a **Rejected** operation nothing is on record.
@@ -68,7 +74,7 @@ Without a **Rejected** operation nothing is on record.
 Offered at reconcile for every entry of the parser's `reversals`, and done whenever a human asks for it.
 
 - A closed ticket → reopen it and remove the rejection's mark; a comment says which blocker is met.
-- A file → delete it and file a ticket for the node (`filing-a-ticket.md`).
+- A file → delete it and file a ticket for the Stage (`filing-a-ticket.md`); for a Tool or a Role, for each of its Stages that is not fulfilled.
 - Then reopen the tickets that were closed because they depended on it.
 
-A reversed node is undecided again and has an open ticket.
+A reversed Stage is undecided again and has an open ticket.

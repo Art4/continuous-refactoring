@@ -77,11 +77,11 @@ Read the ticket's text and every comment on it, then its template. Sort what the
 **New lines** — recurring tasks the ticket lacks:
 
 - a task the template gained since the ticket was made;
-- only for the first template the operation names: the **Housekeeping line** of every tooling-tree node
-  that is fulfilled while the template lacks it. The line is the node's **Housekeeping** field, found in
-  the tree docs (`tooling-tree-parser.md` says where) and reworded for the template's reader; each such
-  node is judged per `track-scan.md`, *Judging a node*, once per run. The line goes into the template
-  too. A node's own merge request is the ordinary way its line arrives; this catches a tool set up by
+- only for the first template the operation names: the **Housekeeping line** of every tooling-tree Tool
+  that is fulfilled while the template lacks it. The line is the Tool's **Housekeeping** field, found in
+  its `details` file (`tooling-parser.md` says where) and reworded for the template's reader; each such
+  Tool's first Stage is judged per `track-scan.md`, *Judging a Stage*, once per run. The line goes into the template
+  too. A Stage's own merge request is the ordinary way its line arrives; this catches a tool set up by
   hand.
 
 **Ideas** — every comment that proposes a change to the code and stands below the ticket's newest
@@ -230,5 +230,5 @@ reference hands on or returns, the way leads back here:
 - **Proposals** → `filing-a-ticket.md`, with its own decision point; then go on with the cycle.
 - **None** → go on with the cycle.
 
-Tick the task with what the scan found: the tools still in place, each one that went missing, each node
-the tree gained, and the tickets filed for them.
+Tick the task with what the scan found: the tools still in place, each one that went missing, each Stage
+the Packs gained, and the tickets filed for them.

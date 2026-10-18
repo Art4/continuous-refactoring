@@ -36,7 +36,7 @@ that touches a large part of the code on its own; the switch to the tool's prepa
 configuration, last. Each part leaves the branch green and is worth merging without the others. The
 plan's *This merge request* names the part, what stays, and in one sentence why the cut is there. Work the
 goal of the ticket does not need is proposed as a ticket of its own, through the usual finding at the
-design point, and does not ride along. A node's
+design point, and does not ride along. A Stage's
 **MR scope** is the most one merge request holds, never the least.
 
 *Fails when* the parts are so small that a reviewer has to hold several to understand one, or a cut is made

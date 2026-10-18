@@ -30,7 +30,7 @@ or branch (`worklist.md`, *A ticket's merge request*):
   proposed as the template, its tasks kept, the parts of *The template* it lacks added.
 - **The rhythm to recommend** — count the commits the default branch gained in the last 90 days: more
   than 300 → `daily`; 30 to 300 → `weekly`; fewer → `monthly`.
-- **The Housekeeping lines** of the fulfilled tooling-tree nodes, as `housekeeping-track.md`, step 4,
+- **The Housekeeping lines** of the fulfilled tooling-tree Tools, as `housekeeping-track.md`, step 4,
   finds and words them.
 - **The instruction file** — `AGENTS.md`; where the target has only `CLAUDE.md`, that file.
 - **How a ticket is created and listed**, from the tracker file.

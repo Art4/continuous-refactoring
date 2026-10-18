@@ -6,26 +6,26 @@ in place. Every command comes from the target's `## Refactoring operations` sect
 
 ## 1. Find the open tickets
 
-Run the parser without a seed (`tooling-tree-parser.md`) and take every node of `tracks`.
+Run the parser without a seed (`tooling-parser.md`) and take every node of `tracks`.
 
 - **With a Candidate operation** → list the open tickets it marks. The tooling tickets are among them:
   filing sets that mark.
-- **Without one** → for each node, run **Search** with the node's Name, narrowed to the open tickets.
+- **Without one** → for each Stage, run **Search** with the Stage's Name, narrowed to the open tickets.
   Where one listing of all open tickets is short enough to read — a local folder, a small tracker — read
   that listing once instead. A place the section gives to the suite's tickets alone counts whole; from
-  any other listing keep the tickets that match a node.
+  any other listing keep the tickets that match a Stage.
 - **Housekeeping tickets.** With a **Housekeeping** operation, find the open ones the way it says.
 - **The ticket the call names**, whatever it carries.
 
-A ticket *matches a node* when its title or text names that node's subject as the thing to be set up or
+A ticket *matches a Stage* when its title or text names that Stage's subject as the thing to be set up or
 raised. The Name tells siblings apart: "PHPStan" alone is in every level's ticket, "PHPStan Level 3" in
-one. A ticket about shrinking a PHPStan level's baseline matches that level's node.
+one. A ticket about shrinking a PHPStan level's baseline matches that level's Stage.
 
 ## 2. Assign each to a Track
 
 | The ticket | Track |
 | --- | --- |
-| matches a node | the Track whose `nodes` list holds that node |
+| matches a Stage | the Track whose `nodes` list holds that Stage |
 | is a Housekeeping ticket | Housekeeping |
 | anything else | Investigation |
 
@@ -42,20 +42,23 @@ The first row that applies:
 
 ## 4. Apply the restriction
 
-A restriction in the call removes every ticket and every node it does not cover, before any later step
+A restriction in the call removes every ticket and every Stage it does not cover, before any later step
 counts them.
 
 ## A Track's trace
 
-A tooling Track has a **trace** once the tracker shows it was scanned before: a ticket of one of its
-nodes in any state, or a recorded rejection of one (`rejection.md`, *Finding rejections*). Asked only of a
-Track with no open ticket: run **Search** over open and closed tickets with the Names of the Track's
-nodes, and stop at the first hit.
+A Stage is **known** once the tracker shows it was dealt with before: a ticket of it in any state, or a
+recorded rejection of it, of its Tool or of its Role (`rejection.md`, *Finding rejections*). A tooling
+Track has a **trace** when every Stage of it that applies is known. Asked only of a Track with no open
+ticket, over the Stages of the Track's `nodes` in a call with the Packs that apply (`track-scan.md`,
+*Judging*) and without the Stages whose own *Applies when* does not hold: where one listing of all
+tickets, open and closed, is short enough, read it once; otherwise run **Search** with each Stage's
+`search` words over open and closed tickets, and stop at the first Stage that is not known.
 
-- **No trace** → the Track's scan is due.
-- **A trace** → the Track is not scanned again by itself. A node of it without an open ticket counts as
-  done; a tool that went missing since, or a node the tree gained, is found by a scan the call asks for
-  or by the Housekeeping task that re-checks the tooling Tracks.
+- **A Stage is not known** → the Track's scan is due, and it judges the Stages that are not known.
+- **Every Stage is known** → the Track is not scanned again by itself. A Stage of it without an open
+  ticket counts as done; a tool that went missing since is found by a scan the call asks for or by the
+  Housekeeping task that re-checks the tooling Tracks.
 
 ## A ticket's merge request
 

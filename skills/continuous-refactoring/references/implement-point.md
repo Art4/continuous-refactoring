@@ -1,7 +1,7 @@
 # Reference: the implement point
 
 Ends with a **branch whose checks are green**, holding the planned change and nothing else. Handed in: the
-ticket with its plan, its Track, the run's mode, for a tooling ticket the node's slug and tree-doc file,
+ticket with its plan, its Track, the run's mode, for a tooling ticket the Stage's slug and its Tool's `details` file,
 and for a ticket in review its merge request with the review's comments. Every slice keeps
 `foundational-refactoring-rules.md`.
 
@@ -53,7 +53,7 @@ merge request is its own matter. Then go to step 4.
   run them the same way. Then slice by slice, test-first at the plan's seam: write one failing test through the
   seam's public interface, watch it fail for the expected reason, write the code that makes it pass,
   commit. Tests go where the target's `tests/README.md` puts them; where that file is missing, the
-  target's language may have a layout among the tree docs (`tooling-tree-parser.md` says where they are;
+  target's language may have a layout among the Tools' `details` files (`tooling-parser.md` says where they are;
   PHP: `phpunit.md`, *Test layout*). Which tests are kept: `reviewing-a-change.md`, *Tests worth
   keeping*. After a rename or a move, search the whole repository for the old name — strings, docs,
   configuration and tests too, not only the references a tool found; a hit is fixed, or named in the
@@ -77,7 +77,7 @@ comes before the first one that moves structure.
 
 Run all of these on the branch, after the last commit:
 
-- the plan's `Done when` commands — for a tooling ticket the node's Fulfilment check, for a baseline
+- the plan's `Done when` commands — for a tooling ticket the Stage's Fulfilment check, for a baseline
   ticket the regenerated baseline without the part's entries;
 - the target's whole test suite;
 - every tool the target already runs as a check — static analysis, code style, the ones its CI file
@@ -173,7 +173,7 @@ The plan lists them where they apply; they are built in step 3 like any slice, e
   place, the decision stays in the plan and goes into the merge request's description.
 - **Glossary** — where those docs name a glossary file: a term the work introduced, added as a definition
   and nothing else.
-- **Housekeeping line** — a node with a **Housekeeping** field adds that line, as a recurring task, to
+- **Housekeeping line** — a Tool with a **Housekeeping** field adds that line, as a recurring task, to
   the Housekeeping template the target's **Housekeeping** operation names, the first where it names
   several. Where the target has no such
   operation the line is left out, and the Housekeeping Track adds it once its mechanism exists.
