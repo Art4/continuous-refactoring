@@ -14,22 +14,14 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 - **MR scope:** none — recognition-only, never a ticket; recognized only
   when already present. Adopting Psalm from scratch is a decision made outside this tree's proposal flow,
   same as choosing Pest over PHPUnit.
-- **Mutual exclusion:** on a target where this node is fulfilled and real PHPStan adoption is absent,
-  `phpstan-not-psalm` stays unfulfilled and holds `phpstan-level-1` and every level above it closed. A
-  scan names those levels as out of reach and files no ticket for them; `phpstan-level-5`, the level
-  chain's `php-safety-net` leaf, then counts as done like any node without an open ticket once the
-  Track has a trace in the tracker (`../worklist.md`, *A Track's trace*).
-  This does **not** touch `phpstan-level-0` itself — see that node's own entry and the
-  *Equivalents* section in `phpstan.md` for why its equivalence-driven fulfilment must stay intact.
-- **Co-presence:** if both PHPStan and Psalm are present, PHPStan is authoritative for the level chain (see
-  `phpstan.md`'s *Equivalents* section) — this node still shows fulfilled, harmlessly; nothing downstream
-  reads its fulfilled state except `phpstan-level-0`'s own equivalence bullet and `rector-php-set`'s
-  (`rector.md`) `required-any` gate (already satisfied via `phpstan-level-0` on that path regardless, so
-  this is never load-bearing there either). A target that adopts `psalm-taint-analysis` (below) on the
-  PHPStan path also installs `vimeo/psalm` and a `psalm.xml`, which makes this node's own fulfilment check
-  incidentally read `true` too — harmless: `psalm` isn't a `php-safety-net` leaf, so there's no
-  resolved-leaf state this could disturb. See `psalm-taint-analysis`'s own entry below for the full
-  reasoning.
+- **Takes the place of PHPStan:** once this Stage is fulfilled and PHPStan's first Stage is not, Psalm fills
+  the Role Static Analysis and PHPStan is not proposed; none of the level Stages gets a ticket. Strictness is
+  governed by `psalm.xml`'s `errorLevel`. The agent hands in `psalm` as fulfilled and does not hand in
+  `phpstan-level-0` for it (`phpstan.md`, *PHPStan and Psalm*).
+- **Co-presence:** if both PHPStan and Psalm are present, PHPStan is the Tool in use and this Stage is
+  harmlessly fulfilled too. A target on PHPStan that adopts `psalm-taint-analysis` (below) also installs
+  `vimeo/psalm` and a `psalm.xml`, so this Stage's own check reads `true` as well — which changes nothing,
+  since PHPStan's first Stage is fulfilled.
 
 ### `psalm-taint-analysis`
 

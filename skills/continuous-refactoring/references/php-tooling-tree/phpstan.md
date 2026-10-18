@@ -6,10 +6,9 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 
 - **Name:** PHPStan Level 0
 - **Tool:** PHPStan
-- **Purpose:** static analysis introduced green at level 0. `vimeo/psalm`, via the `psalm` node — see `php-tooling-tree.md` — fulfils as an equivalent — see *Equivalents* below.
+- **Purpose:** static analysis introduced green at level 0. A target on Psalm has the Role Static Analysis filled by Psalm (the Stage `psalm`), and PHPStan is then not proposed — see *PHPStan and Psalm* below.
 - **Fulfilment check:** one of:
   - **PHPStan path (canonical):** `phpstan/phpstan` present as a dev dependency **— or installed ephemerally at CI-runtime only** (a CI job body containing both a `composer require[--dev] phpstan/phpstan` invocation and the `vendor/bin/phpstan analyse` invocation counts the same as a committed dependency; some targets deliberately keep the app's own manifest free of pure-analysis tooling), `phpstan.neon`/`phpstan.neon.dist` at the repo root declares a level (`level: 0` at introduce time — see *MR scope* below; **a project already advanced to level 1+ satisfies this too**, since every level-0 check is a strict subset of any higher level's, and this node is re-detected fresh from the current config on every scan rather than pinned to whatever level it was first delivered at), a committed baseline file exists at the fixed path `phpstan-baseline.neon` (repo root), `vendor/bin/phpstan analyse` (with the baseline included) exits 0 without errors, **and**, once `ci-runner` is fulfilled, a CI job actually invokes `vendor/bin/phpstan analyse` (self-wired CI gate — no CI yet still fulfils the node on local adoption alone; see `ci-runner`'s node prose). The CI check is level-independent, so it lives here and is not repeated on `phpstan-level-1..10`. `phpstan.neon` takes precedence when both files exist, matching PHPStan's own auto-discovery order (same "committed default, locally overridable" convention this tree already reads for `phpunit.xml.dist`/`psalm.xml.dist`/`phpmd.xml.dist`). OR
-  - **Psalm path (equivalent):** the `psalm` node (`php-tooling-tree.md`) is fulfilled — then this node is considered fulfilled without PHPStan. Psalm's own strictness is tracked via its `errorLevel`, not via the PHPStan level chain. This bullet only states the equivalence; see `psalm`'s own entry for its fulfilment check, so the detection isn't duplicated here.
 - **Config (PHPStan path):**
   - `phpstan.neon` — committed at repo root by this node's own introduce MR (not `phpstan.neon.dist` — a fresh adoption always writes the non-`.dist` name; detection reads either, see *Fulfilment check* above, for a target that already adopted PHPStan via the `.dist` convention before this tree ever touched it). Minimal exact content:
     ```neon
@@ -43,13 +42,13 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
 - **`phpstan-level-6`'s own additional required parent:** this one level also requires `php-safety-net`
   in addition to its ordinary chain predecessor (`phpstan-level-5`) — a **Guardrails** node: workable only once the Safety Net is fulfilled. Levels 7–10 need no edge of their own, inheriting the wait
   transitively through level 6's own required-parent chain.
-- **Fulfilment check:** the immediate predecessor level node is fulfilled **and** its baseline is **empty** (see *Empty baseline*). Then: bump `level` in `phpstan.neon` by exactly one (e.g., `0 → 1`, `1 → 2`, …, `9 → 10`), regenerate `phpstan-baseline.neon` via `vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon`, and `vendor/bin/phpstan analyse` is green. Levels are never skipped; one MR raises exactly one level. **Psalm equivalence:** when the `psalm` node (`php-tooling-tree.md`) is the fulfiller (no genuine PHPStan adoption), all level nodes (`phpstan-level-1` through `phpstan-level-10`) are not applicable — the `phpstan-not-psalm` gate node, required by `phpstan-level-1`, stays unfulfilled and keeps the whole chain blocked. Psalm's own strictness is governed by its `errorLevel`, not by this chain. This applies uniformly across every level node; no level is partially exempt.
+- **Fulfilment check:** the immediate predecessor level node is fulfilled **and** its baseline is **empty** (see *Empty baseline*). Then: bump `level` in `phpstan.neon` by exactly one (e.g., `0 → 1`, `1 → 2`, …, `9 → 10`), regenerate `phpstan-baseline.neon` via `vendor/bin/phpstan analyse --generate-baseline=phpstan-baseline.neon`, and `vendor/bin/phpstan analyse` is green. Levels are never skipped; one MR raises exactly one level. **The Ratchet:** a level is fulfilled only while its baseline is empty. A level the target has set up whose baseline still holds entries is not fulfilled; its ticket is "PHPStan Level N: shrink the baseline" (`../track-scan.md`, step 4), and the next level requires it. On a target on Psalm none of the levels applies: PHPStan is not proposed (*PHPStan and Psalm*).
 - **Empty baseline — operational definition:** `phpstan-baseline.neon` is **absent** at repo root **OR** the file exists but `parameters.ignoreErrors` is absent or an empty array (no `message:` entries). Both count as empty. A file that exists and contains one or more ignore entries is non-empty and blocks the next level raise. The scan performs this check by parsing the Neon file (or, equivalently, counting `message:` entries); an absent file is treated as zero entries. After the introduce MR the file is normally present; absence is tolerated as empty for the purpose of gating the next level, but after any successful analysis the committed state should include the file (empty list when green without baseline).
 - **MR scope:** level bump (single integer increment) + regenerated baseline (overwritten in place) + only those source fixes that strictly reduce the new baseline's `ignoreErrors` count. Shrinking findings into the regenerated baseline is part of the same MR — the MR must commit the reduced baseline alongside any fixes that produced the reduction. Unrelated refactoring or feature changes stay out. The chain stays open above level 10 — further levels are appended as new nodes with the same rules, not a redesign.
 - **Stop conditions / when not to raise:**
-  - Baseline is non-empty → the next level waits; instead the highest currently-fulfilled level's own non-empty baseline gets a ticket of its own, "PHPStan Level N: shrink the baseline" (`../track-scan.md`, step 4), planned part by part (`../design-point.md`, *Planning a baseline ticket*) until the baseline is empty and the next level is workable again.
+  - Baseline is non-empty → the level it belongs to is not fulfilled and the next level waits; the level's own ticket is "PHPStan Level N: shrink the baseline" (`../track-scan.md`, step 4), planned part by part (`../design-point.md`, *Planning a baseline ticket*) until the baseline is empty and the next level is workable again.
   - Immediate predecessor level node is not fulfilled → blocked by the required edge; the scan does not propose out-of-order levels.
-  - Target uses Psalm as its `phpstan-level-0` fulfiller → level nodes are not proposed at all (see *Equivalents*). Psalm strictness is governed by `psalm.xml` `errorLevel`, not by this chain.
+  - Target uses Psalm → PHPStan is not proposed (*PHPStan and Psalm*). Psalm strictness is governed by `psalm.xml` `errorLevel`, not by this chain.
   - CI is irrelevant to this node's gating: the fulfilment check is local (`vendor/bin/phpstan analyse` green). The CI-job child with two parents (tool + `ci-runner`) remains deferred and does not gate the level chain.
 - **Verification:** after the MR, `vendor/bin/phpstan analyse` exits 0 at the new level with the committed baseline; `phpstan.neon` diff is exactly one `level:` line change; `phpstan-baseline.neon` is regenerated and reflects the current violations at that level.
 
@@ -78,28 +77,11 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
   alongside rather than replacing `phpstan-level-5` for the same rejection-must-permanently-close
   reasoning every other additively-gated Guardrails node shares.
 
-### `phpstan` equivalents
+### PHPStan and Psalm
 
-- **Psalm fulfils `phpstan-level-0`** — see the `psalm` node (`php-tooling-tree.md`, under `static-code-analyzer`)
-  for its own fulfilment check; this bullet only states the equivalence relationship, not the detection
-  itself, to avoid duplicating it. Fill gaps, never downgrade — the same equivalence shape Pest gets for
-  `phpunit`.
-- **Level nodes (`phpstan-level-1` → `phpstan-level-10`) do not apply when Psalm is the fulfiller.** They are PHPStan-specific. A project that chose Psalm raises strictness via Psalm's `errorLevel` (8 loosest → 1 strictest) rather than via PHPStan levels; proposing a PHPStan level on top of a Psalm-only codebase would reintroduce a second analyser as a new, out-of-scope decision. If a repo later replaces Psalm with PHPStan, that is recorded as a reversal of the Psalm equivalent and the PHPStan introduce + level chain is then proposed from level 0.
-- **Co-presence:** if both analysers are present, PHPStan is the authoritative check for this tree; Psalm fulfilment is considered superseded and the standard PHPStan baseline/level rules apply.
-- **No other analyser fulfils the node:** only `vimeo/psalm` is recognised as an equivalent for the PHPStan nodes. Other tools (e.g., Phan, Psalm plugins) are not treated as fulfilling this chain.
-- **Mutual exclusion does not touch this equivalence.** It would be tempting to read "PHPStan
-  and Psalm are mutually exclusive" as `phpstan-level-0` itself getting rejected on the Psalm
-  path — it does not. `rector-dead-code`, `rector-type-coverage`, and
-  `rector-php-set` previously all had `phpstan-level-0` as a **required** parent, and rejecting a required
-  parent permanently closes every node beneath it (`php-tooling-tree.md`'s *Nodes* preamble); rejecting this node on the
-  Psalm path would have silently made the entire Rector family unreachable for every Psalm-only target — a
-  real behavior change nothing asked for. `rector-dead-code`/`rector-type-coverage` no longer carry that
-  direct edge at all (`rector-dead-code`'s gate is now read transitively via `rector-php-set`'s own
-  `required-any` parent; `rector-type-coverage` no longer carries any tie to this gate at all — a later
-  restructuring moved it onto sibling Rector nodes instead, see that node's own entry), but the underlying
-  reasoning still applies to `rector-php-set` itself: its `required-any`
-  parents are `phpstan-level-0` **and** `psalm` (either fulfilled unlocks it) precisely so a
-  Psalm-only target keeps reaching it without depending on `phpstan-level-0` ever being rejected.
-  Mutual exclusion instead shows at `phpstan-level-1` and above, held closed by `phpstan-not-psalm` — see
-  `psalm`'s own entry (`psalm.md`, *Mutual exclusion*); `psalm` itself is deliberately not a leaf. This node's fulfilment check keeps reading "PHPStan path OR `psalm` fulfilled" exactly as it
-  already does above, unchanged.
+Psalm is a Tool of its own, recognized and never proposed, with one Stage, `psalm` (`psalm.md`); PHPStan is the recommended Tool for the Role Static Analysis.
+
+- **A target on Psalm.** Once the Stage `psalm` is fulfilled the Role is filled by Psalm, PHPStan is out, and none of its Stages is proposed: the level chain is PHPStan-specific. A project that chose Psalm raises strictness via Psalm's `errorLevel` (8 loosest → 1 strictest). The agent hands in `psalm` as fulfilled, and `phpstan-level-0` only where PHPStan itself is there. If a repo later replaces Psalm with PHPStan, `phpstan-level-0` is fulfilled and PHPStan is the Tool in use again.
+- **Co-presence:** if both analysers are present, PHPStan is the Tool in use and its Stages apply with the standard baseline and level rules; Psalm's Stage is harmlessly fulfilled too.
+- **No other analyser fills the Role:** only `vimeo/psalm` is recognised beside PHPStan. Other tools (e.g. Phan, Psalm plugins) are not treated as filling it.
+- **What waits for the Role:** `rector-php-set` requires the Role Static Analysis, filled by either Tool, and `psalm-taint-analysis` requires PHPStan Level 4 or Psalm.
