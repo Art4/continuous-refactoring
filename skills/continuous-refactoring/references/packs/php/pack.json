@@ -172,7 +172,7 @@
       "uses": "PHPStan",
       "roles": ["static-analysis"],
       "status": "recommended",
-      "details": "php-tooling-tree/phpstan.md",
+      "details": "packs/php/phpstan.md",
       "min_runtime": {
         "php": "7.0"
       },
@@ -269,7 +269,7 @@
       "uses": "vimeo/psalm",
       "roles": ["static-analysis"],
       "status": "recognized",
-      "details": "php-tooling-tree/psalm.md",
+      "details": "packs/php/psalm.md",
       "stages": [
         {
           "slug": "psalm",
@@ -286,7 +286,7 @@
       "uses": "Rector",
       "roles": ["automated-refactoring"],
       "status": "recommended",
-      "details": "php-tooling-tree/rector.md",
+      "details": "packs/php/rector.md",
       "stages": [
         {
           "slug": "rector-php-set",
@@ -348,7 +348,7 @@
       "uses": "vimeo/psalm",
       "roles": ["taint-analysis"],
       "status": "recommended",
-      "details": "php-tooling-tree/psalm.md",
+      "details": "packs/php/psalm.md",
       "stages": [
         {
           "slug": "psalm-taint-analysis",
