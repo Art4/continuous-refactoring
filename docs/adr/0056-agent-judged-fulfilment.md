@@ -1,5 +1,7 @@
 # Agent-judged fulfilment: `Open` as complete backlog, scheduler rules, `Fulfilled nodes` retired
 
+> Amended by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the parser still computes graph logic only; the Packs it reads are JSON.
+
 > Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
 > [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): `Open` as a list in the bookkeeping
 > document and the scheduler rules built on it (blockade, yielding, preemption, one Track per pass) no

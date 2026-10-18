@@ -231,10 +231,19 @@ set or remove, so this works on a tracker without triage labels.
 
 ## Why "Safety Net" *and* "tooling tree"?
 
-The tooling tree is the underlying model: a graph of adoption steps. "Safety Net" names the
+The tooling tree is the underlying model: the tools a project can adopt, each in steps. "Safety Net" names the
 part of it that must be settled before structural work starts — deterministic checks such as a test
 runner and static analysis — and also names the Track that sets them up. Guardrails is the part that comes
 after. One is the map, the other names regions of it.
+
+## Why does the suite think in roles and tools, not just a list of steps?
+
+Because tools compete and projects differ. Two tools can do the same job — PHPStan and Psalm, PHP CS Fixer
+and Pint — and a project that already uses one should not be offered the other. So the suite names the job
+(a *role*, such as static analysis), the tools that can do it, and the steps of each tool. A project on
+Psalm has the role filled and is never offered PHPStan; declining one tool leaves the role open for
+another; declining a role closes every tool for it. The same shape lets a project of another language, or a
+tool the suite does not know, be added as data instead of a change to the suite.
 
 ## Is it compatible with other engineering skills?
 

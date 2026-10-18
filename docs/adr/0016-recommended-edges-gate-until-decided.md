@@ -1,5 +1,8 @@
 # Recommended edges gate on decision, not just fulfilment
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the rule — wait until the parent is decided, a rejection releases the child — lives
+> on as `after`; the edge type and the `moot` case are gone.
+
 > Revises [ADR-0007](0007-required-recommended-edges.md). That ADR's "a recommended edge advises: the child stays proposable even when its recommended parent was rejected" said what happens once a recommended parent is *rejected* — that part is unchanged and restated below — but said nothing about the parent sitting *undecided* (neither fulfilled nor rejected), which in practice meant a recommended edge never withheld its child at all: the child was proposable from the moment its own required parents were satisfied, recommended or not. This ADR closes that gap.
 
 A real reviewer-loop observation run surfaced Rector's dead-code suite (`rector-dead-code`) introduced while `php-cs-fixer` had never even been proposed yet — not a `required`-edge violation (its only required parent, `phpstan-level-0-baseline`, was fulfilled), but a direct contradiction of `php-cs-fixer`'s own documented purpose: automated style so later Rector output lands styled. `refactor-prioritize`'s Skip-streak factor (a separate fix, for `required` tooling siblings that never win on their own ranking merits) incidentally reduces how often this specific instance occurs, since `php-cs-fixer` is itself a `required` child of `composer` — but it doesn't eliminate the underlying gap: a target that rejects `php-cs-fixer` outright as out-of-scope would still hit it, since Skip-streak has nothing left to boost once a node is rejected rather than merely neglected.

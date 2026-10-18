@@ -9,7 +9,6 @@
 > [ADR-0040](0040-signal-tool-nodes-and-tree-edge-simplification.md) and
 > [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md) where they describe edges and aggregation. What
 > they decided about **Safety Net**, **Guardrails**, **Signals** and **Onboarding** as concepts stays.
-> Their banners are added when the runs switch to the model.
 >
 > Amends [ADR-0056](0056-agent-judged-fulfilment.md) and [ADR-0014](0014-tooling-tree-parser-ships-under-refactor-scan.md):
 > the parser still computes graph logic only and ships with the data it reads, but the data are JSON Packs.
@@ -95,9 +94,10 @@ and `test-runner-if-missing` are gone; the keys `detected`, `next`, `withheld`, 
 `tree.edges` is `tree.stages`, `safety_net_fulfilled` is new, and reason texts are worded for Stages.
 
 **Delivered in parts.** First the model, the data and the parser beside the old one, with no run using
-them; then the references switch, the old parser, its tests and the edge tables go, and the banners of the
-superseded ADRs are added. Then the files per Tool move into the Packs and `CONTEXT.md` gets the terms, the
-generator and the validator checks follow, then a target's own Pack, then a new Pack as the acceptance case.
+them; then the references switch, the old parser, its tests, the edge tables and the nodes that no longer exist
+go, `CONTEXT.md` gets the terms, and the superseded ADRs get their banners. Then the files per Tool move into
+the Packs and lose their history, the generator and the validator checks follow, then a target's own Pack,
+then a new Pack as the acceptance case.
 
 **What a target sees.** Rejections already on record keep their Stage names. A rejection of a Role or a Tool
 is new, and a scan of an existing target proposes Stages it has not judged before (per-Stage trace).

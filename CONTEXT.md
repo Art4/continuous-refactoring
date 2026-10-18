@@ -5,11 +5,11 @@ The vocabulary of a portable agent-skill suite that keeps a software project und
 ## Language
 
 **Candidate**:
-A **ticket** the suite works as refactoring: the adoption of a **tooling tree** node, a structural deepening, or a ticket a human wrote. Recognised by its subject, named in plain words in title and text — never by a fixed marker. A ticket a human wrote is picked up when the target's **Candidate** operation says how such tickets are marked, or when the call names it.
+A **ticket** the suite works as refactoring: the adoption of a **tooling tree** Stage, a structural deepening, or a ticket a human wrote. Recognised by its subject, named in plain words in title and text — never by a fixed marker. A ticket a human wrote is picked up when the target's **Candidate** operation says how such tickets are marked, or when the call names it.
 _Avoid_: todo
 
 **Backlog**:
-The ordered list of a **Track**'s tooling-tree nodes that are neither fulfilled nor rejected, blocked ones included — what the tree's parser emits and what a scan offers tickets for. Once the tickets exist, the **Worklist** is what a run works from.
+The ordered list of a **Track**'s tooling-tree Stages that are neither fulfilled nor closed by a rejection, blocked ones included — what the tree's parser emits and what a scan offers tickets for. Once the tickets exist, the **Worklist** is what a run works from.
 _Avoid_: debt list, todo list
 
 **Run**:
@@ -25,7 +25,7 @@ The two modes of a **run**. **Interactive**, the default: the human decides at e
 _Avoid_: ask-each-time, human-opens, create-mode (settings that no longer exist)
 
 **Worklist**:
-The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree node belongs to that node's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
+The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
 _Avoid_: bookkeeping, open list, state file
 
 **Merge request**:
@@ -48,27 +48,27 @@ An issue on the project's tracker — the word the suite uses, in its own texts 
 _Avoid_: todo
 
 **Tooling tree**:
-The directed graph of adoption steps a target repo climbs — a generic root (the tooling-tree doc: `git`, `onboarding-setup`) that every language specialization's tree (PHP: the PHP tooling-tree doc) attaches beneath. A **node** adopts one tool, or one suite-level prerequisite at the root, up to a stated degree a tool may own several nodes (each PHPStan level is its own node). Operational lessons discovered while adopting or fulfilling a node are worked directly into its Purpose/Fulfilment check/MR scope prose, not tracked as a separate entry. Each node also carries a human-facing **Name** (the tree doc's `**Name:**` field), used instead of the slug anywhere a human reads it — ticket titles, merge requests, a run's reports; the tree's own internals (the edges table, the parser's input and output) stay keyed by the slug. A node may also carry a **Housekeeping** field — a recurring-maintenance line contributed to the **Housekeeping template** (below), ordinarily through the node's own merge request, or added by a **Housekeeping** run for a fulfilled node whose line is missing; unrelated to the node's own one-time Fulfilment check. A node may also carry a **Signal** field, naming which signals-catalogue factor its tool output feeds once the node is adopted — see the **Signal** entry below for the full picture across both usages. Deliberately not every node produces one: a node can gate `structural-scan` without producing a Signal, and vice versa — a Signal-producing node like `phpmd` or `secret-detection` carries no `resolved` edge into `structural-scan` at all (see those nodes' own entries in the tree docs).
+What a target repo climbs, described as **Roles** filled by **Tools** that have **Stages**, delivered in **Packs** (below; the rules are in the suite's tooling-model reference). A **Stage** is one degree of a Tool, up to which a tool is adopted, and the unit a ticket is filed for (each PHPStan level is its own Stage). Each Stage and each Tool carries a human-facing **Name**, used instead of the slug anywhere a human reads it — ticket titles, merge requests, a run's reports; the parser's input and output stay keyed by the slug. The suite's own prerequisites, `git` and `onboarding-setup`, are in no Pack. Operational lessons discovered while adopting or fulfilling a Stage are worked directly into its Purpose, Fulfilment check and MR scope prose, not tracked as a separate entry. A Tool may carry a **Housekeeping** field — a recurring-maintenance line contributed to the **Housekeeping template** (below), ordinarily through the Stage's own merge request, or added by a **Housekeeping** run for a fulfilled Tool whose line is missing; unrelated to the Stage's one-time Fulfilment check. A Role may carry a **Signal**, naming which signals-catalogue factor its tool output feeds once adopted — see the **Signal** entry below. Not every Role produces one.
 _Avoid_: baseline, floor, bootstrap, onboarding (as a name for the tree itself — it never stops being walked; see the dedicated **Onboarding** entry below for the bounded phase within it, which is a real term)
 
 **Track**:
-One of four kinds of work a **run** can spend itself on: **Safety Net**, **Guardrails**, **Housekeeping**, **Investigation** (all below). Track choice is a **decision point**: the suite sorts the **worklist** into Tracks and recommends the first one, in that fixed order, with something workable. While Safety Net is not fulfilled, an autonomous run that finds nothing workable there ends with "Safety Net is waiting for merges"; a human may choose another Track. Once Safety Net is fulfilled, a Track with nothing workable is skipped within the same run. Housekeeping is recommended when its open **Housekeeping ticket**'s due date is reached, or when its mechanism is missing. A Track is scanned only when it has no trace yet in the tracker — no ticket of its nodes, open or closed, and no recorded rejection — or on request; with a trace, a node without an open ticket counts as done, and re-checking the tooling Tracks is a recurring **Housekeeping** task. A human names a Track in the call to work on it whatever the recommendation would be.
+One of four kinds of work a **run** can spend itself on: **Safety Net**, **Guardrails**, **Housekeeping**, **Investigation** (all below). Track choice is a **decision point**: the suite sorts the **worklist** into Tracks and recommends the first one, in that fixed order, with something workable. While Safety Net is not fulfilled, an autonomous run that finds nothing workable there ends with "Safety Net is waiting for merges"; a human may choose another Track. Once Safety Net is fulfilled, a Track with nothing workable is skipped within the same run. Housekeeping is recommended when its open **Housekeeping ticket**'s due date is reached, or when its mechanism is missing. A Track is scanned only when a Stage of it is not known yet — no ticket of it, open or closed, and no recorded rejection of it, of its Tool or of its Role — or on request; a known Stage without an open ticket counts as done, and re-checking the tooling Tracks is a recurring **Housekeeping** task. A Track is a phase or function of work, never a topic: topics are **Signals**. A human names a Track in the call to work on it whatever the recommendation would be.
 _Avoid_: wave (this concept's earlier name; retired once it started colliding with **Guardrails**' own former name, "Signal wave" — see that entry)
 
 **Onboarding**:
-The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup`, the language specialization's recognition gate, and every node in the **Safety Net** (below) — everything before `structural-scan` opens. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is the first thing a call checks. A target whose tracker file has no `## Refactoring operations` section gets a short interview — where the tickets live and how the operations work there, nothing else — that writes the section; a section without **Search** gets it added the same way. Everything from the recognition gate onward is simply what the Safety Net **Track**'s first scan finds — the same mechanism as any later scan, just with more to discover the first time.
+The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup` and every Stage in the **Safety Net** (below) — everything before the Safety Net is fulfilled. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is the first thing a call checks. A target whose tracker file has no `## Refactoring operations` section gets a short interview — where the tickets live and how the operations work there, nothing else — that writes the section; a section without **Search** gets it added the same way. Everything after `onboarding-setup` is simply what the Safety Net **Track**'s first scan finds — the same mechanism as any later scan, just with more to discover the first time.
 _Avoid_: baseline, bootstrap (see **Tooling tree**'s own `_Avoid_` list — those describe the never-ending tree; this term names only the bounded early phase within it)
 
 **Safety Net**:
-The tooling-tree nodes carrying a `resolved` edge into `structural-scan` (generic root: `editorconfig`, `ci-runner`) or into a language specialization's own aggregation node (PHP: `php-safety-net`) — deterministic tooling whose findings could collide with agent-driven structural work, settled before that work starts. Narrower than **Onboarding** (above): every Safety Net node lives inside Onboarding, but `git`/`onboarding-setup`/the recognition gate aren't Safety Net nodes themselves. Also names the **Track** (above) that works through these nodes.
+The tooling-tree Stages whose Track is Safety Net — deterministic tooling whose findings could collide with agent-driven structural work, settled before that work starts. The Safety Net is *fulfilled* when every one of its Stages, in the Packs that apply and of the Tools in use, is fulfilled or closed by a rejection; the parser computes it. Narrower than **Onboarding** (above): every Safety Net Stage lives inside Onboarding, but `git` and `onboarding-setup` aren't Stages. Also names the **Track** (above) that works through these Stages.
 _Avoid_: baseline, tooling gate
 
 **Guardrails**:
-The tooling-tree nodes workable only once the **Safety Net** (above) is fulfilled — required-gated on `structural-scan`/`php-safety-net` itself instead of (or alongside) a domain-specific parent. Also names the **Track** (above) that works through these nodes. Orthogonal to a node's own **Signal** field (below): a Guardrails node always carries one, but a Safety Net node can too (`psalm-taint-analysis`) — one names *when* a node becomes workable, the other names *which factor* it feeds once adopted.
-_Avoid_: signal wave (this concept's former name — renamed for symmetry once both it and **Safety Net** became **Track** names, and to stop reading as an alternate spelling of the unrelated **Signal** field below), security wave (not every Guardrails node is security-flavored — `phpmd`/`coverage-floor` feed Understandability/Testability, not Security)
+The tooling-tree Stages whose Track is Guardrails — workable only once the **Safety Net** (above) is fulfilled. Also names the **Track** (above) that works through these Stages. Orthogonal to a Role's own **Signal** (below): a Guardrails Stage usually serves a Role with one, but a Safety Net Stage can too (`psalm-taint-analysis`) — one names *when* a Stage becomes workable, the other names *which factor* its tool feeds once adopted.
+_Avoid_: signal wave (this concept's former name — renamed for symmetry once both it and **Safety Net** became **Track** names, and to stop reading as an alternate spelling of the unrelated **Signal** field below), security wave (not every Guardrails Stage is security-flavored — `phpmd`/`coverage-floor` feed Understandability/Testability, not Security)
 
 **Fulfilment check**:
-A node's own test for whether it's already adopted — now agent-judged for every node. An agent walking the tree during its **Track**'s scan recognizes any real, working tool that serves the node's stated Purpose rather than matching a fixed list of names (a Laravel-Pint-configured target satisfies `php-cs-fixer`'s Fulfilment check the same as a directly-configured one). Lives in the node's own tree-doc entry, alongside its **MR scope** (what an adoption's merge request actually delivers) — every node carries both, together they're what "a node" (above) means operationally. Run during a Track's scan, and again right before the node's ticket is worked (**Fulfilled at pick-up**, below).
+A Stage's own test for whether it's already adopted — agent-judged for every Stage. An agent walking the tree during its **Track**'s scan recognizes any real, working tool that serves the Role's stated Purpose rather than matching a fixed list of names (a Laravel-Pint-configured target satisfies `php-cs-fixer`'s Fulfilment check the same as a directly-configured one). Lives in the Tool's `details` file, alongside the Stage's **MR scope** (what an adoption's merge request actually delivers) — every Stage carries both, together they're what "a Stage" means operationally. Run during a Track's scan, and again right before the Stage's ticket is worked (**Fulfilled at pick-up**, below).
 _Avoid_: adoption check, acceptance criteria
 
 **Entry point**:
@@ -88,7 +88,7 @@ The file in the target a **Housekeeping ticket** is made from: the recurring tas
 _Avoid_: checklist file, cadence (the rhythm is a line of the template, not a setting of the suite)
 
 **Housekeeping line**:
-The recurring task a **tooling tree** node contributes to the **Housekeeping template**: its **Housekeeping** field, reworded for the template's reader. It arrives through the node's own merge request; for a tool set up by hand, a Housekeeping run adds it.
+The recurring task a **tooling tree** Tool contributes to the **Housekeeping template**: its **Housekeeping** field, reworded for the template's reader. It arrives through the Stage's own merge request; for a tool set up by hand, a Housekeeping run adds it.
 _Avoid_: checklist line
 
 **Part**:
@@ -99,29 +99,25 @@ _Avoid_: partial fix, chunk
 A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync, the secret scan over the Git history (the whole history the first time, afterwards the commits since the last **Housekeeping ticket**). Also names the **Track** (above) that runs it, by working the open **Housekeeping ticket**; `/continuous-housekeeping` runs that Track alone, with no Track choice, so it can be scheduled. Where the mechanism is missing, the Track proposes to set it up: the **Housekeeping template**, the first ticket, the `AGENTS.md` line. Never a tooling-tree node: nothing about it is a one-time adoption with a stable Fulfilment check.
 _Avoid_: maintenance loop, chore loop, cleanup pass
 
-**Required edge**:
-The gating edge between nodes: a node's ticket is workable only once every parent linked by a required edge is fulfilled. Rejecting a required parent is a **decision point** whose recommendation is to close every ticket beneath it as rejected.
-_Avoid_: hard edge, blocking edge
+**Role**:
+What a tool is for: Static Analysis, Code Style, Testing, Secret Scanning. A **Tool** plays one or more Roles, and a Role can be empty. A Role is *filled* once the first **Stage** of one of its Tools is fulfilled; recommended Tools come before recognized ones, so with both present the recommended Tool is the one in use. A Role carries the **Purpose** a **Fulfilment check** is judged by and, where its tool output feeds one, a **Signal**. A rejection may name a Role ("no static analysis"), which closes every Tool that plays it.
+_Avoid_: practice, capability (the tracker's operations use that word)
 
-**Recommended edge**:
-The counterpart that gates on a decision rather than on fulfilment (ADR-0016): a node's ticket is workable only once every parent linked by a recommended edge is _decided_ — fulfilled, or rejected. A parent counts as rejected either directly (its own recorded rejection) or transitively, when one of *its own* required ancestors is itself rejected — the same closure a required edge already causes (see **Required edge** above), just extended here to answer "decided" too. A rejected recommended parent (either way) releases the child instead of closing it, unlike a required parent: at the **decision point** that follows the rejection, the recommendation is to remove the blocker from the child's ticket. The rejected parent is never offered again, unless its rejection is reversed. A recommended parent that hasn't been reached yet at all counts as undecided too, blocking the child just the same as one whose ticket is merely open.
-_Avoid_: soft edge, nice-to-have edge, non-blocking edge
+**Tool**:
+The concrete tool a **Role** is played by — PHPStan, Psalm, PHP CS Fixer — or a convention that needs none (PSR-4 autoloading). *Recommended*: proposed when its Role is empty. *Recognized*: counted when present, never proposed (Psalm). A Tool whose Role another Tool fills takes no place any more (it is *out*) and is not proposed. A Tool has a Name, the oldest runtime any version of it ran on, and its Housekeeping line; a rejection may name a Tool, which closes its Stages and leaves the Role open for another Tool.
+_Avoid_: (none — use the term as-is)
 
-**Required-any edge**:
-An OR variant of the required edge (ADR-0019): a node with required-any parents is workable once _at least one_ of them is fulfilled, not all — distinct from a **choice** (below), which is about mutual exclusion between siblings, not about unlocking a downstream child from either side. Combines with a node's ordinary required parents (if any) via AND between the two edge types, OR within the required-any group itself.
-_Avoid_: optional required edge, either-or edge
+**Stage**:
+One degree of a **Tool**, and the unit a ticket is filed for: PHPStan Level 3, Rector's dead-code set. It has a slug, a Name, one **Track**, what it requires first (Stages, a **Role**, or a group of alternatives) and what it waits for until it is decided. A rejected required Stage closes it; a rejected Stage it waits for releases it. A Stage may carry an *Applies when* of its own, judged like a **Pack**'s.
+_Avoid_: (none yet — the word it replaced was *node*, which the parser's output keys `node` and `nodes` and the prose of the Tool files still use until those files are cleaned)
 
-**Choice**:
-Two or more sibling nodes under a shared required parent where adopting one makes the others rejected by design — recorded the same way any other rejection is (a closed ticket or a file, where the target's **Rejected** operation says), not a separate mechanism. The tree has no dedicated XOR primitive; a choice is just an ordinary sibling pair plus the convention that picking one means rejecting the rest.
-_Avoid_: XOR, either-or
+**Pack**:
+Tools with a condition under which they apply: the generic Pack always, the PHP Pack when the target contains PHP code, a Pack of a target's own as it says. The condition is a sentence the agent judges once per run; a Pack that does not apply is absent everywhere. A target's own Pack has the format of the suite's and may add Tools, Stages and Roles, never redefine the suite's.
+_Avoid_: (none — use the term as-is)
 
-**Recognition-only gate node**:
-A tooling-tree node that never gets a ticket itself — it exists only as a required parent whose fulfilment gates other nodes. It is recognized (judged fulfilled or not by an agent, and handed to the parser like any other node's state) but never adopted through a run's design and implementation. Its fulfilment is a prerequisite for downstream nodes, not work the suite performs. Example: `is-php-project`, which holds the PHP tree closed until the target uses PHP. A node waiting behind an unfulfilled one is out of reach: no ticket could unblock it, so a scan offers none for it.
-_Avoid_: gate node (too broad — a gate node that also gets a ticket is just a normal node)
-
-**Aggregation node**:
-A tooling-tree node others reach through `resolved` edges: `structural-scan`, and one per language specialization (PHP: `php-safety-net`). Its state is computed by the tree's parser from its leaves — fulfilled once every leaf is fulfilled, rejected, or closed by a rejection — never handed in, never judged by an agent, and never a ticket. "Is **Safety Net** fulfilled?" is the computed state of `structural-scan`: it alone decides whether an autonomous run stops at Safety Net and whether a run moves on to the next **Track**. Whether every Safety Net node is done is a different question, and decides neither.
-_Avoid_: resolved gate, plumbing node
+**Ratchet**:
+How a **Stage** is raised without letting the old findings back: no new violations, the existing ones shrink, one direction only — the PHPStan baseline, a coverage floor. A property of a **Tool**. A level whose baseline still has entries is not fulfilled, and its ticket is the baseline's shrinking.
+_Avoid_: (none — use the term as-is)
 
 **Floor correction**:
 Bringing `composer.json`'s declared PHP floor (`require.php`) in line with what the codebase's own source already demonstrably requires — behavior-preserving, since nothing observable changes, only the metadata now tells the truth. The only node that produces this: `php-minimal-version` (the PHP tree), triggered once `rector-php-set` has fully applied a PHP-version rule set.
@@ -164,7 +160,7 @@ The public boundary at which a module is tested — where tests observe behaviou
 _Avoid_: boundary, internal hook
 
 **Tooling pressure**:
-A candidate that an already-fulfilled tooling-tree node keeps surfacing — things that will re-fail until fixed.
+A candidate that an already-fulfilled tooling-tree Stage keeps surfacing — things that will re-fail until fixed.
 _Avoid_: lint noise, tool complaints
 
 **Leverage**:
@@ -180,7 +176,7 @@ The concrete refactoring plan a **run**'s design point ends with — produced by
 _Avoid_: design doc
 
 **Proposals**:
-What a scan lays out at the file-tickets **decision point**: one ticket for every tooling-tree node of the scanned **Track** that is neither fulfilled nor rejected, blocked ones included and marked as blocked — and, for an **Investigation** run with no open tickets, everything its exploration found, in order of **signal**, with the three strongest recommended for filing. What is not filed is not stored.
+What a scan lays out at the file-tickets **decision point**: one ticket for every tooling-tree Stage of the scanned **Track** that is neither fulfilled nor closed by a rejection, blocked ones included and marked as blocked — and, for an **Investigation** run with no open tickets, everything its exploration found, in order of **signal**, with the three strongest recommended for filing. What is not filed is not stored.
 _Avoid_: suggestions, recommendations (a recommendation is the one option a decision point favours)
 
 **Signal**:
@@ -192,7 +188,7 @@ What a **decision point** lays out before its options. At reconcile, the first o
 _Avoid_: events, notifications
 
 **Fulfilled at pick-up**:
-The finding when a node's **Fulfilment check**, run again right before its ticket is worked, finds the node already served — typically adopted by hand since the ticket was filed. The ticket is closed with a note, with no merge request, and selection moves on.
+The finding when a Stage's **Fulfilment check**, run again right before its ticket is worked, finds the Stage already served — typically adopted by hand since the ticket was filed. The ticket is closed with a note, with no merge request, and selection moves on.
 _Avoid_: (none — use the term as-is)
 
 **Flagged candidate**:

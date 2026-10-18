@@ -1,7 +1,7 @@
 # 01 — ADR, model and parser on Packs
 
 Type: task
-Status: in-progress
+Status: done
 
 The tooling tree becomes Roles, Tools and Stages in Packs (`../spec.md`, D1–D24). This ticket brings the
 meaning: after it, runs compute from JSON Packs, not from the tree docs' edge tables.
@@ -53,3 +53,9 @@ names (D12).
 Cut into two parts (D25). Part 1 (branch `tooling-packs-model-data-parser`): ADR, `tooling-model.md`, schemas,
 `roles.json`, `packs/generic` and `packs/php`, `tooling_packs.py` with tests, proved by an equivalence run
 (1,864 comparisons, differences listed in the ADR). Part 2: the references switch and the old goes.
+
+### 2026-10-18 — part 2 (grilled): the switch
+
+One PR, in commits: parser swapped (`tooling_packs.py` → `tooling_tree.py`, old tests and the old parser gone, negative controls on `workable`), references (`tooling-parser.md`; trace per Stage; scan judges Packs, runtime and Stages; rejections name a Role, Tool or Stage; reconcile closes tickets of dropped Stages), tree docs without edges and without the files of the gates and aggregation nodes (banner for the edge prose until the Tool files move), `CONTEXT.md`, docs, ADR banners.
+
+Decisions of the grilling: baseline ticket belongs to the unfulfilled Stage (empty baseline is part of the Fulfilment check); filing and selection offer "decline the Tool / the Role" on request; the parser output gained `tools` and `workable`; a general reconcile row closes open tickets of dropped Stages with a plain-words note. `CONTEXT.md` moved from ticket 02 into this PR, since the glossary would otherwise describe a tree that no longer exists.

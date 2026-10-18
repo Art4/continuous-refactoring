@@ -13,7 +13,7 @@ A **Track** is one of four kinds of work a run can spend itself on. Each run wor
 | **Housekeeping** | Recurring maintenance, and the small refactoring ideas noted along the way ([playbook](housekeeping.md)) | one standing ticket per template |
 | **Investigation** | Structural refactoring — a hot spot, a module worth deepening | the tickets the suite filed after exploring, and tickets you wrote |
 
-Safety Net and Guardrails walk the [tooling tree](../../skills/continuous-refactoring/references/tooling-tree.md): each adoption step is a *node* — one tool, up to a stated degree; each PHPStan level is a node of its own.
+Safety Net and Guardrails walk the [tooling tree](../../skills/continuous-refactoring/references/tooling-model.md): each adoption step is a *Stage* — one tool, up to a stated degree; each PHPStan level is a Stage of its own. A tool plays a *Role* (static analysis, code style, testing, …), and tools come in *Packs* that apply to a project: every project, a project with PHP code, and a Pack of your own.
 
 At the start of a run the suite searches your open tickets and sorts them: a ticket about a tool of the tree belongs to that tool's Track, the open Housekeeping ticket to Housekeeping, everything else to Investigation. Each ticket also gets a state:
 
@@ -28,7 +28,7 @@ Track choice is a decision point. The recommendation is the first Track, in the 
 
 | Track | It has something when |
 |---|---|
-| Safety Net, Guardrails | one of its tickets is workable — or the Track was never scanned, which makes its scan due |
+| Safety Net, Guardrails | one of its tickets is workable — or a tool of it was never looked at, which makes its scan due |
 | Housekeeping | its open ticket states a due date that is reached and is not in review — or its mechanism is not set up yet |
 | Investigation | always: with open tickets it works them, without it explores |
 
@@ -47,13 +47,13 @@ The same holds for a ticket you name: the run works that ticket, and ends if it 
 
 ## When a Track is scanned
 
-A tooling Track is scanned when your tracker shows **no trace** of it yet — no ticket about any of its tools, open or closed, and no recorded rejection of one. In a scan each tool is judged against your project: is something real and working in place that serves the tool's purpose, under any name? A project running Laravel Pint has automated code style, so PHP CS Fixer counts as in place.
+A tooling Track is scanned when your tracker shows **no trace** of one of its tools yet — no ticket about it, open or closed, and no recorded rejection of it, of the tool as a whole, or of the role it plays. In a scan each tool is judged against your project: is something real and working in place that serves the tool's purpose, under any name? A project running Laravel Pint has automated code style, so PHP CS Fixer counts as in place.
 
-Then the suite offers a ticket for **every** tool that is neither in place nor declined — the blocked ones too, marked as blocked. The whole way ahead is visible in your tracker after one scan. At that decision point you file all, some or none, or decline a tool for good.
+Then the suite offers a ticket for **every** tool that is neither in place nor declined — the blocked ones too, marked as blocked. The whole way ahead is visible in your tracker after one scan. At that decision point you file all, some or none, or decline a tool for good — one step of it, the whole tool, or the role it plays, which closes the rest of the tools of that role too.
 
 After that, the tickets are the record:
 
-- A tool without an open ticket counts as done. Nothing is judged again on an ordinary run.
+- A tool without an open ticket counts as done. Nothing is judged again on an ordinary run — except a tool the suite learned about since, which makes the next run scan the Track for it.
 - A proposal you neither filed nor declined is stored nowhere. Its tool counts as done until a later scan offers it again.
 - A scan runs again when you ask for one in the call, and as a recurring Housekeeping task that re-checks both tooling Tracks — that is how a tool that went missing, or a tool the tree gained, is noticed.
 

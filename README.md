@@ -32,7 +32,7 @@ The suite keeps **no state of its own**. Your open tickets are the worklist; mer
 declined work and the standing Housekeeping ticket are found by searching your tracker and your
 forge on every run. What you change there by hand is simply what the next run finds.
 
-The core is [language-neutral](skills/continuous-refactoring/references/tooling-tree.md); the first specialization is a **[general PHP project](skills/continuous-refactoring/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
+The core is [language-neutral](skills/continuous-refactoring/references/tooling-model.md), with tools delivered in Packs; the first language Pack is a **[general PHP project](skills/continuous-refactoring/references/php-tooling-tree.md)** (code style, Rector, PHPStan via the tooling tree), grounded in over 20 years of PHP experience and kept up to date with current best practice.
 
 ## How it works
 

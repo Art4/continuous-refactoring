@@ -254,6 +254,9 @@ docstring is outdated and goes with the function in ticket 1.
 - **D33 — The parser reads only the tracker file of a target** (for `onboarding-setup`). D22's "reads no
   target files any more" meant the PHP floor.
 
+- **D34 — `CONTEXT.md` comes with part 2 of ticket 01**, not with ticket 02, since the references that
+  switch there are what the glossary describes.
+
 **Equivalence run (part 1).** 1,864 comparisons over four worlds: no difference for a PHP project with a
 real dependency; every difference elsewhere is one of D3, D9, D23 or the removed gates (listed in the ADR).
 
