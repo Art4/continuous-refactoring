@@ -216,7 +216,7 @@ Per Pack, the Tools per Role:
   table's `Ticket` column goes.
 - **D24 — `test-runner-if-missing` goes;** the Role Testing with PHPUnit recommended does its job. Ticket 1
   gives it a section in the ADR and a step that closes an open ticket of that Name with a note that the
-  Role Testing takes it over. Before that is written, check the targets for such tickets.
+  Role Testing takes it over. Checked 2026-10-18: youthweb holds no such ticket.
 
 Side finding: `php_floor_precheck`'s docstring says a blocked leaf is not a rejection, while
 `tooling-tree-parser.md` and `php-tooling-tree.md` have the scan propose one with a blocker; the
@@ -237,8 +237,8 @@ In the order they depend on each other.
 9. ~~Where the fields hang~~ → D6.
 
 Smaller: ~~whether the Track thresholds live in `pack.md`~~ (D9: a mark on the Stage). Left to ticket 1's
-plan: how the eleven files above point at the new references; whether targets hold open tickets of
-`test-runner-if-missing` (D24; youthweb's Redmine needs credentials this session does not have).
+plan: how the eleven files above point at the new references; the Roles' names (D12); where the example
+of a target's Pack lives (D17).
 
 ## Constraints
 
@@ -246,6 +246,8 @@ plan: how the eleven files above point at the new references; whether targets ho
 - Supersedes parts of ADR-0007, 0008, 0016, 0017, 0040 and 0054; the change needs an ADR of its own.
 
 ## Order (D20)
+
+Tickets: `issues/01` to `issues/05`, one per step.
 
 1. **ADR and model.** The ADR, `tooling-model.md`, the schemas, the Packs as JSON (generic and PHP, every
    node of today as a Stage), the new parser with its tests, and the references switched to it in the
