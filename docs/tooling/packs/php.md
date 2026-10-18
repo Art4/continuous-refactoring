@@ -94,7 +94,6 @@ flowchart TD
   x_editorconfig[".editorconfig (generic)"]
   x_ci_runner["CI Runner (generic)"]
   r_static_analysis(["Static Analysis"])
-  a_psalm_taint_analysis_0{"one of"}
   s_composer --> s_psr_4
   s_composer --> s_php_cs_fixer
   x_editorconfig -.-> s_php_cs_fixer
@@ -133,8 +132,7 @@ flowchart TD
   s_php_cs_fixer -.-> s_rector_type_coverage
   s_phpstan_level_3 -.-> s_rector_type_coverage
   s_rector_php_set --> s_php_minimal_version
-  s_phpstan_level_4 --> a_psalm_taint_analysis_0
-  s_psalm --> a_psalm_taint_analysis_0
-  a_psalm_taint_analysis_0 --> s_psalm_taint_analysis
+  s_phpstan_level_4 -->|one of| s_psalm_taint_analysis
+  s_psalm -->|one of| s_psalm_taint_analysis
   x_ci_runner -.-> s_semgrep
 ```

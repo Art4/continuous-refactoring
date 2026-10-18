@@ -196,12 +196,9 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
 
     for stage in own:
         target = _node("s", stage["slug"])
-        for index, item in enumerate(stage["requires"]):
+        for item in stage["requires"]:
             if isinstance(item, list):
-                gate = _node("a", stage["slug"]) + f"_{index}"
-                lines.append(f"  {gate}{{{_label('one of')}}}")
-                edges.extend(f"  {stage_node(m)} --> {gate}" for m in item)
-                edges.append(f"  {gate} --> {target}")
+                edges.extend(f"  {stage_node(m)} -->|one of| {target}" for m in item)
             elif item in stages:
                 edges.append(f"  {stage_node(item)} --> {target}")
             else:
