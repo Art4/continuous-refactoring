@@ -637,6 +637,16 @@ class SuiteDataTests(unittest.TestCase):
         self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer")
         self.assertIn("psalm-taint-analysis", out["tracks"]["Safety Net"]["backlog"])
 
+    def test_pint_and_ecs_take_the_place_of_php_cs_fixer(self):
+        for tool in ("pint", "ecs"):
+            out = self.compute({"fulfilled": ["composer", "phpstan-level-0", tool]})
+            filled = {r["role"]: r["filled_by"] for r in out["roles"]}
+            self.assertEqual(filled["code-style"], tool)
+            safety_net = out["tracks"]["Safety Net"]
+            self.assertNotIn("php-cs-fixer", {n["node"] for n in safety_net["nodes"]})
+            self.assertNotIn(tool, {n["node"] for n in safety_net["nodes"]})
+            self.assertIn("rector-php-set", safety_net["workable"])
+
     def test_phpstan_is_proposed_when_the_role_is_empty(self):
         out = self.compute({"fulfilled": ["composer"]})
         self.assertIn("phpstan-level-0", out["tracks"]["Safety Net"]["backlog"])

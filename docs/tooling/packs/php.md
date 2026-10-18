@@ -12,6 +12,8 @@ flowchart TD
     s_composer["Composer"]
     s_psr_4["PSR-4 Autoloading"]
     s_php_cs_fixer["PHP CS Fixer"]
+    s_pint["Laravel Pint"]
+    s_ecs["Easy Coding Standard"]
     s_phpunit["PHPUnit"]
     s_phpstan_level_0["PHPStan Level 0"]
     s_phpstan_level_1["PHPStan Level 1"]
@@ -46,6 +48,8 @@ flowchart TD
   s_composer --> s_psr_4
   s_composer --> s_php_cs_fixer
   x_editorconfig -.-> s_php_cs_fixer
+  s_composer --> s_pint
+  s_composer --> s_ecs
   s_composer --> s_phpmd
   s_composer --> s_phpunit
   s_phpunit --> s_coverage_floor
@@ -90,19 +94,21 @@ flowchart TD
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |
 | --- | --- | --- | --- | --- | --- |
-| Composer (`composer`) | recommended | Package Management | Composer | – | [php-tooling-tree/composer.md](../../../skills/continuous-refactoring/references/php-tooling-tree/composer.md) |
-| PSR-4 Autoloading (`psr-4`) | recommended | Autoloading | – | – | [php-tooling-tree/psr-4.md](../../../skills/continuous-refactoring/references/php-tooling-tree/psr-4.md) |
-| PHP CS Fixer (`php-cs-fixer`) | recommended | Code Style | php-cs-fixer | php 5.3 | [php-tooling-tree/php-cs-fixer.md](../../../skills/continuous-refactoring/references/php-tooling-tree/php-cs-fixer.md) |
-| PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [php-tooling-tree/phpmd.md](../../../skills/continuous-refactoring/references/php-tooling-tree/phpmd.md) |
-| PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [php-tooling-tree/phpunit.md](../../../skills/continuous-refactoring/references/php-tooling-tree/phpunit.md) |
-| Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [php-tooling-tree/coverage-floor.md](../../../skills/continuous-refactoring/references/php-tooling-tree/coverage-floor.md) |
-| Composer Audit (`composer-audit`) | recommended | Dependency Audit | composer audit | php 7.2 | [php-tooling-tree/composer-audit.md](../../../skills/continuous-refactoring/references/php-tooling-tree/composer-audit.md) |
+| Composer (`composer`) | recommended | Package Management | Composer | – | [packs/php/composer.md](../../../skills/continuous-refactoring/references/packs/php/composer.md) |
+| PSR-4 Autoloading (`psr-4`) | recommended | Autoloading | – | – | [packs/php/psr-4.md](../../../skills/continuous-refactoring/references/packs/php/psr-4.md) |
+| PHP CS Fixer (`php-cs-fixer`) | recommended | Code Style | php-cs-fixer | php 5.3 | [packs/php/php-cs-fixer.md](../../../skills/continuous-refactoring/references/packs/php/php-cs-fixer.md) |
+| Laravel Pint (`pint`) | recognized | Code Style | Laravel Pint | – | [packs/php/pint.md](../../../skills/continuous-refactoring/references/packs/php/pint.md) |
+| Easy Coding Standard (`ecs`) | recognized | Code Style | Easy Coding Standard | – | [packs/php/ecs.md](../../../skills/continuous-refactoring/references/packs/php/ecs.md) |
+| PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring/references/packs/php/phpmd.md) |
+| PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
+| Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
+| Composer Audit (`composer-audit`) | recommended | Dependency Audit | composer audit | php 7.2 | [packs/php/composer-audit.md](../../../skills/continuous-refactoring/references/packs/php/composer-audit.md) |
 | PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [php-tooling-tree/phpstan.md](../../../skills/continuous-refactoring/references/php-tooling-tree/phpstan.md) |
 | Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [php-tooling-tree/psalm.md](../../../skills/continuous-refactoring/references/php-tooling-tree/psalm.md) |
 | Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [php-tooling-tree/rector.md](../../../skills/continuous-refactoring/references/php-tooling-tree/rector.md) |
-| PHP Minimum Version (`php-minimal-version`) | recommended | Runtime Floor | – | – | [php-tooling-tree/php-minimal-version.md](../../../skills/continuous-refactoring/references/php-tooling-tree/php-minimal-version.md) |
+| PHP Minimum Version (`php-minimal-version`) | recommended | Runtime Floor | – | – | [packs/php/php-minimal-version.md](../../../skills/continuous-refactoring/references/packs/php/php-minimal-version.md) |
 | Psalm Taint Analysis (`psalm-taint-analysis`) | recommended | Taint Analysis | vimeo/psalm | – | [php-tooling-tree/psalm.md](../../../skills/continuous-refactoring/references/php-tooling-tree/psalm.md) |
-| Semgrep (OWASP Top 10) (`semgrep`) | recommended | Static Security Analysis | Semgrep | – | [php-tooling-tree/semgrep.md](../../../skills/continuous-refactoring/references/php-tooling-tree/semgrep.md) |
+| Semgrep (OWASP Top 10) (`semgrep`) | recommended | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring/references/packs/php/semgrep.md) |
 
 ## Stages
 
@@ -111,6 +117,8 @@ flowchart TD
 | Composer (`composer`) | `composer` | Safety Net | – | – | – |
 | PSR-4 Autoloading (`psr-4`) | `psr-4` | Safety Net | `composer` | – | – |
 | PHP CS Fixer (`php-cs-fixer`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
+| Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |
+| Easy Coding Standard (`ecs`) | `ecs` | Safety Net | `composer` | – | – |
 | PHPMD (`phpmd`) | `phpmd` | Guardrails | `composer` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
 | Test Coverage Floor (`coverage-floor`) | `coverage-floor` | Guardrails | `phpunit` | – | – |

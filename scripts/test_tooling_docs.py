@@ -144,9 +144,9 @@ class ModelTests(unittest.TestCase):
     def test_a_missing_details_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_repo(tmp)
-            (root / REFS / "tooling-tree" / "ci-runner.md").unlink()
+            (root / REFS / "packs" / "generic" / "ci-runner.md").unlink()
             problems = td.check(root)
-            self.assertIn(("tool ci-runner", "names the details file tooling-tree/ci-runner.md, which does not exist"), problems)
+            self.assertIn(("tool ci-runner", "names the details file packs/generic/ci-runner.md, which does not exist"), problems)
 
     def test_a_broken_model_is_reported_not_raised(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -54,8 +54,7 @@ Nodes on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, an
   `phpstan.md`) — only the tree structure and each node's own detection record it. Nothing reads
   `psalm.fulfilled` in a way this incidental flip could break.
 - **`php-safety-net` resolved-leaf:** yes — one of the nine. The gate's purpose is "deterministic
-  tooling has had its say before agent-driven structural work begins" (`../tooling-tree.md`'s
-  `structural-scan` node), not "structural-quality tools only" — `composer-audit` (`composer-audit.md`) is
+  tooling has had its say before agent-driven structural work begins" (the former `structural-scan` gate), not "structural-quality tools only" — `composer-audit` (`composer-audit.md`) is
   already one of these thirteen leaves and is itself a pure security scan (dependency vulnerabilities), so
   excluding this node on a "security vs. structural" distinction wouldn't have been consistent with that
   precedent.

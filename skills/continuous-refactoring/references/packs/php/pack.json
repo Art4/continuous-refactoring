@@ -9,7 +9,7 @@
       "uses": "Composer",
       "roles": ["package-management"],
       "status": "recommended",
-      "details": "php-tooling-tree/composer.md",
+      "details": "packs/php/composer.md",
       "stages": [
         {
           "slug": "composer",
@@ -26,7 +26,7 @@
       "uses": null,
       "roles": ["autoloading"],
       "status": "recommended",
-      "details": "php-tooling-tree/psr-4.md",
+      "details": "packs/php/psr-4.md",
       "stages": [
         {
           "slug": "psr-4",
@@ -43,7 +43,7 @@
       "uses": "php-cs-fixer",
       "roles": ["code-style"],
       "status": "recommended",
-      "details": "php-tooling-tree/php-cs-fixer.md",
+      "details": "packs/php/php-cs-fixer.md",
       "min_runtime": {
         "php": "5.3"
       },
@@ -58,12 +58,46 @@
       ]
     },
     {
+      "tool": "pint",
+      "name": "Laravel Pint",
+      "uses": "Laravel Pint",
+      "roles": ["code-style"],
+      "status": "recognized",
+      "details": "packs/php/pint.md",
+      "stages": [
+        {
+          "slug": "pint",
+          "name": "Laravel Pint",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "ecs",
+      "name": "Easy Coding Standard",
+      "uses": "Easy Coding Standard",
+      "roles": ["code-style"],
+      "status": "recognized",
+      "details": "packs/php/ecs.md",
+      "stages": [
+        {
+          "slug": "ecs",
+          "name": "Easy Coding Standard",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
       "tool": "phpmd",
       "name": "PHPMD",
       "uses": "PHPMD",
       "roles": ["code-smell-detection"],
       "status": "recommended",
-      "details": "php-tooling-tree/phpmd.md",
+      "details": "packs/php/phpmd.md",
       "stages": [
         {
           "slug": "phpmd",
@@ -80,7 +114,7 @@
       "uses": "PHPUnit",
       "roles": ["testing"],
       "status": "recommended",
-      "details": "php-tooling-tree/phpunit.md",
+      "details": "packs/php/phpunit.md",
       "min_runtime": {
         "php": "5.3"
       },
@@ -100,7 +134,7 @@
       "uses": "PHPUnit",
       "roles": ["test-coverage"],
       "status": "recommended",
-      "details": "php-tooling-tree/coverage-floor.md",
+      "details": "packs/php/coverage-floor.md",
       "stages": [
         {
           "slug": "coverage-floor",
@@ -117,7 +151,7 @@
       "uses": "composer audit",
       "roles": ["dependency-audit"],
       "status": "recommended",
-      "details": "php-tooling-tree/composer-audit.md",
+      "details": "packs/php/composer-audit.md",
       "min_runtime": {
         "php": "7.2"
       },
@@ -297,7 +331,7 @@
       "uses": null,
       "roles": ["runtime-floor"],
       "status": "recommended",
-      "details": "php-tooling-tree/php-minimal-version.md",
+      "details": "packs/php/php-minimal-version.md",
       "stages": [
         {
           "slug": "php-minimal-version",
@@ -331,7 +365,7 @@
       "uses": "Semgrep",
       "roles": ["static-security-analysis"],
       "status": "recommended",
-      "details": "php-tooling-tree/semgrep.md",
+      "details": "packs/php/semgrep.md",
       "stages": [
         {
           "slug": "semgrep",

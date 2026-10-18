@@ -38,10 +38,12 @@ Purpose in the target, under any name.
 
 - **The evidence the Fulfilment check names is there** — the dependency, the config file, the CI
   invocation → fulfilled.
-- **It is absent, and another tool serves the Purpose** → fulfilled. A target running Laravel Pint has no
-  `friendsofphp/php-cs-fixer` dependency, and Pint serves "automated code style": `php-cs-fixer` is
-  fulfilled. A CI job running `composer run security-check`, a script that calls `composer audit`,
-  fulfils `composer-audit`. A target running Psalm fulfils the Stage `psalm`, never a PHPStan Stage.
+- **It is absent, and another tool serves the Purpose** → fulfilled. A CI job running
+  `composer run security-check`, a script that calls `composer audit`, fulfils `composer-audit`. Where the
+  Pack knows the other tool as a recognized Tool, its own Stage is the one fulfilled, never the
+  recommended Tool's: a target running Psalm fulfils the Stage `psalm`, one running Laravel Pint the Stage
+  `pint` (Easy Coding Standard: `ecs`), and no PHPStan Stage and not `php-cs-fixer` is judged fulfilled for
+  it. The Role is then filled by the recognized Tool, and the recommended one is not proposed.
 - **Two tools compete for the Purpose, or it is unclear whether one serves it** → undecided, and the
   proposal carries the question, so the human answers it at filing.
 - **Nothing serves it** → undecided. A human who says the Purpose is met without a tool declines the

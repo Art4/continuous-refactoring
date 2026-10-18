@@ -1,0 +1,1 @@
+The prose for a tool now sits beside its Pack: the generic Pack's tools, the suite's two prerequisites and the smaller PHP tools moved to `packs/<pack>/<tool>.md`, without the history of how they used to be wired. The PHP Pack also knows Laravel Pint and Easy Coding Standard now: a project on either has its code style settled, and PHP CS Fixer is not proposed to it.

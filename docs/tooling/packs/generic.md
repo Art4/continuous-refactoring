@@ -21,9 +21,9 @@ flowchart TD
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |
 | --- | --- | --- | --- | --- | --- |
-| CI Runner (`ci-runner`) | recommended | Continuous Integration | GitHub Actions / GitLab CI | – | [tooling-tree/ci-runner.md](../../../skills/continuous-refactoring/references/tooling-tree/ci-runner.md) |
-| .editorconfig (`editorconfig`) | recommended | Editor Settings | EditorConfig | – | [tooling-tree/editorconfig.md](../../../skills/continuous-refactoring/references/tooling-tree/editorconfig.md) |
-| Secret Detection (`secret-detection`) | recommended | Secret Scanning | any secret scanner | – | [tooling-tree/secret-detection.md](../../../skills/continuous-refactoring/references/tooling-tree/secret-detection.md) |
+| CI Runner (`ci-runner`) | recommended | Continuous Integration | GitHub Actions / GitLab CI | – | [packs/generic/ci-runner.md](../../../skills/continuous-refactoring/references/packs/generic/ci-runner.md) |
+| .editorconfig (`editorconfig`) | recommended | Editor Settings | EditorConfig | – | [packs/generic/editorconfig.md](../../../skills/continuous-refactoring/references/packs/generic/editorconfig.md) |
+| Secret Detection (`secret-detection`) | recommended | Secret Scanning | any secret scanner | – | [packs/generic/secret-detection.md](../../../skills/continuous-refactoring/references/packs/generic/secret-detection.md) |
 
 ## Stages
 
