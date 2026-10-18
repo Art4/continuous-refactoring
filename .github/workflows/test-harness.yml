@@ -31,4 +31,4 @@ jobs:
         with:
           python-version: '3.11'
       - name: Run Tier 4 deterministic tests
-        run: python3 -m unittest scripts.test_tooling_tree scripts.test_tooling_packs scripts.test_trigger_controls -v
+        run: python3 -m unittest scripts.test_tooling_tree scripts.test_trigger_controls -v

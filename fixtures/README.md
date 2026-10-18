@@ -22,7 +22,7 @@ violations. They are the ground truth an exploration of that project should come
 ## What is tested where
 
 - **The tooling-tree parser** — `python3 -m unittest scripts.test_tooling_tree`. The tests build their
-  own small repositories and trees; they do not read these fixtures.
+  own small repositories and Packs; they do not read these fixtures.
 - **Negative controls for the parser** — `python3 -m unittest scripts.test_trigger_controls`.
 - **The skill texts** — `python3 scripts/validate_skills.py .`: references that do not exist, glossary
   use, avoided terms.
