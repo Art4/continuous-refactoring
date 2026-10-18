@@ -1,20 +1,95 @@
 {
   "$schema": "roles.schema.json",
   "roles": [
-    {"slug": "editor-settings", "name": "Editor Settings", "purpose": "The basic formatting conventions (indentation, charset, line endings) are written down once, for every editor.", "signal": null},
-    {"slug": "continuous-integration", "name": "Continuous Integration", "purpose": "A pipeline that runs the quality jobs on every change.", "signal": null},
-    {"slug": "package-management", "name": "Package Management", "purpose": "Dependencies are declared and installed by a package manager.", "signal": null},
-    {"slug": "autoloading", "name": "Autoloading", "purpose": "Classes are found by a convention, not by hand-written includes.", "signal": null},
-    {"slug": "code-style", "name": "Code Style", "purpose": "An automatic fixer keeps the code in one style, so later automated rewrites land styled.", "signal": null},
-    {"slug": "testing", "name": "Testing", "purpose": "A test suite that runs locally and catches regressions.", "signal": null},
-    {"slug": "test-coverage", "name": "Test Coverage", "purpose": "The share of the code the tests reach is measured and may not fall.", "signal": "Untested / hard-to-test"},
-    {"slug": "static-analysis", "name": "Static Analysis", "purpose": "A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step.", "signal": null},
-    {"slug": "taint-analysis", "name": "Taint Analysis", "purpose": "A tool follows data from untrusted input to dangerous operations.", "signal": "Security"},
-    {"slug": "automated-refactoring", "name": "Automated Refactoring", "purpose": "Rule sets rewrite code mechanically, one reviewable set at a time.", "signal": null},
-    {"slug": "code-smell-detection", "name": "Code Smell Detection", "purpose": "A tool measures complexity and flags code that is hard to read.", "signal": "Understandability"},
-    {"slug": "dependency-audit", "name": "Dependency Audit", "purpose": "Known vulnerabilities in the third-party dependencies are reported and gate the pipeline.", "signal": "Security"},
-    {"slug": "secret-scanning", "name": "Secret Scanning", "purpose": "Committed secrets and credentials are found before they ship.", "signal": "Security"},
-    {"slug": "static-security-analysis", "name": "Static Security Analysis", "purpose": "A rule-based scanner looks for common vulnerability patterns in the source.", "signal": "Security"},
-    {"slug": "runtime-floor", "name": "Runtime Floor", "purpose": "The declared minimum runtime version matches what the code demonstrably needs.", "signal": null}
+    {
+      "slug": "editor-settings",
+      "name": "Editor Settings",
+      "purpose": "The basic formatting conventions (indentation, charset, line endings) are written down once, for every editor.",
+      "signal": null
+    },
+    {
+      "slug": "continuous-integration",
+      "name": "Continuous Integration",
+      "purpose": "A pipeline that runs the quality jobs on every change.",
+      "signal": null
+    },
+    {
+      "slug": "package-management",
+      "name": "Package Management",
+      "purpose": "Dependencies are declared and installed by a package manager.",
+      "signal": null
+    },
+    {
+      "slug": "autoloading",
+      "name": "Autoloading",
+      "purpose": "Classes are found by a convention, not by hand-written includes.",
+      "signal": null
+    },
+    {
+      "slug": "code-style",
+      "name": "Code Style",
+      "purpose": "An automatic fixer keeps the code in one style, so later automated rewrites land styled.",
+      "signal": null
+    },
+    {
+      "slug": "testing",
+      "name": "Testing",
+      "purpose": "A test suite that runs locally and catches regressions.",
+      "signal": null
+    },
+    {
+      "slug": "test-coverage",
+      "name": "Test Coverage",
+      "purpose": "The share of the code the tests reach is measured and may not fall.",
+      "signal": "Untested / hard-to-test"
+    },
+    {
+      "slug": "static-analysis",
+      "name": "Static Analysis",
+      "purpose": "A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step.",
+      "signal": null
+    },
+    {
+      "slug": "taint-analysis",
+      "name": "Taint Analysis",
+      "purpose": "A tool follows data from untrusted input to dangerous operations.",
+      "signal": "Security"
+    },
+    {
+      "slug": "automated-refactoring",
+      "name": "Automated Refactoring",
+      "purpose": "Rule sets rewrite code mechanically, one reviewable set at a time.",
+      "signal": null
+    },
+    {
+      "slug": "code-smell-detection",
+      "name": "Code Smell Detection",
+      "purpose": "A tool measures complexity and flags code that is hard to read.",
+      "signal": "Understandability"
+    },
+    {
+      "slug": "dependency-audit",
+      "name": "Dependency Audit",
+      "purpose": "Known vulnerabilities in the third-party dependencies are reported and gate the pipeline.",
+      "signal": "Security"
+    },
+    {
+      "slug": "secret-scanning",
+      "name": "Secret Scanning",
+      "purpose": "Committed secrets and credentials are found before they ship.",
+      "signal": "Security"
+    },
+    {
+      "slug": "static-security-analysis",
+      "name": "Static Security Analysis",
+      "purpose": "A rule-based scanner looks for common vulnerability patterns in the source.",
+      "signal": "Security"
+    },
+    {
+      "slug": "runtime-floor",
+      "name": "Runtime Floor",
+      "purpose": "The declared minimum runtime version matches what the code demonstrably needs.",
+      "signal": null
+    }
   ]
 }
