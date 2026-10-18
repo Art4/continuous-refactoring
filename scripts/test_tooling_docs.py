@@ -198,6 +198,7 @@ class DocsTests(unittest.TestCase):
         self.assertIn('x_editorconfig[".editorconfig (generic)"]', php)   # another Pack's Stage at the edge
         self.assertIn('r_static_analysis(["Static Analysis"])', php)      # a Role
         self.assertIn("Secret Scanning", docs["docs/tooling/README.md"])
+        self.assertLess(php.index("## Diagram"), php.index("## Tools"))     # the picture comes first
 
     def test_node_ids_of_different_kinds_never_meet(self):
         self.assertNotEqual(td._node("s", "psalm"), td._node("r", "psalm"))

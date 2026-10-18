@@ -132,7 +132,10 @@ def _pack_page(model: dict, name: str) -> str:
     own = [stages[s] for s in model["stage_order"] if stages[s]["pack"] == name]
     out = [_HEADER, f"# Pack `{name}`\n", f"Applies when: {pack['applies_when']}\n"]
 
-    out.append("## Tools\n")
+    out.append("## Diagram\n")
+    out.append(_diagram(model, name, own))
+
+    out.append("\n## Tools\n")
     out.append("| Tool | Status | Roles | Uses | Minimum runtime | Details |\n| --- | --- | --- | --- | --- | --- |")
     for slug in pack["tools"]:
         tool = tools[slug]
@@ -154,8 +157,6 @@ def _pack_page(model: dict, name: str) -> str:
             f"{_cell(requires)} | {after} | {_cell(stage.get('applies_when') or '–')} |"
         )
 
-    out.append("\n## Diagram\n")
-    out.append(_diagram(model, name, own))
     return "\n".join(out) + "\n"
 
 

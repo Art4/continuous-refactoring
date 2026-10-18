@@ -4,6 +4,19 @@
 
 Applies when: Always.
 
+## Diagram
+
+```mermaid
+flowchart TD
+  subgraph t_safety_net["Safety Net"]
+    s_ci_runner["CI Runner"]
+    s_editorconfig[".editorconfig"]
+  end
+  subgraph t_guardrails["Guardrails"]
+    s_secret_detection["Secret Detection"]
+  end
+```
+
 ## Tools
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |
@@ -19,16 +32,3 @@ Applies when: Always.
 | CI Runner (`ci-runner`) | `ci-runner` | Safety Net | – | – | – |
 | .editorconfig (`editorconfig`) | `editorconfig` | Safety Net | – | – | – |
 | Secret Detection (`secret-detection`) | `secret-detection` | Guardrails | – | – | – |
-
-## Diagram
-
-```mermaid
-flowchart TD
-  subgraph t_safety_net["Safety Net"]
-    s_ci_runner["CI Runner"]
-    s_editorconfig[".editorconfig"]
-  end
-  subgraph t_guardrails["Guardrails"]
-    s_secret_detection["Secret Detection"]
-  end
-```
