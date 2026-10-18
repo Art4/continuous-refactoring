@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Roles of the tooling model",
+  "description": "What a tool is for. A Pack names the Roles its Tools play; a Role may be empty.",
+  "type": "object",
+  "required": ["roles"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "roles": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["slug", "name", "purpose", "signal"],
+        "additionalProperties": false,
+        "properties": {
+          "slug": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+          "name": {"type": "string", "minLength": 1},
+          "purpose": {"type": "string", "minLength": 1},
+          "signal": {"type": ["string", "null"], "description": "The factor of signals.md the tool output feeds, or null."}
+        }
+      }
+    }
+  }
+}

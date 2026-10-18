@@ -1,0 +1,61 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "A Pack of the tooling model",
+  "description": "Tools with a condition under which they apply. Each Tool plays Roles and has Stages; a Stage is one degree of the Tool and the unit a ticket is filed for.",
+  "type": "object",
+  "required": ["pack", "applies_when", "tools"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {"type": "string"},
+    "pack": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "applies_when": {"type": "string", "minLength": 1, "description": "A sentence the agent judges against the target, once per run."},
+    "tools": {
+      "type": "array",
+      "minItems": 1,
+      "items": {"$ref": "#/$defs/tool"}
+    }
+  },
+  "$defs": {
+    "slug": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "version": {"type": "string", "minLength": 1},
+    "tool": {
+      "type": "object",
+      "required": ["tool", "name", "uses", "roles", "status", "details", "stages"],
+      "additionalProperties": false,
+      "properties": {
+        "tool": {"$ref": "#/$defs/slug"},
+        "name": {"type": "string", "minLength": 1},
+        "uses": {"type": ["string", "null"], "description": "What it runs (binary, package, service); null for a convention."},
+        "roles": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/slug"}},
+        "status": {"enum": ["recommended", "recognized"]},
+        "details": {"type": "string", "minLength": 1, "description": "The Markdown file with Fulfilment check, MR scope and Ratchet, relative to references/."},
+        "min_runtime": {
+          "type": "object",
+          "minProperties": 1,
+          "additionalProperties": {"$ref": "#/$defs/version"},
+          "description": "The oldest runtime any version of the tool ever ran on, e.g. {\"php\": \"7.2\"}."
+        },
+        "stages": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/stage"}}
+      }
+    },
+    "requirement": {
+      "oneOf": [
+        {"$ref": "#/$defs/slug"},
+        {"type": "array", "minItems": 2, "items": {"$ref": "#/$defs/slug"}, "description": "Any one of these."}
+      ]
+    },
+    "stage": {
+      "type": "object",
+      "required": ["slug", "name", "track", "requires", "after"],
+      "additionalProperties": false,
+      "properties": {
+        "slug": {"$ref": "#/$defs/slug"},
+        "name": {"type": "string", "minLength": 1},
+        "track": {"enum": ["Safety Net", "Guardrails"]},
+        "requires": {"type": "array", "items": {"$ref": "#/$defs/requirement"}, "description": "Stages or Roles that must be fulfilled first; a rejected one closes this Stage."},
+        "after": {"type": "array", "items": {"$ref": "#/$defs/slug"}, "description": "Stages that must be decided first; a rejected one releases this Stage."},
+        "applies_when": {"type": "string", "minLength": 1, "description": "The Stage's own condition, judged like the Pack's."}
+      }
+    }
+  }
+}
