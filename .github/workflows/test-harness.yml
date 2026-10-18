@@ -16,7 +16,7 @@ jobs:
         with:
           python-version: '3.11'
       - name: Install dependencies
-        run: pip install pyyaml
+        run: pip install pyyaml jsonschema==4.23.0
       - name: Run validator
         run: python scripts/validate_skills.py .
 

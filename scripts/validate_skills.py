@@ -47,7 +47,7 @@ Tier 2 — writing-for-agents advisories (warnings, never fail the build):
   subjective phrase instead of a checkable condition
 
 Usage:
-    pip install pyyaml          # only non-stdlib dependency
+    pip install pyyaml jsonschema   # the only non-stdlib dependencies; jsonschema checks the Packs' schemas
     python3 scripts/validate_skills.py [REPO_ROOT]
 
 Exit codes: 0 clean, 1 any issue found.
@@ -62,6 +62,8 @@ import sys
 from dataclasses import dataclass
 
 import yaml
+
+import tooling_docs
 
 ALLOWED_FRONTMATTER = {"name", "description", "disable-model-invocation", "allowed-tools"}
 MAX_NAME = 64
@@ -710,6 +712,12 @@ def completion_clarity_issues(skills_text):
 # Whole-repo orchestration
 # --------------------------------------------------------------------------
 
+def tooling_model_issues(repo_root):
+    """Schemas, the fixed JSON form, one recommended Tool per Role and Pack, the Tools' details
+    files and the generated docs; the checks live in tooling_docs.py, beside the generator."""
+    return [Issue(where, problem) for where, problem in tooling_docs.check(repo_root)]
+
+
 def validate_repo(repo_root):
     repo_root = pathlib.Path(repo_root)
     issues = []
@@ -818,6 +826,9 @@ def validate_repo(repo_root):
         if rel.startswith(DOC_CITATION_EXEMPT_DIRS):
             continue
         issues += doc_citation_issues(f.read_text(), rel, scratch_allowed=rel in DOC_SCRATCH_ALLOW)
+
+    # --- the tooling model: schemas, fixed form, generated docs ---
+    issues += tooling_model_issues(repo_root)
 
     # --- Tier 2: semantic checks ---
     adr_dir = repo_root / "docs" / "adr"

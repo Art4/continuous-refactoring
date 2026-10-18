@@ -20,11 +20,15 @@ where external reports go.)
      python3 -m unittest discover -s scripts -p 'test_*.py'
      python3 scripts/validate_skills.py .
      ```
-     The first command includes the tooling-tree parser's tests. No automated check runs an agent
+     The first command includes the tooling-tree parser's tests. The validator needs `pip install pyyaml jsonschema`. No automated check runs an agent
      against a sample project; see [fixtures/README.md](fixtures/README.md).
 
    See [AGENTS.md](AGENTS.md) for the full policy — pushing untested and iterating on red CI is
    not an acceptable substitute for running it yourself first.
+   - A change to a Pack (`packs/*/pack.json`) or to `roles.json`: regenerate first, with
+     `python3 scripts/tooling_docs.py`. It writes the JSON in its fixed form and the tables and
+     diagrams under `docs/tooling/`; the validator fails on a Pack, a Role or a generated page that is
+     out of date (`--check` lists the differences without writing).
 4. Open a pull request. CI must be green; merge only after review.
 
 ## Skill suite conventions
