@@ -1,7 +1,7 @@
 # 02 — Tool files into the Packs, and the new terms
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 01
 
 **What to build**

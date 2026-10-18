@@ -1,0 +1,1 @@
+The last tool files (PHPStan, Psalm, Rector) moved into the PHP Pack and lost the description of how the tools used to be wired; the two tooling-tree documents are gone. Every tool now has one file beside its Pack, and the Pack pages under `docs/tooling/` link to it.

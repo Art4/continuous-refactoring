@@ -108,13 +108,6 @@ GLOSSARY_REVERSE_ALLOW = {"none"}
 # that's a deliberate, reviewed exception rather than accidental drift.
 # Keyed by frozenset({path_a, path_b}) — order-independent.
 DUPLICATION_ALLOW = {
-    # A node's Purpose is deliberately duplicated verbatim between its stub
-    # (tooling-tree.md) and its extracted file (tooling-tree.md's own ##
-    # Nodes intro) — same convention php-tooling-tree.md established first.
-    frozenset({
-        "skills/continuous-refactoring/references/php-tooling-tree.md",
-        "skills/continuous-refactoring/references/php-tooling-tree/psalm.md",
-    }): "Purpose duplicated between stub and extracted node file, by design",
 }
 
 
@@ -772,7 +765,7 @@ def validate_repo(repo_root):
 
         # Every file a skill ships under references/ — not just its top-level
         # *.md — is in scope for the same four checks: a reference doc or
-        # script can live nested (e.g. php-tooling-tree/composer.md), and a
+        # script can live nested (e.g. packs/php/composer.md), and a
         # non-.md file (e.g. tooling_tree.py) can carry an ADR, .scratch/, or
         # ticket/PR citation in its own docstrings/comments just as easily as
         # prose can. Skip compiled bytecode and its cache directory — never

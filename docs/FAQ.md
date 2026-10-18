@@ -118,9 +118,9 @@ result is already in your tracker afterwards: one ticket per tool still to set u
 every run would repeat work the tickets record. So a tool without an open ticket counts as done, a
 recurring Housekeeping task re-checks the tooling, and you can ask for a scan in the call any time.
 
-## Why is Housekeeping a standing ticket instead of a tooling-tree node?
+## Why is Housekeeping a standing ticket instead of a Stage of the tooling tree?
 
-A node of the tree is a one-time adoption with a stable test for "done". Maintenance never is. It
+A Stage of the tree is a one-time adoption with a stable test for "done". Maintenance never is. It
 also needs a home between cycles: a ticket that is always open is the place where an idea noticed
 during feature work can be left. The ticket states its own due date, and its last task creates the
 next one, so nothing has to remember when Housekeeping last ran.

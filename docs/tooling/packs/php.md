@@ -103,11 +103,11 @@ flowchart TD
 | PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
 | Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
 | Composer Audit (`composer-audit`) | recommended | Dependency Audit | composer audit | php 7.2 | [packs/php/composer-audit.md](../../../skills/continuous-refactoring/references/packs/php/composer-audit.md) |
-| PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [php-tooling-tree/phpstan.md](../../../skills/continuous-refactoring/references/php-tooling-tree/phpstan.md) |
-| Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [php-tooling-tree/psalm.md](../../../skills/continuous-refactoring/references/php-tooling-tree/psalm.md) |
-| Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [php-tooling-tree/rector.md](../../../skills/continuous-refactoring/references/php-tooling-tree/rector.md) |
+| PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring/references/packs/php/phpstan.md) |
+| Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
+| Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [packs/php/rector.md](../../../skills/continuous-refactoring/references/packs/php/rector.md) |
 | PHP Minimum Version (`php-minimal-version`) | recommended | Runtime Floor | – | – | [packs/php/php-minimal-version.md](../../../skills/continuous-refactoring/references/packs/php/php-minimal-version.md) |
-| Psalm Taint Analysis (`psalm-taint-analysis`) | recommended | Taint Analysis | vimeo/psalm | – | [php-tooling-tree/psalm.md](../../../skills/continuous-refactoring/references/php-tooling-tree/psalm.md) |
+| Psalm Taint Analysis (`psalm-taint-analysis`) | recommended | Taint Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
 | Semgrep (OWASP Top 10) (`semgrep`) | recommended | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring/references/packs/php/semgrep.md) |
 
 ## Stages

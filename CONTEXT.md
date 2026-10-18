@@ -13,7 +13,7 @@ The ordered list of a **Track**'s tooling-tree Stages that are neither fulfilled
 _Avoid_: debt list, todo list
 
 **Run**:
-One call of the suite, from its first **decision point** to its end: reconcile → **Track** choice → scan (only when the Track needs one) → file tickets → select → design → implement → **merge request**. A run ends when the merge request is open, when the design cannot proceed without a human answer or finds that the ticket would change behavior, or when nothing is workable; more work is another call, not a longer run. Nothing limits how many merge requests or candidates are open at once. The call takes free text the suite interprets — a Track, a restriction ("only the Rector nodes"), a ticket, the mode. Text addressed to the human says "run" and "skill suite".
+One call of the suite, from its first **decision point** to its end: reconcile → **Track** choice → scan (only when the Track needs one) → file tickets → select → design → implement → **merge request**. A run ends when the merge request is open, when the design cannot proceed without a human answer or finds that the ticket would change behavior, or when nothing is workable; more work is another call, not a longer run. Nothing limits how many merge requests or candidates are open at once. The call takes free text the suite interprets — a Track, a restriction ("only the Rector Stages"), a ticket, the mode. Text addressed to the human says "run" and "skill suite".
 _Avoid_: loop pass, session, sprint
 
 **Decision point**:
@@ -56,7 +56,7 @@ One of four kinds of work a **run** can spend itself on: **Safety Net**, **Guard
 _Avoid_: wave (this concept's earlier name; retired once it started colliding with **Guardrails**' own former name, "Signal wave" — see that entry)
 
 **Onboarding**:
-The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup` and every Stage in the **Safety Net** (below) — everything before the Safety Net is fulfilled. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` node (Name "Onboarding Setup"), is not a scan: it is the first thing a call checks. A target whose tracker file has no `## Refactoring operations` section gets a short interview — where the tickets live and how the operations work there, nothing else — that writes the section; a section without **Search** gets it added the same way. Everything after `onboarding-setup` is simply what the Safety Net **Track**'s first scan finds — the same mechanism as any later scan, just with more to discover the first time.
+The phase of a target's own tree walk from a bare repo through `git`, `onboarding-setup` and every Stage in the **Safety Net** (below) — everything before the Safety Net is fulfilled. Bounded and, per target, effectively one-time, unlike the **Tooling tree** itself (above), which is walked forever. Its first step, fulfilling the `onboarding-setup` prerequisite (Name "Onboarding Setup"), is not a scan: it is the first thing a call checks. A target whose tracker file has no `## Refactoring operations` section gets a short interview — where the tickets live and how the operations work there, nothing else — that writes the section; a section without **Search** gets it added the same way. Everything after `onboarding-setup` is simply what the Safety Net **Track**'s first scan finds — the same mechanism as any later scan, just with more to discover the first time.
 _Avoid_: baseline, bootstrap (see **Tooling tree**'s own `_Avoid_` list — those describe the never-ending tree; this term names only the bounded early phase within it)
 
 **Safety Net**:
@@ -72,7 +72,7 @@ A Stage's own test for whether it's already adopted — agent-judged for every S
 _Avoid_: adoption check, acceptance criteria
 
 **Entry point**:
-A PHP file the runtime (webserver or CLI) executes directly — never `require`d or `include`d by another file in the target's own source tree. `psr-4`'s autoloader-wiring step (that node's own doc in the PHP tree) targets every entry point directly when the target has no single **Composition root**.
+A PHP file the runtime (webserver or CLI) executes directly — never `require`d or `include`d by another file in the target's own source tree. `psr-4`'s autoloader-wiring step (that Tool's file in the PHP Pack) targets every entry point directly when the target has no single **Composition root**.
 _Avoid_: front controller
 
 **Composition root**:
@@ -84,7 +84,7 @@ The one standing, open **ticket** per **Housekeeping template** that a **Houseke
 _Avoid_: housekeeping issue (dated, one per due cycle — the earlier shape), chore ticket
 
 **Housekeeping template**:
-The file in the target a **Housekeeping ticket** is made from: the recurring tasks, the rhythm, and as its last item "create the next Housekeeping ticket". Where it lives and how the next ticket is made from it are the target's, written as the **Housekeeping** operation. Shared and committed like code. The rhythm is chosen by the human when Housekeeping is first set up, with a recommendation drawn from the target; several templates with different rhythms may exist side by side, each with its own open ticket. **Tooling tree** nodes contribute their Housekeeping line to it.
+The file in the target a **Housekeeping ticket** is made from: the recurring tasks, the rhythm, and as its last item "create the next Housekeeping ticket". Where it lives and how the next ticket is made from it are the target's, written as the **Housekeeping** operation. Shared and committed like code. The rhythm is chosen by the human when Housekeeping is first set up, with a recommendation drawn from the target; several templates with different rhythms may exist side by side, each with its own open ticket. **Tooling tree** Tools contribute their Housekeeping line to it.
 _Avoid_: checklist file, cadence (the rhythm is a line of the template, not a setting of the suite)
 
 **Housekeeping line**:
@@ -96,7 +96,7 @@ What one merge request delivers of a **ticket** that takes several: one group of
 _Avoid_: partial fix, chunk
 
 **Housekeeping** (recurring maintenance):
-A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync, the secret scan over the Git history (the whole history the first time, afterwards the commits since the last **Housekeeping ticket**). Also names the **Track** (above) that runs it, by working the open **Housekeeping ticket**; `/continuous-housekeeping` runs that Track alone, with no Track choice, so it can be scheduled. Where the mechanism is missing, the Track proposes to set it up: the **Housekeeping template**, the first ticket, the `AGENTS.md` line. Never a tooling-tree node: nothing about it is a one-time adoption with a stable Fulfilment check.
+A periodic maintenance sweep — dependency currency, tooling-deprecation cleanup, documentation sync, the secret scan over the Git history (the whole history the first time, afterwards the commits since the last **Housekeeping ticket**). Also names the **Track** (above) that runs it, by working the open **Housekeeping ticket**; `/continuous-housekeeping` runs that Track alone, with no Track choice, so it can be scheduled. Where the mechanism is missing, the Track proposes to set it up: the **Housekeeping template**, the first ticket, the `AGENTS.md` line. Never a Stage of the tooling tree: nothing about it is a one-time adoption with a stable Fulfilment check.
 _Avoid_: maintenance loop, chore loop, cleanup pass
 
 **Role**:
@@ -109,7 +109,7 @@ _Avoid_: (none — use the term as-is)
 
 **Stage**:
 One degree of a **Tool**, and the unit a ticket is filed for: PHPStan Level 3, Rector's dead-code set. It has a slug, a Name, one **Track**, what it requires first (Stages, a **Role**, or a group of alternatives) and what it waits for until it is decided. A rejected required Stage closes it; a rejected Stage it waits for releases it. A Stage may carry an *Applies when* of its own, judged like a **Pack**'s.
-_Avoid_: (none yet — the word it replaced was *node*, which the parser's output keys `node` and `nodes` and the prose of the Tool files still use until those files are cleaned)
+_Avoid_: node (the word it replaced; only the parser's output keys `node` and `nodes` still carry it)
 
 **Pack**:
 Tools with a condition under which they apply: the generic Pack always, the PHP Pack when the target contains PHP code, a Pack of a target's own as it says. The condition is a sentence the agent judges once per run; a Pack that does not apply is absent everywhere. A target's own Pack has the format of the suite's and may add Tools, Stages and Roles, never redefine the suite's.
@@ -120,11 +120,11 @@ How a **Stage** is raised without letting the old findings back: no new violatio
 _Avoid_: (none — use the term as-is)
 
 **Floor correction**:
-Bringing `composer.json`'s declared PHP floor (`require.php`) in line with what the codebase's own source already demonstrably requires — behavior-preserving, since nothing observable changes, only the metadata now tells the truth. The only node that produces this: `php-minimal-version` (the PHP tree), triggered once `rector-php-set` has fully applied a PHP-version rule set.
+Bringing `composer.json`'s declared PHP floor (`require.php`) in line with what the codebase's own source already demonstrably requires — behavior-preserving, since nothing observable changes, only the metadata now tells the truth. The only Stage that produces this: `php-minimal-version` (the PHP tree), triggered once `rector-php-set` has fully applied a PHP-version rule set.
 _Avoid_: floor bump, floor raise (see **Floor raise** — a different, deliberately out-of-scope thing)
 
 **Floor raise**:
-Committing the application to a newer PHP version than its own code currently requires — a genuine **Breaking change**, a product decision, never autonomously proposed by any tooling-tree node. Distinct from **Floor correction** (above), which changes only metadata to match already-existing reality.
+Committing the application to a newer PHP version than its own code currently requires — a genuine **Breaking change**, a product decision, never autonomously proposed by any Stage of the tooling tree. Distinct from **Floor correction** (above), which changes only metadata to match already-existing reality.
 _Avoid_: floor bump, upgrade (collides with `rector-php-set`'s own "PHP-upgrade rule set" wording — syntax modernization, a different concern)
 
 **Hot spot**:
@@ -180,7 +180,7 @@ What a scan lays out at the file-tickets **decision point**: one ticket for ever
 _Avoid_: suggestions, recommendations (a recommendation is the one option a decision point favours)
 
 **Signal**:
-The named factor (heat, leverage, security, blast radius of inaction, …) that qualified a candidate as a genuine friction spot. The full catalogue lives in the suite's signals reference; Within Investigation the order of tickets follows the signals, a ticket marked as priority first. Two distinct places carry this name: (1) the third field on a structural candidate's ticket, alongside Where and Problem, named when the suite files it; (2) a node-level **Signal** field on a **tooling tree** node (see that entry above) — once a Signal-producing node like `phpmd` or `secret-detection` is adopted, its own real tool output is what the search for structural candidates reads for that factor, in place of the generic (reading-the-code) recognition method a ticket's own Signal field would otherwise rely on. A tooling-tree node's Signal field never gates `structural-scan`; it only ever strengthens candidate selection.
+The named factor (heat, leverage, security, blast radius of inaction, …) that qualified a candidate as a genuine friction spot. The full catalogue lives in the suite's signals reference; Within Investigation the order of tickets follows the signals, a ticket marked as priority first. Two distinct places carry this name: (1) the third field on a structural candidate's ticket, alongside Where and Problem, named when the suite files it; (2) a **Signal** field on a **Role** of the **tooling tree** (see that entry above) — once a Tool of a Signal-carrying Role like `phpmd` or `secret-detection` is adopted, its own real tool output is what the search for structural candidates reads for that factor, in place of the generic (reading-the-code) recognition method a ticket's own Signal field would otherwise rely on. A Role's Signal never gates the Safety Net; it only ever strengthens candidate selection.
 _Avoid_: (none — use the term as-is)
 
 **Findings**:

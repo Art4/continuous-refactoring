@@ -288,6 +288,11 @@ def model_problems(repo: pathlib.Path, model: dict) -> list[Problem]:
     for slug, tool in model["tools"].items():
         if not (repo / REFERENCES / tool["details"]).is_file():
             problems.append((f"tool {slug}", f"names the details file {tool['details']}, which does not exist"))
+    named = {tool["details"] for tool in model["tools"].values()}
+    for path in sorted((repo / REFERENCES / "packs").glob("*/*.md")):
+        rel = path.relative_to(repo / REFERENCES).as_posix()
+        if path.name != "README.md" and rel not in named:
+            problems.append((rel, "is the details file of no Tool in its Pack"))
     return problems
 
 

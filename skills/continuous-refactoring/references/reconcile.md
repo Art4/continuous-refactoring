@@ -28,7 +28,7 @@ recommendation.
 dropped when the tooling tree became Roles, Tools and Stages: "Test Runner (fallback)" is taken over by
 the Stage PHPUnit of the Role Testing. What follows is closing it with a note that says, in plain words and
 without the suite's terms, what covers it now (here: PHPUnit as the project's test runner); that is the recommendation. A dropped Stage that never had tickets (the gates and the
-aggregation nodes) needs nothing.
+aggregation steps) needs nothing.
 
 **In review.** The tickets whose merge request is still open are named in one line, with their merge
 requests; nothing follows for them. One whose review asks for changes is named as such; it is worked when the call names

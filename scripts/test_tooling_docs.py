@@ -148,6 +148,17 @@ class ModelTests(unittest.TestCase):
             problems = td.check(root)
             self.assertIn(("tool ci-runner", "names the details file packs/generic/ci-runner.md, which does not exist"), problems)
 
+    def test_a_tool_file_no_tool_names_is_reported(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = copy_repo(tmp)
+            (root / REFS / "packs" / "php" / "forgotten.md").write_text("# Forgotten\n")
+            (root / REFS / "packs" / "php" / "README.md").write_text("# Pack prose\n")
+            problems = td.check(root)
+            self.assertEqual(
+                [p for p in problems if p[0].startswith("packs/")],
+                [("packs/php/forgotten.md", "is the details file of no Tool in its Pack")],
+            )
+
     def test_a_broken_model_is_reported_not_raised(self):
         with tempfile.TemporaryDirectory() as tmp:
             root = copy_repo(tmp)

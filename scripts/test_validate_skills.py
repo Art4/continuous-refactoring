@@ -627,7 +627,7 @@ class ReferencesDirTests(unittest.TestCase):
 
     def test_adr_ref_in_nested_reference_dir_flagged(self):
         # references/ can nest a subdirectory of its own (e.g.
-        # php-tooling-tree/composer.md) — scanning must recurse, not just
+        # packs/php/composer.md) — scanning must recurse, not just
         # glob the top level.
         tmp, root = self._repo("# glossary")
         try:

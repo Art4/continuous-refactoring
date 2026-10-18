@@ -6,7 +6,7 @@ in place. Every command comes from the target's `## Refactoring operations` sect
 
 ## 1. Find the open tickets
 
-Run the parser without a seed (`tooling-parser.md`) and take every node of `tracks`.
+Run the parser without a seed (`tooling-parser.md`) and take every Stage of `tracks`.
 
 - **With a Candidate operation** → list the open tickets it marks. The tooling tickets are among them:
   filing sets that mark.
