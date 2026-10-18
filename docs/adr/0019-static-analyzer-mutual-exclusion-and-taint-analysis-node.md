@@ -1,5 +1,8 @@
 # PHPStan/Psalm mutual exclusion, and a new `required-any` edge for `psalm-taint-analysis`/`rector-php-set`
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) for the mutual exclusion: a Role another Tool fills takes the place of the Tool that is
+> not in use, so Psalm needs no gate nodes. Taint analysis as a Stage stays.
+
 > Closes the gap ADR-0018 and ticket 43 left open: `psalm` existed as a recognition-only node but wasn't a
 > `php-structural-scan` resolved-leaf, so a Psalm-only target's `structural-scan` gate stayed permanently
 > blocked. Also introduces a new node, `psalm-taint-analysis` (itself a `php-structural-scan` resolved-leaf

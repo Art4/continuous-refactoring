@@ -1,15 +1,15 @@
-"""Deterministic graph-logic parser for the tooling tree.
+"""Deterministic graph-logic parser for the tooling model: Roles, Tools and Stages in Packs.
 
-Reads the tree docs and the target repository; the state of the nodes an
-agent can judge (which are fulfilled, which rejected) is handed in by the
-caller, the state of the aggregation nodes is computed from it. Emits, per
-Track, whether it is fulfilled, the nodes a ticket can be filed for with
-name, tool and search words, the ordered backlog (blocked nodes included)
-and why a node is withheld — without invoking an LLM, keeping a file of
-its own, or mutating the repo.
+Reads the Packs (``packs/*/pack.json``) and ``roles.json`` beside this file and
+the tracker file of the target repository. What an agent can judge — which
+Stages are fulfilled, which subjects are rejected, which Packs apply, the
+target's runtime — is handed in as a seed; everything else is computed from it.
+Emits, per Track, whether it is fulfilled, the Stages a ticket can be filed
+for with name, tool and search words, the ordered backlog, and why a Stage is
+withheld — without invoking an LLM, keeping a file of its own, or mutating
+the repo. Standard library only.
 
-Docs: tooling-tree.md and php-tooling-tree.md (siblings to this file) are
-machine-readable (edges table, node sections), CONTEXT.md vocabulary.
+Vocabulary and rules: tooling-model.md (beside this file).
 """
 
 from __future__ import annotations
@@ -19,55 +19,283 @@ import pathlib
 import re
 
 _HERE = pathlib.Path(__file__).resolve().parent
-TREE_MD = _HERE / "php-tooling-tree.md"
-# Generic root: git -> onboarding-setup, and the structural-scan node that PHP's
-# tree leaves point into via `resolved` edges.
-GENERIC_TREE_MD = _HERE / "tooling-tree.md"
+PACKS_DIR = _HERE / "packs"
+ROLES_JSON = _HERE / "roles.json"
 
 # The target's tracker file; its `## Refactoring operations` section is what
 # onboarding leaves behind.
 TRACKER_FILE = pathlib.PurePosixPath("docs/agents/issue-tracker.md")
 
-_VALID_EDGE_TYPES = ("required", "recommended", "resolved", "required-any")
+# In the order a run works them; a Stage may require only Stages of the same
+# or an earlier Track.
+TRACKS = ("Safety Net", "Guardrails")
 
-# Recognition-only nodes: they say something about the target (or merely
-# organise the tree) and are never work to do, so no ticket is ever filed
-# for one — `git` (never an MR), `static-code-analyzer` (pure plumbing),
-# `psalm` (recognised when present, never suggested), `is-php-project` (the
-# gate of the whole PHP specialization), and the three gates in front of
-# `composer-audit` and the PHPStan level chain. The other two kinds of node
-# without a ticket are derived, see `_gets_ticket`.
-_NEVER_PROPOSED = {"git", "static-code-analyzer", "psalm", "is-php-project", "has-real-dependency", "phpstan-baseline-empty", "phpstan-not-psalm"}
+# The suite's own prerequisites: no Pack holds them, a seed may mention them
+# and is ignored for them.
+PREREQUISITES = ("git", "onboarding-setup")
 
-# The two nodes whose state the parser reads off the target itself.
-_OWN_NODES = {"git", "onboarding-setup"}
+_SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
+_VERSION = re.compile(r"\d+(?:\.\d+)*")
 
-# ---------------------------------------------------------------------------
-# Node state: handed in by the caller, never looked up
-# ---------------------------------------------------------------------------
+
+class PackError(ValueError):
+    """A Pack or the roles file could not be used as it is."""
 
 
 class SeedError(ValueError):
     """A handed-over seed file could not be used as given."""
 
 
-def load_seed(seed_path: pathlib.Path, tree: dict) -> tuple[dict[str, bool], dict[str, dict | None]]:
-    """Load a seed file — the node state as a caller hands it in on the
-    command line — and return ``(fulfilled, rejected)`` in the shape the
-    functions here take::
+# ---------------------------------------------------------------------------
+# Versions: best effort, numbers only
+# ---------------------------------------------------------------------------
 
-        {"fulfilled": ["composer", "phpunit"],
-         "rejected": {"phpmd": null, "phpstan-level-0": {"php": "7.1"}}}
 
-    ``rejected`` maps each rejected node to its blocker: ``null``, or the
-    minimum PHP version whose arrival lifts the rejection. A plain list of
-    slugs works where no rejection carries a blocker. A node named in
-    neither is undecided.
+def _version(text) -> tuple[int, ...] | None:
+    """The first run of dotted numbers in *text* (``'>=7.2'``, ``'8.1.3'``),
+    or None where there is none. Best effort: a value it cannot read blocks
+    nothing."""
+    if not isinstance(text, str):
+        return None
+    match = _VERSION.search(text)
+    return tuple(int(part) for part in match.group(0).split(".")) if match else None
 
-    Anything else raises ``SeedError`` — a caller who handed over a
-    judgement must never get outputs computed from something else. That
-    includes a slug the tree doesn't know: a typo would otherwise turn a
-    decided node silently into an undecided one.
+
+def _below(current: tuple[int, ...], minimum: tuple[int, ...]) -> bool:
+    width = max(len(current), len(minimum))
+    pad = lambda v: v + (0,) * (width - len(v))  # noqa: E731
+    return pad(current) < pad(minimum)
+
+
+def _dotted(version: tuple[int, ...]) -> str:
+    return ".".join(map(str, version))
+
+
+# ---------------------------------------------------------------------------
+# Loading and checking the model
+# ---------------------------------------------------------------------------
+
+
+def _read_json(path: pathlib.Path):
+    try:
+        return json.loads(path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise PackError(f"{path} could not be read as JSON: {exc}") from exc
+
+
+def _need(condition: bool, where: str, problem: str) -> None:
+    if not condition:
+        raise PackError(f"{where}: {problem}")
+
+
+def _is_slug(value) -> bool:
+    return isinstance(value, str) and _SLUG.match(value) is not None
+
+
+def _is_text(value) -> bool:
+    return isinstance(value, str) and bool(value.strip())
+
+
+def load_roles(roles_json: pathlib.Path | None = None) -> dict[str, dict]:
+    path = pathlib.Path(roles_json or ROLES_JSON)
+    data = _read_json(path)
+    _need(isinstance(data, dict) and isinstance(data.get("roles"), list), str(path), 'must hold {"roles": [...]}')
+    roles: dict[str, dict] = {}
+    for item in data["roles"]:
+        _need(isinstance(item, dict), str(path), "a role is not an object")
+        slug = item.get("slug")
+        _need(_is_slug(slug), str(path), f"role slug {slug!r} is not a slug")
+        _need(slug not in roles, str(path), f"role {slug} is listed twice")
+        _need(_is_text(item.get("name")) and _is_text(item.get("purpose")), str(path), f"role {slug} needs a name and a purpose")
+        _need(item.get("signal") is None or _is_text(item.get("signal")), str(path), f"role {slug}: signal must be text or null")
+        roles[slug] = item
+    return roles
+
+
+def _pack_paths(packs_dir: pathlib.Path) -> list[pathlib.Path]:
+    """``generic`` first, the other Packs in name order."""
+    paths = sorted(packs_dir.glob("*/pack.json"), key=lambda p: (p.parent.name != "generic", p.parent.name))
+    return paths
+
+
+def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path | None = None) -> dict:
+    """Load Roles and Packs and check what the parser computes with. Raises
+    ``PackError`` for a model it cannot compute from.
+
+    Returns ``roles`` (slug -> role), ``packs`` (name -> pack), ``tools``
+    (slug -> tool, with ``pack`` and the slugs of its ``stage_slugs``),
+    ``stages`` (slug -> stage, with ``tool``, ``pack``, ``first`` and
+    ``index``) and ``stage_order`` (the Stages in the order of the Packs).
+    """
+    packs_dir = pathlib.Path(packs_dir or PACKS_DIR)
+    roles = load_roles(roles_json)
+    paths = _pack_paths(packs_dir)
+    _need(bool(paths), str(packs_dir), "holds no pack.json")
+
+    packs: dict[str, dict] = {}
+    tools: dict[str, dict] = {}
+    stages: dict[str, dict] = {}
+    stage_order: list[str] = []
+    for path in paths:
+        data = _read_json(path)
+        where = str(path)
+        _need(isinstance(data, dict), where, "must be an object")
+        name = data.get("pack")
+        _need(_is_slug(name), where, f"pack name {name!r} is not a slug")
+        _need(name not in packs, where, f"pack {name} is listed twice")
+        _need(_is_text(data.get("applies_when")), where, "needs an applies_when sentence")
+        _need(isinstance(data.get("tools"), list) and data["tools"], where, "needs a list of tools")
+        packs[name] = {"pack": name, "applies_when": data["applies_when"], "tools": []}
+        for tool in data["tools"]:
+            _need(isinstance(tool, dict), where, "a tool is not an object")
+            slug = tool.get("tool")
+            _need(_is_slug(slug), where, f"tool slug {slug!r} is not a slug")
+            _need(slug not in tools, where, f"tool {slug} is listed twice")
+            _need(slug not in roles, where, f"tool {slug} has the slug of a role")
+            _need(_is_text(tool.get("name")), where, f"tool {slug} needs a name")
+            _need(tool.get("uses") is None or _is_text(tool.get("uses")), where, f"tool {slug}: uses must be text or null")
+            _need(tool.get("status") in ("recommended", "recognized"), where, f"tool {slug}: status must be recommended or recognized")
+            _need(_is_text(tool.get("details")), where, f"tool {slug} needs a details file")
+            tool_roles = tool.get("roles")
+            _need(isinstance(tool_roles, list) and tool_roles, where, f"tool {slug} must play at least one role")
+            for role in tool_roles:
+                _need(role in roles, where, f"tool {slug} plays the unknown role {role!r}")
+            min_runtime = tool.get("min_runtime", {})
+            _need(
+                isinstance(min_runtime, dict) and all(isinstance(k, str) and isinstance(v, str) for k, v in min_runtime.items()),
+                where,
+                f"tool {slug}: min_runtime must map runtime names to version strings",
+            )
+            _need(isinstance(tool.get("stages"), list) and tool["stages"], where, f"tool {slug} needs at least one stage")
+            entry = {**tool, "pack": name, "stage_slugs": []}
+            tools[slug] = entry
+            packs[name]["tools"].append(slug)
+            for index, stage in enumerate(tool["stages"]):
+                _need(isinstance(stage, dict), where, f"a stage of {slug} is not an object")
+                sslug = stage.get("slug")
+                _need(_is_slug(sslug), where, f"stage slug {sslug!r} is not a slug")
+                _need(sslug not in stages, where, f"stage {sslug} is listed twice")
+                _need(sslug not in roles, where, f"stage {sslug} has the slug of a role")
+                _need(_is_text(stage.get("name")), where, f"stage {sslug} needs a name")
+                _need(stage.get("track") in TRACKS, where, f"stage {sslug}: track must be one of {', '.join(TRACKS)}")
+                _need(isinstance(stage.get("requires"), list), where, f"stage {sslug}: requires must be a list")
+                _need(isinstance(stage.get("after"), list), where, f"stage {sslug}: after must be a list")
+                _need(
+                    stage.get("applies_when") is None or _is_text(stage.get("applies_when")),
+                    where,
+                    f"stage {sslug}: applies_when must be text",
+                )
+                stages[sslug] = {**stage, "tool": slug, "pack": name, "index": index, "first": index == 0}
+                entry["stage_slugs"].append(sslug)
+                stage_order.append(sslug)
+
+    # a Tool and a Stage may share a slug only when the Stage is the Tool's only one
+    for slug, tool in tools.items():
+        if slug in stages:
+            _need(
+                tool["stage_slugs"] == [slug],
+                slug,
+                "a tool may share its slug with a stage only when that stage is its only one",
+            )
+
+    model = {"roles": roles, "packs": packs, "tools": tools, "stages": stages, "stage_order": stage_order}
+    _check_references(model)
+    return model
+
+
+def _track_rank(track: str) -> int:
+    return TRACKS.index(track)
+
+
+def _check_references(model: dict) -> None:
+    roles, tools, stages = model["roles"], model["tools"], model["stages"]
+    for slug, stage in stages.items():
+        rank = _track_rank(stage["track"])
+        for item in stage["requires"]:
+            members = item if isinstance(item, list) else [item]
+            _need(not isinstance(item, list) or len(item) >= 2, slug, "an any-of group needs at least two members")
+            for member in members:
+                _need(_is_slug(member), slug, f"requires {member!r} is not a slug")
+                if isinstance(item, list):
+                    _need(member in stages, slug, f"any-of group names {member}, which is not a stage")
+                _need(member in stages or member in roles, slug, f"requires {member}, which is neither a stage nor a role")
+                _need(member != slug, slug, "requires itself")
+                if member in stages:
+                    firsts = [stages[member]]
+                else:
+                    firsts = [stages[tools[t]["stage_slugs"][0]] for t in tools if member in tools[t]["roles"]]
+                for parent in firsts:
+                    _need(
+                        _track_rank(parent["track"]) <= rank,
+                        slug,
+                        f"requires {parent['slug']}, which is in the later Track {parent['track']}",
+                    )
+        for after in stage["after"]:
+            _need(after in stages, slug, f"after {after}, which is not a stage")
+            _need(after != slug, slug, "is after itself")
+
+    # no cycles over requires, role requirements and after
+    def deps(slug: str) -> list[str]:
+        stage = stages[slug]
+        found: list[str] = []
+        for item in stage["requires"]:
+            for member in item if isinstance(item, list) else [item]:
+                if member in stages:
+                    found.append(member)
+                else:
+                    found.extend(tools[t]["stage_slugs"][0] for t in tools if member in tools[t]["roles"])
+        found.extend(stage["after"])
+        return found
+
+    state: dict[str, int] = {}
+
+    def visit(slug: str, trail: list[str]) -> None:
+        if state.get(slug) == 2:
+            return
+        _need(state.get(slug) != 1, slug, "is part of a cycle: " + " -> ".join(trail + [slug]))
+        state[slug] = 1
+        for dep in deps(slug):
+            visit(dep, trail + [slug])
+        state[slug] = 2
+
+    for slug in model["stage_order"]:
+        visit(slug, [])
+
+
+# ---------------------------------------------------------------------------
+# The seed: what the caller judged
+# ---------------------------------------------------------------------------
+
+
+def _blocker(value) -> tuple[str, tuple[int, ...]] | None:
+    """A rejection's blocker ``{"php": "8.1"}`` as (runtime, version), or None."""
+    if not isinstance(value, dict) or len(value) != 1:
+        return None
+    (runtime, text), = value.items()
+    version = _version(text)
+    return (runtime, version) if version is not None else None
+
+
+def load_seed(seed_path: pathlib.Path, model: dict) -> dict:
+    """Load a seed file and return it checked and in one shape::
+
+        {"fulfilled": ["composer"],
+         "rejected": {"phpmd": null, "static-analysis": null, "phpstan-level-0": {"php": "7.1"}},
+         "packs": ["generic", "php"],
+         "not_applicable": ["composer-audit"],
+         "runtime": {"php": "7.4"}}
+
+    ``fulfilled`` names Stages. ``rejected`` names a Role, a Tool or a Stage
+    and maps it to its blocker: ``null``, or the minimum runtime whose arrival
+    lifts the rejection (a plain list of slugs works where no rejection
+    carries one). ``packs`` lists the Packs that apply (all, when it is
+    missing), ``not_applicable`` the Stages whose own condition does not hold,
+    ``runtime`` the lowest runtime the target allows, as a string.
+
+    Anything else raises ``SeedError``: a judgement handed over is never
+    answered with outputs computed from something else. That includes a name
+    the model doesn't know, since a typo would otherwise turn a decided
+    subject silently into an undecided one.
     """
     seed_path = pathlib.Path(seed_path)
 
@@ -78,87 +306,62 @@ def load_seed(seed_path: pathlib.Path, tree: dict) -> tuple[dict[str, bool], dic
         data = json.loads(seed_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
         raise fail(f"could not be read as JSON: {exc}") from exc
-    shape = 'must hold a JSON object {"fulfilled": [slug, ...], "rejected": {slug: null | {"php": "X.Y"}}}'
-    if not isinstance(data, dict) or set(data) - {"fulfilled", "rejected"}:
+    shape = (
+        'must hold a JSON object {"fulfilled": [stage, ...], "rejected": {role|tool|stage: null | {"php": "X.Y"}}, '
+        '"packs": [pack, ...], "not_applicable": [stage, ...], "runtime": {"php": "X.Y"}}'
+    )
+    allowed = {"fulfilled", "rejected", "packs", "not_applicable", "runtime"}
+    if not isinstance(data, dict) or set(data) - allowed:
         raise fail(shape)
 
-    fulfilled = data.get("fulfilled", [])
-    if not isinstance(fulfilled, list) or not all(isinstance(n, str) for n in fulfilled):
-        raise fail(f'{shape} — "fulfilled" is not a list of slugs')
+    def names(key: str) -> list[str]:
+        value = data.get(key, [])
+        if not isinstance(value, list) or not all(isinstance(n, str) for n in value):
+            raise fail(f'{shape} — "{key}" is not a list of names')
+        return value
+
+    fulfilled = [n for n in names("fulfilled") if n not in PREREQUISITES]
+    unknown = sorted(set(fulfilled) - set(model["stages"]))
+    if unknown:
+        raise fail(f"names stages the model doesn't have in \"fulfilled\": {', '.join(unknown)}")
 
     rejected = data.get("rejected", {})
     if isinstance(rejected, list) and all(isinstance(n, str) for n in rejected):
         rejected = {n: None for n in rejected}
     if not isinstance(rejected, dict):
-        raise fail(f'{shape} — "rejected" is neither an object nor a list of slugs')
-    for node, blocker in rejected.items():
-        if blocker is not None and _blocked_by_php(blocker) is None:
-            raise fail(f'has no usable blocker for {node}: expected null or {{"php": "X.Y"}}')
-
-    unknown = sorted((set(fulfilled) | set(rejected)) - set(tree["nodes"]))
+        raise fail(f'{shape} — "rejected" is neither an object nor a list of names')
+    rejected = {n: b for n, b in rejected.items() if n not in PREREQUISITES}
+    for subject, blocker in rejected.items():
+        if blocker is not None and _blocker(blocker) is None:
+            raise fail(f'has no usable blocker for {subject}: expected null or {{"php": "X.Y"}}')
+    known = set(model["roles"]) | set(model["tools"]) | set(model["stages"])
+    unknown = sorted(set(rejected) - known)
     if unknown:
-        raise fail(f"names nodes the tree doesn't have: {', '.join(unknown)}")
-    # what is handed in for a node the parser settles itself is ignored anyway
-    both = sorted((set(fulfilled) & set(rejected)) - _OWN_NODES - _aggregation_nodes(tree))
+        raise fail(f"names subjects the model doesn't have in \"rejected\": {', '.join(unknown)}")
+    both = sorted(set(fulfilled) & set(rejected))
     if both:
-        raise fail(f"names nodes as both fulfilled and rejected: {', '.join(both)}")
-    return {n: True for n in fulfilled}, rejected
+        raise fail(f"names stages as both fulfilled and rejected: {', '.join(both)}")
+
+    packs = data.get("packs")
+    if packs is not None:
+        packs = names("packs")
+        unknown = sorted(set(packs) - set(model["packs"]))
+        if unknown:
+            raise fail(f"names packs the model doesn't have: {', '.join(unknown)}")
+    not_applicable = names("not_applicable")
+    unknown = sorted(set(not_applicable) - set(model["stages"]))
+    if unknown:
+        raise fail(f"names stages the model doesn't have in \"not_applicable\": {', '.join(unknown)}")
+
+    runtime = data.get("runtime", {})
+    if not isinstance(runtime, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in runtime.items()):
+        raise fail('"runtime" must map runtime names to version strings')
+    return {"fulfilled": fulfilled, "rejected": rejected, "packs": packs, "not_applicable": not_applicable, "runtime": runtime}
 
 
-def _guardrails_scope(tree: dict) -> set[str]:
-    """Nodes of the Guardrails Track: every node with a required (or
-    required-any) ancestor that is itself resolved-gated (PHP:
-    ``php-safety-net``) — proposable only once the Safety Net has closed.
-    Every other node belongs to the Safety Net Track."""
-    gates = _aggregation_nodes(tree)
-    scope: set[str] = set()
-    changed = True
-    while changed:
-        changed = False
-        for node in tree["nodes"]:
-            if node in scope:
-                continue
-            parents = tree["required_parents"].get(node, []) + tree["required_any_parents"].get(node, [])
-            if any(parent in gates or parent in scope for parent in parents):
-                scope.add(node)
-                changed = True
-    return scope
-
-
-def _aggregation_nodes(tree: dict) -> set[str]:
-    """The nodes others reach through ``resolved`` edges (PHP:
-    ``php-safety-net``, and ``structural-scan`` behind it)."""
-    return {n for n, parents in tree["resolved_parents"].items() if parents}
-
-
-def _gets_ticket(node: str, tree: dict) -> bool:
-    """Whether a ticket can be filed for *node*. Not for a recognition-only
-    node, not for one the parser settles itself, and not for an aggregation
-    node — its leaves are where the work is."""
-    return node not in _NEVER_PROPOSED and node not in _OWN_NODES and node not in _aggregation_nodes(tree)
-
-
-def _node_state(repo: pathlib.Path, tree: dict, fulfilled, rejected) -> tuple[dict[str, bool], set[str]]:
-    """The node state every output is computed from: what the caller handed
-    in. A node named in neither *fulfilled* nor *rejected* is undecided.
-    Some nodes the parser settles itself, whatever was handed in for them:
-    ``git`` is fulfilled, ``onboarding-setup`` is fulfilled exactly when
-    the target's tracker file carries its ``## Refactoring operations``
-    section, and an aggregation node is fulfilled once its leaves are
-    decided (see ``_with_aggregation_state``)."""
-    own = _OWN_NODES | _aggregation_nodes(tree)
-    state = {n: v for n, v in (fulfilled or {}).items() if n not in own}
-    state["git"] = True
-    state["onboarding-setup"] = _has_refactoring_operations(repo)
-    rejected = set(rejected or ()) - own
-    return _with_aggregation_state(tree, state, rejected), rejected
-
-
-def _with_aggregation_state(tree: dict, state: dict[str, bool], rejected: set[str]) -> dict[str, bool]:
-    """*state* with every aggregation node's fulfilment computed from its
-    leaves: fulfilled once each leaf is fulfilled or rejected."""
-    gates = _resolved_gate_status(tree, lambda n: state.get(n, False), rejected)
-    return {**state, **{node: resolved for node, (resolved, _) in gates.items()}}
+# ---------------------------------------------------------------------------
+# Computing
+# ---------------------------------------------------------------------------
 
 
 def _has_refactoring_operations(repo: pathlib.Path) -> bool:
@@ -169,824 +372,366 @@ def _has_refactoring_operations(repo: pathlib.Path) -> bool:
     return re.search(r"^## Refactoring operations\s*$", text, re.MULTILINE) is not None
 
 
-def track_nodes(tree: dict) -> dict[str, list[dict]]:
-    """Per Track, the nodes a ticket can be filed for, in tree order, each
-    with the ``name`` and ``tool`` its node section gives as plain text
-    (None where the tree doc has no section for it, or names no tool) and
-    with ``search``, the words to look the node's ticket up by: name and
-    tool, each once. Membership is derived from the edges, see
-    ``_guardrails_scope``."""
-    guardrails = _guardrails_scope(tree)
-    sections = tree.get("sections", {})
-    tracks: dict[str, list[dict]] = {"Safety Net": [], "Guardrails": []}
-    for node in tree["order"]:
-        if not _gets_ticket(node, tree):
-            continue
-        section = sections.get(node, {})
-        name, tool = _plain(section.get("name")), _plain(section.get("tool"))
-        if tool == "none":
-            tool = None
-        search = [name] if name else []
-        if tool and tool.casefold() != (name or "").casefold():
-            search.append(tool)
-        tracks["Guardrails" if node in guardrails else "Safety Net"].append(
-            {"node": node, "name": name, "tool": tool, "search": search}
-        )
-    return tracks
-
-
-def _plain(field: str | None) -> str | None:
-    """A node section's field without its Markdown backticks."""
-    if field is None:
-        return None
-    return field.replace("`", "").strip() or None
-
-
-def closed_by_rejection(tree: dict, rejected: set[str], fulfilled: dict[str, bool] | None = None) -> list[str]:
-    """Nodes closed by a rejection — permanently closed for good, unlike
-    merely unfulfilled nodes: a required ancestor is rejected, or a
-    rejection leaves no member of a required-any group that could still be
-    fulfilled (see ``_is_effectively_rejected``). *fulfilled* is the
-    handed-in node state; it says which recognition-only nodes are
-    fulfilled."""
-    state = fulfilled or {}
-    result = []
-    for node in tree["order"]:
-        if node in rejected:
-            continue
-        if _is_effectively_rejected(node, tree, rejected, fulfilled_lookup=lambda n: state.get(n, False)):
-            result.append(node)
-    return result
-
-
-def _withheld_guard_cascade(
-    repo: pathlib.Path,
-    tree: dict | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    rejected=None,
-):
-    """The guard cascade withheld_with_reasons() and withheld_candidates()
-    share: takes the handed-in node state, then yields ``(node, blocked_reason,
-    undecided_parents)`` for every node that survives the common guards
-    (gets a ticket, not fulfilled, not rejected,
-    recommended gate not moot) and is either blocked — below its PHP floor
-    or on a required parent (``blocked_reason`` set, ``undecided_parents``
-    None — never computed, the node never gets that far) — or waiting on
-    undecided recommended parents (``blocked_reason`` None)."""
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    state, rejected = _node_state(repo, tree, fulfilled, rejected)
-    detected = {n: {"fulfilled": v} for n, v in state.items()}
-    php_floor_blocked = {b["node"]: b["reason"] for b in php_floor_precheck(repo)}
-    for node in tree["order"]:
-        if not _gets_ticket(node, tree):
-            continue
-        if detected.get(node, {}).get("fulfilled", False) or node in rejected:
-            continue
-        if node in php_floor_blocked:
-            yield node, php_floor_blocked[node], None
-            continue
-        if _recommended_gate_moot(node, tree, detected):
-            continue
-        ok, why = _is_unblocked(node, tree, detected)
-        if not ok:
-            yield node, why, None
-            continue
-        undecided = _undecided_recommended_parents(node, tree, detected, rejected)
-        if undecided:
-            yield node, None, undecided
-
-
-def withheld_with_reasons(
-    repo: pathlib.Path,
-    tree: dict | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    rejected=None,
-) -> list[dict]:
-    """Withheld nodes with reasons: below the PHP floor, blocked by an
-    unfulfilled required parent, or waiting on undecided recommended
-    parents."""
-    result: list[dict] = []
-    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled, rejected):
-        if why is not None:
-            result.append({"node": node, "reason": why})
-        else:
-            result.append({"node": node, "reason": f"waiting on: {', '.join(undecided)}"})
-    return result
-
-
-def ordered_backlog(
-    repo: pathlib.Path,
-    tree: dict | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    rejected=None,
-) -> list[str]:
-    """Complete ordered list of the nodes a ticket can be filed for that
-    are neither fulfilled nor rejected, in tree order, blocked nodes
-    included — the nodes a scan offers tickets for."""
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    resolved, rejected = _node_state(repo, tree, fulfilled, rejected)
-    closed = set(closed_by_rejection(tree, rejected, resolved))
-    backlog = []
-    for node in tree["order"]:
-        if not _gets_ticket(node, tree):
-            continue
-        if resolved.get(node, False):
-            continue
-        if node in rejected:
-            continue
-        if node in closed:
-            continue
-        backlog.append(node)
-    return backlog
-
-
-def _parse_edges(path: pathlib.Path) -> list[dict]:
-    text = path.read_text(encoding="utf-8")
-    edges = []
-    # Parse edges table rows: | `from` | `to` | type |
-    for line in text.splitlines():
-        line = line.strip()
-        if not line.startswith("| `"):
-            continue
-        # cols: from, to, type
-        cols = [c.strip() for c in line.strip("|").split("|")]
-        if len(cols) < 3:
-            continue
-        frm = cols[0].strip("`").strip()
-        to = cols[1].strip("`").strip()
-        typ = cols[2].strip()
-        if frm in ("from (parent)", "from") and to == "to (child)":
-            continue
-        if typ not in _VALID_EDGE_TYPES:
-            continue
-        edges.append({"from": frm, "to": to, "type": typ})
-    return edges
-
-
-_SECTION_HEADING = re.compile(r"^### `([^`]+)`(?: through `([^`]+)`)?\s*$")
-_SECTION_FIELD = re.compile(r"^- \*\*(Names?|Tool):\*\*\s*(.*)$")
-_TRAILING_NUMBER = re.compile(r"^(.*?)(\d+)$")
-
-
-def _section_slugs(heading: str) -> tuple[list[str], dict[str, str]]:
-    """The slugs a heading line opens a node section for, plus — for a
-    numbered run — each slug's number. No node section: ``([], {})``."""
-    match = _SECTION_HEADING.match(heading)
-    if not match:
-        return [], {}
-    first, last = match.group(1), match.group(2)
-    lo, hi = _TRAILING_NUMBER.match(first), _TRAILING_NUMBER.match(last or "")
-    if lo and hi and lo.group(1) == hi.group(1):
-        numbers = {f"{lo.group(1)}{n}": str(n) for n in range(int(lo.group(2)), int(hi.group(2)) + 1)}
-        return list(numbers), numbers
-    return [first], {}
-
-
-def _parse_node_sections(path: pathlib.Path) -> dict[str, dict]:
-    """Each node section's ``**Name:**`` and ``**Tool:**`` fields, keyed by
-    slug: ``{slug: {"name": ..., "tool": ...}}``, the field text as written
-    (None for a field the section lacks).
-
-    A section heading is ``### `slug```. One heading may cover a numbered
-    run of nodes (``### `x-1` through `x-10```); its ``**Names:**`` field
-    then holds a quoted template with ``N`` standing for the number."""
-    sections: dict[str, dict] = {}
-    slugs: list[str] = []
-    numbers: dict[str, str] = {}
-    fields: dict[str, str] = {}
-    field: str | None = None
-
-    def close_section() -> None:
-        for slug in slugs:
-            name = fields.get("name")
-            template = re.search(r'"([^"]*\bN\b[^"]*)"', name or "") if slug in numbers else None
-            if template:
-                name = re.sub(r"\bN\b", numbers[slug], template.group(1))
-            sections[slug] = {"name": name, "tool": fields.get("tool")}
-
-    for line in path.read_text(encoding="utf-8").splitlines():
-        if line.startswith("#"):
-            close_section()
-            (slugs, numbers), fields, field = _section_slugs(line), {}, None
-            continue
-        match = _SECTION_FIELD.match(line)
-        if match:
-            field = "tool" if match.group(1) == "Tool" else "name"
-            fields[field] = match.group(2).strip()
-        elif field and line[:1].isspace() and line.strip():
-            fields[field] += " " + line.strip()  # a field wrapped onto the next line
-        else:
-            field = None
-    close_section()
-    return sections
-
-
-def load_tree(tree_md: pathlib.Path | None = None) -> dict:
-    """Load the tree's edges and node sections.
-
-    With an explicit ``tree_md``, loads only that one file (single-file mode,
-    useful for isolated parser tests). With none, loads the generic root
-    (``tooling-tree.md``) plus the PHP specialization
-    (``php-tooling-tree.md``) and merges their edges — the default,
-    real-world shape.
-    """
-    if tree_md is not None:
-        paths = [pathlib.Path(tree_md)]
-    else:
-        paths = [GENERIC_TREE_MD, TREE_MD]
-    edges: list[dict] = []
-    sections: dict[str, dict] = {}
-    for path in paths:
-        if path.exists():
-            edges.extend(_parse_edges(path))
-            sections.update(_parse_node_sections(path))
-    # nodes are distinct names from edges
-    nodes = sorted({e["from"] for e in edges} | {e["to"] for e in edges})
-    # Build parent maps
-    required_parents: dict[str, list[str]] = {n: [] for n in nodes}
-    recommended_parents: dict[str, list[str]] = {n: [] for n in nodes}
-    # `resolved` parents: unlike a required parent, a *rejected* resolved
-    # parent still counts as resolved. Used by structural-scan and, one hop
-    # down, by php-safety-net (the PHP tree's own aggregation node
-    # feeding it) — see tooling-tree.md's structural-scan node.
-    resolved_parents: dict[str, list[str]] = {n: [] for n in nodes}
-    # `required-any` parents: unlike `required` (every parent
-    # must be fulfilled), a node with required-any parents is unblocked once
-    # *at least one* of them is fulfilled — e.g. psalm-taint-analysis is
-    # proposed once either phpstan-level-4 or psalm is fulfilled, whichever
-    # general-analysis path the target took. Ordinary required parents (if
-    # any) on the same node must still all be fulfilled too — the two lists
-    # combine with AND between them, OR within this one.
-    required_any_parents: dict[str, list[str]] = {n: [] for n in nodes}
-    for e in edges:
-        if e["type"] == "required":
-            required_parents[e["to"]].append(e["from"])
-        elif e["type"] == "recommended":
-            recommended_parents[e["to"]].append(e["from"])
-        elif e["type"] == "required-any":
-            required_any_parents[e["to"]].append(e["from"])
-        else:
-            resolved_parents[e["to"]].append(e["from"])
-    # Preserve order as appear in file
-    order = []
-    seen = set()
-    for e in edges:
-        for n in (e["from"], e["to"]):
-            if n not in seen:
-                seen.add(n)
-                order.append(n)
-    return {
-        "edges": edges,
-        "nodes": nodes,
-        "order": order,
-        "required_parents": required_parents,
-        "required_any_parents": required_any_parents,
-        "recommended_parents": recommended_parents,
-        "resolved_parents": resolved_parents,
-        "sections": {n: sections[n] for n in nodes if n in sections},
-    }
-
-
-def _read_composer(repo: pathlib.Path) -> dict | None:
-    for cand in [repo / "composer.json", repo / "composer" / "composer.json"]:
-        if cand.exists():
-            try:
-                return json.loads(cand.read_text(encoding="utf-8"))
-            except Exception:
-                return None
-    return None
-
-
-def _parse_min_version(constraint: str) -> tuple[int, ...] | None:
-    """Best-effort minimum-version extraction from a composer-style version
-    constraint (e.g. '>=7.2', '^8.1', '7.2.0'). Not a full composer
-    constraint parser — handles the single-lower-bound shapes this suite's
-    `Blocked by:` fields and `require.php`/`config.platform.php` actually
-    use. Returns None if no version-like substring is found."""
-    if not constraint:
-        return None
-    m = re.search(r"(\d+(?:\.\d+){0,2})", constraint)
-    if not m:
-        return None
-    return tuple(int(p) for p in m.group(1).split("."))
-
-
-def _current_php_floor(composer: dict | None) -> tuple[int, ...] | None:
-    """The target's current minimum PHP version: `config.platform.php`
-    (an exact pin) if present, else `require.php`'s constraint
-    (best-effort lower bound)."""
-    if not composer:
-        return None
-    platform_php = composer.get("config", {}).get("platform", {}).get("php")
-    v = _parse_min_version(platform_php) if platform_php else None
-    if v:
-        return v
-    return _parse_min_version(composer.get("require", {}).get("php"))
-
-
-# The oldest PHP version each of the five deterministic PHP tooling leaves
-# has ever run on, across every published major line of the
-# tool — below this floor, no version of the tool (however old or
-# unmaintained) can be installed at all, so no
-# ticket could ever land it. Checked once per call instead of once
-# per leaf (see `php_floor_precheck`). Source facts:
-#   - php-cs-fixer: friendsofphp/php-cs-fixer 1.0 (2012) required PHP >=5.3.6.
-#   - phpunit: phpunit/phpunit's earliest Composer-installable line (3.7)
-#     required PHP >=5.3.3.
-#   - test-runner-if-missing: defaults to adopting phpunit — same floor.
-#   - composer-audit: the `composer audit` subcommand shipped in Composer
-#     2.4.0 (2022); no earlier Composer release (1.x or 2.0-2.3) ever had it,
-#     and Composer 2.4 itself requires PHP >=7.2.5.
-#   - phpstan-level-0: phpstan/phpstan's first published release
-#     (0.1) required PHP ~7.0 — it has never run on PHP 5.x; vimeo/psalm
-#     (this node's equivalent fulfiller) has likewise required PHP 7+ since
-#     its earliest releases.
-_LEAF_MIN_PHP_VERSION = {
-    "php-cs-fixer": "5.3",
-    "phpunit": "5.3",
-    "test-runner-if-missing": "5.3",
-    "composer-audit": "7.2",
-    "phpstan-level-0": "7.0",
-}
-
-
-def php_floor_precheck(repo: pathlib.Path) -> list[dict]:
-    """Check the target's current PHP floor once against each of
-    `_LEAF_MIN_PHP_VERSION`'s five leaves, instead of proposing (and
-    eventually rejecting) each one individually five separate times.
-    Returns the leaves whose minimum isn't met yet, each with a
-    human-readable reason — `next_candidates()` skips these,
-    and `detect_and_roadmap()` surfaces the list so a caller can report the
-    fact at once instead of it silently vanishing.
-
-    Design decision: skip silently, a blocked leaf is not a rejection.
-    The check is cheap and re-derived fully from `composer.json` every
-    call — a rejection records a genuine human/agent decision, not a
-    mechanical fact already on disk. Once the target's PHP floor rises, a
-    previously-blocked leaf is simply unblocked; there is nothing to
-    reverse. The one consequence worth naming: `phpunit` is the only one
-    of these five nodes that's still a `php-safety-net` leaf (php-tooling-
-    tree.md's `resolved` edges) — while blocked here, it counts as neither
-    fulfilled nor rejected, so `structural-scan` stays genuinely closed
-    until the floor rises (matching how a target that truly cannot run
-    these tools yet shouldn't be treated as tooling-ready). `composer-audit`
-    is no longer a `php-safety-net` leaf either (moved to the Guardrails
-    instead) — like
-    `php-cs-fixer`/`test-runner-if-missing`, a floor block on it now only
-    delays its own adoption. A human who wants `structural-scan` to open
-    anyway despite the floor can still reject those leaves by
-    hand — this precheck doesn't do it for them.
-
-    Returns `[]` when the target's PHP floor can't be determined (no
-    `composer.json`, or neither `require.php` nor `config.platform.php`
-    parses) — consistent with `php_version_reversal_findings()`, unknown
-    floor never blocks anything here either."""
-    repo = pathlib.Path(repo)
-    current = _current_php_floor(_read_composer(repo))
-    if current is None:
-        return []
-    blocked = []
-    for node, min_constraint in _LEAF_MIN_PHP_VERSION.items():
-        minimum = _parse_min_version(min_constraint)
-        if minimum is not None and current < minimum:
-            blocked.append({
-                "node": node,
-                "reason": (
-                    f"PHP floor {'.'.join(map(str, current))} below {node}'s minimum "
-                    f"PHP >= {'.'.join(map(str, minimum))}"
-                ),
-            })
-    return blocked
-
-
-def _blocked_by_php(blocker) -> tuple[int, ...] | None:
-    """The minimum PHP version a rejection's blocker names
-    (``{"php": "8.1"}``), or None when the rejection carries none."""
-    if not isinstance(blocker, dict) or set(blocker) != {"php"} or not isinstance(blocker["php"], str):
-        return None
-    return _parse_min_version(blocker["php"])
-
-
-def php_version_reversal_findings(repo: pathlib.Path, rejected=None) -> list[dict]:
-    """Rejected nodes whose handed-in blocker (``{node: {"php": "X.Y"}}``)
-    the target's PHP floor now satisfies — findings the caller offers for
-    reversal; the node stays rejected until the caller reverses it."""
-    repo = pathlib.Path(repo)
-    current = _current_php_floor(_read_composer(repo))
-    if current is None or not isinstance(rejected, dict):
-        return []
-    findings = []
-    for node in sorted(rejected):
-        blocked_by = _blocked_by_php(rejected[node])
-        if blocked_by is not None and current >= blocked_by:
-            findings.append({
-                "node": node,
-                "reason": (
-                    f"PHP floor now {'.'.join(map(str, current))}, satisfies "
-                    f"Blocked by PHP >= {'.'.join(map(str, blocked_by))}"
-                ),
-            })
-    return findings
-
-
-def _is_effectively_rejected(
-    node: str, tree: dict, rejected: set[str], _seen: set[str] | None = None, fulfilled_lookup=None
-) -> bool:
-    """True if `node` is rejected outright, or permanently closed because a
-    `required` ancestor is (recursively) effectively rejected — the same
-    closure a `required` edge already causes for proposability, made
-    explicit here because `recommended`-edge gating (unlike `required`-edge
-    gating) must tell "permanently rejected" apart from "not reached yet":
-    only the former releases a `recommended`-gated child. Also used by
-    `_resolved_gate_status()` for the same "closed for good" question one
-    level down: a `resolved`-gate leaf that isn't itself rejected but sits
-    behind a rejected required parent (e.g. `phpstan-level-5` behind a
-    rejected `phpstan-level-2`) must still count as resolved, the same as a
-    directly-rejected leaf already does.
-
-    A `required-any` group only closes this way once *no* option is left
-    that could be fulfilled: each one effectively rejected, or a
-    recognition-only node (`_NEVER_PROPOSED`) that is not fulfilled — no
-    ticket is ever filed for such a node, so nothing a run does fulfils it
-    (e.g. `rector-php-set` behind a rejected `phpstan-level-0` on a target
-    without `psalm`). Rejecting just one of several options must not close
-    the child while another could still fulfil it, and without any
-    rejection in the group nothing is closed: the closure follows the
-    rejection and is gone with it. ``fulfilled_lookup(name) -> bool``
-    supplies the handed-in state; without it no node is fulfilled.
-
-    Each sibling call below gets its own *copy* of `_seen`, not the same
-    mutable set — two required(-any) siblings can legitimately re-converge
-    on a shared ancestor further up (a diamond, not a cycle), and sharing
-    one set across them would make the second sibling's honest re-visit
-    look like a cycle and short-circuit to `False`, even when continuing
-    would find the real rejection (e.g. `rector-php-set`'s `phpstan-level-0`
-    and `psalm`, both requiring `static-code-analyzer`)."""
-    if _seen is None:
-        _seen = set()
-    if node in _seen:
-        return False  # guard against a cycle, which a well-formed tree never has
-    _seen.add(node)
-    if node in rejected:
-        return True
-    if any(
-        _is_effectively_rejected(p, tree, rejected, set(_seen), fulfilled_lookup)
-        for p in tree["required_parents"].get(node, [])
-    ):
-        return True
-    req_any = tree["required_any_parents"].get(node, [])
-    rejected_options = {
-        p for p in req_any if _is_effectively_rejected(p, tree, rejected, set(_seen), fulfilled_lookup)
-    }
-    never_fulfilled = {
-        p for p in req_any
-        if p in _NEVER_PROPOSED and not (fulfilled_lookup is not None and fulfilled_lookup(p))
-    }
-    return bool(rejected_options) and rejected_options | never_fulfilled == set(req_any)
-
-
-def _is_decided(node: str, tree: dict, detected: dict, rejected: set[str]) -> bool:
-    """True once `node` has reached a final state for `recommended`-edge
-    gating purposes (CONTEXT.md's Recommended edge): fulfilled, or
-    effectively rejected (see above) — not merely "not yet reached"."""
-    def is_fulfilled(name: str) -> bool:
-        return detected.get(name, {}).get("fulfilled", False)
-
-    return is_fulfilled(node) or _is_effectively_rejected(node, tree, rejected, fulfilled_lookup=is_fulfilled)
-
-
-def _undecided_recommended_parents(node: str, tree: dict, detected: dict, rejected: set[str]) -> list[str]:
-    """`node`'s `recommended` parents that haven't reached a decided state
-    yet — a non-empty result means `node` stays withheld: a
-    `recommended` edge now gates until every parent is decided, releasing
-    the child either way once decided (fulfilled, or rejected — unlike a
-    `required` edge, which closes the child on rejection instead)."""
-    return [rp for rp in tree["recommended_parents"].get(node, []) if not _is_decided(rp, tree, detected, rejected)]
-
-
-def _is_permanently_gated(node: str, tree: dict, detected: dict, _seen: set[str] | None = None) -> bool:
-    """True once `node` sits behind an unfulfilled recognition/detection
-    gate (`_NEVER_PROPOSED` — `is-php-project`, `static-code-analyzer`,
-    `psalm`) somewhere in its required-parent closure: a real, currently-
-    false signal about the target itself (wrong language, no static
-    analyzer adopted) that no run or human ever decides on — unlike
-    `_is_effectively_rejected`, nobody rejected anything here.
-
-    Each sibling call below gets its own *copy* of `_seen` — see
-    `_is_effectively_rejected`'s identical note; the same diamond shape
-    (two required(-any) siblings re-converging on a shared ancestor) would
-    otherwise make the second sibling's honest re-visit look like a cycle."""
-    if _seen is None:
-        _seen = set()
-    if node in _seen:
-        return False
-    _seen.add(node)
-    if node in _NEVER_PROPOSED and not detected.get(node, {}).get("fulfilled", False):
-        return True
-    if any(_is_permanently_gated(p, tree, detected, set(_seen)) for p in tree["required_parents"].get(node, [])):
-        return True
-    req_any = tree["required_any_parents"].get(node, [])
-    if req_any and all(_is_permanently_gated(p, tree, detected, set(_seen)) for p in req_any):
-        return True
-    return False
-
-
-def _recommended_gate_moot(node: str, tree: dict, detected: dict) -> bool:
-    """True when `node` has at least one `recommended` parent and *every*
-    one of them is permanently gated (see `_is_permanently_gated`) — the
-    recommended edge can never actually release on this target, so
-    surfacing `node` as "withheld, waiting on X" is noise: X will never
-    reach a decided state through a run's ordinary work (e.g.
-    `rector-type-coverage` on a non-PHP target, whose four recommended
-    parents all bottom out at the unfulfilled `is-php-project` gate, despite
-    `rector-type-coverage` itself carrying no required parent of its own to
-    be blocked by directly)."""
-    parents = tree["recommended_parents"].get(node, [])
-    return bool(parents) and all(_is_permanently_gated(p, tree, detected) for p in parents)
-
-
-def _resolved_gate_status(
-    tree: dict, fulfilled_lookup, rejected: set[str]
-) -> dict[str, tuple[bool, list[str]]]:
-    """Compute ``{node: (resolved, unresolved_leaves)}`` for every node with
-    one or more `resolved` parents — generic over any such node (today:
-    ``structural-scan``, and PHP's own aggregation node ``php-safety-net``
-    feeding it), not hardcoded to one node name. A node is resolved
-    once every one of its resolved-parent leaves is itself fulfilled,
-    recorded as rejected, or effectively rejected (``_is_effectively_rejected``
-    — closed for good because a required ancestor of the leaf is rejected or
-    its whole required-any group is out of reach, even though the leaf
-    itself was never explicitly rejected) — unlike a
-    required parent, a rejected resolved parent still counts as resolved.
-
-    Computed in dependency order so an aggregation node (whose own
-    resolved-parents are ordinary leaves) is resolved *before* a node that
-    reads its resolved-ness as one of its own resolved-parents (e.g.
-    structural-scan reading php-safety-net) — independent of where
-    either node happens to sit in ``tree["order"]``.
-
-    ``fulfilled_lookup(name) -> bool`` supplies each ordinary leaf's
-    fulfilled state — either the real fulfilled-set output, or
-    a per-iteration simulated snapshot.
-    """
-    computed: dict[str, tuple[bool, list[str]]] = {}
-    pending = _aggregation_nodes(tree)
-    while pending:
-        progressed = False
-        for node in list(pending):
-            leaves = tree["resolved_parents"][node]
-            if any(leaf in pending for leaf in leaves):
-                continue  # a resolved-gated leaf not yet computed this pass -- defer
-            unresolved = [
-                leaf for leaf in leaves
-                if not (
-                    (computed[leaf][0] if leaf in computed else fulfilled_lookup(leaf))
-                    or _is_effectively_rejected(leaf, tree, rejected, fulfilled_lookup=fulfilled_lookup)
-                )
-            ]
-            computed[node] = (not unresolved, unresolved)
-            pending.discard(node)
-            progressed = True
-        if not progressed:
-            break  # cycle among resolved-gated nodes -- a well-formed tree never has one
-    return computed
-
-
-def _is_unblocked(node: str, tree: dict, fulfilled: dict) -> tuple[bool, str]:
-    """Check if node's required parents are fulfilled and no required parent is blocked by missing."""
-    req = tree["required_parents"].get(node, [])
-    for p in req:
-        if not fulfilled.get(p, {}).get("fulfilled", False):
-            return False, f"blocked by required parent {p}"
-    # required-any: at least one, not all, must be fulfilled.
-    # Combines with the ordinary required parents above via AND (both checks
-    # must pass); within this group the parents combine via OR.
-    req_any = tree["required_any_parents"].get(node, [])
-    if req_any and not any(fulfilled.get(p, {}).get("fulfilled", False) for p in req_any):
-        return False, f"blocked — none of required-any parents fulfilled: {', '.join(req_any)}"
-    return True, "required parents fulfilled"
-
-
-def next_candidates(
-    repo: pathlib.Path,
-    tree: dict | None = None,
-    limit: int | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    rejected=None,
-) -> list[dict]:
-    """Return every node a ticket can be filed for that is *really*
-    unblocked and unfulfilled right now (or, with an explicit `limit`, at most that many — a scan itself
-    never passes one: more than five nodes can be genuinely unblocked at
-    once, so this is never capped by default).
-
-    Does not simulate — does not assume a returned node is already fulfilled
-    to compute what comes after it.  Only each node's real required
-    parents decide what's in this list, so entries here can be true
-    siblings, not a serial lookahead.
-
-    A node with an undecided `recommended` parent is withheld from this list
-    entirely rather than merely ranked lower — see ``withheld_candidates()``
-    for the matching "waiting on" list.
-
-    *fulfilled* (a ``{node: bool}`` mapping) and *rejected* (the rejected
-    nodes' slugs) are the node state the caller hands in; a node named in
-    neither is undecided.
-    """
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    state, rejected = _node_state(repo, tree, fulfilled, rejected)
-    detected = {n: {"fulfilled": v} for n, v in state.items()}
-    return _next_candidates(repo, tree, detected, rejected, limit)
-
-
-def _next_candidates(
-    repo: pathlib.Path, tree: dict, detected: dict, rejected: set[str], limit: int | None = None
-) -> list[dict]:
-    """next_candidates() over an already-resolved node state."""
-    php_floor_blocked = {b["node"] for b in php_floor_precheck(repo)}
-
-    result: list[dict] = []
-    for node in tree["order"]:
-        if not _gets_ticket(node, tree):
-            continue
-        if detected.get(node, {}).get("fulfilled", False):
-            continue
-        if node in rejected:
-            continue
-        if node in php_floor_blocked:
-            continue
-        if _recommended_gate_moot(node, tree, detected):
-            continue
-        ok, why = _is_unblocked(node, tree, detected)
-        if not ok:
-            continue
-        if _undecided_recommended_parents(node, tree, detected, rejected):
-            continue
-        result.append({"node": node, "reason": why})
-        if limit is not None and len(result) >= limit:
-            break
-    return result
-
-
-def directly_unblocked_children(
-    repo: pathlib.Path,
-    landed_node: str,
-    tree: dict | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    rejected=None,
-) -> list[dict]:
-    """Every node this one candidate's fulfilment newly makes proposable.
-    A node no ticket is filed for is walked through to what it opens in
-    turn.
-
-    *fulfilled* and *rejected* are the handed-in node state, as for
-    ``next_candidates()``.
-    """
-    repo = pathlib.Path(repo)
-    if tree is None:
-        tree = load_tree()
-    if landed_node not in tree["nodes"]:
-        return []
-
-    state, rejected = _node_state(repo, tree, fulfilled, rejected)
-    detected = {n: {"fulfilled": v} for n, v in state.items()}
-
-    # Counterfactual snapshot: landed_node never happened.
-    # static-code-analyzer's own fulfilled flag is hardcoded to mirror
-    # composer's (fulfilled state, above) rather than being independently
-    # derived — keep that same derivation consistent here, or the
-    # counterfactual would misreport composer's own downstream plumbing.
-    if landed_node not in detected:
-        return []
-    without = {**state, landed_node: False}
-    if "static-code-analyzer" in without:
-        without["static-code-analyzer"] = without.get("composer", False)
-    without = _with_aggregation_state(tree, without, rejected)
-    detected_without = {n: {"fulfilled": v} for n, v in without.items()}
-
-    next_now = {c["node"] for c in _next_candidates(repo, tree, detected, rejected)}
-    next_without = {c["node"] for c in _next_candidates(repo, tree, detected_without, rejected)}
-
-    children_of: dict[str, list[dict]] = {}
-    for e in tree["edges"]:
-        children_of.setdefault(e["from"], []).append(e)
-
-    result: list[dict] = []
-    seen: set[str] = set()
-    frontier: list[tuple[str, str]] = [(e["to"], e["type"]) for e in children_of.get(landed_node, [])]
-    while frontier:
-        child, edge_type = frontier.pop(0)
-        if child in seen:
-            continue
-        seen.add(child)
-
-        if not _gets_ticket(child, tree):
-            if detected.get(child, {}).get("fulfilled", False):
-                frontier.extend((e["to"], e["type"]) for e in children_of.get(child, []))
-            continue
-
-        if child not in next_now:
-            continue  # not a real candidate right now — blocked by something else too
-        if child in next_without:
-            continue  # reachable via some other already-fulfilled parent too — not new
-
-        result.append({"node": child, "type": edge_type})
-    return result
-
-
-def withheld_candidates(
-    repo: pathlib.Path,
-    tree: dict | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    rejected=None,
-) -> list[dict]:
-    """Nodes that would otherwise be in ``next_candidates()`` (required
-    parents fulfilled, not rejected, not yet fulfilled) but stay withheld
-    because one or more ``recommended`` parents haven't reached a decided
-    state yet.
-
-    *fulfilled* and *rejected* are the handed-in node state, as for
-    ``next_candidates()``.
-    """
-    result: list[dict] = []
-    for node, why, undecided in _withheld_guard_cascade(repo, tree, fulfilled, rejected):
-        if why is not None:
-            continue  # blocked outright — not the recommended-gate withholding this list reports
-        result.append({"node": node, "waiting_on": undecided})
-    return result
-
-
-def detect_and_roadmap(
-    repo: pathlib.Path,
-    steps: int = 10,
-    tree_md: pathlib.Path | None = None,
-    fulfilled: dict[str, bool] | None = None,
-    seed_path: pathlib.Path | None = None,
-    rejected=None,
-) -> dict:
-    """Main entry point: compute graph outputs from the handed-in node state.
-
-    The state comes from *seed_path* (see ``load_seed``; it must be usable
-    as given, otherwise ``SeedError`` is raised) or from
-    *fulfilled*/*rejected*. With none of them, every node is undecided.
-    """
-    tree = load_tree(tree_md=tree_md)
-    repo = pathlib.Path(repo)
-    if seed_path is not None:
-        fulfilled, rejected = load_seed(seed_path, tree)
-    state, rejected_nodes = _node_state(repo, tree, fulfilled, rejected)
-    backlog = ordered_backlog(repo, tree=tree, fulfilled=fulfilled, rejected=rejected)
-    withheld_reasons = withheld_with_reasons(repo, tree=tree, fulfilled=fulfilled, rejected=rejected)
-    tracks = {}
-    for track, nodes in track_nodes(tree).items():
-        members = {n["node"] for n in nodes}
-        track_backlog = [n for n in backlog if n in members]
-        tracks[track] = {
-            # every node of the Track is fulfilled or rejected
-            "fulfilled": not track_backlog,
-            "nodes": nodes,
-            "backlog": track_backlog,
-            "withheld": [w for w in withheld_reasons if w["node"] in members],
+class _State:
+    """Everything computed from a model and a seed, once."""
+
+    def __init__(self, model: dict, seed: dict, onboarded: bool):
+        self.model = model
+        self.seed = seed
+        self.onboarded = onboarded
+        stages, tools, roles = model["stages"], model["tools"], model["roles"]
+
+        packs = seed["packs"] if seed["packs"] is not None else list(model["packs"])
+        self.packs = [p for p in model["packs"] if p in packs]
+        self.active = {
+            s for s in model["stage_order"]
+            if stages[s]["pack"] in self.packs and s not in seed["not_applicable"]
         }
+        self.fulfilled = {s for s in seed["fulfilled"] if s in self.active}
+
+        rejected = set(seed["rejected"])
+        self.rejected_roles = rejected & set(roles)
+        self.rejected_tools = rejected & set(tools)
+        self.rejected_stages = rejected & set(stages)
+
+        self.tools_of_role: dict[str, list[str]] = {r: [] for r in roles}
+        for slug, tool in tools.items():
+            if tool["pack"] in self.packs:
+                for role in tool["roles"]:
+                    self.tools_of_role[role].append(slug)
+
+        self.filled_by = {r: self._filled_by(r) for r in roles}
+        self.out = self._out_tools()
+        self._closed: dict[str, bool] = {}
+
+    # -- roles and tools ----------------------------------------------------
+
+    def first(self, tool: str) -> str:
+        return self.model["tools"][tool]["stage_slugs"][0]
+
+    def _filled_by(self, role: str) -> str | None:
+        """The Tool that fills *role*: the first, recommended ones before
+        recognized ones, whose first Stage is fulfilled."""
+        candidates = sorted(
+            self.tools_of_role[role],
+            key=lambda t: self.model["tools"][t]["status"] != "recommended",
+        )
+        for tool in candidates:
+            if self.first(tool) in self.fulfilled:
+                return tool
+        return None
+
+    def _out_tools(self) -> set[str]:
+        """Tools another Tool has taken the place of: a Role of theirs is
+        filled by that other Tool and their own first Stage is not fulfilled."""
+        out = set()
+        for slug, tool in self.model["tools"].items():
+            if tool["pack"] not in self.packs or self.first(slug) in self.fulfilled:
+                continue
+            for role in tool["roles"]:
+                filler = self.filled_by[role]
+                if filler is not None and filler != slug:
+                    out.add(slug)
+        return out
+
+    def stage_out(self, stage: str) -> bool:
+        return self.model["stages"][stage]["tool"] in self.out
+
+    def never_fulfilled(self, stage: str) -> bool:
+        """Nothing a run does will fulfil it: a Stage of a recognized Tool
+        that is not there, or of a Tool another Tool took the place of."""
+        if stage in self.fulfilled:
+            return False
+        tool_slug = self.model["stages"][stage]["tool"]
+        return self.model["tools"][tool_slug]["status"] == "recognized" or tool_slug in self.out
+
+    # -- rejection ------------------------------------------------------------
+
+    def directly_rejected(self, stage: str) -> bool:
+        s = self.model["stages"][stage]
+        tool = self.model["tools"][s["tool"]]
+        return (
+            stage in self.rejected_stages
+            or s["tool"] in self.rejected_tools
+            or any(r in self.rejected_roles for r in tool["roles"])
+        )
+
+    def closed(self, stage: str) -> bool:
+        """Rejected, or closed for good because something it requires is:
+        a required Stage is closed, or an any-of group has a closed member and
+        no member left that could be fulfilled, or a required Role cannot be
+        filled any more."""
+        if stage in self._closed:
+            return self._closed[stage]
+        self._closed[stage] = False  # a well-formed model has no cycle
+        result = False
+        if stage in self.active:
+            if self.directly_rejected(stage):
+                result = True
+            else:
+                result = any(self._item_closed(item) for item in self.model["stages"][stage]["requires"])
+        self._closed[stage] = result
+        return result
+
+    def _item_closed(self, item) -> bool:
+        if isinstance(item, list):
+            closed = [m for m in item if self._stage_dead(m)]
+            return bool(closed) and all(self._stage_dead(m) or self.never_fulfilled(m) for m in item)
+        if item in self.model["stages"]:
+            return self._stage_dead(item)
+        return self._role_closed(item)
+
+    def _stage_dead(self, stage: str) -> bool:
+        """Closed, or in a Pack that does not apply."""
+        return stage not in self.active or self.closed(stage)
+
+    def _role_closed(self, role: str) -> bool:
+        if role in self.rejected_roles:
+            return True
+        if self.filled_by[role] is not None:
+            return False
+        tools = self.tools_of_role[role]
+        closed = [t for t in tools if self.closed(self.first(t))]
+        return bool(closed) and all(
+            t in closed or self.never_fulfilled(self.first(t)) for t in tools
+        )
+
+    def closed_because(self, stage: str) -> str:
+        """What a closed Stage hangs on, as a phrase: a declined subject, or
+        a Role no Tool can fill any more."""
+        stages = self.model["stages"]
+
+        def subject(slug: str) -> str | None:
+            s = stages[slug]
+            if slug in self.rejected_stages:
+                return f"{slug} was declined"
+            if s["tool"] in self.rejected_tools:
+                return f"{s['tool']} was declined"
+            for role in self.model["tools"][s["tool"]]["roles"]:
+                if role in self.rejected_roles:
+                    return f"{role} was declined"
+            for item in s["requires"]:
+                for member in item if isinstance(item, list) else [item]:
+                    if member in stages:
+                        if member in self.active and self.closed(member):
+                            return subject(member)
+                    elif self._role_closed(member):
+                        if member in self.rejected_roles:
+                            return f"{member} was declined"
+                        return f"no Tool can fill the Role {member} any more"
+            return None
+
+        return subject(stage) or f"{stage} was declined"
+
+    def decided(self, stage: str) -> bool:
+        """For `after`: fulfilled, closed, or never going to be."""
+        return (
+            stage in self.fulfilled
+            or stage not in self.active
+            or self.closed(stage)
+            or self.never_fulfilled(stage)
+        )
+
+    # -- tickets --------------------------------------------------------------
+
+    def ticketable(self, stage: str) -> bool:
+        s = self.model["stages"][stage]
+        return (
+            stage in self.active
+            and self.model["tools"][s["tool"]]["status"] == "recommended"
+            and s["tool"] not in self.out
+        )
+
+    def backlog(self, track: str) -> list[str]:
+        return [
+            s for s in self.model["stage_order"]
+            if self.model["stages"][s]["track"] == track
+            and self.ticketable(s)
+            and s not in self.fulfilled
+            and not self.closed(s)
+        ]
+
+    # -- runtime --------------------------------------------------------------
+
+    def runtime_blocked(self) -> list[dict]:
+        blocked = []
+        for slug, tool in self.model["tools"].items():
+            if tool["pack"] not in self.packs:
+                continue
+            for runtime, minimum_text in tool.get("min_runtime", {}).items():
+                current, minimum = _version(self.seed["runtime"].get(runtime)), _version(minimum_text)
+                if current is not None and minimum is not None and _below(current, minimum):
+                    node = self.first(slug)
+                    blocked.append({
+                        "node": node,
+                        "reason": (
+                            f"{runtime} runtime {_dotted(current)} is below {node}'s minimum "
+                            f"{runtime} >= {_dotted(minimum)}"
+                        ),
+                    })
+        return blocked
+
+    def _subject_applies(self, subject: str) -> bool:
+        if subject in self.model["stages"]:
+            return subject in self.active
+        if subject in self.model["tools"]:
+            return self.model["tools"][subject]["pack"] in self.packs
+        return bool(self.tools_of_role.get(subject))
+
+    def reversals(self) -> list[dict]:
+        found = []
+        for subject in sorted(self.seed["rejected"]):
+            if not self._subject_applies(subject):
+                continue
+            blocker = _blocker(self.seed["rejected"][subject])
+            if blocker is None:
+                continue
+            runtime, needed = blocker
+            current = _version(self.seed["runtime"].get(runtime))
+            if current is not None and not _below(current, needed):
+                found.append({
+                    "node": subject,
+                    "reason": (
+                        f"{runtime} runtime now {_dotted(current)}, satisfies "
+                        f"Blocked by {runtime} >= {_dotted(needed)}"
+                    ),
+                })
+        return found
+
+    # -- why a Stage waits ----------------------------------------------------
+
+    def withheld_reason(self, stage: str, runtime_blocked: dict[str, str], safety_net_fulfilled: bool) -> str | None:
+        s = self.model["stages"][stage]
+        if not self.onboarded:
+            return "onboarding-setup is not fulfilled"
+        if stage in runtime_blocked:
+            return runtime_blocked[stage]
+        for item in s["requires"]:
+            if isinstance(item, list):
+                if not any(m in self.fulfilled for m in item):
+                    return f"blocked — none of the alternatives fulfilled: {', '.join(item)}"
+            elif item in self.model["stages"]:
+                if item not in self.fulfilled:
+                    return f"blocked by required parent {item}"
+            elif self.filled_by[item] is None:
+                return f"blocked — no Tool fills the Role {item}"
+        if s["track"] == "Guardrails" and not safety_net_fulfilled:
+            return "waiting on the Safety Net"
+        undecided = [a for a in s["after"] if not self.decided(a)]
+        if undecided:
+            return f"waiting on: {', '.join(undecided)}"
+        return None
+
+
+def _plain_search(name: str, uses: str | None) -> list[str]:
+    search = [name]
+    if uses and uses.casefold() != name.casefold():
+        search.append(uses)
+    return search
+
+
+def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = None) -> dict:
+    """The graph outputs for *repo* from the handed-in *seed* (see
+    ``load_seed``; without one, every Stage of every Pack is undecided)."""
+    repo = pathlib.Path(repo)
+    model = model or load_model()
+    seed = seed or {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+    state = _State(model, seed, _has_refactoring_operations(repo))
+    stages, tools = model["stages"], model["tools"]
+
+    backlogs = {track: state.backlog(track) for track in TRACKS}
+    safety_net_fulfilled = not backlogs["Safety Net"]
+    blocked = state.runtime_blocked()
+    blocked_reason = {b["node"]: b["reason"] for b in blocked}
+
+    tracks = {}
+    for track in TRACKS:
+        nodes = []
+        for slug in model["stage_order"]:
+            if stages[slug]["track"] != track or not state.ticketable(slug):
+                continue
+            stage, tool = stages[slug], tools[stages[slug]["tool"]]
+            nodes.append({
+                "node": slug,
+                "name": stage["name"],
+                "tool": tool["uses"],
+                "search": _plain_search(stage["name"], tool["uses"]),
+            })
+        withheld = []
+        for slug in model["stage_order"]:
+            if stages[slug]["track"] != track or not state.ticketable(slug) or slug in state.fulfilled:
+                continue
+            if state.directly_rejected(slug):
+                continue
+            if state.closed(slug):
+                withheld.append({"node": slug, "reason": f"closed — {state.closed_because(slug)}"})
+                continue
+            reason = state.withheld_reason(slug, blocked_reason, safety_net_fulfilled)
+            if reason is not None:
+                withheld.append({"node": slug, "reason": reason})
+        waiting = {w["node"] for w in withheld}
+        tracks[track] = {
+            "fulfilled": not backlogs[track],
+            "nodes": nodes,
+            "backlog": backlogs[track],
+            "workable": [s for s in backlogs[track] if s not in waiting],
+            "withheld": withheld,
+        }
+
+    closed = [
+        s for s in model["stage_order"]
+        if s in state.active and s not in state.rejected_stages and state.closed(s)
+    ]
     return {
-        "detected": {n: {"fulfilled": v, "reason": "", "details": {}} for n, v in state.items()},
+        "prerequisites": {"git": True, "onboarding-setup": state.onboarded},
+        "packs": state.packs,
+        "roles": [
+            {"role": slug, "name": role["name"], "filled_by": state.filled_by[slug]}
+            for slug, role in model["roles"].items()
+        ],
+        "tools": [
+            {"tool": slug, "name": tool["name"], "roles": tool["roles"], "status": tool["status"],
+             "pack": tool["pack"], "out": slug in state.out}
+            for slug, tool in tools.items()
+        ],
+        "safety_net_fulfilled": safety_net_fulfilled,
         "tracks": tracks,
-        "next": next_candidates(repo, tree=tree, fulfilled=fulfilled, rejected=rejected),
-        "withheld": withheld_candidates(repo, tree=tree, fulfilled=fulfilled, rejected=rejected),
-        "withheld_with_reasons": withheld_reasons,
-        "reversals": php_version_reversal_findings(repo, rejected),
-        "php_floor_blocked": php_floor_precheck(repo),
-        "backlog": backlog,
-        "closed_by_rejection": closed_by_rejection(tree, rejected_nodes, state),
-        "tree": {"edges": tree["edges"]},
+        "runtime_blocked": blocked,
+        "reversals": state.reversals(),
+        "closed_by_rejection": closed,
+        "tree": {
+            "stages": [
+                {
+                    "stage": slug,
+                    "name": stages[slug]["name"],
+                    "tool": stages[slug]["tool"],
+                    "roles": tools[stages[slug]["tool"]]["roles"],
+                    "pack": stages[slug]["pack"],
+                    "track": stages[slug]["track"],
+                    "requires": stages[slug]["requires"],
+                    "after": stages[slug]["after"],
+                }
+                for slug in model["stage_order"]
+            ]
+        },
     }
 
 
 if __name__ == "__main__":
     import argparse
 
-    ap = argparse.ArgumentParser(description="Compute the tooling tree's graph outputs from a handed-in node state (dry-run, no mutation)")
-    ap.add_argument("repo", nargs="?", default=".", help="path to fixture/repo (default: .)")
-    ap.add_argument("--tree", type=str, default=None, help="path to a single tree file to use instead of the suite's own generic root + PHP tree (single-file mode, e.g. for a synthetic test tree)")
-    ap.add_argument("--seed", type=str, default=None, help='path to a JSON file holding the node state: {"fulfilled": [slug, ...], "rejected": {slug: null | {"php": "X.Y"}}} — without it, every node is undecided')
-    ap.add_argument("--json", action="store_true", help="output JSON (default)")
-    ap.add_argument("--unblocked-by", type=str, default=None, metavar="NODE", help="add an 'unblocked_by' key: every node NODE's fulfilment newly makes proposable")
+    ap = argparse.ArgumentParser(description="Compute the tooling model's graph outputs from a handed-in seed (dry-run, no mutation)")
+    ap.add_argument("repo", nargs="?", default=".", help="path to the target repository (default: .)")
+    ap.add_argument("--packs", type=str, default=None, help="directory holding the Packs, one subdirectory each with a pack.json (default: the suite's own)")
+    ap.add_argument(
+        "--seed", type=str, default=None,
+        help='path to a JSON file holding what the caller judged: {"fulfilled": [stage, ...], "rejected": {role|tool|stage: null | {"php": "X.Y"}}, '
+             '"packs": [pack, ...], "not_applicable": [stage, ...], "runtime": {"php": "X.Y"}} — without it, every Stage is undecided',
+    )
     args = ap.parse_args()
-    repo = pathlib.Path(args.repo)
-    tree_md = pathlib.Path(args.tree) if args.tree else None
-    tree = load_tree(tree_md=tree_md)
-    fulfilled = rejected = None
-    if args.seed:
-        try:
-            fulfilled, rejected = load_seed(pathlib.Path(args.seed), tree)
-        except SeedError as exc:
-            ap.exit(2, f"error: {exc}\n")
-    data = detect_and_roadmap(repo, tree_md=tree_md, fulfilled=fulfilled, rejected=rejected)
-    if args.unblocked_by:
-        data["unblocked_by"] = directly_unblocked_children(repo, args.unblocked_by, tree=tree, fulfilled=fulfilled, rejected=rejected)
-    print(json.dumps(data, indent=2))
+    try:
+        model = load_model(pathlib.Path(args.packs) if args.packs else None)
+        seed = load_seed(pathlib.Path(args.seed), model) if args.seed else None
+    except (PackError, SeedError) as exc:
+        ap.exit(2, f"error: {exc}\n")
+    print(json.dumps(compute(pathlib.Path(args.repo), model, seed), indent=2))

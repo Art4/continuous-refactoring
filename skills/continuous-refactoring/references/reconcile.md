@@ -20,9 +20,15 @@ taken.
 | closed, with no reason given | ask the human which of the two it is | ask; in an autonomous run the ticket is left as it is, its state becomes waiting, and the closing report carries the question |
 
 **Rejections whose blocker is met.** Read the recorded rejections (`rejection.md`, *Finding rejections*),
-hand them to the parser as `rejected` with their blockers (`tooling-tree-parser.md`), and take each entry
+hand them to the parser as `rejected` with their blockers (`tooling-parser.md`), and take each entry
 of its `reversals`: what follows is reversing the rejection (`rejection.md`, *Reversing*), and that is the
 recommendation.
+
+**Tickets of a Stage the Packs no longer hold.** An open ticket whose title or text names a Stage that was
+dropped when the tooling tree became Roles, Tools and Stages: "Test Runner (fallback)" is taken over by
+the Stage PHPUnit of the Role Testing. What follows is closing it with a note that says, in plain words and
+without the suite's terms, what covers it now (here: PHPUnit as the project's test runner); that is the recommendation. A dropped Stage that never had tickets (the gates and the
+aggregation nodes) needs nothing.
 
 **In review.** The tickets whose merge request is still open are named in one line, with their merge
 requests; nothing follows for them. One whose review asks for changes is named as such; it is worked when the call names

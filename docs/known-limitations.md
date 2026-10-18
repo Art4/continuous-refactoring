@@ -34,22 +34,6 @@ Each merges cleanly on its own; after the first is merged the second may conflic
 **What to do:** resolving that is yours, as with any two branches. Merge in the order the tickets
 block each other, or let fewer run side by side by reviewing before calling again.
 
-## A target that is not a PHP project never gets a fulfilled Safety Net out of a scan
-
-Beyond `.editorconfig` and a CI pipeline, every tool of the Safety Net is a PHP tool. On a project in
-another language a scan finds those out of reach, files no ticket for them, and Safety Net does not
-come out of it as fulfilled. An autonomous run that scanned stops there with "Safety Net is waiting
-for merges".
-
-Where both language-neutral tools are already in place, the scan has nothing to file, the tracker
-never shows that the Track was scanned, and every run scans and stops again. Where the scan did file
-tickets, later runs read the tracker instead of scanning: once those tickets are closed they count
-Safety Net as fulfilled and move on — until a scan you ask for, or Housekeeping's re-check within
-its own run, judges the tools again.
-
-**What to do:** name the Track in the call, or run interactively and choose it. Investigation and
-Housekeeping work on any project.
-
 ## On a tracker strangers can write to, their comments on the Housekeeping ticket are weighed like anyone's
 
 A Housekeeping run reads the comments on its ticket as refactoring ideas, whoever wrote them. On a

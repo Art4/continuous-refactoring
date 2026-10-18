@@ -1,6 +1,6 @@
 # Reference: the tooling model
 
-How the tools a target can adopt are described and what the parser (`tooling_packs.py`, beside this file)
+How the tools a target can adopt are described and what the parser (`tooling_tree.py`, beside this file)
 computes from them: **Roles** filled by **Tools** that have **Stages**, delivered in **Packs**. Vocabulary
 the rest of the suite shares: `CONTEXT.md`.
 
@@ -27,7 +27,7 @@ roles.json              Roles: slug, name, purpose, signal
 roles.schema.json
 pack.schema.json
 packs/<pack>/pack.json  one Pack: applies_when and its Tools with their Stages
-tooling_packs.py        the parser
+tooling_tree.py         the parser
 ```
 
 A Tool's `details` file holds what is prose: the Fulfilment check and MR scope of each Stage, the Ratchet,
@@ -68,7 +68,7 @@ be fulfilled — and a rejection of one releases this Stage instead of closing i
 
 ## What the parser computes
 
-From the Packs and a seed (`tooling_packs.py` documents what the seed holds): which Packs and Stages apply, which Stages are fulfilled,
+From the Packs and a seed (`tooling-parser.md`): which Packs and Stages apply, which Stages are fulfilled,
 which subjects are rejected, and the runtime the target allows.
 
 - **A Role is filled** by the first Tool whose first Stage is fulfilled; recommended Tools come before

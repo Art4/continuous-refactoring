@@ -1,0 +1,1 @@
+The tooling tree is now Roles, Tools and Stages delivered in Packs: a project on Psalm is no longer offered PHPStan, a project that is not PHP can have a fulfilled Safety Net from the language-neutral tools, a rejection can name a whole tool or role, and a tool the suite learns about later is picked up on the next run.

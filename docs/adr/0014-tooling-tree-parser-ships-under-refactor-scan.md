@@ -1,5 +1,7 @@
 # The tooling-tree parser and its two tree docs ship together under `skills/refactor-scan/references/`
 
+> Amended by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the parser still ships beside the data it reads, but the data are JSON Packs.
+
 > Amended by [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): `refactor-scan`
 > is no longer a skill; the parser and its tree docs still ship together under a skill that remains.
 

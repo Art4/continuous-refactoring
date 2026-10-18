@@ -1,80 +1,90 @@
 # Reference: scanning a tooling Track
 
-The scan of Safety Net or Guardrails: judge the Track's nodes against the target, let the parser order
-them, and turn every node that is neither fulfilled nor rejected into a **proposal** for a ticket. It runs
-when the Track has no trace yet (`worklist.md`, *A Track's trace*), when the call asked for it, or as the
-Housekeeping task that re-checks the tooling Tracks. The scan reads; its proposals reach the
-tracker through the filing step.
+The scan of Safety Net or Guardrails: judge the Track's Stages against the target, let the parser order
+them, and turn every Stage that is neither fulfilled nor closed by a rejection into a **proposal** for a
+ticket. It runs when a Stage of the Track is not known yet (`worklist.md`, *A Track's trace*), when the
+call asked for it, or as the Housekeeping task that re-checks the tooling Tracks. The scan reads; its
+proposals reach the tracker through the filing step.
 
 ## 1. Scope
 
-From the parser's seedless call (`tooling-tree-parser.md`): the Track's `nodes`, and every
-recognition-only node. A restriction in the call narrows what step 4 proposes; of the nodes outside it,
-only those a covered node hangs on are judged.
+From the parser's seedless call (`tooling-parser.md`): the Track's `nodes`, the Packs, and the first Stage
+of every Tool, recognized ones included — they say which Tool fills a Role. A restriction in the call
+narrows what step 4 proposes; of the Stages outside it, only those a covered Stage requires are judged.
 
-## 2. Node state
+## 2. Judging
 
-- **Rejected** — the recorded rejections (`rejection.md`, *Finding rejections*), with their blockers.
-- **Every other node in scope** — judged, below.
-- **The other tooling Track's nodes.** In a Safety Net scan they stay undecided. In a Guardrails scan the
-  Safety Net nodes decide what blocks a Guardrails node: one with an open ticket stays undecided, every other is
-  judged unless this run already judged it.
+- **Rejected** — the recorded rejections (`rejection.md`, *Finding rejections*), of Roles, Tools and
+  Stages, with their blockers.
+- **The Packs.** Each Pack's *Applies when*, judged once per run against the target; the Packs it holds
+  for go into the seed's `packs`. The generic Pack always applies.
+- **The runtime.** For each runtime a Tool of an applying Pack names in `min_runtime`, the lowest version
+  the target's manifest allows, as the seed's `runtime` (`tooling-parser.md`). Where it is unclear, none is
+  handed in and nothing is blocked.
+- **Every other Stage in scope** whose Pack applies — judged, below. A Stage whose own *Applies when* does
+  not hold goes into `not_applicable`.
+- **The other tooling Track's Stages.** In a Safety Net scan they stay undecided. In a Guardrails scan the
+  Safety Net decides what blocks a Guardrails Stage: one with an open ticket stays undecided, every other
+  is judged unless this run already judged it.
 
-Judging may run in a subagent handed this section and the tree docs; it returns the two lists of the seed
-and, per node judged fulfilled under another name than its Tool, the evidence in one line.
+Judging may run in a subagent handed this section and the Packs; it returns the seed and, per Stage
+judged fulfilled under another name than its Tool, the evidence in one line.
 
-### Judging a node
+### Judging a Stage
 
-Read the node's Purpose and Fulfilment check in its tree-doc file, then the target. **Judge by Purpose:**
-a node is fulfilled when a real, working tool serves its Purpose in the target, under any name.
+Read the Purpose of the Tool's Role (`roles.json`) and the Stage's Fulfilment check in its Tool's `details`
+file, then the target. **Judge by Purpose:** a Stage is fulfilled when a real, working tool serves the
+Purpose in the target, under any name.
 
 - **The evidence the Fulfilment check names is there** — the dependency, the config file, the CI
   invocation → fulfilled.
 - **It is absent, and another tool serves the Purpose** → fulfilled. A target running Laravel Pint has no
   `friendsofphp/php-cs-fixer` dependency, and Pint serves "automated code style": `php-cs-fixer` is
   fulfilled. A CI job running `composer run security-check`, a script that calls `composer audit`,
-  fulfils `composer-audit`.
+  fulfils `composer-audit`. A target running Psalm fulfils the Stage `psalm`, never a PHPStan Stage.
 - **Two tools compete for the Purpose, or it is unclear whether one serves it** → undecided, and the
   proposal carries the question, so the human answers it at filing.
-- **Nothing serves it** → undecided. A human who says the Purpose is met without a tool declines the node
-  at filing; that is a rejection, never a fulfilment.
+- **Nothing serves it** → undecided. A human who says the Purpose is met without a tool declines the
+  Stage at filing; that is a rejection, never a fulfilment.
 
-Step 2 is done when every node in scope is in one of the seed's two lists or deliberately in neither.
+Step 2 is done when every Stage in scope is in one of the seed's lists or deliberately in neither.
 
 ## 3. Order
 
-Write the seed and run the parser with it. Take the Track's `backlog` and `withheld`, plus
-`php_floor_blocked`, `closed_by_rejection` and `tree.edges`.
+Write the seed and run the parser with it. Take the Track's `backlog`, `workable` and `withheld`, plus
+`runtime_blocked`, `closed_by_rejection`, `roles`, `tools` and `tree.stages`.
 
 ## 4. Proposals
 
-Go through the backlog in its order. Each node becomes one proposal — its Name, its Purpose in one line,
+Go through the backlog in its order. Each Stage becomes one proposal — its Name, its Purpose in one line,
 and what blocks it — unless one of these applies first:
 
-| The node | Instead |
+| The Stage | Instead |
 | --- | --- |
 | already has an open ticket (a scan the call asked for) | no proposal; the ticket stands |
-| is in `php_floor_blocked` and not rejected | the proposal is to record a rejection with that PHP version as its blocker (`rejection.md`, *Below the PHP floor*) |
-| waits, directly or through other nodes, behind a node that gets no ticket: an unfulfilled recognition-only node, or a node below the PHP floor | out of reach: no ticket could unblock it. Named in one line with the reason, no proposal — except behind `phpstan-baseline-empty`, below |
+| is in `runtime_blocked` and not rejected | the proposal is to record a rejection with that runtime version as its blocker (`rejection.md`, *Below the runtime floor*) |
+| is in `withheld` as closed by a rejection | out of reach: no ticket could unblock it. Named in one line with what it hangs on, no proposal |
 
-**What blocks a proposal** is read from `tree.edges`: every parent by a `required` or `recommended` edge
-that is undecided, and, where a parent is an aggregation node, that node's undecided `resolved` parents in
-its place. Where a `required-any` group has no fulfilled member, its members block together, and the
-ticket says that one of them is enough.
+**What blocks a proposal** is read from `tree.stages`: every `requires` Stage that is not fulfilled; every
+required Role that is not filled, where the Tool recommended for it stands for it; and every `after`
+Stage that is undecided. Where a `requires` item is a group of alternatives, its members block together,
+and the ticket says that one of them is enough.
 
-**A PHPStan baseline with entries.** `phpstan-baseline-empty` unfulfilled means the highest fulfilled
-level's baseline still holds findings, and the next level waits for them. Propose one ticket, "PHPStan
-Level N: shrink the baseline", N being that fulfilled level; it belongs to that level's Track, and the next
-level's proposal is blocked by it. What a baseline ticket's check asks is whether the baseline still has
-entries; the level's own Fulfilment check says nothing about it.
+**A PHPStan baseline with entries.** A level the target has set up whose baseline still holds findings is
+not fulfilled, since the Fulfilment check asks for an empty baseline, and the next level requires it. Its
+proposal is titled "PHPStan Level N: shrink the baseline" instead of "Raise to PHPStan Level N"; the check of
+a baseline ticket is whether the baseline still has entries.
 
-**A scan the call asked for** also re-judged nodes that have an open ticket: one found fulfilled is laid
+**Which Tool fills a Role.** The report says, per Role the Track's Stages need, which Tool fills it, and
+which Tool is not proposed because another took its place (`tools` marks it `out`).
+
+**A scan the call asked for** also re-judged Stages that have an open ticket: one found fulfilled is laid
 out at filing for closing with a note, as selection does at pick-up (`selection.md`).
 
 ## 5. Hand on
 
 - **Proposals** → the filing step, in backlog order.
-- **None** → say what the scan found — every node fulfilled or rejected, or which are out of reach and
+- **None** → say what the scan found — every Stage fulfilled or rejected, or which are out of reach and
   why — and return to Track choice with the Track marked as tried.
 
-The scan is done when every node in scope is fulfilled, rejected, proposed, or named as out of reach.
+The scan is done when every Stage in scope is fulfilled, rejected, proposed, or named as out of reach.

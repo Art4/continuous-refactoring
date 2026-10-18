@@ -12,7 +12,7 @@ How the suite is put together, for someone who wants to understand or extend it.
          ├── scanning a tooling Track, filing tickets, selection, rejections
          ├── the Investigation Track, the signals, the search for structural candidates
          ├── design point, implement point, review, opening the merge request
-         └── the tooling tree: its parser, the tree docs, one file per node
+         └── the tooling tree: its parser, the model, the Packs, one file per tool
 
 /continuous-housekeeping           ← the Housekeeping Track alone, no Track choice
    └── references/
@@ -85,14 +85,14 @@ The tracker and the **forge** — the system that hosts the repository and its m
 
 ## The tooling tree
 
-Safety Net and Guardrails work through the **tooling tree**: a directed graph of adoption steps a project climbs — a language-neutral root ([tooling-tree.md](../skills/continuous-refactoring/references/tooling-tree.md)) with a specialization attached beneath (PHP: [php-tooling-tree.md](../skills/continuous-refactoring/references/php-tooling-tree.md)). An edge is *required* (the child waits until the parent is fulfilled), *recommended* (the child waits until the parent is decided — fulfilled or declined), or one of two variants the tree docs explain.
+Safety Net and Guardrails work through the **tooling tree**: the tools a project can adopt, described as **Roles** (what a tool is for: static analysis, code style, testing …) filled by **Tools** (PHPStan, Psalm, PHP CS Fixer …) that have **Stages** — one degree of a tool, such as a PHPStan level, and the unit a ticket is filed for. Tools come in **Packs** with a condition under which they apply: every project, a project with PHP code, a Pack of the project's own ([tooling-model.md](../skills/continuous-refactoring/references/tooling-model.md) holds the rules). A Stage requires others first (a Stage, a Role, or one of several alternatives) and may wait until others are decided — fulfilled or declined.
 
-- **Fulfilment is judged, not detected.** Each node has a Purpose and a Fulfilment check; an agent judges whether the project already serves the Purpose — so a tool set up by hand, or an equivalent under another name, counts. There is no list of dependency names.
-- **The parser only does graph logic.** `tooling_tree.py` is handed which nodes are fulfilled and which declined, and answers what that means: the nodes per Track, their order, what holds each one back, which nodes a rejection closes, and which declined node can come back because its PHP version is now reached. It reads the tree docs and the project, and keeps no file.
-- **Safety Net has a gate.** A handful of nodes aggregate others; their state is computed, never judged. "Is Safety Net fulfilled?" is the state of one of them, and that answer decides whether an autonomous run stops at Safety Net.
-- **A tooling merge request is small and factual:** one node, and its own Fulfilment check says when it is done.
+- **Fulfilment is judged, not detected.** Each Stage has a Fulfilment check, each Role a Purpose; an agent judges whether the project already serves the Purpose — so a tool set up by hand, or an equivalent under another name, counts. There is no list of dependency names. A Role another tool already fills takes the place of the recommended one: a project on Psalm is not offered PHPStan.
+- **The parser only does graph logic.** `tooling_tree.py` is handed which Packs apply, which Stages are fulfilled, which Roles, Tools or Stages were declined and the runtime the project allows, and answers what that means: the Stages per Track, their order, what holds each one back, which Stages a rejection closes, and which declined one can come back because its runtime version is now reached. It reads the Packs and the project's tracker file, and keeps no file.
+- **Safety Net has a gate, and it is computed.** Safety Net is fulfilled when every one of its Stages is fulfilled or closed by a rejection; that answer decides whether an autonomous run stops at Safety Net, and Guardrails Stages wait for it.
+- **A tooling merge request is small and factual:** one Stage, and its own Fulfilment check says when it is done.
 
-The parser and the tree docs ship together inside `continuous-refactoring`, so a copied or symlinked skill is complete.
+The parser and the Packs ship together inside `continuous-refactoring`, so a copied or symlinked skill is complete.
 
 ## Self-containment
 

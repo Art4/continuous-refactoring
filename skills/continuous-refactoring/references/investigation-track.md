@@ -11,7 +11,7 @@ taken.
 
 ## 1. The tickets
 
-Take the worklist's Investigation tickets — every open ticket found that matches no tooling-tree node and
+Take the worklist's Investigation tickets — every open ticket found that matches no tooling-tree Stage and
 is no Housekeeping ticket — within the call's restriction. On a tracker that also holds other work, a
 ticket a human wrote is among them only through the target's **Candidate** mark or by being named in the
 call.

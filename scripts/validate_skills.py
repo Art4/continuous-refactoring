@@ -114,10 +114,6 @@ DUPLICATION_ALLOW = {
         "skills/continuous-refactoring/references/tooling-tree/ci-runner.md",
     }): "Purpose duplicated between stub and extracted node file, by design",
     frozenset({
-        "skills/continuous-refactoring/references/tooling-tree.md",
-        "skills/continuous-refactoring/references/tooling-tree/is-php-project.md",
-    }): "Purpose duplicated between stub and extracted node file, by design",
-    frozenset({
         "skills/continuous-refactoring/references/php-tooling-tree.md",
         "skills/continuous-refactoring/references/php-tooling-tree/psalm.md",
     }): "Purpose duplicated between stub and extracted node file, by design",

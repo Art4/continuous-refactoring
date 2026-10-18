@@ -9,7 +9,7 @@ Write each sentence from the thing itself:
 - **State the rule or the finding in plain words**, where the suite's own texts would cite one of their
   files.
 - **Describe the actual thing**, where the suite's own texts would use one of their terms — candidate,
-  node, Track, Safety Net, fulfilled, decision point: "PHPStan is not set up yet".
+  Stage, Role, Tool, Track, Safety Net, fulfilled, decision point: "PHPStan is not set up yet".
 - **Keep every external fact as concrete as it is**: a tool's or feature's real name ("PHPStan Level 0"),
   a file and line of the target, the behaviour observed, the number of a ticket or merge request.
 

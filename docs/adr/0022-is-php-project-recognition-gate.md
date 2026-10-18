@@ -1,5 +1,7 @@
 # `is-php-project`: a recognition gate for the PHP specialization, declared at the generic root
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the recognition gate is a Pack's *Applies when*, judged by the agent once per run.
+
 > Amends [ADR-0008](0008-generic-tool-tree-and-structural-scan-gate.md): the generic root's own claim to
 > stay "language-neutral" now has one deliberate, bounded exception — one **recognition gate** per language
 > specialization lives here, even though what a given gate detects is necessarily specific to that language.

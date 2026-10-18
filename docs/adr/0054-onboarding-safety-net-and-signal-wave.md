@@ -1,5 +1,8 @@
 # Onboarding/Safety Net split; Signal wave nodes wait for the Safety Net to close; `php-structural-scan` renamed `php-safety-net`
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and aggregation; Onboarding, Safety Net and Guardrails as
+> concepts stay.
+
 > Amends [ADR-0040](0040-signal-tool-nodes-and-tree-edge-simplification.md): `secret-detection` and `phpmd`
 > were introduced as Signal-producing nodes proposed as early as their domain-specific required parent
 > allowed — this ADR moves them (and every other Signal-producing node, plus two nodes reclassified out of

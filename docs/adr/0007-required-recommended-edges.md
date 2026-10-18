@@ -1,5 +1,8 @@
 # Required and recommended edges; Rector behind PHPStan levels
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): required and recommended edges are `requires` and `after` on Stages; what the ADR
+> decided about Rector behind PHPStan levels stays in the Packs.
+
 The tooling tree needs two kinds of edges, not one. A **required edge** gates: the child is proposed only once the parent is fulfilled, and rejecting a required parent closes every node beneath it. A **recommended edge** advises: the child stays proposable even when its recommended parent was rejected, the rejected parent is never re-proposed, and the merge request outlook states where it would have helped. Fulfilling a parent later unlocks its dependents; reopening a rejected node is a recorded reversal of its out-of-scope entry. A node is one adoption step of a tool — a tool may own several nodes, and a node may span several merge requests.
 
 This revises ADR-0005's single-edge model and its first-wave list: Rector leaves the parallel Composer children and becomes suite nodes adopted in levels — `rector-dead-code` (required: `phpstan-level-0-baseline`) and `rector-type-coverage` (required: `phpstan-level-0-baseline`; recommended: `phpstan-level-3`, `php-cs-fixer`). Rector's rewrites are only reviewable under strict static analysis, and its output must remain styleable; adopting it blind in the first wave invited unreviewable MRs. The canonical shape now lives in `docs/php-tooling-tree.md`; target repos keep recording state under `docs/refactoring/`. CI-job children with two parents (tool + ci-runner) are deferred to a later wave.

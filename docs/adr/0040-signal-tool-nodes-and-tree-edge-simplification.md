@@ -1,5 +1,7 @@
 # Signal-producing tooling-tree nodes never gate `structural-scan`; three existing PHP-tree edges simplified
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and `resolved` parents; the Signal field now belongs to a Role.
+
 > Amends [ADR-0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md): its "Considered
 > Options" list rejected "also drop `php-cs-fixer`/`phpunit`'s direct `php-structural-scan` resolved
 > edges" as "a real gate relaxation, not a no-op." This ADR does drop `php-cs-fixer`'s direct edge after

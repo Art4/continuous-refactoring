@@ -1,5 +1,8 @@
 # Generic tool-tree root; structural scanning as a gated tree node
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the generic root is the generic Pack, and "Safety Net fulfilled" is a state the
+> parser computes without a `structural-scan` node.
+
 > Amends [ADR-0005](0005-tooling-tree-not-baseline-skill.md): `git`'s tree entry moves to a new generic root (`docs/tooling-tree.md`); PHP's `composer`/`ci-runner` re-parent from `git` to a new `loop-config` node.
 >
 > Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): `structural-scan`'s "MR scope" changes — once the gate opens it is proposed like any other node, and the codebase walk that used to be `refactor-scan`'s own inline work moves to `refactor-design`, run only for the chosen candidate.

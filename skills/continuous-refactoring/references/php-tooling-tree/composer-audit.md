@@ -27,9 +27,8 @@ Node on the PHP **tooling tree** (`../php-tooling-tree.md`); parents, edges, and
   nodes are added (more are planned).
 - **MR scope:** wire `composer audit` into CI as a gate — no production-code change. Also add this node's `Housekeeping` line (below) to the target's Housekeeping template (`../implement-point.md`, *Slices every kind of ticket can have*).
 - **Housekeeping:** review `composer audit`'s current report; attempt a fix for any advisory with an available patched version. A CI gate only fails on advisories present *right now* — it never surfaces one that appears later against an already-passing, unchanged lockfile.
-- **Stop conditions / when not to propose:** `composer` fulfilled is necessary but not sufficient — this
-  node also stays blocked until `composer.json`'s `require` block names at least one real package
-  (platform pseudo-packages — `php`, `hhvm`, `ext-*`, `lib-*`, `composer-plugin-api`,
-  `composer-runtime-api` — don't count; `composer audit` has nothing to check without a real dependency).
-  There is no longer a fallback for a dependency-free target — this node isn't a `php-safety-net` leaf
-  any more, so leaving it permanently blocked no longer risks leaving `structural-scan` blocked with it.
+- **Applies when:** `composer.json`'s `require` block names at least one real package (platform
+  pseudo-packages — `php`, `hhvm`, `ext-*`, `lib-*`, `composer-plugin-api`, `composer-runtime-api` — don't
+  count; `composer audit` has nothing to check without a real dependency). This is the Stage's own
+  condition in `packs/php/pack.json`, judged by the agent like a Pack's: without it the Stage is handed in
+  as `not_applicable` and gets no ticket.

@@ -3,7 +3,7 @@
 The reader watches the conversation live and has to be able to tell what the run is doing and what it just
 changed, without opening anything.
 
-- **Words.** Say "skill suite" for what is running and "run" for one call of it. Name a tooling-tree node by
+- **Words.** Say "skill suite" for what is running and "run" for one call of it. Name a tooling-tree Stage by
   its Name ("PHPStan Level 0"). Use the forge's own word for a merge request (pull request on GitHub).
 - **The same in both modes.** An autonomous run reports exactly as an interactive one does; it only
   asks nothing. A step worked without a message to the human is a step left unreported.

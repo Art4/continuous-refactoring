@@ -1,5 +1,7 @@
 # `php-structural-scan`: a language specialization's own aggregation node before `structural-scan`'s gate
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): there are no aggregation nodes; each Pack's Stages count towards the Safety Net directly.
+
 > Amends [ADR-0008](0008-generic-tool-tree-and-structural-scan-gate.md): `structural-scan`'s seven PHP-tree `resolved` edges (plus ticket 41's `editorconfig`, an eighth) are replaced by one `resolved` edge from a new PHP-tree node, `php-structural-scan`, which itself aggregates the seven.
 
 ADR-0008 designed `structural-scan` to be shared across future language specializations (`docs/tooling-tree.md`'s intro paragraph, `tree-walk-prompt.md`'s tree-loading step) — PHP today, others later per ADR-0002. But it wired PHP's contribution as seven direct `resolved` edges into the generic root's own node instead of one aggregated edge. `tooling-tree.md`'s `structural-scan` node already had to hedge its leaf-set prose around "the active language specialization's own tree" as a result — workable with one specialization, but the leaf set stops being locally enumerable from `tooling-tree.md` alone the moment a second one exists, and every specialization's own leaf count then shows up directly in the generic root's resolved-parent count.
