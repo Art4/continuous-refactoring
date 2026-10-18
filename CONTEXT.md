@@ -104,7 +104,7 @@ What a tool is for: Static Analysis, Code Style, Testing, Secret Scanning. A **T
 _Avoid_: practice, capability (the tracker's operations use that word)
 
 **Tool**:
-The concrete tool a **Role** is played by — PHPStan, Psalm, PHP CS Fixer — or a convention that needs none (PSR-4 autoloading). *Recommended*: proposed when its Role is empty. *Recognized*: counted when present, never proposed (Psalm). A Tool whose Role another Tool fills takes no place any more (it is *out*) and is not proposed. A Tool has a Name, the oldest runtime any version of it ran on, and its Housekeeping line; a rejection may name a Tool, which closes its Stages and leaves the Role open for another Tool.
+The concrete tool a **Role** is played by — PHPStan, Psalm, PHP CS Fixer — or a convention that needs none (PSR-4 autoloading). *Recommended*: proposed when its Role is empty. *Recognized*: counted when present, never proposed (Psalm, Laravel Pint, Easy Coding Standard). A Tool whose Role another Tool fills takes no place any more (it is *out*) and is not proposed. A Tool has a Name, the oldest runtime any version of it ran on, and its Housekeeping line; a rejection may name a Tool, which closes its Stages and leaves the Role open for another Tool.
 _Avoid_: (none — use the term as-is)
 
 **Stage**:

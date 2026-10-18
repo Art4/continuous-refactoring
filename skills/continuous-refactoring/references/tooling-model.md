@@ -27,16 +27,21 @@ roles.json              Roles: slug, name, purpose, signal
 roles.schema.json
 pack.schema.json
 packs/<pack>/pack.json  one Pack: applies_when and its Tools with their Stages
+packs/<pack>/<tool>.md  one file per Tool: the prose of its Stages
+packs/<pack>/README.md  prose for the Pack as a whole, where it has some (the PHP Pack's runtime floor)
+prerequisites/          git and onboarding-setup, in no Pack
 tooling_tree.py         the parser
 ```
 
-A Tool's `details` file holds what is prose: the Fulfilment check and MR scope of each Stage, the Ratchet,
-the Housekeeping line. The JSON holds only what the parser computes with.
+A Tool's `details` file holds what is prose: for each Stage its Purpose where it goes beyond the Role's, the
+Fulfilment check and MR scope, the Ratchet, the Housekeeping line, and a sentence on why the Tool comes
+after what it comes after. The JSON holds only what the parser computes with and the generated pages show.
 
 The JSON files are written in one fixed form: two-space indent, objects expanded one key per line, lists
 of plain values on one line, Stages in the order of the Pack, keys in the order of the schema.
 
-The suite's prerequisites, `git` and `onboarding-setup`, are in no Pack: `git` always holds,
+The suite's prerequisites, `git` and `onboarding-setup` (`prerequisites/git.md`,
+`prerequisites/onboarding-setup.md`), are in no Pack: `git` always holds,
 `onboarding-setup` holds exactly when the target's tracker file carries the `## Refactoring operations`
 section (`onboarding-setup-interview.md`), and no Stage is workable before it does.
 

@@ -112,10 +112,6 @@ DUPLICATION_ALLOW = {
     # (tooling-tree.md) and its extracted file (tooling-tree.md's own ##
     # Nodes intro) — same convention php-tooling-tree.md established first.
     frozenset({
-        "skills/continuous-refactoring/references/tooling-tree.md",
-        "skills/continuous-refactoring/references/tooling-tree/ci-runner.md",
-    }): "Purpose duplicated between stub and extracted node file, by design",
-    frozenset({
         "skills/continuous-refactoring/references/php-tooling-tree.md",
         "skills/continuous-refactoring/references/php-tooling-tree/psalm.md",
     }): "Purpose duplicated between stub and extracted node file, by design",
