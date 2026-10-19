@@ -1,0 +1,1 @@
+A new Pack for Twig in PHP projects: it applies when the PHP project requires `twig/twig` (the file extension of the templates does not decide) and brings Twig-CS-Fixer for the Code Style of the templates and TwigStan for their Static Analysis. Both stand beside the PHP Tools and do not take their place.
