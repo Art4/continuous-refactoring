@@ -13,7 +13,7 @@ the rest of the suite shares: `CONTEXT.md`.
 | **Stage** | one degree of a Tool, and the unit a ticket is filed for | PHPStan Level 0 … 10, Rector: Dead Code Set |
 | **Track** | the phase of work a Stage belongs to: Safety Net or Guardrails | PHPStan Level 5 is Safety Net, Level 6 Guardrails |
 | **Pack** | Tools with a condition under which they apply | generic, PHP, a target's own |
-| **Ratchet** | the way a Stage is raised: no new violations, the old ones shrink, one direction only; a property of a Tool | the PHPStan baseline, a coverage floor |
+| **Ratchet** | the way a Stage is raised: no new violations, the old ones shrink, one direction only; a property of a Tool | the PHPStan baseline, a coverage floor, PHPMD's limits |
 
 A Track says when and for what a Stage is worked, not which topic it is about: Safety Net settles the
 deterministic tooling before structural work starts, Guardrails keeps quality after it. Topics are

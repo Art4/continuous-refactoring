@@ -35,10 +35,10 @@ it is not, the generic reading stands.
   code and its trend over recent commits.
 - **Defect density** — where bugs cluster, however often the area changes. *Generic* — the tracker's
   history, commit messages that mention fixes (`git log --grep`). *From a tool* — PHP: PHPMD's
-  complexity findings, which track where defects gather.
+  complexity findings at its default limits, which track where defects gather.
 - **Understandability** — how hard it is to follow or to change safely: cognitive load (nested
   conditionals, implicit state, unclear names) and knowledge held by one person. *Generic* — reading the
-  code; `git shortlog` or blame for the second half. *From a tool* — PHP: PHPMD's cyclomatic complexity.
+  code; `git shortlog` or blame for the second half. *From a tool* — PHP: PHPMD's complexity findings at its default limits.
 - **Observability** — nobody can tell when it breaks. *Generic* — reading for silent failures: swallowed
   exceptions, unchecked return values.
 - **Domain criticality** — it sits on a core user journey or a revenue path, by what the target's

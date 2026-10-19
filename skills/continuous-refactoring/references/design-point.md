@@ -204,6 +204,10 @@ judges it. Where the target has no usable input, the pin is of another kind.
    autonomous one. The agent judges the cost; there is no fixed threshold.
 4. **Check against the goal.** With a `Refactoring goal`: the design moves the code towards it, or the
    plan says why it does not.
+5. **A Ratchet.** Where the target's tooling holds a Ratchet that records where its worst value sits (the
+   PHPMD limits' `Current peak` comments) and a file the slices touch is named there, the plan lists the
+   Ratchet slice (`implement-point.md`, *Slices every kind of ticket can have*) and its `Done when` says
+   which limit is expected to fall.
 
 *Done when* all six are named, no question is open, and the slices follow the moves of
 `principles.md`, *Technique vocabulary*.

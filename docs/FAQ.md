@@ -157,6 +157,10 @@ nothing. A type check or a linter is no substitute. A tooling or baseline ticket
 code, and your existing test suite is what notices a difference, so it adds none. Where a test cannot be
 written at a reasonable cost, the suite asks you instead of restructuring unchecked.
 
+## Why does PHPMD have no baseline?
+
+A baseline would let the existing findings stay in view only as a list of rule, file and method. It holds no value and no reason, so a method that gets worse after it was baselined stays quiet, and nobody can tell why an entry is there. The suite sets each limit of PHPMD's metrics to the worst value the code has now and lowers it whenever the work removes that value, so the limits themselves are the record of the debt. An exception that is deliberate sits at the code, with its reason beside it. The cost is that PHPMD reports nothing on a project whose limits are ratcheted, so the search for candidates runs it with PHPMD's default limits instead.
+
 ## Why does the suite sometimes compare the old and the new code on real inputs?
 
 A test only covers the cases someone thought of. When a restructuring reaches over several steps behind

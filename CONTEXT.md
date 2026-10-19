@@ -116,7 +116,7 @@ Tools with a condition under which they apply: the generic Pack always, the PHP 
 _Avoid_: (none — use the term as-is)
 
 **Ratchet**:
-How a **Stage** is raised without letting the old findings back: no new violations, the existing ones shrink, one direction only — the PHPStan baseline, a coverage floor. A property of a **Tool**. A level whose baseline still has entries is not fulfilled, and its ticket is the baseline's shrinking.
+How a **Stage** is raised without letting the old findings back: no new violations, the existing ones shrink, one direction only — the PHPStan baseline, a coverage floor, PHPMD's limits. A property of a **Tool**. A level whose baseline still has entries is not fulfilled, and its ticket is the baseline's shrinking. PHPMD's ratchet is its limits: set to today's worst value when the Tool is adopted, lowered by the merge request that removes that worst value, never raised and never moved into a baseline.
 _Avoid_: (none — use the term as-is)
 
 **Floor correction**:

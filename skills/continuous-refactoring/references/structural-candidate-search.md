@@ -39,7 +39,8 @@ The first that applies:
 Read each place and check it against every signal of `signals.md`, structural and consequence. Where a
 signal names a tool the target has set up, take that tool's result as the evidence: its existing report,
 or a run of it in a mode that leaves the target's files as they are (a dry run, output to a temporary
-directory outside the target).
+directory outside the target). A tool that holds a Ratchet is read at its default limits, not at the ones
+the target has ratcheted to: under them it reports nothing (PHPMD: `packs/php/phpmd.md`, *Measuring*).
 
 A place qualifies by itself: it has a signal, and evidence for it you can point to. The bar is the same
 for the first proposal and for the tenth. PHPStan baseline entries belong to the baseline ticket of their

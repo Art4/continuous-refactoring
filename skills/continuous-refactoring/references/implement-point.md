@@ -177,6 +177,9 @@ The plan lists them where they apply; they are built in step 3 like any slice, e
   the Housekeeping template the target's **Housekeeping** operation names, the first where it names
   several. Where the target has no such
   operation the line is left out, and the Housekeeping Track adds it once its mechanism exists.
+- **Ratchet** — where the plan names it (`design-point.md`, *Planning any other ticket*): the step the
+  Tool's `details` file gives under its Ratchet, carried out as written once the other slices are built,
+  as one commit. For PHPMD it measures again and lowers the limits the change made possible.
 
 ## Hand on
 

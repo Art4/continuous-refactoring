@@ -78,6 +78,10 @@ not fulfilled, since the Fulfilment check asks for an empty baseline, and the ne
 proposal is titled "PHPStan Level N: shrink the baseline" instead of "Raise to PHPStan Level N"; the check of
 a baseline ticket is whether the baseline still has entries.
 
+**A PHPMD with a baseline.** The Stage `phpmd` is not fulfilled while a baseline file exists, however PHPMD
+got there. Its proposal is titled "PHPMD: replace the baseline"; the merge request is one, not a series
+(`packs/php/phpmd.md`, *MR scope*).
+
 **Which Tool fills a Role.** The report says, per Role the Track's Stages need, which Tool fills it, and
 which Tool is not proposed because another took its place (`tools` marks it `out`).
 

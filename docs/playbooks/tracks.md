@@ -74,6 +74,10 @@ A tool's change can touch so many files that nobody could review it as one. The 
 
 A PHPStan level whose baseline still holds findings does not block the suite silently. The scan proposes one ticket, "PHPStan Level N: shrink the baseline", and the next level's ticket is blocked by it. That ticket takes one merge request after another, each removing one group of findings at their cause, and closes with the one that empties the baseline. A merge request may add a new baseline entry when the baseline still gets shorter overall, and names it. A finding that should stay ignored, or a baseline that would not get shorter, becomes an ignore rule in `phpstan.neon` — only once you have allowed it.
 
+### PHPMD's limits
+
+PHPMD does not get a baseline. Its metric rules (complexity, length, coupling) have limits, and when the tool is adopted each limit is set to the worst value the code has today, with a comment that names that value and where it is. The limits only ever fall: a merge request that rewrites the method which sets the worst value measures again, lowers the limit and updates the comment, and PHPMD stays green. The Housekeeping ticket lowers a limit the code has already come under. Deliberate exceptions are written at the code with a reason, never into a baseline. A project that already has a baseline gets one merge request that moves its entries into limits and suppressions and deletes the file.
+
 ## Investigation without tickets
 
 With no open Investigation ticket, the run explores the code: your focus areas first, else the places the Git history shows changing again and again. Everything it finds is shown to you in order of signal. The recommendation is to file the **three strongest** — you may file others, as many as you want, or none. What is not filed is not stored; a later exploration may come upon it again. An autonomous run files those three and goes on to work the strongest.
