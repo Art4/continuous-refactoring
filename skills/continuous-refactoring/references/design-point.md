@@ -165,6 +165,8 @@ it is shorter overall. The merge request names each new entry and its reason. Wh
 become shorter, or a finding is to be ignored for good, the ignore rule goes into `phpstan.neon` instead,
 and only after the human allows it: that is an open question, and the run ends with it named.
 
+The ticket "PHPMD: take in the remaining rules" is planned the same way, with the rules in place of the groups: read the `<exclude>` entries marked `Not yet:` in the PHPMD config, count the findings of each rule with the rule included, and plan one rule as this merge request's part (`packs/php/phpmd.md`, *Taking in a rule*). *Done when* PHPMD, with the rule included, reports nothing, its `<exclude>` is gone, and the test suite is green.
+
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies: the baseline cannot become
 empty, so the level above cannot be raised. The open question names what follows from each answer. Where a
@@ -204,6 +206,10 @@ judges it. Where the target has no usable input, the pin is of another kind.
    autonomous one. The agent judges the cost; there is no fixed threshold.
 4. **Check against the goal.** With a `Refactoring goal`: the design moves the code towards it, or the
    plan says why it does not.
+5. **A Ratchet.** Where the target's tooling holds a Ratchet that records where its worst value sits (the
+   PHPMD limits' `Current peak` comments) and a file the slices touch is named there, the plan lists the
+   Ratchet slice (`implement-point.md`, *Slices every kind of ticket can have*) and its `Done when` says
+   which limit is expected to fall.
 
 *Done when* all six are named, no question is open, and the slices follow the moves of
 `principles.md`, *Technique vocabulary*.
