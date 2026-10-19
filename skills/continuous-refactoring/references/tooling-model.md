@@ -51,6 +51,11 @@ section (`onboarding-setup-interview.md`), and no Stage is workable before it do
 Packs that apply. The generic Pack always applies. A Stage may carry an `applies_when` of its own (Composer
 Audit: the repository requires a real package), judged the same way.
 
+A Pack may name a `scope`, the language or area its Tools work on (`php`, `twig`, `js`); the generic Pack has
+none. Tools compete for a Role only with Tools of their own scope, so a Pack for Twig and a Pack for PHP can
+each have a Code Style Tool and neither takes the other's place. A target's own Pack for PHP names the scope
+`php` to stand among the PHP Tools.
+
 Every Tool has:
 
 - `status` — **recommended**: proposed when its Role is empty. **recognized**: counted when it is there,
@@ -76,11 +81,12 @@ be fulfilled — and a rejection of one releases this Stage instead of closing i
 From the Packs and a seed (`tooling-parser.md`): which Packs and Stages apply, which Stages are fulfilled,
 which subjects are rejected, and the runtime the target allows.
 
-- **A Role is filled** by the first Tool whose first Stage is fulfilled; recommended Tools come before
-  recognized ones, so with both present the recommended Tool is the one in use.
-- **A Tool is out** when a Role of it is filled by another Tool and its own first Stage is not fulfilled.
+- **A Role is filled, per scope,** by the first Tool of that scope whose first Stage is fulfilled; recommended
+  Tools come before recognized ones, so with both present the recommended Tool is the one in use. A Stage
+  that requires a Role needs it filled in its own Pack's scope (a Stage of a Pack without a scope, in any).
+- **A Tool is out** when a Role of it is filled, in its scope, by another Tool and its own first Stage is not fulfilled.
   Its Stages are not proposed, do not count towards the Track, and hold nobody's `after`. A target on Psalm
-  has the Role Static Analysis filled, and PHPStan is out.
+  has the Role Static Analysis filled, and PHPStan is out. A Tool of another scope is not touched.
 - **A Stage is closed** when a rejection reaches it: its own, its Tool's or a Role of its Tool; a required
   Stage is closed; every member of an any-of group is closed or can never be fulfilled and at least one is
   closed; or a required Role cannot be filled any more because every Tool of it is closed or can never be

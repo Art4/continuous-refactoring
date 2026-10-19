@@ -1,6 +1,7 @@
 {
   "$schema": "../../pack.schema.json",
   "pack": "php",
+  "scope": "php",
   "applies_when": "The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/.",
   "tools": [
     {

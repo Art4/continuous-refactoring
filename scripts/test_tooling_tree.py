@@ -40,8 +40,11 @@ def tool(slug, stages, roles=("alpha",), status="recommended", uses="uses", **ex
             "details": f"{slug}.md", "stages": stages, **extra}
 
 
-def pack(name, tools, applies_when="Always."):
-    return {"pack": name, "applies_when": applies_when, "tools": tools}
+def pack(name, tools, applies_when="Always.", scope=None):
+    doc = {"pack": name, "applies_when": applies_when, "tools": tools}
+    if scope is not None:
+        doc["scope"] = scope
+    return doc
 
 
 ROLES = {"roles": [
@@ -81,6 +84,73 @@ def chain():
         tool("b", [stage("b1", requires=["a2"])], roles=["beta"]),
         tool("g", [stage("g1", track="Guardrails", requires=["a1"])], roles=["gamma"]),
     ])])
+
+
+def languages():
+    """A role filled once per scope: Code Style (alpha) in php (two competing Tools) and in twig, and a
+    php Stage that requires static analysis (beta), which a twig Tool also plays."""
+    return Model([
+        pack("php", [
+            tool("fixer", [stage("fixer")], roles=["alpha"]),
+            tool("pint", [stage("pint")], roles=["alpha"], status="recognized"),
+            tool("analyser", [stage("analyser")], roles=["beta"]),
+            tool("refactor", [stage("refactor", requires=["beta"])], roles=["gamma"]),
+        ], scope="php"),
+        pack("twig", [
+            tool("twig-fixer", [stage("twig-fixer")], roles=["alpha"]),
+            tool("twig-lint", [stage("twig-lint")], roles=["beta"]),
+        ], scope="twig"),
+    ])
+
+
+class ScopeTests(unittest.TestCase):
+    def test_a_role_is_filled_once_per_scope(self):
+        out = languages().compute({"fulfilled": ["fixer"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("alpha", "php")], "fixer")
+        self.assertIsNone(filled[("alpha", "twig")])
+        self.assertIn("twig-fixer", out["tracks"]["Safety Net"]["backlog"])
+        out_tools = {t["tool"] for t in out["tools"] if t["out"]}
+        self.assertNotIn("twig-fixer", out_tools)
+
+    def test_tools_of_one_scope_still_compete(self):
+        out = languages().compute({"fulfilled": ["pint"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("alpha", "php")], "pint")
+        self.assertEqual({t["tool"] for t in out["tools"] if t["out"]}, {"fixer"})
+        self.assertIn("twig-fixer", out["tracks"]["Safety Net"]["backlog"])
+
+    def test_both_scopes_can_be_fulfilled_side_by_side(self):
+        out = languages().compute({"fulfilled": ["fixer", "twig-fixer"]})
+        self.assertEqual({t["tool"] for t in out["tools"] if t["out"]}, {"pint"})  # only php's own alternative
+
+    def test_a_required_role_is_filled_in_the_scope_of_the_stage(self):
+        reasons = lambda out: {w["node"]: w["reason"] for w in out["tracks"]["Safety Net"]["withheld"]}
+        out = languages().compute({"fulfilled": ["twig-lint"]})
+        self.assertEqual(reasons(out)["refactor"], "blocked — no Tool fills the Role beta")
+        out = languages().compute({"fulfilled": ["analyser"]})
+        self.assertNotIn("refactor", reasons(out))
+
+    def test_a_stage_may_not_require_a_role_nothing_of_its_scope_plays(self):
+        with self.assertRaises(tp.PackError) as caught:
+            Model([
+                pack("php", [tool("a", [stage("a1", requires=["beta"])], roles=["alpha"])], scope="php"),
+                pack("twig", [tool("b", [stage("b1")], roles=["beta"])], scope="twig"),
+            ]).load()
+        self.assertIn("scope php", str(caught.exception))
+
+    def test_rejecting_a_role_closes_its_tools_in_every_scope(self):
+        out = languages().compute({"rejected": {"alpha": None}})
+        self.assertTrue({"fixer", "twig-fixer"} <= set(out["closed_by_rejection"]))
+
+    def test_a_scope_must_be_a_slug(self):
+        with self.assertRaises(tp.PackError):
+            Model([pack("php", [tool("a", [stage("a1")])], scope="Not A Slug")]).load()
+
+    def test_the_suites_php_pack_has_the_scope_php(self):
+        model = tp.load_model()
+        self.assertEqual(model["packs"]["php"]["scope"], "php")
+        self.assertIsNone(model["packs"]["generic"]["scope"])
 
 
 class LoadModelTests(unittest.TestCase):

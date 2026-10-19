@@ -48,7 +48,7 @@ again.
 | `runtime_blocked` | `{node, reason}` for each Tool whose runtime is below its minimum, at the Tool's first Stage, a rejected one included; the reason names both versions |
 | `closed_by_rejection` | the Stages closed because a Role, a Tool or a required Stage is rejected, or because a rejection left a required Role or an any-of group nothing that could be fulfilled |
 | `reversals` | rejections whose runtime blocker the target now meets |
-| `roles`, `tools` | each Role with the Tool that fills it; each Tool with its Roles, its status (recommended or recognized), and whether another Tool took its place |
+| `roles`, `tools` | each Role, in each scope its Tools are in, as `{role, name, scope, filled_by}` with the Tool that fills it; each Tool with its Roles, its status (recommended or recognized), and whether another Tool took its place |
 | `prerequisites`, `packs` | whether `git` and `onboarding-setup` hold; the Packs that applied |
 | `tree.stages` | every Stage with its Tool, Roles, Pack, Track, `requires` and `after` |
 

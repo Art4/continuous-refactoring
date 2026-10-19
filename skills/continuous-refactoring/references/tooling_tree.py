@@ -143,9 +143,11 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
         name = data.get("pack")
         _need(_is_slug(name), where, f"pack name {name!r} is not a slug")
         _need(name not in packs, where, f"pack {name} is listed twice")
+        scope = data.get("scope")
+        _need(scope is None or _is_slug(scope), where, f"scope {scope!r} is not a slug")
         _need(_is_text(data.get("applies_when")), where, "needs an applies_when sentence")
         _need(isinstance(data.get("tools"), list) and data["tools"], where, "needs a list of tools")
-        packs[name] = {"pack": name, "applies_when": data["applies_when"], "tools": []}
+        packs[name] = {"pack": name, "scope": scope, "applies_when": data["applies_when"], "tools": []}
         for tool in data["tools"]:
             _need(isinstance(tool, dict), where, "a tool is not an object")
             slug = tool.get("tool")
@@ -167,7 +169,7 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
                 f"tool {slug}: min_runtime must map runtime names to version strings",
             )
             _need(isinstance(tool.get("stages"), list) and tool["stages"], where, f"tool {slug} needs at least one stage")
-            entry = {**tool, "pack": name, "stage_slugs": []}
+            entry = {**tool, "pack": name, "scope": scope, "stage_slugs": []}
             tools[slug] = entry
             packs[name]["tools"].append(slug)
             for index, stage in enumerate(tool["stages"]):
@@ -185,7 +187,7 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
                     where,
                     f"stage {sslug}: applies_when must be text",
                 )
-                stages[sslug] = {**stage, "tool": slug, "pack": name, "index": index, "first": index == 0}
+                stages[sslug] = {**stage, "tool": slug, "pack": name, "scope": scope, "index": index, "first": index == 0}
                 entry["stage_slugs"].append(sslug)
                 stage_order.append(sslug)
 
@@ -207,6 +209,15 @@ def _track_rank(track: str) -> int:
     return TRACKS.index(track)
 
 
+def _role_tools(model: dict, role: str, scope: str | None) -> list[str]:
+    """The Tools that can fill *role* for a Stage of *scope*: those of the same
+    scope, or every Tool of the Role for a Stage that has none."""
+    return [
+        t for t, tool in model["tools"].items()
+        if role in tool["roles"] and (scope is None or tool["scope"] == scope)
+    ]
+
+
 def _check_references(model: dict) -> None:
     roles, tools, stages = model["roles"], model["tools"], model["stages"]
     for slug, stage in stages.items():
@@ -223,7 +234,12 @@ def _check_references(model: dict) -> None:
                 if member in stages:
                     firsts = [stages[member]]
                 else:
-                    firsts = [stages[tools[t]["stage_slugs"][0]] for t in tools if member in tools[t]["roles"]]
+                    firsts = [stages[tools[t]["stage_slugs"][0]] for t in _role_tools(model, member, stage["scope"])]
+                    _need(
+                        bool(firsts),
+                        slug,
+                        f"requires the role {member}, which no tool of the scope {stage['scope']} plays",
+                    )
                 for parent in firsts:
                     _need(
                         _track_rank(parent["track"]) <= rank,
@@ -243,7 +259,7 @@ def _check_references(model: dict) -> None:
                 if member in stages:
                     found.append(member)
                 else:
-                    found.extend(tools[t]["stage_slugs"][0] for t in tools if member in tools[t]["roles"])
+                    found.extend(tools[t]["stage_slugs"][0] for t in _role_tools(model, member, stage["scope"]))
         found.extend(stage["after"])
         return found
 
@@ -394,13 +410,17 @@ class _State:
         self.rejected_tools = rejected & set(tools)
         self.rejected_stages = rejected & set(stages)
 
+        # A Role is filled per scope: Tools compete for it only with Tools of
+        # their own scope (a Pack without one is its own, general scope).
         self.tools_of_role: dict[str, list[str]] = {r: [] for r in roles}
+        self.tools_of_slot: dict[tuple[str, str | None], list[str]] = {}
         for slug, tool in tools.items():
             if tool["pack"] in self.packs:
                 for role in tool["roles"]:
                     self.tools_of_role[role].append(slug)
+                    self.tools_of_slot.setdefault((role, tool["scope"]), []).append(slug)
 
-        self.filled_by = {r: self._filled_by(r) for r in roles}
+        self.filled_by = {slot: self._filled_by(slot) for slot in self.tools_of_slot}
         self.out = self._out_tools()
         self._closed: dict[str, bool] = {}
 
@@ -409,11 +429,18 @@ class _State:
     def first(self, tool: str) -> str:
         return self.model["tools"][tool]["stage_slugs"][0]
 
-    def _filled_by(self, role: str) -> str | None:
-        """The Tool that fills *role*: the first, recommended ones before
-        recognized ones, whose first Stage is fulfilled."""
+    def filled(self, role: str, scope: str | None) -> bool:
+        """Is *role* filled for a Stage of *scope*; a Stage without a scope is
+        content with the Role filled in any."""
+        if scope is None:
+            return any(self.filled_by[slot] for slot in self.tools_of_slot if slot[0] == role)
+        return self.filled_by.get((role, scope)) is not None
+
+    def _filled_by(self, slot: tuple[str, str | None]) -> str | None:
+        """The Tool that fills the Role in a scope: the first, recommended ones
+        before recognized ones, whose first Stage is fulfilled."""
         candidates = sorted(
-            self.tools_of_role[role],
+            self.tools_of_slot[slot],
             key=lambda t: self.model["tools"][t]["status"] != "recommended",
         )
         for tool in candidates:
@@ -429,7 +456,7 @@ class _State:
             if tool["pack"] not in self.packs or self.first(slug) in self.fulfilled:
                 continue
             for role in tool["roles"]:
-                filler = self.filled_by[role]
+                filler = self.filled_by[(role, tool["scope"])]
                 if filler is not None and filler != slug:
                     out.add(slug)
         return out
@@ -469,28 +496,29 @@ class _State:
             if self.directly_rejected(stage):
                 result = True
             else:
-                result = any(self._item_closed(item) for item in self.model["stages"][stage]["requires"])
+                scope = self.model["stages"][stage]["scope"]
+                result = any(self._item_closed(item, scope) for item in self.model["stages"][stage]["requires"])
         self._closed[stage] = result
         return result
 
-    def _item_closed(self, item) -> bool:
+    def _item_closed(self, item, scope: str | None) -> bool:
         if isinstance(item, list):
             closed = [m for m in item if self._stage_dead(m)]
             return bool(closed) and all(self._stage_dead(m) or self.never_fulfilled(m) for m in item)
         if item in self.model["stages"]:
             return self._stage_dead(item)
-        return self._role_closed(item)
+        return self._role_closed(item, scope)
 
     def _stage_dead(self, stage: str) -> bool:
         """Closed, or in a Pack that does not apply."""
         return stage not in self.active or self.closed(stage)
 
-    def _role_closed(self, role: str) -> bool:
+    def _role_closed(self, role: str, scope: str | None) -> bool:
         if role in self.rejected_roles:
             return True
-        if self.filled_by[role] is not None:
+        if self.filled(role, scope):
             return False
-        tools = self.tools_of_role[role]
+        tools = [t for t in self.tools_of_role[role] if scope is None or self.model["tools"][t]["scope"] == scope]
         closed = [t for t in tools if self.closed(self.first(t))]
         return bool(closed) and all(
             t in closed or self.never_fulfilled(self.first(t)) for t in tools
@@ -515,7 +543,7 @@ class _State:
                     if member in stages:
                         if member in self.active and self.closed(member):
                             return subject(member)
-                    elif self._role_closed(member):
+                    elif self._role_closed(member, s["scope"]):
                         if member in self.rejected_roles:
                             return f"{member} was declined"
                         return f"no Tool can fill the Role {member} any more"
@@ -613,7 +641,7 @@ class _State:
             elif item in self.model["stages"]:
                 if item not in self.fulfilled:
                     return f"blocked by required parent {item}"
-            elif self.filled_by[item] is None:
+            elif not self.filled(item, s["scope"]):
                 return f"blocked — no Tool fills the Role {item}"
         if s["track"] == "Guardrails" and not safety_net_fulfilled:
             return "waiting on the Safety Net"
@@ -686,8 +714,9 @@ def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = N
         "prerequisites": {"git": True, "onboarding-setup": state.onboarded},
         "packs": state.packs,
         "roles": [
-            {"role": slug, "name": role["name"], "filled_by": state.filled_by[slug]}
+            {"role": slug, "name": role["name"], "scope": scope, "filled_by": state.filled_by.get((slug, scope))}
             for slug, role in model["roles"].items()
+            for scope in (sorted({s for r, s in state.tools_of_slot if r == slug}, key=lambda s: (s is not None, s or "")) or [None])
         ],
         "tools": [
             {"tool": slug, "name": tool["name"], "roles": tool["roles"], "status": tool["status"],

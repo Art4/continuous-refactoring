@@ -8,6 +8,7 @@
   "properties": {
     "$schema": {"type": "string"},
     "pack": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
+    "scope": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "The language or area the Pack's Tools work on. Tools compete for a Role only with Tools of their own scope; a Pack without one is general."},
     "applies_when": {"type": "string", "minLength": 1, "description": "A sentence the agent judges against the target, once per run."},
     "tools": {
       "type": "array",

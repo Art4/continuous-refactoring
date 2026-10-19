@@ -32,7 +32,7 @@ import tooling_tree  # noqa: E402
 
 # Keys in the order of the schemas; a key the schema does not know keeps its place after these.
 ORDER = {
-    "pack": ["$schema", "pack", "applies_when", "tools"],
+    "pack": ["$schema", "pack", "scope", "applies_when", "tools"],
     "tool": ["tool", "name", "uses", "roles", "status", "details", "min_runtime", "stages"],
     "stage": ["slug", "name", "track", "requires", "after", "applies_when"],
     "roles": ["$schema", "roles"],
@@ -161,7 +161,7 @@ def _pack_page(model: dict, name: str) -> str:
 
 
 def _diagram(model: dict, name: str, own: list[dict]) -> str:
-    roles, tools, stages = model["roles"], model["tools"], model["stages"]
+    roles, tools, stages, packs = model["roles"], model["tools"], model["stages"], model["packs"]
     lines = ["```mermaid", "flowchart TD"]
     declared: set[str] = set()
     edges: list[str] = []
@@ -182,7 +182,7 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
             declared.add(node)
             lines.append(f"  {node}([{_label(roles[slug]['name'])}])")
             for tool in tools.values():
-                if slug in tool["roles"]:
+                if slug in tool["roles"] and tool["scope"] == packs[name]["scope"]:
                     edges.append(f"  {stage_node(tool['stage_slugs'][0])} --> {node}")
         return node
 
