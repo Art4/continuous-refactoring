@@ -9,7 +9,7 @@
       "uses": "GitHub Actions / GitLab CI",
       "roles": ["continuous-integration"],
       "status": "recommended",
-      "details": "packs/generic/ci-runner.md",
+      "details": "ci-runner.md",
       "stages": [
         {
           "slug": "ci-runner",
@@ -26,7 +26,7 @@
       "uses": "EditorConfig",
       "roles": ["editor-settings"],
       "status": "recommended",
-      "details": "packs/generic/editorconfig.md",
+      "details": "editorconfig.md",
       "stages": [
         {
           "slug": "editorconfig",
@@ -43,7 +43,7 @@
       "uses": "any secret scanner",
       "roles": ["secret-scanning"],
       "status": "recommended",
-      "details": "packs/generic/secret-detection.md",
+      "details": "secret-detection.md",
       "stages": [
         {
           "slug": "secret-detection",

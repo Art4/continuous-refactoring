@@ -759,7 +759,7 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_every_details_file_exists(self):
         for slug, t in self.model["tools"].items():
-            self.assertTrue((_REFERENCES / t["details"]).is_file(), f"{slug}: {t['details']}")
+            self.assertTrue((t["dir"] / t["details"]).is_file(), f"{slug}: {t['details']}")
 
 
 class PortabilityTests(unittest.TestCase):

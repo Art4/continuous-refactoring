@@ -60,7 +60,7 @@ Every Tool has:
 
 - `status` — **recommended**: proposed when its Role is empty. **recognized**: counted when it is there,
   never proposed. One recommended Tool per Role and Pack.
-- `roles` — at least one; `uses` — what it runs, or null for a convention; `details` — its prose file;
+- `roles` — at least one; `uses` — what it runs, or null for a convention; `details` — its prose file, named relative to the Pack's directory;
   `min_runtime` — the oldest runtime any version of the Tool ever ran on, per runtime
   (`{"php": "7.2"}`).
 

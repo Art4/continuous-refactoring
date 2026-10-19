@@ -147,7 +147,7 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
         _need(scope is None or _is_slug(scope), where, f"scope {scope!r} is not a slug")
         _need(_is_text(data.get("applies_when")), where, "needs an applies_when sentence")
         _need(isinstance(data.get("tools"), list) and data["tools"], where, "needs a list of tools")
-        packs[name] = {"pack": name, "scope": scope, "applies_when": data["applies_when"], "tools": []}
+        packs[name] = {"pack": name, "dir": path.parent, "scope": scope, "applies_when": data["applies_when"], "tools": []}
         for tool in data["tools"]:
             _need(isinstance(tool, dict), where, "a tool is not an object")
             slug = tool.get("tool")
@@ -169,7 +169,7 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
                 f"tool {slug}: min_runtime must map runtime names to version strings",
             )
             _need(isinstance(tool.get("stages"), list) and tool["stages"], where, f"tool {slug} needs at least one stage")
-            entry = {**tool, "pack": name, "scope": scope, "stage_slugs": []}
+            entry = {**tool, "pack": name, "dir": path.parent, "scope": scope, "stage_slugs": []}
             tools[slug] = entry
             packs[name]["tools"].append(slug)
             for index, stage in enumerate(tool["stages"]):
