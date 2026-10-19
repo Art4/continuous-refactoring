@@ -1,5 +1,7 @@
 # The tooling tree becomes Roles, Tools and Stages in Packs
 
+> Amended by [ADR-0080](0080-a-role-is-filled-per-scope.md): a Role is filled per scope, not once for the target.
+
 > Supersedes the graph mechanics of [ADR-0007](0007-required-recommended-edges.md) (required and recommended
 > edges), [ADR-0008](0008-generic-tool-tree-and-structural-scan-gate.md) (the generic root and the
 > `structural-scan` gate), [ADR-0016](0016-recommended-edges-gate-until-decided.md) (recommended edges gate

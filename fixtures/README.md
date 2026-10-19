@@ -13,6 +13,8 @@ suite against by hand.
 | `php-psalm` | Composer, PHPUnit and Psalm |
 | `php-p0-empty` | CI, PHP CS Fixer, PHPUnit and PHPStan at level 0 with an empty baseline |
 | `php-p0-nonempty` | The same, with entries in the PHPStan baseline |
+| `php-own-pack` | A project with a Pack of its own: Deptrac with a Role the suite does not have, and Mago in place of PHPStan |
+| `php-own-pack-clash` | The same kind of project, whose Pack reuses the slug `phpunit` of the suite's: the parser refuses it |
 | `php-clean` | A well-kept project: `.editorconfig`, CI, PHP CS Fixer, PHPUnit with a coverage floor, PHPStan, PHPMD, Rector |
 
 Where a fixture has `expected/issues/`, those files describe the structural problems planted in its

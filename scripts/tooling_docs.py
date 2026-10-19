@@ -32,7 +32,7 @@ import tooling_tree  # noqa: E402
 
 # Keys in the order of the schemas; a key the schema does not know keeps its place after these.
 ORDER = {
-    "pack": ["$schema", "pack", "applies_when", "tools"],
+    "pack": ["$schema", "pack", "scope", "applies_when", "tools"],
     "tool": ["tool", "name", "uses", "roles", "status", "details", "min_runtime", "stages"],
     "stage": ["slug", "name", "track", "requires", "after", "applies_when"],
     "roles": ["$schema", "roles"],
@@ -141,7 +141,8 @@ def _pack_page(model: dict, name: str) -> str:
         tool = tools[slug]
         role_names = ", ".join(roles[r]["name"] for r in tool["roles"])
         minimum = ", ".join(f"{k} {v}" for k, v in tool.get("min_runtime", {}).items()) or "–"
-        link = f"[{tool['details']}](../../../{REFERENCES.as_posix()}/{tool['details']})"
+        details = f"packs/{tool['dir'].name}/{tool['details']}"
+        link = f"[{details}](../../../{REFERENCES.as_posix()}/{details})"
         out.append(
             f"| {_cell(tool['name'])} (`{slug}`) | {tool['status']} | {_cell(role_names)} | "
             f"{_cell(tool['uses'] or '–')} | {_cell(minimum)} | {link} |"
@@ -161,7 +162,7 @@ def _pack_page(model: dict, name: str) -> str:
 
 
 def _diagram(model: dict, name: str, own: list[dict]) -> str:
-    roles, tools, stages = model["roles"], model["tools"], model["stages"]
+    roles, tools, stages, packs = model["roles"], model["tools"], model["stages"], model["packs"]
     lines = ["```mermaid", "flowchart TD"]
     declared: set[str] = set()
     edges: list[str] = []
@@ -182,7 +183,7 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
             declared.add(node)
             lines.append(f"  {node}([{_label(roles[slug]['name'])}])")
             for tool in tools.values():
-                if slug in tool["roles"]:
+                if slug in tool["roles"] and tool["scope"] == packs[name]["scope"]:
                     edges.append(f"  {stage_node(tool['stage_slugs'][0])} --> {node}")
         return node
 
@@ -286,13 +287,12 @@ def model_problems(repo: pathlib.Path, model: dict) -> list[Problem]:
                     ))
                 seen[role] = slug
     for slug, tool in model["tools"].items():
-        if not (repo / REFERENCES / tool["details"]).is_file():
+        if not (tool["dir"] / tool["details"]).is_file():
             problems.append((f"tool {slug}", f"names the details file {tool['details']}, which does not exist"))
-    named = {tool["details"] for tool in model["tools"].values()}
+    named = {(tool["dir"] / tool["details"]).resolve() for tool in model["tools"].values()}
     for path in sorted((repo / REFERENCES / "packs").glob("*/*.md")):
-        rel = path.relative_to(repo / REFERENCES).as_posix()
-        if path.name != "README.md" and rel not in named:
-            problems.append((rel, "is the details file of no Tool in its Pack"))
+        if path.name != "README.md" and path.resolve() not in named:
+            problems.append((path.relative_to(repo / REFERENCES).as_posix(), "is the details file of no Tool in its Pack"))
     return problems
 
 

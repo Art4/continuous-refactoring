@@ -100,7 +100,7 @@ A periodic maintenance sweep — dependency currency, tooling-deprecation cleanu
 _Avoid_: maintenance loop, chore loop, cleanup pass
 
 **Role**:
-What a tool is for: Static Analysis, Code Style, Testing, Secret Scanning. A **Tool** plays one or more Roles, and a Role can be empty. A Role is *filled* once the first **Stage** of one of its Tools is fulfilled; recommended Tools come before recognized ones, so with both present the recommended Tool is the one in use. A Role carries the **Purpose** a **Fulfilment check** is judged by and, where its tool output feeds one, a **Signal**. A rejection may name a Role ("no static analysis"), which closes every Tool that plays it.
+What a tool is for: Static Analysis, Code Style, Testing, Secret Scanning. A **Tool** plays one or more Roles, and a Role can be empty. A Role is *filled*, per scope, once the first **Stage** of one of its Tools is fulfilled; recommended Tools come before recognized ones, so with both present the recommended Tool is the one in use. Tools of other scopes do not compete (a Code Style Tool for PHP and one for Twig are both in use). A Role carries the **Purpose** a **Fulfilment check** is judged by and, where its tool output feeds one, a **Signal**. A rejection may name a Role ("no static analysis"), which closes every Tool that plays it.
 _Avoid_: practice, capability (the tracker's operations use that word)
 
 **Tool**:
@@ -112,7 +112,7 @@ One degree of a **Tool**, and the unit a ticket is filed for: PHPStan Level 3, R
 _Avoid_: node (the word it replaced; only the parser's output keys `node` and `nodes` still carry it)
 
 **Pack**:
-Tools with a condition under which they apply: the generic Pack always, the PHP Pack when the target contains PHP code, a Pack of a target's own as it says. The condition is a sentence the agent judges once per run; a Pack that does not apply is absent everywhere. A target's own Pack has the format of the suite's and may add Tools, Stages and Roles, never redefine the suite's.
+Tools with a condition under which they apply: the generic Pack always, the PHP Pack when the target contains PHP code, a Pack of a target's own as it says. The condition is a sentence the agent judges once per run; a Pack that does not apply is absent everywhere. A Pack may name a **scope** — the language or area its Tools work on — and Tools compete for a Role only within a scope. A target's own Pack has the format of the suite's and may add Tools, Stages and Roles, never redefine the suite's.
 _Avoid_: (none — use the term as-is)
 
 **Ratchet**:

@@ -1,6 +1,7 @@
 {
   "$schema": "../../pack.schema.json",
   "pack": "php",
+  "scope": "php",
   "applies_when": "The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/.",
   "tools": [
     {
@@ -9,7 +10,7 @@
       "uses": "Composer",
       "roles": ["package-management"],
       "status": "recommended",
-      "details": "packs/php/composer.md",
+      "details": "composer.md",
       "stages": [
         {
           "slug": "composer",
@@ -26,7 +27,7 @@
       "uses": null,
       "roles": ["autoloading"],
       "status": "recommended",
-      "details": "packs/php/psr-4.md",
+      "details": "psr-4.md",
       "stages": [
         {
           "slug": "psr-4",
@@ -43,7 +44,7 @@
       "uses": "php-cs-fixer",
       "roles": ["code-style"],
       "status": "recommended",
-      "details": "packs/php/php-cs-fixer.md",
+      "details": "php-cs-fixer.md",
       "min_runtime": {
         "php": "5.3"
       },
@@ -63,7 +64,7 @@
       "uses": "Laravel Pint",
       "roles": ["code-style"],
       "status": "recognized",
-      "details": "packs/php/pint.md",
+      "details": "pint.md",
       "stages": [
         {
           "slug": "pint",
@@ -80,7 +81,7 @@
       "uses": "Easy Coding Standard",
       "roles": ["code-style"],
       "status": "recognized",
-      "details": "packs/php/ecs.md",
+      "details": "ecs.md",
       "stages": [
         {
           "slug": "ecs",
@@ -97,7 +98,7 @@
       "uses": "PHPMD",
       "roles": ["code-smell-detection"],
       "status": "recommended",
-      "details": "packs/php/phpmd.md",
+      "details": "phpmd.md",
       "stages": [
         {
           "slug": "phpmd",
@@ -114,7 +115,7 @@
       "uses": "PHPUnit",
       "roles": ["testing"],
       "status": "recommended",
-      "details": "packs/php/phpunit.md",
+      "details": "phpunit.md",
       "min_runtime": {
         "php": "5.3"
       },
@@ -134,7 +135,7 @@
       "uses": "PHPUnit",
       "roles": ["test-coverage"],
       "status": "recommended",
-      "details": "packs/php/coverage-floor.md",
+      "details": "coverage-floor.md",
       "stages": [
         {
           "slug": "coverage-floor",
@@ -151,7 +152,7 @@
       "uses": "composer audit",
       "roles": ["dependency-audit"],
       "status": "recommended",
-      "details": "packs/php/composer-audit.md",
+      "details": "composer-audit.md",
       "min_runtime": {
         "php": "7.2"
       },
@@ -172,7 +173,7 @@
       "uses": "PHPStan",
       "roles": ["static-analysis"],
       "status": "recommended",
-      "details": "packs/php/phpstan.md",
+      "details": "phpstan.md",
       "min_runtime": {
         "php": "7.0"
       },
@@ -269,7 +270,7 @@
       "uses": "vimeo/psalm",
       "roles": ["static-analysis"],
       "status": "recognized",
-      "details": "packs/php/psalm.md",
+      "details": "psalm.md",
       "stages": [
         {
           "slug": "psalm",
@@ -286,7 +287,7 @@
       "uses": "Rector",
       "roles": ["automated-refactoring"],
       "status": "recommended",
-      "details": "packs/php/rector.md",
+      "details": "rector.md",
       "stages": [
         {
           "slug": "rector-php-set",
@@ -331,7 +332,7 @@
       "uses": null,
       "roles": ["runtime-floor"],
       "status": "recommended",
-      "details": "packs/php/php-minimal-version.md",
+      "details": "php-minimal-version.md",
       "stages": [
         {
           "slug": "php-minimal-version",
@@ -348,7 +349,7 @@
       "uses": "vimeo/psalm",
       "roles": ["taint-analysis"],
       "status": "recommended",
-      "details": "packs/php/psalm.md",
+      "details": "psalm.md",
       "stages": [
         {
           "slug": "psalm-taint-analysis",
@@ -365,7 +366,7 @@
       "uses": "Semgrep",
       "roles": ["static-security-analysis"],
       "status": "recommended",
-      "details": "packs/php/semgrep.md",
+      "details": "semgrep.md",
       "stages": [
         {
           "slug": "semgrep",

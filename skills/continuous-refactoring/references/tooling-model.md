@@ -51,11 +51,16 @@ section (`onboarding-setup-interview.md`), and no Stage is workable before it do
 Packs that apply. The generic Pack always applies. A Stage may carry an `applies_when` of its own (Composer
 Audit: the repository requires a real package), judged the same way.
 
+A Pack may name a `scope`, the language or area its Tools work on (`php`, `twig`, `js`); the generic Pack has
+none. Tools compete for a Role only with Tools of their own scope, so a Pack for Twig and a Pack for PHP can
+each have a Code Style Tool and neither takes the other's place. A target's own Pack for PHP names the scope
+`php` to stand among the PHP Tools.
+
 Every Tool has:
 
 - `status` — **recommended**: proposed when its Role is empty. **recognized**: counted when it is there,
   never proposed. One recommended Tool per Role and Pack.
-- `roles` — at least one; `uses` — what it runs, or null for a convention; `details` — its prose file;
+- `roles` — at least one; `uses` — what it runs, or null for a convention; `details` — its prose file, named relative to the Pack's directory;
   `min_runtime` — the oldest runtime any version of the Tool ever ran on, per runtime
   (`{"php": "7.2"}`).
 
@@ -71,16 +76,34 @@ parser refuses a Pack that breaks either.
 **`after`** lists Stages that must be *decided* first — fulfilled, closed by a rejection, or never going to
 be fulfilled — and a rejection of one releases this Stage instead of closing it.
 
+## A target's own Pack
+
+A target may keep a Pack of its own for the tools it uses and the suite does not know: a directory with a
+`pack.json` in the form above and, where it adds Roles, a `roles.json` in the form of the suite's.
+`## Refactoring operations` names the directory (**Tooling Pack**, `refactoring-operations.md`). Its
+`details` files are named relative to that directory, and its `"$schema"` points at the schema in the
+target's installed skills, so an editor checks it.
+
+- **It adds, never redefines.** Tools, Stages and Roles of its own, and Tools that play a Role of the suite.
+  Its Stages may require and wait for Stages and Roles of the suite; nothing of the suite requires one of
+  its own. A slug already taken by the suite, a Pack name or a Role is not reusable: the parser ends in exit
+  code 2 and names both places. A suite Tool the target does not want is rejected (`rejection.md`).
+- **It stands among the suite's Tools through its scope.** A Pack for PHP names the scope `php`; its Tool for
+  Static Analysis then competes with PHPStan and Psalm, and a target that prefers it rejects the PHPStan Tool.
+- **It comes last** in the order of the Packs, so the suite's Stages are proposed first.
+- **Its *Applies when* is judged** like the suite's Packs'; the Pack of a project is usually "Always."
+
 ## What the parser computes
 
 From the Packs and a seed (`tooling-parser.md`): which Packs and Stages apply, which Stages are fulfilled,
 which subjects are rejected, and the runtime the target allows.
 
-- **A Role is filled** by the first Tool whose first Stage is fulfilled; recommended Tools come before
-  recognized ones, so with both present the recommended Tool is the one in use.
-- **A Tool is out** when a Role of it is filled by another Tool and its own first Stage is not fulfilled.
+- **A Role is filled, per scope,** by the first Tool of that scope whose first Stage is fulfilled; recommended
+  Tools come before recognized ones, so with both present the recommended Tool is the one in use. A Stage
+  that requires a Role needs it filled in its own Pack's scope (a Stage of a Pack without a scope, in any).
+- **A Tool is out** when a Role of it is filled, in its scope, by another Tool and its own first Stage is not fulfilled.
   Its Stages are not proposed, do not count towards the Track, and hold nobody's `after`. A target on Psalm
-  has the Role Static Analysis filled, and PHPStan is out.
+  has the Role Static Analysis filled, and PHPStan is out. A Tool of another scope is not touched.
 - **A Stage is closed** when a rejection reaches it: its own, its Tool's or a Role of its Tool; a required
   Stage is closed; every member of an any-of group is closed or can never be fulfilled and at least one is
   closed; or a required Role cannot be filled any more because every Tool of it is closed or can never be

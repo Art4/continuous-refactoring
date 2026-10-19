@@ -1,0 +1,11 @@
+{
+  "$schema": "../../../.agents/skills/continuous-refactoring/references/roles.schema.json",
+  "roles": [
+    {
+      "slug": "architecture-rules",
+      "name": "Architecture Rules",
+      "purpose": "The allowed dependencies between the layers of the code are written down and checked automatically.",
+      "signal": null
+    }
+  ]
+}

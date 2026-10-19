@@ -1,0 +1,49 @@
+{
+  "$schema": "../../../.agents/skills/continuous-refactoring/references/pack.schema.json",
+  "pack": "example-house-rules",
+  "scope": "php",
+  "applies_when": "Always.",
+  "tools": [
+    {
+      "tool": "deptrac",
+      "name": "Deptrac",
+      "uses": "qossmic/deptrac",
+      "roles": ["architecture-rules"],
+      "status": "recommended",
+      "details": "deptrac.md",
+      "stages": [
+        {
+          "slug": "deptrac-layers",
+          "name": "Deptrac Layers",
+          "track": "Guardrails",
+          "requires": ["composer"],
+          "after": []
+        },
+        {
+          "slug": "deptrac-strict",
+          "name": "Deptrac Strict Rules",
+          "track": "Guardrails",
+          "requires": ["deptrac-layers"],
+          "after": []
+        }
+      ]
+    },
+    {
+      "tool": "mago",
+      "name": "Mago",
+      "uses": "carthage-software/mago",
+      "roles": ["static-analysis"],
+      "status": "recommended",
+      "details": "mago.md",
+      "stages": [
+        {
+          "slug": "mago",
+          "name": "Mago",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    }
+  ]
+}

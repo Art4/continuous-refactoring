@@ -8,7 +8,8 @@ proposals reach the tracker through the filing step.
 
 ## 1. Scope
 
-From the parser's seedless call (`tooling-parser.md`): the Track's `nodes`, the Packs, and the first Stage
+From the parser's seedless call (`tooling-parser.md`, with `--own-pack` where the target has a Tooling Pack):
+the Track's `nodes`, the Packs, and the first Stage
 of every Tool, recognized ones included — they say which Tool fills a Role. A restriction in the call
 narrows what step 4 proposes; of the Stages outside it, only those a covered Stage requires are judged.
 
@@ -32,7 +33,7 @@ judged fulfilled under another name than its Tool, the evidence in one line.
 
 ### Judging a Stage
 
-Read the Purpose of the Tool's Role (`roles.json`) and the Stage's Fulfilment check in its Tool's `details`
+Read the Purpose of the Tool's Role (`roles.json`, or the target Pack's own `roles.json` for a Role it added) and the Stage's Fulfilment check in its Tool's `details`
 file, then the target. **Judge by Purpose:** a Stage is fulfilled when a real, working tool serves the
 Purpose in the target, under any name.
 

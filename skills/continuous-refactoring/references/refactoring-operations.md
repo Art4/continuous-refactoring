@@ -41,6 +41,7 @@ column.
 | **Rejected** | How a rejection is recorded with its reason and found again: a closed ticket or a file, and where | At the decision point that records the first rejection the suite proposes a place, and writes the bullet from the answer |
 | **Blocked by** | How a ticket states which tickets block it, and when it counts as unblocked | The suite writes the dependency as a sentence in the ticket's text and reads it there |
 | **Housekeeping** | Where the **Housekeeping template** lives and how the next **Housekeeping ticket** is made from it | Housekeeping's mechanism counts as missing: the Housekeeping Track proposes to set it up and writes the bullet |
+| **Tooling Pack** | The directory in the target that holds its own **Pack**: a `pack.json` and, where the Pack adds Roles, a `roles.json`, with the Tool files beside them. Recommended place: a folder `tooling-pack` beside the tracker file | The target has no Pack of its own; only the tools of the suite's Packs are proposed |
 
 ## Templates
 

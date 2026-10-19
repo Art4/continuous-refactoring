@@ -40,8 +40,11 @@ def tool(slug, stages, roles=("alpha",), status="recommended", uses="uses", **ex
             "details": f"{slug}.md", "stages": stages, **extra}
 
 
-def pack(name, tools, applies_when="Always."):
-    return {"pack": name, "applies_when": applies_when, "tools": tools}
+def pack(name, tools, applies_when="Always.", scope=None):
+    doc = {"pack": name, "applies_when": applies_when, "tools": tools}
+    if scope is not None:
+        doc["scope"] = scope
+    return doc
 
 
 ROLES = {"roles": [
@@ -81,6 +84,73 @@ def chain():
         tool("b", [stage("b1", requires=["a2"])], roles=["beta"]),
         tool("g", [stage("g1", track="Guardrails", requires=["a1"])], roles=["gamma"]),
     ])])
+
+
+def languages():
+    """A role filled once per scope: Code Style (alpha) in php (two competing Tools) and in twig, and a
+    php Stage that requires static analysis (beta), which a twig Tool also plays."""
+    return Model([
+        pack("php", [
+            tool("fixer", [stage("fixer")], roles=["alpha"]),
+            tool("pint", [stage("pint")], roles=["alpha"], status="recognized"),
+            tool("analyser", [stage("analyser")], roles=["beta"]),
+            tool("refactor", [stage("refactor", requires=["beta"])], roles=["gamma"]),
+        ], scope="php"),
+        pack("twig", [
+            tool("twig-fixer", [stage("twig-fixer")], roles=["alpha"]),
+            tool("twig-lint", [stage("twig-lint")], roles=["beta"]),
+        ], scope="twig"),
+    ])
+
+
+class ScopeTests(unittest.TestCase):
+    def test_a_role_is_filled_once_per_scope(self):
+        out = languages().compute({"fulfilled": ["fixer"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("alpha", "php")], "fixer")
+        self.assertIsNone(filled[("alpha", "twig")])
+        self.assertIn("twig-fixer", out["tracks"]["Safety Net"]["backlog"])
+        out_tools = {t["tool"] for t in out["tools"] if t["out"]}
+        self.assertNotIn("twig-fixer", out_tools)
+
+    def test_tools_of_one_scope_still_compete(self):
+        out = languages().compute({"fulfilled": ["pint"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("alpha", "php")], "pint")
+        self.assertEqual({t["tool"] for t in out["tools"] if t["out"]}, {"fixer"})
+        self.assertIn("twig-fixer", out["tracks"]["Safety Net"]["backlog"])
+
+    def test_both_scopes_can_be_fulfilled_side_by_side(self):
+        out = languages().compute({"fulfilled": ["fixer", "twig-fixer"]})
+        self.assertEqual({t["tool"] for t in out["tools"] if t["out"]}, {"pint"})  # only php's own alternative
+
+    def test_a_required_role_is_filled_in_the_scope_of_the_stage(self):
+        reasons = lambda out: {w["node"]: w["reason"] for w in out["tracks"]["Safety Net"]["withheld"]}
+        out = languages().compute({"fulfilled": ["twig-lint"]})
+        self.assertEqual(reasons(out)["refactor"], "blocked — no Tool fills the Role beta")
+        out = languages().compute({"fulfilled": ["analyser"]})
+        self.assertNotIn("refactor", reasons(out))
+
+    def test_a_stage_may_not_require_a_role_nothing_of_its_scope_plays(self):
+        with self.assertRaises(tp.PackError) as caught:
+            Model([
+                pack("php", [tool("a", [stage("a1", requires=["beta"])], roles=["alpha"])], scope="php"),
+                pack("twig", [tool("b", [stage("b1")], roles=["beta"])], scope="twig"),
+            ]).load()
+        self.assertIn("scope php", str(caught.exception))
+
+    def test_rejecting_a_role_closes_its_tools_in_every_scope(self):
+        out = languages().compute({"rejected": {"alpha": None}})
+        self.assertTrue({"fixer", "twig-fixer"} <= set(out["closed_by_rejection"]))
+
+    def test_a_scope_must_be_a_slug(self):
+        with self.assertRaises(tp.PackError):
+            Model([pack("php", [tool("a", [stage("a1")])], scope="Not A Slug")]).load()
+
+    def test_the_suites_php_pack_has_the_scope_php(self):
+        model = tp.load_model()
+        self.assertEqual(model["packs"]["php"]["scope"], "php")
+        self.assertIsNone(model["packs"]["generic"]["scope"])
 
 
 class LoadModelTests(unittest.TestCase):
@@ -689,7 +759,104 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_every_details_file_exists(self):
         for slug, t in self.model["tools"].items():
-            self.assertTrue((_REFERENCES / t["details"]).is_file(), f"{slug}: {t['details']}")
+            self.assertTrue((t["dir"] / t["details"]).is_file(), f"{slug}: {t['details']}")
+
+
+_FIXTURES = pathlib.Path(__file__).resolve().parents[1] / "fixtures" / "php"
+OWN_PACK = _FIXTURES / "php-own-pack" / "project" / "docs" / "agents" / "tooling-pack"
+CLASHING_PACK = _FIXTURES / "php-own-pack-clash" / "project" / "docs" / "agents" / "tooling-pack"
+
+
+class OwnPackTests(unittest.TestCase):
+    """A target's own Pack: added after the suite's, never redefining one of theirs."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model = tp.load_model(own_pack=OWN_PACK)
+
+    def compute(self, seed=None):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+            full.update(seed or {})
+            return tp.compute(repo, self.model, full)
+
+    def test_it_comes_after_the_suites_packs_and_adds_stages_and_a_role(self):
+        self.assertEqual(list(self.model["packs"]), ["generic", "php", "example-house-rules"])
+        self.assertEqual(self.model["stage_order"][-3:], ["deptrac-layers", "deptrac-strict", "mago"])
+        self.assertIn("architecture-rules", self.model["roles"])
+        out = self.compute()
+        self.assertIn("example-house-rules", out["packs"])
+        self.assertEqual([n["node"] for n in out["tracks"]["Guardrails"]["nodes"]][-2:], ["deptrac-layers", "deptrac-strict"])
+        self.assertIn("mago", [n["node"] for n in out["tracks"]["Safety Net"]["nodes"]])
+        self.assertIn({"role": "architecture-rules", "name": "Architecture Rules", "scope": "php", "filled_by": None}, out["roles"])
+
+    def test_its_stages_wait_like_any_other(self):
+        reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": ["composer"]})["tracks"]["Guardrails"]["withheld"]}
+        self.assertEqual(reasons["deptrac-layers"], "waiting on the Safety Net")
+        self.assertEqual(reasons["deptrac-strict"], "blocked by required parent deptrac-layers")
+
+    def test_a_tool_of_its_own_stands_beside_the_suites_for_a_role(self):
+        # both are recommended: both are proposed until the target rejects the suite's
+        out = self.compute({"fulfilled": ["composer"]})
+        backlog = out["tracks"]["Safety Net"]["backlog"]
+        self.assertTrue({"phpstan-level-0", "mago"} <= set(backlog))
+        out = self.compute({"fulfilled": ["composer", "mago", "php-cs-fixer", "editorconfig"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("static-analysis", "php")], "mago")
+        self.assertTrue(next(t for t in out["tools"] if t["tool"] == "phpstan")["out"])
+        self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["workable"])
+
+    def test_rejecting_the_suites_tool_leaves_the_role_to_the_own_one(self):
+        out = self.compute({"fulfilled": ["composer"], "rejected": {"phpstan": None}})
+        self.assertNotIn("phpstan-level-0", out["tracks"]["Safety Net"]["backlog"])
+        self.assertIn("mago", out["tracks"]["Safety Net"]["backlog"])
+        self.assertNotIn("rector-php-set", out["tracks"]["Safety Net"]["workable"])
+
+    def test_the_seed_may_name_the_pack(self):
+        out = self.compute({"packs": ["generic", "php"]})
+        self.assertNotIn("example-house-rules", out["packs"])
+        self.assertNotIn("mago", [n["node"] for t in out["tracks"].values() for n in t["nodes"]])
+
+    def test_a_stage_that_reuses_a_slug_of_the_suite_is_refused(self):
+        with self.assertRaises(tp.PackError) as caught:
+            tp.load_model(own_pack=CLASHING_PACK)
+        message = str(caught.exception)
+        self.assertIn("stage phpunit is already defined in", message)
+        self.assertIn(str(tp.PACKS_DIR / "php" / "pack.json"), message)
+        self.assertIn(str(CLASHING_PACK / "pack.json"), message)
+
+    def test_a_role_of_the_suite_may_not_be_defined_again(self):
+        with tempfile.TemporaryDirectory() as d:
+            own = pathlib.Path(d)
+            (own / "pack.json").write_text(json.dumps(pack("mine", [tool("t", [stage("t1")], roles=["testing"])])))
+            (own / "roles.json").write_text(json.dumps({"roles": [{"slug": "testing", "name": "T", "purpose": "p", "signal": None}]}))
+            with self.assertRaises(tp.PackError) as caught:
+                tp.load_model(own_pack=own)
+            self.assertIn("role testing is already defined in", str(caught.exception))
+
+    def test_a_pack_named_like_one_of_the_suite_is_refused(self):
+        with tempfile.TemporaryDirectory() as d:
+            own = pathlib.Path(d)
+            (own / "pack.json").write_text(json.dumps(pack("php", [tool("t", [stage("t1")], roles=["testing"])])))
+            with self.assertRaises(tp.PackError) as caught:
+                tp.load_model(own_pack=own)
+            self.assertIn("pack php is already defined in", str(caught.exception))
+
+    def test_a_directory_without_a_pack_is_refused(self):
+        with tempfile.TemporaryDirectory() as d, self.assertRaises(tp.PackError):
+            tp.load_model(own_pack=pathlib.Path(d))
+
+    def test_the_command_line_takes_it_and_exits_2_on_a_clash(self):
+        script = str(_REFERENCES / "tooling_tree.py")
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            ok = subprocess.run([sys.executable, script, "--own-pack", str(OWN_PACK), str(repo)], capture_output=True, text=True)
+            self.assertEqual(ok.returncode, 0, ok.stderr)
+            self.assertIn("deptrac-layers", {n["node"] for n in json.loads(ok.stdout)["tracks"]["Guardrails"]["nodes"]})
+            bad = subprocess.run([sys.executable, script, "--own-pack", str(CLASHING_PACK), str(repo)], capture_output=True, text=True)
+            self.assertEqual(bad.returncode, 2)
+            self.assertIn("stage phpunit is already defined", bad.stderr)
 
 
 class PortabilityTests(unittest.TestCase):
