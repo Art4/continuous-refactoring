@@ -76,6 +76,23 @@ parser refuses a Pack that breaks either.
 **`after`** lists Stages that must be *decided* first — fulfilled, closed by a rejection, or never going to
 be fulfilled — and a rejection of one releases this Stage instead of closing it.
 
+## A target's own Pack
+
+A target may keep a Pack of its own for the tools it uses and the suite does not know: a directory with a
+`pack.json` in the form above and, where it adds Roles, a `roles.json` in the form of the suite's.
+`## Refactoring operations` names the directory (**Tooling Pack**, `refactoring-operations.md`). Its
+`details` files are named relative to that directory, and its `"$schema"` points at the schema in the
+target's installed skills, so an editor checks it.
+
+- **It adds, never redefines.** Tools, Stages and Roles of its own, and Tools that play a Role of the suite.
+  Its Stages may require and wait for Stages and Roles of the suite; nothing of the suite requires one of
+  its own. A slug already taken by the suite, a Pack name or a Role is not reusable: the parser ends in exit
+  code 2 and names both places. A suite Tool the target does not want is rejected (`rejection.md`).
+- **It stands among the suite's Tools through its scope.** A Pack for PHP names the scope `php`; its Tool for
+  Static Analysis then competes with PHPStan and Psalm, and a target that prefers it rejects the PHPStan Tool.
+- **It comes last** in the order of the Packs, so the suite's Stages are proposed first.
+- **Its *Applies when* is judged** like the suite's Packs'; the Pack of a project is usually "Always."
+
 ## What the parser computes
 
 From the Packs and a seed (`tooling-parser.md`): which Packs and Stages apply, which Stages are fulfilled,

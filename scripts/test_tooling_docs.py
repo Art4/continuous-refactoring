@@ -97,6 +97,20 @@ class FixedFormTests(unittest.TestCase):
             self.assertIn("fixed form", problems[0][1])
 
 
+class OwnPackFixtureTests(unittest.TestCase):
+    """The example of a project's own Pack follows the schema and the fixed form, as the suite's do."""
+
+    PACK = REPO / "fixtures/php/php-own-pack/project/docs/agents/tooling-pack"
+
+    def test_the_example_is_valid_and_in_the_fixed_form(self):
+        import jsonschema
+        for name, kind, schema in (("pack.json", "pack", "pack.schema.json"), ("roles.json", "roles", "roles.schema.json")):
+            text = (self.PACK / name).read_text()
+            data = json.loads(text)
+            jsonschema.Draft202012Validator(json.loads((REPO / REFS / schema).read_text())).validate(data)
+            self.assertEqual(text, td.canonical_json(data, kind), name)
+
+
 class SchemaTests(unittest.TestCase):
     def test_a_track_outside_the_schema(self):
         with tempfile.TemporaryDirectory() as tmp:

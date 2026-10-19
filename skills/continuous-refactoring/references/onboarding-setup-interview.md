@@ -86,7 +86,7 @@ available" is an answer, and its bullet is left out.
 - an `.out-of-scope/` folder → proposed as **Rejected**, in place of the template's bullet.
 
 Recommendation: take what is in use. A mark Explore did not find is left out without a question, and so is
-**Housekeeping**, which the Housekeeping Track writes when it sets its mechanism up.
+**Housekeeping**, which the Housekeeping Track writes when it sets its mechanism up. **Tooling Pack** is never asked about either; the closing "Left out" line names it, and a human who keeps a Pack of their own adds the bullet.
 
 Step 2 is done when every operation in the reference is in one of four states: answered, on record, taken
 from a template, or left out with its fallback noted.

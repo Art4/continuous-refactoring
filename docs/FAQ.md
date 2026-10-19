@@ -245,6 +245,14 @@ Psalm has the role filled and is never offered PHPStan; declining one tool leave
 another; declining a role closes every tool for it. The same shape lets a project of another language, or a
 tool the suite does not know, be added as data instead of a change to the suite.
 
+## How do I add a tool the suite does not know?
+
+Keep a Pack of your own: a `pack.json` with the tool and its steps, a Markdown file saying what makes a step
+fulfilled, and a **Tooling Pack** bullet in your tracker file that names the directory. The suite proposes your
+steps like its own, and a tool of yours that does the job of one of its tools stands beside it (decline the
+suite's if you prefer yours). It adds, it never redefines, and it names the language it works on so a tool for
+Twig does not take the place of one for PHP. The [playbook](playbooks/own-tool.md) has a worked example.
+
 ## Is it compatible with other engineering skills?
 
 Yes, and it is better with them. A run recommends a project's own skills for planning and implementing,

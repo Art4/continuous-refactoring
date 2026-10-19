@@ -7,16 +7,22 @@ fulfilled. It reads the Packs and the target's tracker file, and writes nothing.
 in `tooling-model.md`.
 
 - **Script:** `tooling_tree.py`, beside this file.
-- **Data:** `roles.json` and `packs/<pack>/pack.json`, beside it too. Each Tool's `details` file holds the
-  **Fulfilment check** and **MR scope** of its Stages.
+- **Data:** `roles.json` and `packs/<pack>/pack.json`, beside it too, and the target's own Pack where it has
+  one. Each Tool's `details` file, named relative to its Pack's directory, holds the **Fulfilment check** and
+  **MR scope** of its Stages.
 
 ## Calling it
 
 ```
-python3 <script> [--seed <seed file>] [--packs <dir>] <target repo>
+python3 <script> [--seed <seed file>] [--own-pack <dir>] [--packs <dir>] <target repo>
 ```
 
-Without `--seed` nothing is decided and every Pack applies: the call for the Stages and the tree's
+Where the target's `## Refactoring operations` section has a **Tooling Pack** bullet (`refactoring-operations.md`),
+`--own-pack` is handed the directory it names, relative to the target. The parser then reads that Pack after
+the suite's own, with its Roles. A Pack that redefines a slug of the suite's, or a Role, ends in exit code 2
+and names both places.
+
+`--packs` replaces the directory of the suite's Packs; it is for tests. Without `--seed` nothing is decided and every Pack applies, the target's own included: the call for the Stages and the tree's
 order. The seed is a JSON file written to a temporary directory outside the target:
 
 ```json

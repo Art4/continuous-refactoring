@@ -1,0 +1,29 @@
+{
+  "$schema": "../../../.agents/skills/continuous-refactoring/references/pack.schema.json",
+  "pack": "example-house-rules",
+  "scope": "php",
+  "applies_when": "Always.",
+  "tools": [
+    {
+      "tool": "my-tests",
+      "name": "My Tests",
+      "uses": null,
+      "roles": [
+        "testing"
+      ],
+      "status": "recommended",
+      "details": "my-tests.md",
+      "stages": [
+        {
+          "slug": "phpunit",
+          "name": "My PHPUnit",
+          "track": "Safety Net",
+          "requires": [
+            "composer"
+          ],
+          "after": []
+        }
+      ]
+    }
+  ]
+}

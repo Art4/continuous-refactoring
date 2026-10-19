@@ -118,9 +118,18 @@ def _pack_paths(packs_dir: pathlib.Path) -> list[pathlib.Path]:
     return paths
 
 
-def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path | None = None) -> dict:
+def load_model(
+    packs_dir: pathlib.Path | None = None,
+    roles_json: pathlib.Path | None = None,
+    own_pack: pathlib.Path | None = None,
+) -> dict:
     """Load Roles and Packs and check what the parser computes with. Raises
     ``PackError`` for a model it cannot compute from.
+
+    ``own_pack`` is a target's own Pack: a directory with a ``pack.json`` and,
+    optionally, a ``roles.json``. It comes after the suite's Packs and may add
+    Roles, Tools and Stages but not redefine one: a slug is unique across all of
+    them.
 
     Returns ``roles`` (slug -> role), ``packs`` (name -> pack), ``tools``
     (slug -> tool, with ``pack`` and the slugs of its ``stage_slugs``),
@@ -131,6 +140,20 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
     roles = load_roles(roles_json)
     paths = _pack_paths(packs_dir)
     _need(bool(paths), str(packs_dir), "holds no pack.json")
+    # where each slug was defined first, to name both places in a collision
+    origin: dict[str, str] = {slug: str(roles_json or ROLES_JSON) for slug in roles}
+    if own_pack is not None:
+        own_pack = pathlib.Path(own_pack)
+        _need((own_pack / "pack.json").is_file(), str(own_pack), "holds no pack.json")
+        paths.append(own_pack / "pack.json")
+        if (own_pack / "roles.json").is_file():
+            for slug, role in load_roles(own_pack / "roles.json").items():
+                _need(slug not in roles, str(own_pack / "roles.json"), f"role {slug} is already defined in {origin.get(slug)}")
+                roles[slug] = role
+                origin[slug] = str(own_pack / "roles.json")
+
+    def taken(slug: str) -> str:
+        return f"{slug} is already defined in {origin.get(slug)}"
 
     packs: dict[str, dict] = {}
     tools: dict[str, dict] = {}
@@ -142,7 +165,8 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
         _need(isinstance(data, dict), where, "must be an object")
         name = data.get("pack")
         _need(_is_slug(name), where, f"pack name {name!r} is not a slug")
-        _need(name not in packs, where, f"pack {name} is listed twice")
+        _need(name not in packs, where, f"pack {name} is already defined in {origin.get(name)}")
+        origin[name] = where
         scope = data.get("scope")
         _need(scope is None or _is_slug(scope), where, f"scope {scope!r} is not a slug")
         _need(_is_text(data.get("applies_when")), where, "needs an applies_when sentence")
@@ -152,8 +176,9 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
             _need(isinstance(tool, dict), where, "a tool is not an object")
             slug = tool.get("tool")
             _need(_is_slug(slug), where, f"tool slug {slug!r} is not a slug")
-            _need(slug not in tools, where, f"tool {slug} is listed twice")
-            _need(slug not in roles, where, f"tool {slug} has the slug of a role")
+            _need(slug not in tools, where, f"tool {taken(slug)}")
+            _need(slug not in roles, where, f"tool {slug} has the slug of the role defined in {origin.get(slug)}")
+            origin[slug] = where
             _need(_is_text(tool.get("name")), where, f"tool {slug} needs a name")
             _need(tool.get("uses") is None or _is_text(tool.get("uses")), where, f"tool {slug}: uses must be text or null")
             _need(tool.get("status") in ("recommended", "recognized"), where, f"tool {slug}: status must be recommended or recognized")
@@ -176,8 +201,9 @@ def load_model(packs_dir: pathlib.Path | None = None, roles_json: pathlib.Path |
                 _need(isinstance(stage, dict), where, f"a stage of {slug} is not an object")
                 sslug = stage.get("slug")
                 _need(_is_slug(sslug), where, f"stage slug {sslug!r} is not a slug")
-                _need(sslug not in stages, where, f"stage {sslug} is listed twice")
-                _need(sslug not in roles, where, f"stage {sslug} has the slug of a role")
+                _need(sslug not in stages, where, f"stage {taken(sslug)}")
+                _need(sslug not in roles, where, f"stage {sslug} has the slug of the role defined in {origin.get(sslug)}")
+                origin.setdefault(sslug, where)
                 _need(_is_text(stage.get("name")), where, f"stage {sslug} needs a name")
                 _need(stage.get("track") in TRACKS, where, f"stage {sslug}: track must be one of {', '.join(TRACKS)}")
                 _need(isinstance(stage.get("requires"), list), where, f"stage {sslug}: requires must be a list")
@@ -752,6 +778,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Compute the tooling model's graph outputs from a handed-in seed (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to the target repository (default: .)")
     ap.add_argument("--packs", type=str, default=None, help="directory holding the Packs, one subdirectory each with a pack.json (default: the suite's own)")
+    ap.add_argument("--own-pack", type=str, default=None, help="directory of the target's own Pack (a pack.json and optionally a roles.json), loaded after the suite's Packs")
     ap.add_argument(
         "--seed", type=str, default=None,
         help='path to a JSON file holding what the caller judged: {"fulfilled": [stage, ...], "rejected": {role|tool|stage: null | {"php": "X.Y"}}, '
@@ -759,7 +786,7 @@ if __name__ == "__main__":
     )
     args = ap.parse_args()
     try:
-        model = load_model(pathlib.Path(args.packs) if args.packs else None)
+        model = load_model(pathlib.Path(args.packs) if args.packs else None, own_pack=pathlib.Path(args.own_pack) if args.own_pack else None)
         seed = load_seed(pathlib.Path(args.seed), model) if args.seed else None
     except (PackError, SeedError) as exc:
         ap.exit(2, f"error: {exc}\n")

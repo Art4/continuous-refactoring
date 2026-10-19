@@ -1,0 +1,12 @@
+{
+    "name": "example/php-own-pack-clash",
+    "description": "A fixture with a Pack of its own",
+    "require": {
+        "php": "^8.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "Example\\": "src/"
+        }
+    }
+}

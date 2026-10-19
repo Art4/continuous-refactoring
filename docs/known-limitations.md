@@ -121,6 +121,7 @@ The closing report's **Status** line always says why. The usual reasons:
 | A run ended on a failing check or a review finding | The same check or finding came back after a fix and a second attempt; the branch stays local and the ticket carries the account as an open question | Reply on the ticket: how to go on, or take the branch over yourself |
 | A branch was handed over | No forge, or you chose to push yourself | Merge it, or push and open the merge request |
 | Tools named as out of reach | They wait behind something no ticket can change: a PHP version your project does not allow yet, or a project that is not PHP | Raise the PHP version, or record the rejection the suite proposes |
+| A run ends because of a Pack | The project's own Pack redefines a slug, a Role or a Pack name the suite has, or the file is not in the Pack format; the error names the file and the slug. A slug the suite added later does the same | Rename your slug or correct the file, then call again ([playbook](playbooks/own-tool.md)) |
 | Housekeeping: nothing due | The open ticket's date is not reached | Wait for the date the report names, or say "now" |
 | Housekeeping: the setup waits for its merge request | The template is not on the default branch yet | Merge the first cycle's merge request |
 | The line for `AGENTS.md` is missing | A setup left it out — in an autonomous run nobody agreed to it | Ask for it in a call of `/continuous-housekeeping` |
