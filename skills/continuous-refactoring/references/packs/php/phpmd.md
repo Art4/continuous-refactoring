@@ -12,18 +12,33 @@ The Tool for the Role Code Smell Detection in the PHP Pack.
   - a ruleset config is committed (`phpmd.xml`, `phpmd.xml.dist` or `.phpmd.xml`). The rule sets it takes are the target's choice (*Rule sets*);
   - no baseline file (`phpmd.baseline.xml`) exists, nor does the config name one;
   - every limit the config overrides on a metric rule carries the Ratchet comment (below);
+  - no rule is left out *for now*: an `<exclude>` whose comment begins `Not yet:` (*Taking in a rule*) keeps the Stage unfulfilled;
   - PHPMD runs locally without a violation;
   - once `ci-runner` is fulfilled, a CI job invokes PHPMD with that config (a self-wired CI gate, the same shape as PHPUnit's; with no CI yet, local adoption alone still fulfils the Stage).
-- **Rule sets:** a fresh adoption writes `cleancode`, `codesize`, `design`, `naming` and `unusedcode`, not `controversial`: its camel-case rules overlap the code style fixer, and its superglobal rule depends on the framework. A target that does not want a rule set, or a single rule, leaves it out of the config or names it in an `<exclude>`, with a comment beside it that says why. The check accepts any selection, with or without the comment, and the suite never proposes a rule set later that the config left out.
+- **Rule sets:** a fresh adoption writes `cleancode`, `codesize`, `design`, `naming` and `unusedcode`, not `controversial`: its camel-case rules overlap the code style fixer, and its superglobal rule depends on the framework. A target that does not want a rule set, or a single rule, leaves it out of the config or names it in an `<exclude>`, with a comment beside it that says why. The check accepts such a selection, with or without the comment, and the suite never proposes a rule set later that the config left out. Many findings are no reason to decline a rule: such a rule waits (*Taking in a rule*), and the human is not asked to give it up.
 - **Version:** a fresh adoption installs the newest major version. A target on 2.x stays on it and uses the 2.x property names (*The Ratchet*); moving to 3.x is no part of this Stage.
 - **MR scope:**
   - *A fresh adoption:* the dependency, the config and, once `ci-runner` is fulfilled, the CI job. The config is made so PHPMD runs green, in this order:
     1. Noise the stack causes is expressed in the config, not in the code: path excludes, and rule properties such as `exceptions` or `ignore-global` where the rule has them (for example static calls the framework makes idiomatic, or short method names it requires).
     2. Every metric rule the target breaks gets its limit set to today's peak, with the Ratchet comment. The target's code is not touched for these. A name-length limit it breaks is set once to what the target uses, with no comment.
-    3. What is left, and is a finding that is cheap to fix, is fixed. What stays is suppressed at the code (*Suppressions*).
+    3. A rule that is no metric and reports so few findings that fixing or suppressing them keeps the merge request one a person can review (`../../principles.md`, *A merge request a person can review*) is taken in: the findings are fixed at their cause, and a deliberate exception is suppressed at the code (*Suppressions*). A rule with more findings is not taken in yet (*Taking in a rule*).
+    4. Where the merge request is still too big, the plan is cut into parts (`../../design-point.md`, *Planning a tooling ticket*): the first holds the dependency, the config, the limits and the rules already green; the rest is taken in later.
   - *A target that has a baseline:* one merge request replaces it, whether the suite or the target's own hand put it there. Entries of metric rules become limits at today's peak, with the Ratchet comment; the others are fixed or suppressed as above; the baseline file is deleted. This is no ticket that stays open: nothing is repaired, only moved.
   - In both cases the merge request reads in its description what was set to which peak and what was suppressed, with the reasons.
 - **Suppressions:** a deliberate exception is written at the code it concerns, never in a baseline, which holds only rule, file and method and has no place for a reason. On 3.x it is the attribute `#[SuppressWarnings(RuleClass::class)]` on the method or class; on 2.x the docblock annotation `@SuppressWarnings(PHPMD.RuleName)`. A comment above says why. On 3.x the rule `UnusedSuppression` reports a suppression that no longer suppresses anything. A metric rule is never suppressed: its limit is the tool for that. A suppression at adoption is judged by the merge request's review; later, a new one is an open question to the human, like an ignore rule for PHPStan.
+
+### Taking in a rule
+
+A rule that reports too much to take in at adoption is named in an `<exclude>` inside its rule set's `<rule ref>`, with the comment `Not yet:` and the number of findings the last measurement counted, so that the config stays green and the debt stays in sight:
+
+```xml
+<rule ref="rulesets/cleancode.xml">
+    <!-- Not yet: 212 findings. -->
+    <exclude name="ElseExpression"/>
+</rule>
+```
+
+The Stage is not fulfilled while such an `<exclude>` exists. Its ticket is "PHPMD: take in the remaining rules", the same shape as a PHPStan baseline ticket and planned part by part (`../../design-point.md`, *Planning a baseline ticket*): one rule per merge request, the one with the fewest findings first; a rule too large for one merge request is cut by directory, and its `<exclude>` stays until the last part is merged. A part fixes findings at their cause, and suppresses only a deliberate exception. A suppression that merely lowers the count is no fix. Taking in a rule deletes its `<exclude>` and its comment. A finding that only a behaviour change could remove is named in the plan, and the rule is declined instead: its `<exclude>` then carries the reason, and only a human decides that.
 
 ### The Ratchet
 

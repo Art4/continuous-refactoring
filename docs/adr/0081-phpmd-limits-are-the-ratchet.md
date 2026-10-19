@@ -18,6 +18,10 @@ and `--update-baseline` rewrites the file without any comment.
   comment carries a Ratchet slice, a step of the Tool's details file: measure again, lower the limits the change
   made possible. The Housekeeping ticket lowers what the code reached without it. The success is that PHPMD is
   green with every other limit unchanged and the target rule's peak has fallen.
+- **Rules wait, they are not given up.** A rule with more findings than one reviewable merge request can take
+  is excluded with a `Not yet:` comment; the Stage stays unfulfilled and its ticket takes the rules in one at a
+  time, in the shape of the PHPStan baseline ticket. Without this, a first run could only ask the human to drop
+  rules (found in the first trial run on a real project).
 - **A CI job** runs PHPMD once `ci-runner` is fulfilled, or the limits hold only for the suite's own runs.
 - **The search for candidates** runs PHPMD at the rules' default limits, since under the ratcheted ones it reports
   nothing.

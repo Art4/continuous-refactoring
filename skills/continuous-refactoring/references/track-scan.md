@@ -82,6 +82,10 @@ a baseline ticket is whether the baseline still has entries.
 got there. Its proposal is titled "PHPMD: replace the baseline"; the merge request is one, not a series
 (`packs/php/phpmd.md`, *MR scope*).
 
+**A PHPMD with rules not taken in yet.** The same Stage is not fulfilled while its config holds an
+`<exclude>` commented `Not yet:`. Its proposal is titled "PHPMD: take in the remaining rules"; the check of
+that ticket is whether such an `<exclude>` is left.
+
 **Which Tool fills a Role.** The report says, per Role the Track's Stages need, which Tool fills it, and
 which Tool is not proposed because another took its place (`tools` marks it `out`).
 

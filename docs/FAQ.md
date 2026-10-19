@@ -159,7 +159,7 @@ written at a reasonable cost, the suite asks you instead of restructuring unchec
 
 ## Why does PHPMD have no baseline?
 
-A baseline would let the existing findings stay in view only as a list of rule, file and method. It holds no value and no reason, so a method that gets worse after it was baselined stays quiet, and nobody can tell why an entry is there. The suite sets each limit of PHPMD's metrics to the worst value the code has now and lowers it whenever the work removes that value, so the limits themselves are the record of the debt. An exception that is deliberate sits at the code, with its reason beside it. The cost is that PHPMD reports nothing on a project whose limits are ratcheted, so the search for candidates runs it with PHPMD's default limits instead.
+A baseline would let the existing findings stay in view only as a list of rule, file and method. It holds no value and no reason, so a method that gets worse after it was baselined stays quiet, and nobody can tell why an entry is there. The suite sets each limit of PHPMD's metrics to the worst value the code has now and lowers it whenever the work removes that value, so the limits themselves are the record of the debt. An exception that is deliberate sits at the code, with its reason beside it. A rule with too many findings to fix in one reviewable merge request waits, marked in the config, and is taken in one rule at a time; you are not asked to give it up. The cost is that PHPMD reports nothing on a project whose limits are ratcheted, so the search for candidates runs it with PHPMD's default limits instead.
 
 ## Why does the suite sometimes compare the old and the new code on real inputs?
 
