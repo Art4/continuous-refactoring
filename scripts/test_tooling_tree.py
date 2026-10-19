@@ -673,8 +673,8 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
-        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 18)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 12)
+        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 19)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 13)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -698,8 +698,8 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_psalm_takes_the_place_of_phpstan(self):
         out = self.compute({"fulfilled": ["composer", "psalm"]})
-        filled = {r["role"]: r["filled_by"] for r in out["roles"]}
-        self.assertEqual(filled["static-analysis"], "psalm")
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("static-analysis", "php")], "psalm")
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertFalse({s for s in listed if s.startswith("phpstan-")})
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["backlog"])
@@ -710,8 +710,8 @@ class SuiteDataTests(unittest.TestCase):
     def test_pint_and_ecs_take_the_place_of_php_cs_fixer(self):
         for tool in ("pint", "ecs"):
             out = self.compute({"fulfilled": ["composer", "phpstan-level-0", tool]})
-            filled = {r["role"]: r["filled_by"] for r in out["roles"]}
-            self.assertEqual(filled["code-style"], tool)
+            filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+            self.assertEqual(filled[("code-style", "php")], tool)
             safety_net = out["tracks"]["Safety Net"]
             self.assertNotIn("php-cs-fixer", {n["node"] for n in safety_net["nodes"]})
             self.assertNotIn(tool, {n["node"] for n in safety_net["nodes"]})
@@ -767,6 +767,50 @@ OWN_PACK = _FIXTURES / "php-own-pack" / "project" / "docs" / "agents" / "tooling
 CLASHING_PACK = _FIXTURES / "php-own-pack-clash" / "project" / "docs" / "agents" / "tooling-pack"
 
 
+class TwigPackTests(unittest.TestCase):
+    """The Twig PHP Pack: it applies where the PHP project requires Twig, and stands beside the PHP Tools."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model = tp.load_model()
+
+    def compute(self, seed=None):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+            full.update(seed or {})
+            return tp.compute(repo, self.model, full)
+
+    def listed(self, out):
+        return {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
+
+    def test_its_stages_appear_where_the_pack_applies(self):
+        out = self.compute({"packs": ["generic", "php", "twig-php"]})
+        self.assertLessEqual({"twig-cs-fixer", "twigstan"}, self.listed(out))
+        self.assertIn("twig-cs-fixer", out["tracks"]["Safety Net"]["backlog"])
+
+    def test_they_do_not_appear_where_it_does_not(self):
+        out = self.compute({"packs": ["generic", "php"]})
+        self.assertFalse({"twig-cs-fixer", "twigstan"} & self.listed(out))
+
+    def test_it_fills_its_roles_beside_the_php_tools(self):
+        out = self.compute({"packs": ["generic", "php", "twig-php"], "fulfilled": ["composer", "php-cs-fixer", "twig-cs-fixer"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("code-style", "php")], "php-cs-fixer")
+        self.assertEqual(filled[("code-style", "twig-php")], "twig-cs-fixer")
+        tools = {t["tool"]: t for t in out["tools"]}
+        self.assertNotEqual(tools["php-cs-fixer"].get("status"), "out")
+
+    def test_twigstan_waits_for_phpstan_level_5(self):
+        seed = {"packs": ["generic", "php", "twig-php"], "fulfilled": ["composer", "twig-cs-fixer"]}
+        reasons = {w["node"]: w["reason"] for w in self.compute(seed)["tracks"]["Guardrails"]["withheld"]}
+        self.assertIn("twigstan", reasons)
+
+    def test_the_fixture_requires_twig(self):
+        composer = json.loads((_REFERENCES.parents[2] / "fixtures/php/php-twig/project/composer.json").read_text())
+        self.assertIn("twig/twig", composer["require"])
+
+
 class OwnPackTests(unittest.TestCase):
     """A target's own Pack: added after the suite's, never redefining one of theirs."""
 
@@ -782,7 +826,7 @@ class OwnPackTests(unittest.TestCase):
             return tp.compute(repo, self.model, full)
 
     def test_it_comes_after_the_suites_packs_and_adds_stages_and_a_role(self):
-        self.assertEqual(list(self.model["packs"]), ["generic", "php", "example-house-rules"])
+        self.assertEqual(list(self.model["packs"]), ["generic", "php", "twig-php", "example-house-rules"])
         self.assertEqual(self.model["stage_order"][-3:], ["deptrac-layers", "deptrac-strict", "mago"])
         self.assertIn("architecture-rules", self.model["roles"])
         out = self.compute()

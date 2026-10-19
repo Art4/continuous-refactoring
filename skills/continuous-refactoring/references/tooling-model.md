@@ -51,7 +51,7 @@ section (`onboarding-setup-interview.md`), and no Stage is workable before it do
 Packs that apply. The generic Pack always applies. A Stage may carry an `applies_when` of its own (Composer
 Audit: the repository requires a real package), judged the same way.
 
-A Pack may name a `scope`, the language or area its Tools work on (`php`, `twig`, `js`); the generic Pack has
+A Pack may name a `scope`, the language or area its Tools work on (`php`, `twig-php`, `js`); the generic Pack has
 none. Tools compete for a Role only with Tools of their own scope, so a Pack for Twig and a Pack for PHP can
 each have a Code Style Tool and neither takes the other's place. A target's own Pack for PHP names the scope
 `php` to stand among the PHP Tools.

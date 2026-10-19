@@ -1,0 +1,42 @@
+{
+  "$schema": "../../pack.schema.json",
+  "pack": "twig-php",
+  "scope": "twig-php",
+  "applies_when": "The PHP Pack applies and composer.json (or, for an indirect requirement, composer.lock) requires twig/twig or a package that brings Twig along, such as symfony/twig-bundle. The file extension of the templates does not decide.",
+  "tools": [
+    {
+      "tool": "twig-cs-fixer",
+      "name": "Twig-CS-Fixer",
+      "uses": "Twig-CS-Fixer",
+      "roles": ["code-style"],
+      "status": "recommended",
+      "details": "twig-cs-fixer.md",
+      "stages": [
+        {
+          "slug": "twig-cs-fixer",
+          "name": "Twig-CS-Fixer",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": ["editorconfig"]
+        }
+      ]
+    },
+    {
+      "tool": "twigstan",
+      "name": "TwigStan",
+      "uses": "TwigStan",
+      "roles": ["static-analysis"],
+      "status": "recommended",
+      "details": "twigstan.md",
+      "stages": [
+        {
+          "slug": "twigstan",
+          "name": "TwigStan",
+          "track": "Guardrails",
+          "requires": ["phpstan-level-5"],
+          "after": ["twig-cs-fixer"]
+        }
+      ]
+    }
+  ]
+}
