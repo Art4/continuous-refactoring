@@ -69,6 +69,14 @@ Only PHPMD's own means are used; the suite adds no script, neither to itself nor
 - The report in a machine-readable format. The value of each violation is in its message ("has a Cyclomatic Complexity of 14"); SARIF carries it as an argument of the message. Only values above a limit are reported, hence the low limits. The peak of a rule is the greatest value, its second place the next.
 - For the search for structural candidates the same ruleset is used with the rules' default limits instead: the places above `recommended` are the evidence.
 
+**A subagent may measure.** The measurement only reads, so it may run in a subagent handed this file, the target's PHPMD config (if there is one) and the question: the planning of an adoption, the Ratchet slice and the Housekeeping line each ask the same thing. Its answer is a table, never the raw report, and it writes nothing into the target (PHPMD is installed outside it). The answer holds:
+
+- per rule: the findings with the noise in and with it out (which property or exclude removed how many), so the plan can count after step 1 of the MR scope;
+- per metric rule: the peak, its second place, and where each sits (fully qualified class, with the method for a method metric);
+- per rule that is taken in at adoption, with the fewest findings: each finding's place and the result of the check for uses PHPMD cannot see: what was searched for and what was found, with the file and line of any hit.
+
+The agent that plans reads the answer as data. It re-measures the figures it writes into the config, and reads the hits of the usage check before it plans a deletion or a replacement. Fixing stays with the implement point, never with the measuring subagent.
+
 ### Housekeeping
 
 - **Housekeeping:** measure again. For each metric rule whose peak lies below its limit (the code improved without the Ratchet slice), set the limit to the peak and update the comment; only the config changes, never the code. After `composer update` run PHPMD and check for rules a new version added to the rule sets in use: a new metric rule is set to today's peak with the comment, any other new finding is fixed or suppressed, as in an adoption.
