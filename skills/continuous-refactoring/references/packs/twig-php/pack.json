@@ -15,7 +15,7 @@
         {
           "slug": "twig-cs-fixer",
           "name": "Twig-CS-Fixer",
-          "track": "Safety Net",
+          "track": "Guardrails",
           "requires": ["composer"],
           "after": ["editorconfig"]
         }

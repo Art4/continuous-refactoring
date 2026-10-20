@@ -1,0 +1,1 @@
+Twig-CS-Fixer is now a Guardrails Stage instead of a Safety Net one: a style pass over Twig templates no longer holds the Safety Net, and with it every PHP Guardrails Stage, back. TwigStan still waits for it.

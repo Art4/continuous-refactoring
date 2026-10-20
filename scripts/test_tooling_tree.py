@@ -673,8 +673,8 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
-        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 19)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 13)
+        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 18)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 14)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -787,7 +787,8 @@ class TwigPackTests(unittest.TestCase):
     def test_its_stages_appear_where_the_pack_applies(self):
         out = self.compute({"packs": ["generic", "php", "twig-php"]})
         self.assertLessEqual({"twig-cs-fixer", "twigstan"}, self.listed(out))
-        self.assertIn("twig-cs-fixer", out["tracks"]["Safety Net"]["backlog"])
+        self.assertNotIn("twig-cs-fixer", out["tracks"]["Safety Net"]["backlog"])
+        self.assertIn("twig-cs-fixer", {n["node"] for n in out["tracks"]["Guardrails"]["nodes"]})
 
     def test_they_do_not_appear_where_it_does_not(self):
         out = self.compute({"packs": ["generic", "php"]})
