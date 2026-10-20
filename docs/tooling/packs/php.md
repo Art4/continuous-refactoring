@@ -14,6 +14,7 @@ flowchart TD
     s_php_cs_fixer["PHP CS Fixer"]
     s_pint["Laravel Pint"]
     s_ecs["Easy Coding Standard"]
+    s_phpcs["PHP_CodeSniffer"]
     s_phpunit["PHPUnit"]
     s_phpstan_level_0["PHPStan Level 0"]
     s_phpstan_level_1["PHPStan Level 1"]
@@ -50,6 +51,7 @@ flowchart TD
   x_editorconfig -.-> s_php_cs_fixer
   s_composer --> s_pint
   s_composer --> s_ecs
+  s_composer --> s_phpcs
   s_composer --> s_phpmd
   s_composer --> s_phpunit
   s_phpunit --> s_coverage_floor
@@ -99,6 +101,7 @@ flowchart TD
 | PHP CS Fixer (`php-cs-fixer`) | recommended | Code Style | php-cs-fixer | php 5.3 | [packs/php/php-cs-fixer.md](../../../skills/continuous-refactoring/references/packs/php/php-cs-fixer.md) |
 | Laravel Pint (`pint`) | recognized | Code Style | Laravel Pint | – | [packs/php/pint.md](../../../skills/continuous-refactoring/references/packs/php/pint.md) |
 | Easy Coding Standard (`ecs`) | recognized | Code Style | Easy Coding Standard | – | [packs/php/ecs.md](../../../skills/continuous-refactoring/references/packs/php/ecs.md) |
+| PHP_CodeSniffer (`phpcs`) | recognized | Code Style | PHP_CodeSniffer | – | [packs/php/phpcs.md](../../../skills/continuous-refactoring/references/packs/php/phpcs.md) |
 | PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring/references/packs/php/phpmd.md) |
 | PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
 | Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
@@ -119,6 +122,7 @@ flowchart TD
 | PHP CS Fixer (`php-cs-fixer`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
 | Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |
 | Easy Coding Standard (`ecs`) | `ecs` | Safety Net | `composer` | – | – |
+| PHP_CodeSniffer (`phpcs`) | `phpcs` | Safety Net | `composer` | – | – |
 | PHPMD (`phpmd`) | `phpmd` | Guardrails | `composer` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
 | Test Coverage Floor (`coverage-floor`) | `coverage-floor` | Guardrails | `phpunit` | – | – |
