@@ -8,10 +8,8 @@ Applies when: The PHP Pack applies and composer.json (or, for an indirect requir
 
 ```mermaid
 flowchart TD
-  subgraph t_safety_net["Safety Net"]
-    s_twig_cs_fixer["Twig-CS-Fixer"]
-  end
   subgraph t_guardrails["Guardrails"]
+    s_twig_cs_fixer["Twig-CS-Fixer"]
     s_twigstan["TwigStan"]
   end
   x_composer["Composer (php)"]
@@ -34,5 +32,5 @@ flowchart TD
 
 | Stage | Tool | Track | Requires | After | Applies when |
 | --- | --- | --- | --- | --- | --- |
-| Twig-CS-Fixer (`twig-cs-fixer`) | `twig-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
+| Twig-CS-Fixer (`twig-cs-fixer`) | `twig-cs-fixer` | Guardrails | `composer` | `editorconfig` | – |
 | TwigStan (`twigstan`) | `twigstan` | Guardrails | `phpstan-level-5` | `twig-cs-fixer` | – |
