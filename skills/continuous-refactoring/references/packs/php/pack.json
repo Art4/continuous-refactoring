@@ -371,7 +371,7 @@
         {
           "slug": "psalm-taint-analysis",
           "name": "Psalm Taint Analysis",
-          "track": "Safety Net",
+          "track": "Guardrails",
           "requires": [["phpstan-level-4", "psalm"]],
           "after": []
         }

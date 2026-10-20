@@ -673,8 +673,8 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
-        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 18)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 14)
+        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 17)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 15)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -705,7 +705,8 @@ class SuiteDataTests(unittest.TestCase):
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["backlog"])
         reasons = {w["node"]: w["reason"] for w in out["tracks"]["Safety Net"]["withheld"]}
         self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer")
-        self.assertIn("psalm-taint-analysis", out["tracks"]["Safety Net"]["backlog"])
+        self.assertNotIn("psalm-taint-analysis", out["tracks"]["Safety Net"]["backlog"])
+        self.assertIn("psalm-taint-analysis", {n["node"] for n in out["tracks"]["Guardrails"]["nodes"]})
 
     def test_pint_ecs_and_phpcs_take_the_place_of_php_cs_fixer(self):
         for tool in ("pint", "ecs", "phpcs"):
