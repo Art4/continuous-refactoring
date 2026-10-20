@@ -20,7 +20,7 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Continuous Integration (`continuous-integration`) | A pipeline that runs the quality jobs on every change. | – | CI Runner (recommended, generic) |
 | Package Management (`package-management`) | Dependencies are declared and installed by a package manager. | – | Composer (recommended, php) |
 | Autoloading (`autoloading`) | Classes are found by a convention, not by hand-written includes. | – | PSR-4 Autoloading (recommended, php) |
-| Code Style (`code-style`) | An automatic fixer keeps the code in one style, so later automated rewrites land styled. | – | PHP CS Fixer (recommended, php); Laravel Pint (recognized, php); Easy Coding Standard (recognized, php); Twig-CS-Fixer (recommended, twig-php) |
+| Code Style (`code-style`) | An automatic fixer keeps the code in one style, so later automated rewrites land styled. | – | PHP CS Fixer (recommended, php); Laravel Pint (recognized, php); Easy Coding Standard (recognized, php); PHP_CodeSniffer (recognized, php); Twig-CS-Fixer (recommended, twig-php) |
 | Testing (`testing`) | A test suite that runs locally and catches regressions. | – | PHPUnit (recommended, php) |
 | Test Coverage (`test-coverage`) | The share of the code the tests reach is measured and may not fall. | Untested / hard-to-test | Test Coverage Floor (recommended, php) |
 | Static Analysis (`static-analysis`) | A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step. | – | PHPStan (recommended, php); Psalm (recognized, php); TwigStan (recommended, twig-php) |

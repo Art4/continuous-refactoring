@@ -93,6 +93,23 @@
       ]
     },
     {
+      "tool": "phpcs",
+      "name": "PHP_CodeSniffer",
+      "uses": "PHP_CodeSniffer",
+      "roles": ["code-style"],
+      "status": "recognized",
+      "details": "phpcs.md",
+      "stages": [
+        {
+          "slug": "phpcs",
+          "name": "PHP_CodeSniffer",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "after": []
+        }
+      ]
+    },
+    {
       "tool": "phpmd",
       "name": "PHPMD",
       "uses": "PHPMD",

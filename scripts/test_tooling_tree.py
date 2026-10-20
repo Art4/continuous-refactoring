@@ -707,8 +707,8 @@ class SuiteDataTests(unittest.TestCase):
         self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer")
         self.assertIn("psalm-taint-analysis", out["tracks"]["Safety Net"]["backlog"])
 
-    def test_pint_and_ecs_take_the_place_of_php_cs_fixer(self):
-        for tool in ("pint", "ecs"):
+    def test_pint_ecs_and_phpcs_take_the_place_of_php_cs_fixer(self):
+        for tool in ("pint", "ecs", "phpcs"):
             out = self.compute({"fulfilled": ["composer", "phpstan-level-0", tool]})
             filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
             self.assertEqual(filled[("code-style", "php")], tool)
