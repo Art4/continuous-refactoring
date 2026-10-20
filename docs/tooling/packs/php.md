@@ -28,6 +28,7 @@ flowchart TD
     s_rector_code_quality["Rector: Code Quality Set"]
     s_rector_phpunit_set["Rector: PHPUnit Set"]
     s_rector_type_coverage["Rector: Type Coverage Set"]
+    r_static_analysis(["Static Analysis"])
   end
   subgraph t_guardrails["Guardrails"]
     s_phpmd["PHPMD"]
@@ -45,7 +46,6 @@ flowchart TD
   end
   x_editorconfig[".editorconfig (generic)"]
   x_ci_runner["CI Runner (generic)"]
-  r_static_analysis(["Static Analysis"])
   s_composer --> s_psr_4
   s_composer --> s_php_cs_fixer
   x_editorconfig -.-> s_php_cs_fixer

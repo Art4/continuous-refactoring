@@ -177,15 +177,27 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
             lines.append(f"  {node}[{_label(stage['name'] + ' (' + stage['pack'] + ')')}]")
         return node
 
+    def players(slug: str) -> list[str]:
+        return [t["stage_slugs"][0] for t in tools.values() if slug in t["roles"] and t["scope"] == packs[name]["scope"]]
+
     def role_node(slug: str) -> str:
         node = _node("r", slug)
         if node not in declared:
             declared.add(node)
             lines.append(f"  {node}([{_label(roles[slug]['name'])}])")
-            for tool in tools.values():
-                if slug in tool["roles"] and tool["scope"] == packs[name]["scope"]:
-                    edges.append(f"  {stage_node(tool['stage_slugs'][0])} --> {node}")
+        if slug not in linked:
+            linked.add(slug)
+            edges.extend(f"  {stage_node(first)} --> {node}" for first in players(slug))
         return node
+
+    own_slugs = {s["slug"]: s for s in own}
+    wanted_roles = [i for s in own for i in s["requires"] if isinstance(i, str) and i not in stages]
+    home: dict[str, str] = {}  # a Role sits in the Track of its first player in this Pack
+    for slug in wanted_roles:
+        first = next((p for p in players(slug) if p in own_slugs), None)
+        if first:
+            home.setdefault(slug, own_slugs[first]["track"])
+    linked: set[str] = set()
 
     for track in tooling_tree.TRACKS:
         members = [s for s in own if s["track"] == track]
@@ -194,6 +206,10 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
         lines.append(f"  subgraph {_node('t', track.lower().replace(' ', '_'))}[{_label(track)}]")
         for stage in members:
             lines.append(f"    {_node('s', stage['slug'])}[{_label(stage['name'])}]")
+        for slug, home_track in home.items():
+            if home_track == track:
+                declared.add(_node("r", slug))
+                lines.append(f"    {_node('r', slug)}([{_label(roles[slug]['name'])}])")
         lines.append("  end")
 
     for stage in own:
