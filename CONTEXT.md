@@ -64,7 +64,7 @@ The tooling-tree Stages whose Track is Safety Net — deterministic tooling whos
 _Avoid_: baseline, tooling gate
 
 **Guardrails**:
-The tooling-tree Stages whose Track is Guardrails — workable only once the **Safety Net** (above) is fulfilled. Also names the **Track** (above) that works through these Stages. Orthogonal to a Role's own **Signal** (below): a Guardrails Stage usually serves a Role with one, but a Safety Net Stage can too (`psalm-taint-analysis`) — one names *when* a Stage becomes workable, the other names *which factor* its tool feeds once adopted.
+The tooling-tree Stages whose Track is Guardrails — workable only once the **Safety Net** (above) is fulfilled. Also names the **Track** (above) that works through these Stages. Orthogonal to a Role's own **Signal** (below): one names *when* a Stage becomes workable, the other names *which factor* its tool feeds once adopted. Every Stage whose Role carries a Signal is a Guardrails Stage today.
 _Avoid_: signal wave (this concept's former name — renamed for symmetry once both it and **Safety Net** became **Track** names, and to stop reading as an alternate spelling of the unrelated **Signal** field below), security wave (not every Guardrails Stage is security-flavored — `phpmd`/`coverage-floor` feed Understandability/Testability, not Security)
 
 **Fulfilment check**:

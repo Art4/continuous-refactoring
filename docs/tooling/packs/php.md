@@ -28,7 +28,6 @@ flowchart TD
     s_rector_code_quality["Rector: Code Quality Set"]
     s_rector_phpunit_set["Rector: PHPUnit Set"]
     s_rector_type_coverage["Rector: Type Coverage Set"]
-    s_psalm_taint_analysis["Psalm Taint Analysis"]
   end
   subgraph t_guardrails["Guardrails"]
     s_phpmd["PHPMD"]
@@ -41,6 +40,7 @@ flowchart TD
     s_phpstan_level_10["PHPStan Level 10"]
     s_phpstan_deprecation_rules["PHPStan Deprecation Rules"]
     s_php_minimal_version["PHP Minimum Version"]
+    s_psalm_taint_analysis["Psalm Taint Analysis"]
     s_semgrep["Semgrep (OWASP Top 10)"]
   end
   x_editorconfig[".editorconfig (generic)"]
@@ -146,5 +146,5 @@ flowchart TD
 | Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Safety Net | `phpunit` | `rector-code-quality`, `php-cs-fixer` | – |
 | Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `php-cs-fixer`, `phpstan-level-3` | – |
 | PHP Minimum Version (`php-minimal-version`) | `php-minimal-version` | Guardrails | `rector-php-set` | – | – |
-| Psalm Taint Analysis (`psalm-taint-analysis`) | `psalm-taint-analysis` | Safety Net | one of `phpstan-level-4`, `psalm` | – | – |
+| Psalm Taint Analysis (`psalm-taint-analysis`) | `psalm-taint-analysis` | Guardrails | one of `phpstan-level-4`, `psalm` | – | – |
 | Semgrep (OWASP Top 10) (`semgrep`) | `semgrep` | Guardrails | – | `ci-runner` | – |
