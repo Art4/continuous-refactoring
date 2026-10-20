@@ -50,8 +50,9 @@ yet. I have a few questions about where your tickets live, then I write one file
 
 Then say in plain prose what Explore found and which questions remain — both sentences are messages in
 the conversation, posted before the first question. Ask the questions one at a time: a title,
-two to four concrete options, one recommendation drawn from Explore — a single-question `AskUserQuestion`
-call where that tool exists, the same content as numbered prose otherwise — and wait for the answer before
+two to four concrete options, one recommendation drawn from Explore — a single-question call of the
+environment's multiple-choice question tool (see Decision points in `SKILL.md`) where the agent has one,
+the same content as numbered prose in the last message otherwise — and wait for the answer before
 the next. In an autonomous run each recommendation is taken as the answer, and a question that has none
 stays open.
 

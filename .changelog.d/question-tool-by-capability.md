@@ -1,0 +1,1 @@
+The suite no longer names one agent's question tool: it asks for the environment's multiple-choice question tool (Claude Code, Cursor and OpenCode each have one under a different name) and falls back to numbered options in chat when there is none, so questions are shown in Cursor and OpenCode too. A tool reply that no human gave counts as unanswered.
