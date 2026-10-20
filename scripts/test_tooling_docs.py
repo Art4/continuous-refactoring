@@ -225,6 +225,11 @@ class DocsTests(unittest.TestCase):
         self.assertIn("Secret Scanning", docs["docs/tooling/README.md"])
         self.assertLess(php.index("## Diagram"), php.index("## Tools"))     # the picture comes first
 
+    def test_a_role_sits_inside_the_track_of_its_player(self):
+        php = td.render_docs(td.tooling_tree.load_model())["docs/tooling/packs/php.md"]
+        safety_net = php[php.index("subgraph t_safety_net"):php.index("subgraph t_guardrails")]
+        self.assertIn('r_static_analysis(["Static Analysis"])', safety_net)
+
     def test_node_ids_of_different_kinds_never_meet(self):
         self.assertNotEqual(td._node("s", "psalm"), td._node("r", "psalm"))
 
