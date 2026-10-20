@@ -125,6 +125,14 @@ also needs a home between cycles: a ticket that is always open is the place wher
 during feature work can be left. The ticket states its own due date, and its last task creates the
 next one, so nothing has to remember when Housekeeping last ran.
 
+## Why does the suite mark a ticket ready after the plan, but never set a status when work starts?
+
+Which status a ticket gets when work starts is your workflow, and the suite neither sets nor asks for it. The moment
+its own plan lands on a ticket is different: it is the same for every project, and a project whose planning skill
+cannot run unattended would otherwise never see the ticket marked. If your tracker section has a **Ready after
+plan** bullet, the suite runs it after it posts a plan, and not when your own skill wrote the plan or while an open
+question waits. Without the bullet nothing is written.
+
 ## Why does an agent have to ask me before leaving an idea on the Housekeeping ticket?
 
 A comment on a tracker is a write you did not ask for. The line the suite proposes for your

@@ -107,6 +107,11 @@ run finds the branch or its merge request and continues there. Post it as one co
 
 An open question is posted after the plan, so that it is the ticket's newest comment.
 
+Where the target has **Ready after plan**, run it once the `Plan` comment is posted, whichever way the run
+goes on (the implementation, or the human implementing in a session of their own). Run it only for a plan
+this step posted, and not while an open question follows the plan: the answer's new plan runs it. If it
+fails, the run goes on and the closing report names the command.
+
 *Done when* the ticket carries the plan and goes to the implement point, or the run has ended with the
 open question or the finding named.
 

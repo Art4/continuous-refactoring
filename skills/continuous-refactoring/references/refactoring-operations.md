@@ -38,6 +38,7 @@ column.
 | **Priority** | How a ticket is marked to come first, and how those are listed — a hint for the order | The order is the Track's own; no ticket comes first |
 | **Linked merge request** | How a merge request refers to its ticket, and how to get from a ticket to its merge request | The merge request names its ticket in plain words and is found by searching the forge's merge requests for it |
 | **Claim** | How a ticket is assigned to whoever works on it | Nothing is assigned |
+| **Ready after plan** | How a ticket is marked ready for implementation once the suite has posted its plan, in the tracker's own commands; the command can run again without harm | Nothing is written |
 | **Rejected** | How a rejection is recorded with its reason and found again: a closed ticket or a file, and where | At the decision point that records the first rejection the suite proposes a place, and writes the bullet from the answer |
 | **Blocked by** | How a ticket states which tickets block it, and when it counts as unblocked | The suite writes the dependency as a sentence in the ticket's text and reads it there |
 | **Housekeeping** | Where the **Housekeeping template** lives and how the next **Housekeeping ticket** is made from it | Housekeeping's mechanism counts as missing: the Housekeeping Track proposes to set it up and writes the bullet |
@@ -109,5 +110,6 @@ the same name.
 
 - **Candidate**, as a label: ``the label `<label>`. List the open ones with `<the tracker's list command, narrowed to that label>`.`` Where the tracker has no labels: the mechanism the human names (a custom field, a subject prefix, child tickets of one collecting ticket).
 - **Priority**, as a label: ``the label `<label>`, next to the **Candidate** mark.``
+- **Ready after plan**, as a label: ``the label `<label>`: `<the tracker's command to set it>`; removing a blocking label: `<command>`.`` Running it twice leaves the ticket as it is. Where the tracker uses a board column or a status field, the command that moves the ticket there.
 - **Rejected**, as a closed ticket: ``a closed ticket carrying `<mark>`, the reason in its last comment. Found again with **Search**, narrowed to that mark.``
 - **Rejected**, as a file: ``one file per rejection at `<folder>/<slug>.md`, holding the reason. Found again with `grep -rli "<word>" <folder>/`.`` The engineering skills' `.out-of-scope/` folder is the natural `<folder>` when the target uses it.
