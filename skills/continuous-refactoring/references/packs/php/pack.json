@@ -345,7 +345,7 @@
     },
     {
       "tool": "php-minimal-version",
-      "name": "PHP Minimum Version",
+      "name": "PHP Version Floor",
       "uses": null,
       "roles": ["runtime-floor"],
       "status": "recommended",
@@ -353,7 +353,7 @@
       "stages": [
         {
           "slug": "php-minimal-version",
-          "name": "PHP Minimum Version",
+          "name": "PHP Version Floor",
           "track": "Guardrails",
           "requires": ["rector-php-set"],
           "after": []

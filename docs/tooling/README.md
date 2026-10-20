@@ -30,4 +30,4 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Dependency Audit (`dependency-audit`) | Known vulnerabilities in the third-party dependencies are reported and gate the pipeline. | Security | Composer Audit (recommended, php) |
 | Secret Scanning (`secret-scanning`) | Committed secrets and credentials are found before they ship. | Security | Secret Detection (recommended, generic) |
 | Static Security Analysis (`static-security-analysis`) | A rule-based scanner looks for common vulnerability patterns in the source. | Security | Semgrep (OWASP Top 10) (recommended, php) |
-| Runtime Floor (`runtime-floor`) | The declared minimum runtime version matches what the code demonstrably needs. | – | PHP Minimum Version (recommended, php) |
+| Runtime Floor (`runtime-floor`) | The declared minimum runtime version matches what the code demonstrably needs. | – | PHP Version Floor (recommended, php) |

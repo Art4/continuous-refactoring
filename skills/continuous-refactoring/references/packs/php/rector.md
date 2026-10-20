@@ -8,7 +8,7 @@ The recommended Tool for the Role Automated Refactoring in the PHP Pack. One fil
 - **Style first.** Every Rector Stage except PHPUnit Set waits until PHP CS Fixer is decided (fulfilled or rejected), so Rector's rewrites land on already-styled code. A rejected PHP CS Fixer releases them; they just never get styled output. A target on Pint or ECS has PHP CS Fixer out, which holds nobody back.
 - **Type Coverage** waits until Dead Code and Code Quality are decided (type-coverage rewrites touch messier code if dead code is not removed and control flow not flattened first) and until PHPStan Level 3 is decided (without strict analysis its rewrites are hard to review). Level 3 was judged strict enough for reviewable rewrites and stays the threshold although the chain reaches level 10. Any of these rejected instead of fulfilled still releases it; it just goes in without that benefit. It requires only Composer: in principle it could become proposable with Dead Code and Code Quality rejected and PHP Set never touched.
 - **PHPUnit Set** rewrites PHPUnit-specific code, so it requires PHPUnit (or Pest, which the `phpunit` Stage recognizes) adopted first, and waits until Code Quality and PHP CS Fixer are decided.
-- **PHP Minimum Version** (`php-minimal-version.md`) requires PHP Set fulfilled, so the declared floor follows what the rewrites landed.
+- **PHP Version Floor** (`php-minimal-version.md`) requires PHP Set fulfilled, so the declared floor follows what the rewrites landed.
 
 ### `rector-php-set`
 
