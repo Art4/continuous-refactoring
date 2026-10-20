@@ -39,7 +39,7 @@ flowchart TD
     s_phpstan_level_9["PHPStan Level 9"]
     s_phpstan_level_10["PHPStan Level 10"]
     s_phpstan_deprecation_rules["PHPStan Deprecation Rules"]
-    s_php_minimal_version["PHP Minimum Version"]
+    s_php_minimal_version["PHP Version Floor"]
     s_psalm_taint_analysis["Psalm Taint Analysis"]
     s_semgrep["Semgrep (OWASP Top 10)"]
   end
@@ -109,7 +109,7 @@ flowchart TD
 | PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring/references/packs/php/phpstan.md) |
 | Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
 | Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [packs/php/rector.md](../../../skills/continuous-refactoring/references/packs/php/rector.md) |
-| PHP Minimum Version (`php-minimal-version`) | recommended | Runtime Floor | – | – | [packs/php/php-minimal-version.md](../../../skills/continuous-refactoring/references/packs/php/php-minimal-version.md) |
+| PHP Version Floor (`php-minimal-version`) | recommended | Runtime Floor | – | – | [packs/php/php-minimal-version.md](../../../skills/continuous-refactoring/references/packs/php/php-minimal-version.md) |
 | Psalm Taint Analysis (`psalm-taint-analysis`) | recommended | Taint Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
 | Semgrep (OWASP Top 10) (`semgrep`) | recommended | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring/references/packs/php/semgrep.md) |
 
@@ -145,6 +145,6 @@ flowchart TD
 | Rector: Code Quality Set (`rector-code-quality`) | `rector` | Safety Net | `rector-php-set` | `php-cs-fixer` | – |
 | Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Safety Net | `phpunit` | `rector-code-quality`, `php-cs-fixer` | – |
 | Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `php-cs-fixer`, `phpstan-level-3` | – |
-| PHP Minimum Version (`php-minimal-version`) | `php-minimal-version` | Guardrails | `rector-php-set` | – | – |
+| PHP Version Floor (`php-minimal-version`) | `php-minimal-version` | Guardrails | `rector-php-set` | – | – |
 | Psalm Taint Analysis (`psalm-taint-analysis`) | `psalm-taint-analysis` | Guardrails | one of `phpstan-level-4`, `psalm` | – | – |
 | Semgrep (OWASP Top 10) (`semgrep`) | `semgrep` | Guardrails | – | `ci-runner` | – |

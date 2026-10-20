@@ -1,4 +1,4 @@
-# PHP Minimum Version
+# PHP Version Floor
 
 The Tool for the Role Runtime Floor in the PHP Pack. It has no third-party tool: the gap detection is its own.
 
