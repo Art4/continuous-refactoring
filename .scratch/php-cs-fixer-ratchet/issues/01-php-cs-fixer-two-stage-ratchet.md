@@ -1,4 +1,4 @@
-# 01 — PHP CS Fixer: adoption Stage plus a Ratchet Stage that rolls rules and paths out in reviewable parts
+# 01 — PHP CS Fixer: adoption Stage plus a rollout Stage that takes rules and paths in, in reviewable parts
 
 Type: task
 Status: open
@@ -23,14 +23,32 @@ answer to a formatting pass that touches hundreds of files.
 
 ### Two Stages
 
-- **`php-cs-fixer` (adoption).** Dependency, main config with the pinned preset, every rule that is already
-  green on the whole target, the CI job once `ci-runner` is fulfilled. Rules not yet taken in stay in the
-  main config as `'<rule>' => false` with a `Not yet:` comment. Keeps `requires: composer`,
-  `after: editorconfig`. The Rector `after` edges stay on this Stage, so Rector is released once adoption
-  is decided, not when the last file is formatted. Rector then runs on partly styled code; accepted.
-- **Ratchet Stage (name open, working name `php-cs-fixer-ratchet`).** Takes in every `Not yet:` rule.
-  `requires: php-cs-fixer`, `after: []`. Fulfilled when no `Not yet:` marker and no staging file is left.
-  Stays open across many merge requests, like the PHPStan baseline ticket; each run plans the next part.
+- **`php-cs-fixer` (adoption).** Dependency, main config, the CI job once `ci-runner` is fulfilled, and the
+  first rules taken in (below). Keeps `requires: composer`, `after: editorconfig`. The Rector `after` edges
+  stay on this Stage, so Rector is released once adoption is decided, not when the last file is formatted.
+  Rector then runs on partly styled code; accepted.
+  - Rules are taken in as for PHPMD (*Taking in a rule*): first those with no findings, then those with the
+    fewest, while each rule's commit stays checkable by one pattern (`principles.md`, *A merge request a
+    person can review*). The tool's own formatting run is one commit per rule. The first rule whose commit
+    is no longer checkable that way, and every rule after it, stays off with `Not yet:` and belongs to the
+    rollout Stage. So the boundary between the Stages is where the first merge request is full, not a fixed line.
+  - Steps, one commit each: dependency and main config; extra rules (proposal); rules with no findings; rules
+    with few findings, each with its formatting run; CI job; `php -l` on the floor PHP as Done-when.
+  - Finding the rules that fail: one `check --dry-run --format=json` with the full preset lists the applied
+    fixers per file, so the per-rule file count falls out of one run (the `appliedFixers` field is from
+    memory, not yet verified).
+  - Fulfilment check: dependency installed, main config committed with the pinned preset (or the target's
+    own), `check` reports zero diffs, every rule switched off carries `Not yet:` or `Declined:`, and once
+    `ci-runner` is fulfilled a CI job runs `check`.
+  - An existing config with rules switched off and no marker is the target's own decision (as PHPMD's rule
+    sets): accepted, never proposed again. A target that already runs `php-cs-fixer` clean thus has both
+    Stages fulfilled at the first evaluation.
+  - Housekeeping line: look for a newer PER-CS version than the pinned one (the preset is pinned, so a
+    newer one never arrives by itself). Goes into the Housekeeping template as for other Tools.
+- **Rollout Stage (name: `php-cs-fixer-rollout`).** Takes in every `Not yet:` rule. `requires: php-cs-fixer`,
+  `after: []`. Fulfilled when no `Not yet:` marker and no rollout file is left. Stays open across many merge
+  requests, like the PHPStan baseline ticket; each run plans the next part. The name avoids "ratchet", which
+  in `tooling-model.md` is a property of a Tool; this Stage carries it out.
 
 ### Preset
 
@@ -38,6 +56,18 @@ answer to a formatting pass that touches hundreds of files.
   the newest version, so a fixer update moves the target) and never `@auto` (floats, and includes the
   `@PHPxMigration` sets, which rewrite code).
 - If the target already has a config with a preset, that preset is the target (the project's choice).
+- The preset stands in the main config **from the first merge request**, with the rules not yet taken in
+  switched off below it as `'<rule>' => false`:
+
+  ```php
+  '@PER-CS3x0' => true,
+  'array_syntax' => false, // Not yet: ...
+  'ordered_imports' => false, // Declined: ...
+  ```
+
+  The config reads as the end state, the markers are a shrinking list, and the last step of a rule is only
+  deleting its `false` line. The alternative, listing the preset's rules one by one and switching to the
+  preset at the end, makes the config unreadable and the last merge request a big bang.
 - `:risky` sets are out of scope for now. `@PHPxMigration` sets stay out: code conversions are Rector's.
 
 ### Extra rules, declinable
@@ -62,37 +92,50 @@ answer to a formatting pass that touches hundreds of files.
 - Done-when includes a `php -l` run on the floor PHP over the changed files. The fixer itself should run on
   the floor PHP too; it warns when it does not.
 
-### Cutting: one rule at a time, a staging file per rule
+### Cutting: one rule at a time, a rollout file
 
 Worked example: `array_syntax` (short arrays), part of the preset, hits several hundred files.
 
 - **Main config** (`.php-cs-fixer.dist.php`): preset, **all** paths. Rules rolled out everywhere are on;
   rules in progress or not yet taken in are `false` with `Not yet:`.
-- **Staging config** (one per rule in progress; file name open): only that rule, a Finder over the paths
-  already migrated. Tried with two config files and `--config`: they run independently.
-- **CI** runs the main config and every staging config.
+- **Rollout config** (`.php-cs-fixer.rollout.php`, fixed name): only the rule in progress, a Finder over the
+  paths already migrated. The rule is named inside the file, not in its name. Tried with two config files
+  and `--config`: they run independently. The fixer discovers only `.php-cs-fixer.php` and
+  `.php-cs-fixer.dist.php` by itself, so this file is always passed with `--config`.
+- **CI** runs the main config, and the rollout config where the file exists.
 - Sequence: adoption MR with the rule `false`; then one MR per directory step (or file group for a big
-  directory): widen the staging Finder, commit the tool's formatting run by itself; last MR: the Finder
-  covers everything, the staging file is deleted and the rule's `false` is removed from main.
+  directory): widen the rollout Finder, commit the tool's formatting run by itself; last MR: the Finder
+  covers everything, the rollout file is deleted and the rule's `false` is removed from main. The next rule
+  gets a new rollout file.
 - Why not narrow the main Finder: paths dropped from main would lose every rule already rolled out.
-- Only one staging file at a time; a later run finds it and continues. Several tiny rules with few findings
-  may share one staging file.
-- The staging file's existence is the marker: it keeps the Ratchet Stage unfulfilled.
-- Ordering of rules: fewest findings first (dry run per rule), stopping at the first rule whose commit a
-  reviewer could not check by one pattern, as for PHPMD (*Taking in a rule*). Path steps are sized by the
-  agent's judgment, no fixed threshold.
+- Only one rollout file at a time (so no rule name in the file name); a later run finds it and continues.
+  Several tiny rules with few findings may share it.
+- The rollout file's existence is the marker: it keeps the rollout Stage unfulfilled.
+- Ordering of rules: fewest findings first (dry run), stopping at the first rule whose commit a reviewer
+  could not check by one pattern, as for PHPMD (*Taking in a rule*). Path steps are sized by the agent's
+  judgment, no fixed threshold.
 
 ## Open points
 
-- Name of the staging file and of the Ratchet Stage.
 - Extra rule list (see above).
 - `.git-blame-ignore-revs`: a squash merge changes the commit hash, so the entry cannot be written on the
   branch. A follow-up step after merge, or left out?
 - Merge conflicts with parallel work when a step touches many files; smaller directory steps only mitigate.
-- A staging file a human created by hand before any plan: does it count as the marker?
+- A rollout file a human created by hand before any plan: does it count as the marker?
 - Separate cache file per config (set in the experiment, collisions not tested).
+- `appliedFixers` in the JSON output: verify before the plan relies on it.
 - `pack.json` `min_runtime: php 5.3` for this Tool: the fixer's own requirement is `^7.4 || ^8.0`
   (3.95.27); decide whether the field is about the tool, the target, or is just stale.
+
+## Decided
+
+- Two Stages; Rector edges stay on adoption (the first merge request releases Rector).
+- Stage 1 takes rules in like PHPMD does; the boundary to the rollout Stage is the first full merge request.
+- Preset in main from the start, unfinished rules `false` with `Not yet:`; declined ones `Declined:`.
+- One rollout file at a time, fixed name `.php-cs-fixer.rollout.php`; Stage name `php-cs-fixer-rollout`.
+- An existing config's switched-off rules without marker are the target's choice.
+- Housekeeping line: look for a newer PER-CS version.
+- `:risky` and migration sets stay out; the agent checks the PHP floor and proposes the PER version.
 
 ## Verified facts
 
@@ -106,9 +149,9 @@ Checked 2026-10-20 against PHP CS Fixer 3.95.27 on PHP 8.3 (throwaway install, n
 
 ## To change when built
 
-`php-cs-fixer.md` (two Stages, preset, markers, staging pattern), `pack.json` (second Stage, edges),
+`php-cs-fixer.md` (two Stages, preset, markers, rollout file), `pack.json` (second Stage, edges),
 the docs `AGENTS.md` lists for a skill change (`docs/playbooks/tracks.md`, `CONTEXT.md` if *Not yet* /
-*Declined* / staging file become vocabulary, `docs/FAQ.md` for "why two Stages"), a `.changelog.d/`
+*Declined* / rollout file become vocabulary, `docs/FAQ.md` for "why two Stages"), a `.changelog.d/`
 fragment, and tests in `scripts/`. `pint.md` and `ecs.md` stay as they are.
 
 ## Comments
