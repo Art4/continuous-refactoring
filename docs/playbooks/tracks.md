@@ -13,7 +13,7 @@ A **Track** is one of four kinds of work a run can spend itself on. Each run wor
 | **Housekeeping** | Recurring maintenance, and the small refactoring ideas noted along the way ([playbook](housekeeping.md)) | one standing ticket per template |
 | **Investigation** | Structural refactoring — a hot spot, a module worth deepening | the tickets the suite filed after exploring, and tickets you wrote |
 
-Safety Net and Guardrails walk the [tooling tree](../../skills/continuous-refactoring/references/tooling-model.md): each adoption step is a *Stage* — one tool, up to a stated degree; each PHPStan level is a Stage of its own. A tool plays a *Role* (static analysis, code style, testing, …), and tools come in *Packs* that apply to a project: every project, a project with PHP code, and a [Pack of your own](own-tool.md).
+Safety Net and Guardrails walk the [tooling tree](../../skills/continuous-refactoring/references/tooling-model.md): each adoption step is a *Stage* — one tool, up to a stated degree; each PHPStan level is a Stage of its own. A tool plays a *Role* (static analysis, code style, testing, …), and tools come in *Packs* that apply to a project: every project, a project with PHP code, a PHP project that uses Twig, and a [Pack of your own](own-tool.md).
 
 At the start of a run the suite searches your open tickets and sorts them: a ticket about a tool of the tree belongs to that tool's Track, the open Housekeeping ticket to Housekeeping, everything else to Investigation. Each ticket also gets a state:
 
