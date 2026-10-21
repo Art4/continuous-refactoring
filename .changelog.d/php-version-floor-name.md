@@ -1,1 +1,0 @@
-The PHP Pack Stage "PHP Minimum Version" is now called "PHP Version Floor", matching its Role Runtime Floor and the terms Floor correction and Floor raise; its slug `php-minimal-version` is unchanged.
