@@ -125,10 +125,17 @@
       "details": "phpmd.md",
       "stages": [
         {
-          "slug": "phpmd",
+          "slug": "phpmd-adoption",
           "name": "PHPMD",
           "track": "Guardrails",
           "requires": ["composer"],
+          "after": []
+        },
+        {
+          "slug": "phpmd-rollout",
+          "name": "PHPMD Rollout",
+          "track": "Guardrails",
+          "requires": ["phpmd-adoption"],
           "after": []
         }
       ]

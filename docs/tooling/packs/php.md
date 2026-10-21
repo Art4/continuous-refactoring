@@ -33,7 +33,8 @@ flowchart TD
   end
   subgraph t_guardrails["Guardrails"]
     s_php_cs_fixer_rollout["PHP CS Fixer Rollout"]
-    s_phpmd["PHPMD"]
+    s_phpmd_adoption["PHPMD"]
+    s_phpmd_rollout["PHPMD Rollout"]
     s_coverage_floor["Test Coverage Floor"]
     s_composer_audit["Composer Audit"]
     s_phpstan_level_6["PHPStan Level 6"]
@@ -55,7 +56,8 @@ flowchart TD
   s_composer --> s_pint
   s_composer --> s_ecs
   s_composer --> s_phpcs
-  s_composer --> s_phpmd
+  s_composer --> s_phpmd_adoption
+  s_phpmd_adoption --> s_phpmd_rollout
   s_composer --> s_phpunit
   s_phpunit --> s_coverage_floor
   s_composer --> s_composer_audit
@@ -131,7 +133,8 @@ flowchart TD
 | Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |
 | Easy Coding Standard (`ecs`) | `ecs` | Safety Net | `composer` | – | – |
 | PHP_CodeSniffer (`phpcs`) | `phpcs` | Safety Net | `composer` | – | – |
-| PHPMD (`phpmd`) | `phpmd` | Guardrails | `composer` | – | – |
+| PHPMD (`phpmd-adoption`) | `phpmd` | Guardrails | `composer` | – | – |
+| PHPMD Rollout (`phpmd-rollout`) | `phpmd` | Guardrails | `phpmd-adoption` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
 | Test Coverage Floor (`coverage-floor`) | `coverage-floor` | Guardrails | `phpunit` | – | – |
 | Composer Audit (`composer-audit`) | `composer-audit` | Guardrails | `composer` | `ci-runner` | The repository's composer.json requires at least one real package; platform pseudo-packages (php, hhvm, ext-*, lib-*, composer-plugin-api, composer-runtime-api) do not count. |
