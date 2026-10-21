@@ -152,7 +152,7 @@ def _pack_page(model: dict, name: str) -> str:
     out.append("| Stage | Tool | Track | Requires | After | Applies when |\n| --- | --- | --- | --- | --- | --- |")
     for stage in own:
         requires = "; ".join(_requirement(i, stages, roles) for i in stage["requires"]) or "–"
-        after = ", ".join(f"`{a}`" for a in stage["after"]) or "–"
+        after = ", ".join(_requirement(a, stages, roles) for a in stage["after"]) or "–"
         out.append(
             f"| {_cell(stage['name'])} (`{stage['slug']}`) | `{stage['tool']}` | {stage['track']} | "
             f"{_cell(requires)} | {after} | {_cell(stage.get('applies_when') or '–')} |"
@@ -191,7 +191,7 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
         return node
 
     own_slugs = {s["slug"]: s for s in own}
-    wanted_roles = [i for s in own for i in s["requires"] if isinstance(i, str) and i not in stages]
+    wanted_roles = [i for s in own for i in s["requires"] + s["after"] if isinstance(i, str) and i not in stages]
     home: dict[str, str] = {}  # a Role sits in the Track of its first player in this Pack
     for slug in wanted_roles:
         first = next((p for p in players(slug) if p in own_slugs), None)
@@ -222,7 +222,8 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
             else:
                 edges.append(f"  {role_node(item)} --> {target}")
         for after in stage["after"]:
-            edges.append(f"  {stage_node(after)} -.-> {target}")
+            source = stage_node(after) if after in stages else role_node(after)
+            edges.append(f"  {source} -.-> {target}")
 
     lines += edges
     lines.append("```")

@@ -73,8 +73,11 @@ its Tools is fulfilled); or a list of Stages of which one is enough. A rejected 
 one. A Stage requires only Stages of its own Track or an earlier one, and the model has no cycles — the
 parser refuses a Pack that breaks either.
 
-**`after`** lists Stages that must be *decided* first — fulfilled, closed by a rejection, or never going to
-be fulfilled — and a rejection of one releases this Stage instead of closing it.
+**`after`** lists Stages or Roles that must be *decided* first, and a rejection of one releases this Stage
+instead of closing it. A Stage is decided when it is fulfilled, closed by a rejection, or never going to be
+fulfilled; a Role, when it is filled in the Stage's scope or the first Stage of every Tool that could fill it
+there is decided. A Role stands for whichever Tool fills it: the Rector Stages wait for Code Style, so a
+target on Pint releases them as well as one on PHP CS Fixer.
 
 ## A target's own Pack
 
@@ -137,4 +140,4 @@ Without `python3`, take the same steps in this order, over the Packs that apply:
 4. List the backlog per Track in the order of the Packs; the Safety Net is fulfilled when its backlog is empty.
 5. For each backlog Stage, name what holds it back, in this order: the target is not onboarded; the
    runtime is below a minimum; a required Stage is not fulfilled or a required Role is not filled; the
-   Safety Net is open (Guardrails only); an `after` Stage is undecided.
+   Safety Net is open (Guardrails only); an `after` Stage or Role is undecided.

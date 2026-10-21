@@ -54,7 +54,7 @@
         "name": {"type": "string", "minLength": 1},
         "track": {"enum": ["Safety Net", "Guardrails"]},
         "requires": {"type": "array", "items": {"$ref": "#/$defs/requirement"}, "description": "Stages or Roles that must be fulfilled first; a rejected one closes this Stage."},
-        "after": {"type": "array", "items": {"$ref": "#/$defs/slug"}, "description": "Stages that must be decided first; a rejected one releases this Stage."},
+        "after": {"type": "array", "items": {"$ref": "#/$defs/slug"}, "description": "Stages or Roles that must be decided first; a rejected one releases this Stage."},
         "applies_when": {"type": "string", "minLength": 1, "description": "The Stage's own condition, judged like the Pack's."}
       }
     }

@@ -273,20 +273,25 @@ def _check_references(model: dict) -> None:
                         f"requires {parent['slug']}, which is in the later Track {parent['track']}",
                     )
         for after in stage["after"]:
-            _need(after in stages, slug, f"after {after}, which is not a stage")
+            _need(after in stages or after in roles, slug, f"after {after}, which is neither a stage nor a role")
             _need(after != slug, slug, "is after itself")
+            if after in roles:
+                _need(
+                    bool(_role_tools(model, after, stage["scope"])),
+                    slug,
+                    f"after the role {after}, which no tool of the scope {stage['scope']} plays",
+                )
 
     # no cycles over requires, role requirements and after
     def deps(slug: str) -> list[str]:
         stage = stages[slug]
         found: list[str] = []
-        for item in stage["requires"]:
-            for member in item if isinstance(item, list) else [item]:
-                if member in stages:
-                    found.append(member)
-                else:
-                    found.extend(tools[t]["stage_slugs"][0] for t in _role_tools(model, member, stage["scope"]))
-        found.extend(stage["after"])
+        members = [m for item in stage["requires"] for m in (item if isinstance(item, list) else [item])]
+        for member in members + stage["after"]:
+            if member in stages:
+                found.append(member)
+            else:
+                found.extend(tools[t]["stage_slugs"][0] for t in _role_tools(model, member, stage["scope"]))
         return found
 
     state: dict[str, int] = {}
@@ -586,6 +591,14 @@ class _State:
             or self.never_fulfilled(stage)
         )
 
+    def after_decided(self, item: str, scope: str | None) -> bool:
+        """An `after` entry: a Stage decided, or a Role filled or with the first
+        Stage of every Tool that could fill it decided."""
+        if item in self.model["stages"]:
+            return self.decided(item)
+        tools = [t for t in self.tools_of_role[item] if scope is None or self.model["tools"][t]["scope"] == scope]
+        return self.filled(item, scope) or all(self.decided(self.first(t)) for t in tools)
+
     # -- tickets --------------------------------------------------------------
 
     def ticketable(self, stage: str) -> bool:
@@ -671,7 +684,7 @@ class _State:
                 return f"blocked — no Tool fills the Role {item}"
         if s["track"] == "Guardrails" and not safety_net_fulfilled:
             return "waiting on the Safety Net"
-        undecided = [a for a in s["after"] if not self.decided(a)]
+        undecided = [a for a in s["after"] if not self.after_decided(a, s["scope"])]
         if undecided:
             return f"waiting on: {', '.join(undecided)}"
         return None

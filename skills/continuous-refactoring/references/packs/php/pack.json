@@ -318,35 +318,35 @@
           "name": "Rector: PHP Set",
           "track": "Safety Net",
           "requires": ["static-analysis"],
-          "after": ["php-cs-fixer-adoption"]
+          "after": ["code-style"]
         },
         {
           "slug": "rector-dead-code",
           "name": "Rector: Dead Code Set",
           "track": "Safety Net",
           "requires": ["rector-php-set"],
-          "after": ["php-cs-fixer-adoption"]
+          "after": ["code-style"]
         },
         {
           "slug": "rector-code-quality",
           "name": "Rector: Code Quality Set",
           "track": "Safety Net",
           "requires": ["rector-php-set"],
-          "after": ["php-cs-fixer-adoption"]
+          "after": ["code-style"]
         },
         {
           "slug": "rector-phpunit-set",
           "name": "Rector: PHPUnit Set",
           "track": "Safety Net",
           "requires": ["phpunit"],
-          "after": ["rector-code-quality", "php-cs-fixer-adoption"]
+          "after": ["rector-code-quality", "code-style"]
         },
         {
           "slug": "rector-type-coverage",
           "name": "Rector: Type Coverage Set",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": ["rector-dead-code", "rector-code-quality", "php-cs-fixer-adoption", "phpstan-level-3"]
+          "after": ["rector-dead-code", "rector-code-quality", "code-style", "phpstan-level-3"]
         }
       ]
     },
