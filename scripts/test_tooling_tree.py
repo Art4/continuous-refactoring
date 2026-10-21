@@ -714,8 +714,8 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
-        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 17)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 17)
+        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 16)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 18)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -800,6 +800,24 @@ class SuiteDataTests(unittest.TestCase):
             self.assertEqual(stages[f"phpstan-level-{n}"]["requires"], [f"phpstan-level-{n - 1}"])
         self.assertEqual(stages["phpstan-level-5"]["track"], "Safety Net")
         self.assertEqual(stages["phpstan-level-6"]["track"], "Guardrails")
+
+    def test_phpstan_levels_4_and_5_wait_for_the_rector_sets_that_shrink_their_baselines(self):
+        stages = self.model["stages"]
+        self.assertEqual(stages["phpstan-level-4"]["after"], ["rector-dead-code"])
+        self.assertEqual(stages["phpstan-level-5"]["after"], ["rector-type-coverage"])
+        chain = ["composer", "php-cs-fixer-adoption", "phpstan-level-0", "phpstan-level-1", "phpstan-level-2", "phpstan-level-3"]
+        reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": chain})["tracks"]["Safety Net"]["withheld"]}
+        self.assertEqual(reasons["phpstan-level-4"], "waiting on: rector-dead-code")
+        out = self.compute({"fulfilled": chain, "rejected": {"rector-dead-code": None}})
+        self.assertIn("phpstan-level-4", out["tracks"]["Safety Net"]["workable"])
+        out = self.compute({"fulfilled": chain + ["phpstan-level-4", "rector-php-set", "rector-dead-code", "rector-code-quality"]})
+        reasons = {w["node"]: w["reason"] for w in out["tracks"]["Safety Net"]["withheld"]}
+        self.assertEqual(reasons["phpstan-level-5"], "waiting on: rector-type-coverage")
+        out = self.compute({"fulfilled": chain + ["phpstan-level-4"], "rejected": {"rector": None}})
+        self.assertIn("phpstan-level-5", out["tracks"]["Safety Net"]["workable"])
+
+    def test_the_rector_phpunit_set_is_a_guardrails_stage(self):
+        self.assertEqual(self.model["stages"]["rector-phpunit-set"]["track"], "Guardrails")
 
     def test_composer_audit_applies_only_to_a_repository_with_a_real_dependency(self):
         self.assertIn("applies_when", self.model["stages"]["composer-audit"])

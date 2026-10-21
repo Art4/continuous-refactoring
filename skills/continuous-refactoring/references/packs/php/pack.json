@@ -242,14 +242,14 @@
           "name": "PHPStan Level 4",
           "track": "Safety Net",
           "requires": ["phpstan-level-3"],
-          "after": []
+          "after": ["rector-dead-code"]
         },
         {
           "slug": "phpstan-level-5",
           "name": "PHPStan Level 5",
           "track": "Safety Net",
           "requires": ["phpstan-level-4"],
-          "after": []
+          "after": ["rector-type-coverage"]
         },
         {
           "slug": "phpstan-level-6",
@@ -344,7 +344,7 @@
         {
           "slug": "rector-phpunit-set",
           "name": "Rector: PHPUnit Set",
-          "track": "Safety Net",
+          "track": "Guardrails",
           "requires": ["phpunit"],
           "after": ["rector-code-quality", "code-style"]
         },

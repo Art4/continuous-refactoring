@@ -180,6 +180,18 @@ Guardrails, where it does not hold up structural work either. The price is that 
 changes run on code that is only partly styled for a while; a conflict there is resolved by running the
 fixer again.
 
+## Why do PHPStan Levels 4 and 5 wait for Rector?
+
+Because Rector clears part of their baseline mechanically, and every finding it clears is one nobody fixes
+by hand. Level 4 reports dead code — unreachable statements, conditions and type checks that are always
+true or false — and Rector's Dead Code set removes exactly that, so Level 4 waits until that set is decided.
+Level 5 checks the types of the arguments passed to methods and functions; once Rector's Type Coverage has
+declared the types it can infer, Level 5 is measured once against them, not fixed against docblocks the
+rewrites later replace, so Level 5 waits for Type Coverage. The two tools are meant to be used side by side.
+Declining the Rector set releases the level; it is then taken in without the rewrites. Rector's PHPUnit Set
+does not touch what the levels check and is a Guardrails Stage: it rewrites only test code, and a conflict
+with structural work is resolved by running Rector again.
+
 ## Why does the suite sometimes compare the old and the new code on real inputs?
 
 A test only covers the cases someone thought of. When a restructuring reaches over several steps behind
