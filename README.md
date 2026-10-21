@@ -8,8 +8,8 @@
 
 🌐 [continuous-refactoring.de](https://continuous-refactoring.de/)
 
-A portable agent-skill suite for [Claude Code](https://claude.com/claude-code) that keeps a
-software project under **continuous refactoring**. Each call is one **run**: it leads from the
+A portable agent-skill suite for coding agents — [Claude Code](https://claude.com/claude-code),
+Cursor, OpenCode — that keeps a software project under **continuous refactoring**. Each call is one **run**: it leads from the
 project's open refactoring tickets to one opened merge request, and stops there. You get more work
 done by calling again.
 
@@ -32,7 +32,7 @@ The suite keeps **no state of its own**. Your open tickets are the worklist; mer
 declined work and the standing Housekeeping ticket are found by searching your tracker and your
 forge on every run. What you change there by hand is simply what the next run finds.
 
-The core is [language-neutral](skills/continuous-refactoring/references/tooling-model.md), with tools delivered in Packs; the first language Pack is a **[general PHP project](docs/tooling/packs/php.md)** (code style, Rector, PHPStan and more, with the diagram of what comes after what), grounded in over 20 years of PHP experience and kept up to date with current best practice.
+The core is [language-neutral](skills/continuous-refactoring/references/tooling-model.md), with tools delivered in **Packs**. A [generic Pack](docs/tooling/packs/generic.md) applies to every project; the first language Pack is a **[general PHP project](docs/tooling/packs/php.md)** (code style, Rector, PHPStan, PHPMD and more, with the diagram of what comes after what), grounded in over 20 years of PHP experience and kept up to date with current best practice; a [Twig Pack](docs/tooling/packs/twig-php.md) adds the templates of a PHP project that uses Twig. Tools you already run — Psalm instead of PHPStan, Laravel Pint instead of PHP CS Fixer — are recognised and not replaced, and a tool the suite does not know joins through a [Pack of your own](docs/playbooks/own-tool.md). The [tooling overview](docs/tooling/README.md) lists every Role, Tool and Pack.
 
 ## How it works
 
@@ -42,7 +42,7 @@ recommends the first one, in this fixed order, that has something to work on:
 | Track | What it does | Recommended when |
 |---|---|---|
 | **Safety Net** | Sets up the deterministic checks (test runner, coding standards, static analysis, CI) that catch a regression before an agent's own judgement has to | one of its tickets can be worked, or the Track was never scanned |
-| **Guardrails** | Adds further quality and security tooling once the Safety Net is in place (dependency audit, coverage floor, mess detection, …) | the same, once Safety Net is fulfilled |
+| **Guardrails** | Adds further quality and security tooling once the Safety Net is in place (dependency audit, coverage floor, mess detection, taint analysis, …) and takes in a large rule set — a code style, PHPMD — rule by rule, in merge requests a person can review | the same, once Safety Net is fulfilled |
 | **Housekeeping** | Recurring maintenance — dependency currency, tooling-deprecation cleanup, a secret scan over the Git history — plus the small refactoring ideas left as comments on its ticket | its open ticket is due, or it is not set up yet |
 | **Investigation** | Structural refactoring: works the tickets that ask for one, or explores the code for hot spots and deepening opportunities and proposes tickets | nothing above has work |
 
@@ -95,15 +95,11 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong t
 5. **Review and merge** what the suite opens. Nothing limits how many merge requests are open at once; how much runs in parallel is your decision.
 6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at either command.
 
-## Moving over from 0.6.0
+## Upgrading
 
-The rebuild is a breaking change. Three steps per project:
-
-1. **Run the onboarding again** — call `/continuous-refactoring`; it notices what the tracker section lacks and adds it.
-2. **Delete the suite's old state** in its scratch folder: the files `config.md`, `bookkeeping.md` and `merge-requests.md` and the folder `out-of-scope/`. They are no longer read. A folder of local tickets next to them is still in use and stays. To keep old rejections where they are, name that folder under **Rejected** in the tracker section instead of deleting it.
-3. **Remove the symlinks of the removed skills** — everything except `continuous-refactoring` and `continuous-housekeeping`.
-
-Nothing is migrated: the first scan of each Track rebuilds the worklist as tickets.
+Pull the suite's checkout; the symlinks follow it. What a version changes, and the steps a breaking
+change needs in your project, are in the [CHANGELOG](CHANGELOG.md) — coming from 0.6.0 or earlier,
+read the 0.7.0 entry first.
 
 ## Where things live
 
@@ -113,7 +109,8 @@ Everything is in your project, your tracker and your forge — nothing in the co
 - **Work in review:** open merge requests on your forge, found from their tickets
 - **Declined work:** a closed ticket or a file with the reason, in the place your tracker section names under **Rejected**
 - **Recurring maintenance:** the Housekeeping template, a file in your repository, and the one open Housekeeping ticket made from it
-- **How the tracker is reached:** the `## Refactoring operations` section of `docs/agents/issue-tracker.md`
+- **How the tracker is reached:** the `## Refactoring operations` section of `docs/agents/issue-tracker.md`, including the optional bullets — a **Candidate** mark, **Ready after plan**, **Rejected**
+- **Tools of your own:** a Pack in your repository, named under **Tooling Pack** in that section
 - **Focus areas and refactoring goal:** two lines you add to `AGENTS.md` (or `CLAUDE.md`), any time
 - **Domain language and decisions:** your own glossary and ADR directory, where your project keeps them
 
@@ -126,6 +123,7 @@ Everything is in your project, your tracker and your forge — nothing in the co
 | [Own-tool playbook](docs/playbooks/own-tool.md) | Adding a tool the suite does not know, as a Pack of your own |
 | [Housekeeping playbook](docs/playbooks/housekeeping.md) | The maintenance Track — template, standing ticket, rhythm |
 | [Reviewer-loop playbook](docs/playbooks/reviewer-loop.md) | Observing a run from a separate reviewer agent |
+| [Tooling](docs/tooling/README.md) | Every Role, Tool and Pack the suite knows, with a diagram per Pack |
 | [Architecture](docs/architecture.md) | The two skills, their references, the tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
 | [Known limitations](docs/known-limitations.md) | Limits without a suite-side fix, plus troubleshooting |
