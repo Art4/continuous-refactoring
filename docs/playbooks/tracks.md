@@ -80,6 +80,12 @@ PHPMD does not get a baseline. Its metric rules (complexity, length, coupling) h
 
 A rule that would report too much to be taken in at once is not given up. The first merge request leaves it out, marked as not taken in yet with the number of its findings, and the suite proposes one ticket, "PHPMD: take in the remaining rules", worked one rule per merge request, the rule with the fewest findings first. Only you decide that a rule is declined for good.
 
+### PHP CS Fixer on a large project
+
+PHP CS Fixer comes in two steps. The first merge request adds the tool with a pinned PER Coding Style version, a short list of extra rules you may decline, and as many rules as one reviewable merge request can carry, fewest files first. Every other rule is switched off in the config with a comment saying it is not taken in yet and how many files it touches. The config already reads as the end state; the list of switched-off rules only shrinks. This first merge request is enough for Rector to start.
+
+The rest is one Guardrails ticket, "PHP CS Fixer: take in the remaining rules", worked one rule at a time. A second config file next to the main one holds only the rule in progress and the paths already done, and CI checks both. Each merge request widens it by a few directories, the ones changed least recently first, with the fixer's own output as the change. The last one for a rule deletes the second file and switches the rule on in the main config. The suite reads your PHP version first, so the style never adds syntax your oldest supported PHP cannot parse. The Housekeeping ticket looks for a newer PER Coding Style version, because a pinned one never moves by itself.
+
 ## Investigation without tickets
 
 With no open Investigation ticket, the run explores the code: your focus areas first, else the places the Git history shows changing again and again. Everything it finds is shown to you in order of signal. The recommendation is to file the **three strongest** — you may file others, as many as you want, or none. What is not filed is not stored; a later exploration may come upon it again. An autonomous run files those three and goes on to work the strongest.

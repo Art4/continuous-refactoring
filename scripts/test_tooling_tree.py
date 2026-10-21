@@ -674,7 +674,7 @@ class SuiteDataTests(unittest.TestCase):
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
         self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 17)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 15)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 16)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -686,7 +686,7 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_a_rejected_composer_closes_the_php_pack(self):
         out = self.compute({"rejected": {"composer": None}})
-        for slug in ("psr-4", "php-cs-fixer", "phpunit", "phpstan-level-0", "rector-type-coverage", "composer-audit", "semgrep" if False else "phpmd"):
+        for slug in ("psr-4", "php-cs-fixer-adoption", "php-cs-fixer-rollout", "phpunit", "phpstan-level-0", "rector-type-coverage", "composer-audit", "semgrep" if False else "phpmd"):
             self.assertIn(slug, out["closed_by_rejection"], slug)
         self.assertNotIn("ci-runner", out["closed_by_rejection"])
 
@@ -704,7 +704,7 @@ class SuiteDataTests(unittest.TestCase):
         self.assertFalse({s for s in listed if s.startswith("phpstan-")})
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["backlog"])
         reasons = {w["node"]: w["reason"] for w in out["tracks"]["Safety Net"]["withheld"]}
-        self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer")
+        self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer-adoption")
         self.assertNotIn("psalm-taint-analysis", out["tracks"]["Safety Net"]["backlog"])
         self.assertIn("psalm-taint-analysis", {n["node"] for n in out["tracks"]["Guardrails"]["nodes"]})
 
@@ -714,9 +714,20 @@ class SuiteDataTests(unittest.TestCase):
             filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
             self.assertEqual(filled[("code-style", "php")], tool)
             safety_net = out["tracks"]["Safety Net"]
-            self.assertNotIn("php-cs-fixer", {n["node"] for n in safety_net["nodes"]})
+            self.assertNotIn("php-cs-fixer-adoption", {n["node"] for n in safety_net["nodes"]})
             self.assertNotIn(tool, {n["node"] for n in safety_net["nodes"]})
             self.assertIn("rector-php-set", safety_net["workable"])
+
+    def test_the_php_cs_fixer_rollout_holds_up_neither_rector_nor_the_safety_net(self):
+        stages = self.model["stages"]
+        self.assertEqual(stages["php-cs-fixer-rollout"]["track"], "Guardrails")
+        self.assertEqual(stages["php-cs-fixer-rollout"]["requires"], ["php-cs-fixer-adoption"])
+        rector = [s for s in stages.values() if s["tool"] == "rector"]
+        self.assertTrue(rector)
+        for stage in rector:
+            self.assertNotIn("php-cs-fixer-rollout", stage["after"], stage)
+        out = self.compute({"fulfilled": ["composer", "phpstan-level-0", "php-cs-fixer-adoption"]})
+        self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["workable"])
 
     def test_phpstan_is_proposed_when_the_role_is_empty(self):
         out = self.compute({"fulfilled": ["composer"]})
@@ -727,7 +738,7 @@ class SuiteDataTests(unittest.TestCase):
         reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": ["composer"]})["tracks"]["Safety Net"]["withheld"]}
         self.assertEqual(reasons["rector-php-set"], "blocked — no Tool fills the Role static-analysis")
         reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": ["composer", "phpstan-level-0"]})["tracks"]["Safety Net"]["withheld"]}
-        self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer")
+        self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer-adoption")
 
     def test_the_phpstan_levels_are_a_chain(self):
         stages = self.model["stages"]
@@ -745,7 +756,7 @@ class SuiteDataTests(unittest.TestCase):
         out = self.compute({"runtime": {"php": "5.6"}})
         self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"composer-audit", "phpstan-level-0"})
         out = self.compute({"runtime": {"php": "5.2"}})
-        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"composer-audit", "phpstan-level-0", "php-cs-fixer", "phpunit"})
+        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"composer-audit", "phpstan-level-0", "php-cs-fixer-adoption", "phpunit"})
         self.assertEqual(self.compute({"runtime": {"php": "8.3"}})["runtime_blocked"], [])
 
     def test_the_tracks_partition_the_ticketable_stages(self):
@@ -796,7 +807,7 @@ class TwigPackTests(unittest.TestCase):
         self.assertFalse({"twig-cs-fixer", "twigstan"} & self.listed(out))
 
     def test_it_fills_its_roles_beside_the_php_tools(self):
-        out = self.compute({"packs": ["generic", "php", "twig-php"], "fulfilled": ["composer", "php-cs-fixer", "twig-cs-fixer"]})
+        out = self.compute({"packs": ["generic", "php", "twig-php"], "fulfilled": ["composer", "php-cs-fixer-adoption", "twig-cs-fixer"]})
         filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
         self.assertEqual(filled[("code-style", "php")], "php-cs-fixer")
         self.assertEqual(filled[("code-style", "twig-php")], "twig-cs-fixer")
@@ -847,7 +858,7 @@ class OwnPackTests(unittest.TestCase):
         out = self.compute({"fulfilled": ["composer"]})
         backlog = out["tracks"]["Safety Net"]["backlog"]
         self.assertTrue({"phpstan-level-0", "mago"} <= set(backlog))
-        out = self.compute({"fulfilled": ["composer", "mago", "php-cs-fixer", "editorconfig"]})
+        out = self.compute({"fulfilled": ["composer", "mago", "php-cs-fixer-adoption", "editorconfig"]})
         filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
         self.assertEqual(filled[("static-analysis", "php")], "mago")
         self.assertTrue(next(t for t in out["tools"] if t["tool"] == "phpstan")["out"])

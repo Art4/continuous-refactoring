@@ -1,7 +1,7 @@
 # 01 — PHP CS Fixer: adoption Stage plus a rollout Stage that takes rules and paths in, in reviewable parts
 
 Type: task
-Status: open
+Status: done
 Priority: normal
 
 **Goal:** a target with 1000+ PHP files can be brought to a code style in merge requests a person can
@@ -208,3 +208,15 @@ change), a `.changelog.d/` fragment, and tests in `scripts/`. `pint.md` and `ecs
 
 > **2026-10-21:** Design grilled with the user in two rounds; every decision is under *Decided*.
 > Follow-up idea outside this ticket: split PHPMD's adoption into two Stages the same way.
+>
+> **2026-10-21:** Built. One change to the design: the parser lets a Tool share its slug with a Stage only
+> when that Stage is its only one, since a rejection naming `php-cs-fixer` would otherwise be ambiguous
+> between the Tool and its first Stage. Decided with the user: the Tool keeps `php-cs-fixer`, the adoption
+> Stage becomes `php-cs-fixer-adoption` (Name "PHP CS Fixer"), the rollout Stage is `php-cs-fixer-rollout`
+> (Name "PHP CS Fixer Rollout"). The Rector `after` edges moved to `php-cs-fixer-adoption`; a rejection a
+> target recorded on `php-cs-fixer` now reads as one of the whole Tool.
+>
+> Beyond the list under *To change when built*: `track-scan.md` (the rollout ticket's title and check),
+> `implement-point.md` (the rollout ticket is built like a tooling ticket, not file by file), `rector.md`
+> (waits for the adoption only), `CONTEXT.md` (the slug in one example), the generated
+> `docs/tooling/packs/php.md`, and the count and diagram assertions in `scripts/`.

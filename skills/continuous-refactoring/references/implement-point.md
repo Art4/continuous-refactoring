@@ -47,7 +47,8 @@ merge request is its own matter. Then go to step 4.
   nothing typed by hand. No test is written.
 - **A baseline ticket** → fix file by file, one commit per file, following the tool's diagnosis. Then
   regenerate the baseline with the command the plan names and commit it by itself. No test is written:
-  the existing suite is what notices a behaviour change.
+  the existing suite is what notices a behaviour change. "PHP CS Fixer: take in the remaining rules" is
+  built like a tooling ticket instead: the fixer's run is the commit.
 - **Any other ticket** → first the pin: where the plan's pin is new, write it, run it on the code as it
   stands and see it pass, and commit it before any commit moves structure; where it names existing tests,
   run them the same way. Then slice by slice, test-first at the plan's seam: write one failing test through the
