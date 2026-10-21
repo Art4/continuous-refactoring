@@ -17,7 +17,8 @@ answer to a formatting pass that touches hundreds of files.
   fulfilled or rejected), so Rector waits for a Stage that, on a big target, would take many merge requests.
 - Reviewability is generic only: `design-point.md`, *Planning a tooling ticket* (size estimate, cut into
   parts) and `principles.md`, *A merge request a person can review*. Nothing says how to cut a style fixer.
-- `pack.json` still says `min_runtime: php 5.3` for this Tool, which looks stale (see *Verified facts*).
+- `pack.json` says `min_runtime: php 5.3`: by `tooling-model.md` the oldest runtime any version of the Tool
+  ever ran on, so not stale.
 
 ## Design (settled in discussion)
 
@@ -72,10 +73,33 @@ answer to a formatting pass that touches hundreds of files.
 
 ### Extra rules, declinable
 
-- The plan proposes the preset plus a few extra rules (candidates, to be fixed in this ticket:
-  `ordered_imports`, `no_unused_imports`, `single_quote`, `global_namespace_import`; the list is open).
-- A declined rule is written `'<rule>' => false` with a `Declined: <reason>` comment. Fulfilment accepts
-  `Declined:`, not `Not yet:`.
+- The plan proposes the preset plus extra rules from a default list in the Tool's `details` file. None is
+  risky, none is in `@PER-CS3x0`, none rewrites code (Rector's), touches PHPDoc content (PHPStan's) or
+  overlaps PHPMD, none depends on a PHP version. Confirmed list (`method_chaining_indentation` was
+  declined: by its own description it does not support mixed indentation):
+  - `no_unused_imports`, `single_quote`
+  - Casing: `native_function_casing`, `magic_constant_casing`, `magic_method_casing`,
+    `class_reference_name_casing`, `native_type_declaration_casing`, `integer_literal_case`
+  - Whitespace: `whitespace_after_comma_in_array`, `no_whitespace_before_comma_in_array`,
+    `trim_array_spaces`, `no_whitespace_in_empty_array`, `no_trailing_comma_in_singleline`,
+    `no_multiline_whitespace_around_double_arrow`, `no_spaces_around_offset`,
+    `object_operator_without_whitespace`, `no_singleline_whitespace_before_semicolons`,
+    `space_after_semicolon`, `type_declaration_spaces`, `single_line_comment_spacing`, `include`,
+    `no_leading_namespace_whitespace`
+  - Empty: `no_empty_statement`, `no_empty_comment`, `no_empty_phpdoc`
+  - PHPDoc form: `phpdoc_indent`, `phpdoc_trim`, `phpdoc_trim_consecutive_blank_line_separation`,
+    `no_blank_lines_after_phpdoc`, `phpdoc_single_line_var_spacing`, `phpdoc_types`, `phpdoc_scalar`
+- Left out on purpose: Rector's ground (`no_useless_else`, `simplified_if_return`,
+  `ternary_to_null_coalescing`, `protected_to_private`, `combine_consecutive_*`, `no_useless_return`,
+  `lambda_not_used_import`, `php_unit_*`), PHPStan-relevant (`no_superfluous_phpdoc_tags`,
+  `phpdoc_to_comment`), taste (`yoda_style`, `phpdoc_align`, `phpdoc_summary`, `single_line_throw`,
+  `blank_line_before_statement`, `global_namespace_import`), version-bound (`octal_notation`,
+  `numeric_literal_separator`, `stringable_for_to_string`).
+- Note: Rector can also remove unused imports (`withImportNames(removeUnusedImports: true)`); no hard
+  collision, both would do the same.
+- Extra rules are taken in like preset rules (no findings first, then fewest, the rest `Not yet:`).
+- A declined rule is written `'<rule>' => false` with a `Declined: <reason>` comment. Only a human
+  declines. Fulfilment accepts `Declined:`, not `Not yet:`.
 - Interactive: a question to the human. Autonomous: the proposal is the default, named in the merge request
   description; the reviewer declines per comment.
 
@@ -110,22 +134,25 @@ Worked example: `array_syntax` (short arrays), part of the preset, hits several 
 - Why not narrow the main Finder: paths dropped from main would lose every rule already rolled out.
 - Only one rollout file at a time (so no rule name in the file name); a later run finds it and continues.
   Several tiny rules with few findings may share it.
-- The rollout file's existence is the marker: it keeps the rollout Stage unfulfilled.
+- The rollout file's existence is the marker: it keeps the rollout Stage unfulfilled, whoever created it.
+- The `Not yet:` comment of a rule in progress names the rollout file's path, so a later run finds it
+  wherever it lies: `'array_syntax' => false, // Not yet: rolled out via .php-cs-fixer.rollout.php`.
+  A rule with no rollout running carries `Not yet:` without a path.
+- File names and places (main config, rollout file, cache files) are defaults. The plan or the target may
+  set others; an existing config of the target always wins. Each config gets its own cache file, all of
+  them in `.gitignore`.
+- Path steps go from the least recently changed directories to the most (git history), to keep merge
+  conflicts with parallel work low.
+- When the floor PHP is not available for `php -l`, the run does not stop: the overrides against known
+  version traps stand in, and the merge request says the floor was not checked.
 - Ordering of rules: fewest findings first (dry run), stopping at the first rule whose commit a reviewer
   could not check by one pattern, as for PHPMD (*Taking in a rule*). Path steps are sized by the agent's
   judgment, no fixed threshold.
 
 ## Open points
 
-- Extra rule list (see above).
-- `.git-blame-ignore-revs`: a squash merge changes the commit hash, so the entry cannot be written on the
-  branch. A follow-up step after merge, or left out?
-- Merge conflicts with parallel work when a step touches many files; smaller directory steps only mitigate.
-- A rollout file a human created by hand before any plan: does it count as the marker?
-- Separate cache file per config (set in the experiment, collisions not tested).
-- `appliedFixers` in the JSON output: verify before the plan relies on it.
-- `pack.json` `min_runtime: php 5.3` for this Tool: the fixer's own requirement is `^7.4 || ^8.0`
-  (3.95.27); decide whether the field is about the tool, the target, or is just stale.
+- Ticket shape of the rollout Stage, `Not yet:` count, preset bump, Track of the rollout Stage,
+  vocabulary: in the next grilling round.
 
 ## Decided
 
@@ -136,6 +163,13 @@ Worked example: `array_syntax` (short arrays), part of the preset, hits several 
 - An existing config's switched-off rules without marker are the target's choice.
 - Housekeeping line: look for a newer PER-CS version.
 - `:risky` and migration sets stay out; the agent checks the PHP floor and proposes the PER version.
+- Extra rules: the list above; only a human declines.
+- A hand-made rollout file counts as the marker; `Not yet:` names its path.
+- File names and places are defaults; the plan or the target may set others.
+- `.git-blame-ignore-revs`: left out.
+- Floor PHP not available: overrides stand in, the merge request names it.
+- Path steps: coldest directories first.
+- Built as one ticket, one PR.
 
 ## Verified facts
 
@@ -146,6 +180,8 @@ Checked 2026-10-20 against PHP CS Fixer 3.95.27 on PHP 8.3 (throwaway install, n
 - Fixer `composer.json` requires PHP `^7.4 || ^8.0`.
 - `@PER-CS3x0` includes `array_syntax` (short): the main run reported `array(1, 2)` as fixable.
 - Two config files with `--config` work side by side.
+- `check --format=json` lists `appliedFixers` per file only with `-v`.
+- `ordered_imports` is already part of `@PER-CS3x0`.
 
 ## To change when built
 
