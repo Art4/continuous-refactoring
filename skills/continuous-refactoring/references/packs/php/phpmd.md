@@ -1,33 +1,41 @@
 # PHPMD
 
-The Tool for the Role Code Smell Detection in the PHP Pack.
+The Tool for the Role Code Smell Detection in the PHP Pack. Two Stages: `phpmd-adoption` adopts the tool with its limits and the rules a first merge request can carry, `phpmd-rollout` takes in the rest, one rule at a time.
 
-**Why this order.** A Guardrails Stage: workable only once the Safety Net is fulfilled, and it needs Composer. Adopting it enriches the search for structural candidates; it never holds structural work up.
+**Why this order.** Both are Guardrails Stages: workable only once the Safety Net is fulfilled; the adoption needs Composer, the rollout the adoption. Adopting it enriches the search for structural candidates; it never holds structural work up. The rollout is a Stage of its own so the adoption counts as done once the limits hold and the CI job runs, while the last rule may be many merge requests away.
 
-### `phpmd`
+### `phpmd-adoption`
 
-- **Purpose:** measure the size and complexity of the code, and keep it from growing: the limits of its metrics are a Ratchet (below). Once fulfilled, the search for structural candidates reads its real output for the Understandability factor (nested conditionals, long methods, deep coupling) and for Defect density (complexity correlates with bug rates), both in `../../signals.md`, in place of the generic recognition method. It runs there with the rules' own default limits (*Measuring*), because under the Ratchet the target's run is green and reports nothing.
+- **Purpose:** measure the size and complexity of the code, and keep it from growing: the limits of its metrics are a Ratchet (below). Once `phpmd-adoption` is fulfilled, the search for structural candidates reads its real output for the Understandability factor (nested conditionals, long methods, deep coupling) and for Defect density (complexity correlates with bug rates), both in `../../signals.md`, in place of the generic recognition method. It runs there with the rules' own default limits (*Measuring*), because under the Ratchet the target's run is green and reports nothing.
 - **Fulfilment check:** all of:
   - the dev dependency `phpmd/phpmd` is installed;
   - a ruleset config is committed (`phpmd.xml`, `phpmd.xml.dist` or `.phpmd.xml`). The rule sets it takes are the target's choice (*Rule sets*);
   - no baseline file (`phpmd.baseline.xml`) exists, nor does the config name one;
   - every limit the config overrides on a metric rule carries the Ratchet comment (below);
-  - no rule is left out *for now*: an `<exclude>` whose comment begins `Not yet:` (*Taking in a rule*) keeps the Stage unfulfilled;
   - PHPMD runs locally without a violation;
-  - once `ci-runner` is fulfilled, a CI job invokes PHPMD with that config (a self-wired CI gate, the same shape as PHPUnit's; with no CI yet, local adoption alone still fulfils the Stage).
+  - once `ci-runner` is fulfilled, a CI job invokes PHPMD with that config, and with the rollout ruleset where there is one (*Taking in a rule*). It is a self-wired CI gate, the same shape as PHPUnit's; with no CI yet, local adoption alone still fulfils the Stage.
+
+  Rules left out with `Not yet:` leave this Stage fulfilled; they are `phpmd-rollout`'s (*Taking in a rule*).
 - **Rule sets:** a fresh adoption writes `cleancode`, `codesize`, `design`, `naming` and `unusedcode`, not `controversial`: its camel-case rules overlap the code style fixer, and its superglobal rule depends on the framework. A target that does not want a rule set, or a single rule, leaves it out of the config or names it in an `<exclude>`, with a comment beside it that says why. The check accepts such a selection, with or without the comment, and the suite never proposes a rule set later that the config left out. Many findings are no reason to decline a rule: such a rule waits (*Taking in a rule*), and the human is not asked to give it up.
 - **Version:** a fresh adoption installs the newest major version. A target on 2.x stays on it and uses the 2.x property names (*The Ratchet*); moving to 3.x is no part of this Stage.
 - **MR scope:**
   - *A fresh adoption:* the dependency, the config and, once `ci-runner` is fulfilled, the CI job. The config is made so PHPMD runs green, in this order:
     1. Noise the stack causes is expressed in the config, not in the code: path excludes, and rule properties such as `exceptions` or `ignore-global` where the rule has them (for example static calls the framework makes idiomatic, or short method names it requires). A path exclude covers every rule, and an `exceptions` list covers its rule in every file, by name. So a name goes into `exceptions` only where the stack fixes it for the whole project (a method the framework calls, a class it makes static). A name that is only a convention of some classes (the fields a mapper fills through reflection, in the entities) is suppressed on those classes instead, or the list would silence a real finding of that name anywhere else.
     2. Every metric rule the target breaks gets its limit set to today's peak, with the Ratchet comment. The target's code is not touched for these. A name-length limit it breaks is set once to what the target uses, with no comment.
-    3. Count the findings of every rule that is no metric **after step 1**, with the noise out: a rule is judged by what is left. `MissingImport` is the usual case: where the target writes global classes and functions without an import, `ignore-global` removes nearly all of its findings. Take the rules in with the fewest findings first: each one's findings are fixed at their cause, and a deliberate exception is suppressed at the code (*Suppressions*). Stop at the first rule whose commit a reviewer could no longer check by one pattern (`../../principles.md`, *A merge request a person can review*): a mechanical rewrite of many places counts for little, a suppression that needs its own reason in each place counts for much. That rule and every rule after it are not taken in yet (*Taking in a rule*). The plan names the count of each rule and the rule where it stopped. **A fix that deletes or replaces code** (unused code, a debug function) comes after a check that nothing uses it that PHPMD cannot see: a call built from a string, reflection, a framework convention, serialization, text someone reads. Where something does, the finding is a false alarm and is suppressed with that as the reason. The check is made while planning, not while implementing, and the plan states its result per rule taken in (what was searched for, what was found), because a reviewer can only read it there. A replacement that changes text someone reads (an exception message, a log line) counts as a use.
+    3. Count the findings of every rule that is no metric **after step 1**, with the noise out: a rule is judged by what is left. `MissingImport` is the usual case: where the target writes global classes and functions without an import, `ignore-global` removes nearly all of its findings. Take the rules in with the fewest findings first: each one's findings are fixed at their cause, and a deliberate exception is suppressed at the code (*Suppressions*). Stop at the first rule whose commit a reviewer could no longer check by one pattern (`../../principles.md`, *A merge request a person can review*): a mechanical rewrite of many places counts for little, a suppression that needs its own reason in each place counts for much. That rule and every rule after it stay `Not yet:` and belong to `phpmd-rollout`; the boundary between the two Stages is where the first merge request is full. The plan names the count of each rule and the rule where it stopped. **A fix that deletes or replaces code** (unused code, a debug function) comes after a check that nothing uses it that PHPMD cannot see: a call built from a string, reflection, a framework convention, serialization, text someone reads. Where something does, the finding is a false alarm and is suppressed with that as the reason. The check is made while planning, not while implementing, and the plan states its result per rule taken in (what was searched for, what was found), because a reviewer can only read it there. A replacement that changes text someone reads (an exception message, a log line) counts as a use.
     4. The commits leave PHPMD green each: the config commit already holds every `Not yet:` exclude, including those of the rules the following commits take in, and each such commit deletes its own exclude together with the fix.
-    5. Where the merge request is still too big, the plan is cut into parts (`../../design-point.md`, *Planning a tooling ticket*): the first holds the dependency, the config, the limits and the rules already green; the rest is taken in later.
+    5. Where the merge request is still too big, it takes in fewer rules: the least it holds is the dependency, the config, the limits and the rules already green.
   - *A target that has a baseline:* one merge request replaces it, whether the suite or the target's own hand put it there. Entries of metric rules become limits at today's peak, with the Ratchet comment; the others are fixed or suppressed as above; the baseline file is deleted. This is no ticket that stays open: nothing is repaired, only moved.
   - In both cases the merge request reads in its description what was set to which peak and what was suppressed, with the reasons.
   - Also add the Housekeeping line below to the target's Housekeeping template (`../../implement-point.md`, *Slices every kind of ticket can have*), as a commit of its own before the changelog entry. A Stage already fulfilled the very first time it is evaluated never gets a merge request of its own; its line then reaches the template through the Housekeeping Track (`../../../../continuous-housekeeping/references/housekeeping-track.md`, step 4).
 - **Suppressions:** a deliberate exception is written at the code it concerns, never in a baseline, which holds only rule, file and method and has no place for a reason. On 3.x it is the attribute `#[SuppressWarnings(RuleClass::class)]` on the method or class; on 2.x the docblock annotation `@SuppressWarnings(PHPMD.RuleName)`. A comment above says why. On 3.x the rule `UnusedSuppression` reports a suppression that no longer suppresses anything. A metric rule is never suppressed: its limit is the tool for that. A suppression at adoption is judged by the merge request's review; later, a new one is an open question to the human, like an ignore rule for PHPStan.
+
+### `phpmd-rollout`
+
+- **Purpose:** take in every rule the adoption left `Not yet:`, in merge requests a person can review.
+- **Fulfilment check:** `phpmd-adoption` is fulfilled, the config holds no `<exclude>` commented `Not yet:`, and no rollout ruleset exists (*Taking in a rule*), whoever created them.
+- **Its ticket** is "PHPMD: take in the remaining rules", the shape of a PHPStan baseline ticket: it stays open across many merge requests, each run plans the next part (`../../design-point.md`, *Planning a baseline ticket*), and each merge request delivers a part and carries no closing reference.
+- **A part** is one rule, or one path step of a rule too large for one merge request (*Taking in a rule*).
 
 ### Taking in a rule
 
@@ -42,7 +50,30 @@ A rule that reports too much to take in at adoption is named in an `<exclude>` i
 
 Every such `<exclude>` has its own comment directly above it, and no other `<exclude>` of the config carries a `Not yet:`. A metric rule whose limit is overridden, or a rule with a property set for noise, is named in an `<exclude>` of its rule set without a comment and then referenced once more on its own with the property: PHPMD does not merge a rule named twice, it runs both, and the default one would still report.
 
-The Stage is not fulfilled while such an `<exclude>` exists. Its ticket is "PHPMD: take in the remaining rules", the same shape as a PHPStan baseline ticket and planned part by part (`../../design-point.md`, *Planning a baseline ticket*): one rule per merge request, the one with the fewest findings first; a rule too large for one merge request is cut by directory, and its `<exclude>` stays until the last part is merged. A part fixes findings at their cause, after the check for uses PHPMD cannot see (*MR scope*), and suppresses only a deliberate exception or a false alarm. A suppression that merely lowers the count is no fix. Taking in a rule deletes its `<exclude>` and its comment. A finding that only a behaviour change could remove is named in the plan, and the rule is declined instead: its `<exclude>` then carries the reason, and only a human decides that.
+Such an `<exclude>` is `phpmd-rollout`'s. One rule at a time, the one with the fewest findings first by a fresh measurement (*Measuring*). A rule that fits one merge request has its findings fixed and its `<exclude>` deleted in that merge request. A rule too large for one is cut by directory, through a second ruleset beside the main one:
+
+- **The main config** keeps every rule set and every path. The rule in progress keeps its `<exclude>` there until the last part.
+- **The rollout ruleset**, `phpmd.rollout.xml` by default: only the rule in progress, with the properties the main config gives it, and the main config's `<exclude-pattern>` entries. It names the rule in its description, not in its file name, since there is only one at a time:
+
+  ```xml
+  <?xml version="1.0"?>
+  <ruleset name="PHPMD rollout"
+           xmlns="http://pmd.sf.net/ruleset/1.0.0"
+           xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xsi:schemaLocation="http://pmd.sf.net/ruleset/1.0.0 http://pmd.sf.net/ruleset_xml_schema.xsd">
+      <description>Takes in ElseExpression path by path; phpmd.xml excludes it until the paths cover everything.</description>
+      <rule ref="rulesets/cleancode.xml/ElseExpression"/>
+  </ruleset>
+  ```
+
+- **The paths already done** are in the command that runs the rollout ruleset, since PHPMD reads no paths from a ruleset passed to it: `vendor/bin/phpmd analyze lib/Legacy src/Billing --ruleset phpmd.rollout.xml` on 3.x, `vendor/bin/phpmd lib/Legacy,src/Billing text phpmd.rollout.xml` on 2.x. The command lives where the main config's does: in the CI job, or in the script the CI job calls.
+- **The path steps:** the directories changed least recently first (`git log`), to keep merge conflicts with parallel work low; a big directory is cut into groups of files. The agent sizes each step by `../../principles.md`, *A merge request a person can review*; there is no fixed threshold. A part widens the paths in the command and fixes the rule's findings in them.
+- **The last part** of a rule: its paths would cover every path of the main config. The rollout ruleset and its command are deleted, the rule's `<exclude>` and its comment in the main config with them. The next rule too large for one merge request gets a new rollout ruleset.
+- **CI** runs PHPMD with the main config, and with the rollout ruleset wherever it exists.
+
+**Names and places.** The rollout ruleset's name is a default; the plan or the target may set another.
+
+A part fixes findings at their cause, after the check for uses PHPMD cannot see (*MR scope*), and suppresses only a deliberate exception or a false alarm. A suppression that merely lowers the count is no fix. A finding that only a behaviour change could remove is named in the plan, and the rule is declined instead: its `<exclude>` then carries the reason, and only a human decides that.
 
 ### The Ratchet
 

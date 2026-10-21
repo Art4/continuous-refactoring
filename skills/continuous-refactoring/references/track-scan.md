@@ -78,13 +78,13 @@ not fulfilled, since the Fulfilment check asks for an empty baseline, and the ne
 proposal is titled "PHPStan Level N: shrink the baseline" instead of "Raise to PHPStan Level N"; the check of
 a baseline ticket is whether the baseline still has entries.
 
-**A PHPMD with a baseline.** The Stage `phpmd` is not fulfilled while a baseline file exists, however PHPMD
+**A PHPMD with a baseline.** The Stage `phpmd-adoption` is not fulfilled while a baseline file exists, however PHPMD
 got there. Its proposal is titled "PHPMD: replace the baseline"; the merge request is one, not a series
 (`packs/php/phpmd.md`, *MR scope*).
 
-**A PHPMD with rules not taken in yet.** The same Stage is not fulfilled while its config holds an
-`<exclude>` commented `Not yet:`. Its proposal is titled "PHPMD: take in the remaining rules"; the check of
-that ticket is whether such an `<exclude>` is left.
+**A PHPMD with rules not taken in yet.** The Stage `phpmd-rollout` is not fulfilled while the config holds
+an `<exclude>` commented `Not yet:` or a rollout ruleset exists. Its proposal is titled "PHPMD: take in the
+remaining rules"; the check of that ticket is whether either is left (`packs/php/phpmd.md`).
 
 **A PHP CS Fixer with rules not taken in yet.** The Stage `php-cs-fixer-rollout` is not fulfilled while the
 main config switches a rule off with `Not yet:` or a rollout file exists. Its proposal is titled "PHP CS

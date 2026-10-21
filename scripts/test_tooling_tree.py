@@ -715,7 +715,7 @@ class SuiteDataTests(unittest.TestCase):
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
         self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 17)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 16)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 17)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -727,7 +727,7 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_a_rejected_composer_closes_the_php_pack(self):
         out = self.compute({"rejected": {"composer": None}})
-        for slug in ("psr-4", "php-cs-fixer-adoption", "php-cs-fixer-rollout", "phpunit", "phpstan-level-0", "rector-type-coverage", "composer-audit", "semgrep" if False else "phpmd"):
+        for slug in ("psr-4", "php-cs-fixer-adoption", "php-cs-fixer-rollout", "phpunit", "phpstan-level-0", "rector-type-coverage", "composer-audit", "phpmd-adoption", "phpmd-rollout"):
             self.assertIn(slug, out["closed_by_rejection"], slug)
         self.assertNotIn("ci-runner", out["closed_by_rejection"])
 
@@ -770,6 +770,18 @@ class SuiteDataTests(unittest.TestCase):
             self.assertIn("code-style", stage["after"], stage)
         out = self.compute({"fulfilled": ["composer", "phpstan-level-0", "php-cs-fixer-adoption"]})
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["workable"])
+
+    def test_the_phpmd_rollout_follows_the_adoption(self):
+        stages = self.model["stages"]
+        self.assertEqual(stages["phpmd-adoption"]["name"], "PHPMD")
+        self.assertEqual(stages["phpmd-rollout"]["track"], "Guardrails")
+        self.assertEqual(stages["phpmd-rollout"]["requires"], ["phpmd-adoption"])
+        base = ["composer", "phpstan-level-0", "phpstan-level-1", "phpstan-level-2", "phpstan-level-3", "phpstan-level-4", "phpstan-level-5"]
+        out = self.compute({"fulfilled": base + ["phpmd-adoption"]})
+        self.assertIn("phpmd-rollout", out["tracks"]["Guardrails"]["backlog"])
+        out = self.compute({"rejected": {"phpmd": None}})
+        self.assertIn("phpmd-adoption", out["closed_by_rejection"])
+        self.assertIn("phpmd-rollout", out["closed_by_rejection"])
 
     def test_phpstan_is_proposed_when_the_role_is_empty(self):
         out = self.compute({"fulfilled": ["composer"]})
