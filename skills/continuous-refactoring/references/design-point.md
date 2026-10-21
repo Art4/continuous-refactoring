@@ -172,6 +172,8 @@ and only after the human allows it: that is an open question, and the run ends w
 
 The ticket "PHPMD: take in the remaining rules" is planned the same way, with the rules in place of the groups: read the `<exclude>` entries marked `Not yet:` in the PHPMD config, count the findings of each rule with the rule included, and plan one rule as this merge request's part (`packs/php/phpmd.md`, *Taking in a rule*). *Done when* PHPMD, with the rule included, reports nothing, its `<exclude>` is gone, and the test suite is green.
 
+The ticket "PHP CS Fixer: take in the remaining rules" is planned the same way, with the rule in progress in place of the group (`packs/php/php-cs-fixer.md`, *Taking in a rule*). A rollout file exists → its rule is this merge request's; otherwise measure the rules marked `Not yet:` in the main config and take the one in the fewest files. The part is the next path step of that rule, or its last. *Done when* `check` reports zero diffs with the main config and with the rollout file where it is left, `php -l` on the floor PHP passes over the changed files, and the test suite is green. `This merge request` names the rule, the paths of the part, and the paths and rules that stay.
+
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies: the baseline cannot become
 empty, so the level above cannot be raised. The open question names what follows from each answer. Where a

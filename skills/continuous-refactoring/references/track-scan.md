@@ -43,7 +43,7 @@ Purpose in the target, under any name.
   `composer run security-check`, a script that calls `composer audit`, fulfils `composer-audit`. Where the
   Pack knows the other tool as a recognized Tool, its own Stage is the one fulfilled, never the
   recommended Tool's: a target running Psalm fulfils the Stage `psalm`, one running Laravel Pint the Stage
-  `pint` (Easy Coding Standard: `ecs`, PHP_CodeSniffer: `phpcs`), and no PHPStan Stage and not `php-cs-fixer` is judged fulfilled for
+  `pint` (Easy Coding Standard: `ecs`, PHP_CodeSniffer: `phpcs`), and no PHPStan Stage and not `php-cs-fixer-adoption` is judged fulfilled for
   it. The Role is then filled by the recognized Tool, and the recommended one is not proposed.
 - **Two tools compete for the Purpose, or it is unclear whether one serves it** → undecided, and the
   proposal carries the question, so the human answers it at filing.
@@ -85,6 +85,11 @@ got there. Its proposal is titled "PHPMD: replace the baseline"; the merge reque
 **A PHPMD with rules not taken in yet.** The same Stage is not fulfilled while its config holds an
 `<exclude>` commented `Not yet:`. Its proposal is titled "PHPMD: take in the remaining rules"; the check of
 that ticket is whether such an `<exclude>` is left.
+
+**A PHP CS Fixer with rules not taken in yet.** The Stage `php-cs-fixer-rollout` is not fulfilled while the
+main config switches a rule off with `Not yet:` or a rollout file exists. Its proposal is titled "PHP CS
+Fixer: take in the remaining rules"; the check of that ticket is whether either is left
+(`packs/php/php-cs-fixer.md`).
 
 **Which Tool fills a Role.** The report says, per Role the Track's Stages need, which Tool fills it, and
 which Tool is not proposed because another took its place (`tools` marks it `out`).

@@ -11,7 +11,7 @@ flowchart TD
   subgraph t_safety_net["Safety Net"]
     s_composer["Composer"]
     s_psr_4["PSR-4 Autoloading"]
-    s_php_cs_fixer["PHP CS Fixer"]
+    s_php_cs_fixer_adoption["PHP CS Fixer"]
     s_pint["Laravel Pint"]
     s_ecs["Easy Coding Standard"]
     s_phpcs["PHP_CodeSniffer"]
@@ -31,6 +31,7 @@ flowchart TD
     r_static_analysis(["Static Analysis"])
   end
   subgraph t_guardrails["Guardrails"]
+    s_php_cs_fixer_rollout["PHP CS Fixer Rollout"]
     s_phpmd["PHPMD"]
     s_coverage_floor["Test Coverage Floor"]
     s_composer_audit["Composer Audit"]
@@ -47,8 +48,9 @@ flowchart TD
   x_editorconfig[".editorconfig (generic)"]
   x_ci_runner["CI Runner (generic)"]
   s_composer --> s_psr_4
-  s_composer --> s_php_cs_fixer
-  x_editorconfig -.-> s_php_cs_fixer
+  s_composer --> s_php_cs_fixer_adoption
+  x_editorconfig -.-> s_php_cs_fixer_adoption
+  s_php_cs_fixer_adoption --> s_php_cs_fixer_rollout
   s_composer --> s_pint
   s_composer --> s_ecs
   s_composer --> s_phpcs
@@ -73,18 +75,18 @@ flowchart TD
   s_phpstan_level_0 --> r_static_analysis
   s_psalm --> r_static_analysis
   r_static_analysis --> s_rector_php_set
-  s_php_cs_fixer -.-> s_rector_php_set
+  s_php_cs_fixer_adoption -.-> s_rector_php_set
   s_rector_php_set --> s_rector_dead_code
-  s_php_cs_fixer -.-> s_rector_dead_code
+  s_php_cs_fixer_adoption -.-> s_rector_dead_code
   s_rector_php_set --> s_rector_code_quality
-  s_php_cs_fixer -.-> s_rector_code_quality
+  s_php_cs_fixer_adoption -.-> s_rector_code_quality
   s_phpunit --> s_rector_phpunit_set
   s_rector_code_quality -.-> s_rector_phpunit_set
-  s_php_cs_fixer -.-> s_rector_phpunit_set
+  s_php_cs_fixer_adoption -.-> s_rector_phpunit_set
   s_composer --> s_rector_type_coverage
   s_rector_dead_code -.-> s_rector_type_coverage
   s_rector_code_quality -.-> s_rector_type_coverage
-  s_php_cs_fixer -.-> s_rector_type_coverage
+  s_php_cs_fixer_adoption -.-> s_rector_type_coverage
   s_phpstan_level_3 -.-> s_rector_type_coverage
   s_rector_php_set --> s_php_minimal_version
   s_phpstan_level_4 -->|one of| s_psalm_taint_analysis
@@ -119,7 +121,8 @@ flowchart TD
 | --- | --- | --- | --- | --- | --- |
 | Composer (`composer`) | `composer` | Safety Net | – | – | – |
 | PSR-4 Autoloading (`psr-4`) | `psr-4` | Safety Net | `composer` | – | – |
-| PHP CS Fixer (`php-cs-fixer`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
+| PHP CS Fixer (`php-cs-fixer-adoption`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
+| PHP CS Fixer Rollout (`php-cs-fixer-rollout`) | `php-cs-fixer` | Guardrails | `php-cs-fixer-adoption` | – | – |
 | Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |
 | Easy Coding Standard (`ecs`) | `ecs` | Safety Net | `composer` | – | – |
 | PHP_CodeSniffer (`phpcs`) | `phpcs` | Safety Net | `composer` | – | – |
@@ -140,11 +143,11 @@ flowchart TD
 | PHPStan Level 10 (`phpstan-level-10`) | `phpstan` | Guardrails | `phpstan-level-9` | – | – |
 | PHPStan Deprecation Rules (`phpstan-deprecation-rules`) | `phpstan` | Guardrails | `phpstan-level-5` | – | – |
 | Psalm (`psalm`) | `psalm` | Safety Net | `composer` | – | – |
-| Rector: PHP Set (`rector-php-set`) | `rector` | Safety Net | `static-analysis` (Role) | `php-cs-fixer` | – |
-| Rector: Dead Code Set (`rector-dead-code`) | `rector` | Safety Net | `rector-php-set` | `php-cs-fixer` | – |
-| Rector: Code Quality Set (`rector-code-quality`) | `rector` | Safety Net | `rector-php-set` | `php-cs-fixer` | – |
-| Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Safety Net | `phpunit` | `rector-code-quality`, `php-cs-fixer` | – |
-| Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `php-cs-fixer`, `phpstan-level-3` | – |
+| Rector: PHP Set (`rector-php-set`) | `rector` | Safety Net | `static-analysis` (Role) | `php-cs-fixer-adoption` | – |
+| Rector: Dead Code Set (`rector-dead-code`) | `rector` | Safety Net | `rector-php-set` | `php-cs-fixer-adoption` | – |
+| Rector: Code Quality Set (`rector-code-quality`) | `rector` | Safety Net | `rector-php-set` | `php-cs-fixer-adoption` | – |
+| Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Safety Net | `phpunit` | `rector-code-quality`, `php-cs-fixer-adoption` | – |
+| Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `php-cs-fixer-adoption`, `phpstan-level-3` | – |
 | PHP Version Floor (`php-minimal-version`) | `php-minimal-version` | Guardrails | `rector-php-set` | – | – |
 | Psalm Taint Analysis (`psalm-taint-analysis`) | `psalm-taint-analysis` | Guardrails | one of `phpstan-level-4`, `psalm` | – | – |
 | Semgrep (OWASP Top 10) (`semgrep`) | `semgrep` | Guardrails | – | `ci-runner` | – |
