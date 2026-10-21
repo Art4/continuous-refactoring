@@ -1,1 +1,0 @@
-Psalm Taint Analysis is now a Guardrails Stage instead of a Safety Net one: its findings can need a restructuring to fix, and that restructuring waits for the Safety Net, so the Stage no longer holds the Safety Net back and no longer has to be skipped to pass it.

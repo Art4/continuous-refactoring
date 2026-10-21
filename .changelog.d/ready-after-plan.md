@@ -1,1 +1,0 @@
-A new optional operation, **Ready after plan**, lets a target mark a ticket ready for implementation (for example a label or a board column) right after the suite posts a plan on it. Without the bullet nothing changes.
