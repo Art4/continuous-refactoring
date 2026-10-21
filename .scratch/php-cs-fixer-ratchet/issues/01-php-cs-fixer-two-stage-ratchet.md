@@ -45,9 +45,12 @@ answer to a formatting pass that touches hundreds of files.
     sets): accepted, never proposed again. A target that already runs `php-cs-fixer` clean thus has both
     Stages fulfilled at the first evaluation.
   - Housekeeping line: look for a newer PER-CS version than the pinned one (the preset is pinned, so a
-    newer one never arrives by itself). Goes into the Housekeeping template as for other Tools.
-- **Rollout Stage (name: `php-cs-fixer-rollout`).** Takes in every `Not yet:` rule. `requires: php-cs-fixer`,
-  `after: []`. Fulfilled when no `Not yet:` marker and no rollout file is left. Stays open across many merge
+    newer one never arrives by itself); if there is one, switch the pinned preset and set the rules that now
+    report findings to `Not yet:`. The rollout Stage is then unfulfilled again and is worked as usual.
+- **Rollout Stage (name: `php-cs-fixer-rollout`, Track Guardrails).** Takes in every `Not yet:` rule.
+  `requires: php-cs-fixer`, `after: []`. In Guardrails, not Safety Net, so structural work does not wait for
+  the last file to be formatted; an occasional merge conflict with a structural merge request is resolved
+  by running the fixer again. Fulfilled when no `Not yet:` marker and no rollout file is left. Stays open across many merge
   requests, like the PHPStan baseline ticket; each run plans the next part. The name avoids "ratchet", which
   in `tooling-model.md` is a property of a Tool; this Stage carries it out.
 
@@ -134,6 +137,13 @@ Worked example: `array_syntax` (short arrays), part of the preset, hits several 
 - Why not narrow the main Finder: paths dropped from main would lose every rule already rolled out.
 - Only one rollout file at a time (so no rule name in the file name); a later run finds it and continues.
   Several tiny rules with few findings may share it.
+- The rollout Stage's ticket is "PHP CS Fixer: take in the remaining rules", shaped like a baseline ticket
+  (PHPMD's "take in the remaining rules" is the model): open across many merge requests, each run plans the
+  next part, merge requests deliver a part and carry no closing reference. `design-point.md`, *Planning a
+  baseline ticket*, gets a paragraph for it, like PHPMD's. It is built by the tooling rule: the fixer's run
+  is one commit with nothing typed by hand.
+- The `Not yet:` comment carries the number of files the last measurement counted, as PHPMD's does:
+  `// Not yet: 212 files, rolled out via .php-cs-fixer.rollout.php`.
 - The rollout file's existence is the marker: it keeps the rollout Stage unfulfilled, whoever created it.
 - The `Not yet:` comment of a rule in progress names the rollout file's path, so a later run finds it
   wherever it lies: `'array_syntax' => false, // Not yet: rolled out via .php-cs-fixer.rollout.php`.
@@ -151,8 +161,7 @@ Worked example: `array_syntax` (short arrays), part of the preset, hits several 
 
 ## Open points
 
-- Ticket shape of the rollout Stage, `Not yet:` count, preset bump, Track of the rollout Stage,
-  vocabulary: in the next grilling round.
+None left after grilling.
 
 ## Decided
 
@@ -170,6 +179,11 @@ Worked example: `array_syntax` (short arrays), part of the preset, hits several 
 - Floor PHP not available: overrides stand in, the merge request names it.
 - Path steps: coldest directories first.
 - Built as one ticket, one PR.
+- Rollout Stage in Guardrails; its ticket is baseline-shaped, planned like PHPMD's remaining rules.
+- `Not yet:` carries the file count of the last measurement.
+- Housekeeping line also switches to a newer PER-CS and sets new failing rules to `Not yet:`.
+- No new `CONTEXT.md` terms: rollout file, `Not yet:`, `Declined:` stay Tool conventions in the `details`
+  files until a third Tool uses the pattern.
 
 ## Verified facts
 
@@ -185,9 +199,12 @@ Checked 2026-10-20 against PHP CS Fixer 3.95.27 on PHP 8.3 (throwaway install, n
 
 ## To change when built
 
-`php-cs-fixer.md` (two Stages, preset, markers, rollout file), `pack.json` (second Stage, edges),
-the docs `AGENTS.md` lists for a skill change (`docs/playbooks/tracks.md`, `CONTEXT.md` if *Not yet* /
-*Declined* / rollout file become vocabulary, `docs/FAQ.md` for "why two Stages"), a `.changelog.d/`
-fragment, and tests in `scripts/`. `pint.md` and `ecs.md` stay as they are.
+`php-cs-fixer.md` (two Stages, preset, extra rules, markers, rollout file, Housekeeping line), `pack.json`
+(second Stage, edges), `design-point.md` (*Planning a baseline ticket* paragraph), the docs `AGENTS.md`
+lists for a skill change (`docs/playbooks/tracks.md`, `docs/FAQ.md` for "why two Stages"; no `CONTEXT.md`
+change), a `.changelog.d/` fragment, and tests in `scripts/`. `pint.md` and `ecs.md` stay as they are.
 
 ## Comments
+
+> **2026-10-21:** Design grilled with the user in two rounds; every decision is under *Decided*.
+> Follow-up idea outside this ticket: split PHPMD's adoption into two Stages the same way.
