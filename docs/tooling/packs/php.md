@@ -26,7 +26,6 @@ flowchart TD
     s_rector_php_set["Rector: PHP Set"]
     s_rector_dead_code["Rector: Dead Code Set"]
     s_rector_code_quality["Rector: Code Quality Set"]
-    s_rector_phpunit_set["Rector: PHPUnit Set"]
     s_rector_type_coverage["Rector: Type Coverage Set"]
     r_static_analysis(["Static Analysis"])
     r_code_style(["Code Style"])
@@ -43,6 +42,7 @@ flowchart TD
     s_phpstan_level_9["PHPStan Level 9"]
     s_phpstan_level_10["PHPStan Level 10"]
     s_phpstan_deprecation_rules["PHPStan Deprecation Rules"]
+    s_rector_phpunit_set["Rector: PHPUnit Set"]
     s_php_minimal_version["PHP Version Floor"]
     s_psalm_taint_analysis["Psalm Taint Analysis"]
     s_semgrep["Semgrep (OWASP Top 10)"]
@@ -67,7 +67,9 @@ flowchart TD
   s_phpstan_level_1 --> s_phpstan_level_2
   s_phpstan_level_2 --> s_phpstan_level_3
   s_phpstan_level_3 --> s_phpstan_level_4
+  s_rector_dead_code -.-> s_phpstan_level_4
   s_phpstan_level_4 --> s_phpstan_level_5
+  s_rector_type_coverage -.-> s_phpstan_level_5
   s_phpstan_level_5 --> s_phpstan_level_6
   s_phpstan_level_6 --> s_phpstan_level_7
   s_phpstan_level_7 --> s_phpstan_level_8
@@ -142,8 +144,8 @@ flowchart TD
 | PHPStan Level 1 (`phpstan-level-1`) | `phpstan` | Safety Net | `phpstan-level-0` | – | – |
 | PHPStan Level 2 (`phpstan-level-2`) | `phpstan` | Safety Net | `phpstan-level-1` | – | – |
 | PHPStan Level 3 (`phpstan-level-3`) | `phpstan` | Safety Net | `phpstan-level-2` | – | – |
-| PHPStan Level 4 (`phpstan-level-4`) | `phpstan` | Safety Net | `phpstan-level-3` | – | – |
-| PHPStan Level 5 (`phpstan-level-5`) | `phpstan` | Safety Net | `phpstan-level-4` | – | – |
+| PHPStan Level 4 (`phpstan-level-4`) | `phpstan` | Safety Net | `phpstan-level-3` | `rector-dead-code` | – |
+| PHPStan Level 5 (`phpstan-level-5`) | `phpstan` | Safety Net | `phpstan-level-4` | `rector-type-coverage` | – |
 | PHPStan Level 6 (`phpstan-level-6`) | `phpstan` | Guardrails | `phpstan-level-5` | – | – |
 | PHPStan Level 7 (`phpstan-level-7`) | `phpstan` | Guardrails | `phpstan-level-6` | – | – |
 | PHPStan Level 8 (`phpstan-level-8`) | `phpstan` | Guardrails | `phpstan-level-7` | – | – |
@@ -154,7 +156,7 @@ flowchart TD
 | Rector: PHP Set (`rector-php-set`) | `rector` | Safety Net | `static-analysis` (Role) | `code-style` (Role) | – |
 | Rector: Dead Code Set (`rector-dead-code`) | `rector` | Safety Net | `rector-php-set` | `code-style` (Role) | – |
 | Rector: Code Quality Set (`rector-code-quality`) | `rector` | Safety Net | `rector-php-set` | `code-style` (Role) | – |
-| Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Safety Net | `phpunit` | `rector-code-quality`, `code-style` (Role) | – |
+| Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Guardrails | `phpunit` | `rector-code-quality`, `code-style` (Role) | – |
 | Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `code-style` (Role), `phpstan-level-3` | – |
 | PHP Version Floor (`php-minimal-version`) | `php-minimal-version` | Guardrails | `rector-php-set` | – | – |
 | Psalm Taint Analysis (`psalm-taint-analysis`) | `psalm-taint-analysis` | Guardrails | one of `phpstan-level-4`, `psalm` | – | – |
