@@ -219,7 +219,9 @@ class DocsTests(unittest.TestCase):
         self.assertIn("s_phpstan_level_4 -->|one of| s_psalm_taint_analysis", php)  # an any-of: one labelled edge per member
         self.assertIn("s_psalm -->|one of| s_psalm_taint_analysis", php)
         self.assertIn("s_phpstan_level_5 --> s_phpstan_level_6", php)     # requires: solid
-        self.assertIn("s_php_cs_fixer_adoption -.-> s_rector_php_set", php)        # after: dashed
+        self.assertIn("s_phpstan_level_3 -.-> s_rector_type_coverage", php)       # after: dashed
+        self.assertIn("r_code_style -.-> s_rector_php_set", php)                  # after a Role
+        self.assertIn("s_pint --> r_code_style", php)                             # every player feeds it
         self.assertIn('x_editorconfig[".editorconfig (generic)"]', php)   # another Pack's Stage at the edge
         self.assertIn('r_static_analysis(["Static Analysis"])', php)      # a Role
         self.assertIn("Secret Scanning", docs["docs/tooling/README.md"])

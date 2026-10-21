@@ -203,6 +203,8 @@ class LoadModelTests(unittest.TestCase):
             "bad min_runtime": [pack("m", [tool("a", [stage("a1")], min_runtime={"php": 7})])],
             "cycle": [pack("m", [tool("a", [stage("a1", requires=["a2"]), stage("a2", requires=["a1"])])])],
             "after cycle": [pack("m", [tool("a", [stage("a1", after=["a2"]), stage("a2", after=["a1"])])])],
+            "after cycle over a role": [pack("m", [tool("a", [stage("a1", after=["beta"])]), tool("b", [stage("b1", requires=["a1"])], roles=["beta"])])],
+            "after a role nothing plays": [pack("m", [tool("a", [stage("a1", after=["gamma"])])])],
         }
         for label, packs in cases.items():
             with self.subTest(label), self.assertRaises(tp.PackError):
@@ -477,6 +479,45 @@ class AfterTests(unittest.TestCase):
         self.assertEqual([w for w in out["tracks"]["Safety Net"]["withheld"] if w["node"] == "c1"][0]["reason"], "waiting on: b1")
 
 
+class AfterARoleTests(unittest.TestCase):
+    def model(self):
+        """Role alpha: tool p (recommended) or tool q (recognized). s waits for the Role."""
+        return Model([pack("m", [
+            tool("p", [stage("p1")], roles=["alpha"]),
+            tool("q", [stage("q1")], roles=["alpha"], status="recognized"),
+            tool("s", [stage("s1", after=["alpha"])], roles=["beta"]),
+        ])])
+
+    def withheld(self, seed=None):
+        return self.model().compute(seed)["tracks"]["Safety Net"]["withheld"]
+
+    def test_it_waits_until_the_role_is_decided(self):
+        self.assertEqual(self.withheld(), [{"node": "s1", "reason": "waiting on: alpha"}])
+
+    def test_whichever_tool_fills_the_role_releases_it(self):
+        self.assertEqual(self.withheld({"fulfilled": ["p1"]}), [])
+        self.assertEqual(self.withheld({"fulfilled": ["q1"]}), [])
+
+    def test_a_rejected_tool_with_no_other_left_to_fill_it_releases_it(self):
+        self.assertEqual(self.withheld({"rejected": {"p": None}}), [])
+
+    def test_a_rejected_role_releases_it(self):
+        out = self.model().compute({"rejected": {"alpha": None}})
+        self.assertEqual(out["tracks"]["Safety Net"]["withheld"], [])
+        self.assertEqual(out["tracks"]["Safety Net"]["backlog"], ["s1"])
+
+    def test_only_tools_of_its_own_scope_count(self):
+        m = Model([
+            pack("m", [
+                tool("p", [stage("p1")], roles=["alpha"]),
+                tool("s", [stage("s1", after=["alpha"])], roles=["beta"]),
+            ], scope="m"),
+            pack("n", [tool("o", [stage("o1")], roles=["alpha"])], scope="n"),
+        ])
+        withheld = m.compute({"fulfilled": ["o1"]})["tracks"]["Safety Net"]["withheld"]
+        self.assertEqual(withheld, [{"node": "s1", "reason": "waiting on: alpha"}])
+
+
 class RolesAndToolsTests(unittest.TestCase):
     def model(self):
         """Role alpha: tool p (recommended, two stages) or tool q (recognized). rr requires the Role."""
@@ -704,7 +745,7 @@ class SuiteDataTests(unittest.TestCase):
         self.assertFalse({s for s in listed if s.startswith("phpstan-")})
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["backlog"])
         reasons = {w["node"]: w["reason"] for w in out["tracks"]["Safety Net"]["withheld"]}
-        self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer-adoption")
+        self.assertEqual(reasons["rector-php-set"], "waiting on: code-style")
         self.assertNotIn("psalm-taint-analysis", out["tracks"]["Safety Net"]["backlog"])
         self.assertIn("psalm-taint-analysis", {n["node"] for n in out["tracks"]["Guardrails"]["nodes"]})
 
@@ -726,6 +767,7 @@ class SuiteDataTests(unittest.TestCase):
         self.assertTrue(rector)
         for stage in rector:
             self.assertNotIn("php-cs-fixer-rollout", stage["after"], stage)
+            self.assertIn("code-style", stage["after"], stage)
         out = self.compute({"fulfilled": ["composer", "phpstan-level-0", "php-cs-fixer-adoption"]})
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["workable"])
 
@@ -738,7 +780,7 @@ class SuiteDataTests(unittest.TestCase):
         reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": ["composer"]})["tracks"]["Safety Net"]["withheld"]}
         self.assertEqual(reasons["rector-php-set"], "blocked — no Tool fills the Role static-analysis")
         reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": ["composer", "phpstan-level-0"]})["tracks"]["Safety Net"]["withheld"]}
-        self.assertEqual(reasons["rector-php-set"], "waiting on: php-cs-fixer-adoption")
+        self.assertEqual(reasons["rector-php-set"], "waiting on: code-style")
 
     def test_the_phpstan_levels_are_a_chain(self):
         stages = self.model["stages"]

@@ -70,7 +70,7 @@ and what blocks it — unless one of these applies first:
 
 **What blocks a proposal** is read from `tree.stages`: every `requires` Stage that is not fulfilled; every
 required Role that is not filled, where the Tool recommended for it stands for it; and every `after`
-Stage that is undecided. Where a `requires` item is a group of alternatives, its members block together,
+Stage or Role that is undecided, a Role again stood for by its recommended Tool. Where a `requires` item is a group of alternatives, its members block together,
 and the ticket says that one of them is enough.
 
 **A PHPStan baseline with entries.** A level the target has set up whose baseline still holds findings is
