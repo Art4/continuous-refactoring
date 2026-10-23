@@ -62,14 +62,21 @@ tracker full of other work.
 Earlier versions were eleven skills, all but one internal, each linked into your project and listed
 among your skills. The split existed to give each step a context of its own and to keep one skill as
 the only writer of the suite's state. The state is gone, and a step gets a context of its own by
-being handed to a subagent together with its instructions. What is left are the two things a human
-calls: a run, and Housekeeping alone.
+being handed to a subagent together with its instructions. What is left are the two things you
+call: a run, and Housekeeping alone.
 
 ## Why does Housekeeping have a command of its own?
 
 So it can be scheduled. `/continuous-housekeeping` needs no choice between Tracks: it works the due
 ticket or reports that nothing is due. `/continuous-refactoring` still recommends Housekeeping when
 its ticket is due.
+
+## Can an agent start a run?
+
+Yes, both commands. An agent you put in charge can hand each run to a subagent of its own, so every run
+starts with a fresh context, and call the next one after it has dealt with the merge request. Such a
+run asks nobody, so say "do it yourself" in the call: without it the run ends at its first decision
+point and writes nothing. The one thing it still leaves to you is a change to your `AGENTS.md`.
 
 ## Why does the suite prefer my project's own skills for planning and implementing?
 
