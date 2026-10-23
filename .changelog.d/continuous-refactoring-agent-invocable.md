@@ -1,0 +1,1 @@
+An agent may now start `continuous-refactoring` by itself, as it already could `continuous-housekeeping` — for example one that hands each run to a subagent and reviews its merge request before calling the next.

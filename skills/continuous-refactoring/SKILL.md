@@ -1,7 +1,6 @@
 ---
 name: continuous-refactoring
-description: One run of the skill suite — from the open refactoring tickets to an opened merge request. Asks you at every decision, or decides by itself when you say so in the call.
-disable-model-invocation: true
+description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked to run continuous refactoring or the skill suite on this project, or to work one of its Tracks or tickets.
 ---
 
 # Continuous Refactoring
