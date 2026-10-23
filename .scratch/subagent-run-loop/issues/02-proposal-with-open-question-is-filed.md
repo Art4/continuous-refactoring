@@ -1,6 +1,6 @@
 # 02: A proposal with an open question is filed, with the question on its ticket
 
-**Status:** open — direction agreed 2026-10-23
+**Status:** done — PR #193
 
 ## Observation
 
@@ -33,3 +33,7 @@ human leaves it open.
   anywhere" reads true against it.
 - `docs/playbooks/run.md`, `docs/FAQ.md`, CONTEXT.md read true; ADR if the reversal meets the bar; a
   changelog fragment exists.
+
+## Comments
+
+- 2026-10-23: No ADR — the reversal is cheap to undo. An answer that declines the subject now records the rejection; that also covers the behaviour-change question, which had no row for it.

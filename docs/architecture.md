@@ -69,7 +69,7 @@ One sentence when a step starts and one with its result; one line per write, as 
 | A ticket's Track | the tool or subject its title and text name |
 | What blocks a ticket | the tracker's own blocking mechanism, or a `Blocked by:` sentence in the ticket |
 | Work in review | the ticket's merge request, found through the tracker's link or by searching the forge |
-| A ticket waiting for your answer | its newest comment is an open question |
+| A ticket waiting for your answer | an open question on it has no answer after it — a comment that is neither the suite's plan nor another open question |
 | Declined work | a closed ticket or a file with the reason, where the project's operations say |
 | Housekeeping: when due, what is done, how far the history was scanned | the Housekeeping tickets |
 | Focus areas, refactoring goal | two lines in `AGENTS.md`/`CLAUDE.md`, written by you only |

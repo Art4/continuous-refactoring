@@ -49,7 +49,7 @@ One change always waits for you, in an autonomous run too: an edit to your proje
 | Onboarding (only when the tracker section is missing or incomplete) | the tracker, where merge requests live, each operation and where its answer came from, and whether its search and merge-request commands answered | write the section |
 | Reconcile | merge requests of open tickets that were merged or closed, and declined work whose blocker is now met | close the ticket of a merged one; record a rejection where the comments say the change is not wanted; keep the ticket where they name a defect; ask you where a merge request was closed without a reason |
 | Track choice | per Track how many tickets are workable, in review, blocked, waiting | the first Track in the fixed order with something to work on ([Track playbook](tracks.md)) |
-| File tickets (after a scan) | one proposal per tool that is neither in place nor declined, blocked ones included, each with existing tickets on the subject | file them all; you may file some, none, or decline a tool for good |
+| File tickets (after a scan) | one proposal per tool that is neither in place nor declined, blocked ones included, each with existing tickets on the subject | file them all, each with its open question on the ticket where one is left; you may file some, none, or decline a tool for good |
 | Select | tickets whose tool turned out to be in place already, tickets that cannot be worked and why, the rest in order | close the first group with a note, work the first of the rest |
 | Who plans, who implements | the skills your project offers for it | your project's own; the suite's procedure only as a fallback |
 | The plan | the plan in full: what changes, the slices, the commands that show it is done, and for a structural ticket the test that holds today's behaviour first | post it on the ticket; where your tracker section says how a ticket is marked ready for implementation, the suite does that right after, unless an open question follows |
@@ -67,7 +67,7 @@ Two findings at the design point stop a run instead of guessing:
 
 A third thing leaves a ticket waiting: **a fix that does not hold** at the implementation. When the same failing check or review finding comes back after two attempts, the suite stops, keeps the branch to itself without pushing it, and leaves the account on the ticket in the same way.
 
-A ticket waits while that comment is its newest one. **Answer by commenting on the ticket** — any newer comment ends the wait, and the next run reads it: it lets the plan stand, plans again with the way you named, or asks once more. There is no label to set or remove.
+A ticket waits until that comment is answered. **Answer by commenting on the ticket** — any newer comment that is not another plan or question of the suite ends the wait, whoever wrote it, and the next run reads it: it lets the plan stand, plans again with the way you named, records your decline, or asks once more. There is no label to set or remove.
 
 ## How a run ends
 

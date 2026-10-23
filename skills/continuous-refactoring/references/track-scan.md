@@ -46,7 +46,7 @@ Purpose in the target, under any name.
   `pint` (Easy Coding Standard: `ecs`, PHP_CodeSniffer: `phpcs`), and no PHPStan Stage and not `php-cs-fixer-adoption` is judged fulfilled for
   it. The Role is then filled by the recognized Tool, and the recommended one is not proposed.
 - **Two tools compete for the Purpose, or it is unclear whether one serves it** → undecided, and the
-  proposal carries the question, so the human answers it at filing.
+  proposal carries the question to filing (`filing-a-ticket.md`): answered there, or posted on its ticket.
 - **Nothing serves it** → undecided. A human who says the Purpose is met without a tool declines the
   Stage at filing; that is a rejection, never a fulfilment.
 

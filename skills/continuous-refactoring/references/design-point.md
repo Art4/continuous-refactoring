@@ -18,7 +18,7 @@ Read its text and all its comments, oldest first. The first row that applies:
 | --- | --- |
 | arrived with its merge request and the review's comments | the plan it carries stands → the implement point |
 | is waiting on an open question (*Open questions*, below) | interactive: put the question to the human here, and treat the reply as *An answer arrived*. Autonomous, or unanswered: the run ends with the question named |
-| has comments newer than its open question, none of them a plan | *Open questions*, *An answer arrived* |
+| has an answer after its open question (*Open questions*) | *Open questions*, *An answer arrived* |
 | is a baseline ticket | *Planning a baseline ticket* decides whether its newest plan still stands |
 | carries a plan, and no newer comment asks for a change to it | the plan stands → the implement point |
 | anything else | step 2 |
@@ -118,17 +118,23 @@ open question or the finding named.
 ## Open questions
 
 An **open question** is a comment that opens with the words `Open question` on a line of its own, then:
-the question, the default the plan took and why, and one sentence saying that a reply as a comment on
-this ticket answers it.
+the question, the default the plan took and why — on a ticket filed with its question
+(`filing-a-ticket.md`), the default the suite recommends —, and one sentence saying that a reply as a
+comment on this ticket answers it.
 
-**Waiting.** A ticket is waiting while its newest comment is an open question. Any newer comment ends the
-wait; nothing else is set or removed.
+An **answer** is a comment newer than the open question that opens with neither `Plan` nor `Open
+question`, the two forms the suite posts while a ticket waits. The content decides, never the account
+that wrote it: an agent often posts with the human's own account.
 
-**An answer arrived.** Read every comment newer than the question:
+**Waiting.** A ticket is waiting while its newest open question has no answer after it. The first answer
+ends the wait; nothing else is set or removed.
+
+**An answer arrived.** Read every answer:
 
 | The answer | Then |
 | --- | --- |
-| confirms the default | the plan stands → the implement point |
+| confirms the default | the plan stands → the implement point; a ticket without a plan yet → step 2, the default taken |
+| declines the ticket's subject | record the rejection with the answer as its reason (`rejection.md`); the run ends with it named |
 | names another way, concretely enough to plan with | plan again with it (steps 2 to 5) and post the new plan |
 | leaves the question open, or raises a further one | interactive: put it to the human here. Autonomous: post it as a new open question; the run ends with it named |
 

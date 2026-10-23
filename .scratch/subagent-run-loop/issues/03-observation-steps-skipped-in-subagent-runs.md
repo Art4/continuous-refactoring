@@ -1,6 +1,6 @@
 # 03: Observation — steps skipped by runs inside a subagent
 
-**Status:** observing — no skill change yet
+**Status:** done — limit documented, PR #193; skill text unchanged
 
 ## Observation
 
@@ -22,3 +22,7 @@ Per the rule "fix gaps that force a wrong decision or skip a required step; leav
 implementation/review": a required step was skipped more than once, but the loop's separate review
 compensated. Watch further loops; if it recurs, decide between a skill-text change and documenting the
 limit (`docs/known-limitations.md`: a run inside a subagent does every step in its own context).
+
+## Comments
+
+- 2026-10-23: Documented in `docs/known-limitations.md` with the driving agent's own review as the remedy; skill text still unchanged. Reopen if a run outside a subagent skips steps too.

@@ -33,8 +33,9 @@ and settle on one:
   **decline its Tool** or **its Role**, which closes the other Stages of the Tool or of every Tool of the Role
   too. The recommendation never offers the last two.
 - **Recommendation:** file every proposal that carries no open question; record the proposed rejections;
-  close the tickets whose Stage is fulfilled. A proposal with an open question is filed once a human
-  answered it; an autonomous run leaves it unfiled and carries the question into the closing report.
+  close the tickets whose Stage is fulfilled. A proposal with an open question is filed with it: a
+  question the human answered here goes into the ticket's text; one left open — always in an autonomous
+  run — is posted on the new ticket in step 3.
 - A proposal neither filed nor declined is not stored anywhere. Say so before the answer is taken: its
   Stage counts as done from now on, until a scan the call asks for or Housekeeping's re-check offers it
   again.
@@ -54,7 +55,9 @@ In the order handed in, so that a ticket's blockers exist before it does:
   one of them is enough.
 - **Marks** — the **Candidate** mark, where the target has that operation.
 
-Create each ticket the way the tracker file says, report it by itself, and add it to the worklist.
+Create each ticket the way the tracker file says, report it by itself, and add it to the worklist. A
+ticket filed with a question still open gets it as its first comment, an open question
+(`design-point.md`, *Open questions*); the ticket is waiting until someone answers.
 
 Filing is done when every proposal has a ticket, continues on an existing one, or was declined or left
 unfiled by decision.

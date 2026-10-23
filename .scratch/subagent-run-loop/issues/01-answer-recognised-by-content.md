@@ -1,6 +1,6 @@
 # 01: An answer to an open question is recognised by its content, not its author
 
-**Status:** open — direction agreed 2026-10-23
+**Status:** done — PR #193
 
 ## Observation
 
