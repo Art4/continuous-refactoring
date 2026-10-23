@@ -25,7 +25,7 @@ Say what you want in your own words after the command. The suite says back in on
 | nothing | an interactive run over everything |
 | "do it yourself", "without asking" | an **autonomous** run: every decision takes the suite's own recommendation |
 | a Track — "work on Guardrails" | that Track, whatever the suite would have recommended; the run ends when that Track has nothing to work on |
-| a ticket — "ticket 42" | exactly that ticket; the run ends if it turns out not to need work |
+| a ticket — "ticket 42" | exactly that ticket: the run looks at no other ticket, reconcile included, and ends if it turns out not to need work |
 | a restriction — "only the Rector tools" | scan, filing and selection stay within it |
 | "scan again" | the Track is scanned although it was scanned before |
 

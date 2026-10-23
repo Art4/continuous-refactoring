@@ -20,7 +20,7 @@ understood.
 | --- | --- |
 | the **autonomous** mode ("do it yourself", "without asking") | every decision point takes its recommendation |
 | a **Track** | the Track choice is answered; the run stays in that Track and ends when it has nothing workable |
-| a **ticket** | Track and ticket are chosen: the run works that ticket, and ends if it turns out not to need work |
+| a **ticket** | Track and ticket are chosen: the worklist and reconcile hold that ticket alone, the run works it, and ends if it turns out not to need work |
 | a **restriction** ("only the Rector Stages") | the worklist, the scan, the filing and the selection hold only what it covers |
 
 Nothing stated → the run is **interactive** and unrestricted.

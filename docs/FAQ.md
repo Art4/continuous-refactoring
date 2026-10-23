@@ -327,6 +327,11 @@ lists the files.
 Name it in the call: "work on Guardrails", "ticket 42". The run then stays with it, and ends when it
 has nothing to work on. Details: [Track playbook](playbooks/tracks.md).
 
+A named ticket also narrows what the run looks at before it starts: it searches for no other ticket and
+reconciles only that ticket's merge request. A run you started for one ticket writes nothing to the
+others and does not search the whole tracker first. Merge requests of other tickets that were merged or
+closed meanwhile, and declined work whose blocker is met, wait for the next run that names no ticket.
+
 ## What happens if there is no remote or forge?
 
 The run still goes as far as it can: it prepares the branch and its commits, names the branch in a comment

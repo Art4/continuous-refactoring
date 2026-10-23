@@ -1,0 +1,1 @@
+A run whose call names a ticket now looks at that ticket alone: it no longer searches every open ticket first, and reconcile checks only that ticket's merge request, so it writes nothing to tickets you did not name.

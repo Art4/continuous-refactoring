@@ -8,6 +8,9 @@ in place. Every command comes from the target's `## Refactoring operations` sect
 
 Run the parser without a seed (`tooling-parser.md`) and take every Stage of `tracks`.
 
+**The call names a ticket** → the worklist is that ticket alone, whatever it carries: read it and go on
+with step 2. A ticket it names as its blocker is read for the state, not added. Otherwise:
+
 - **With a Candidate operation** → list the open tickets it marks. The tooling tickets are among them:
   filing sets that mark.
 - **Without one** → for each Stage, run **Search** with the Stage's Name, narrowed to the open tickets.
@@ -15,7 +18,6 @@ Run the parser without a seed (`tooling-parser.md`) and take every Stage of `tra
   that listing once instead. A place the section gives to the suite's tickets alone counts whole; from
   any other listing keep the tickets that match a Stage.
 - **Housekeeping tickets.** With a **Housekeeping** operation, find the open ones the way it says.
-- **The ticket the call names**, whatever it carries.
 
 A ticket *matches a Stage* when its title or text names that Stage's subject as the thing to be set up or
 raised. The Name tells siblings apart: "PHPStan" alone is in every level's ticket, "PHPStan Level 3" in
