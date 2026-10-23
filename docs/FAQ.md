@@ -266,9 +266,11 @@ Other changes get no such paragraph.
 
 ## I answered an open question on a ticket — what happens now?
 
-Any comment newer than the suite's `Open question` comment ends the wait. The next run reads your
-answer: if it confirms the default the plan took, the plan stands; if it names another way, the suite
-plans again with it; if the question is still open, you are asked once more. There is no label to
+Any comment newer than the suite's `Open question` comment ends the wait, unless it is another
+`Plan` or `Open question` of the suite. Who wrote it does not count: agents often post with your own
+account, so the suite goes by what a comment says. The next run reads your answer: if it confirms the default the plan took, the plan stands; if it names another way, the suite
+plans again with it; if it declines the ticket, the decline is recorded; if the question is still
+open, you are asked once more. There is no label to
 set or remove, so this works on a tracker without triage labels.
 
 ## Why "Safety Net" *and* "tooling tree"?

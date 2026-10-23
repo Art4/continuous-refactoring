@@ -103,6 +103,25 @@ markup of ticket texts are your project's conventions. The suite follows what `d
 your contribution guide say and asks for little of it during onboarding. A convention those files don't state is
 one a run won't follow.
 
+## An agent's comment on a waiting ticket counts as your answer
+
+A ticket with an open question waits until a comment follows that is neither the suite's plan nor
+another of its questions. Who wrote it does not count, because agents often post with your own
+account: the suite cannot tell your reply from an agent's comment, and reads either as the answer.
+
+**What to do:** an agent that drives runs for you — or reviews them — leaves waiting tickets alone and
+asks you somewhere else.
+
+## A run inside a subagent does every step in its own context
+
+A run hands some steps that only read and judge — the review of its change, judging a scan — to
+subagents of its own. A run started in a subagent cannot start further ones in Claude Code, so it does
+those steps in its own context, which fills up faster. Runs driven this way have shortened steps: a
+review replaced by a quick read, a plan not posted.
+
+**What to do:** the agent driving the runs reviews each merge request in a subagent of its own before
+merging, and checks that the ticket carries the plan.
+
 ## Troubleshooting: why did the run end without a merge request?
 
 The closing report's **Status** line always says why. The usual reasons:
@@ -115,7 +134,7 @@ The closing report's **Status** line always says why. The usual reasons:
 | Safety Net is waiting for merges | An autonomous run found nothing workable in Safety Net while it is unfinished | Review and merge what the report lists, or name another Track |
 | Nothing is workable | Every open ticket is in review, blocked or waiting | Merge, answer the open questions, or ask for a scan |
 | Nothing is workable in what was asked for | The Track or ticket you named has nothing to work on; a run that was told where to work does not move on | Call without naming it, or name another |
-| An open question is on the ticket | The design met a decision it does not make alone, or found that the work would change behaviour | Reply as a comment on the ticket; the next run reads it |
+| An open question is on the ticket | The design met a decision it does not make alone, or found that the work would change behaviour; or a ticket was filed with a question the scan could not settle | Reply as a comment on the ticket; the next run reads it |
 | An open question says behaviour cannot be held in a test | The design found no way to pin down what a structural ticket must keep, at a reasonable cost | Reply on the ticket: name another seam, accept a coarser test, or decline the ticket |
 | A run ended with no merge request after the review | The review found that no change made the code easier to follow, so the run took them all off | Read the ticket's comment; decline the ticket, or reword what it asks for |
 | A run ended on a failing check or a review finding | The same check or finding came back after a fix and a second attempt; the branch stays local and the ticket carries the account as an open question | Reply on the ticket: how to go on, or take the branch over yourself |

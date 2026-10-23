@@ -20,7 +20,7 @@ At the start of a run the suite searches your open tickets and sorts them: a tic
 - **workable** — open, and everything that blocks it is done;
 - **in review** — it has an open merge request;
 - **blocked** — it names a blocker that is not done;
-- **waiting** — its newest comment is an open question for you.
+- **waiting** — an open question for you is on it, and nobody has answered yet.
 
 ## How a Track is chosen
 
@@ -49,7 +49,7 @@ The same holds for a ticket you name: the run works that ticket, and ends if it 
 
 A tooling Track is scanned when your tracker shows **no trace** of one of its tools yet — no ticket about it, open or closed, and no recorded rejection of it, of the tool as a whole, or of the role it plays. In a scan each tool is judged against your project: is something real and working in place that serves the tool's purpose, under any name? A project running Laravel Pint has automated code style, so PHP CS Fixer counts as in place.
 
-Then the suite offers a ticket for **every** tool that is neither in place nor declined — the blocked ones too, marked as blocked. The whole way ahead is visible in your tracker after one scan. At that decision point you file all, some or none, or decline a tool for good — one step of it, the whole tool, or the role it plays, which closes the rest of the tools of that role too.
+Then the suite offers a ticket for **every** tool that is neither in place nor declined — the blocked ones too, marked as blocked. The whole way ahead is visible in your tracker after one scan. At that decision point you file all, some or none, or decline a tool for good — one step of it, the whole tool, or the role it plays, which closes the rest of the tools of that role too. A tool whose judgement stayed open — two tools compete, or it is unclear whether one serves the purpose — is filed with that question: you answer it there, or, in an autonomous run, on its ticket, which waits for you meanwhile.
 
 After that, the tickets are the record:
 

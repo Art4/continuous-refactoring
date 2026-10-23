@@ -198,8 +198,8 @@ behavior-preserving — distinct from a **Finding**'s breaking-change case, whic
 all. In an interactive run the human answers at the design point. An autonomous run does not guess:
 its plan takes a default, the question is left on the ticket as a comment opening with the words
 `Open question`, and the run ends with a message naming it. The ticket is _waiting_ — not workable,
-and not in the way of the rest of the **worklist** — while that comment is its newest one. Any newer
-comment ends the wait: the next run's design point reads it, and lets the plan stand, plans again with
+and not in the way of the rest of the **worklist** — until an answer follows that comment: any newer
+comment that opens with neither `Plan` nor `Open question`, whichever account wrote it. The answer ends the wait: the next run's design point reads it, and lets the plan stand, plans again with
 the way it names, or asks once more. No label is set or removed for any of this, so it works in a
 target without triage labels.
 _Avoid_: blocked candidate, paused candidate

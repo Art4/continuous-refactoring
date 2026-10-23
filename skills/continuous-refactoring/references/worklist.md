@@ -39,7 +39,7 @@ The first row that applies:
 | --- | --- |
 | **in review** | has an open merge request (below) |
 | **blocked** | names a blocker that is not done, or one that has no ticket yet: per **Blocked by**, or, without that operation, in the sentence `Blocked by: …` in its text |
-| **waiting** | its newest comment is an open question (`design-point.md`, *Open questions*); or, for this run, reconcile's question about its closed merge request went unanswered |
+| **waiting** | its newest open question has no answer after it (`design-point.md`, *Open questions*); or, for this run, reconcile's question about its closed merge request went unanswered |
 | **workable** | none of the above |
 
 ## 4. Apply the restriction
