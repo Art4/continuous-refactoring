@@ -64,7 +64,8 @@ and one line for every change to your tracker, your forge or your repository. De
 | `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule |
 
 You or an agent may start either one — an agent from a scheduled job, say, or one that hands each run
-to a subagent and reviews its merge request before calling the next.
+to a subagent and reviews its merge request before calling the next — a **Driver**
+([playbook](docs/playbooks/driver.md)).
 
 Everything else — choosing a Track, scanning, selecting, planning, implementing, onboarding — is
 reference material these two load when a run reaches it. Where your project has its own skills for

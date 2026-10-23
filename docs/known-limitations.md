@@ -109,7 +109,7 @@ A ticket with an open question waits until a comment follows that is neither the
 another of its questions. Who wrote it does not count, because agents often post with your own
 account: the suite cannot tell your reply from an agent's comment, and reads either as the answer.
 
-**What to do:** an agent that drives runs for you — or reviews them — leaves waiting tickets alone and
+**What to do:** an agent that drives runs for you ([Driver](playbooks/driver.md)) — or reviews them — leaves waiting tickets alone and
 asks you somewhere else.
 
 ## A run inside a subagent does every step in its own context
@@ -119,7 +119,7 @@ subagents of its own. A run started in a subagent cannot start further ones in C
 those steps in its own context, which fills up faster. Runs driven this way have shortened steps: a
 review replaced by a quick read, a plan not posted.
 
-**What to do:** the agent driving the runs reviews each merge request in a subagent of its own before
+**What to do:** the agent driving the runs ([Driver](playbooks/driver.md)) reviews each merge request in a subagent of its own before
 merging, and checks that the ticket carries the plan.
 
 ## Troubleshooting: why did the run end without a merge request?
