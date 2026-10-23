@@ -1,6 +1,6 @@
 # 01: Worklist and reconcile scope when the call names a ticket
 
-**Status:** open
+**Status:** done — option 1, ADR-0085
 
 ## Observation
 
@@ -52,3 +52,6 @@ Arguments for keeping it as is:
 - `docs/playbooks/run.md` and `CONTEXT.md` read true against it; a changelog fragment exists.
 
 ## Comments
+
+- 2026-10-23: Option 2 dropped while implementing — reconcile reads the worklist, so keeping reconcile
+  whole needs the full worklist and saves almost nothing. Option 1 chosen instead.

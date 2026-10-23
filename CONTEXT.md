@@ -25,7 +25,7 @@ The two modes of a **run**. **Interactive**, the default: the human decides at e
 _Avoid_: ask-each-time, human-opens, create-mode (settings that no longer exist)
 
 **Worklist**:
-The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
+The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. A call that names a ticket narrows the worklist to that ticket, and reconcile with it. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
 _Avoid_: bookkeeping, open list, state file
 
 **Merge request**:

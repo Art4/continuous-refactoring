@@ -43,7 +43,7 @@ Once Safety Net is fulfilled, a Track that turns out to have nothing workable is
 
 Name the Track in the call — "work on Guardrails", "Investigation" — and the choice is answered: the run works that Track whatever the order would recommend, Safety Net's precedence included. Such a run stays there. When the named Track has nothing workable it ends and does not move on.
 
-The same holds for a ticket you name: the run works that ticket, and ends if it turns out not to need work.
+The same holds for a ticket you name: the run works that ticket, and ends if it turns out not to need work. It looks at no other ticket on the way.
 
 ## When a Track is scanned
 
