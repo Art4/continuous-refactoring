@@ -82,7 +82,7 @@ Every run closes with two lines. **Status** opens with how many things wait for 
 
 ## Running it regularly
 
-The suite schedules nothing. Point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring do it yourself` and at `/continuous-housekeeping do it yourself`, as often as fits.
+The suite schedules nothing. Point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring do it yourself` and at `/continuous-housekeeping do it yourself`, as often as fits. To have an agent call runs one after another and review each merge request in between, see the [Driver playbook](driver.md).
 
 Nothing limits how many merge requests are open at once. Called repeatedly, Safety Net ends at "every workable tool has a ticket and an open merge request" — from there the next step is yours: review and merge. Merge requests opened side by side may conflict with each other; resolving that is yours too.
 

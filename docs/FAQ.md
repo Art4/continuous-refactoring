@@ -76,7 +76,8 @@ its ticket is due.
 Yes, both commands. An agent you put in charge can hand each run to a subagent of its own, so every run
 starts with a fresh context, and call the next one after it has dealt with the merge request. Such a
 run asks nobody, so say "do it yourself" in the call: without it the run ends at its first decision
-point and writes nothing. The one thing it still leaves to you is a change to your `AGENTS.md`.
+point and writes nothing. The one thing it still leaves to you is a change to your `AGENTS.md`. The
+[Driver playbook](playbooks/driver.md) describes such an agent and gives a prompt for it.
 
 ## Why does the suite prefer my project's own skills for planning and implementing?
 

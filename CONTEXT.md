@@ -24,6 +24,10 @@ _Avoid_: checkpoint, approval step
 The two modes of a **run**. **Interactive**, the default: the human decides at every **decision point**. **Autonomous**: the suite takes its own recommendation at every one — the same chain, not a second path. Autonomous is said in the call, in free words, or mid-run ("carry on yourself from here"); it is never stored. Without that hint and with nobody answering, the run ends at the first decision point with a report and has written nothing. One write needs a human even in an autonomous run: changing the target's `AGENTS.md`.
 _Avoid_: ask-each-time, human-opens, create-mode (settings that no longer exist)
 
+**Driver**:
+An agent that calls **runs** one after another on the human's behalf, each in a subagent of its own and always **autonomous**, and reviews each **merge request** — merging it, asking for changes, or asking the human — before the next call. It passes on the human's Track or restriction, and names a ticket to go on with one — reworking its merge request, its next part, a question the human answered, or the human's wish — never one that waits or is blocked. It calls the next run until a run finds nothing workable, or until an end the human set. The runs stay separate calls: the Driver keeps no state the tracker does not hold, and it never answers an open question itself.
+_Avoid_: orchestrator, loop, run loop
+
 **Worklist**:
 The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. A call that names a ticket narrows the worklist to that ticket, and reconcile with it. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
 _Avoid_: bookkeeping, open list, state file

@@ -1,0 +1,1 @@
+A new Driver playbook describes an agent that calls runs one after another, each in a subagent of its own, reviews and merges each merge request in between, and asks you only where a decision is yours — with a prompt to copy into your project.
