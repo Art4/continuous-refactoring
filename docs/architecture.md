@@ -29,7 +29,7 @@ Both are typed by a human; neither is picked by the agent on its own. A step tha
 
 | Step | What happens | Ends when |
 |---|---|---|
-| 1 Ready | No Git repository ends the run. A tracker file without the suite's section, or with a required operation missing, leads into the onboarding interview | the section carries the three required operations |
+| 1 Ready | No Git repository ends the run. A tracker file without the suite's section, or with a required operation missing, leads into the onboarding interview. A complete section without a **BC promise** answer gets that one question, and the run goes on | the section carries the three required operations, and the BC promise was asked about |
 | 2 Worklist | The open tickets are searched, each sorted into a Track and given a state: workable, in review, blocked, waiting. A ticket named in the call is the worklist alone | every ticket found has both |
 | 3 Reconcile | Merge requests that were merged or closed since, and declined work whose stated blocker is now met, are laid out with what follows. With a ticket named in the call, only that ticket's merge request | every finding is acted on or left as decided |
 | 4 Track choice | One Track is recommended in the fixed order; the run may end here | a Track is named |

@@ -131,6 +131,17 @@ the last word on it.
 
 **What to do:** look at that gate's result in CI before you merge, or install what it needs locally.
 
+## An autonomous run does not settle the BC promise on a guess
+
+Whether your project promises stability to code outside it — your package's users, your application's
+addons — decides whether an old API may be deleted. An autonomous run takes a promise it found in exactly
+one document, but never decides that there is none: with no document found, or several, it leaves the
+question open, and until you answer it treats code outside the project could reach as covered. Restructurings
+then keep old APIs beside new ones where a deletion would have been fine.
+
+**What to do:** answer the question in an interactive run, or add the **BC promise** bullet to
+`docs/agents/issue-tracker.md` yourself — a path, or `none`.
+
 ## Troubleshooting: why did the run end without a merge request?
 
 The closing report's **Status** line always says why. The usual reasons:

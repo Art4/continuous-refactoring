@@ -44,26 +44,30 @@ by file count alone, one merge request per rule.
 
 ## Strangler Fig
 
-**Applies when** old and new have to live side by side: something outside this repository depends on the
-old API (a published library's public interface, a documented or marked-public contract), or the
-migration is too wide to replace in one reviewable step. When in doubt whether something outside depends
-on it, treat it as depended on.
+**Applies when** old and new have to live side by side: the target's **BC promise** covers the old API
+(`refactoring-operations.md`, **BC promise**; what it covers is the promise's own call, `@internal` code is
+often left out), or the migration is too wide to replace in one reviewable step. While the target's
+**BC promise** bullet is missing, the question is not settled: treat whatever code outside the repository
+could reach as covered.
 
 Replace the old piece by piece, old and new working side by side until the swap is complete — never a
-big-bang rewrite.
+big-bang rewrite. Under a promise the old path is deprecated the way the promise says — the marker, and
+the triggered notice and upgrade note where its procedure has reached that step — and never deleted in
+the same wave. Its removal is a **Breaking change** the promise may allow, but never one for the refactor
+label: it is proposed as an ordinary ticket for the human.
 
 *Fails when* a rewrite lands in one merge request nobody can review.
 
 ## Migrate callers, then delete
 
 **Applies when** a new internal API replaces an old one, every caller of the old one is in this
-repository, and nothing outside depends on it. The plan records that call under `Decisions`.
+repository, and the target's **BC promise** does not cover it, or says `none`. The plan records that call under `Decisions`.
 
 Move every caller to the new API and delete the old one in the same wave: no shim, no parallel old and
 new path. Tests that only protected the old implementation go with it; the pin at the seam stays.
 
-*Fails when* the "internal" API was in fact someone else's contract: deleting it breaks a user of the
-library, which no refactoring may do.
+*Fails when* the "internal" API was in fact covered by the promise: deleting it breaks a user of the
+package or an addon of the application, which no refactoring may do.
 
 ## Subtract before you add
 
