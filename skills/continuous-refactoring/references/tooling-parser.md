@@ -56,7 +56,7 @@ again.
 | `reversals` | rejections whose runtime blocker the target now meets |
 | `roles`, `tools` | each Role, in each scope its Tools are in, as `{role, name, scope, filled_by}` with the Tool that fills it; each Tool with its Roles, its status (recommended or recognized), and whether another Tool took its place |
 | `prerequisites`, `packs` | whether `git` and `onboarding-setup` hold; the Packs that applied |
-| `tree.stages` | every Stage with its Tool, Roles, Pack, Track, `requires` and `after` |
+| `tree.stages` | every Stage with its Tool, Roles, Pack, Track, `requires` and `waits_for` |
 
 A Stage of a recognized Tool, or of a Tool another Tool took the place of, is in no `nodes` list and gets
 no ticket.

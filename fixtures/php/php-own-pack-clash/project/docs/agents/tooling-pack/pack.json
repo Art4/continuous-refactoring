@@ -21,7 +21,7 @@
           "requires": [
             "composer"
           ],
-          "after": []
+          "waits_for": []
         }
       ]
     }

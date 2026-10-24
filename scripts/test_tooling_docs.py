@@ -46,7 +46,7 @@ class FixedFormTests(unittest.TestCase):
             "pack": "x",
             "$schema": "s.json",
             "tools": [{
-                "stages": [{"after": [], "requires": ["a", ["b", "c"]], "track": "Safety Net", "name": "N", "slug": "n"}],
+                "stages": [{"waits_for": [], "requires": ["a", ["b", "c"]], "track": "Safety Net", "name": "N", "slug": "n"}],
                 "min_runtime": {"php": "7.2"},
                 "tool": "t", "name": "T", "uses": None, "roles": ["r"], "status": "recommended", "details": "d.md",
             }],
@@ -74,7 +74,7 @@ class FixedFormTests(unittest.TestCase):
           "name": "N",
           "track": "Safety Net",
           "requires": ["a", ["b", "c"]],
-          "after": []
+          "waits_for": []
         }
       ]
     }
@@ -141,7 +141,7 @@ class ModelTests(unittest.TestCase):
                 tools = data["tools"]
                 twin = json.loads(json.dumps(tools[0]))
                 twin.update(tool="twin", name="Twin")
-                twin["stages"] = [{"slug": "twin", "name": "Twin", "track": "Safety Net", "requires": [], "after": []}]
+                twin["stages"] = [{"slug": "twin", "name": "Twin", "track": "Safety Net", "requires": [], "waits_for": []}]
                 tools.append(twin)
 
             edit_pack(root, "generic", second)

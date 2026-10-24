@@ -17,7 +17,7 @@
           "name": "Composer",
           "track": "Safety Net",
           "requires": [],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -34,7 +34,7 @@
           "name": "PSR-4 Autoloading",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -54,14 +54,14 @@
           "name": "PHP CS Fixer",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": ["editorconfig"]
+          "waits_for": ["editorconfig"]
         },
         {
           "slug": "php-cs-fixer-rollout",
           "name": "PHP CS Fixer Rollout",
           "track": "Guardrails",
           "requires": ["php-cs-fixer-adoption"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -78,7 +78,7 @@
           "name": "Laravel Pint",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -95,7 +95,7 @@
           "name": "Easy Coding Standard",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -112,7 +112,7 @@
           "name": "PHP_CodeSniffer",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -129,14 +129,14 @@
           "name": "PHPMD",
           "track": "Guardrails",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpmd-rollout",
           "name": "PHPMD Rollout",
           "track": "Guardrails",
           "requires": ["phpmd-adoption"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -156,7 +156,7 @@
           "name": "PHPUnit",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -173,7 +173,7 @@
           "name": "Test Coverage Floor",
           "track": "Guardrails",
           "requires": ["phpunit"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -193,7 +193,7 @@
           "name": "Composer Audit",
           "track": "Guardrails",
           "requires": ["composer"],
-          "after": ["ci-runner"],
+          "waits_for": ["ci-runner"],
           "applies_when": "The repository's composer.json requires at least one real package; platform pseudo-packages (php, hhvm, ext-*, lib-*, composer-plugin-api, composer-runtime-api) do not count."
         }
       ]
@@ -214,84 +214,84 @@
           "name": "PHPStan Level 0",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-1",
           "name": "PHPStan Level 1",
           "track": "Safety Net",
           "requires": ["phpstan-level-0"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-2",
           "name": "PHPStan Level 2",
           "track": "Safety Net",
           "requires": ["phpstan-level-1"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-3",
           "name": "PHPStan Level 3",
           "track": "Safety Net",
           "requires": ["phpstan-level-2"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-4",
           "name": "PHPStan Level 4",
           "track": "Safety Net",
           "requires": ["phpstan-level-3"],
-          "after": ["rector-dead-code"]
+          "waits_for": ["rector-dead-code"]
         },
         {
           "slug": "phpstan-level-5",
           "name": "PHPStan Level 5",
           "track": "Safety Net",
           "requires": ["phpstan-level-4"],
-          "after": ["rector-type-coverage"]
+          "waits_for": ["rector-type-coverage"]
         },
         {
           "slug": "phpstan-level-6",
           "name": "PHPStan Level 6",
           "track": "Guardrails",
           "requires": ["phpstan-level-5"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-7",
           "name": "PHPStan Level 7",
           "track": "Guardrails",
           "requires": ["phpstan-level-6"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-8",
           "name": "PHPStan Level 8",
           "track": "Guardrails",
           "requires": ["phpstan-level-7"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-9",
           "name": "PHPStan Level 9",
           "track": "Guardrails",
           "requires": ["phpstan-level-8"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-level-10",
           "name": "PHPStan Level 10",
           "track": "Guardrails",
           "requires": ["phpstan-level-9"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "phpstan-deprecation-rules",
           "name": "PHPStan Deprecation Rules",
           "track": "Guardrails",
           "requires": ["phpstan-level-5"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -308,7 +308,7 @@
           "name": "Psalm",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -325,35 +325,35 @@
           "name": "Rector: PHP Set",
           "track": "Safety Net",
           "requires": ["static-analysis"],
-          "after": ["code-style"]
+          "waits_for": ["code-style"]
         },
         {
           "slug": "rector-dead-code",
           "name": "Rector: Dead Code Set",
           "track": "Safety Net",
           "requires": ["rector-php-set"],
-          "after": ["code-style"]
+          "waits_for": ["code-style"]
         },
         {
           "slug": "rector-code-quality",
           "name": "Rector: Code Quality Set",
           "track": "Safety Net",
           "requires": ["rector-php-set"],
-          "after": ["code-style"]
+          "waits_for": ["code-style"]
         },
         {
           "slug": "rector-phpunit-set",
           "name": "Rector: PHPUnit Set",
           "track": "Guardrails",
           "requires": ["phpunit"],
-          "after": ["rector-code-quality", "code-style"]
+          "waits_for": ["rector-code-quality", "code-style"]
         },
         {
           "slug": "rector-type-coverage",
           "name": "Rector: Type Coverage Set",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": ["rector-dead-code", "rector-code-quality", "code-style", "phpstan-level-3"]
+          "waits_for": ["rector-dead-code", "rector-code-quality", "code-style", "phpstan-level-3"]
         }
       ]
     },
@@ -370,7 +370,7 @@
           "name": "Psalm Taint Analysis",
           "track": "Guardrails",
           "requires": [["phpstan-level-4", "psalm"]],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -387,7 +387,7 @@
           "name": "Semgrep (OWASP Top 10)",
           "track": "Guardrails",
           "requires": [],
-          "after": ["ci-runner"]
+          "waits_for": ["ci-runner"]
         }
       ]
     }

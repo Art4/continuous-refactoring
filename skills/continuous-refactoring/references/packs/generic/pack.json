@@ -16,7 +16,7 @@
           "name": "CI Runner",
           "track": "Safety Net",
           "requires": [],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -33,7 +33,7 @@
           "name": ".editorconfig",
           "track": "Safety Net",
           "requires": [],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -50,7 +50,7 @@
           "name": "Secret Detection",
           "track": "Guardrails",
           "requires": [],
-          "after": []
+          "waits_for": []
         }
       ]
     }

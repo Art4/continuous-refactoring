@@ -65,7 +65,7 @@ Every Tool has:
   (`{"php": "7.2"}`).
 
 Every Stage has a slug and a Name (the words in ticket titles, merge requests and reports), a `track`,
-`requires` and `after`. Slugs of Stages and Tools are unique across all Packs, and so are slugs of
+`requires` and `waits_for`. Slugs of Stages and Tools are unique across all Packs, and so are slugs of
 Roles; a Tool may share its slug with its Stage only when that is its only one.
 
 **`requires`** lists what must be fulfilled first: a Stage; a Role (filled once the first Stage of one of
@@ -73,8 +73,8 @@ its Tools is fulfilled); or a list of Stages of which one is enough. A rejected 
 one. A Stage requires only Stages of its own Track or an earlier one, and the model has no cycles — the
 parser refuses a Pack that breaks either.
 
-**`after`** lists Stages or Roles that must be *decided* first, and a rejection of one releases this Stage
-instead of closing it. A Stage is decided when it is fulfilled, closed by a rejection, or never going to be
+**`waits_for`** lists Stages or Roles this Stage waits for until they are *decided*, and a rejection of one
+releases this Stage instead of closing it. A Stage is decided when it is fulfilled, closed by a rejection, or never going to be
 fulfilled; a Role, when it is filled in the Stage's scope or the first Stage of every Tool that could fill it
 there is decided. A Role stands for whichever Tool fills it: the Rector Stages wait for Code Style, so a
 target on Pint releases them as well as one on PHP CS Fixer.
@@ -105,7 +105,7 @@ which subjects are rejected, and the runtime the target allows.
   Tools come before recognized ones, so with both present the recommended Tool is the one in use. A Stage
   that requires a Role needs it filled in its own Pack's scope (a Stage of a Pack without a scope, in any).
 - **A Tool is out** when a Role of it is filled, in its scope, by another Tool and its own first Stage is not fulfilled.
-  Its Stages are not proposed, do not count towards the Track, and hold nobody's `after`. A target on Psalm
+  Its Stages are not proposed, do not count towards the Track, and hold nobody's `waits_for`. A target on Psalm
   has the Role Static Analysis filled, and PHPStan is out. A Tool of another scope is not touched.
 - **A Stage is closed** when a rejection reaches it: its own, its Tool's or a Role of its Tool; a required
   Stage is closed; every member of an any-of group is closed or can never be fulfilled and at least one is
@@ -119,7 +119,7 @@ which subjects are rejected, and the runtime the target allows.
 - **A Stage is ticketable** when it applies, its Tool is recommended and not out. Per Track, its **backlog**
   is the ticketable Stages not fulfilled and not closed, in the order of the Packs. Its **withheld** list
   names those that cannot be worked now, and why — the target is not onboarded, the runtime is too old, a
-  required parent or Role is open, the Safety Net is not fulfilled, an `after` is undecided — and those
+  required parent or Role is open, the Safety Net is not fulfilled, a `waits_for` is undecided — and those
   closed by a rejection, with what they hang on.
 - **The Safety Net is fulfilled** when its backlog is empty: every Safety Net Stage is fulfilled or
   closed by a rejection. Guardrails Stages wait for it. A run that stops because it is not fulfilled is
@@ -140,4 +140,4 @@ Without `python3`, take the same steps in this order, over the Packs that apply:
 4. List the backlog per Track in the order of the Packs; the Safety Net is fulfilled when its backlog is empty.
 5. For each backlog Stage, name what holds it back, in this order: the target is not onboarded; the
    runtime is below a minimum; a required Stage is not fulfilled or a required Role is not filled; the
-   Safety Net is open (Guardrails only); an `after` Stage or Role is undecided.
+   Safety Net is open (Guardrails only); a `waits_for` Stage or Role is undecided.

@@ -17,14 +17,14 @@
           "name": "Deptrac Layers",
           "track": "Guardrails",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "deptrac-strict",
           "name": "Deptrac Strict Rules",
           "track": "Guardrails",
           "requires": ["deptrac-layers"],
-          "after": []
+          "waits_for": []
         }
       ]
     },
@@ -41,7 +41,7 @@
           "name": "Mago",
           "track": "Safety Net",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         }
       ]
     }

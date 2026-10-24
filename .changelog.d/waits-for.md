@@ -1,0 +1,1 @@
+A Stage's `after` field in a Pack is now named `waits_for` ("B waits for A"), and the generated tooling tables call the column "Waits for". A Pack of your own that still says `after` is refused with a message asking you to rename the key.
