@@ -19,7 +19,9 @@ it is not, the generic reading stands.
 - **Tightly-coupled seams** — modules leaking across their boundaries. *Generic* — reading the code.
 - **Untested or hard to test** — no test reaches it, or its interface resists testing. *Generic* — the
   test suite, or its absence. *From a tool* — PHP: the coverage report of the coverage floor (Clover
-  XML); a file well under the floor is the evidence.
+  XML); a file well under the floor is the evidence. Where mutation testing is in place (Infection, Pest's
+  `--mutate`), its log names the places whose tests run the code but catch none of the faults planted
+  there — evidence a coverage report cannot give.
 - **Tooling pressure** — a place the target's own tools keep flagging, or a dependency nearing its end of
   life. *From a tool* — PHP: PHPStan's findings at the level in force, a Rector dry run, `composer
   outdated`.

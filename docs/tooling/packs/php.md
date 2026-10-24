@@ -28,6 +28,7 @@ flowchart TD
     s_rector_dead_code["Rector: Dead Code Set"]
     s_rector_code_quality["Rector: Code Quality Set"]
     s_rector_type_coverage["Rector: Type Coverage Set"]
+    r_testing(["Testing"])
     r_static_analysis(["Static Analysis"])
     r_code_style(["Code Style"])
   end
@@ -36,6 +37,8 @@ flowchart TD
     s_phpmd_adoption["PHPMD"]
     s_phpmd_rollout["PHPMD Rollout"]
     s_coverage_floor["Test Coverage Floor"]
+    s_infection["Infection"]
+    s_pest_mutate["Pest Mutation Testing"]
     s_phpstan_level_6["PHPStan Level 6"]
     s_phpstan_level_7["PHPStan Level 7"]
     s_phpstan_level_8["PHPStan Level 8"]
@@ -61,6 +64,10 @@ flowchart TD
   s_phpmd_adoption --> s_phpmd_rollout
   s_composer --> s_phpunit
   s_phpunit --> s_coverage_floor
+  s_phpunit --> r_testing
+  r_testing --> s_infection
+  s_coverage_floor -.-> s_infection
+  r_testing --> s_pest_mutate
   s_composer --> s_phpstan_level_0
   s_phpstan_level_0 --> s_phpstan_level_1
   s_phpstan_level_1 --> s_phpstan_level_2
@@ -101,9 +108,9 @@ flowchart TD
   s_psalm -->|one of| s_psalm_taint_analysis
   x_ci_runner -.-> s_semgrep
   classDef onRequest stroke-dasharray: 6 4
-  class s_psalm_taint_analysis,s_semgrep onRequest
+  class s_infection,s_psalm_taint_analysis,s_semgrep onRequest
   classDef recognized stroke-dasharray: 2 2
-  class s_pint,s_ecs,s_phpcs,s_psalm recognized
+  class s_pint,s_ecs,s_phpcs,s_pest_mutate,s_psalm recognized
 ```
 
 Solid arrow: requires · dashed arrow: waits for · solid outline: recommended · dashed outline: on request · dotted outline: recognized
@@ -123,6 +130,8 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring/references/packs/php/phpmd.md) |
 | PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
 | Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
+| Infection (`infection`) | on-request | Mutation Testing | Infection | php 7.0 | [packs/php/infection.md](../../../skills/continuous-refactoring/references/packs/php/infection.md) |
+| Pest Mutation Testing (`pest-mutate`) | recognized | Mutation Testing | Pest | – | [packs/php/pest-mutate.md](../../../skills/continuous-refactoring/references/packs/php/pest-mutate.md) |
 | PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring/references/packs/php/phpstan.md) |
 | Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
 | Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [packs/php/rector.md](../../../skills/continuous-refactoring/references/packs/php/rector.md) |
@@ -145,6 +154,8 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | PHPMD Rollout (`phpmd-rollout`) | `phpmd` | Guardrails | `phpmd-adoption` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
 | Test Coverage Floor (`coverage-floor`) | `coverage-floor` | Guardrails | `phpunit` | – | – |
+| Infection (`infection`) | `infection` | Guardrails | `testing` (Role) | `coverage-floor` | – |
+| Pest Mutation Testing (`pest-mutate`) | `pest-mutate` | Guardrails | `testing` (Role) | – | – |
 | PHPStan Level 0 (`phpstan-level-0`) | `phpstan` | Safety Net | `composer` | – | – |
 | PHPStan Level 1 (`phpstan-level-1`) | `phpstan` | Safety Net | `phpstan-level-0` | – | – |
 | PHPStan Level 2 (`phpstan-level-2`) | `phpstan` | Safety Net | `phpstan-level-1` | – | – |

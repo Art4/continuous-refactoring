@@ -6,7 +6,7 @@
 
 **Wave:** later — see `.scratch/php-tooling-tree/spec.md` (not pickable before first-wave tickets 10/18 land)
 
-**Status:** ready-for-agent
+**Status:** done
 
 - [ ] Mutation tool configured with a defined scope per ticket 06's defaults
 - [ ] Surviving mutants on touched files block a refactor or are filed as candidates
@@ -19,3 +19,4 @@
 > **2026-08-23:** Ticket hygiene — added an explicit `Wave:` field so `Status: ready-for-agent` isn't misread as pickable now; the prose in `Blocked by` said "later wave" but nothing machine-scannable enforced it. See `spec.md`'s wave table.
 > **2026-09-07:** Signals ticket 2 (`.scratch/signals/issues/02-signal-tool-nodes-and-tree-edge-simplification.md`) settled the pattern this node should follow once picked up: a real, adoptable tooling-tree node with a **Signal** field, carrying **no** `resolved` edge into `php-structural-scan` — a Signal-producing node, not a Safety Net one (see `phpmd`'s and `secret-detection`'s node entries for the concrete shape). Applies here unchanged; surviving mutants are exactly the kind of prioritization evidence a Signal node is for, not a structural gate.
 > **2026-10-24:** Taken over by `.scratch/on-request-tools-and-bc-promise/issues/06-infection.md` (ADR-0086): Infection becomes an on-request Tool requiring the Role Testing; Pest's own mutation testing is a recognized Tool of the same Role. Closed when 06 lands.
+> **2026-10-24:** Closed: delivered by `.scratch/on-request-tools-and-bc-promise/issues/06-infection.md` — Infection on request (Role Mutation Testing, Signal Untested / hard-to-test), Pest's mutation testing recognized.

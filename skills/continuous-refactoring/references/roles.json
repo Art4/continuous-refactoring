@@ -44,6 +44,12 @@
       "signal": "Untested / hard-to-test"
     },
     {
+      "slug": "mutation-testing",
+      "name": "Mutation Testing",
+      "purpose": "Small faults are planted in the code one at a time, and the tests must notice each: they are judged by what they catch, not by what they reach.",
+      "signal": "Untested / hard-to-test"
+    },
+    {
       "slug": "static-analysis",
       "name": "Static Analysis",
       "purpose": "A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step.",

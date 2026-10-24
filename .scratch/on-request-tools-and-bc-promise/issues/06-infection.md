@@ -1,7 +1,7 @@
 # 06 — Infection and Pest's mutation testing
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 02, 03
 
 Replaces `.scratch/php-tooling-tree/issues/09-mutation-testing-in-loop.md`.
@@ -25,3 +25,5 @@ Replaces `.scratch/php-tooling-tree/issues/09-mutation-testing-in-loop.md`.
 `pest --mutate` in CI has the Role filled, and tests and validator are green.
 
 ## Comments
+
+> **2026-10-24:** Done. `min_runtime` php 7.0 (Infection 0.1–0.2 required ^7.0; 0.35 needs ^8.3). Found while building: an unasked on-request Tool also stayed out of `runtime_blocked` — otherwise a scan would propose a runtime rejection for a Tool nobody asked for; fixed in the parser with a test. Old ticket `php-tooling-tree/09` closed.

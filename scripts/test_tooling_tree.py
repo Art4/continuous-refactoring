@@ -639,6 +639,12 @@ class OnRequestTests(unittest.TestCase):
         self.assertIn("s1", out["tracks"]["Safety Net"]["backlog"])
         self.assertFalse(out["safety_net_fulfilled"])
 
+    def test_its_runtime_floor_blocks_nothing_until_it_is_asked_for(self):
+        m = Model([pack("m", [tool("o", [stage("o1", track="Guardrails")], status="on-request", min_runtime={"php": "8.1"})])])
+        self.assertEqual(m.compute({"runtime": {"php": "7.4"}})["runtime_blocked"], [])
+        out = m.compute({"runtime": {"php": "7.4"}, "requested": ["o1"]})
+        self.assertEqual([b["node"] for b in out["runtime_blocked"]], ["o1"])
+
     def test_present_it_fills_its_role_after_a_recommended_tool(self):
         out = self.model().compute({"fulfilled": ["o1"]})
         self.assertEqual({r["role"]: r["filled_by"] for r in out["roles"]}["alpha"], "o")
@@ -765,7 +771,7 @@ class SuiteDataTests(unittest.TestCase):
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
         self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 17)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 16)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 17)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -881,6 +887,14 @@ class SuiteDataTests(unittest.TestCase):
         out = self.compute({**ready, "not_applicable": ["roave-bc-check"]})
         self.assertIn("rector-type-coverage", out["tracks"]["Safety Net"]["workable"])
 
+    def test_mutation_testing_is_on_request_and_pest_takes_its_place(self):
+        self.assertEqual(self.model["tools"]["infection"]["status"], "on-request")
+        self.assertEqual(self.model["stages"]["infection"]["requires"], ["testing"])
+        self.assertEqual(self.model["stages"]["infection"]["waits_for"], ["coverage-floor"])
+        out = self.compute({"fulfilled": ["pest-mutate"], "requested": ["infection"]})
+        self.assertEqual({r["role"]: r["filled_by"] for r in out["roles"]}["mutation-testing"], "pest-mutate")
+        self.assertIn("infection", [t["tool"] for t in out["tools"] if t["out"]])
+
     def test_the_security_scanners_are_proposed_only_on_request(self):
         for slug in ("semgrep", "psalm-taint-analysis"):
             self.assertEqual(self.model["tools"][slug]["status"], "on-request", slug)
@@ -891,6 +905,8 @@ class SuiteDataTests(unittest.TestCase):
     def test_a_php_floor_below_a_tools_minimum_blocks_its_first_stage(self):
         out = self.compute({"runtime": {"php": "5.6"}})
         self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"phpstan-level-0"})
+        out = self.compute({"runtime": {"php": "5.6"}, "requested": ["infection"]})
+        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"phpstan-level-0", "infection"})
         out = self.compute({"runtime": {"php": "5.2"}})
         self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"phpstan-level-0", "php-cs-fixer-adoption", "phpunit"})
         self.assertEqual(self.compute({"runtime": {"php": "8.3"}})["runtime_blocked"], [])
