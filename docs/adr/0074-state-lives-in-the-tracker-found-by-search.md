@@ -37,6 +37,8 @@
 > [ADR-0036](0036-refactoring-goal-field-steers-structural-candidates.md): `Refactoring goal` is a
 > human-written project line, not a field of a bookkeeping document.
 
+> Supersedes in part [ADR-0005](0005-tooling-tree-not-baseline-skill.md).
+
 The suite kept its own record of which nodes were open, when a Track last ran, what was rejected and
 which merge request belonged to which ticket — a bookkeeping document, a pointer to it, a config file, a
 local and a remote variant, and a single skill allowed to write it. That record duplicated what the

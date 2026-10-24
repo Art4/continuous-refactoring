@@ -14,6 +14,8 @@
 > `guardrails-track.md`'s "Filling `Open`") — the format was specified there, but no write ever
 > produced it once a node's issue existed.
 
+> Amended by [ADR-0065](0065-investigation-gets-its-own-open.md).
+
 `safety-net-write.md`/`guardrails-write.md` define exactly three writes to a Track's `Open` list:
 Merge removes an entry, Fulfilled-at-pick-up removes one, Rejection removes one and adds an
 `Out-of-scope` pointer. None of them ever *adds* the `(#<issue>)` a node's entry is supposed to carry

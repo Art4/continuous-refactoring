@@ -9,6 +9,8 @@
 > for *where* a skill-facing reference doc lives (`skills/<owning-skill>/references/`, not
 > `docs/playbooks/`) is untouched — only how another skill cites it changes.
 
+> Amended by [ADR-0014](0014-tooling-tree-parser-ships-under-refactor-scan.md).
+
 Manual testing that found the unresolvable ADR self-citations (bookkeeping-branch/MR fix era) surfaced a sibling bug: `docs/playbooks/refactoring-config.md` is cited inline, as something the executing agent should consult, from four `SKILL.md` files — but `docs/playbooks/` never ships. Install is `ln -s .../skills/* <target>/.agents/skills/` (`README.md`): an entire `skills/<name>/` directory ships as a unit, and nothing outside `skills/` reaches the target repo. Every citation of `docs/playbooks/refactoring-config.md` from skill prose pointed at a file the agent could never resolve, the exact same class of gap the ADR self-citation fix closed for `docs/adr/`.
 
 Not every file under `docs/playbooks/` has this problem, though. `docs/playbooks/loop.md` is a human-facing steering guide referenced only from `README.md` — no skill instructs the agent to consult it mid-run, so it has nothing to ship and stays exactly where it is.

@@ -17,6 +17,12 @@
 > Amends [ADR-0056](0056-agent-judged-fulfilment.md) and [ADR-0014](0014-tooling-tree-parser-ships-under-refactor-scan.md):
 > the parser still computes graph logic only and ships with the data it reads, but the data are JSON Packs.
 
+> Supersedes [ADR-0018](0018-psalm-becomes-a-tree-node.md) and [ADR-0035](0035-resolved-gate-cascades-through-rejected-required-ancestor.md).
+
+> Supersedes in part [ADR-0005](0005-tooling-tree-not-baseline-skill.md) and [ADR-0021](0021-remaining-php-tooling-tree-nodes-extracted.md).
+
+> Amends [ADR-0032](0032-psr-4-node-for-app-source-autoloading.md), [ADR-0044](0044-coverage-floor-node.md), [ADR-0045](0045-semgrep-owasp-top-ten-node.md) and [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md).
+
 The suite could not be used on another language, and adding a tool was expensive. A node meant a row in
 an edge table, a line in a diagram, a stub in a tree doc, a file of its own and sometimes a change in the
 parser; Infection waited from August. Competing tools needed graph tricks: PHPStan or Psalm cost

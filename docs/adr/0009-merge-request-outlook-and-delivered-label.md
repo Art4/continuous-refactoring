@@ -2,7 +2,7 @@
 
 > Amended by [ADR-0026](0026-drop-delivered-label-use-native-pr-linkage.md): the `refactor:delivered` label is dropped.
 >
-> The outlook (the next node, and later its diagram, [ADR-0027](0027-mr-outlook-diagram-of-unblocked-nodes.md)) was dropped without an ADR when the run's texts
+> Superseded in part without an ADR: the outlook (the next node, and later its diagram, [ADR-0027](0027-mr-outlook-diagram-of-unblocked-nodes.md)) was dropped when the run's texts
 > were written anew for [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): the merge request description names what the project gains, the ticket, the
 > changes and the checks, and no next Stage. [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) then removed the parser's `unblocked_by` output, which no
 > reference read. The plain-language opener stands.

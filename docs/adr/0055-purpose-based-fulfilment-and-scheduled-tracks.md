@@ -35,6 +35,12 @@
 > corrected: it does not wait for Guardrails' `Open`, and the claim that ordinary eligibility keeps
 > Guardrails selected after its first scan is removed.
 
+> Superseded in part by [ADR-0065](0065-investigation-gets-its-own-open.md).
+
+> Amended by [ADR-0060](0060-track-open-entries-record-their-issue-number.md).
+
+> Amends [ADR-0039](0039-batch-filing-and-priority-backlog-admission.md).
+
 Raised against a live incident: `refactor-scan` proposed adopting `php-cs-fixer` on a target that
 already ran Laravel Pint (which wraps PHP CS Fixer internally, under its own config format). The
 candidate's own text correctly flagged that a second, separately-configured style tool could collide

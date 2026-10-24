@@ -6,6 +6,8 @@
 > Amends [ADR-0050](0050-pre-implementation-decision-gate.md): the same gate, the same two labels,
 > now actively set/cleared instead of one being passively withheld.
 
+> Amended by [ADR-0066](0066-flagged-candidate-self-confirms-from-a-plain-comment.md).
+
 ADR-0050's gate only ever withheld `ready-for-agent` — it never checked for, or cleared, a
 **pre-existing** one. An externally-labeled candidate (`refactor-scan` step 3b — an issue a human
 files directly with `refactor:candidate`) can plausibly arrive already carrying `ready-for-agent`,

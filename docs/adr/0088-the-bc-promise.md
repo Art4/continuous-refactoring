@@ -1,5 +1,8 @@
 # The BC promise
 
+> Amends [ADR-0071](0071-tracker-through-operations-tracker-and-forge-apart.md).
+
+
 The suite cannot tell a project with a promise to outside code from one without. `principles.md` judges it ad hoc
 ("when in doubt, treat it as depended on"), `rector-type-coverage` adds return types that break a subclass in another
 repository, and Roave BackwardCompatibilityCheck, the tool that would catch such a break, has no place in the tree

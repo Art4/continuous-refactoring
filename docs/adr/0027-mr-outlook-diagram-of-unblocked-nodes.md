@@ -1,6 +1,6 @@
 # MR outlook: no type enum, and a fan-out diagram of newly-unblocked nodes
 
-> Superseded: the outlook this diagram sat beside was dropped without an ADR when the run's texts were written anew
+> Superseded without an ADR: the outlook this diagram sat beside was dropped when the run's texts were written anew
 > for [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md), and [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) removed the parser's `unblocked_by` output, which no reference read. There is still
 > no type enum.
 

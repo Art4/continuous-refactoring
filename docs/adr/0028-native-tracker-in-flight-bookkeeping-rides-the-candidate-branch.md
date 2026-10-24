@@ -25,6 +25,8 @@
 > querying the tracker, not by reading a committed file — so nothing external needs `bookkeeping.md`
 > to reflect that fact *before* the candidate's own merge request merges.
 
+> Amended by [ADR-0031](0031-draft-candidate-mrs-until-fold-in-lands.md).
+
 A human reviewing a live run of this suite against a real target (`Art4/legacy-todo`, native GitHub
 tracker) asked for exactly this simplification: every "in flight" bookkeeping write observed during
 that run (e.g. `docs(refactor): bookkeeping — clear pending, phpunit in flight`) opened its own

@@ -1,5 +1,8 @@
 # A named ticket narrows the worklist and reconcile to itself
 
+> Amends [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md).
+
+
 A call that names a ticket ("do ticket 68 yourself") answered Track choice and selection, but steps 2 and 3 of the run
 had no shortcut for it: the worklist searched every Stage's open tickets and looked up each one's merge request, and
 reconcile laid out findings for all of them and for every recorded rejection. A named ticket was not a restriction, so

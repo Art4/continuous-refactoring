@@ -7,6 +7,8 @@
 >
 > Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): `structural-scan`'s "MR scope" changes — once the gate opens it is proposed like any other node, and the codebase walk that used to be `refactor-scan`'s own inline work moves to `refactor-design`, run only for the chosen candidate.
 
+> Amended by [ADR-0017](0017-php-structural-scan-aggregation-node.md), [ADR-0018](0018-psalm-becomes-a-tree-node.md), [ADR-0022](0022-is-php-project-recognition-gate.md) and [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md).
+
 Two gaps surfaced testing the suite end-to-end against a real target repo (a legacy PHP fixture with zero tooling). First, `refactor-scan` and `refactor-prioritize` never actually implemented the tree-walking ADR-0005 and ADR-0007 specify — the orchestrator's prose claimed it, `scripts/lib/tooling_tree.py` proved the design out against fixtures, but nothing wired either into the agent-facing skill text. A scan against the fixture found five genuine structural candidates and filed them without any awareness that the repo had no `composer.json`, no CI, no PHPStan — the tree was invisible to the skill that was supposed to walk it.
 
 Second, and separately: the orchestrator's own "scaffold `docs/refactoring/config.md` on the first pass" logic and ADR-0005's "`git` is the only hard requirement" rule are both real suite behaviors with no home in the tree they precede. A target repo's very first state — is this a git repository, has the loop been configured here yet — sat outside the tree that is supposed to describe what's missing before deepening work can start.

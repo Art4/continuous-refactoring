@@ -27,6 +27,10 @@
 > `refactor-scan` — that parser's role as ground truth for fulfilment is superseded by agent judgement
 > against each node's Purpose statement (ADR-0055), and its `Fulfilled nodes` cache is now ignored.
 
+> Supersedes in part [ADR-0046](0046-utility-script-entry-point-exclusion.md).
+
+> Amends [ADR-0032](0032-psr-4-node-for-app-source-autoloading.md), [ADR-0042](0042-psr4-wires-autoloader-into-entry-points.md) and [ADR-0044](0044-coverage-floor-node.md).
+
 Raised against the observation that the old `Open` semantics (listing only nodes with filed issues)
 created ambiguity about what "done" meant for a Track, and that `Fulfilled nodes` was a stale cache
 no lifecycle skill needed once fulfilment checks moved to agent judgement. The scheduler rules also

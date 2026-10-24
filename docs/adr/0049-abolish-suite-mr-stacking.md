@@ -19,6 +19,8 @@
 > the simpler case that rule still protects (a single candidate branch with its own unmerged write)
 > is unaffected by whether stacking exists at all.
 
+> Supersedes in part [ADR-0006](0006-loop-delivers-remembered-merge-requests.md).
+
 ## Context
 
 ADR-0015 traded a real, observed problem (two suite branches independently writing

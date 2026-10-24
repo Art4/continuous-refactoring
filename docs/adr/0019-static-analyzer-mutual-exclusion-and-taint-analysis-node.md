@@ -3,7 +3,7 @@
 > Amended by [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md) and [ADR-0086](0086-tools-on-request.md): `psalm-taint-analysis` is a Guardrails Stage after all (Part C's Safety Net
 > membership is reversed) and is proposed only on request.
 
-> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) for the mutual exclusion: a Role another Tool fills takes the place of the Tool that is
+> Superseded in part by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md), for the mutual exclusion: a Role another Tool fills takes the place of the Tool that is
 > not in use, so Psalm needs no gate nodes. Taint analysis as a Stage stays.
 
 > Closes the gap ADR-0018 and ticket 43 left open: `psalm` existed as a recognition-only node but wasn't a
@@ -16,6 +16,8 @@
 > holds — ADR-0040 drops it after all, but only alongside a new compensating `recommended` edge into
 > `rector-php-set` that the version rejected here lacked. `phpunit`'s own leaf, and every other decision
 > in this document, are unaffected.
+
+> Amended by [ADR-0030](0030-drop-rector-early-return-node-merge-into-code-quality.md).
 
 Ticket 37 was filed during ticket 34's grilling, `ready-for-human`, flagging that its own
 `tooling_tree.py` mechanics needed a dedicated design pass before implementation. This ADR is the record of

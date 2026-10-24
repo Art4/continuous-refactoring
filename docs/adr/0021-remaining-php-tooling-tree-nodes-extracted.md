@@ -10,6 +10,8 @@
 > only stubs (Name/Tool/Purpose per node) plus its two non-node cross-cutting sections and the *Nodes*
 > preamble — every node's Fulfilment check/MR scope lives in `php-tooling-tree/`.
 
+> Amended by [ADR-0030](0030-drop-rector-early-return-node-merge-into-code-quality.md).
+
 Ticket 30 established one-file-per-node extraction, deferred "one node at a time." ADR-0020 (ticket 45)
 deviated once, for the PHPStan family, because its four sections constantly cross-referenced each other.
 With `composer`, `phpunit`, and the PHPStan family already extracted, fifteen nodes remained inline, several
