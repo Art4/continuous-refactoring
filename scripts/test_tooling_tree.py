@@ -715,7 +715,7 @@ class SuiteDataTests(unittest.TestCase):
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
         self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 16)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 18)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 17)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 

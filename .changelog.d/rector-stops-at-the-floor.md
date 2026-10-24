@@ -1,0 +1,1 @@
+Rector's PHP set now goes up to the PHP version your `composer.json` declares and never above it, and the "PHP Version Floor" step is gone: the suite no longer raises your declared minimum PHP after rewriting the code for a newer one. A rejection of that step you recorded earlier is ignored.

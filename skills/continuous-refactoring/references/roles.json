@@ -84,12 +84,6 @@
       "name": "Static Security Analysis",
       "purpose": "A rule-based scanner looks for common vulnerability patterns in the source.",
       "signal": "Security"
-    },
-    {
-      "slug": "runtime-floor",
-      "name": "Runtime Floor",
-      "purpose": "The declared minimum runtime version matches what the code demonstrably needs.",
-      "signal": null
     }
   ]
 }

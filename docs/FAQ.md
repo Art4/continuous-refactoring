@@ -206,6 +206,16 @@ Declining the Rector set releases the level; it is then taken in without the rew
 does not touch what the levels check and is a Guardrails Stage: it rewrites only test code, and a conflict
 with structural work is resolved by running Rector again.
 
+## Why does Rector stop at the PHP version my project declares?
+
+Because rewriting the code for a newer PHP is the same promise as raising the minimum in `composer.json`:
+afterwards the code no longer runs on the older PHP. Whoever installs your package or runs your application
+on that PHP breaks, even though `composer.json` still says it is supported. Raising the minimum is a product
+decision, so the suite never makes it, neither in `composer.json` nor through Rector. Rector's PHP set goes
+up to the version you declare; when you raise it yourself, the next re-check of the tooling offers the next
+level. Code that already needed a newer PHP before the suite came is proposed as an ordinary ticket, for you
+to decide whether the minimum goes up or the code comes down.
+
 ## Why does the suite sometimes compare the old and the new code on real inputs?
 
 A test only covers the cases someone thought of. When a restructuring reaches over several steps behind
