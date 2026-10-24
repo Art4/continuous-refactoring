@@ -1,7 +1,7 @@
 # 05 — Roave BC Check and the BC-safe Type Coverage path
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 02, 04
 
 **What to build** (ADR-0088)
@@ -23,3 +23,5 @@ Blocked by: 02, 04
 Friendica-style promise does not, `rector-type-coverage` waits for it, and tests and validator are green.
 
 ## Comments
+
+> **2026-10-24:** Done. Verified from Roave's README and Packagist: base release found only in `x.y.z` tags; tags must be fetched; autoload must cover the sources; intended breaks go into `<ignored-regex>` entries. Oldest versions ran on PHP 7.2, but the Stage installs through the Docker image or Action, so no `min_runtime` (as Semgrep). An unsettled promise takes the BC-safe Rector path. Side note: rector-bc-library's README has two typos (`typeDeclaraion:` for `typeDeclarations:`, `>withRules` missing a `-`).

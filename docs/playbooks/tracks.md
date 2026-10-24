@@ -8,7 +8,7 @@ A **Track** is one of four kinds of work a run can spend itself on. Each run wor
 
 | Track | Purpose | Its tickets |
 |---|---|---|
-| **Safety Net** | Set up the deterministic tooling (test runner, coding standards, static analysis, CI) that catches a regression *before* structural work starts | one per tool still to set up |
+| **Safety Net** | Set up the deterministic tooling (test runner, coding standards, static analysis, CI, a backward-compatibility check under a SemVer promise) that catches a regression *before* structural work starts | one per tool still to set up |
 | **Guardrails** | Set up further quality and security tooling once the Safety Net is in place (coverage floor, mess detection, stricter static analysis, …) | one per tool still to set up |
 | **Housekeeping** | Recurring maintenance, and the small refactoring ideas noted along the way ([playbook](housekeeping.md)) | one standing ticket per template |
 | **Investigation** | Structural refactoring — a hot spot, a module worth deepening | the tickets the suite filed after exploring, and tickets you wrote |

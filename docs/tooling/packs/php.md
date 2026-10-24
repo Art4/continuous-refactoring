@@ -11,6 +11,7 @@ flowchart TD
   subgraph t_safety_net["Safety Net"]
     s_composer["Composer"]
     s_psr_4["PSR-4 Autoloading"]
+    s_roave_bc_check["Roave Backward Compatibility Check"]
     s_php_cs_fixer_adoption["PHP CS Fixer"]
     s_pint["Laravel Pint"]
     s_ecs["Easy Coding Standard"]
@@ -45,9 +46,11 @@ flowchart TD
     s_psalm_taint_analysis["Psalm Taint Analysis"]
     s_semgrep["Semgrep (OWASP Top 10)"]
   end
-  x_editorconfig[".editorconfig (generic)"]
   x_ci_runner["CI Runner (generic)"]
+  x_editorconfig[".editorconfig (generic)"]
   s_composer --> s_psr_4
+  s_composer --> s_roave_bc_check
+  x_ci_runner -.-> s_roave_bc_check
   s_composer --> s_php_cs_fixer_adoption
   x_editorconfig -.-> s_php_cs_fixer_adoption
   s_php_cs_fixer_adoption --> s_php_cs_fixer_rollout
@@ -93,6 +96,7 @@ flowchart TD
   s_rector_code_quality -.-> s_rector_type_coverage
   r_code_style -.-> s_rector_type_coverage
   s_phpstan_level_3 -.-> s_rector_type_coverage
+  s_roave_bc_check -.-> s_rector_type_coverage
   s_phpstan_level_4 -->|one of| s_psalm_taint_analysis
   s_psalm -->|one of| s_psalm_taint_analysis
   x_ci_runner -.-> s_semgrep
@@ -111,6 +115,7 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | --- | --- | --- | --- | --- | --- |
 | Composer (`composer`) | recommended | Package Management | Composer | – | [packs/php/composer.md](../../../skills/continuous-refactoring/references/packs/php/composer.md) |
 | PSR-4 Autoloading (`psr-4`) | recommended | Autoloading | – | – | [packs/php/psr-4.md](../../../skills/continuous-refactoring/references/packs/php/psr-4.md) |
+| Roave Backward Compatibility Check (`roave-bc-check`) | recommended | API Compatibility | roave-backward-compatibility-check | – | [packs/php/roave-bc-check.md](../../../skills/continuous-refactoring/references/packs/php/roave-bc-check.md) |
 | PHP CS Fixer (`php-cs-fixer`) | recommended | Code Style | php-cs-fixer | php 5.3 | [packs/php/php-cs-fixer.md](../../../skills/continuous-refactoring/references/packs/php/php-cs-fixer.md) |
 | Laravel Pint (`pint`) | recognized | Code Style | Laravel Pint | – | [packs/php/pint.md](../../../skills/continuous-refactoring/references/packs/php/pint.md) |
 | Easy Coding Standard (`ecs`) | recognized | Code Style | Easy Coding Standard | – | [packs/php/ecs.md](../../../skills/continuous-refactoring/references/packs/php/ecs.md) |
@@ -130,6 +135,7 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | --- | --- | --- | --- | --- | --- |
 | Composer (`composer`) | `composer` | Safety Net | – | – | – |
 | PSR-4 Autoloading (`psr-4`) | `psr-4` | Safety Net | `composer` | – | – |
+| Roave Backward Compatibility Check (`roave-bc-check`) | `roave-bc-check` | Safety Net | `composer` | `ci-runner` | The project's BC promise (the BC promise operation of its tracker file) follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise does not count. |
 | PHP CS Fixer (`php-cs-fixer-adoption`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
 | PHP CS Fixer Rollout (`php-cs-fixer-rollout`) | `php-cs-fixer` | Guardrails | `php-cs-fixer-adoption` | – | – |
 | Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |
@@ -156,6 +162,6 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | Rector: Dead Code Set (`rector-dead-code`) | `rector` | Safety Net | `rector-php-set` | `code-style` (Role) | – |
 | Rector: Code Quality Set (`rector-code-quality`) | `rector` | Safety Net | `rector-php-set` | `code-style` (Role) | – |
 | Rector: PHPUnit Set (`rector-phpunit-set`) | `rector` | Guardrails | `phpunit` | `rector-code-quality`, `code-style` (Role) | – |
-| Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `code-style` (Role), `phpstan-level-3` | – |
+| Rector: Type Coverage Set (`rector-type-coverage`) | `rector` | Safety Net | `composer` | `rector-dead-code`, `rector-code-quality`, `code-style` (Role), `phpstan-level-3`, `roave-bc-check` | – |
 | Psalm Taint Analysis (`psalm-taint-analysis`) | `psalm-taint-analysis` | Guardrails | one of `phpstan-level-4`, `psalm` | – | – |
 | Semgrep (OWASP Top 10) (`semgrep`) | `semgrep` | Guardrails | – | `ci-runner` | – |

@@ -288,6 +288,17 @@ the answer and a wrong guess cannot be undone by declining a ticket: deleting an
 break, keeping an API nobody outside uses is clutter. It proposes the document it found, or "none". Until
 you answer, it treats code reachable from outside as covered.
 
+## Why is the backward-compatibility check set up only for a SemVer promise?
+
+Because the check, Roave's Backward Compatibility Check, compares your code with the last release and
+reports every removed or changed method as a break. Under SemVer that is exactly the rule: a break waits for
+the next major version. Under a promise counted in time and releases, like Friendica's, a removal after the
+deprecation period is allowed, and the check would fail on each one until someone told it to ignore it. It
+also finds the last release only in a tag such as `1.4.2`. So it is set up where your promise follows SemVer
+and you have tagged a release, and before the suite's own restructurings start, since those are what could
+break your users. Where a type the suite adds could break a subclass in someone else's code, Rector's type
+coverage takes a BC-safe path that leaves non-final public and protected methods alone.
+
 ## Why doesn't the suite just do what a review bot asks?
 
 A bot finds real defects and also files comments that are wrong or only noise, and acting on all of them
