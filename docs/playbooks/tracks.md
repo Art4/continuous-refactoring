@@ -9,7 +9,7 @@ A **Track** is one of four kinds of work a run can spend itself on. Each run wor
 | Track | Purpose | Its tickets |
 |---|---|---|
 | **Safety Net** | Set up the deterministic tooling (test runner, coding standards, static analysis, CI) that catches a regression *before* structural work starts | one per tool still to set up |
-| **Guardrails** | Set up further quality and security tooling once the Safety Net is in place (dependency audit, coverage floor, mess detection, …) | one per tool still to set up |
+| **Guardrails** | Set up further quality and security tooling once the Safety Net is in place (coverage floor, mess detection, stricter static analysis, …) | one per tool still to set up |
 | **Housekeeping** | Recurring maintenance, and the small refactoring ideas noted along the way ([playbook](housekeeping.md)) | one standing ticket per template |
 | **Investigation** | Structural refactoring — a hot spot, a module worth deepening | the tickets the suite filed after exploring, and tickets you wrote |
 
@@ -56,6 +56,8 @@ After that, the tickets are the record:
 - A tool without an open ticket counts as done. Nothing is judged again on an ordinary run — except a tool the suite learned about since, which makes the next run scan the Track for it.
 - A proposal you neither filed nor declined is stored nowhere. Its tool counts as done until a later scan offers it again.
 - A scan runs again when you ask for one in the call, and as a recurring Housekeeping task that re-checks both tooling Tracks — that is how a tool that went missing, or a tool the tree gained, is noticed.
+
+A few tools are proposed **only when you ask** for them: worth having on some projects and noise on others. Semgrep and Psalm's taint analysis are two: they find much in old code that grew without guardrails and little in a young project under them. Their tools make no scan due and are named at the end of each scan report as "available on request". Name one in the call ("set up Semgrep") and the run scans that tool and proposes it like any other; or ask for a scan "including the tools on request". Once one has a ticket, it is worked like every other.
 
 Some tools can get no ticket at the moment: one that needs a newer PHP than your project allows, or one that waits behind a condition no ticket can change (a PHP tool on a project that is not PHP). The scan names them as out of reach, with the reason. For a tool below your PHP version it recommends recording a rejection that states the PHP version needed; once your project reaches it, a later run offers to reverse that rejection.
 

@@ -68,12 +68,6 @@
       "signal": "Understandability"
     },
     {
-      "slug": "dependency-audit",
-      "name": "Dependency Audit",
-      "purpose": "Known vulnerabilities in the third-party dependencies are reported and gate the pipeline.",
-      "signal": "Security"
-    },
-    {
       "slug": "secret-scanning",
       "name": "Secret Scanning",
       "purpose": "Committed secrets and credentials are found before they ship.",

@@ -30,6 +30,7 @@ order. The seed is a JSON file written to a temporary directory outside the targ
  "rejected": {"<role, tool or stage>": null, "<role, tool or stage>": {"php": "7.4"}},
  "packs": ["generic", "php"],
  "not_applicable": ["<stage>"],
+ "requested": ["<stage>"],
  "runtime": {"php": "7.4"}}
 ```
 
@@ -39,6 +40,7 @@ order. The seed is a JSON file written to a temporary directory outside the targ
 | `rejected` | each rejected Role, Tool or Stage, with its blocker: `null`, or the minimum runtime whose arrival lifts the rejection (`rejection.md`) |
 | `packs` | the Packs whose *Applies when* holds; missing means all of them |
 | `not_applicable` | the Stages whose own *Applies when* does not hold |
+| `requested` | the Stages of on-request Tools a human asked for: a ticket of them exists, or the call names them. Naming a Stage of another Tool ends in exit code 2 |
 | `runtime` | the lowest version of each runtime the target allows, read from its manifest and written as a string: for PHP the lowest version `require.php` allows, or `config.platform.php` where that is set. Left out where it is unclear: a missing or unreadable version blocks nothing |
 
 A Stage in none of the lists is undecided. `git` and `onboarding-setup` are settled by the parser itself and
@@ -49,17 +51,18 @@ again.
 
 | Key | Holds |
 | --- | --- |
-| `tracks["Safety Net"]`, `tracks["Guardrails"]` | `nodes`: every Stage of the Track a ticket can be filed for, as `{node, name, tool, search}` in the order of the Packs · `backlog`: the slugs among them that are neither fulfilled nor closed by a rejection, blocked ones included · `workable`: the backlog without what waits · `withheld`: `{node, reason}` for each Stage of the Track that cannot be worked now, those closed by a rejection included, with what they hang on · `fulfilled`: the backlog is empty |
+| `tracks["Safety Net"]`, `tracks["Guardrails"]` | `nodes`: every Stage of the Track a ticket can be filed for, as `{node, name, tool, search, on_request}` in the order of the Packs; `on_request` marks a Stage of an on-request Tool, listed so its tickets are found, whether or not it was asked for · `backlog`: the slugs among them that are neither fulfilled nor closed by a rejection, blocked ones included, a Stage of an on-request Tool only once it was asked for · `workable`: the backlog without what waits · `withheld`: `{node, reason}` for each Stage of the Track that cannot be worked now, those closed by a rejection included, with what they hang on · `fulfilled`: the backlog is empty |
 | `safety_net_fulfilled` | the Safety Net's backlog is empty: every Stage is fulfilled or closed by a rejection |
 | `runtime_blocked` | `{node, reason}` for each Tool whose runtime is below its minimum, at the Tool's first Stage, a rejected one included; the reason names both versions |
 | `closed_by_rejection` | the Stages closed because a Role, a Tool or a required Stage is rejected, or because a rejection left a required Role or an any-of group nothing that could be fulfilled |
 | `reversals` | rejections whose runtime blocker the target now meets |
-| `roles`, `tools` | each Role, in each scope its Tools are in, as `{role, name, scope, filled_by}` with the Tool that fills it; each Tool with its Roles, its status (recommended or recognized), and whether another Tool took its place |
+| `roles`, `tools` | each Role, in each scope its Tools are in, as `{role, name, scope, filled_by}` with the Tool that fills it; each Tool with its Roles, its status (recommended, on-request or recognized), and whether another Tool took its place |
 | `prerequisites`, `packs` | whether `git` and `onboarding-setup` hold; the Packs that applied |
 | `tree.stages` | every Stage with its Tool, Roles, Pack, Track, `requires` and `waits_for` |
 
 A Stage of a recognized Tool, or of a Tool another Tool took the place of, is in no `nodes` list and gets
-no ticket.
+no ticket. A Stage of an on-request Tool nobody asked for is in `nodes` with `on_request`, and in no
+backlog.
 
 ## Is Safety Net fulfilled?
 
@@ -77,6 +80,8 @@ For a tooling Track that has a trace, its tickets are the state. The seed holds:
 - every Stage of the Track that is *known* — a ticket of it exists in some state, or a rejection of it is
   on record — and has no open ticket as `fulfilled`, taken as done and not judged. A Stage that is not
   known stays undecided, and its Track's scan is due (`worklist.md`);
+- every Stage of an on-request Tool that has a ticket in some state, or that the call names, as
+  `requested`;
 - the Packs and Stages the *Applies when* sentences hold for, and the runtime, judged this run
   (`track-scan.md`, *Judging*). No ticket stands for them, so the tracker says nothing about them.
 

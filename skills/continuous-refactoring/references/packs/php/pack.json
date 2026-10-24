@@ -178,27 +178,6 @@
       ]
     },
     {
-      "tool": "composer-audit",
-      "name": "Composer Audit",
-      "uses": "composer audit",
-      "roles": ["dependency-audit"],
-      "status": "recommended",
-      "details": "composer-audit.md",
-      "min_runtime": {
-        "php": "7.2"
-      },
-      "stages": [
-        {
-          "slug": "composer-audit",
-          "name": "Composer Audit",
-          "track": "Guardrails",
-          "requires": ["composer"],
-          "waits_for": ["ci-runner"],
-          "applies_when": "The repository's composer.json requires at least one real package; platform pseudo-packages (php, hhvm, ext-*, lib-*, composer-plugin-api, composer-runtime-api) do not count."
-        }
-      ]
-    },
-    {
       "tool": "phpstan",
       "name": "PHPStan",
       "uses": "PHPStan",
@@ -362,7 +341,7 @@
       "name": "Psalm Taint Analysis",
       "uses": "vimeo/psalm",
       "roles": ["taint-analysis"],
-      "status": "recommended",
+      "status": "on-request",
       "details": "psalm.md",
       "stages": [
         {
@@ -379,7 +358,7 @@
       "name": "Semgrep (OWASP Top 10)",
       "uses": "Semgrep",
       "roles": ["static-security-analysis"],
-      "status": "recommended",
+      "status": "on-request",
       "details": "semgrep.md",
       "stages": [
         {

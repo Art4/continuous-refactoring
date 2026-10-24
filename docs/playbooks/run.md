@@ -28,6 +28,7 @@ Say what you want in your own words after the command. The suite says back in on
 | a ticket — "ticket 42" | exactly that ticket: the run looks at no other ticket, reconcile included, and ends if it turns out not to need work |
 | a restriction — "only the Rector tools" | scan, filing and selection stay within it |
 | "scan again" | the Track is scanned although it was scanned before |
+| a tool on request — "set up Semgrep" | that tool is scanned and proposed, though the suite never offers it unasked; "scan including the tools on request" judges all of them |
 
 These combine: "do Guardrails yourself, only the security tools".
 

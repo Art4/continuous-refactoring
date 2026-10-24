@@ -24,9 +24,8 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Testing (`testing`) | A test suite that runs locally and catches regressions. | – | PHPUnit (recommended, php) |
 | Test Coverage (`test-coverage`) | The share of the code the tests reach is measured and may not fall. | Untested / hard-to-test | Test Coverage Floor (recommended, php) |
 | Static Analysis (`static-analysis`) | A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step. | – | PHPStan (recommended, php); Psalm (recognized, php); TwigStan (recommended, twig-php) |
-| Taint Analysis (`taint-analysis`) | A tool follows data from untrusted input to dangerous operations. | Security | Psalm Taint Analysis (recommended, php) |
+| Taint Analysis (`taint-analysis`) | A tool follows data from untrusted input to dangerous operations. | Security | Psalm Taint Analysis (on-request, php) |
 | Automated Refactoring (`automated-refactoring`) | Rule sets rewrite code mechanically, one reviewable set at a time. | – | Rector (recommended, php) |
 | Code Smell Detection (`code-smell-detection`) | A tool measures complexity and flags code that is hard to read. | Understandability | PHPMD (recommended, php) |
-| Dependency Audit (`dependency-audit`) | Known vulnerabilities in the third-party dependencies are reported and gate the pipeline. | Security | Composer Audit (recommended, php) |
 | Secret Scanning (`secret-scanning`) | Committed secrets and credentials are found before they ship. | Security | Secret Detection (recommended, generic) |
-| Static Security Analysis (`static-security-analysis`) | A rule-based scanner looks for common vulnerability patterns in the source. | Security | Semgrep (OWASP Top 10) (recommended, php) |
+| Static Security Analysis (`static-security-analysis`) | A rule-based scanner looks for common vulnerability patterns in the source. | Security | Semgrep (OWASP Top 10) (on-request, php) |

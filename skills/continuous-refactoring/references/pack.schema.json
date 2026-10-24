@@ -28,7 +28,7 @@
         "name": {"type": "string", "minLength": 1},
         "uses": {"type": ["string", "null"], "description": "What it runs (binary, package, service); null for a convention."},
         "roles": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/slug"}},
-        "status": {"enum": ["recommended", "recognized"]},
+        "status": {"enum": ["recommended", "on-request", "recognized"]},
         "details": {"type": "string", "minLength": 1, "description": "The Markdown file with Fulfilment check, MR scope and Ratchet, relative to the directory of the Pack's pack.json."},
         "min_runtime": {
           "type": "object",

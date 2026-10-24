@@ -13,6 +13,16 @@ the Track's `nodes`, the Packs, and the first Stage
 of every Tool, recognized ones included — they say which Tool fills a Role. A restriction in the call
 narrows what step 4 proposes; of the Stages outside it, only those a covered Stage requires are judged.
 
+**Tools on request.** A Stage `nodes` marks `on_request` is in scope only when a human asked for its Tool:
+
+- **The call names the Tool or one of its Stages** ("set up Semgrep") → the scan covers that Tool alone, as
+  a restriction, and its Stages go into the seed's `requested`.
+- **The call asks for a scan including the on-request Tools** → all of them are in scope and `requested`.
+- **A ticket of one exists** → its Stages are `requested` (`tooling-parser.md`, *The seed from the trace*).
+
+Otherwise its Stages are not judged, except the first Stage of each such Tool, which is judged like a
+recognized Tool's to say whether it fills a Role.
+
 ## 2. Judging
 
 - **Rejected** — the recorded rejections (`rejection.md`, *Finding rejections*), of Roles, Tools and
@@ -40,7 +50,7 @@ Purpose in the target, under any name.
 - **The evidence the Fulfilment check names is there** — the dependency, the config file, the CI
   invocation → fulfilled.
 - **It is absent, and another tool serves the Purpose** → fulfilled. A CI job running
-  `composer run security-check`, a script that calls `composer audit`, fulfils `composer-audit`. Where the
+  `semgrep` through a marketplace action fulfils `semgrep` as well as one in a shell step. Where the
   Pack knows the other tool as a recognized Tool, its own Stage is the one fulfilled, never the
   recommended Tool's: a target running Psalm fulfils the Stage `psalm`, one running Laravel Pint the Stage
   `pint` (Easy Coding Standard: `ecs`, PHP_CodeSniffer: `phpcs`), and no PHPStan Stage and not `php-cs-fixer-adoption` is judged fulfilled for
@@ -102,5 +112,9 @@ out at filing for closing with a note, as selection does at pick-up (`selection.
 - **Proposals** → the filing step, in backlog order.
 - **None** → say what the scan found — every Stage fulfilled or rejected, or which are out of reach and
   why — and return to Track choice with the Track marked as tried.
+
+Either way the report ends with one line naming the Track's on-request Tools that are neither asked for
+nor in place, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis —
+name one in the call to set it up." Nothing is filed for them.
 
 The scan is done when every Stage in scope is fulfilled, rejected, proposed, or named as out of reach.

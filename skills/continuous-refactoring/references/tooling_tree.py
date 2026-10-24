@@ -33,6 +33,9 @@ TRACKS = ("Safety Net", "Guardrails")
 # The suite's own prerequisites: no Pack holds them, a seed may mention them
 # and is ignored for them.
 PREREQUISITES = ("git", "onboarding-setup")
+# In the order a Role prefers its Tools: a recommended one before one on
+# request, both before a recognized one.
+STATUSES = ("recommended", "on-request", "recognized")
 
 _SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 _VERSION = re.compile(r"\d+(?:\.\d+)*")
@@ -181,7 +184,7 @@ def load_model(
             origin[slug] = where
             _need(_is_text(tool.get("name")), where, f"tool {slug} needs a name")
             _need(tool.get("uses") is None or _is_text(tool.get("uses")), where, f"tool {slug}: uses must be text or null")
-            _need(tool.get("status") in ("recommended", "recognized"), where, f"tool {slug}: status must be recommended or recognized")
+            _need(tool.get("status") in STATUSES, where, f"tool {slug}: status must be one of {', '.join(STATUSES)}")
             _need(_is_text(tool.get("details")), where, f"tool {slug} needs a details file")
             tool_roles = tool.get("roles")
             _need(isinstance(tool_roles, list) and tool_roles, where, f"tool {slug} must play at least one role")
@@ -330,7 +333,8 @@ def load_seed(seed_path: pathlib.Path, model: dict) -> dict:
         {"fulfilled": ["composer"],
          "rejected": {"phpmd": null, "static-analysis": null, "phpstan-level-0": {"php": "7.1"}},
          "packs": ["generic", "php"],
-         "not_applicable": ["composer-audit"],
+         "not_applicable": ["twigstan"],
+         "requested": ["semgrep"],
          "runtime": {"php": "7.4"}}
 
     ``fulfilled`` names Stages. ``rejected`` names a Role, a Tool or a Stage
@@ -338,7 +342,9 @@ def load_seed(seed_path: pathlib.Path, model: dict) -> dict:
     lifts the rejection (a plain list of slugs works where no rejection
     carries one). ``packs`` lists the Packs that apply (all, when it is
     missing), ``not_applicable`` the Stages whose own condition does not hold,
-    ``runtime`` the lowest runtime the target allows, as a string.
+    ``requested`` the Stages of on-request Tools a human asked for (a ticket
+    of them exists, or the call names them), ``runtime`` the lowest runtime
+    the target allows, as a string.
 
     Anything else raises ``SeedError``: a judgement handed over is never
     answered with outputs computed from something else. That includes a name
@@ -356,9 +362,9 @@ def load_seed(seed_path: pathlib.Path, model: dict) -> dict:
         raise fail(f"could not be read as JSON: {exc}") from exc
     shape = (
         'must hold a JSON object {"fulfilled": [stage, ...], "rejected": {role|tool|stage: null | {"php": "X.Y"}}, '
-        '"packs": [pack, ...], "not_applicable": [stage, ...], "runtime": {"php": "X.Y"}}'
+        '"packs": [pack, ...], "not_applicable": [stage, ...], "requested": [stage, ...], "runtime": {"php": "X.Y"}}'
     )
-    allowed = {"fulfilled", "rejected", "packs", "not_applicable", "runtime"}
+    allowed = {"fulfilled", "rejected", "packs", "not_applicable", "requested", "runtime"}
     if not isinstance(data, dict) or set(data) - allowed:
         raise fail(shape)
 
@@ -400,11 +406,21 @@ def load_seed(seed_path: pathlib.Path, model: dict) -> dict:
     unknown = sorted(set(not_applicable) - set(model["stages"]))
     if unknown:
         raise fail(f"names stages the model doesn't have in \"not_applicable\": {', '.join(unknown)}")
+    requested = names("requested")
+    unknown = sorted(set(requested) - set(model["stages"]))
+    if unknown:
+        raise fail(f"names stages the model doesn't have in \"requested\": {', '.join(unknown)}")
+    asked = sorted(s for s in requested if model["tools"][model["stages"][s]["tool"]]["status"] != "on-request")
+    if asked:
+        raise fail(f"names stages of Tools that are not on request in \"requested\": {', '.join(asked)}")
 
     runtime = data.get("runtime", {})
     if not isinstance(runtime, dict) or not all(isinstance(k, str) and isinstance(v, str) for k, v in runtime.items()):
         raise fail('"runtime" must map runtime names to version strings')
-    return {"fulfilled": fulfilled, "rejected": rejected, "packs": packs, "not_applicable": not_applicable, "runtime": runtime}
+    return {
+        "fulfilled": fulfilled, "rejected": rejected, "packs": packs,
+        "not_applicable": not_applicable, "requested": requested, "runtime": runtime,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -436,6 +452,8 @@ class _State:
             if stages[s]["pack"] in self.packs and s not in seed["not_applicable"]
         }
         self.fulfilled = {s for s in seed["fulfilled"] if s in self.active}
+        # An on-request Tool is asked for once one of its Stages is.
+        self.requested_tools = {stages[s]["tool"] for s in seed.get("requested", [])}
 
         rejected = set(seed["rejected"])
         self.rejected_roles = rejected & set(roles)
@@ -469,11 +487,11 @@ class _State:
         return self.filled_by.get((role, scope)) is not None
 
     def _filled_by(self, slot: tuple[str, str | None]) -> str | None:
-        """The Tool that fills the Role in a scope: the first, recommended ones
-        before recognized ones, whose first Stage is fulfilled."""
+        """The Tool that fills the Role in a scope: the first, in the order of
+        ``STATUSES``, whose first Stage is fulfilled."""
         candidates = sorted(
             self.tools_of_slot[slot],
-            key=lambda t: self.model["tools"][t]["status"] != "recommended",
+            key=lambda t: STATUSES.index(self.model["tools"][t]["status"]),
         )
         for tool in candidates:
             if self.first(tool) in self.fulfilled:
@@ -498,11 +516,17 @@ class _State:
 
     def never_fulfilled(self, stage: str) -> bool:
         """Nothing a run does will fulfil it: a Stage of a recognized Tool
-        that is not there, or of a Tool another Tool took the place of."""
+        that is not there, of an on-request Tool nobody asked for, or of a
+        Tool another Tool took the place of."""
         if stage in self.fulfilled:
             return False
         tool_slug = self.model["stages"][stage]["tool"]
-        return self.model["tools"][tool_slug]["status"] == "recognized" or tool_slug in self.out
+        status = self.model["tools"][tool_slug]["status"]
+        return (
+            status == "recognized"
+            or (status == "on-request" and tool_slug not in self.requested_tools)
+            or tool_slug in self.out
+        )
 
     # -- rejection ------------------------------------------------------------
 
@@ -602,12 +626,23 @@ class _State:
 
     # -- tickets --------------------------------------------------------------
 
-    def ticketable(self, stage: str) -> bool:
+    def listed(self, stage: str) -> bool:
+        """A Stage a ticket may be filed for: it applies, its Tool is not
+        recognized and has not been replaced by another."""
         s = self.model["stages"][stage]
         return (
             stage in self.active
-            and self.model["tools"][s["tool"]]["status"] == "recommended"
+            and self.model["tools"][s["tool"]]["status"] != "recognized"
             and s["tool"] not in self.out
+        )
+
+    def on_request(self, stage: str) -> bool:
+        return self.model["tools"][self.model["stages"][stage]["tool"]]["status"] == "on-request"
+
+    def ticketable(self, stage: str) -> bool:
+        """Listed, and of a recommended Tool or one a human asked for."""
+        return self.listed(stage) and (
+            not self.on_request(stage) or self.model["stages"][stage]["tool"] in self.requested_tools
         )
 
     def backlog(self, track: str) -> list[str]:
@@ -703,7 +738,7 @@ def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = N
     ``load_seed``; without one, every Stage of every Pack is undecided)."""
     repo = pathlib.Path(repo)
     model = model or load_model()
-    seed = seed or {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+    seed = seed or {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
     state = _State(model, seed, _has_refactoring_operations(repo))
     stages, tools = model["stages"], model["tools"]
 
@@ -716,7 +751,7 @@ def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = N
     for track in TRACKS:
         nodes = []
         for slug in model["stage_order"]:
-            if stages[slug]["track"] != track or not state.ticketable(slug):
+            if stages[slug]["track"] != track or not state.listed(slug):
                 continue
             stage, tool = stages[slug], tools[stages[slug]["tool"]]
             nodes.append({
@@ -724,6 +759,7 @@ def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = N
                 "name": stage["name"],
                 "tool": tool["uses"],
                 "search": _plain_search(stage["name"], tool["uses"]),
+                "on_request": state.on_request(slug),
             })
         withheld = []
         for slug in model["stage_order"]:

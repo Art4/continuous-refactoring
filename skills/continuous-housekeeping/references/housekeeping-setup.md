@@ -92,6 +92,8 @@ below. Ideas for a refactoring are left on it as comments. A new task goes above
   added since the previous Housekeeping ticket's scan. Note the commit scanned up to.
 - Re-check the project's quality tooling: is every tool set up so far still in place and running, and is
   there a further one to set up? File a ticket for each gap.
+- Audit the third-party dependencies for known vulnerabilities with the package manager's own audit
+  (`composer audit`, `npm audit`, …) and update each one with an advisory to a patched version.
 - <one task per tool: what its Housekeeping line asks, in the template reader's words>
 - Create the next Housekeeping ticket from this file, due one rhythm from today.
 ```
@@ -121,7 +123,8 @@ the template without one. Created → report it.
 A human who asks for a second rhythm ("a monthly one beside the weekly") gets steps 2 to 4 for it:
 
 - **The template** — a path of its own, its rhythm, the tasks the human names, and the last task. The
-  secret scan, the re-check and the tools' Housekeeping lines stay in the first template alone.
+  secret scan, the re-check, the dependency audit and the tools' Housekeeping lines stay in the first
+  template alone.
 - **The bullet** — extended: it names each template's path, the first one first, and each title carries
   its template's rhythm, as in the title of a monthly one: Housekeeping, monthly, the date.
 - **The line in the instruction file** stays as it is.

@@ -72,7 +72,7 @@ class Model:
         model = self.load()
         repo_tmp, repo = make_repo(onboarded)
         with repo_tmp:
-            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
             full.update(seed or {})
             return tp.compute(repo, model, full)
 
@@ -256,7 +256,7 @@ class SeedFileTests(unittest.TestCase):
 
     def test_defaults(self):
         seed = self.seed({})
-        self.assertEqual(seed, {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}})
+        self.assertEqual(seed, {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}})
 
     def test_rejected_may_be_a_plain_list_and_a_role_a_tool_or_a_stage(self):
         self.assertEqual(self.seed({"rejected": ["alpha", "b", "g1"]})["rejected"], {"alpha": None, "b": None, "g1": None})
@@ -274,6 +274,7 @@ class SeedFileTests(unittest.TestCase):
             {"rejected": {"b1": {"php": "7", "node": "8"}}},
             {"fulfilled": ["a1"], "rejected": ["a1"]},
             {"packs": ["nope"]}, {"packs": "main"}, {"not_applicable": ["nope"]},
+            {"requested": ["nope"]}, {"requested": ["a1"]},
             {"runtime": {"php": 7}}, {"runtime": []},
         ]
         for data in bad:
@@ -310,7 +311,7 @@ class OutputTests(unittest.TestCase):
         out = chain().compute()
         self.assertEqual([n["node"] for n in out["tracks"]["Safety Net"]["nodes"]], ["a1", "a2", "b1"])
         self.assertEqual(out["tracks"]["Guardrails"]["nodes"][0],
-                         {"node": "g1", "name": "G1", "tool": "uses", "search": ["G1", "uses"]})
+                         {"node": "g1", "name": "G1", "tool": "uses", "search": ["G1", "uses"], "on_request": False})
 
     def test_search_holds_the_tool_once_and_none_for_a_convention(self):
         m = Model([pack("m", [tool("a", [stage("a1")], uses="A1"), tool("b", [stage("b1")], uses=None, roles=["beta"])])])
@@ -446,7 +447,7 @@ class GuardrailsTests(unittest.TestCase):
             tp.load_seed(path, chain().load())
 
 
-class AfterTests(unittest.TestCase):
+class WaitsForTests(unittest.TestCase):
     def model(self):
         return Model([pack("m", [
             tool("a", [stage("a1")], roles=["alpha"]),
@@ -484,7 +485,7 @@ class AfterTests(unittest.TestCase):
         self.assertEqual([w for w in out["tracks"]["Safety Net"]["withheld"] if w["node"] == "c1"][0]["reason"], "waiting on: b1")
 
 
-class AfterARoleTests(unittest.TestCase):
+class WaitsForARoleTests(unittest.TestCase):
     def model(self):
         """Role alpha: tool p (recommended) or tool q (recognized). s waits for the Role."""
         return Model([pack("m", [
@@ -602,6 +603,50 @@ class RolesAndToolsTests(unittest.TestCase):
         self.assertEqual(m.compute({"rejected": {"b1": None}})["tracks"]["Safety Net"]["backlog"], [])
 
 
+class OnRequestTests(unittest.TestCase):
+    def model(self):
+        """Role alpha: tool p (recommended) or tool o (on request). Guardrails: tool m on request, which
+        waits for nothing; tool w waits for m; tool s in the Safety Net on request."""
+        return Model([pack("m", [
+            tool("p", [stage("p1")], roles=["alpha"]),
+            tool("o", [stage("o1")], roles=["alpha"], status="on-request"),
+            tool("s", [stage("s1")], roles=["delta"], status="on-request"),
+            tool("m", [stage("m1", track="Guardrails"), stage("m2", track="Guardrails", requires=["m1"])],
+                 roles=["beta"], status="on-request"),
+            tool("w", [stage("w1", track="Guardrails", waits_for=["m1"])], roles=["gamma"]),
+        ])])
+
+    def test_a_stage_nobody_asked_for_is_listed_but_not_in_the_backlog(self):
+        out = self.model().compute({"fulfilled": ["p1"]})
+        nodes = {n["node"]: n for t in out["tracks"].values() for n in t["nodes"]}
+        self.assertTrue(nodes["m1"]["on_request"])
+        self.assertFalse(nodes["w1"]["on_request"])
+        self.assertEqual(out["tracks"]["Guardrails"]["backlog"], ["w1"])
+        self.assertNotIn("m1", [w["node"] for w in out["tracks"]["Guardrails"]["withheld"]])
+
+    def test_it_holds_neither_the_safety_net_nor_a_stage_waiting_for_it(self):
+        out = self.model().compute({"fulfilled": ["p1"]})
+        self.assertTrue(out["safety_net_fulfilled"])
+        self.assertEqual(out["tracks"]["Guardrails"]["workable"], ["w1"])
+
+    def test_once_asked_for_its_stages_are_ordinary_backlog_stages(self):
+        out = self.model().compute({"fulfilled": ["p1"], "requested": ["m1"]})
+        self.assertEqual(out["tracks"]["Guardrails"]["backlog"], ["m1", "m2", "w1"])
+        self.assertEqual(out["tracks"]["Guardrails"]["workable"], ["m1"])
+        reasons = {w["node"]: w["reason"] for w in out["tracks"]["Guardrails"]["withheld"]}
+        self.assertEqual(reasons["w1"], "waiting on: m1")
+        out = self.model().compute({"requested": ["s1"]})
+        self.assertIn("s1", out["tracks"]["Safety Net"]["backlog"])
+        self.assertFalse(out["safety_net_fulfilled"])
+
+    def test_present_it_fills_its_role_after_a_recommended_tool(self):
+        out = self.model().compute({"fulfilled": ["o1"]})
+        self.assertEqual({r["role"]: r["filled_by"] for r in out["roles"]}["alpha"], "o")
+        self.assertIn("p", [t["tool"] for t in out["tools"] if t["out"]])
+        out = self.model().compute({"fulfilled": ["o1", "p1"]})
+        self.assertEqual({r["role"]: r["filled_by"] for r in out["roles"]}["alpha"], "p")
+
+
 class AppliesWhenTests(unittest.TestCase):
     def model(self):
         return Model([
@@ -713,14 +758,14 @@ class SuiteDataTests(unittest.TestCase):
     def compute(self, seed):
         repo_tmp, repo = make_repo()
         with repo_tmp:
-            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
             full.update(seed)
             return tp.compute(repo, self.model, full)
 
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
         self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 16)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 17)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 16)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -732,7 +777,7 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_a_rejected_composer_closes_the_php_pack(self):
         out = self.compute({"rejected": {"composer": None}})
-        for slug in ("psr-4", "php-cs-fixer-adoption", "php-cs-fixer-rollout", "phpunit", "phpstan-level-0", "rector-type-coverage", "composer-audit", "phpmd-adoption", "phpmd-rollout"):
+        for slug in ("psr-4", "php-cs-fixer-adoption", "php-cs-fixer-rollout", "phpunit", "phpstan-level-0", "rector-type-coverage", "phpmd-adoption", "phpmd-rollout"):
             self.assertIn(slug, out["closed_by_rejection"], slug)
         self.assertNotIn("ci-runner", out["closed_by_rejection"])
 
@@ -824,16 +869,18 @@ class SuiteDataTests(unittest.TestCase):
     def test_the_rector_phpunit_set_is_a_guardrails_stage(self):
         self.assertEqual(self.model["stages"]["rector-phpunit-set"]["track"], "Guardrails")
 
-    def test_composer_audit_applies_only_to_a_repository_with_a_real_dependency(self):
-        self.assertIn("applies_when", self.model["stages"]["composer-audit"])
-        out = self.compute({"not_applicable": ["composer-audit"]})
-        self.assertNotIn("composer-audit", out["tracks"]["Guardrails"]["backlog"])
+    def test_the_security_scanners_are_proposed_only_on_request(self):
+        for slug in ("semgrep", "psalm-taint-analysis"):
+            self.assertEqual(self.model["tools"][slug]["status"], "on-request", slug)
+        out = self.compute({"fulfilled": [s for s in self.model["stages"] if self.model["stages"][s]["track"] == "Safety Net"]})
+        self.assertNotIn("semgrep", out["tracks"]["Guardrails"]["backlog"])
+        self.assertIn("semgrep", self.compute({"requested": ["semgrep"]})["tracks"]["Guardrails"]["backlog"])
 
     def test_a_php_floor_below_a_tools_minimum_blocks_its_first_stage(self):
         out = self.compute({"runtime": {"php": "5.6"}})
-        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"composer-audit", "phpstan-level-0"})
+        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"phpstan-level-0"})
         out = self.compute({"runtime": {"php": "5.2"}})
-        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"composer-audit", "phpstan-level-0", "php-cs-fixer-adoption", "phpunit"})
+        self.assertEqual({b["node"] for b in out["runtime_blocked"]}, {"phpstan-level-0", "php-cs-fixer-adoption", "phpunit"})
         self.assertEqual(self.compute({"runtime": {"php": "8.3"}})["runtime_blocked"], [])
 
     def test_the_tracks_partition_the_ticketable_stages(self):
@@ -866,7 +913,7 @@ class TwigPackTests(unittest.TestCase):
     def compute(self, seed=None):
         repo_tmp, repo = make_repo()
         with repo_tmp:
-            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
             full.update(seed or {})
             return tp.compute(repo, self.model, full)
 
@@ -911,7 +958,7 @@ class OwnPackTests(unittest.TestCase):
     def compute(self, seed=None):
         repo_tmp, repo = make_repo()
         with repo_tmp:
-            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
             full.update(seed or {})
             return tp.compute(repo, self.model, full)
 

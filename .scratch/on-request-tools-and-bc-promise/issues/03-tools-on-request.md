@@ -1,7 +1,7 @@
 # 03 — Tools on request; Composer Audit to Housekeeping
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: 02
 
 **What to build** (ADR-0086)
@@ -38,3 +38,5 @@ it, the first template carries the audit task, and tests and validator are green
 ## Comments
 
 > **2026-10-24 (from 01):** `php-minimal-version` was dropped without handling an open ticket of it on a target: with a **Candidate** operation it would be listed and sorted into Investigation (`worklist.md`, step 2). Solve the open-ticket case for a dropped Stage generically here, for `composer-audit` and `php-minimal-version` alike.
+
+> **2026-10-24:** Done. Parser: new seed key `requested`; on-request Stages stay in `tracks[].nodes` (flag `on_request`) so their tickets are found, and enter the backlog only once requested. Dropped Stages: `worklist.md`, *Dropped Stages* — searched by Name, never sorted into a Track, one decision point to close with the table's note; covers `php-minimal-version` from 01 too.

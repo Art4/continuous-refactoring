@@ -42,7 +42,7 @@ recommends the first one, in this fixed order, that has something to work on:
 | Track | What it does | Recommended when |
 |---|---|---|
 | **Safety Net** | Sets up the deterministic checks (test runner, coding standards, static analysis, CI) that catch a regression before an agent's own judgement has to | one of its tickets can be worked, or the Track was never scanned |
-| **Guardrails** | Adds further quality and security tooling once the Safety Net is in place (dependency audit, coverage floor, mess detection, taint analysis, …) and takes in a large rule set — a code style, PHPMD — rule by rule, in merge requests a person can review | the same, once Safety Net is fulfilled |
+| **Guardrails** | Adds further quality and security tooling once the Safety Net is in place (coverage floor, mess detection, stricter static analysis, …) — a few tools, such as security scanners, only when you ask for them — and takes in a large rule set — a code style, PHPMD — rule by rule, in merge requests a person can review | the same, once Safety Net is fulfilled |
 | **Housekeeping** | Recurring maintenance — dependency currency, tooling-deprecation cleanup, a secret scan over the Git history — plus the small refactoring ideas left as comments on its ticket | its open ticket is due, or it is not set up yet |
 | **Investigation** | Structural refactoring: works the tickets that ask for one, or explores the code for hot spots and deepening opportunities and proposes tickets | nothing above has work |
 

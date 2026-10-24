@@ -58,8 +58,10 @@ each have a Code Style Tool and neither takes the other's place. A target's own 
 
 Every Tool has:
 
-- `status` — **recommended**: proposed when its Role is empty. **recognized**: counted when it is there,
-  never proposed. One recommended Tool per Role and Pack.
+- `status` — **recommended**: proposed when its Role is empty. **on-request**: counted when it is there,
+  proposed only when a human asks for it — worth having on some targets and noise on others (Semgrep finds
+  little in code written under guardrails). **recognized**: counted when it is there, never proposed. One
+  recommended Tool per Role and Pack.
 - `roles` — at least one; `uses` — what it runs, or null for a convention; `details` — its prose file, named relative to the Pack's directory;
   `min_runtime` — the oldest runtime any version of the Tool ever ran on, per runtime
   (`{"php": "7.2"}`).
@@ -102,7 +104,8 @@ From the Packs and a seed (`tooling-parser.md`): which Packs and Stages apply, w
 which subjects are rejected, and the runtime the target allows.
 
 - **A Role is filled, per scope,** by the first Tool of that scope whose first Stage is fulfilled; recommended
-  Tools come before recognized ones, so with both present the recommended Tool is the one in use. A Stage
+  Tools come before on-request ones and both before recognized ones, so with several present the
+  recommended Tool is the one in use. A Stage
   that requires a Role needs it filled in its own Pack's scope (a Stage of a Pack without a scope, in any).
 - **A Tool is out** when a Role of it is filled, in its scope, by another Tool and its own first Stage is not fulfilled.
   Its Stages are not proposed, do not count towards the Track, and hold nobody's `waits_for`. A target on Psalm
@@ -111,12 +114,15 @@ which subjects are rejected, and the runtime the target allows.
   Stage is closed; every member of an any-of group is closed or can never be fulfilled and at least one is
   closed; or a required Role cannot be filled any more because every Tool of it is closed or can never be
   fulfilled (and one is closed).
-- **A Stage that can never be fulfilled** is one of a recognized Tool that is not there, or of a Tool that
-  is out.
+- **A Stage that can never be fulfilled** is one of a recognized Tool that is not there, of an on-request
+  Tool nobody asked for, or of a Tool that is out.
+- **An on-request Tool is asked for** once a Stage of it is in the seed's `requested`: a ticket of it
+  exists, or the call names it. Its Stages are then ordinary Stages.
 - **A rejection** names a Role, a Tool or a Stage and may carry a blocker, `{"php": "8.1"}`: the runtime
   whose arrival lifts it. Rejecting a Role closes the Tools that play it; rejecting a Tool closes its
   Stages and leaves the Role for another Tool.
-- **A Stage is ticketable** when it applies, its Tool is recommended and not out. Per Track, its **backlog**
+- **A Stage is ticketable** when it applies, its Tool is not out, and the Tool is recommended or an
+  on-request Tool that was asked for. Per Track, its **backlog**
   is the ticketable Stages not fulfilled and not closed, in the order of the Packs. Its **withheld** list
   names those that cannot be worked now, and why — the target is not onboarded, the runtime is too old, a
   required parent or Role is open, the Safety Net is not fulfilled, a `waits_for` is undecided — and those
