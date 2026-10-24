@@ -47,7 +47,8 @@ Push the branch and open the merge request against the default branch.
    that delivers a **part** — a baseline ticket with entries left, or a tooling ticket whose plan was cut —
    names the ticket with the word "part"
    and uses no closing reference, and says what stays.
-3. What changed, which checks ran and passed, and for code changes which tests cover it. For a structural
+3. What changed, which checks ran and passed — and a gate that could not run locally, left to CI — and for
+   code changes which tests cover it. For a structural
    ticket: the pin, and that it passed before the change (for an equivalence script: on how many inputs old
    and new gave the same output, or that no usable input was found and another pin was used), and in plain words where the code became
    easier to follow. The review's notes, each in a sentence: what was seen and why it was left.

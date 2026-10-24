@@ -10,7 +10,8 @@ is dismissed with its reason.
 Does the diff do what the plan on the ticket says? Go through the plan slice by slice and quote the line
 each finding is checked against. Three kinds of finding: a slice missing or half done; a change the plan
 does not ask for; a slice that looks done and does something else; for a structural ticket, a pin that
-is missing or whose commit comes after the first commit that moves structure (read the order from `git log`). A change in what the target observably
+is missing or whose commit comes after the first commit that moves structure (read the order from `git log`);
+a new type reachable from outside its file with no test of its own. A change in what the target observably
 does is always a finding, whatever the plan says.
 
 ## Standards
@@ -65,7 +66,7 @@ line of reason:
   endorses the pattern, or the code was already there and the diff does not touch it. "Minor" is no reason.
 
 A **Spec** finding is never dismissed or noted: a slice missing, a change the plan does not ask for, a
-missing or late pin, a change in what the target observably does. Only Standards findings — smells and
+missing or late pin, a new type without its own test, a change in what the target observably does. Only Standards findings — smells and
 tests — can be noted or dismissed.
 
 The review returns all three lists. The notes go to the merge request; the dismissals, each with its

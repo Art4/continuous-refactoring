@@ -53,7 +53,10 @@ merge request is its own matter. Then go to step 4.
   stands and see it pass, and commit it before any commit moves structure; where it names existing tests,
   run them the same way. Then slice by slice, test-first at the plan's seam: write one failing test through the
   seam's public interface, watch it fail for the expected reason, write the code that makes it pass,
-  commit. Tests go where the target's `tests/README.md` puts them; where that file is missing, the
+  commit. A slice that brings in a new type reachable from outside its file — a class, an interface, an
+  exported function, also one an extract or a move creates — gives it a test of its own through its public
+  interface, written first and red while the type does not exist yet, committed with it; the pin staying
+  green is no test of the new type. A type moved or renamed as it is keeps its tests. Tests go where the target's `tests/README.md` puts them; where that file is missing, the
   target's language may have a layout among the Tools' `details` files (`tooling-parser.md` says where they are;
   PHP: `phpunit.md`, *Test layout*). Which tests are kept: `reviewing-a-change.md`, *Tests worth
   keeping*. After a rename or a move, search the whole repository for the old name — strings, docs,
@@ -72,7 +75,8 @@ A pin that holds only internals and fails *Tests worth keeping* (`reviewing-a-ch
 the branch's last commit; any other stays as a test of the target.
 
 *Done when* every slice of the plan is committed on the branch, and for any other ticket the pin's commit
-comes before the first one that moves structure.
+comes before the first one that moves structure and every new type reachable from outside its file has a
+test of its own.
 
 ## 4. Checks
 
@@ -82,7 +86,11 @@ Run all of these on the branch, after the last commit:
   ticket the regenerated baseline without the part's entries;
 - the target's whole test suite;
 - every tool the target already runs as a check — static analysis, code style, the ones its CI file
-  calls — over the files this branch touched.
+  calls — over the files this branch touched;
+- every gate the target's CI runs over the whole project — a coverage floor, say — in full: with the
+  command the target documents for it (`tests/README.md`, `AGENTS.md`, its build scripts), else as the CI
+  file runs it. A gate that cannot run here, its coverage driver missing say, is named as not run
+  locally; CI decides it, and the merge request still opens.
 
 A red check → fix it on the branch and run them all again; the fix changes the code, never the check
 (`foundational-refactoring-rules.md`). The same check red again after a second attempt → *A fix that does
@@ -101,7 +109,7 @@ unproved, the run asks (`design-point.md`, *Open questions*) instead of going on
 or baseline ticket.
 
 *Done when* every command above ran after the last commit and passed, or is named as red before this
-work, and where the paragraph above applies the fact is named with how far it was proved.
+work or as a gate not run locally, and where the paragraph above applies the fact is named with how far it was proved.
 
 ## 5. Review
 
