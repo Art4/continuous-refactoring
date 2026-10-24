@@ -123,13 +123,9 @@ _Avoid_: (none — use the term as-is)
 How a **Stage** is raised without letting the old findings back: no new violations, the existing ones shrink, one direction only — the PHPStan baseline, a coverage floor, PHPMD's limits. A property of a **Tool**. A level whose baseline still has entries is not fulfilled, and its ticket is the baseline's shrinking. PHPMD's ratchet is its limits: set to today's worst value when the Tool is adopted, lowered by the merge request that removes that worst value, never raised and never moved into a baseline.
 _Avoid_: (none — use the term as-is)
 
-**Floor correction**:
-Bringing `composer.json`'s declared PHP floor (`require.php`) in line with what the codebase's own source already demonstrably requires — behavior-preserving, since nothing observable changes, only the metadata now tells the truth. The only Stage that produces this: `php-minimal-version` (the PHP tree), triggered once `rector-php-set` has fully applied a PHP-version rule set.
-_Avoid_: floor bump, floor raise (see **Floor raise** — a different, deliberately out-of-scope thing)
-
 **Floor raise**:
-Committing the application to a newer PHP version than its own code currently requires — a genuine **Breaking change**, a product decision, never autonomously proposed by any Stage of the tooling tree. Distinct from **Floor correction** (above), which changes only metadata to match already-existing reality.
-_Avoid_: floor bump, upgrade (collides with `rector-php-set`'s own "PHP-upgrade rule set" wording — syntax modernization, a different concern)
+Committing a project to a newer PHP version than the floor it declares (`composer.json`'s `require.php`) — by raising the declared floor, or by changing the code so it needs a newer PHP than declared, as a Rector PHP-version set above the floor would. A genuine **Breaking change**, a product decision, never autonomously proposed by any Stage of the tooling tree: the suite's PHP-version rewrites stop at the declared floor.
+_Avoid_: floor bump, floor correction (a rewrite above the floor followed by a matching `require.php` is a raise, not a correction), upgrade (collides with `rector-php-set`'s own "PHP-upgrade rule set" wording — syntax modernization, a different concern)
 
 **Hot spot**:
 A part of the codebase that keeps appearing in change history — the primary place to look for candidates.

@@ -72,7 +72,8 @@ trace.
 
 For a tooling Track that has a trace, its tickets are the state. The seed holds:
 
-- every recorded rejection as `rejected`, with its blocker (`rejection.md`, *Finding rejections*);
+- every recorded rejection as `rejected`, with its blocker (`rejection.md`, *Finding rejections*), of a
+  Role, Tool or Stage the Packs still have; a rejection of one the suite has since dropped is left out;
 - every Stage of the Track that is *known* — a ticket of it exists in some state, or a rejection of it is
   on record — and has no open ticket as `fulfilled`, taken as done and not judged. A Stage that is not
   known stays undecided, and its Track's scan is due (`worklist.md`);

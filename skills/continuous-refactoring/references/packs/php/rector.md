@@ -9,13 +9,13 @@ The recommended Tool for the Role Automated Refactoring in the PHP Pack. One fil
 - **Type Coverage** waits until Dead Code and Code Quality are decided (type-coverage rewrites touch messier code if dead code is not removed and control flow not flattened first) and until PHPStan Level 3 is decided (without strict analysis its rewrites are hard to review). Level 3 was judged strict enough for reviewable rewrites and stays the threshold although the chain reaches level 10. Any of these rejected instead of fulfilled still releases it; it just goes in without that benefit. It requires only Composer: in principle it could become proposable with Dead Code and Code Quality rejected and PHP Set never touched.
 - **PHPStan waits for two of them.** PHPStan Level 4 waits until Dead Code is decided and Level 5 until Type Coverage is (`phpstan.md`, *Why this order*): the two Tools are worked side by side, and these rewrites shrink the baseline the level would otherwise fix by hand.
 - **PHPUnit Set** rewrites PHPUnit-specific code, so it requires PHPUnit (or Pest, which the `phpunit` Stage recognizes) adopted first, and waits until Code Quality and Code Style are decided. It is a Guardrails Stage: it touches only test code, mechanically, and a conflict with structural work is resolved by running Rector again, so the Safety Net does not wait for it.
-- **PHP Version Floor** (`php-minimal-version.md`) requires PHP Set fulfilled, so the declared floor follows what the rewrites landed.
-
 ### `rector-php-set`
 
-- **Purpose:** adopt Rector's own PHP-version-targeted rule set, the common gate the other Rector rule-set Stages wait on. A versioned PHP-upgrade rule set, such as `LevelSetList::up_to_php_8x`.
-- **Fulfilment check:** the PHP-version rule set is enabled in `rector.php` / `rector.neon` and fully applied, with no remaining rule findings.
-- **MR scope:** adopted in levels, one merge request per target PHP version bump; keeps PHPStan green by shrinking the baseline within the same merge requests (the same shape as `rector-dead-code`).
+- **Purpose:** adopt Rector's own PHP-version-targeted rule set, the common gate the other Rector rule-set Stages wait on. A versioned PHP-upgrade rule set, such as `LevelSetList::up_to_php_8x`, up to the PHP floor the target declares and never above it: `config.platform.php` where it is set, otherwise the lowest version `require.php` allows. `withPhpSets()` without an argument reads that floor from `composer.json`. A set above the floor would make the code need a newer PHP than the project promises, a **Floor raise** (`CONTEXT.md`), which is a product decision and never a Stage's.
+- **Fulfilment check:** the PHP-version rule set is enabled in `rector.php` / `rector.neon` at the level of the declared floor and fully applied, with no remaining rule findings. A level below the floor is not fulfilled. When there is no `composer.json`, or the floor cannot be read, the Stage is fulfilled at any level that is fully applied.
+- **MR scope:** adopted in levels, one merge request per PHP version up to the floor; keeps PHPStan green by shrinking the baseline within the same merge requests (the same shape as `rector-dead-code`). Never edits `require.php` or `config.platform.php`.
+- **Re-triggering:** the floor is a moving target. When a human raises it later, the Stage is unfulfilled again, and a scan the call asks for, or Housekeeping's re-check of the tooling Tracks, offers a ticket for the next level.
+- **Code already above the floor:** code that needed a newer PHP than declared before the suite came is not this Stage's to fix. Whoever notices it proposes an ordinary ticket, because raising the floor or lowering the code is a product decision.
 
 ### `rector-dead-code`
 

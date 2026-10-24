@@ -1,7 +1,7 @@
 # 01 — Rector stops at the declared PHP floor
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: —
 
 **What to build** (ADR-0087)
@@ -29,3 +29,5 @@ Blocked by: —
 and validator are green.
 
 ## Comments
+
+> **2026-10-24:** Done. A recorded rejection of a dropped Stage is left out of the seed (`tooling-parser.md`, *The seed from the trace*): the parser itself still refuses unknown names, to catch typos. An open ticket of a dropped Stage is not handled generically yet — ticket 03 meets the same case for `composer-audit` and should solve it for both.

@@ -358,23 +358,6 @@
       ]
     },
     {
-      "tool": "php-minimal-version",
-      "name": "PHP Version Floor",
-      "uses": null,
-      "roles": ["runtime-floor"],
-      "status": "recommended",
-      "details": "php-minimal-version.md",
-      "stages": [
-        {
-          "slug": "php-minimal-version",
-          "name": "PHP Version Floor",
-          "track": "Guardrails",
-          "requires": ["rector-php-set"],
-          "after": []
-        }
-      ]
-    },
-    {
       "tool": "psalm-taint-analysis",
       "name": "Psalm Taint Analysis",
       "uses": "vimeo/psalm",

@@ -36,3 +36,5 @@ Blocked by: 02
 it, the first template carries the audit task, and tests and validator are green.
 
 ## Comments
+
+> **2026-10-24 (from 01):** `php-minimal-version` was dropped without handling an open ticket of it on a target: with a **Candidate** operation it would be listed and sorted into Investigation (`worklist.md`, step 2). Solve the open-ticket case for a dropped Stage generically here, for `composer-audit` and `php-minimal-version` alike.
