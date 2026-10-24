@@ -16,6 +16,8 @@ The suite keeps nothing between runs. Each one searches your tracker and your fo
 
 On a project the suite has not seen, the run begins with a short **onboarding**: where your tickets live and how a few operations work there. The answer is written as one section into `docs/agents/issue-tracker.md`; commit that file. The run ends there: it reports the onboarding as complete, points out the changes in your working tree and recommends committing them and calling the skill again.
 
+The onboarding also asks whether your project promises stability to code outside it — your package's users, your application's addons — and where that promise is written. A project onboarded before this question existed is asked once at the start of its next run, and the run goes on. The answer decides whether the suite may delete an old API it replaced, or must keep it and mark it deprecated the way your promise says.
+
 ## The call
 
 Say what you want in your own words after the command. The suite says back in one sentence what it understood.
@@ -48,6 +50,7 @@ One change always waits for you, in an autonomous run too: an edit to your proje
 | Decision point | What is laid out | Recommended |
 |---|---|---|
 | Onboarding (only when the tracker section is missing or incomplete) | the tracker, where merge requests live, each operation and where its answer came from, and whether its search and merge-request commands answered | write the section |
+| BC promise (only when the section has no answer yet) | the documents that read like a promise to code outside the project, with a line from each | that document, another one, none, or ask again next run |
 | Reconcile | merge requests of open tickets that were merged or closed, and declined work whose blocker is now met | close the ticket of a merged one; record a rejection where the comments say the change is not wanted; keep the ticket where they name a defect; ask you where a merge request was closed without a reason |
 | Track choice | per Track how many tickets are workable, in review, blocked, waiting | the first Track in the fixed order with something to work on ([Track playbook](tracks.md)) |
 | File tickets (after a scan) | one proposal per tool that is neither in place nor declined, blocked ones included, each with existing tickets on the subject | file them all, each with its open question on the ticket where one is left; you may file some, none, or decline a tool for good |

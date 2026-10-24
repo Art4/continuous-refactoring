@@ -30,7 +30,7 @@ tracker. Its three shapes:
 ## Optional operations
 
 An absent bullet means the tracker lacks the capability, and the suite takes the fallback in the last
-column.
+column — except **BC promise**, which is not about the tracker: absent, the question is not settled yet.
 
 | Operation | What the bullet states | Without it |
 | --- | --- | --- |
@@ -42,6 +42,7 @@ column.
 | **Rejected** | How a rejection is recorded with its reason and found again: a closed ticket or a file, and where | At the decision point that records the first rejection the suite proposes a place, and writes the bullet from the answer |
 | **Blocked by** | How a ticket states which tickets block it, and when it counts as unblocked | The suite writes the dependency as a sentence in the ticket's text and reads it there |
 | **Housekeeping** | Where the **Housekeeping template** lives and how the next **Housekeeping ticket** is made from it | Housekeeping's mechanism counts as missing: the Housekeeping Track proposes to set it up and writes the bullet |
+| **BC promise** | Where the project's **BC promise** is written down — a path in the repository — or `none` when no code outside the repository relies on this one's. The suite reads the document; it models no promise of its own | Not settled yet: the next run asks (`onboarding-setup-interview.md`, *The BC promise alone*), and until then code outside the repository could reach counts as covered (`principles.md`, *Strangler Fig*) |
 | **Tooling Pack** | The directory in the target that holds its own **Pack**: a `pack.json` and, where the Pack adds Roles, a `roles.json`, with the Tool files beside them. Recommended place: a folder `tooling-pack` beside the tracker file | The target has no Pack of its own; only the tools of the suite's Packs are proposed |
 
 ## Templates
@@ -111,5 +112,6 @@ the same name.
 - **Candidate**, as a label: ``the label `<label>`. List the open ones with `<the tracker's list command, narrowed to that label>`.`` Where the tracker has no labels: the mechanism the human names (a custom field, a subject prefix, child tickets of one collecting ticket).
 - **Priority**, as a label: ``the label `<label>`, next to the **Candidate** mark.``
 - **Ready after plan**, as a label: ``the label `<label>`: `<the tracker's command to set it>`; removing a blocking label: `<command>`.`` Running it twice leaves the ticket as it is. Where the tracker uses a board column or a status field, the command that moves the ticket there.
+- **BC promise**: ``the project's promise to code outside it is `<path>`; read it before changing what it covers.`` Or: ``none — no code outside this repository relies on this one's.``
 - **Rejected**, as a closed ticket: ``a closed ticket carrying `<mark>`, the reason in its last comment. Found again with **Search**, narrowed to that mark.``
 - **Rejected**, as a file: ``one file per rejection at `<folder>/<slug>.md`, holding the reason. Found again with `grep -rli "<word>" <folder>/`.`` The engineering skills' `.out-of-scope/` folder is the natural `<folder>` when the target uses it.

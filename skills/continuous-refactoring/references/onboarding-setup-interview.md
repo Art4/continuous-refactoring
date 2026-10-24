@@ -31,16 +31,17 @@ Read-only. Note each of these as found or not found:
 - **Marks already in use** for **Candidate**, **Priority** and **Rejected**: labels on a reachable forge
   that plainly mark refactoring work or priority (`gh label list` / `glab label list`), a mark the tracker
   file or the repository's docs name for either, and an `.out-of-scope/` folder at the repository root.
+- **A BC promise** — *Finding the BC promise*, below.
 
 Then name the case the rest of the interview follows:
 
 | The tracker file | Case |
 | --- | --- |
-| has the section with **Search**, **Done** and **Merge requests** | **Complete** — tell the human the target is onboarded and end the interview here |
+| has the section with **Search**, **Done** and **Merge requests** | **Complete** — tell the human the target is onboarded and end the interview here; without a **BC promise** bullet, *The BC promise alone* follows instead |
 | has the section, a required operation is missing | **Incomplete** — the tracker and every bullet present are on record |
 | has no section, or does not exist | **New** |
 
-Step 1 is done when each of the four is noted and the case is named.
+Step 1 is done when each of the five is noted and the case is named.
 
 ## 2. Ask
 
@@ -89,6 +90,9 @@ available" is an answer, and its bullet is left out.
 Recommendation: take what is in use. A mark Explore did not find is left out without a question, and so is
 **Housekeeping**, which the Housekeeping Track writes when it sets its mechanism up. **Ready after plan** and **Tooling Pack** are never asked about either; the closing "Left out" line names it, and a human who keeps a Pack of their own adds the bullet.
 
+**Does the project promise stability to code outside it?** On record when the section has a **BC promise**
+bullet. Otherwise asked as *The BC promise alone* asks it, in this interview.
+
 Step 2 is done when every operation in the reference is in one of four states: answered, on record, taken
 from a template, or left out with its fallback noted.
 
@@ -120,6 +124,7 @@ below it, before the question is asked:
 > already recorded>.
 > Checked: <each command of step 3 — answered, answered after a correction, or not verified with its
 > error>.
+> BC promise: <the document | none | not settled — asked again next run>.
 > Left out: <each absent optional operation and what the skill suite does without it>.
 > Removed: <**Bookkeeping**, **Filed date**, **Comment author and time** — only where an existing section carries them>.
 > File: `docs/agents/issue-tracker.md`, <created | section appended | section completed>.
@@ -137,7 +142,8 @@ Step 4 is done when one of the three options is chosen, or the interview has end
 ## 5. Write
 
 One file, `docs/agents/issue-tracker.md`; say one status line when it is written. In every case the
-**Merge requests** bullet states the forge Explore read from the remote.
+**Merge requests** bullet states the forge Explore read from the remote, and the section carries the
+**BC promise** bullet where step 2 settled it.
 
 | Situation | What is written |
 | --- | --- |
@@ -150,6 +156,37 @@ One file, `docs/agents/issue-tracker.md`; say one status line when it is written
 Read the file back. Step 5 is done when the section carries **Search**, **Done** and **Merge requests**
 exactly as the summary showed them, and none of **Bookkeeping**, **Filed date** and **Comment author and
 time**.
+
+## Finding the BC promise
+
+Read-only. Look for a document in which the project promises code outside the repository — the users of its
+package, the addons of its application — which parts stay stable and how a breaking change is allowed:
+`AGENTS.md`, `CLAUDE.md`, `CONTRIBUTING*`, `README*`, `UPGRADE*` and `docs/`, for words such as backward
+compatibility, BC promise, deprecation policy or semantic versioning. A pointer in `AGENTS.md` to such a
+document counts as finding it. Note the path of each hit; a sentence that only names SemVer for the version
+numbers is no promise.
+
+The result is **one document**, **several** or **none found**.
+
+## The BC promise alone
+
+For a target whose section is complete and has no **BC promise** bullet: the first step of a run that finds
+it so, and inside the interview for the question of step 2. One decision point. Findings: what *Finding the
+BC promise* found, with a line from each document. Options:
+
+- **That document** — the recommendation where exactly one was found.
+- **Another document** — the human names its path.
+- **None** — no code outside the repository relies on this one's; the recommendation where none was found.
+- **Ask again next run** — nothing is written.
+
+The answer is written as the **BC promise** bullet (`refactoring-operations.md`, *Bullets the target
+chooses*), placed after the last bullet, the rest of the file unchanged. Say one status line when it is
+written. Outside the interview the run then goes on; the file is in the working tree like any other change
+this run made (`SKILL.md`, *A clean working tree*).
+
+- **Autonomous run** → exactly one document found is taken. With several or none, nothing is written: a
+  guessed `none` could later let a covered API be deleted. The report names the question as open, and until
+  a human answers, the run treats code outside the repository could reach as covered.
 
 ## 6. Report
 

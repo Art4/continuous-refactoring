@@ -270,12 +270,23 @@ green by deleting or loosening it.
 
 ## Why is the old API sometimes kept beside the new one and sometimes deleted at once?
 
-It depends on who else uses it. Where something outside the project depends on the old interface — a
-published library's public API, a documented contract — the suite replaces it piece by piece and keeps old
-and new side by side until the swap is done, because deleting it would break users. Where every caller is in
-the project and nothing outside relies on it, the suite moves all callers and deletes the old API in the
-same step, so no compatibility layer is left behind. When it cannot tell, it assumes someone depends on it.
-The plan says which case it found.
+It depends on your project's promise to the code outside it — the users of your package, the addons of
+your application. Where your BC promise covers the old interface, the suite replaces it piece by piece,
+keeps old and new side by side, and marks the old one deprecated the way your promise says; it never
+deletes it, because that would break someone the promise protects. The removal comes later as an ordinary
+ticket for you, when your promise allows it. Where every caller is in the project and the promise does not
+cover it, the suite moves all callers and deletes the old API in the same step, so no compatibility layer is
+left behind. The plan says which case it found.
+
+## What is the BC promise, and why does the suite ask about it?
+
+It is your project's own document saying which parts of the code stay stable for code outside the project
+and how a breaking change is allowed: a new major version under SemVer, or a deprecation period counted in
+releases and months, as Friendica's addon promise does. The suite does not model either; it reads your
+document. It asks once, at onboarding or at the start of the next run, because several decisions depend on
+the answer and a wrong guess cannot be undone by declining a ticket: deleting an API your addons use is a
+break, keeping an API nobody outside uses is clutter. It proposes the document it found, or "none". Until
+you answer, it treats code reachable from outside as covered.
 
 ## Why doesn't the suite just do what a review bot asks?
 

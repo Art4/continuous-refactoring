@@ -1,7 +1,7 @@
 # 04 — The BC promise
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: —
 
 **What to build** (ADR-0088)
@@ -37,3 +37,5 @@ Blocked by: —
 tests and validator are green.
 
 ## Comments
+
+> **2026-10-24:** Done. *Finding the BC promise* and *The BC promise alone* live in `onboarding-setup-interview.md`; `SKILL.md` step 1 calls the latter for a complete section without the bullet and the run goes on. Interactive recommends `none` when nothing was found; autonomous never writes it.
