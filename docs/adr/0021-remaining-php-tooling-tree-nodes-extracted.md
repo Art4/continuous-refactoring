@@ -1,5 +1,10 @@
 # Remaining PHP tooling-tree nodes extracted to reference files
 
+> Superseded in part by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the files per Tool moved into the Packs. `static-code-analyzer.md`,
+> `php-structural-scan.md` and `test-runner-if-missing.md` went with their nodes, `ci-runner.md` lives in the generic
+> Pack ([ADR-0022](0022-is-php-project-recognition-gate.md)), `composer-audit.md` went with [ADR-0086](0086-tools-on-request.md) and `php-minimal-version.md` with [ADR-0087](0087-rector-stops-at-the-declared-php-floor.md). One file
+> per Tool, or per tightly linked family (`psalm.md`, `rector.md`, `phpstan.md`), stands.
+
 > Continues ADR-0020's PHPStan extraction with the rest of `php-tooling-tree.md`'s `## Nodes` section, using
 > the same ticket-30 stub/pointer convention. `skills/refactor-scan/references/php-tooling-tree.md` now holds
 > only stubs (Name/Tool/Purpose per node) plus its two non-node cross-cutting sections and the *Nodes*

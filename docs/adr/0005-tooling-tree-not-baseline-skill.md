@@ -1,5 +1,9 @@
 # Tooling tree instead of a baseline skill
 
+> Superseded in part by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md), [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) and [ADR-0086](0086-tools-on-request.md): rejections and settings no longer live under
+> `docs/refactoring/`, the tree is Roles, Tools and Stages in Packs, and Composer Audit leaves it for a Housekeeping
+> task. A missing tool is still a small candidate, never a baseline skill, and `git` the only hard requirement.
+
 > Amended by [ADR-0007](0007-required-recommended-edges.md): tree edges split into **required** and **recommended**; Rector leaves the first wave and becomes suite nodes adopted in levels behind PHPStan (`docs/php-tooling-tree.md`).
 >
 > Amended by [ADR-0008](0008-generic-tool-tree-and-structural-scan-gate.md): `git` moves to a new generic root (`docs/tooling-tree.md`) alongside a new `loop-config` node; PHP's tree attaches beneath `loop-config` instead of `git` directly.

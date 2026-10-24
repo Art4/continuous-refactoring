@@ -1,5 +1,7 @@
 # Fulfilment checks move from `tooling_tree.py` to agent judgement against a node's Purpose; scanning reorganized into four scheduled Tracks
 
+> Amended by [ADR-0057](0057-refactor-loop-and-per-track-skills.md) and [ADR-0059](0059-cadence-carries-a-unit.md), both since superseded.
+
 > Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md),
 > [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md) and
 > [ADR-0076](0076-standing-housekeeping-ticket-from-a-template.md): scheduling by cadence, the per-Track

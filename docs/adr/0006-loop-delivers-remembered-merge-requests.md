@@ -1,5 +1,7 @@
 # Loop delivers via remembered merge requests
 
+> Superseded in part by [ADR-0049](0049-abolish-suite-mr-stacking.md): suite branches never stack; every branch starts from the default branch.
+
 > Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
 > [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the limit of two open merge requests is
 > removed, and merge requests are found by search instead of remembered. A run still ends once the merge

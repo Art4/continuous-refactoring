@@ -1,5 +1,8 @@
 # PHPStan/Psalm mutual exclusion, and a new `required-any` edge for `psalm-taint-analysis`/`rector-php-set`
 
+> Amended by [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md) and [ADR-0086](0086-tools-on-request.md): `psalm-taint-analysis` is a Guardrails Stage after all (Part C's Safety Net
+> membership is reversed) and is proposed only on request.
+
 > Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) for the mutual exclusion: a Role another Tool fills takes the place of the Tool that is
 > not in use, so Psalm needs no gate nodes. Taint analysis as a Stage stays.
 

@@ -1,5 +1,8 @@
 # A non-empty `unwired_entry_points` result is an agentic judgement call, not a parser guess
 
+> Superseded in part by [ADR-0056](0056-agent-judged-fulfilment.md): the parser no longer reports `unwired_entry_points` — every fulfilment is judged
+> by the agent. The judgement this ADR moved into `psr-4.md` stands there.
+
 ## Context
 
 Caught live on `Art4/legacy-todo`: once the `coverage-floor` node (ADR-0044) landed there, its own

@@ -1,7 +1,7 @@
 # Recommended edges gate on decision, not just fulfilment
 
 > Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): the rule — wait until the parent is decided, a rejection releases the child — lives
-> on as `after`; the edge type and the `moot` case are gone.
+> on as `waits_for` (named `after` until [ADR-0086](0086-tools-on-request.md)); the edge type and the `moot` case are gone.
 
 > Revises [ADR-0007](0007-required-recommended-edges.md). That ADR's "a recommended edge advises: the child stays proposable even when its recommended parent was rejected" said what happens once a recommended parent is *rejected* — that part is unchanged and restated below — but said nothing about the parent sitting *undecided* (neither fulfilled nor rejected), which in practice meant a recommended edge never withheld its child at all: the child was proposable from the moment its own required parents were satisfied, recommended or not. This ADR closes that gap.
 

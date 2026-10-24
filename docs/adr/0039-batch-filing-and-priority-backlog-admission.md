@@ -1,5 +1,8 @@
 # Select mode batch-files candidates; Security/Blast-Radius signals bypass the backlog cap
 
+> Amended by [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): "Safety Net stays prose-only" no longer holds — Safety Net is a Track's name, and since
+> [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) a Stage's Track.
+
 > Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md): the backlog cap and its
 > two admission tiers are removed. The signals catalogue stands; a priority ticket comes first in the
 > order.

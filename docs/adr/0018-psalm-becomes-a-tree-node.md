@@ -1,5 +1,8 @@
 # Psalm becomes its own tree node under a shared `static-code-analyzer` ancestor
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): there are no plumbing or recognition-only nodes. Psalm is a recognized Tool of the Role
+> Static Analysis; a target on Psalm has the Role filled, and PHPStan is out there.
+
 > Amends [ADR-0008](0008-generic-tool-tree-and-structural-scan-gate.md)'s `phpstan-level-0-baseline` equivalents note: Psalm's inline "fulfils as an equivalent" branch is replaced by a sibling node, `psalm`, sharing a new required parent, `static-code-analyzer`, with `phpstan-level-0-baseline` — no change to what any project's tree state actually resolves to.
 
 Before this ADR, `phpstan-level-0-baseline`'s own fulfilment check carried two branches: the canonical

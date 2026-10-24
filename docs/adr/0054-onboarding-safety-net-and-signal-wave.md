@@ -1,5 +1,8 @@
 # Onboarding/Safety Net split; Signal wave nodes wait for the Safety Net to close; `php-structural-scan` renamed `php-safety-net`
 
+> Amended by [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): **Signal wave** is renamed **Guardrails**. Amended by [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md):
+> `psalm-taint-analysis` leaves the Safety Net after all.
+
 > Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and aggregation; Onboarding, Safety Net and Guardrails as
 > concepts stay.
 

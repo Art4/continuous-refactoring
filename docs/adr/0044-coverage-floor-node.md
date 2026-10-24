@@ -1,5 +1,8 @@
 # `coverage-floor` — a self-tightening ratchet, not a fixed percentage
 
+> Amended by [ADR-0056](0056-agent-judged-fulfilment.md) and [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): fulfilment is judged by the agent against `coverage-floor.md`; the
+> detection in `tooling_tree.py` below is gone, and the Stage is a Guardrails Stage. The ratchet stands.
+
 ## Context
 
 Test coverage was a real, named gap in this suite's own baseline design (`.scratch/php-tooling-tree/

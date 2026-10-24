@@ -1,5 +1,9 @@
 # A new `psr-4` node for the app's own source autoloading
 
+> Amended by [ADR-0056](0056-agent-judged-fulfilment.md) and [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): fulfilment is judged by the agent against `psr-4.md`; the detection in
+> `tooling_tree.py` below is gone, and `psr-4` is a Safety Net Stage instead of a `resolved` leaf. The criteria and
+> the narrow MR scope stand.
+
 > Not an amendment — a new PHP-tooling-tree node, the tree's normal growth path (same weight as
 > ADR-0016's `psr-4`-unrelated node additions before it). Referenced here only because two existing
 > nodes' own reference files change as a direct consequence: `phpstan.md`'s `paths` resolution needs

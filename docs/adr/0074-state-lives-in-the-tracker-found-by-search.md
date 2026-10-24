@@ -1,5 +1,9 @@
 # The suite keeps no state of its own — tickets are the worklist, everything else is found by search
 
+> Amended by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): a scan's trace is kept per Stage, not per Track. Amended by [ADR-0085](0085-a-named-ticket-narrows-worklist-and-reconcile.md): a named ticket
+> narrows worklist and reconcile to itself. Amended by [ADR-0086](0086-tools-on-request.md): a Stage of an on-request Tool never makes a scan
+> due.
+
 > Extends [ADR-0001](0001-backlog-in-issue-tracker.md): the reasoning that put the backlog on the tracker
 > now covers all of the suite's state.
 >

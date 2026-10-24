@@ -1,5 +1,8 @@
 # The tracker is reached through operations, and tracker and forge are two things
 
+> Amended by [ADR-0072](0072-remote-bookkeeping-belongs-to-the-target.md) (since superseded), [ADR-0083](0083-ready-after-plan-is-an-optional-operation.md) and [ADR-0088](0088-the-bc-promise.md): **Ready after plan** and **BC promise** join
+> the optional operations; an absent **BC promise** means the question is not settled yet.
+
 > Amended by [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): **Search**, **Rejected**,
 > **Blocked by** and **Housekeeping** join the operations; **Bookkeeping** and **Filed date** leave;
 > **Candidate** and **Priority** become optional hints.
