@@ -42,7 +42,7 @@
       "name": "Secret Detection",
       "uses": "any secret scanner",
       "roles": ["secret-scanning"],
-      "status": "recommended",
+      "status": "on-request",
       "details": "secret-detection.md",
       "stages": [
         {
@@ -50,7 +50,7 @@
           "name": "Secret Detection",
           "track": "Guardrails",
           "requires": [],
-          "waits_for": []
+          "waits_for": ["ci-runner"]
         }
       ]
     }

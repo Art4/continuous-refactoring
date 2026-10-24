@@ -130,7 +130,7 @@ recurring Housekeeping task re-checks the tooling, and you can ask for a scan in
 
 Because their worth depends on the project, and the suite cannot tell it reliably. A security scanner such
 as Semgrep finds a lot in code that grew for years without guardrails and almost nothing in a young project
-that had them from the start; there, its ticket is only noise. Mutation testing is costly in another way: it runs the tests hundreds of times, which is worth it once they are good enough to judge. Such a tool is never offered unasked, and
+that had them from the start; there, its ticket is only noise. Mutation testing is costly in another way: it runs the tests hundreds of times, which is worth it once they are good enough to judge. A gate against committed secrets adds little on top of Housekeeping, which scans the Git history in every cycle, with a scanner of its own where your project has none; and a pipeline only sees a secret once it is pushed, when it has to be rotated anyway. Such a tool is never offered unasked, and
 never blocks a Track. Every scan report names what is available on request; name one in the call and it is
 proposed and worked like any other tool.
 

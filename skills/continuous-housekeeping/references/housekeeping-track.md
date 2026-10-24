@@ -211,8 +211,11 @@ A task is one of these by what it asks, in whatever words the template puts it.
 
 1. **Scanner** — the one the target's own secret scanning invokes, read from its CI job or its config
    (gitleaks, detect-secrets, trufflehog, or what serves the same purpose), with the file of known
-   findings the target keeps for it, so that those stay quiet. The target has none → tick the task with
-   `not run: no secret scanner is set up`.
+   findings the target keeps for it, so that those stay quiet. The target has none → a secret scanner
+   this run can execute without adding it to the project, as a binary or a Docker image; nothing is
+   written to the target for it, no file of known findings either — the range below keeps findings from
+   coming back. None can run → tick the task with `not run: no secret scanner available`, say in the
+   closing report what is missing, and go on; the next cycle tries again.
 2. **Range** — look through the earlier Housekeeping tickets of this template, newest first, for a scan
    task whose result names the commit it scanned up to.
    - **None does** → the whole history: every commit of every branch and tag.

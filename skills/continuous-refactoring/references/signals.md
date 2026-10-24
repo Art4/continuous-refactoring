@@ -30,8 +30,8 @@ it is not, the generic reading stands.
 
 - **Security** — an exposed secret, an unauthenticated path to sensitive data, an injection class left
   open. *Generic* — reading request handling and the deployment and docroot configuration. *From a
-  tool* — the secret scanner's findings; PHP: Psalm's taint analysis, and Semgrep's OWASP rules for what
-  taint analysis does not reach (crypto misuse, misconfiguration, logging gaps).
+  tool* — PHP: Psalm's taint analysis, and Semgrep's OWASP rules for what taint analysis does not reach
+  (crypto misuse, misconfiguration, logging gaps).
 - **Blast radius of inaction** — the cost of leaving it alone keeps rising: a dependency that gets harder
   to migrate the longer it stays, a workaround other code starts to build on. *Generic* — the surrounding
   code and its trend over recent commits.

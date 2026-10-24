@@ -76,8 +76,14 @@ class NothingBelowTheSafetyNetTests(unittest.TestCase):
     def test_secret_detection_waits(self):
         tmp, root = make_target(onboarded=True)
         self.addCleanup(tmp.cleanup)
-        self.assertNotIn("secret-detection", workable(root, {"packs": ["generic"]}))
-        self.assertIn(
+        asked = {"packs": ["generic"], "requested": ["secret-detection"]}
+        self.assertNotIn("secret-detection", workable(root, asked))
+        self.assertIn("secret-detection", workable(root, {**asked, "fulfilled": ["ci-runner", "editorconfig"]}))
+
+    def test_secret_detection_is_not_offered_unasked(self):
+        tmp, root = make_target(onboarded=True)
+        self.addCleanup(tmp.cleanup)
+        self.assertNotIn(
             "secret-detection",
             workable(root, {"packs": ["generic"], "fulfilled": ["ci-runner", "editorconfig"]}),
         )

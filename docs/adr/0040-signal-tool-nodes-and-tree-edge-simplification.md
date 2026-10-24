@@ -1,5 +1,7 @@
 # Signal-producing tooling-tree nodes never gate `structural-scan`; three existing PHP-tree edges simplified
 
+> Amended by [ADR-0089](0089-secret-detection-on-request.md): `secret-detection` feeds no Signal.
+
 > Superseded in part by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and `resolved` parents; the Signal field now belongs to a Role.
 
 > Amends [ADR-0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md): its "Considered
