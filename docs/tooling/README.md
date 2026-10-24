@@ -25,6 +25,7 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Test Coverage (`test-coverage`) | The share of the code the tests reach is measured and may not fall. | Untested / hard-to-test | Test Coverage Floor (recommended, php) |
 | Static Analysis (`static-analysis`) | A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step. | – | PHPStan (recommended, php); Psalm (recognized, php); TwigStan (recommended, twig-php) |
 | Taint Analysis (`taint-analysis`) | A tool follows data from untrusted input to dangerous operations. | Security | Psalm Taint Analysis (on-request, php) |
+| API Compatibility (`api-compatibility`) | A check compares the code with the last release and fails on a break of what the project's BC promise covers. | – | Roave Backward Compatibility Check (recommended, php) |
 | Automated Refactoring (`automated-refactoring`) | Rule sets rewrite code mechanically, one reviewable set at a time. | – | Rector (recommended, php) |
 | Code Smell Detection (`code-smell-detection`) | A tool measures complexity and flags code that is hard to read. | Understandability | PHPMD (recommended, php) |
 | Secret Scanning (`secret-scanning`) | Committed secrets and credentials are found before they ship. | Security | Secret Detection (recommended, generic) |

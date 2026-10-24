@@ -56,6 +56,12 @@
       "signal": "Security"
     },
     {
+      "slug": "api-compatibility",
+      "name": "API Compatibility",
+      "purpose": "A check compares the code with the last release and fails on a break of what the project's BC promise covers.",
+      "signal": null
+    },
+    {
       "slug": "automated-refactoring",
       "name": "Automated Refactoring",
       "purpose": "Rule sets rewrite code mechanically, one reviewable set at a time.",

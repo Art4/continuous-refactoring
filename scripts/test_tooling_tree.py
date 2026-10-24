@@ -764,7 +764,7 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
-        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 16)
+        self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 17)
         self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 16)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
@@ -868,6 +868,18 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_the_rector_phpunit_set_is_a_guardrails_stage(self):
         self.assertEqual(self.model["stages"]["rector-phpunit-set"]["track"], "Guardrails")
+
+    def test_the_bc_check_stands_before_type_coverage_and_only_for_a_semver_promise(self):
+        self.assertEqual(self.model["stages"]["roave-bc-check"]["track"], "Safety Net")
+        self.assertIn("applies_when", self.model["stages"]["roave-bc-check"])
+        self.assertIn("roave-bc-check", self.model["stages"]["rector-type-coverage"]["waits_for"])
+        ready = {"fulfilled": ["composer", "rector-dead-code", "rector-code-quality", "php-cs-fixer-adoption",
+                               "phpstan-level-0", "phpstan-level-1", "phpstan-level-2", "phpstan-level-3",
+                               "rector-php-set", "ci-runner"]}
+        reasons = {w["node"]: w["reason"] for w in self.compute(ready)["tracks"]["Safety Net"]["withheld"]}
+        self.assertEqual(reasons["rector-type-coverage"], "waiting on: roave-bc-check")
+        out = self.compute({**ready, "not_applicable": ["roave-bc-check"]})
+        self.assertIn("rector-type-coverage", out["tracks"]["Safety Net"]["workable"])
 
     def test_the_security_scanners_are_proposed_only_on_request(self):
         for slug in ("semgrep", "psalm-taint-analysis"):

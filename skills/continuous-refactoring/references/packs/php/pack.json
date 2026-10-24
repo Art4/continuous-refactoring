@@ -39,6 +39,24 @@
       ]
     },
     {
+      "tool": "roave-bc-check",
+      "name": "Roave Backward Compatibility Check",
+      "uses": "roave-backward-compatibility-check",
+      "roles": ["api-compatibility"],
+      "status": "recommended",
+      "details": "roave-bc-check.md",
+      "stages": [
+        {
+          "slug": "roave-bc-check",
+          "name": "Roave Backward Compatibility Check",
+          "track": "Safety Net",
+          "requires": ["composer"],
+          "waits_for": ["ci-runner"],
+          "applies_when": "The project's BC promise (the BC promise operation of its tracker file) follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise does not count."
+        }
+      ]
+    },
+    {
       "tool": "php-cs-fixer",
       "name": "PHP CS Fixer",
       "uses": "php-cs-fixer",
@@ -332,7 +350,7 @@
           "name": "Rector: Type Coverage Set",
           "track": "Safety Net",
           "requires": ["composer"],
-          "waits_for": ["rector-dead-code", "rector-code-quality", "code-style", "phpstan-level-3"]
+          "waits_for": ["rector-dead-code", "rector-code-quality", "code-style", "phpstan-level-3", "roave-bc-check"]
         }
       ]
     },
