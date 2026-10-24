@@ -17,7 +17,7 @@
           "name": "Twig-CS-Fixer",
           "track": "Guardrails",
           "requires": ["composer"],
-          "after": ["editorconfig"]
+          "waits_for": ["editorconfig"]
         }
       ]
     },
@@ -34,7 +34,7 @@
           "name": "TwigStan",
           "track": "Guardrails",
           "requires": ["phpstan-level-5"],
-          "after": ["twig-cs-fixer"]
+          "waits_for": ["twig-cs-fixer"]
         }
       ]
     }

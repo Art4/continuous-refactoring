@@ -123,7 +123,7 @@ flowchart TD
 
 ## Stages
 
-| Stage | Tool | Track | Requires | After | Applies when |
+| Stage | Tool | Track | Requires | Waits for | Applies when |
 | --- | --- | --- | --- | --- | --- |
 | Composer (`composer`) | `composer` | Safety Net | – | – | – |
 | PSR-4 Autoloading (`psr-4`) | `psr-4` | Safety Net | `composer` | – | – |

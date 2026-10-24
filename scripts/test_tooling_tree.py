@@ -31,8 +31,8 @@ def make_repo(onboarded=True):
     return tmp, root
 
 
-def stage(slug, track="Safety Net", requires=(), after=(), **extra):
-    return {"slug": slug, "name": slug.upper(), "track": track, "requires": list(requires), "after": list(after), **extra}
+def stage(slug, track="Safety Net", requires=(), waits_for=(), **extra):
+    return {"slug": slug, "name": slug.upper(), "track": track, "requires": list(requires), "waits_for": list(waits_for), **extra}
 
 
 def tool(slug, stages, roles=("alpha",), status="recommended", uses="uses", **extra):
@@ -195,20 +195,25 @@ class LoadModelTests(unittest.TestCase):
             "tool with a role's slug": [pack("m", [tool("alpha", [stage("alpha")])])],
             "stage with a role's slug": [pack("m", [tool("a", [stage("alpha")])])],
             "requires unknown": [pack("m", [tool("a", [stage("a1", requires=["zz"])])])],
-            "after unknown": [pack("m", [tool("a", [stage("a1", after=["zz"])])])],
+            "waits_for unknown": [pack("m", [tool("a", [stage("a1", waits_for=["zz"])])])],
             "any-of with a role": [pack("m", [tool("a", [stage("a1", requires=[["alpha", "a2"]]), stage("a2")])])],
             "any-of of one": [pack("m", [tool("a", [stage("a1", requires=[["a2"]]), stage("a2")])])],
             "bad status": [pack("m", [tool("a", [stage("a1")], status="maybe")])],
             "no applies_when": [{"pack": "m", "tools": [tool("a", [stage("a1")])]}],
             "bad min_runtime": [pack("m", [tool("a", [stage("a1")], min_runtime={"php": 7})])],
             "cycle": [pack("m", [tool("a", [stage("a1", requires=["a2"]), stage("a2", requires=["a1"])])])],
-            "after cycle": [pack("m", [tool("a", [stage("a1", after=["a2"]), stage("a2", after=["a1"])])])],
-            "after cycle over a role": [pack("m", [tool("a", [stage("a1", after=["beta"])]), tool("b", [stage("b1", requires=["a1"])], roles=["beta"])])],
-            "after a role nothing plays": [pack("m", [tool("a", [stage("a1", after=["gamma"])])])],
+            "waits_for cycle": [pack("m", [tool("a", [stage("a1", waits_for=["a2"]), stage("a2", waits_for=["a1"])])])],
+            "waits_for cycle over a role": [pack("m", [tool("a", [stage("a1", waits_for=["beta"])]), tool("b", [stage("b1", requires=["a1"])], roles=["beta"])])],
+            "waits_for a role nothing plays": [pack("m", [tool("a", [stage("a1", waits_for=["gamma"])])])],
         }
         for label, packs in cases.items():
             with self.subTest(label), self.assertRaises(tp.PackError):
                 Model(packs).load()
+
+    def test_a_pack_written_with_the_old_after_key_is_told_to_rename_it(self):
+        packs = [pack("m", [tool("a", [stage("a1", after=[])])])]
+        with self.assertRaisesRegex(tp.PackError, "after is now named waits_for"):
+            Model(packs).load()
 
     def test_a_stage_may_not_require_a_stage_of_a_later_track(self):
         packs = [pack("m", [tool("a", [stage("a1", requires=["g1"])]), tool("g", [stage("g1", track="Guardrails")], roles=["gamma"])])]
@@ -445,7 +450,7 @@ class AfterTests(unittest.TestCase):
     def model(self):
         return Model([pack("m", [
             tool("a", [stage("a1")], roles=["alpha"]),
-            tool("b", [stage("b1", after=["a1"])], roles=["beta"]),
+            tool("b", [stage("b1", waits_for=["a1"])], roles=["beta"]),
         ])])
 
     def test_a_stage_waits_until_its_predecessor_is_decided(self):
@@ -464,7 +469,7 @@ class AfterTests(unittest.TestCase):
         m = Model([pack("m", [
             tool("p", [stage("p1")], roles=["alpha"]),
             tool("a", [stage("a1", requires=["p1"])], roles=["beta"]),
-            tool("b", [stage("b1", after=["a1"])], roles=["gamma"]),
+            tool("b", [stage("b1", waits_for=["a1"])], roles=["gamma"]),
         ])])
         self.assertEqual([w["node"] for w in m.compute({"rejected": {"p1": None}})["tracks"]["Safety Net"]["withheld"]], ["a1"])
         self.assertNotIn("b1", [w["node"] for w in m.compute({"rejected": {"p1": None}})["tracks"]["Safety Net"]["withheld"]])
@@ -473,7 +478,7 @@ class AfterTests(unittest.TestCase):
         m = Model([pack("m", [
             tool("a", [stage("a1")], roles=["alpha"]),
             tool("b", [stage("b1")], roles=["beta"]),
-            tool("c", [stage("c1", after=["a1", "b1"])], roles=["gamma"]),
+            tool("c", [stage("c1", waits_for=["a1", "b1"])], roles=["gamma"]),
         ])])
         out = m.compute({"fulfilled": ["a1"]})
         self.assertEqual([w for w in out["tracks"]["Safety Net"]["withheld"] if w["node"] == "c1"][0]["reason"], "waiting on: b1")
@@ -485,7 +490,7 @@ class AfterARoleTests(unittest.TestCase):
         return Model([pack("m", [
             tool("p", [stage("p1")], roles=["alpha"]),
             tool("q", [stage("q1")], roles=["alpha"], status="recognized"),
-            tool("s", [stage("s1", after=["alpha"])], roles=["beta"]),
+            tool("s", [stage("s1", waits_for=["alpha"])], roles=["beta"]),
         ])])
 
     def withheld(self, seed=None):
@@ -510,7 +515,7 @@ class AfterARoleTests(unittest.TestCase):
         m = Model([
             pack("m", [
                 tool("p", [stage("p1")], roles=["alpha"]),
-                tool("s", [stage("s1", after=["alpha"])], roles=["beta"]),
+                tool("s", [stage("s1", waits_for=["alpha"])], roles=["beta"]),
             ], scope="m"),
             pack("n", [tool("o", [stage("o1")], roles=["alpha"])], scope="n"),
         ])
@@ -552,11 +557,11 @@ class RolesAndToolsTests(unittest.TestCase):
         self.assertEqual({r["role"]: r["filled_by"] for r in out["roles"]}["alpha"], "p")
         self.assertIn("p2", out["tracks"]["Safety Net"]["backlog"])
 
-    def test_a_tool_that_took_its_place_does_not_hold_the_after_of_others(self):
+    def test_a_tool_that_took_its_place_does_not_hold_the_waits_for_of_others(self):
         m = Model([pack("m", [
             tool("p", [stage("p1")], roles=["alpha"]),
             tool("q", [stage("q1")], roles=["alpha"], status="recognized"),
-            tool("s", [stage("s1", after=["p1"])], roles=["beta"]),
+            tool("s", [stage("s1", waits_for=["p1"])], roles=["beta"]),
         ])])
         self.assertEqual(m.compute({"fulfilled": ["q1"]})["tracks"]["Safety Net"]["withheld"], [])
         self.assertEqual(m.compute()["tracks"]["Safety Net"]["withheld"], [{"node": "s1", "reason": "waiting on: p1"}])
@@ -766,8 +771,8 @@ class SuiteDataTests(unittest.TestCase):
         rector = [s for s in stages.values() if s["tool"] == "rector"]
         self.assertTrue(rector)
         for stage in rector:
-            self.assertNotIn("php-cs-fixer-rollout", stage["after"], stage)
-            self.assertIn("code-style", stage["after"], stage)
+            self.assertNotIn("php-cs-fixer-rollout", stage["waits_for"], stage)
+            self.assertIn("code-style", stage["waits_for"], stage)
         out = self.compute({"fulfilled": ["composer", "phpstan-level-0", "php-cs-fixer-adoption"]})
         self.assertIn("rector-php-set", out["tracks"]["Safety Net"]["workable"])
 
@@ -803,8 +808,8 @@ class SuiteDataTests(unittest.TestCase):
 
     def test_phpstan_levels_4_and_5_wait_for_the_rector_sets_that_shrink_their_baselines(self):
         stages = self.model["stages"]
-        self.assertEqual(stages["phpstan-level-4"]["after"], ["rector-dead-code"])
-        self.assertEqual(stages["phpstan-level-5"]["after"], ["rector-type-coverage"])
+        self.assertEqual(stages["phpstan-level-4"]["waits_for"], ["rector-dead-code"])
+        self.assertEqual(stages["phpstan-level-5"]["waits_for"], ["rector-type-coverage"])
         chain = ["composer", "php-cs-fixer-adoption", "phpstan-level-0", "phpstan-level-1", "phpstan-level-2", "phpstan-level-3"]
         reasons = {w["node"]: w["reason"] for w in self.compute({"fulfilled": chain})["tracks"]["Safety Net"]["withheld"]}
         self.assertEqual(reasons["phpstan-level-4"], "waiting on: rector-dead-code")

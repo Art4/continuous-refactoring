@@ -51,7 +51,7 @@ recommendation:
 | The dependent | Recommendation |
 | --- | --- |
 | is in `closed_by_rejection`: it belongs to the rejected Tool or Role, requires the rejected Stage, requires a Role nothing can fill any more, or lost every alternative of a group | close its ticket, the reason being "depends on <Name>, which was declined" |
-| only waits `after` the rejected Stage or a Role it fills, or has a group of alternatives with a member left that could be fulfilled | remove the blocker from its ticket; the ticket stays |
+| only waits for the rejected Stage (`waits_for`) or a Role it fills, or has a group of alternatives with a member left that could be fulfilled | remove the blocker from its ticket; the ticket stays |
 
 A dependent without a ticket needs nothing. Options: as recommended, the other way for a ticket the human
 names, or leave the tickets as they are.

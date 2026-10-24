@@ -27,7 +27,7 @@ flowchart TD
 
 ## Stages
 
-| Stage | Tool | Track | Requires | After | Applies when |
+| Stage | Tool | Track | Requires | Waits for | Applies when |
 | --- | --- | --- | --- | --- | --- |
 | CI Runner (`ci-runner`) | `ci-runner` | Safety Net | – | – | – |
 | .editorconfig (`editorconfig`) | `editorconfig` | Safety Net | – | – | – |

@@ -34,7 +34,7 @@ import tooling_tree  # noqa: E402
 ORDER = {
     "pack": ["$schema", "pack", "scope", "applies_when", "tools"],
     "tool": ["tool", "name", "uses", "roles", "status", "details", "min_runtime", "stages"],
-    "stage": ["slug", "name", "track", "requires", "after", "applies_when"],
+    "stage": ["slug", "name", "track", "requires", "waits_for", "applies_when"],
     "roles": ["$schema", "roles"],
     "role": ["slug", "name", "purpose", "signal"],
 }
@@ -149,13 +149,13 @@ def _pack_page(model: dict, name: str) -> str:
         )
 
     out.append("\n## Stages\n")
-    out.append("| Stage | Tool | Track | Requires | After | Applies when |\n| --- | --- | --- | --- | --- | --- |")
+    out.append("| Stage | Tool | Track | Requires | Waits for | Applies when |\n| --- | --- | --- | --- | --- | --- |")
     for stage in own:
         requires = "; ".join(_requirement(i, stages, roles) for i in stage["requires"]) or "–"
-        after = ", ".join(_requirement(a, stages, roles) for a in stage["after"]) or "–"
+        waits_for = ", ".join(_requirement(a, stages, roles) for a in stage["waits_for"]) or "–"
         out.append(
             f"| {_cell(stage['name'])} (`{stage['slug']}`) | `{stage['tool']}` | {stage['track']} | "
-            f"{_cell(requires)} | {after} | {_cell(stage.get('applies_when') or '–')} |"
+            f"{_cell(requires)} | {waits_for} | {_cell(stage.get('applies_when') or '–')} |"
         )
 
     return "\n".join(out) + "\n"
@@ -191,7 +191,7 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
         return node
 
     own_slugs = {s["slug"]: s for s in own}
-    wanted_roles = [i for s in own for i in s["requires"] + s["after"] if isinstance(i, str) and i not in stages]
+    wanted_roles = [i for s in own for i in s["requires"] + s["waits_for"] if isinstance(i, str) and i not in stages]
     home: dict[str, str] = {}  # a Role sits in the Track of its first player in this Pack
     for slug in wanted_roles:
         first = next((p for p in players(slug) if p in own_slugs), None)
@@ -221,8 +221,8 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
                 edges.append(f"  {stage_node(item)} --> {target}")
             else:
                 edges.append(f"  {role_node(item)} --> {target}")
-        for after in stage["after"]:
-            source = stage_node(after) if after in stages else role_node(after)
+        for awaited in stage["waits_for"]:
+            source = stage_node(awaited) if awaited in stages else role_node(awaited)
             edges.append(f"  {source} -.-> {target}")
 
     lines += edges

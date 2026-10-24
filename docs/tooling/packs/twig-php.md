@@ -30,7 +30,7 @@ flowchart TD
 
 ## Stages
 
-| Stage | Tool | Track | Requires | After | Applies when |
+| Stage | Tool | Track | Requires | Waits for | Applies when |
 | --- | --- | --- | --- | --- | --- |
 | Twig-CS-Fixer (`twig-cs-fixer`) | `twig-cs-fixer` | Guardrails | `composer` | `editorconfig` | – |
 | TwigStan (`twigstan`) | `twigstan` | Guardrails | `phpstan-level-5` | `twig-cs-fixer` | – |

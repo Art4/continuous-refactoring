@@ -1,7 +1,7 @@
 # 02 — `after` is renamed `waits_for`
 
 Type: task
-Status: ready-for-agent
+Status: done
 Blocked by: —
 
 **What to build** (ADR-0086)
@@ -18,3 +18,5 @@ Blocked by: —
 validator are green.
 
 ## Comments
+
+> **2026-10-24:** Done. A Pack that still says `after` is refused with a message naming the rename (no silent dual reading); parser output `tree.stages` carries `waits_for` too.

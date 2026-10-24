@@ -42,14 +42,14 @@ A project that checks the dependencies between its layers with Deptrac, and want
           "name": "Deptrac Layers",
           "track": "Guardrails",
           "requires": ["composer"],
-          "after": []
+          "waits_for": []
         },
         {
           "slug": "deptrac-strict",
           "name": "Deptrac Strict Rules",
           "track": "Guardrails",
           "requires": ["deptrac-layers"],
-          "after": []
+          "waits_for": []
         }
       ]
     }
@@ -63,7 +63,7 @@ A project that checks the dependencies between its layers with Deptrac, and want
 
 - **Add, never redefine.** Slugs are unique across the suite's Packs and yours: a Tool, a Stage, a Role or a Pack of the same slug ends the run's tooling step with an error that names both places. A Tool of the suite you do not want is declined with a rejection, as any other.
 - **The scope decides who competes.** A Pack names the language it works on (`"scope": "php"`). Tools of one scope compete for a Role: a project that uses Mago instead of PHPStan names the scope `php`, declines PHPStan, and Mago fills Static Analysis, so Rector's Stages stop waiting for PHPStan. Tools of other scopes do not take each other's place: a Code Style Tool for Twig and one for PHP are both in use.
-- **A Stage may wait for the suite's.** `requires` and `after` can name Stages and Roles of the suite's Packs (`composer`, `static-analysis`); nothing of the suite waits for yours.
+- **A Stage may wait for the suite's.** `requires` and `waits_for` can name Stages and Roles of the suite's Packs (`composer`, `static-analysis`); nothing of the suite waits for yours.
 - **It comes last.** The suite's Stages are proposed first.
 - **Applies when** is a sentence the suite judges against the project, once per run. A project's own Pack usually says "Always."
 - The `"$schema"` line points at the schema in the project's installed skills; it lets an editor check and complete the file. Write the file in the form the suite's own Packs have: two-space indent, objects one key per line, lists of plain values on one line.

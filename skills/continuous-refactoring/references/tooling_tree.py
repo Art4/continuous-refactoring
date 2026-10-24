@@ -207,7 +207,8 @@ def load_model(
                 _need(_is_text(stage.get("name")), where, f"stage {sslug} needs a name")
                 _need(stage.get("track") in TRACKS, where, f"stage {sslug}: track must be one of {', '.join(TRACKS)}")
                 _need(isinstance(stage.get("requires"), list), where, f"stage {sslug}: requires must be a list")
-                _need(isinstance(stage.get("after"), list), where, f"stage {sslug}: after must be a list")
+                _need("after" not in stage, where, f"stage {sslug}: after is now named waits_for; rename the key")
+                _need(isinstance(stage.get("waits_for"), list), where, f"stage {sslug}: waits_for must be a list")
                 _need(
                     stage.get("applies_when") is None or _is_text(stage.get("applies_when")),
                     where,
@@ -272,22 +273,22 @@ def _check_references(model: dict) -> None:
                         slug,
                         f"requires {parent['slug']}, which is in the later Track {parent['track']}",
                     )
-        for after in stage["after"]:
-            _need(after in stages or after in roles, slug, f"after {after}, which is neither a stage nor a role")
-            _need(after != slug, slug, "is after itself")
-            if after in roles:
+        for awaited in stage["waits_for"]:
+            _need(awaited in stages or awaited in roles, slug, f"waits for {awaited}, which is neither a stage nor a role")
+            _need(awaited != slug, slug, "waits for itself")
+            if awaited in roles:
                 _need(
-                    bool(_role_tools(model, after, stage["scope"])),
+                    bool(_role_tools(model, awaited, stage["scope"])),
                     slug,
-                    f"after the role {after}, which no tool of the scope {stage['scope']} plays",
+                    f"waits for the role {awaited}, which no tool of the scope {stage['scope']} plays",
                 )
 
-    # no cycles over requires, role requirements and after
+    # no cycles over requires, role requirements and waits_for
     def deps(slug: str) -> list[str]:
         stage = stages[slug]
         found: list[str] = []
         members = [m for item in stage["requires"] for m in (item if isinstance(item, list) else [item])]
-        for member in members + stage["after"]:
+        for member in members + stage["waits_for"]:
             if member in stages:
                 found.append(member)
             else:
@@ -583,7 +584,7 @@ class _State:
         return subject(stage) or f"{stage} was declined"
 
     def decided(self, stage: str) -> bool:
-        """For `after`: fulfilled, closed, or never going to be."""
+        """For `waits_for`: fulfilled, closed, or never going to be."""
         return (
             stage in self.fulfilled
             or stage not in self.active
@@ -591,8 +592,8 @@ class _State:
             or self.never_fulfilled(stage)
         )
 
-    def after_decided(self, item: str, scope: str | None) -> bool:
-        """An `after` entry: a Stage decided, or a Role filled or with the first
+    def awaited_decided(self, item: str, scope: str | None) -> bool:
+        """A `waits_for` entry: a Stage decided, or a Role filled or with the first
         Stage of every Tool that could fill it decided."""
         if item in self.model["stages"]:
             return self.decided(item)
@@ -684,7 +685,7 @@ class _State:
                 return f"blocked — no Tool fills the Role {item}"
         if s["track"] == "Guardrails" and not safety_net_fulfilled:
             return "waiting on the Safety Net"
-        undecided = [a for a in s["after"] if not self.after_decided(a, s["scope"])]
+        undecided = [a for a in s["waits_for"] if not self.awaited_decided(a, s["scope"])]
         if undecided:
             return f"waiting on: {', '.join(undecided)}"
         return None
@@ -777,7 +778,7 @@ def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = N
                     "pack": stages[slug]["pack"],
                     "track": stages[slug]["track"],
                     "requires": stages[slug]["requires"],
-                    "after": stages[slug]["after"],
+                    "waits_for": stages[slug]["waits_for"],
                 }
                 for slug in model["stage_order"]
             ]

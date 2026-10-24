@@ -69,7 +69,7 @@ and what blocks it — unless one of these applies first:
 | is in `withheld` as closed by a rejection | out of reach: no ticket could unblock it. Named in one line with what it hangs on, no proposal |
 
 **What blocks a proposal** is read from `tree.stages`: every `requires` Stage that is not fulfilled; every
-required Role that is not filled, where the Tool recommended for it stands for it; and every `after`
+required Role that is not filled, where the Tool recommended for it stands for it; and every `waits_for`
 Stage or Role that is undecided, a Role again stood for by its recommended Tool. Where a `requires` item is a group of alternatives, its members block together,
 and the ticket says that one of them is enough.
 
