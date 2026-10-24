@@ -114,7 +114,7 @@ out at filing for closing with a note, as selection does at pick-up (`selection.
   why — and return to Track choice with the Track marked as tried.
 
 Either way the report ends with one line naming the Track's on-request Tools that are neither asked for
-nor in place, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis —
-name one in the call to set it up." Nothing is filed for them.
+nor in place, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis,
+Secret Detection — name one in the call to set it up." Nothing is filed for them.
 
 The scan is done when every Stage in scope is fulfilled, rejected, proposed, or named as out of reach.

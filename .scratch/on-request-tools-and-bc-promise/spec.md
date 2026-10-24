@@ -52,7 +52,8 @@ spec cuts them into tickets.
 
 ## Not in this plan
 
-- **Secret Detection.** Its placement feels off to the user; any change touches Housekeeping's history scan.
+- **Secret Detection.** Its placement feels off to the user; any change touches Housekeeping's history scan. Followed up in
+  `.scratch/secret-detection-on-request/` (ADR-0089).
 - **Deprecation upkeep** (Q18).
 
 ## Tickets

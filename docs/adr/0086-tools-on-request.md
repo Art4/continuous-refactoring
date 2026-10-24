@@ -1,5 +1,7 @@
 # Tools on request
 
+> Amended by [ADR-0089](0089-secret-detection-on-request.md): Secret Detection is on request too.
+
 > Amends [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): a Tool has a third status, and `after` is
 > renamed `waits_for`. Amends [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md): Semgrep no longer
 > covers the Security Signal unasked.

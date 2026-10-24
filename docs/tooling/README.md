@@ -29,5 +29,5 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | API Compatibility (`api-compatibility`) | A check compares the code with the last release and fails on a break of what the project's BC promise covers. | – | Roave Backward Compatibility Check (recommended, php) |
 | Automated Refactoring (`automated-refactoring`) | Rule sets rewrite code mechanically, one reviewable set at a time. | – | Rector (recommended, php) |
 | Code Smell Detection (`code-smell-detection`) | A tool measures complexity and flags code that is hard to read. | Understandability | PHPMD (recommended, php) |
-| Secret Scanning (`secret-scanning`) | Committed secrets and credentials are found before they ship. | Security | Secret Detection (recommended, generic) |
+| Secret Scanning (`secret-scanning`) | Committed secrets and credentials are found before they ship. | – | Secret Detection (on-request, generic) |
 | Static Security Analysis (`static-security-analysis`) | A rule-based scanner looks for common vulnerability patterns in the source. | Security | Semgrep (OWASP Top 10) (on-request, php) |

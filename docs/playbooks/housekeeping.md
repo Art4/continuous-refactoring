@@ -67,7 +67,7 @@ It turns the Housekeeping ticket into the place where ideas from feature work la
 
 ### The secret scan
 
-The first cycle scans the whole Git history; each later one scans the commits added since the scan before. It uses the secret scanner your project already runs, with that scanner's own list of known findings. Without one, the task is ticked as not run. A finding is reported by place only — the secret's value is written nowhere. Where people outside the project can read the tracker, the recommendation is to file no ticket for a finding and to tell you in the conversation.
+The first cycle scans the whole Git history; each later one scans the commits added since the scan before. It uses the secret scanner your project already runs, with that scanner's own list of known findings. Without one, the agent runs a scanner of its own (gitleaks, for instance) without adding anything to your project; only where none can run is the task ticked as not run, and tried again next cycle. A finding is reported by place only — the secret's value is written nowhere. Where people outside the project can read the tracker, the recommendation is to file no ticket for a finding and to tell you in the conversation.
 
 ### The re-check of the tooling
 

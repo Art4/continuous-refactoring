@@ -15,6 +15,9 @@ flowchart TD
   subgraph t_guardrails["Guardrails"]
     s_secret_detection["Secret Detection"]
   end
+  s_ci_runner -.-> s_secret_detection
+  classDef onRequest stroke-dasharray: 6 4
+  class s_secret_detection onRequest
 ```
 
 Solid arrow: requires · dashed arrow: waits for · solid outline: recommended · dashed outline: on request · dotted outline: recognized
@@ -26,7 +29,7 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | --- | --- | --- | --- | --- | --- |
 | CI Runner (`ci-runner`) | recommended | Continuous Integration | GitHub Actions / GitLab CI | – | [packs/generic/ci-runner.md](../../../skills/continuous-refactoring/references/packs/generic/ci-runner.md) |
 | .editorconfig (`editorconfig`) | recommended | Editor Settings | EditorConfig | – | [packs/generic/editorconfig.md](../../../skills/continuous-refactoring/references/packs/generic/editorconfig.md) |
-| Secret Detection (`secret-detection`) | recommended | Secret Scanning | any secret scanner | – | [packs/generic/secret-detection.md](../../../skills/continuous-refactoring/references/packs/generic/secret-detection.md) |
+| Secret Detection (`secret-detection`) | on-request | Secret Scanning | any secret scanner | – | [packs/generic/secret-detection.md](../../../skills/continuous-refactoring/references/packs/generic/secret-detection.md) |
 
 ## Stages
 
@@ -34,4 +37,4 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | --- | --- | --- | --- | --- | --- |
 | CI Runner (`ci-runner`) | `ci-runner` | Safety Net | – | – | – |
 | .editorconfig (`editorconfig`) | `editorconfig` | Safety Net | – | – | – |
-| Secret Detection (`secret-detection`) | `secret-detection` | Guardrails | – | – | – |
+| Secret Detection (`secret-detection`) | `secret-detection` | Guardrails | – | `ci-runner` | – |

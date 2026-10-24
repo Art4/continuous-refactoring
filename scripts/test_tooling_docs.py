@@ -232,7 +232,8 @@ class DocsTests(unittest.TestCase):
         php = docs["docs/tooling/packs/php.md"]
         self.assertIn("  classDef onRequest stroke-dasharray: 6 4\n  class s_infection,s_psalm_taint_analysis,s_semgrep onRequest", php)
         self.assertIn("  classDef recognized stroke-dasharray: 2 2\n  class s_pint,s_ecs,s_phpcs,s_pest_mutate,s_psalm recognized", php)
-        self.assertNotIn("classDef", docs["docs/tooling/packs/generic.md"])   # only recommended Tools: no class
+        self.assertIn("  class s_secret_detection onRequest", docs["docs/tooling/packs/generic.md"])
+        self.assertNotIn("classDef", docs["docs/tooling/packs/twig-php.md"])  # only recommended Tools: no class
         self.assertIn("dashed outline: on request", php[php.index("## Diagram"):php.index("## Tools")])
 
     def test_a_role_sits_inside_the_track_of_its_player(self):

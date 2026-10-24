@@ -791,7 +791,7 @@ class SuiteDataTests(unittest.TestCase):
         out = self.compute({"packs": ["generic"], "fulfilled": ["ci-runner", "editorconfig"]})
         self.assertTrue(out["safety_net_fulfilled"])
         self.assertEqual([w["node"] for w in out["tracks"]["Guardrails"]["withheld"]], [])
-        self.assertEqual(out["tracks"]["Guardrails"]["backlog"], ["secret-detection"])
+        self.assertEqual(out["tracks"]["Guardrails"]["backlog"], [])
 
     def test_psalm_takes_the_place_of_phpstan(self):
         out = self.compute({"fulfilled": ["composer", "psalm"]})
@@ -901,6 +901,11 @@ class SuiteDataTests(unittest.TestCase):
         out = self.compute({"fulfilled": [s for s in self.model["stages"] if self.model["stages"][s]["track"] == "Safety Net"]})
         self.assertNotIn("semgrep", out["tracks"]["Guardrails"]["backlog"])
         self.assertIn("semgrep", self.compute({"requested": ["semgrep"]})["tracks"]["Guardrails"]["backlog"])
+
+    def test_secret_detection_is_on_request_and_waits_for_ci(self):
+        self.assertEqual(self.model["tools"]["secret-detection"]["status"], "on-request")
+        self.assertEqual(self.model["stages"]["secret-detection"]["waits_for"], ["ci-runner"])
+        self.assertIsNone(self.model["roles"]["secret-scanning"]["signal"])
 
     def test_a_php_floor_below_a_tools_minimum_blocks_its_first_stage(self):
         out = self.compute({"runtime": {"php": "5.6"}})

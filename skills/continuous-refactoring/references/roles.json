@@ -83,7 +83,7 @@
       "slug": "secret-scanning",
       "name": "Secret Scanning",
       "purpose": "Committed secrets and credentials are found before they ship.",
-      "signal": "Security"
+      "signal": null
     },
     {
       "slug": "static-security-analysis",
