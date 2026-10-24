@@ -1,5 +1,7 @@
 # The tooling tree becomes Roles, Tools and Stages in Packs
 
+> Amended by [ADR-0086](0086-tools-on-request.md): a Tool may be *on request*, and `after` is renamed `waits_for`.
+
 > Amended by [ADR-0080](0080-a-role-is-filled-per-scope.md): a Role is filled per scope, not once for the target.
 
 > Supersedes the graph mechanics of [ADR-0007](0007-required-recommended-edges.md) (required and recommended

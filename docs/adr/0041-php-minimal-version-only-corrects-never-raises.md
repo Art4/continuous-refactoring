@@ -1,5 +1,8 @@
 # `php-minimal-version` only corrects an already-true PHP floor, never raises it
 
+> Superseded by [ADR-0087](0087-rector-stops-at-the-declared-php-floor.md): `rector-php-set` stops at the declared
+> floor, and `php-minimal-version` goes.
+
 > First ADR for this node. Its original introduction (ticket 35, `.scratch/php-tooling-tree/issues/
 > 35-php-upgrade-recommendation-node.md`) shipped straight from a `/grill-me` session with no ADR of
 > its own — recapped briefly below before this correction.
