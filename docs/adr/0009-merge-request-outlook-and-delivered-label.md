@@ -1,5 +1,12 @@
 # Merge-request outlook, plain-language opener, and a delivered label of its own
 
+> Amended by [ADR-0026](0026-drop-delivered-label-use-native-pr-linkage.md): the `refactor:delivered` label is dropped.
+>
+> Superseded in part without an ADR: the outlook (the next node, and later its diagram, [ADR-0027](0027-mr-outlook-diagram-of-unblocked-nodes.md)) was dropped when the run's texts
+> were written anew for [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): the merge request description names what the project gains, the ticket, the
+> changes and the checks, and no next Stage. [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) then removed the parser's `unblocked_by` output, which no
+> reference read. The plain-language opener stands.
+
 > Amends [ADR-0006](0006-loop-delivers-remembered-merge-requests.md): the description gains a plain-language opener and, for tooling-tree candidates, an outlook naming the next node; the in-flight label changes from `ready-for-human` to `refactor:delivered`.
 >
 > Amended by [ADR-0010](0010-orchestrator-explicit-data-flow.md): who applies these labels changes — `refactor-learn` writes them, not the orchestrator inline. The labels and description shape decided here are unchanged.

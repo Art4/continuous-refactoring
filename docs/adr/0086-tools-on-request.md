@@ -4,6 +4,10 @@
 > renamed `waits_for`. Amends [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md): Semgrep no longer
 > covers the Security Signal unasked.
 
+> Supersedes in part [ADR-0005](0005-tooling-tree-not-baseline-skill.md).
+
+> Amends [ADR-0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md), [ADR-0045](0045-semgrep-owasp-top-ten-node.md), [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md) and [ADR-0084](0084-phpstan-levels-wait-for-rector-and-the-phpunit-set-is-guardrails.md).
+
 Every recommended Tool is proposed to every target its Pack applies to. For some that is noise. Semgrep was close to
 useless on young projects that already had their guardrails: it finds little in code written under them, and pays off
 in old code that grew without them. Mutation testing is expensive and worth it only once a good test suite exists.

@@ -1,6 +1,6 @@
 # Signal-producing tooling-tree nodes never gate `structural-scan`; three existing PHP-tree edges simplified
 
-> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and `resolved` parents; the Signal field now belongs to a Role.
+> Superseded in part by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and `resolved` parents; the Signal field now belongs to a Role.
 
 > Amends [ADR-0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md): its "Considered
 > Options" list rejected "also drop `php-cs-fixer`/`phpunit`'s direct `php-structural-scan` resolved
@@ -8,6 +8,8 @@
 > all — but only once a compensating `recommended` edge into `rector-php-set` is added in the same
 > change, which the earlier, rejected version lacked. `phpunit`'s own leaf is untouched; ADR-0019's
 > concern about it stands.
+
+> Amended by [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md).
 
 Raised while filing candidate issues against `Art4/legacy-todo` (signals ticket 1, ADR-0038/0039): the
 suite's own stated principle — deterministic tooling signals take precedence over agentic

@@ -1,5 +1,9 @@
 # Grilling decisions get a visible trail, kept separate from the decision gate
 
+> Amended without an ADR when the run's texts were written anew for [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): the Decision trail is the
+> `Decisions` part of the plan comment — the option this ADR rejected. That it records only answered questions that
+> met the ADR bar, and never blocks, stands.
+
 `/grilling` rounds that settle live, with a human present, previously left no trace on the candidate
 issue — only the final plan (`refactor-design` step 5) survived; the reasoning behind a consequential
 choice, even one meeting the ADR bar, was gone the moment the conversation ended unless it happened to

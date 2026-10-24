@@ -1,5 +1,8 @@
 # `psr-4` wires the autoloader into the target's entry points, not just proves the mechanism
 
+> Amended by [ADR-0056](0056-agent-judged-fulfilment.md): fulfilment is judged by the agent against `psr-4.md`; the detection helpers in
+> `tooling_tree.py` below are gone. The second criterion, Entry point and Composition root stand.
+
 ## Context
 
 `psr-4`'s own fulfilment check and MR scope have always been deliberately narrow: declare

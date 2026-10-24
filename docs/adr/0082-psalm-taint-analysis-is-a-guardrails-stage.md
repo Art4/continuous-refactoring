@@ -4,6 +4,8 @@
 
 > Amends [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md), which rejected moving `psalm-taint-analysis` out of the Safety Net.
 
+> Amends [ADR-0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md).
+
 ADR-0054 kept the Stage in the Safety Net because its findings are the kind structural work collides with. The criterion
 points the other way: the Safety Net is settled so that structural work can start, and a taint finding in the target's
 own code is often fixed only by restructuring (moving the escaping to one place, splitting a function that mixes input

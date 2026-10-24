@@ -5,6 +5,8 @@
 > standing ticket made from a template the target places. A node's `Housekeeping` field and its
 > contribution through the node's own merge request stand.
 
+> Amended by [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md).
+
 The tree has always assumed a node's own Fulfilment check is a one-time artefact question: is the tool adopted, correctly, right now. Nothing kept "adopted but not actually being kept current" concerns on anyone's radar — dependency versions drift, tooling-deprecation warnings surface only after a manual re-run, and CI-gated concerns like `composer audit` only catch what's wrong *at the moment CI runs against an unchanged lockfile*, never what becomes wrong later against that same, still-passing lockfile. Grilled from scratch, starting from "should this be a tree node at all," per the ticket's own note that it was the least-designed of several ideas parked during an earlier grilling session.
 
 ## Considered Options

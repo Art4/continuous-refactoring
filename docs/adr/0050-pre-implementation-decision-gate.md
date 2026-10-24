@@ -1,5 +1,9 @@
 # Pre-implementation decision gate for design-time decisions
 
+> Amended by [ADR-0053](0053-decision-gate-actively-manages-both-triage-labels.md), superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md), [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md) and [ADR-0077](0077-waiting-and-workability-live-in-comments-never-in-labels.md): no triage label is withheld
+> or set; a flagged ticket waits on its open question, the run ends at the design point, and there is no
+> `refactor-learn`. The ADR bar, and that a breaking change is rejected rather than planned, stand.
+
 Design and implementation already run back to back, unattended, in the same pass regardless of
 `Create-mode` — that field only governs how the finished MR gets opened, after implementation has
 already happened. A decision `refactor-design` makes that's genuinely hard to reverse, or a candidate

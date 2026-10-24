@@ -1,5 +1,9 @@
 # `semgrep` — OWASP Top 10 coverage behind `psalm-taint-analysis`, not `composer`
 
+> Amended by [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md), [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) and [ADR-0086](0086-tools-on-request.md): Semgrep waits for the Safety Net and for `ci-runner` instead of
+> `psalm-taint-analysis`, as a Guardrails Stage, and is proposed only on request. Complementing taint analysis
+> stands.
+
 ## Context
 
 Ticket 11 (OWASP-aware static security analysis) had been deferred since ADR-0005 as a later-wave

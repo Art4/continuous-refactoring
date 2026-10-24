@@ -14,6 +14,8 @@
 > Amends [ADR-0014](0014-tooling-tree-parser-ships-under-refactor-scan.md): the parser and its tree docs
 > still ship together under a skill, now one that remains.
 
+> Supersedes in part [ADR-0033](0033-phpstan-baseline-shrink-candidates.md) and [ADR-0050](0050-pre-implementation-decision-gate.md).
+
 The suite was ten skills, eight of them internal, each symlinked into a target and listed among the
 developer's skills. The split existed to give each step a context of its own and to keep one skill as the
 only writer of the bookkeeping. The second reason is gone

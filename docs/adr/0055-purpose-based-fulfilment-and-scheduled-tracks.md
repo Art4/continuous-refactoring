@@ -1,5 +1,7 @@
 # Fulfilment checks move from `tooling_tree.py` to agent judgement against a node's Purpose; scanning reorganized into four scheduled Tracks
 
+> Amended by [ADR-0057](0057-refactor-loop-and-per-track-skills.md) and [ADR-0059](0059-cadence-carries-a-unit.md), both since superseded.
+
 > Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md),
 > [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md) and
 > [ADR-0076](0076-standing-housekeeping-ticket-from-a-template.md): scheduling by cadence, the per-Track
@@ -32,6 +34,12 @@
 > retired from the schema and ignored where it still exists. The one-time bootstrap exception is
 > corrected: it does not wait for Guardrails' `Open`, and the claim that ordinary eligibility keeps
 > Guardrails selected after its first scan is removed.
+
+> Superseded in part by [ADR-0065](0065-investigation-gets-its-own-open.md).
+
+> Amended by [ADR-0060](0060-track-open-entries-record-their-issue-number.md).
+
+> Amends [ADR-0039](0039-batch-filing-and-priority-backlog-admission.md).
 
 Raised against a live incident: `refactor-scan` proposed adopting `php-cs-fixer` on a target that
 already ran Laravel Pint (which wraps PHP CS Fixer internally, under its own config format). The

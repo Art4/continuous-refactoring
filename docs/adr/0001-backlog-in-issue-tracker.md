@@ -4,6 +4,8 @@
 > all of the suite's state lives on the tracker and the forge; nothing is kept under `docs/refactoring/`
 > or anywhere else.
 
+> Amended by [ADR-0012](0012-remembered-merge-requests-follow-the-tracker.md).
+
 The refactoring backlog is a set of candidate issues on the project's issue tracker, not a separate state file. Loop metadata and learned rejections live under `docs/refactoring/` in the target repo (ADR-0005); the backlog itself stays on the tracker.
 
 Chosen so the loop's state travels with the repo and reuses the tracker every contributor already reads. A separate backlog file would duplicate the tracker and split attention between two sources of truth.

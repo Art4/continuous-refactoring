@@ -1,5 +1,8 @@
 # A `resolved`-gate leaf counts as resolved when a required ancestor is rejected, not just when it's rejected itself
 
+> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): there are no `resolved` edges and no aggregation nodes; the Safety Net is fulfilled when
+> each of its Stages is fulfilled or closed by a rejection, a rejection of what it requires included.
+
 A real gap observed live while reviewer-loop-watching `Art4/legacy-todo` (ticket 53): the maintainer
 rejected `phpstan-level-6` specifically to reach `structural-scan` sooner. `php-structural-scan`'s own
 `resolved`-gate check (`_resolved_gate_status()`) correctly counted `phpstan-level-6` itself as

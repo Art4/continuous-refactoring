@@ -3,6 +3,8 @@
 > Supersedes [ADR-0053](0053-decision-gate-actively-manages-both-triage-labels.md) and the label part of
 > [ADR-0066](0066-flagged-candidate-self-confirms-from-a-plain-comment.md).
 
+> Supersedes in part [ADR-0050](0050-pre-implementation-decision-gate.md).
+
 The decision gate used to set and clear `needs-info` and `ready-for-agent` on a flagged candidate, and a
 human answer had to be followed by a label swap, or by the suite doing the swap for them. The labels
 were the triage vocabulary of the engineering skills, and every target needed them.

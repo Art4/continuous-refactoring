@@ -6,6 +6,8 @@
 >
 > Amended by [ADR-0012](0012-remembered-merge-requests-follow-the-tracker.md): this rule no longer applies to `docs/refactoring/merge-requests.md` when the target's issue tracker natively supports labels — there is nothing to commit in that case. It still governs `config.md`, ADRs, `CONTEXT.md`, and `merge-requests.md` itself when the target has no such tracker.
 
+> Amended by [ADR-0023](0023-never-delete-a-branch-as-a-candidates-only-close.md), [ADR-0028](0028-native-tracker-in-flight-bookkeeping-rides-the-candidate-branch.md) and [ADR-0029](0029-native-tracker-design-skips-the-pending-candidate-write.md).
+
 Manual end-to-end testing surfaced a real incident: `refactor-learn`'s closing call committed bookkeeping (the merge-requests ledger) directly to the default branch instead of going out through a review. Tracing it back, the gap was structural, not a one-off mistake: `refactor-implement` checks out the candidate branch, pushes it, and opens its merge request, but never switches the working tree back to the default branch afterward. `refactor-learn` runs immediately next and its own prose only asserted *where* its writes should conceptually end up ("this ledger lives on the default branch") without ever saying *how* to get there — no instruction to check out the default branch, no instruction to verify the current branch first, and, most importantly, no instruction that these writes must go out through a review rather than a direct push. An agent following the skill literally has no guardrail against committing bookkeeping onto whatever branch happens to be checked out, or against pushing straight to the default branch outright.
 
 ## Considered Options

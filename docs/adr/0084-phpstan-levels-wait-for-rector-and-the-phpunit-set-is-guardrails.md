@@ -1,5 +1,7 @@
 # PHPStan Levels 4 and 5 wait for Rector; the Rector PHPUnit Set is a Guardrails Stage
 
+> Amended by [ADR-0086](0086-tools-on-request.md): `after` is renamed `waits_for`.
+
 > Keeps [ADR-0040](0040-signal-tool-nodes-and-tree-edge-simplification.md)'s cut at PHPStan Level 5: the Safety Net still ends there.
 
 The PHPStan level chain and the Rector Stages were independent apart from Rector Type Coverage waiting for Level 3. A

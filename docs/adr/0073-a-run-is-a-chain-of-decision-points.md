@@ -17,6 +17,8 @@
 > preemption rules, one Track per pass). Agent-judged fulfilment, the four Tracks and their fixed order
 > stand.
 
+> Supersedes in part [ADR-0050](0050-pre-implementation-decision-gate.md).
+
 How much of a pass happened without asking was fixed per machine: two settings in a config file, answered
 once in the onboarding interview. A developer could not say "show me what you would do next" on one call
 and "do it yourself" on the next. The suite also braked on its own — at two open merge requests and at

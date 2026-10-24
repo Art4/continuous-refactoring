@@ -1,5 +1,8 @@
 # `loop-config` runs a human interview instead of guessing tracker, create-mode, and storage
 
+> Amended by [ADR-0071](0071-tracker-through-operations-tracker-and-forge-apart.md): the tracker question no longer sends "something else" to the Local Markdown template; a
+> tracker the human describes gets its own operations.
+
 > Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
 > [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): the interview no longer asks for a
 > create-mode or for where state is stored. The tracker question stays.

@@ -1,8 +1,10 @@
 # `AGENTS.md`/`CLAUDE.md` gets a Create-mode pointer, not the value itself
 
-> Superseded in part by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
-> [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): no create-mode pointer and no
-> `Bookkeeping:` line are written. `Focus areas` and `Refactoring goal` stay human-written lines.
+> Superseded by [ADR-0073](0073-a-run-is-a-chain-of-decision-points.md) and
+> [ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md): no create-mode pointer, no
+> `Bookkeeping:` line and no label section are written; a candidate label is at most an optional **Candidate**
+> hint. `Focus areas` and `Refactoring goal` stay human-written lines, decided in
+> [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md).
 
 > Amended by [ADR-0064](0064-bookkeeping-state-lives-in-an-issue-or-a-local-file.md): `AGENTS.md`/`CLAUDE.md` carries `Bookkeeping:`, `Focus areas:` and `Refactoring goal:` lines instead of the Refactoring Notes path.
 

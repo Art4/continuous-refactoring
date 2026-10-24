@@ -35,6 +35,9 @@ Tier 2 — semantic:
 - ADR staleness: ADRs containing ``retired``/``supersedes``/``amends`` are
   parsed into a dependency graph; skills referencing a superseded ADR without
   noting the successor are flagged
+- ADR banners: every relation an ADR's banner states (supersedes, amends, …) is
+  named in the other ADR's banner too, and ``docs/adr/README.md`` — the index
+  generated from the banners — is current (``adr_index.py``)
 
 Tier 2 — writing-for-agents advisories (warnings, never fail the build):
 - Size: a SKILL.md past a word-count guideline — a prompt to disclose more
@@ -63,6 +66,7 @@ from dataclasses import dataclass
 
 import yaml
 
+import adr_index
 import tooling_docs
 
 ALLOWED_FRONTMATTER = {"name", "description", "disable-model-invocation", "allowed-tools"}
@@ -707,6 +711,12 @@ def tooling_model_issues(repo_root):
     return [Issue(where, problem) for where, problem in tooling_docs.check(repo_root)]
 
 
+def adr_banner_issues(repo_root):
+    """Both sides of every banner relation, and the generated ADR index; the checks live in
+    adr_index.py, beside the generator."""
+    return [Issue(where, problem) for where, problem in adr_index.check(repo_root)]
+
+
 def validate_repo(repo_root):
     repo_root = pathlib.Path(repo_root)
     issues = []
@@ -828,6 +838,7 @@ def validate_repo(repo_root):
 
     if adr_dir.is_dir():
         issues += adr_staleness_issues(skills_text, adr_dir)
+        issues += adr_banner_issues(repo_root)
 
     # --- writing-for-agents advisories ---
     issues += size_issues(skills_text)

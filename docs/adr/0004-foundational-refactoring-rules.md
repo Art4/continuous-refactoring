@@ -1,5 +1,8 @@
 # Foundational refactoring rules
 
+> Superseded in part by [ADR-0078](0078-hard-rules-and-principles-apart.md): the Strangler Fig and Kent Beck's technique vocabulary are principles now, not
+> binding rules. Binding stay no breaking changes, deterministic tools over agents, an own branch, and the pin.
+
 The loop's ground rules, binding in `refactor-design` and `refactor-implement` — every plan and every slice follows them:
 
 - **No breaking changes.** A refactor preserves observable behavior; behavior change is not a refactor — it routes to the normal feature/bug path. The loop never ships a breaking change under the refactor label.

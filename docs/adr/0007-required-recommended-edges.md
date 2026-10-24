@@ -1,7 +1,11 @@
 # Required and recommended edges; Rector behind PHPStan levels
 
-> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): required and recommended edges are `requires` and `after` on Stages; what the ADR
+> Superseded in part by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): required and recommended edges are `requires` and `waits_for` on Stages; what the ADR
 > decided about Rector behind PHPStan levels stays in the Packs.
+
+> Amended by [ADR-0016](0016-recommended-edges-gate-until-decided.md).
+
+> Amends [ADR-0005](0005-tooling-tree-not-baseline-skill.md).
 
 The tooling tree needs two kinds of edges, not one. A **required edge** gates: the child is proposed only once the parent is fulfilled, and rejecting a required parent closes every node beneath it. A **recommended edge** advises: the child stays proposable even when its recommended parent was rejected, the rejected parent is never re-proposed, and the merge request outlook states where it would have helped. Fulfilling a parent later unlocks its dependents; reopening a rejected node is a recorded reversal of its out-of-scope entry. A node is one adoption step of a tool — a tool may own several nodes, and a node may span several merge requests.
 

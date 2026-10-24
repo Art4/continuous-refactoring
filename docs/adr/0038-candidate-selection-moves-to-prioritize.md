@@ -9,6 +9,8 @@
 > sorted into a priority or capped admission tier. Everything else here (the two-dispatch mechanism,
 > minimal filing, `refactor-design` grounding/grilling/commenting afterward) is unchanged.
 
+> Supersedes in part [ADR-0033](0033-phpstan-baseline-shrink-candidates.md).
+
 Observed live while reviewer-loop-watching `Art4/legacy-todo`: `refactor-design` did candidate search
 (structural-scan's codebase walk, or a PHPStan baseline-shrink group pick), grounding, and grilling
 all inside one dispatch — the candidate's issue was filed only at the very end, together with the

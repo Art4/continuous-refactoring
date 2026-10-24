@@ -29,6 +29,11 @@ where external reports go.)
      `python3 scripts/tooling_docs.py`. It writes the JSON in its fixed form and the tables and
      diagrams under `docs/tooling/`; the validator fails on a Pack, a Role or a generated page that is
      out of date (`--check` lists the differences without writing).
+   - A new or changed ADR: state how it relates to earlier ones in the quoted banner under its title
+     (*Supersedes*, *Supersedes in part*, *Amends*, …), add the matching *Superseded by* or *Amended by*
+     to the banner of each ADR it names, then run `python3 scripts/adr_index.py`. It writes the index
+     `docs/adr/README.md` from the banners; the validator fails on a relation named on one side only
+     and on an index that is out of date.
 4. Open a pull request. CI must be green; merge only after review.
 
 ## Skill suite conventions

@@ -21,6 +21,8 @@
 > [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md): where the create-modes live, what
 > `AGENTS.md`/`CLAUDE.md` carries, what "onboarded" means, and what an absent `Ticket-create-mode` reads as.
 
+> Amended by [ADR-0072](0072-remote-bookkeeping-belongs-to-the-target.md).
+
 Today the loop's state — `bookkeeping.md`, `merge-requests.md`, `out-of-scope/`, `housekeeping-template.md` —
 lives in the target repo's Refactoring Notes folder, and a good part of the suite exists to get it to the
 other people and machines: a dedicated bookkeeping branch, a fold-in into the candidate's own merge request,

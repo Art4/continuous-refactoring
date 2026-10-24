@@ -4,6 +4,8 @@
 > `refactor-learn` no longer exists, and there is no bookkeeping left to write
 > ([ADR-0074](0074-state-lives-in-the-tracker-found-by-search.md)).
 
+> Amended by [ADR-0060](0060-track-open-entries-record-their-issue-number.md).
+
 Both of `refactor-learn`'s calls could previously run with nothing real to act on: the early call
 only fires when `refactor-scan` reports findings (already guarded by the orchestrator), but the
 closing call runs unconditionally every pass, even when neither a candidate was delivered nor

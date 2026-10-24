@@ -1,6 +1,9 @@
 # Onboarding/Safety Net split; Signal wave nodes wait for the Safety Net to close; `php-structural-scan` renamed `php-safety-net`
 
-> Superseded by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and aggregation; Onboarding, Safety Net and Guardrails as
+> Amended by [ADR-0055](0055-purpose-based-fulfilment-and-scheduled-tracks.md): **Signal wave** is renamed **Guardrails**. Amended by [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md):
+> `psalm-taint-analysis` leaves the Safety Net after all.
+
+> Superseded in part by [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md) where it describes edges and aggregation; Onboarding, Safety Net and Guardrails as
 > concepts stay.
 
 > Amends [ADR-0040](0040-signal-tool-nodes-and-tree-edge-simplification.md): `secret-detection` and `phpmd`
@@ -12,6 +15,8 @@
 > `php-safety-net`. Same node, same mechanism — resolved once its (now nine, was eleven) leaves are
 > resolved, still the PHP tree's sole `resolved` contribution to `structural-scan` — new name, because
 > other nodes now read its resolved-ness too, not only `structural-scan`.
+
+> Amends [ADR-0045](0045-semgrep-owasp-top-ten-node.md).
 
 Raised against a live UX complaint: security-relevant nodes (`composer-audit`, `secret-detection`, …) were
 surfacing in the very first proposal wave, before the deterministic Safety Net had even closed — a target's

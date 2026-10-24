@@ -1,5 +1,9 @@
 # PHPStan baseline-shrink candidates: closing the level chain's stagnation trap
 
+> Superseded in part by [ADR-0038](0038-candidate-selection-moves-to-prioritize.md) and [ADR-0075](0075-one-skill-with-references-the-targets-own-skills-first.md): no scan step and no skill of its own are left. A baseline ticket
+> is found in the worklist and planned at the design point, by root cause; partial reductions per merge request and
+> no TDD cycle stand.
+
 A real gap observed live while reviewer-loop-watching `Art4/legacy-todo` (ticket 51): `phpstan.md`'s
 own Stop conditions for the level chain already promised *"the loop proposes shrinking work... until
 the baseline becomes empty"* once a fulfilled level's baseline is non-empty — but that mechanism
