@@ -6,7 +6,7 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 04 (`Open` as the complete backlog), 06 (A Track scan fills `Open`; `refactor-learn` maintains it).
 
-**Status:** implemented — PR #110, open items listed in Comments
+**Status:** done — PR #110; open items obsolete after the suite rebuild
 
 - [x] Safety Net `Open` non-empty: only Safety Net is selected, also when nothing is workable, and the wait is reported.
 - [x] Guardrails with a workable node is selected ahead of Investigation; a due Housekeeping runs for one pass and Guardrails resumes afterwards.
@@ -33,3 +33,7 @@ Spec: `agent-judged-fulfilment`.
   `track-open-processing.md`, not referenced from the scheduler) or that a yielded Guardrails Track's
   non-workable nodes go into the pass report; the Status line only covers nodes skipped during an `Open`
   walk that actually ran. The ratio/tie-break-among-the-others half is documented.
+
+### 2026-10-24 — closed
+
+Closed by the suite rebuild (PR #144). The open items above refer to things that no longer exist: `track-scheduler.md`, the Tracks' `Open` lists and the Safety Net blockade / Guardrails yield. The tooling tree is now made of packs whose Stages are judged by the agent against their prose. Remaining gaps in that prose are left to real runs to surface.

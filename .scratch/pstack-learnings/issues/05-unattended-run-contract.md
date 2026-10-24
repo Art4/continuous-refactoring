@@ -1,7 +1,7 @@
 # 05 — Unattended run: exit predicate, discard, decision trail
 
 Type: task
-Status: open
+Status: done — PR #154
 
 For scheduled/unattended runs: a checkable exit predicate stated up front and never relaxed, smallest justified change per iteration, discard what did not help, a decision trail one row per decision, stop and write up on a real dead end. Check how this fits the run's decision points and the final report.
 
@@ -19,3 +19,7 @@ Autonomous mode, the findings message as record and `reporting-progress.md` exis
 ### 2026-10-16 — grilled; decisions
 
 One chain, one merge request stays (ADR 0073); no iterating exit predicate — the plan's `Done when` is the predicate and repeated calls make more merge requests. A **dead end** is not a count: the same red check or the same review finding survives a fix and a second attempt (implement steps 4 and 5). Outcome: branch local, no push or merge request; interactive run lays out a decision point (open question on the ticket recommended / the human takes the branch / end), autonomous takes the recommendation; the open question names the branch and says in plain words what was tried. New hard rule in the foundational rules: a check is never weakened without the human's allowance (pin and reader-load review included; the baseline ignore is a case of it). Unchanged: the stop at an unfinished Safety Net (decided with the tooling-tree table; the earlier note above that said "carry on" is withdrawn), the Housekeeping track, `design-point.md`; no new decision trail (findings messages and `Decisions` suffice); no ADR, no new glossary word. Built in PR "Dead end after two failed fixes".
+
+### 2026-10-24 — closed
+
+Built in PR #154 as recorded above; checked against `skills/` on 2026-10-24.

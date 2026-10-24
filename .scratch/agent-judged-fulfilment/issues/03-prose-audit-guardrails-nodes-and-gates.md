@@ -6,7 +6,7 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 01 (Stop-conditions become recognition-only gate nodes) — the audit node's doc is edited there too.
 
-**Status:** implemented — PR #105, open items listed in Comments
+**Status:** done — PR #105; open items obsolete after the suite rebuild
 
 - [x] Every Guardrails node's tree doc, `secret-detection` and the structural-scan gate description are audited; Comments list each as "prose extended" (with what was added) or "already covered".
 - [ ] Every heuristic the parser applies to these nodes is stated in prose or listed as intentionally dropped, with a reason.
@@ -65,3 +65,7 @@ Checks: validation and unit suite pass on the branch head (item 5).
 > with (the seed, or `bookkeeping.md`'s Track sections) instead of the script's `detected` map, and
 > `phpstan.md` no longer says "the parser treats them as blocked". Still open: item 2's level
 > predicate, and `structural-scan.md`'s Fulfilment check.
+
+### 2026-10-24 — closed
+
+Closed by the suite rebuild (PR #144). The open items above refer to things that no longer exist: the parser's level detection, `refactor-scan` step 4b and the `structural-scan` node. The tooling tree is now made of packs whose Stages are judged by the agent against their prose. Remaining gaps in that prose are left to real runs to surface.

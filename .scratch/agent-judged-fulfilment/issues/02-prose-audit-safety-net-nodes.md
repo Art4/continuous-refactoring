@@ -6,7 +6,7 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 01 (Stop-conditions become recognition-only gate nodes) — the same tree docs are edited there.
 
-**Status:** implemented — PR #104, open items listed in Comments
+**Status:** done — PR #104; open items obsolete after the suite rebuild
 
 - [x] Every Safety Net node's tree doc is audited; the ticket's Comments list each node as "prose extended" (with what was added) or "already covered".
 - [ ] Every heuristic the parser applies to a Safety Net node is either stated in that node's prose or listed in Comments as intentionally dropped, with a reason.
@@ -73,3 +73,7 @@ Not covered (open items, see the unticked boxes):
   `_NEVER_PROPOSED`.
 
 Checks: `python3 scripts/validate_skills.py .` and the unit suite pass on the branch head (item 5).
+
+### 2026-10-24 — closed
+
+Closed by the suite rebuild (PR #144). The open items above refer to things that no longer exist: the parser's detection heuristics and the manual tree-walk fallback (`tree-walk-prompt.md`). The tooling tree is now made of packs whose Stages are judged by the agent against their prose. Remaining gaps in that prose are left to real runs to surface.

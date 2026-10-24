@@ -1,6 +1,6 @@
 # Agent-judged fulfilment, deterministic graph
 
-**Status:** ready-for-agent
+**Status:** done — tickets 01–11 closed; leftovers obsolete after the suite rebuild (PR #144)
 
 Builds on [ADR-0055](../../docs/adr/0055-purpose-based-fulfilment-and-scheduled-tracks.md), which already moved the Safety Net and Guardrails nodes' **Fulfilment check** to agent judgement against each node's **Purpose**, with the parser's own result kept as a "first signal". This spec finishes that move for every node, removes the parser's detection half, and reworks what `Open` means so a Track's own bookkeeping can drive scheduling on its own. A new ADR will record the decisions (see *Further Notes*).
 
