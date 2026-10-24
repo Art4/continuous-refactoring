@@ -32,7 +32,7 @@ def make_target(*, onboarded: bool) -> tuple[tempfile.TemporaryDirectory, pathli
 
 
 def workable(root: pathlib.Path, seed: dict | None = None) -> set[str]:
-    full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "runtime": {}}
+    full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
     full.update(seed or {})
     out = tooling_tree.compute(root, tooling_tree.load_model(), full)
     return {s for track in out["tracks"].values() for s in track["workable"]}

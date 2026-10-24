@@ -13,7 +13,8 @@ with step 2. A ticket it names as its blocker is read for the state, not added. 
 
 - **With a Candidate operation** → list the open tickets it marks. The tooling tickets are among them:
   filing sets that mark.
-- **Without one** → for each Stage, run **Search** with the Stage's Name, narrowed to the open tickets.
+- **Without one** → for each Stage, and each Name under *Dropped Stages* below, run **Search** with the
+  Name, narrowed to the open tickets.
   Where one listing of all open tickets is short enough to read — a local folder, a small tracker — read
   that listing once instead. A place the section gives to the suite's tickets alone counts whole; from
   any other listing keep the tickets that match a Stage.
@@ -28,6 +29,7 @@ one. A ticket about shrinking a PHPStan level's baseline matches that level's St
 | The ticket | Track |
 | --- | --- |
 | matches a Stage | the Track whose `nodes` list holds that Stage |
+| matches a dropped Stage (below) | none: one decision point per ticket — close it with the note the table gives (the recommendation), or keep it as an Investigation ticket |
 | is a Housekeeping ticket | Housekeeping |
 | anything else | Investigation |
 
@@ -53,7 +55,8 @@ A Stage is **known** once the tracker shows it was dealt with before: a ticket o
 recorded rejection of it, of its Tool or of its Role (`rejection.md`, *Finding rejections*). A tooling
 Track has a **trace** when every Stage of it that applies is known. Asked only of a Track with no open
 ticket, over the Stages of the Track's `nodes` in a call with the Packs that apply (`track-scan.md`,
-*Judging*) and without the Stages whose own *Applies when* does not hold: where one listing of all
+*Judging*), without the Stages whose own *Applies when* does not hold and without those marked
+`on_request`: a Stage nobody asked for is never due. where one listing of all
 tickets, open and closed, is short enough, read it once; otherwise run **Search** with each Stage's
 `search` words over open and closed tickets, and stop at the first Stage that is not known.
 
@@ -61,6 +64,16 @@ tickets, open and closed, is short enough, read it once; otherwise run **Search*
 - **Every Stage is known** → the Track is not scanned again by itself. A Stage of it without an open
   ticket counts as done; a tool that went missing since is found by a scan the call asks for or by the
   Housekeeping task that re-checks the tooling Tracks.
+
+## Dropped Stages
+
+A Stage the suite no longer has may still have an open ticket on the target. It belongs to no Track. The note
+closing it says what took its place, in the target's words:
+
+| Name | Note |
+| --- | --- |
+| PHP Version Floor | Not needed any more: the automated PHP rewrites now stop at the PHP version the project declares, so the declared version never falls behind the code. Raising it stays the project's own decision. |
+| Composer Audit | Taken over by the recurring Housekeeping ticket, which audits the dependencies on every cycle and attempts a fix for each advisory with a patched version. A CI job that already runs `composer audit` stays as it is. |
 
 ## A ticket's merge request
 

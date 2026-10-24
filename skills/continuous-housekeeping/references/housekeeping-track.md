@@ -77,6 +77,9 @@ Read the ticket's text and every comment on it, then its template. Sort what the
 **New lines** — recurring tasks the ticket lacks:
 
 - a task the template gained since the ticket was made;
+- only for the first template the operation names: a standing task of the first template
+  (`housekeeping-setup.md`, *The template*) that it lacks, such as the dependency audit in a template
+  written before the audit was one. The task goes into the template too;
 - only for the first template the operation names: the **Housekeeping line** of every tooling-tree Tool
   that is fulfilled while the template lacks it. The line is the Tool's **Housekeeping** field, found in
   its `details` file (`tooling-parser.md` says where) and reworded for the template's reader; each such

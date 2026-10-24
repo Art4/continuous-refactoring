@@ -35,7 +35,6 @@ flowchart TD
     s_phpmd_adoption["PHPMD"]
     s_phpmd_rollout["PHPMD Rollout"]
     s_coverage_floor["Test Coverage Floor"]
-    s_composer_audit["Composer Audit"]
     s_phpstan_level_6["PHPStan Level 6"]
     s_phpstan_level_7["PHPStan Level 7"]
     s_phpstan_level_8["PHPStan Level 8"]
@@ -59,8 +58,6 @@ flowchart TD
   s_phpmd_adoption --> s_phpmd_rollout
   s_composer --> s_phpunit
   s_phpunit --> s_coverage_floor
-  s_composer --> s_composer_audit
-  x_ci_runner -.-> s_composer_audit
   s_composer --> s_phpstan_level_0
   s_phpstan_level_0 --> s_phpstan_level_1
   s_phpstan_level_1 --> s_phpstan_level_2
@@ -99,7 +96,14 @@ flowchart TD
   s_phpstan_level_4 -->|one of| s_psalm_taint_analysis
   s_psalm -->|one of| s_psalm_taint_analysis
   x_ci_runner -.-> s_semgrep
+  classDef onRequest stroke-dasharray: 6 4
+  class s_psalm_taint_analysis,s_semgrep onRequest
+  classDef recognized stroke-dasharray: 2 2
+  class s_pint,s_ecs,s_phpcs,s_psalm recognized
 ```
+
+Solid arrow: requires · dashed arrow: waits for · solid outline: recommended · dashed outline: on request · dotted outline: recognized
+
 
 ## Tools
 
@@ -114,12 +118,11 @@ flowchart TD
 | PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring/references/packs/php/phpmd.md) |
 | PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
 | Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
-| Composer Audit (`composer-audit`) | recommended | Dependency Audit | composer audit | php 7.2 | [packs/php/composer-audit.md](../../../skills/continuous-refactoring/references/packs/php/composer-audit.md) |
 | PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring/references/packs/php/phpstan.md) |
 | Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
 | Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [packs/php/rector.md](../../../skills/continuous-refactoring/references/packs/php/rector.md) |
-| Psalm Taint Analysis (`psalm-taint-analysis`) | recommended | Taint Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
-| Semgrep (OWASP Top 10) (`semgrep`) | recommended | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring/references/packs/php/semgrep.md) |
+| Psalm Taint Analysis (`psalm-taint-analysis`) | on-request | Taint Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
+| Semgrep (OWASP Top 10) (`semgrep`) | on-request | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring/references/packs/php/semgrep.md) |
 
 ## Stages
 
@@ -136,7 +139,6 @@ flowchart TD
 | PHPMD Rollout (`phpmd-rollout`) | `phpmd` | Guardrails | `phpmd-adoption` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
 | Test Coverage Floor (`coverage-floor`) | `coverage-floor` | Guardrails | `phpunit` | – | – |
-| Composer Audit (`composer-audit`) | `composer-audit` | Guardrails | `composer` | `ci-runner` | The repository's composer.json requires at least one real package; platform pseudo-packages (php, hhvm, ext-*, lib-*, composer-plugin-api, composer-runtime-api) do not count. |
 | PHPStan Level 0 (`phpstan-level-0`) | `phpstan` | Safety Net | `composer` | – | – |
 | PHPStan Level 1 (`phpstan-level-1`) | `phpstan` | Safety Net | `phpstan-level-0` | – | – |
 | PHPStan Level 2 (`phpstan-level-2`) | `phpstan` | Safety Net | `phpstan-level-1` | – | – |

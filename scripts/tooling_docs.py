@@ -134,6 +134,7 @@ def _pack_page(model: dict, name: str) -> str:
 
     out.append("## Diagram\n")
     out.append(_diagram(model, name, own))
+    out.append(f"\n{_LEGEND}")
 
     out.append("\n## Tools\n")
     out.append("| Tool | Status | Roles | Uses | Minimum runtime | Details |\n| --- | --- | --- | --- | --- | --- |")
@@ -159,6 +160,14 @@ def _pack_page(model: dict, name: str) -> str:
         )
 
     return "\n".join(out) + "\n"
+
+
+# How a Tool's status shows on its Stages; a recommended Tool keeps the plain outline.
+_STATUS_CLASSES = {"on-request": ("onRequest", "stroke-dasharray: 6 4"), "recognized": ("recognized", "stroke-dasharray: 2 2")}
+_LEGEND = (
+    "Solid arrow: requires · dashed arrow: waits for · solid outline: recommended · "
+    "dashed outline: on request · dotted outline: recognized\n"
+)
 
 
 def _diagram(model: dict, name: str, own: list[dict]) -> str:
@@ -226,6 +235,16 @@ def _diagram(model: dict, name: str, own: list[dict]) -> str:
             edges.append(f"  {source} -.-> {target}")
 
     lines += edges
+    for status, (css_class, style) in _STATUS_CLASSES.items():
+        nodes = [
+            n for slug, n in ((s, _node("s", s)) for s in own_slugs) if tools[stages[slug]["tool"]]["status"] == status
+        ] + [
+            _node("x", s) for s in stages
+            if _node("x", s) in declared and tools[stages[s]["tool"]]["status"] == status
+        ]
+        if nodes:
+            lines.append(f"  classDef {css_class} {style}")
+            lines.append(f"  class {','.join(nodes)} {css_class}")
     lines.append("```")
     return "\n".join(lines)
 

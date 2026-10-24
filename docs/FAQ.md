@@ -126,6 +126,21 @@ result is already in your tracker afterwards: one ticket per tool still to set u
 every run would repeat work the tickets record. So a tool without an open ticket counts as done, a
 recurring Housekeeping task re-checks the tooling, and you can ask for a scan in the call any time.
 
+## Why are some tools only set up when I ask for them?
+
+Because their worth depends on the project, and the suite cannot tell it reliably. A security scanner such
+as Semgrep finds a lot in code that grew for years without guardrails and almost nothing in a young project
+that had them from the start; there, its ticket is only noise. Such a tool is never offered unasked, and
+never blocks a Track. Every scan report names what is available on request; name one in the call and it is
+proposed and worked like any other tool.
+
+## Why is the dependency audit a Housekeeping task and not a tool to set up?
+
+Because its value is in repeating it. A pipeline check fails only on advisories known at the moment the
+code changes; an advisory published next month against the same lockfile is never seen, and Composer
+already audits on every update. The Housekeeping ticket audits your dependencies on every cycle and updates
+what has a patched version. A pipeline job that already runs the audit stays as it is.
+
 ## Why is Housekeeping a standing ticket instead of a Stage of the tooling tree?
 
 A Stage of the tree is a one-time adoption with a stable test for "done". Maintenance never is. It

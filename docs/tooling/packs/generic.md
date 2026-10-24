@@ -17,6 +17,9 @@ flowchart TD
   end
 ```
 
+Solid arrow: requires · dashed arrow: waits for · solid outline: recommended · dashed outline: on request · dotted outline: recognized
+
+
 ## Tools
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |

@@ -4,7 +4,7 @@ The playbook for humans. The skill does the work; this document explains how you
 
 ## What it is
 
-Recurring maintenance: dependency currency, tooling-deprecation cleanup, a secret scan over the Git history, a re-check of the project's quality tooling — plus the small refactoring ideas that come up during other work.
+Recurring maintenance: dependency currency, an audit of the dependencies for known vulnerabilities, tooling-deprecation cleanup, a secret scan over the Git history, a re-check of the project's quality tooling — plus the small refactoring ideas that come up during other work.
 
 It is built from two things in your project:
 
@@ -22,7 +22,7 @@ One worked ticket is one cycle. It ends with a merge request holding what change
 
 The first call that finds no Housekeeping mechanism proposes one, as a single decision point:
 
-- **the template**, with a recommended path and the tasks: the secret scan, the re-check of the tooling, and one task for each tool already in place that needs recurring attention;
+- **the template**, with a recommended path and the tasks: the secret scan, the re-check of the tooling, the dependency audit, and one task for each tool already in place that needs recurring attention;
 - **the rhythm** — `daily`, `weekly`, `monthly`, or your own words (`every 3 days`, `monthly on the 1st`). The recommendation is drawn from how busy the repository was in the last 90 days;
 - **the first ticket**, due today;
 - **one line for your `AGENTS.md`** (below). This one is asked of you in every mode; an autonomous run that gets no answer leaves it out and says so.
@@ -37,12 +37,12 @@ Each ticket states the date it is due from, in a line of its own. A call before 
 
 The next ticket is due one rhythm after the day the cycle was worked, not after the old due date. Change the rhythm by editing the line in the template; the next ticket made from it follows.
 
-**Several templates** with different rhythms may exist side by side — say, a weekly and a monthly one — each with its own open ticket. Ask for a further one in the call ("a monthly one beside the weekly"). The secret scan, the tooling re-check and the tools' own tasks stay in the first template; a further one holds the tasks you name.
+**Several templates** with different rhythms may exist side by side — say, a weekly and a monthly one — each with its own open ticket. Ask for a further one in the call ("a monthly one beside the weekly"). The secret scan, the tooling re-check, the dependency audit and the tools' own tasks stay in the first template; a further one holds the tasks you name.
 
 ## What a cycle works
 
 1. **The recurring tasks** of the ticket, in order. Each is ticked on the ticket with its result in a line, so the ticket is the record of the cycle and an interrupted cycle continues where it stopped.
-2. **Tasks the ticket lacks**: one the template gained since, or one for a tool that is in place while the template has no task for it — the way a tool you set up by hand gets its recurring check.
+2. **Tasks the ticket lacks**: one the template gained since, a standing task a template written earlier lacks (such as the dependency audit), or one for a tool that is in place while the template has no task for it — the way a tool you set up by hand gets its recurring check.
 3. **The ideas** left on the ticket as comments.
 
 Before any of it is done, the cycle is laid out as one decision point: the tasks, the new ones, and each idea with what the suite makes of it.
@@ -81,7 +81,7 @@ Housekeeping keeps current what the project already has. A tool the project lack
 
 ## Housekeeping mentions on ordinary merge requests
 
-A merge request that sets up a tool — say `composer audit` — may also add one recurring task to the Housekeeping template. Its description says so in a line. That is the tool's own contribution to future cycles, not a second decision to make.
+A merge request that sets up a tool — say Semgrep — may also add one recurring task to the Housekeeping template. Its description says so in a line. That is the tool's own contribution to future cycles, not a second decision to make.
 
 ## Common mistakes
 
