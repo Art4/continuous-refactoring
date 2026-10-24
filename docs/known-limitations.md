@@ -122,6 +122,15 @@ review replaced by a quick read, a plan not posted.
 **What to do:** the agent driving the runs ([Driver](playbooks/driver.md)) reviews each merge request in a subagent of its own before
 merging, and checks that the ticket carries the plan.
 
+## A gate your CI runs may not run locally
+
+Before it opens a merge request, the suite runs every gate your CI runs over the whole project, such
+as a coverage floor, in full. Some of them need something the local machine lacks, a coverage driver
+for example. The merge request then opens anyway and names that gate as not run locally, and CI has
+the last word on it.
+
+**What to do:** look at that gate's result in CI before you merge, or install what it needs locally.
+
 ## Troubleshooting: why did the run end without a merge request?
 
 The closing report's **Status** line always says why. The usual reasons:
