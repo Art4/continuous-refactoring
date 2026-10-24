@@ -196,6 +196,43 @@
       ]
     },
     {
+      "tool": "infection",
+      "name": "Infection",
+      "uses": "Infection",
+      "roles": ["mutation-testing"],
+      "status": "on-request",
+      "details": "infection.md",
+      "min_runtime": {
+        "php": "7.0"
+      },
+      "stages": [
+        {
+          "slug": "infection",
+          "name": "Infection",
+          "track": "Guardrails",
+          "requires": ["testing"],
+          "waits_for": ["coverage-floor"]
+        }
+      ]
+    },
+    {
+      "tool": "pest-mutate",
+      "name": "Pest Mutation Testing",
+      "uses": "Pest",
+      "roles": ["mutation-testing"],
+      "status": "recognized",
+      "details": "pest-mutate.md",
+      "stages": [
+        {
+          "slug": "pest-mutate",
+          "name": "Pest Mutation Testing",
+          "track": "Guardrails",
+          "requires": ["testing"],
+          "waits_for": []
+        }
+      ]
+    },
+    {
       "tool": "phpstan",
       "name": "PHPStan",
       "uses": "PHPStan",

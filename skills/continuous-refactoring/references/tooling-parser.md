@@ -53,7 +53,7 @@ again.
 | --- | --- |
 | `tracks["Safety Net"]`, `tracks["Guardrails"]` | `nodes`: every Stage of the Track a ticket can be filed for, as `{node, name, tool, search, on_request}` in the order of the Packs; `on_request` marks a Stage of an on-request Tool, listed so its tickets are found, whether or not it was asked for · `backlog`: the slugs among them that are neither fulfilled nor closed by a rejection, blocked ones included, a Stage of an on-request Tool only once it was asked for · `workable`: the backlog without what waits · `withheld`: `{node, reason}` for each Stage of the Track that cannot be worked now, those closed by a rejection included, with what they hang on · `fulfilled`: the backlog is empty |
 | `safety_net_fulfilled` | the Safety Net's backlog is empty: every Stage is fulfilled or closed by a rejection |
-| `runtime_blocked` | `{node, reason}` for each Tool whose runtime is below its minimum, at the Tool's first Stage, a rejected one included; the reason names both versions |
+| `runtime_blocked` | `{node, reason}` for each Tool whose runtime is below its minimum, at the Tool's first Stage, a rejected one included, an on-request one only once asked for; the reason names both versions |
 | `closed_by_rejection` | the Stages closed because a Role, a Tool or a required Stage is rejected, or because a rejection left a required Role or an any-of group nothing that could be fulfilled |
 | `reversals` | rejections whose runtime blocker the target now meets |
 | `roles`, `tools` | each Role, in each scope its Tools are in, as `{role, name, scope, filled_by}` with the Tool that fills it; each Tool with its Roles, its status (recommended, on-request or recognized), and whether another Tool took its place |

@@ -661,6 +661,8 @@ class _State:
         for slug, tool in self.model["tools"].items():
             if tool["pack"] not in self.packs:
                 continue
+            if tool["status"] == "on-request" and slug not in self.requested_tools:
+                continue  # nobody asked for it, so nothing is proposed for it either
             for runtime, minimum_text in tool.get("min_runtime", {}).items():
                 current, minimum = _version(self.seed["runtime"].get(runtime)), _version(minimum_text)
                 if current is not None and minimum is not None and _below(current, minimum):
