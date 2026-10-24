@@ -1,7 +1,7 @@
 # 07 — Short catch-up report with action items
 
 Type: task
-Status: open
+Status: done — PR #155
 
 Report to the human opens with one sentence saying how many things need them (or none), then decisions with a recommendation and what happens if unanswered; under about 150 words; plain words, no suite jargon.
 
@@ -17,3 +17,7 @@ See `../spec.md` for the source and the full list.
 ### 2026-10-16 — built
 
 Built with 06 in the same PR: the closing report's Status opens with how many things wait for the human (or none); Next gives each waiting thing its recommendation and what happens if nobody answers. The two-line shape and the under-150-words idea were left to the existing plain-words rule; no word limit added. No grilling.
+
+### 2026-10-24 — closed
+
+Built in PR #155 as recorded above; checked against `skills/` on 2026-10-24.

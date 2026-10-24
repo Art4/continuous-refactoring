@@ -6,7 +6,7 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 05 (Script reduced to graph logic), 07 (Working an `Open` node), 08 (Scheduler — blockade, yield, insertion), 09 (Housekeeping sweep; `Fulfilled nodes` removed).
 
-**Status:** implemented — PR #112, open items listed in Comments
+**Status:** done — PR #112; open items obsolete after the suite rebuild
 
 - [ ] An advisory check compares the fallback prose's workable and withheld results with the script's on every shared seed fixture and reports differences.
 - [x] No fixture or expected output still depends on the parser's detection; each supplies a seed and a bookkeeping file instead.
@@ -58,3 +58,7 @@ Spec: `agent-judged-fulfilment`.
   11. Drift check: `scripts/drift_check.py`, which does not run the fallback (item 1).
   Open: cases 5 and 9 (Safety Net variant) are not runnable through the harness, case 11 is only nominally
   covered.
+
+### 2026-10-24 — closed
+
+Closed by the suite rebuild (PR #144). The open items above refer to things that no longer exist: `scripts/drift_check.py`, the manual tree-walk fallback and the fixture harness tiers. The tooling tree is now made of packs whose Stages are judged by the agent against their prose. Remaining gaps in that prose are left to real runs to surface.

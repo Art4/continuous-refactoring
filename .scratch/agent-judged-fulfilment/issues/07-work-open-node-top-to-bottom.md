@@ -6,7 +6,7 @@ Spec: `agent-judged-fulfilment`.
 
 **Blocked by:** 06 (A Track scan fills `Open`; `refactor-learn` maintains it).
 
-**Status:** implemented — PR #109, open items listed in Comments
+**Status:** done — PR #109; open items obsolete after the suite rebuild
 
 - [x] With a selected Track, exactly one node is worked per pass: the topmost workable `Open` node.
 - [x] Before creating its issue, the node's Fulfilment check is re-run; if now fulfilled, the node leaves `Open` with no merge request and the pass moves on to the next workable node.
@@ -32,3 +32,7 @@ Spec: `agent-judged-fulfilment`.
   fixture"`, so the documented commands cannot run. Fixtures and expectations are in place; the three
   `case` arms (pick-up re-check, blocked-in-between order, priority vs top of `Open` under the Safety Net
   blockade) are missing.
+
+### 2026-10-24 — closed
+
+Closed by the suite rebuild (PR #144). The open items above refer to things that no longer exist: `fixtures/harness/run.sh` and its `safety-net-track` cases. The tooling tree is now made of packs whose Stages are judged by the agent against their prose. Remaining gaps in that prose are left to real runs to surface.

@@ -1,7 +1,7 @@
 # 01 — Pin behavior before structure moves
 
 Type: task
-Status: open
+Status: done — PR #152
 
 Refactor steps require a behavior pin (characterization test, snapshot or equivalence harness) before any structure moves; no coverage means the pin is written first; type check and lint do not count. For larger reshapes, an old-vs-new equivalence check on the real artifact. Wire into the implement step and the MR report.
 
@@ -19,3 +19,7 @@ See `../spec.md` for the source and the full list.
 ### 2026-10-16 — grilled; decisions
 
 Term: **Pinning Test** (pin), after Feathers' characterization test. Scope: structural tickets only; tooling and baseline tickets keep relying on the existing suite. The plan gets a `Pin` item (kind and what it holds; existing tests count when named); a type check or linter is none. The rule sits in `foundational-refactoring-rules.md` so it binds a target's own skills too, and the review's Spec axis checks it. The pin is the first commit, run on the old code and passing before any structural commit; the merge request names it and says it passed before the change; review reads the order from `git log`. Missing coverage: the run writes the pin as the first slice, also when autonomous; where that costs too much the agent judges, records the reason under `Decisions`, and it is an open question (human asked / autonomous run ends). The pin stays as a test if it meets *Tests worth keeping*, else the last commit removes it. No ADR. Tree order untouched (the table covers that); the equivalence check for large reshapes is ticket 12. Built in the PR "Pinning Test before structure moves".
+
+### 2026-10-24 — closed
+
+Built in PR #152 as recorded above; checked against `skills/` on 2026-10-24.

@@ -26,7 +26,7 @@ version 1.18.23.
 
 **Blocked by:** none — self-contained fix in `fixtures/harness/run.sh`'s opencode-subprocess plumbing.
 
-**Status:** needs-triage
+**Status:** wontfix — obsolete
 
 - [ ] Find a real isolation mechanism — candidates worth checking before picking one:
   - Override `$HOME` for the subprocess (e.g. a throwaway `$HOME` with only `~/.local/share/opencode/auth.json`
@@ -52,3 +52,7 @@ version 1.18.23.
 > found in the same pass (opencode model never pinned; `judge`'s prompt pointed at a path unreachable from
 > the isolated fixture workdir) were fixed directly, since they were narrow and clearly this harness's own
 > defects rather than an environment-dependent gap like this one.
+
+### 2026-10-24 — closed
+
+Obsolete: the suite rebuild (PR #144, commit `56de1c6`) removed `fixtures/harness/` with `run.sh` and its `lift` command. Nothing is left to isolate. If an agent-run comparison harness comes back, the global `~/.agents/skills` path described here has to be handled from the start.
