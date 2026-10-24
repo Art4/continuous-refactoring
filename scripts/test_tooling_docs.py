@@ -219,13 +219,21 @@ class DocsTests(unittest.TestCase):
         self.assertIn("s_phpstan_level_4 -->|one of| s_psalm_taint_analysis", php)  # an any-of: one labelled edge per member
         self.assertIn("s_psalm -->|one of| s_psalm_taint_analysis", php)
         self.assertIn("s_phpstan_level_5 --> s_phpstan_level_6", php)     # requires: solid
-        self.assertIn("s_phpstan_level_3 -.-> s_rector_type_coverage", php)       # after: dashed
+        self.assertIn("s_phpstan_level_3 -.-> s_rector_type_coverage", php)       # waits_for: dashed
         self.assertIn("r_code_style -.-> s_rector_php_set", php)                  # after a Role
         self.assertIn("s_pint --> r_code_style", php)                             # every player feeds it
         self.assertIn('x_editorconfig[".editorconfig (generic)"]', php)   # another Pack's Stage at the edge
         self.assertIn('r_static_analysis(["Static Analysis"])', php)      # a Role
         self.assertIn("Secret Scanning", docs["docs/tooling/README.md"])
         self.assertLess(php.index("## Diagram"), php.index("## Tools"))     # the picture comes first
+
+    def test_a_tools_status_shows_as_the_outline_of_its_stages(self):
+        docs = td.render_docs(td.tooling_tree.load_model())
+        php = docs["docs/tooling/packs/php.md"]
+        self.assertIn("  classDef onRequest stroke-dasharray: 6 4\n  class s_psalm_taint_analysis,s_semgrep onRequest", php)
+        self.assertIn("  classDef recognized stroke-dasharray: 2 2\n  class s_pint,s_ecs,s_phpcs,s_psalm recognized", php)
+        self.assertNotIn("classDef", docs["docs/tooling/packs/generic.md"])   # only recommended Tools: no class
+        self.assertIn("dashed outline: on request", php[php.index("## Diagram"):php.index("## Tools")])
 
     def test_a_role_sits_inside_the_track_of_its_player(self):
         php = td.render_docs(td.tooling_tree.load_model())["docs/tooling/packs/php.md"]

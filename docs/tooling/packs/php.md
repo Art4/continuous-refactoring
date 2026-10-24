@@ -96,7 +96,14 @@ flowchart TD
   s_phpstan_level_4 -->|one of| s_psalm_taint_analysis
   s_psalm -->|one of| s_psalm_taint_analysis
   x_ci_runner -.-> s_semgrep
+  classDef onRequest stroke-dasharray: 6 4
+  class s_psalm_taint_analysis,s_semgrep onRequest
+  classDef recognized stroke-dasharray: 2 2
+  class s_pint,s_ecs,s_phpcs,s_psalm recognized
 ```
+
+Solid arrow: requires · dashed arrow: waits for · solid outline: recommended · dashed outline: on request · dotted outline: recognized
+
 
 ## Tools
 
