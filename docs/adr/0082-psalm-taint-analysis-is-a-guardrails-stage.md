@@ -1,5 +1,7 @@
 # Psalm Taint Analysis is a Guardrails Stage
 
+> Amended by [ADR-0086](0086-tools-on-request.md): Psalm Taint Analysis and Semgrep are proposed only on request.
+
 > Amends [ADR-0054](0054-onboarding-safety-net-and-signal-wave.md), which rejected moving `psalm-taint-analysis` out of the Safety Net.
 
 ADR-0054 kept the Stage in the Safety Net because its findings are the kind structural work collides with. The criterion
