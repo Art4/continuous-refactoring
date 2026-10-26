@@ -3,6 +3,9 @@
 > Amended by [ADR-0056](0056-agent-judged-fulfilment.md) and [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): fulfilment is judged by the agent against `coverage-floor.md`; the
 > detection in `tooling_tree.py` below is gone, and the Stage is a Guardrails Stage. The ratchet stands.
 
+> Amended by [ADR-0090](0090-coverage-metadata-stages.md): the floor may go down once, when a metadata Stage changes
+> what is measured.
+
 ## Context
 
 Test coverage was a real, named gap in this suite's own baseline design (`.scratch/php-tooling-tree/

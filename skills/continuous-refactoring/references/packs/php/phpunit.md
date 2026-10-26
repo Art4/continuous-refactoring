@@ -26,9 +26,11 @@ The convention `tests/README.md` documents. A human may adapt it for the target 
 
 `Fakes/` and `Fixtures/` never get their own `phpunit.xml.dist` testsuite: nothing in them is a test case, so PHPUnit has nothing to run there.
 
+Once `coverage-metadata-strict` (`coverage-floor.md`) is adopted, the test classes in `tests/Integration/` are `#[Medium]` and those in `tests/Functional/` `#[Large]`: they run real collaborators, and PHPUnit spares tests of these sizes the check that every class a test runs is named.
+
 `autoload-dev` in `composer.json`, one entry per folder actually in use: PSR-4 for `tests/Unit/`, `psr-0` for `tests/Psr0/`, `classmap` for `tests/Legacy/` (it is not autoload-mappable by definition, which is why it is not in `Unit/`). The namespace prefix of `tests/Unit/`: when the Stage `psr-4` (`psr-4.md`) is fulfilled, derive it from the app-source root namespace it declares (root namespace `Art4\LegacyTodo\` gives `Art4\LegacyTodo\Tests\Unit\`), so the target's namespace has one source. When `psr-4` is not fulfilled yet, derive the prefix from `composer.json`'s own `name` field (`art4/legacy-todo` gives `Art4\LegacyTodo\Tests\Unit\`).
 
 ## Creating or growing `tests/README.md`
 
 - **Missing entirely:** create it, in any run, not just this Stage's own adoption; a PHPUnit adoption that predates this convention leaves a target without one. Content: the table above in full, plus a one-line note that a folder only gets created once something needs it.
-- **Exists:** never regenerated or overwritten by a run; read it fresh each time. A folder the file documents but that does not exist on disk yet is created (with its `phpunit.xml.dist` testsuite and `autoload-dev` entry, per the rules above) the first time a test needs it, one folder at a time, not as a bulk sync.
+- **Exists:** never regenerated or overwritten by a run; read it fresh each time. The one addition a run makes is the rule a metadata Stage's merge request adds (`coverage-floor.md`), to the file as it stands. A folder the file documents but that does not exist on disk yet is created (with its `phpunit.xml.dist` testsuite and `autoload-dev` entry, per the rules above) the first time a test needs it, one folder at a time, not as a bulk sync.

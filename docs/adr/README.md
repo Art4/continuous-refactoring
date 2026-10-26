@@ -4,7 +4,7 @@
 
 Every decision with the status its banner gives. *Superseded*: nothing of it holds; *superseded in part*: some of it holds, the banner says what; *amended*: it holds with the changes the later ADRs make; *in force*: unchanged.
 
-Superseded: 34 · Superseded in part: 22 · Amended: 16 · In force: 17
+Superseded: 34 · Superseded in part: 22 · Amended: 16 · In force: 18
 
 | ADR | Decision | Status | Changed by | Changes |
 | --- | --- | --- | --- | --- |
@@ -51,7 +51,7 @@ Superseded: 34 · Superseded in part: 22 · Amended: 16 · In force: 17
 | [0041](0041-php-minimal-version-only-corrects-never-raises.md) | `php-minimal-version` only corrects an already-true PHP floor, never raises it | superseded | [0087](0087-rector-stops-at-the-declared-php-floor.md) |  |
 | [0042](0042-psr4-wires-autoloader-into-entry-points.md) | `psr-4` wires the autoloader into the target's entry points, not just proves the mechanism | amended | [0056](0056-agent-judged-fulfilment.md) |  |
 | [0043](0043-secret-history-scan-as-process-step.md) | Retroactive secret-history scan is a `refactor-scan` process step, not a tooling-tree node | superseded in part | [0076](0076-standing-housekeeping-ticket-from-a-template.md), [0089](0089-secret-detection-on-request.md) |  |
-| [0044](0044-coverage-floor-node.md) | `coverage-floor` — a self-tightening ratchet, not a fixed percentage | amended | [0056](0056-agent-judged-fulfilment.md), [0079](0079-tooling-model-roles-tools-stages-in-packs.md) |  |
+| [0044](0044-coverage-floor-node.md) | `coverage-floor` — a self-tightening ratchet, not a fixed percentage | amended | [0056](0056-agent-judged-fulfilment.md), [0079](0079-tooling-model-roles-tools-stages-in-packs.md), [0090](0090-coverage-metadata-stages.md) |  |
 | [0045](0045-semgrep-owasp-top-ten-node.md) | `semgrep` — OWASP Top 10 coverage behind `psalm-taint-analysis`, not `composer` | amended | [0054](0054-onboarding-safety-net-and-signal-wave.md), [0079](0079-tooling-model-roles-tools-stages-in-packs.md), [0086](0086-tools-on-request.md) |  |
 | [0046](0046-utility-script-entry-point-exclusion.md) | A non-empty `unwired_entry_points` result is an agentic judgement call, not a parser guess | superseded in part | [0056](0056-agent-judged-fulfilment.md) |  |
 | [0047](0047-tooling-tree-proposals-are-pre-filed-before-ranking.md) | Tooling-tree proposals are pre-filed as candidate issues before ranking, not only the winner | superseded | [0056](0056-agent-judged-fulfilment.md), [0063](0063-loop-creates-tickets-and-ticket-create-mode.md), [0074](0074-state-lives-in-the-tracker-found-by-search.md) |  |
@@ -97,3 +97,4 @@ Superseded: 34 · Superseded in part: 22 · Amended: 16 · In force: 17
 | [0087](0087-rector-stops-at-the-declared-php-floor.md) | Rector stops at the declared PHP floor | in force |  | [0041](0041-php-minimal-version-only-corrects-never-raises.md) |
 | [0088](0088-the-bc-promise.md) | The BC promise | in force |  | [0071](0071-tracker-through-operations-tracker-and-forge-apart.md) |
 | [0089](0089-secret-detection-on-request.md) | Secret Detection on request, the history scan on its own | in force |  | [0040](0040-signal-tool-nodes-and-tree-edge-simplification.md), [0043](0043-secret-history-scan-as-process-step.md), [0086](0086-tools-on-request.md) |
+| [0090](0090-coverage-metadata-stages.md) | Coverage metadata: two Stages after the coverage floor | in force |  | [0044](0044-coverage-floor-node.md) |

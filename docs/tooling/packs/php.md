@@ -37,6 +37,8 @@ flowchart TD
     s_phpmd_adoption["PHPMD"]
     s_phpmd_rollout["PHPMD Rollout"]
     s_coverage_floor["Test Coverage Floor"]
+    s_coverage_metadata_required["Test Coverage: Metadata Required"]
+    s_coverage_metadata_strict["Test Coverage: Strict Metadata"]
     s_infection["Infection"]
     s_pest_mutate["Pest Mutation Testing"]
     s_phpstan_level_6["PHPStan Level 6"]
@@ -64,6 +66,8 @@ flowchart TD
   s_phpmd_adoption --> s_phpmd_rollout
   s_composer --> s_phpunit
   s_phpunit --> s_coverage_floor
+  s_coverage_floor --> s_coverage_metadata_required
+  s_coverage_metadata_required --> s_coverage_metadata_strict
   s_phpunit --> r_testing
   r_testing --> s_infection
   s_coverage_floor -.-> s_infection
@@ -129,7 +133,7 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | PHP_CodeSniffer (`phpcs`) | recognized | Code Style | PHP_CodeSniffer | – | [packs/php/phpcs.md](../../../skills/continuous-refactoring/references/packs/php/phpcs.md) |
 | PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring/references/packs/php/phpmd.md) |
 | PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
-| Test Coverage Floor (`coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
+| Test Coverage Floor (`test-coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
 | Infection (`infection`) | on-request | Mutation Testing | Infection | php 7.0 | [packs/php/infection.md](../../../skills/continuous-refactoring/references/packs/php/infection.md) |
 | Pest Mutation Testing (`pest-mutate`) | recognized | Mutation Testing | Pest | – | [packs/php/pest-mutate.md](../../../skills/continuous-refactoring/references/packs/php/pest-mutate.md) |
 | PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring/references/packs/php/phpstan.md) |
@@ -153,7 +157,9 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | PHPMD (`phpmd-adoption`) | `phpmd` | Guardrails | `composer` | – | – |
 | PHPMD Rollout (`phpmd-rollout`) | `phpmd` | Guardrails | `phpmd-adoption` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
-| Test Coverage Floor (`coverage-floor`) | `coverage-floor` | Guardrails | `phpunit` | – | – |
+| Test Coverage Floor (`coverage-floor`) | `test-coverage-floor` | Guardrails | `phpunit` | – | – |
+| Test Coverage: Metadata Required (`coverage-metadata-required`) | `test-coverage-floor` | Guardrails | `coverage-floor` | – | – |
+| Test Coverage: Strict Metadata (`coverage-metadata-strict`) | `test-coverage-floor` | Guardrails | `coverage-metadata-required` | – | The project runs its tests with PHPUnit 10 or newer, not with Pest. |
 | Infection (`infection`) | `infection` | Guardrails | `testing` (Role) | `coverage-floor` | – |
 | Pest Mutation Testing (`pest-mutate`) | `pest-mutate` | Guardrails | `testing` (Role) | – | – |
 | PHPStan Level 0 (`phpstan-level-0`) | `phpstan` | Safety Net | `composer` | – | – |
