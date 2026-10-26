@@ -209,6 +209,21 @@ Guardrails, where it does not hold up structural work either. The price is that 
 changes run on code that is only partly styled for a while; a conflict there is resolved by running the
 fixer again.
 
+## Why does each test have to say what it covers, and may my coverage floor go down for it?
+
+A coverage report counts a class as covered when any test runs it, also the test of another class that
+merely passes through. The suite reads those numbers to find code without tests, and such a class looks
+tested when nobody tests it. So after the coverage floor, the suite proposes two more steps: every test
+names the class it covers, and then, on PHPUnit 10 or newer, also what it only uses, so a test that runs
+code it does not name fails. Integration and functional tests are marked as medium and large tests, which
+PHPUnit spares that second check: they run real collaborators and need no list of everything behind them.
+Two steps, because PHPUnit switches each check on for the whole test suite at once and has no baseline for it.
+
+Counting only what a test means to test can lower the measured coverage. The merge request writes the
+missing tests so the floor holds. Where that is more than one reviewable merge request, it measures the
+floor again and sets it to the new value, once, and says so: the old and the new value and the classes left
+without a test. It is the one time the floor goes down, because what is measured changed, not the tests.
+
 ## Why do PHPStan Levels 4 and 5 wait for Rector?
 
 Because Rector clears part of their baseline mechanically, and every finding it clears is one nobody fixes

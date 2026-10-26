@@ -62,6 +62,7 @@ A project that checks the dependencies between its layers with Deptrac, and want
 ## The rules
 
 - **Add, never redefine.** Slugs are unique across the suite's Packs and yours: a Tool, a Stage, a Role or a Pack of the same slug ends the run's tooling step with an error that names both places. A Tool of the suite you do not want is declined with a rejection, as any other.
+- **A Tool with several Stages has a slug of its own.** A Tool with one Stage may share its slug with it; when you add a second Stage, rename the Tool, not the Stage, since your tickets and rejections name the Stage.
 - **The scope decides who competes.** A Pack names the language it works on (`"scope": "php"`). Tools of one scope compete for a Role: a project that uses Mago instead of PHPStan names the scope `php`, declines PHPStan, and Mago fills Static Analysis, so Rector's Stages stop waiting for PHPStan. Tools of other scopes do not take each other's place: a Code Style Tool for Twig and one for PHP are both in use.
 - **A Stage may wait for the suite's.** `requires` and `waits_for` can name Stages and Roles of the suite's Packs (`composer`, `static-analysis`); nothing of the suite waits for yours.
 - **It comes last.** The suite's Stages are proposed first.

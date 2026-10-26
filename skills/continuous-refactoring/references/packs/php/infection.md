@@ -29,5 +29,8 @@ nothing new. A target that runs Pest's own mutation testing has the Role filled,
   states the score it measured.
 - **Ratchet:** `minMsi` and `minCoveredMsi` in the config start at what the first full run measures and only
   rise, through an ordinary reviewed commit, as `.coverage-floor` does (`coverage-floor.md`).
+  A metadata Stage of the coverage floor can lower the score: a mutant is then judged only by the tests
+  that cover its line. Its merge request measures again and keeps the minimum the way it keeps the floor
+  (`coverage-floor.md`, *The one exception*).
 - **Housekeeping:** run Infection over the whole code; where both scores lie above the minimum, raise it to
   them. The CI job sees only the changed files; this run is what keeps the whole log current for the search.

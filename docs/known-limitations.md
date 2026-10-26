@@ -142,6 +142,16 @@ then keep old APIs beside new ones where a deletion would have been fine.
 **What to do:** answer the question in an interactive run, or add the **BC promise** bullet to
 `docs/agents/issue-tracker.md` yourself — a path, or `none`.
 
+## The strict coverage check needs PHPUnit 10, and does not work on Pest
+
+The second coverage-metadata step makes a test fail when it runs code it neither covers nor names as used.
+It needs PHPUnit 10 or newer, and Pest has no way for a test to name what it uses. On PHPUnit 9 or on Pest
+the suite proposes only the first step, that every test says what it covers. PHPUnit also runs the check
+only when it collects coverage, so a test run without coverage passes where the coverage job fails.
+
+**What to do:** on PHPUnit 9, the step is proposed once you move to PHPUnit 10. Locally, run the tests the
+way your coverage job does before you push.
+
 ## Troubleshooting: why did the run end without a merge request?
 
 The closing report's **Status** line always says why. The usual reasons:

@@ -179,7 +179,7 @@
       ]
     },
     {
-      "tool": "coverage-floor",
+      "tool": "test-coverage-floor",
       "name": "Test Coverage Floor",
       "uses": "PHPUnit",
       "roles": ["test-coverage"],
@@ -192,6 +192,21 @@
           "track": "Guardrails",
           "requires": ["phpunit"],
           "waits_for": []
+        },
+        {
+          "slug": "coverage-metadata-required",
+          "name": "Test Coverage: Metadata Required",
+          "track": "Guardrails",
+          "requires": ["coverage-floor"],
+          "waits_for": []
+        },
+        {
+          "slug": "coverage-metadata-strict",
+          "name": "Test Coverage: Strict Metadata",
+          "track": "Guardrails",
+          "requires": ["coverage-metadata-required"],
+          "waits_for": [],
+          "applies_when": "The project runs its tests with PHPUnit 10 or newer, not with Pest."
         }
       ]
     },

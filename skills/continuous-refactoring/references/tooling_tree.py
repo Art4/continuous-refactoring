@@ -227,7 +227,8 @@ def load_model(
             _need(
                 tool["stage_slugs"] == [slug],
                 slug,
-                "a tool may share its slug with a stage only when that stage is its only one",
+                "a tool with several stages needs a slug of its own; rename the tool, not the stage:"
+                " tickets and rejections on record name the stage",
             )
 
     model = {"roles": roles, "packs": packs, "tools": tools, "stages": stages, "stage_order": stage_order}

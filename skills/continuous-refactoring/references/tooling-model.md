@@ -68,7 +68,8 @@ Every Tool has:
 
 Every Stage has a slug and a Name (the words in ticket titles, merge requests and reports), a `track`,
 `requires` and `waits_for`. Slugs of Stages and Tools are unique across all Packs, and so are slugs of
-Roles; a Tool may share its slug with its Stage only when that is its only one.
+Roles; a Tool may share its slug with its Stage only when that is its only one. A Tool that gains a second
+Stage gets a slug of its own and its Stages keep theirs: tickets and rejections on record name the Stage.
 
 **`requires`** lists what must be fulfilled first: a Stage; a Role (filled once the first Stage of one of
 its Tools is fulfilled); or a list of Stages of which one is enough. A rejected required Stage closes this
