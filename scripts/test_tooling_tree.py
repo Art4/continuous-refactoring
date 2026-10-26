@@ -177,8 +177,10 @@ class LoadModelTests(unittest.TestCase):
         self.assertIn("b1", m["stages"])
 
     def test_a_tool_may_not_share_its_slug_with_one_of_several_stages(self):
-        with self.assertRaises(tp.PackError):
+        with self.assertRaises(tp.PackError) as caught:
             Model([pack("main", [tool("a1", [stage("a1"), stage("a2")])])]).load()
+        self.assertIn("a1:", str(caught.exception))
+        self.assertIn("rename the tool, not the stage", str(caught.exception))
 
     def test_generic_comes_first(self):
         model = Model([pack("zeta", [tool("z", [stage("z1")])]), pack("generic", [tool("g", [stage("g1")])])]).load()
