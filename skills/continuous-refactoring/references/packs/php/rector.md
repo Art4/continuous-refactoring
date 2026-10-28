@@ -47,7 +47,7 @@ The recommended Tool for the Role Automated Refactoring in the PHP Pack. One fil
     `Set::withTypeCoverageLevel(n)` instead of Rector's `withTypeCoverageLevel()`. Its guards skip a change
     to a public or protected member of a non-final class. The Rector versions it supports are in its
     README; check them before adding it.
-  - **No promise, or one that leaves extending non-final classes out** (Friendica's) → Rector's own typing
+  - **No promise, or one that leaves extending non-final classes out** → Rector's own typing
     suites.
 - **Fulfilment check:** the typing suites of the path in use are enabled and fully applied at the agreed
   coverage degree. A target that uses the BC-safe path without needing it, or the other way round, is

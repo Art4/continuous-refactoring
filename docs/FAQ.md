@@ -297,7 +297,7 @@ left behind. The plan says which case it found.
 
 It is your project's own document saying which parts of the code stay stable for code outside the project
 and how a breaking change is allowed: a new major version under SemVer, or a deprecation period counted in
-releases and months, as Friendica's addon promise does. The suite does not model either; it reads your
+releases and months, as some applications promise their addons. The suite does not model either; it reads your
 document. It asks once, at onboarding or at the start of the next run, because several decisions depend on
 the answer and a wrong guess cannot be undone by declining a ticket: deleting an API your addons use is a
 break, keeping an API nobody outside uses is clutter. It proposes the document it found, or "none". Until
@@ -307,7 +307,7 @@ you answer, it treats code reachable from outside as covered.
 
 Because the check, Roave's Backward Compatibility Check, compares your code with the last release and
 reports every removed or changed method as a break. Under SemVer that is exactly the rule: a break waits for
-the next major version. Under a promise counted in time and releases, like Friendica's, a removal after the
+the next major version. Under a promise counted in time and releases, a removal after the
 deprecation period is allowed, and the check would fail on each one until someone told it to ignore it. It
 also finds the last release only in a tag such as `1.4.2`. So it is set up where your promise follows SemVer
 and you have tagged a release, and before the suite's own restructurings start, since those are what could
