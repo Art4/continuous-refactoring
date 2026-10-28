@@ -1,1 +1,0 @@
-A structural change that creates a new class or other type reachable from outside now gives it a test of its own, written first, instead of relying on the old code's test staying green; and before opening a merge request a run now executes every gate your CI applies to the whole project, such as a coverage floor, in full, naming any it cannot run locally.

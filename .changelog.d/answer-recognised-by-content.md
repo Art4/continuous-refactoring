@@ -1,1 +1,0 @@
-An open question on a ticket now ends at the first comment that is neither the suite's plan nor another of its questions, whichever account wrote it, and an answer that declines the ticket is recorded as a rejection.

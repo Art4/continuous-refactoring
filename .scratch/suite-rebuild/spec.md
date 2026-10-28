@@ -1,6 +1,6 @@
 # Suite rebuild: one run of decision points, state in the tracker
 
-**Status:** ready-for-agent
+**Status:** done — tickets 01–11 closed
 
 Target release: 0.7.0. Everything lands on the integration branch `suite-rebuild`; `main` stays at 0.6.0
 until the whole rebuild is accepted.

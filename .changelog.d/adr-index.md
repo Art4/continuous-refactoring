@@ -1,1 +1,0 @@
-`docs/adr/README.md` lists every decision with its status — in force, amended, superseded in part or superseded — generated from the ADRs' banners, which the validator now keeps consistent on both sides of every relation.

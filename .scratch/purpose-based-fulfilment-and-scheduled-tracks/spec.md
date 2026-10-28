@@ -1,6 +1,6 @@
 # Purpose-based fulfilment and scheduled Tracks
 
-**Status:** ready-for-agent
+**Status:** done — tickets 01–07 closed
 
 Full design rationale: [ADR-0055](../../docs/adr/0055-purpose-based-fulfilment-and-scheduled-tracks.md) and this same session's `CONTEXT.md` changes (**Track**, **Guardrails**, **Onboarding**, **Safety Net**, **Housekeeping**, **Fulfilment check**). This spec is the buildable *what*; the ADR is the *why*.
 
