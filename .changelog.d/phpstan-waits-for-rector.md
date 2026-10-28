@@ -1,1 +1,0 @@
-PHPStan Level 4 now waits until Rector Dead Code is decided, and Level 5 until Rector Type Coverage is, so the rewrites shrink those levels' baselines before they are fixed by hand; Rector's PHPUnit Set is now a Guardrails Stage and no longer holds the Safety Net back.
