@@ -1,5 +1,8 @@
 # The tracker is reached through operations, and tracker and forge are two things
 
+> Amended by [ADR-0091](0091-the-tracker-file-may-live-elsewhere.md): the section lives in the tracker file,
+> `docs/agents/issue-tracker.md` only where `AGENTS.md`/`CLAUDE.md` name no other.
+
 > Amended by [ADR-0072](0072-remote-bookkeeping-belongs-to-the-target.md) (since superseded), [ADR-0083](0083-ready-after-plan-is-an-optional-operation.md) and [ADR-0088](0088-the-bc-promise.md): **Ready after plan** and **BC promise** join
 > the optional operations; an absent **BC promise** means the question is not settled yet.
 
