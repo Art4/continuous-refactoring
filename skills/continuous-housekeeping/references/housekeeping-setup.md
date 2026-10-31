@@ -33,7 +33,8 @@ or branch (`worklist.md`, *A ticket's merge request*):
 - **The Housekeeping lines** of the fulfilled tooling-tree Tools, as `housekeeping-track.md`, step 4,
   finds and words them.
 - **The instruction file** — `AGENTS.md`; where the target has only `CLAUDE.md`, that file.
-- **How a ticket is created and listed**, from the tracker file.
+- **How a ticket is created and listed**, from the tracker file (`refactoring-operations.md`, *The tracker
+  file*).
 
 *Done when* all five are known.
 
@@ -106,8 +107,10 @@ below. Ideas for a refactoring are left on it as comments. A new task goes above
 
 ## The line in the instruction file
 
+With the target's tracker file in place of `<the tracker file>`:
+
 ```markdown
-**Refactoring ideas.** When you notice a possible refactoring while doing other work, ask the human whether to note it. Once they agree, post it as a comment on the open Housekeeping ticket (`docs/agents/issue-tracker.md`, **Housekeeping**): where it is, what would change, and why. When two Housekeeping tickets are open, ask the human which one, and recommend the younger.
+**Refactoring ideas.** When you notice a possible refactoring while doing other work, ask the human whether to note it. Once they agree, post it as a comment on the open Housekeeping ticket (`<the tracker file>`, **Housekeeping**): where it is, what would change, and why. When two Housekeeping tickets are open, ask the human which one, and recommend the younger.
 ```
 
 A call that asks for the line after the setup gets it in that call's cycle: laid out among the findings

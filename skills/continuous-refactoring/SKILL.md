@@ -7,8 +7,8 @@ description: One run of the continuous-refactoring skill suite — from the proj
 
 One **run**: a chain of **decision points** that leads from the target's open tickets to one opened merge
 request. The suite keeps no state of its own. Tickets, merge requests and rejections are found by searching
-the target's tracker and forge on every run, through the **Refactoring operations** in the target's
-`docs/agents/issue-tracker.md` (`references/refactoring-operations.md`).
+the target's tracker and forge on every run, through the **Refactoring operations** in the target's tracker
+file (`references/refactoring-operations.md`).
 
 ## The call
 
@@ -74,7 +74,10 @@ recommendation is that the human tidies up, and an autonomous run ends here nami
 
 Read `references/reporting-progress.md` before the first sentence to the human.
 
-1. **Ready.** No Git repository → the run ends with that message. Read `docs/agents/issue-tracker.md`:
+1. **Ready.** No Git repository → the run ends with that message. Find the tracker file: read `AGENTS.md`
+   and `CLAUDE.md` for it (`references/refactoring-operations.md`, *The tracker file*). A name that leaves
+   the repository → the run ends, naming it. The two name different files → a finding, and the run goes on.
+   Every call of the parser hands it this path (`references/tooling-parser.md`). Read the tracker file:
    the `## Refactoring operations` section is missing, or lacks **Search**, **Done** or **Merge
    requests** → run `references/onboarding-setup-interview.md` inline. Its summary is this run's first
    decision point. The run ends after the interview whatever its outcome — it does not go on to the

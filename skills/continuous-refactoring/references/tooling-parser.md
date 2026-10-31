@@ -14,13 +14,17 @@ in `tooling-model.md`.
 ## Calling it
 
 ```
-python3 <script> [--seed <seed file>] [--own-pack <dir>] [--packs <dir>] <target repo>
+python3 <script> [--seed <seed file>] [--own-pack <dir>] [--tracker-file <path>] [--packs <dir>] <target repo>
 ```
 
 Where the target's `## Refactoring operations` section has a **Tooling Pack** bullet (`refactoring-operations.md`),
 `--own-pack` is handed the directory it names, relative to the target. The parser then reads that Pack after
 the suite's own, with its Roles. A Pack that redefines a slug of the suite's, or a Role, ends in exit code 2
 and names both places.
+
+Where the target's tracker file (`refactoring-operations.md`, *The tracker file*) is not at the default path,
+every call hands `--tracker-file` its path, relative to the target. The parser reads no prose: it takes the
+path as handed in, and without the flag reads the default. A file missing at that path counts as no section.
 
 `--packs` replaces the directory of the suite's Packs; it is for tests. Without `--seed` nothing is decided and every Pack applies, the target's own included: the call for the Stages and the tree's
 order. The seed is a JSON file written to a temporary directory outside the target:

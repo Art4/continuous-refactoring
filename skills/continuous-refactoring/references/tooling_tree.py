@@ -22,8 +22,8 @@ _HERE = pathlib.Path(__file__).resolve().parent
 PACKS_DIR = _HERE / "packs"
 ROLES_JSON = _HERE / "roles.json"
 
-# The target's tracker file; its `## Refactoring operations` section is what
-# onboarding leaves behind.
+# Where the target's tracker file sits unless the caller names another; its
+# `## Refactoring operations` section is what onboarding leaves behind.
 TRACKER_FILE = pathlib.PurePosixPath("docs/agents/issue-tracker.md")
 
 # In the order a run works them; a Stage may require only Stages of the same
@@ -429,9 +429,9 @@ def load_seed(seed_path: pathlib.Path, model: dict) -> dict:
 # ---------------------------------------------------------------------------
 
 
-def _has_refactoring_operations(repo: pathlib.Path) -> bool:
+def _has_refactoring_operations(repo: pathlib.Path, tracker_file: str | pathlib.PurePath = TRACKER_FILE) -> bool:
     try:
-        text = (pathlib.Path(repo) / TRACKER_FILE).read_text(encoding="utf-8")
+        text = (pathlib.Path(repo) / tracker_file).read_text(encoding="utf-8")
     except OSError:
         return False
     return re.search(r"^## Refactoring operations\s*$", text, re.MULTILINE) is not None
@@ -736,13 +736,18 @@ def _plain_search(name: str, uses: str | None) -> list[str]:
     return search
 
 
-def compute(repo: pathlib.Path, model: dict | None = None, seed: dict | None = None) -> dict:
+def compute(
+    repo: pathlib.Path,
+    model: dict | None = None,
+    seed: dict | None = None,
+    tracker_file: str | pathlib.PurePath = TRACKER_FILE,
+) -> dict:
     """The graph outputs for *repo* from the handed-in *seed* (see
     ``load_seed``; without one, every Stage of every Pack is undecided)."""
     repo = pathlib.Path(repo)
     model = model or load_model()
     seed = seed or {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
-    state = _State(model, seed, _has_refactoring_operations(repo))
+    state = _State(model, seed, _has_refactoring_operations(repo, tracker_file))
     stages, tools = model["stages"], model["tools"]
 
     backlogs = {track: state.backlog(track) for track in TRACKS}
@@ -832,6 +837,7 @@ if __name__ == "__main__":
     ap.add_argument("repo", nargs="?", default=".", help="path to the target repository (default: .)")
     ap.add_argument("--packs", type=str, default=None, help="directory holding the Packs, one subdirectory each with a pack.json (default: the suite's own)")
     ap.add_argument("--own-pack", type=str, default=None, help="directory of the target's own Pack (a pack.json and optionally a roles.json), loaded after the suite's Packs")
+    ap.add_argument("--tracker-file", type=str, default=str(TRACKER_FILE), help=f"the target's tracker file, relative to the target (default: {TRACKER_FILE})")
     ap.add_argument(
         "--seed", type=str, default=None,
         help='path to a JSON file holding what the caller judged: {"fulfilled": [stage, ...], "rejected": {role|tool|stage: null | {"php": "X.Y"}}, '
@@ -843,4 +849,4 @@ if __name__ == "__main__":
         seed = load_seed(pathlib.Path(args.seed), model) if args.seed else None
     except (PackError, SeedError) as exc:
         ap.exit(2, f"error: {exc}\n")
-    print(json.dumps(compute(pathlib.Path(args.repo), model, seed), indent=2))
+    print(json.dumps(compute(pathlib.Path(args.repo), model, seed, args.tracker_file), indent=2))

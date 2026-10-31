@@ -99,7 +99,7 @@ it shows you the summary to confirm.
 ## The suite follows your tracker's conventions, it doesn't set them
 
 Which status a ticket gets when work starts, how a merge request refers to its ticket, and the language and
-markup of ticket texts are your project's conventions. The suite follows what `docs/agents/issue-tracker.md` and
+markup of ticket texts are your project's conventions. The suite follows what your tracker file and
 your contribution guide say and asks for little of it during onboarding. A convention those files don't state is
 one a run won't follow.
 
@@ -140,7 +140,7 @@ question open, and until you answer it treats code outside the project could rea
 then keep old APIs beside new ones where a deletion would have been fine.
 
 **What to do:** answer the question in an interactive run, or add the **BC promise** bullet to
-`docs/agents/issue-tracker.md` yourself — a path, or `none`.
+your tracker file yourself — a path, or `none`.
 
 ## The strict coverage check needs PHPUnit 10, and does not work on Pest
 
@@ -159,7 +159,8 @@ The closing report's **Status** line always says why. The usual reasons:
 | Status says | Cause | What to do |
 |---|---|---|
 | No Git repository | The suite's only hard requirement is missing | `git init` in the target, call again |
-| The onboarding ran and ended | The tracker file had no section for the suite, or lacked a required operation; you stopped the interview, or a required answer was missing — in a run on its own also a **Search** or merge-request command that failed with no working variant found | Call again and answer; commit `docs/agents/issue-tracker.md` once it is written, then call again to start a run |
+| The onboarding ran and ended | The tracker file had no section for the suite, or lacked a required operation; you stopped the interview, or a required answer was missing — in a run on its own also a **Search** or merge-request command that failed with no working variant found | Call again and answer; commit your tracker file once it is written, then call again to start a run |
+| A run ends because of the tracker file | Your `AGENTS.md` or `CLAUDE.md` names a tracker file outside the repository, a URL or a path; the report names it | Name a file inside the repository, or remove the line to use the default path |
 | A decision point is laid out and nothing was written | The run was interactive and nobody answered | Call again and answer, or say "do it yourself" in the call |
 | Safety Net is waiting for merges | An autonomous run found nothing workable in Safety Net while it is unfinished | Review and merge what the report lists, or name another Track |
 | Nothing is workable | Every open ticket is in review, blocked or waiting | Merge, answer the open questions, or ask for a scan |

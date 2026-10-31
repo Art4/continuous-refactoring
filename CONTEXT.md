@@ -37,8 +37,11 @@ The forge reviewable that delivers a completed candidate. Skills always use this
 _Avoid_: PR (in skills), delivery (as a second name for the same artifact)
 
 **Issue tracker**:
-Where a project's tickets live — described, not named: `docs/agents/issue-tracker.md` says how an agent reaches it, and its `## Refactoring operations` section holds the **Refactoring operations**. May be a different system than the **forge**.
+Where a project's tickets live — described, not named: the **tracker file** says how an agent reaches it, and its `## Refactoring operations` section holds the **Refactoring operations**. May be a different system than the **forge**.
 _Avoid_: native-label tracker (the suite no longer sorts trackers by name or by label support)
+
+**Tracker file**:
+The file that says how an agent reaches the **issue tracker** and holds the `## Refactoring operations` section: the file the target's `AGENTS.md` names for it, else the one its `CLAUDE.md` names, else `docs/agents/issue-tracker.md`. A name that leaves the repository ends the **run**.
 
 **Forge**:
 The system that hosts the repository and its **merge requests** (GitHub, GitLab, another host), read from the Git remote. The same system as the **issue tracker** on a GitHub or GitLab project; a different one where tickets live elsewhere (Redmine, Jira, local files).

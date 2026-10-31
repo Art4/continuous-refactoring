@@ -8,7 +8,7 @@ proposals reach the tracker through the filing step.
 
 ## 1. Scope
 
-From the parser's seedless call (`tooling-parser.md`, with `--own-pack` where the target has a Tooling Pack):
+From the parser's seedless call (`tooling-parser.md`, with `--own-pack` where the target has a Tooling Pack, and `--tracker-file` where its tracker file is not at the default path):
 the Track's `nodes`, the Packs, and the first Stage
 of every Tool, recognized ones included — they say which Tool fills a Role. A restriction in the call
 narrows what step 4 proposes; of the Stages outside it, only those a covered Stage requires are judged.

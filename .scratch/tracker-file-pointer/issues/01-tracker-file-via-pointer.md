@@ -1,7 +1,7 @@
 # 01 — The tracker file may live elsewhere, named in `AGENTS.md`
 
 Type: task
-Status: open
+Status: done
 
 Grilled 2026-10-29; decided in ADR-0091. Until now the suite reads `docs/agents/issue-tracker.md` only; a target
 describing its tracker elsewhere cannot say so.

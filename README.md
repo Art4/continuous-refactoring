@@ -88,11 +88,11 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong t
 
 > **Works with other skills, needs none.** The suite is compatible with engineering skills such as [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)): where a project has skills for planning or implementing, a run offers to use them. Without any, the first `/continuous-refactoring` writes the issue-tracker file itself, and plans and implements its own way.
 
-**Any issue tracker works** that `docs/agents/issue-tracker.md` describes. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the suite's few operations work there (how tickets are searched, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
+**Any issue tracker works** that your tracker file describes: `docs/agents/issue-tracker.md`, or the file your `AGENTS.md` names in its place. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the suite's few operations work there (how tickets are searched, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
 
 ## Quick start
 
-1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into `docs/agents/issue-tracker.md` — commit that file. The run ends there; commit, then call it again.
+1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into your tracker file (`docs/agents/issue-tracker.md` unless your `AGENTS.md` names another) — commit that file. The run ends there; commit, then call it again.
 2. **Answer the decision points.** Each comes with a recommendation, so "yes" moves on. Say "carry on yourself from here" at any point and the rest of the run takes its own recommendations.
 3. **Or let it run by itself:** `/continuous-refactoring do it yourself`. One call then takes a ticket from selection to an opened merge request.
 4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), a ticket ("ticket 42").
@@ -113,7 +113,7 @@ Everything is in your project, your tracker and your forge — nothing in the co
 - **Work in review:** open merge requests on your forge, found from their tickets
 - **Declined work:** a closed ticket or a file with the reason, in the place your tracker section names under **Rejected**
 - **Recurring maintenance:** the Housekeeping template, a file in your repository, and the one open Housekeeping ticket made from it
-- **How the tracker is reached:** the `## Refactoring operations` section of `docs/agents/issue-tracker.md`, including the optional bullets — a **Candidate** mark, **Ready after plan**, **Rejected**
+- **How the tracker is reached:** the `## Refactoring operations` section of your tracker file, including the optional bullets — a **Candidate** mark, **Ready after plan**, **Rejected**
 - **Tools of your own:** a Pack in your repository, named under **Tooling Pack** in that section
 - **Focus areas and refactoring goal:** two lines you add to `AGENTS.md` (or `CLAUDE.md`), any time
 - **Domain language and decisions:** your own glossary and ADR directory, where your project keeps them
