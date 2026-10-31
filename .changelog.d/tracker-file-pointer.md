@@ -1,0 +1,1 @@
+The tracker file may live elsewhere: name it in your `AGENTS.md` (or `CLAUDE.md`), in your own words, and the suite reads and writes the `## Refactoring operations` section there. Without such a line nothing changes. A file named outside the repository ends the run.

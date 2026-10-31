@@ -6,11 +6,11 @@ The suite proposes the tools its Packs know. A project that uses a tool the suit
 
 Three things in the project, all committed:
 
-1. **A directory** for the Pack, recommended `docs/agents/tooling-pack/`.
+1. **A directory** for the Pack, recommended a folder `tooling-pack` beside your tracker file: `docs/agents/tooling-pack/` at the default path.
 2. **`pack.json`** in it: the Pack, its Tools and their Stages.
 3. **One Markdown file per Tool**, named in the Tool's `details` field, relative to the directory: what the suite checks to call a Stage fulfilled (the *Fulfilment check*) and what a merge request for it contains (the *MR scope*).
 
-Add a **Tooling Pack** bullet to the `## Refactoring operations` section of `docs/agents/issue-tracker.md`, naming the directory:
+Add a **Tooling Pack** bullet to the `## Refactoring operations` section of your tracker file, naming the directory relative to the repository root:
 
 ```markdown
 - **Tooling Pack**: `docs/agents/tooling-pack/`

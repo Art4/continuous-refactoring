@@ -1,6 +1,6 @@
 # Reference: Local Markdown issue-tracker template
 
-The content of a target's `docs/agents/issue-tracker.md` when the onboarding interview
+The content of a target's tracker file when the onboarding interview
 (`onboarding-setup-interview.md`) records Local Markdown as the tracker and the file does not exist yet.
 Copy it as it stands, with the Local Markdown template of `refactoring-operations.md` in place of the last
 line; that template holds the ticket-file convention.

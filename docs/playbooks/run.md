@@ -14,7 +14,7 @@ A run ends when the merge request is open. More work is another call, not a long
 
 The suite keeps nothing between runs. Each one searches your tracker and your forge afresh: what is open, what is in review, what was merged, what you declined. If you closed a ticket by hand, merged something outside the suite or set a tool up yourself, the next run simply finds it that way.
 
-On a project the suite has not seen, the run begins with a short **onboarding**: where your tickets live and how a few operations work there. The answer is written as one section into `docs/agents/issue-tracker.md`; commit that file. The run ends there: it reports the onboarding as complete, points out the changes in your working tree and recommends committing them and calling the skill again.
+On a project the suite has not seen, the run begins with a short **onboarding**: where your tickets live and how a few operations work there. The answer is written as one section into your tracker file, `docs/agents/issue-tracker.md` unless your `AGENTS.md` or `CLAUDE.md` names another; commit that file. The run ends there: it reports the onboarding as complete, points out the changes in your working tree and recommends committing them and calling the skill again.
 
 The onboarding also asks whether your project promises stability to code outside it — your package's users, your application's addons — and where that promise is written. A project onboarded before this question existed is asked once at the start of its next run, and the run goes on. The answer decides whether the suite may delete an old API it replaced, or must keep it and mark it deprecated the way your promise says.
 

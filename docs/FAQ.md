@@ -375,7 +375,7 @@ the first `/continuous-refactoring` writes that file itself and the run plans an
 
 ## Which issue trackers work?
 
-Any tracker an agent can reach, as long as `docs/agents/issue-tracker.md` describes it. GitHub, GitLab and local
+Any tracker an agent can reach, as long as your tracker file describes it. GitHub, GitLab and local
 Markdown files come with a template, so onboarding asks nothing about their operations. For another tracker
 onboarding offers three ways: use it as that file already describes it, describe it right there in the
 interview, or keep refactoring tickets as local Markdown files while everything else stays where it is.
@@ -385,12 +385,24 @@ needs: how tickets are searched, how a finished one is recognised, where merge r
 merge requests may also live in two systems; the suite then finds a ticket's merge request by searching the
 forge for it.
 
+## How do I keep the tracker file somewhere else?
+
+Say so in your `AGENTS.md`, in your own words, the way you would tell a colleague: which file describes the
+issue tracker. Without a line there the suite looks in `CLAUDE.md`, and then at `docs/agents/issue-tracker.md`.
+The file you name counts even if it does not exist yet, the onboarding then writes there, and it beats a file at
+the default path. If `AGENTS.md` and `CLAUDE.md` name different files, `AGENTS.md` wins and the run tells you.
+Paths inside the section stay relative to the repository root.
+
+The line lives in `AGENTS.md` because that file already says where an agent finds things, so the suite needs no
+configuration of its own. The onboarding does not write the line for you. The file has to be in the repository:
+a URL or a path outside it ends the run instead of quietly creating a second description at the default path.
+
 ## Can I run the onboarding again?
 
 It runs again by itself whenever the tracker section lacks an operation the suite requires — that is how a
 project set up with an earlier version gets what it is missing. What is already recorded stays and isn't
 asked again; only what is missing gets written. On a section that is complete the interview has nothing
-to ask: change a bullet there by editing `docs/agents/issue-tracker.md` yourself.
+to ask: change a bullet there by editing your tracker file yourself.
 
 ## How do I move a project over from 0.6.0?
 

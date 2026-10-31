@@ -1,8 +1,8 @@
 # Reference: the onboarding interview
 
 Asks where a target's tickets live and how the **Refactoring operations** work there, and writes the answer
-as the `## Refactoring operations` section of the target's `docs/agents/issue-tracker.md`. That file is the
-interview's only write. `refactoring-operations.md` names the operations, their fallbacks and the
+as the `## Refactoring operations` section of the target's tracker file (`refactoring-operations.md`, *The
+tracker file*). That file is the interview's only write. `refactoring-operations.md` names the operations, their fallbacks and the
 templates; read it before step 1.
 
 Run the interview inline, where the human can answer. Six steps, in order: Explore, Ask, Check, Summarize,
@@ -19,7 +19,7 @@ the summary as "already recorded", and asked about only if the human wants it ch
 
 Read-only. Note each of these as found or not found:
 
-- **The tracker file.** `docs/agents/issue-tracker.md`: whether it exists, which tracker its title or text
+- **The tracker file**, as the Ready step found it: whether it exists, which tracker its title or text
   names, whether it has a `## Refactoring operations` section, and which bold operation names that section
   carries.
 - **The forge.** `git remote get-url origin`: `github.com` → GitHub, `gitlab.com` → GitLab, another host or
@@ -61,7 +61,7 @@ stays open.
 `# Issue tracker: GitHub`, `GitLab` or `Local Markdown`.
 
 - **GitHub** / **GitLab** — offered when Explore matched that forge.
-- **<Name>, as `docs/agents/issue-tracker.md` describes it** — offered when the tracker file describes
+- **<Name>, as `<the tracker file>` describes it** — offered when the tracker file describes
   another tracker.
 - **Another tracker, described here** — offered when there is no tracker file: the human names it and how
   an agent creates, reads, comments on and closes a ticket there.
@@ -127,7 +127,7 @@ below it, before the question is asked:
 > BC promise: <the document | none | not settled — asked again next run>.
 > Left out: <each absent optional operation and what the skill suite does without it>.
 > Removed: <**Bookkeeping**, **Filed date**, **Comment author and time** — only where an existing section carries them>.
-> File: `docs/agents/issue-tracker.md`, <created | section appended | section completed>.
+> File: `<the tracker file>`, <created | section appended | section completed>.
 
 Options: **write it** (recommended), **change an answer** (back to that question, through step 3 again
 when it touches **Search** or **Merge requests**, then this summary again), **stop** (nothing is written).
@@ -141,7 +141,7 @@ Step 4 is done when one of the three options is chosen, or the interview has end
 
 ## 5. Write
 
-One file, `docs/agents/issue-tracker.md`; say one status line when it is written. In every case the
+One file, the tracker file; say one status line when it is written. In every case the
 **Merge requests** bullet states the forge Explore read from the remote, and the section carries the
 **BC promise** bullet where step 2 settled it.
 

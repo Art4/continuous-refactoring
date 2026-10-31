@@ -1075,6 +1075,42 @@ class OwnPackTests(unittest.TestCase):
             self.assertIn("stage phpunit is already defined", bad.stderr)
 
 
+class TrackerFileTests(unittest.TestCase):
+    """The tracker file sits at the default path unless the caller names another."""
+
+    def write_section(self, root, relative):
+        path = root / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("## Refactoring operations\n\n- **Search**: `gh issue list`\n")
+
+    def onboarding_holds(self, root, *flags):
+        script = str(_REFERENCES / "tooling_tree.py")
+        done = subprocess.run([sys.executable, script, *flags, str(root)], capture_output=True, text=True)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        return json.loads(done.stdout)["prerequisites"]["onboarding-setup"]
+
+    def test_the_section_is_found_at_the_path_handed_in(self):
+        repo_tmp, repo = make_repo(onboarded=False)
+        with repo_tmp:
+            self.write_section(repo, "agent-docs/tracker.md")
+            self.assertTrue(self.onboarding_holds(repo, "--tracker-file", "agent-docs/tracker.md"))
+
+    def test_a_file_missing_at_the_path_handed_in_is_no_section(self):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            self.assertFalse(self.onboarding_holds(repo, "--tracker-file", "agent-docs/tracker.md"))
+
+    def test_without_the_flag_the_default_path_is_read(self):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            self.assertTrue(self.onboarding_holds(repo))
+
+    def test_a_path_handed_in_does_not_fall_back_to_the_default_file(self):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            self.assertFalse(tp.compute(repo, tp.load_model(), tracker_file="elsewhere.md")["prerequisites"]["onboarding-setup"])
+
+
 class PortabilityTests(unittest.TestCase):
     def test_the_model_loads_whatever_the_working_directory(self):
         import os

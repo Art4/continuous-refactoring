@@ -1,7 +1,7 @@
 # Reference: Refactoring operations
 
 The suite reaches a target's issue tracker through **operations**, never through the tracker's name. They
-live in the target's `docs/agents/issue-tracker.md`, in a section `## Refactoring operations`: one bullet
+live in the target's **tracker file**, in a section `## Refactoring operations`: one bullet
 per operation, a fixed bold name followed by prose in that file's own language and with that tracker's own
 commands. The rest of the file (creating, reading, commenting on and closing a ticket) stays as its author
 wrote it, and a step that needs one of those follows the file. Where the section says where the suite's
@@ -11,6 +11,29 @@ keeps refactoring tickets as local files.
 A target is onboarded when its tracker file has the section. The onboarding interview writes the section,
 and completes one that lacks a required operation — **Search**, in a section written before this cut
 (`onboarding-setup-interview.md`).
+
+## The tracker file
+
+The file that says how an agent reaches the tracker and holds the section. It is, in this order:
+
+1. the file the target's `AGENTS.md` names for the issue tracker, in its own words;
+2. where `AGENTS.md` names none, the file `CLAUDE.md` names;
+3. where neither does, `docs/agents/issue-tracker.md`.
+
+What follows from a name in `AGENTS.md` or `CLAUDE.md`:
+
+- **The two name different files** → `AGENTS.md` wins. The contradiction is a finding at the Ready step, and
+  the run goes on.
+- **The named file and the default file both exist** → the named one is the tracker file; the default file
+  goes unmentioned.
+- **The named file does not exist** → it is still the tracker file: the onboarding interview writes the section
+  there.
+- **The name leaves the repository** — a URL, a path outside it → the run ends, naming it. The default is no
+  fallback here: it would write a second description while the human takes the other one for the source.
+
+Paths in the section (**BC promise**, **Tooling Pack**, **Housekeeping**) stay relative to the repository
+root, not to the tracker file. The parser takes the path as an argument (`tooling-parser.md`). The suite
+writes no such name into `AGENTS.md`; a human who wants the file elsewhere does.
 
 ## Required operations
 
