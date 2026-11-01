@@ -20,7 +20,7 @@ How the suite is put together, for someone who wants to understand or extend it.
          └── setting Housekeeping up
 ```
 
-- **`continuous-refactoring`** holds the run: how the call is read, the rules of a decision point, the ten steps, and how a run ends. Each step points to the reference that carries its detail, so a run loads only what it reaches.
+- **`continuous-refactoring`** holds the run: how the call is read, the rules of a decision point, the ten steps, and how a run ends. Each step points to the reference that carries its detail, so a run loads only what it reaches. A call for a Pack of the project's own leaves the chain after step 1, builds that Pack and ends with its merge request.
 - **`continuous-housekeeping`** is a second entry point for one Track. It needs no Track choice, which is what makes it fit for a schedule. A run of `continuous-refactoring` that chooses Housekeeping reads the same Housekeeping reference, so there is one description of the process.
 
 Both are typed by a human; neither is picked by the agent on its own. A step that only reads and judges — the fulfilment judgements of a scan, the exploration for structural candidates, a review — may be handed to a subagent together with its reference, so its reasoning stays out of the main conversation. A subagent asks nothing and writes nothing; every decision point stays in the conversation with you.

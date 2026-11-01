@@ -1074,6 +1074,18 @@ class OwnPackTests(unittest.TestCase):
             self.assertEqual(bad.returncode, 2)
             self.assertIn("stage phpunit is already defined", bad.stderr)
 
+    def test_a_relative_path_is_relative_to_the_target_not_the_working_directory(self):
+        script = str(_REFERENCES / "tooling_tree.py")
+        repo_tmp, repo = make_repo()
+        with repo_tmp, tempfile.TemporaryDirectory() as elsewhere:
+            shutil.copytree(OWN_PACK, repo / "docs" / "agents" / "tooling-pack")
+            run = subprocess.run(
+                [sys.executable, script, "--own-pack", "docs/agents/tooling-pack", str(repo)],
+                capture_output=True, text=True, cwd=elsewhere,
+            )
+            self.assertEqual(run.returncode, 0, run.stderr)
+            self.assertIn("deptrac-layers", {n["node"] for n in json.loads(run.stdout)["tracks"]["Guardrails"]["nodes"]})
+
 
 class TrackerFileTests(unittest.TestCase):
     """The tracker file sits at the default path unless the caller names another."""

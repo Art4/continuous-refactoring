@@ -2,6 +2,12 @@
 
 The suite proposes the tools its Packs know. A project that uses a tool the suite does not know, or has a house rule it wants worked off step by step, keeps a **Pack of its own**. The suite reads it beside its own Packs, proposes its Stages like any other, and judges whether they are fulfilled the same way.
 
+## Let the suite build it
+
+Say so in the call: `/continuous-refactoring a Pack of its own for Deptrac`. A wish for a tool the suite does not know is enough, and "do it yourself" works here too. The suite proposes the Tool, its Role and its Stages, builds the Pack, checks it, and ends with one merge request. It looks at no ticket on the way, and files none. The Stages are worked by the runs that follow, like any other.
+
+The rest of this playbook is what it builds, for reading its merge request or writing a Pack by hand.
+
 ## What you need
 
 Three things in the project, all committed:
