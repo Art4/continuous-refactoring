@@ -1,7 +1,7 @@
 # 02 — The Pack route
 
 Type: task
-Status: open
+Status: done
 Blocked by: 01
 
 Part of `../spec.md`, *The Pack route*. Written against today's skill name; ticket 03 moves it.
@@ -27,3 +27,14 @@ Part of `../spec.md`, *The Pack route*. Written against today's skill name; tick
 
 **Done when** the scenarios `p1`, `p2` and `p3` of ticket 01 pass, a Pack built this way passes `--own-pack` and is read by a
 following run, and tests and validator are green.
+
+## Answer
+
+Built in `references/own-pack.md`, reached from a new row of *The call*; the run leaves after step 1 and files no
+ticket. `opening-a-merge-request.md` now says what a branch with no ticket leaves out: the description's ticket
+point, and in step 5 the comment, where the closing report is the record. `--own-pack` now resolves against the
+target, which is what `tooling-parser.md` said; a test holds it.
+
+`p1`, `p2` and `p3` pass on d53ce5f, results in `../evals/`. A merge request on a real forge was not played, since the
+fixtures have none. A following run reading the Pack was checked with the parser on the branch, which lists its
+Pack and Stages, not with a whole run.

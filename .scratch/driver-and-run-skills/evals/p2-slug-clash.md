@@ -22,3 +22,5 @@ exit code 2 on it. The human's wish is a Pack with that Tool; nothing has been d
 - [ ] The report names the rename and why it was needed.
 
 ## Results
+
+2026-11-01, skill commit d53ce5f: pass, every line. Renamed `phpunit` to `my-phpunit` in `pack.json` and the Tool file; the parser's exit 2 then exit 0 confirmed by a call afterwards. The branch held the first commit before the check refused it, but nothing was handed on until it passed.

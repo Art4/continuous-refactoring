@@ -1,6 +1,6 @@
 ---
 name: continuous-refactoring
-description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked to run continuous refactoring or the skill suite on this project, or to work one of its Tracks or tickets.
+description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked to run continuous refactoring or the skill suite on this project, or to work one of its Tracks or tickets, or to build a Pack of the project's own for a tool the suite does not know.
 ---
 
 # Continuous Refactoring
@@ -21,6 +21,7 @@ understood.
 | a **Track** | the Track choice is answered; the run stays in that Track and ends when it has nothing workable |
 | a **ticket** | Track and ticket are chosen: the worklist and reconcile hold that ticket alone, the run works it, and ends if it turns out not to need work |
 | a **restriction** ("only the Rector Stages") | the worklist, the scan, the filing and the selection hold only what it covers |
+| a **Pack** of the target's own, or a tool the suite does not know | after step 1 the run continues in `references/own-pack.md` instead of step 2, and ends where that reference ends |
 
 Nothing stated → the run is **interactive** and unrestricted.
 
@@ -83,7 +84,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
    decision point. The run ends after the interview whatever its outcome — it does not go on to the
    worklist, and it does not ask who commits what. The final report says the onboarding is complete (or
    what ended it), names the files the interview wrote and any other change in the working tree, and
-   recommends committing them and then calling the skill again. The section is complete but has no
+   recommends committing them and then calling the skill again; a call for a Pack adds that the Pack is still
+   to come. The section is complete but has no
    **BC promise** bullet → `references/onboarding-setup-interview.md`, *The BC promise alone*, then go on.
    *Done when* the section carries the three required operations, and the BC promise was asked about.
 

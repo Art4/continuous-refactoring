@@ -836,7 +836,7 @@ if __name__ == "__main__":
     ap = argparse.ArgumentParser(description="Compute the tooling model's graph outputs from a handed-in seed (dry-run, no mutation)")
     ap.add_argument("repo", nargs="?", default=".", help="path to the target repository (default: .)")
     ap.add_argument("--packs", type=str, default=None, help="directory holding the Packs, one subdirectory each with a pack.json (default: the suite's own)")
-    ap.add_argument("--own-pack", type=str, default=None, help="directory of the target's own Pack (a pack.json and optionally a roles.json), loaded after the suite's Packs")
+    ap.add_argument("--own-pack", type=str, default=None, help="directory of the target's own Pack (a pack.json and optionally a roles.json), relative to the target, loaded after the suite's Packs")
     ap.add_argument("--tracker-file", type=str, default=str(TRACKER_FILE), help=f"the target's tracker file, relative to the target (default: {TRACKER_FILE})")
     ap.add_argument(
         "--seed", type=str, default=None,
@@ -845,7 +845,7 @@ if __name__ == "__main__":
     )
     args = ap.parse_args()
     try:
-        model = load_model(pathlib.Path(args.packs) if args.packs else None, own_pack=pathlib.Path(args.own_pack) if args.own_pack else None)
+        model = load_model(pathlib.Path(args.packs) if args.packs else None, own_pack=pathlib.Path(args.repo) / args.own_pack if args.own_pack else None)
         seed = load_seed(pathlib.Path(args.seed), model) if args.seed else None
     except (PackError, SeedError) as exc:
         ap.exit(2, f"error: {exc}\n")

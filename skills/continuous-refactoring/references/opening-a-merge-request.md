@@ -1,8 +1,8 @@
 # Reference: opening the merge request
 
 The last link of a run: the branch with green checks becomes an open merge request, or is handed to the
-human where there is no forge. Used by the run and by the Housekeeping Track. Handed in: the ticket, the
-branch, its commits, the checks that ran, whether the branch delivers the whole ticket or a part, and where there is one the fact the change is safe
+human where there is no forge. Used by the run and by the Housekeeping Track. Handed in: the ticket (a branch
+of `own-pack.md` has none), the branch, its commits, the checks that ran, whether the branch delivers the whole ticket or a part, and where there is one the fact the change is safe
 because of with how far it was proved, and the review's notes.
 Commands come from the tool the target's **Merge requests** operation names; the description follows
 `forge-facing-writing.md`. Towards the human, say the forge's own word (pull request on GitHub).
@@ -46,7 +46,7 @@ Push the branch and open the merge request against the default branch.
    says, so that merging closes it; without that operation the ticket is named in plain words. A branch
    that delivers a **part** — a baseline ticket with entries left, or a tooling ticket whose plan was cut —
    names the ticket with the word "part"
-   and uses no closing reference, and says what stays.
+   and uses no closing reference, and says what stays. A branch with no ticket leaves this point out.
 3. What changed, which checks ran and passed — and a gate that could not run locally, left to CI — and for
    code changes which tests cover it. For a structural
    ticket: the pin, and that it passed before the change (for an equivalence script: on how many inputs old
@@ -85,7 +85,7 @@ post it (the recommendation), or leave the ticket untouched. In a target without
 there and treat the ticket as in review until the branch is merged (`worklist.md`, *A ticket's merge
 request*); elsewhere the next run finds the branch and continues with it. The closing report names
 the branch and the human's two ways on: merge it into the default branch themselves, or push it and open
-the merge request once a forge is there.
+the merge request once a forge is there. A branch with no ticket posts nothing: the closing report is its record.
 
 *Done when* the closing report can name the branch and both ways.
 
