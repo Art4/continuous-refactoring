@@ -1,6 +1,6 @@
 # The Driver becomes the main skill; a run gets its own
 
-**Status:** open — tickets 01–04
+**Status:** done — tickets 01–04
 
 Grilled 2026-11-01. The ADR comes with ticket 03.
 

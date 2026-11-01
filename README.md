@@ -9,12 +9,13 @@
 🌐 [continuous-refactoring.de](https://continuous-refactoring.de/)
 
 A portable agent-skill suite for coding agents — [Claude Code](https://claude.com/claude-code),
-Cursor, OpenCode — that keeps a software project under **continuous refactoring**. Each call is one **run**: it leads from the
-project's open refactoring tickets to one opened merge request, and stops there. You get more work
-done by calling again.
+Cursor, OpenCode — that keeps a software project under **continuous refactoring**. `/continuous-refactoring` keeps it
+going: one round after another, each a run, its review and any rework, with a pause between them, and it merges nothing
+unless you say so. A **run**, which `/continuous-refactoring-run` calls alone, leads from the project's open refactoring
+tickets to one opened merge request.
 
 ```mermaid
-flowchart LR
+flowchart TD
     Reconcile --> Track[Choose a Track]
     Track --> Scan
     Scan --> File[File tickets]
@@ -25,8 +26,8 @@ flowchart LR
 ```
 
 Every link of that chain is a **decision point**: the suite shows what it found, the options, and
-the one it recommends. By default you decide each time. Say in the call that it should do the run
-itself, and it takes its own recommendation at every point instead.
+the one it recommends. A run called alone asks you each time, unless the call says it should do the run itself. The
+Driver's runs always do: they take their own recommendation at every point.
 
 The suite keeps **no state of its own**. Your open tickets are the worklist; merge requests,
 declined work and the standing Housekeeping ticket are found by searching your tracker and your
@@ -96,13 +97,14 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way. They belong toge
 1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into your tracker file (`docs/agents/issue-tracker.md` unless your `AGENTS.md` names another) — commit that file. The run ends there; commit, then call it again.
 2. **Answer the onboarding.** Each question comes with a recommendation, so "yes" moves on.
 3. **Let it work.** The next call starts the Driver: by itself it works up to five rounds, 30 minutes apart, reviews each merge request and merges none of them. Say otherwise in the call ("merge", "ten rounds", "no pause"). For one run alone, `/continuous-refactoring-run` asks at every decision; `/continuous-refactoring-run do it yourself` takes one ticket from selection to an opened merge request.
-4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), a ticket ("ticket 42"), a [Pack of your own](docs/playbooks/own-tool.md) for a tool the suite does not know ("a Pack of its own for Deptrac").
+4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), or, for one run alone, a ticket ("ticket 42") or a [Pack of your own](docs/playbooks/own-tool.md) for a tool the suite does not know ("a Pack of its own for Deptrac").
 5. **Review and merge** what the suite opens. The Driver stops once more than three of its merge requests are open; a run alone has no such limit.
 6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at any of the commands.
 
 ## Upgrading
 
-Pull the suite's checkout; the symlinks follow it. What a version changes, and the steps a breaking
+Pull the suite's checkout; the symlinks follow it, and a new skill needs a symlink of its own: `continuous-refactoring-run`
+is one. What a version changes, and the steps a breaking
 change needs in your project, are in the [CHANGELOG](CHANGELOG.md) — coming from 0.6.0 or earlier,
 read the 0.7.0 entry first.
 
@@ -128,9 +130,8 @@ Everything is in your project, your tracker and your forge — nothing in the co
 | [Track playbook](docs/playbooks/tracks.md) | How the four Tracks are chosen, scanned and worked |
 | [Own-tool playbook](docs/playbooks/own-tool.md) | Adding a tool the suite does not know, as a Pack of your own |
 | [Housekeeping playbook](docs/playbooks/housekeeping.md) | The maintenance Track — template, standing ticket, rhythm |
-| [Reviewer-loop playbook](docs/playbooks/reviewer-loop.md) | Observing a run from a separate reviewer agent |
 | [Tooling](docs/tooling/README.md) | Every Role, Tool and Pack the suite knows, with a diagram per Pack |
-| [Architecture](docs/architecture.md) | The two skills, their references, the tooling tree |
+| [Architecture](docs/architecture.md) | The three skills, their references, the tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
 | [Known limitations](docs/known-limitations.md) | Limits without a suite-side fix, plus troubleshooting |
 | [Operations reference](skills/continuous-refactoring-run/references/refactoring-operations.md) | The operations the suite needs from a tracker, with the templates |

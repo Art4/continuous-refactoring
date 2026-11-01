@@ -9,7 +9,7 @@ exit code 2 on it. The human's wish is a Pack with that Tool; nothing has been d
 
 ## Call
 
-`/<run skill> a Pack of its own, finish the one in docs/agents/tooling-pack/ and deliver it, do it yourself`
+`/continuous-refactoring-run a Pack of its own, finish the one in docs/agents/tooling-pack/ and deliver it, do it yourself`
 
 ## Expected
 

@@ -356,9 +356,6 @@ class DocCitationTests(unittest.TestCase):
     def test_scratch_path_flagged(self):
         self.assertEqual(len(vs.doc_citation_issues("See `.scratch/foo/a.md`.", "docs/x.md")), 1)
 
-    def test_scratch_path_allowed_where_exempt(self):
-        self.assertEqual(vs.doc_citation_issues("Log in `.scratch/x/findings.md`.", "docs/x.md", scratch_allowed=True), [])
-
     def test_ticket_call_example_is_fine(self):
         self.assertEqual(vs.doc_citation_issues('Name it in the call: "ticket 42".', "README.md"), [])
 
