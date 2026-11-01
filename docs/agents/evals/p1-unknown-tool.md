@@ -10,7 +10,7 @@ bullet from `docs/agents/issue-tracker.md`, then commit. The tracker file has `#
 
 ## Call
 
-`/<run skill> a Pack of its own for Deptrac, to check the dependencies between the layers, do it yourself`
+`/continuous-refactoring-run a Pack of its own for Deptrac, to check the dependencies between the layers, do it yourself`
 
 ## Expected
 

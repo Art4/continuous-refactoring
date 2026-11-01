@@ -1,7 +1,7 @@
 # 04 — The reviewer loop becomes a field eval, and the scenarios move in beside it
 
 Type: task
-Status: open
+Status: done
 Blocked by: 03
 
 Part of `../spec.md`, *The field eval*.
@@ -31,3 +31,11 @@ Part of `../spec.md`, *The field eval*.
 **Done when** a round of the field eval can be played from the file alone, nothing outside `docs/adr/` names the
 old file, the scenarios play from `docs/agents/evals/` with no `.scratch/` file to hand, and tests and validator are
 green.
+
+## Answer
+
+`docs/agents/field-eval.md` replaces the playbook, and `docs/agents/evals/` holds the scenarios, which now read
+without this folder. The list of expected behaviour gained lines for what a run and a Driver should do. `.gitignore`
+covers the findings logs, since a log names its target and no committed file does. Maintainer rules that lived only
+in notes went in as well: the forge in English, a request for changes that leaves the fix open, a status per round, a
+fresh log per eval, the checkout held still. The field eval itself has not been played.

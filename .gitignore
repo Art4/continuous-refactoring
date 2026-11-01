@@ -6,3 +6,6 @@ fixtures/baselines/
 
 # Local Claude Code project settings
 .claude/
+
+# Field eval logs: they name their target
+.scratch/*-loop-observation/

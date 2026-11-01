@@ -9,7 +9,7 @@ answers the interview.
 
 ## Call
 
-`/<run skill> a Pack of its own for Deptrac`
+`/continuous-refactoring-run a Pack of its own for Deptrac`
 
 ## Expected
 

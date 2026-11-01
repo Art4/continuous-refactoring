@@ -128,7 +128,6 @@ Everything is in your project, your tracker and your forge — nothing in the co
 | [Track playbook](docs/playbooks/tracks.md) | How the four Tracks are chosen, scanned and worked |
 | [Own-tool playbook](docs/playbooks/own-tool.md) | Adding a tool the suite does not know, as a Pack of your own |
 | [Housekeeping playbook](docs/playbooks/housekeeping.md) | The maintenance Track — template, standing ticket, rhythm |
-| [Reviewer-loop playbook](docs/playbooks/reviewer-loop.md) | Observing a run from a separate reviewer agent |
 | [Tooling](docs/tooling/README.md) | Every Role, Tool and Pack the suite knows, with a diagram per Pack |
 | [Architecture](docs/architecture.md) | The two skills, their references, the tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
