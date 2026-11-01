@@ -1,141 +1,99 @@
 ---
 name: continuous-refactoring
-description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked to run continuous refactoring or the skill suite on this project, or to work one of its Tracks or tickets, or to build a Pack of the project's own for a tool the suite does not know.
+description: The Driver of the continuous-refactoring skill suite — keeps a project refactored by calling one run after another, reviewing each merge request, and pausing between rounds until an end. Starts without asking. Only when a human or a schedule calls it by name. An agent that wants refactoring done, or a subagent, calls continuous-refactoring-run.
 ---
 
 # Continuous Refactoring
 
-One **run**: a chain of **decision points** that leads from the target's open tickets to one opened merge
-request. The suite keeps no state of its own. Tickets, merge requests and rejections are found by searching
-the target's tracker and forge on every run, through the **Refactoring operations** in the target's tracker
-file (`references/refactoring-operations.md`).
+The **Driver**: one **round** after another, with a **cadence** between them, until an end. A round is a run, its
+review, and any rework. Each run happens in a subagent of its own, always autonomous, and starts fresh: the Driver
+keeps no state the tracker and forge do not hold.
 
 ## The call
 
-The call's free text may state any of these; read it before step 1 and say back in one sentence what was
-understood.
+The Driver starts without asking. It reads the call's free text, and says back in one sentence the settings it took.
 
-| The call states | Effect |
+| Setting | Default | The call can say |
+| --- | --- | --- |
+| Merge | `review only` | `merge` |
+| End | five rounds | a number of rounds, of merged merge requests, a time, or "until nothing is workable" |
+| Cadence | 30 minutes | another duration, or "no pause" |
+| Call | none: each run makes its own Track choice | a Track or a restriction, handed to every run |
+| Log | none | a file the repository ignores: one line per round with the ticket, merge request, verdict and what waits |
+
+"Do it yourself" changes nothing: the Driver's runs are autonomous anyway. A call for one run alone, for a named
+ticket alone, or for a Pack of the project's own is no Driver's work: invoke `continuous-refactoring-run` in this
+session with that call, and end with it.
+
+## Before the first round
+
+Started in a subagent → stop, and say that `continuous-refactoring-run` is what an agent calls: a Driver needs
+subagents of its own, and a subagent cannot start any.
+
+1. `../continuous-refactoring-run/SKILL.md` is missing → stop, and say the skill needs its symlink beside this one.
+2. Find the tracker file (`../continuous-refactoring-run/references/refactoring-operations.md`, *The tracker file*).
+   No `## Refactoring operations` section, or one lacking **Search**, **Done** or **Merge requests** → the onboarding
+   asks a human, and a subagent can ask nobody: invoke `continuous-refactoring-run` here, in this session. The Driver
+   stops when that run ends, and the human commits and calls again.
+3. Read `AGENTS.md`. Its rules win over the environment's defaults, and every subagent's prompt carries them.
+4. Read *Stops*: the open merge requests may already be over the limit, or the working tree not clean.
+
+## A round
+
+1. **Ready.** The default branch checked out and pulled. An open merge request where the human has answered the
+   Driver's question comes first: step 2 names its ticket.
+2. **Run.** In a subagent of its own, and wait for its result:
+
+   > Invoke the continuous-refactoring-run skill with the call `<the Call, if any> do it yourself` and follow it to
+   > its end. Then return its Status and Next lines verbatim, the ticket worked, the merge request URL if any, whether
+   > the run ended because nothing was workable, every open ticket it found with its state (workable, waiting, in
+   > review, blocked) and for a waiting one what it waits for, and the wording of any change it wants in `AGENTS.md`.
+
+   A run's Next line is a report for the human, not an instruction to the Driver. The call names a ticket only
+   to rework its merge request, for its next part, for a question the human has answered, or at the human's wish;
+   a ticket that waits or is blocked is never named. The working tree is checked after each run. No merge request
+   came of it → step 5.
+3. **Review.** In a second subagent that returns only a verdict with its reasons: mergeable, request changes, or ask
+   the human. It uses the project's review skill where there is one; otherwise it judges as an engaged human
+   reviewer: in scope of its ticket, behaviour kept, checks green (run them where there is no CI), the description
+   says why the change is safe. A red check is a request for changes.
+4. **Verdict.**
+   - **Mergeable** → with `review only`, comment that, and leave the merge to the human. With `merge`, follow
+     `references/merging.md`.
+   - **Request changes** → post it on the merge request, describing the problem and its cause, then go back to step 2
+     with a run that names the ticket. Rework has no cadence. After two reworks without a mergeable result, the same
+     comment says so and asks the human.
+   - **Ask the human** → post the question on the merge request.
+
+   *Done when* the merge request is mergeable, merged, or with the human. That is one round, however many runs it
+   took.
+5. **Status.** One line here, a line in the Log, and a notification, through what the environment has, of everything
+   that now waits for the human: mergeable merge requests, open questions on tickets, questions on merge requests, a
+   change a run wants in `AGENTS.md` with its wording. Then read *Stops*: they hold before the cadence, not after it.
+
+Forge text follows `../continuous-refactoring-run/references/forge-facing-writing.md`. An open question stays the
+human's, and a waiting ticket gets no comment: any comment there would count as the human's answer.
+
+## Between rounds
+
+Counted from the end of the round before. The Driver waits in this session with the environment's timer (Claude
+Code: `ScheduleWakeup`), and the wake-up goes on with the next round of this Driver, its settings and its count of
+rounds, rather than starting anew. An environment with no timer, or a cadence longer than the timer holds → the Driver ends
+and says when the next round is due. Only a timer holds the session, never a sleep, and the Driver sets up no
+schedule: what calls it again is the human's. A call starts a round whenever it comes; the Driver reads no time of
+the last round.
+
+## Stops
+
+| What it sees | It ends with |
 | --- | --- |
-| the **autonomous** mode ("do it yourself", "without asking") | every decision point takes its recommendation |
-| a **Track** | the Track choice is answered; the run stays in that Track and ends when it has nothing workable |
-| a **ticket** | Track and ticket are chosen: the worklist and reconcile hold that ticket alone, the run works it, and ends if it turns out not to need work |
-| a **restriction** ("only the Rector Stages") | the worklist, the scan, the filing and the selection hold only what it covers |
-| a **Pack** of the target's own, or a tool the suite does not know | after step 1 the run continues in `references/own-pack.md` instead of step 2, and ends where that reference ends |
+| A run finds nothing workable, and nothing waits | **done**: the merge requests of this Driver, merged and open |
+| A run finds nothing workable, and tickets wait, are in review or are blocked | **paused**: each with what it needs, and how to go on: answer it, then call again |
+| A run failed, the tree is not clean, a merge did not land, or two runs in a row ended without a merge request and without a new waiting ticket | **broken**: what it saw |
+| `review only`, and more than three merge requests open | **paused**: the open merge requests, waiting for the human |
+| The End is reached | **ended**: what the rounds delivered, and what waits |
 
-Nothing stated → the run is **interactive** and unrestricted.
+A stop skips the cadence, and the next run with it.
 
-## Decision points
-
-A decision point lays out three things, in this order: the **findings**, the **options**, and **one
-recommendation** with its reason in a few words. Every write to the target's tracker, forge or files
-follows from one; everything before the run's first decision point is read-only.
-
-- **Interactive** → first post the findings as a message in this conversation: a question dialog shows
-  the human only its own fields, so what is not in a message was not shown. Then ask and wait — the
-  options, the recommendation first, in one call of the environment's multiple-choice question tool
-  (Claude Code: `AskUserQuestion`, Cursor: `AskQuestion`, OpenCode: `question`) where the agent has
-  one, as numbered prose in the last message otherwise. The question refers only to what the message
-  before it shows. A tool reply that no human gave (skipped, declined, or auto-answered because nobody
-  is there) is no answer: ask again as numbered prose, and if that goes unanswered, **Nobody answers**
-  applies.
-- **Autonomous** → post the same findings message a human would get, then one sentence naming the
-  recommendation taken, and only then act on it. Nobody answers, so the message is the record: a reader
-  who comes later learns from it what was found and why the run went the way it did.
-- **Switching** → the human saying mid-run that the suite should carry on by itself makes the run
-  autonomous from the next decision point on.
-- **Nobody answers** — the run is interactive and the question cannot be put to a human or comes back
-  unanswered → the run ends here. Its report is the decision point itself: findings, options,
-  recommendation. Nothing is written.
-- **A change to the target's `AGENTS.md`** is asked of a human in an autonomous run too; unanswered, it
-  stays undone and the report says so.
-
-What the call already states is the human's answer to the choice it addresses. A write that choice did
-not cover — closing a named ticket found fulfilled — is still laid out.
-
-Decision points happen in this conversation. A step that only reads and judges may run in a subagent,
-handed its reference and returning its result; the subagent asks nothing and writes nothing.
-
-## A clean working tree
-
-A run works on a working tree that `git status --porcelain` shows as clean. Check it before the implement
-point checks out its branch. Files the target ignores do not show there and need nothing.
-
-Anything shown → a decision point. Findings: the files, and for each whether this run wrote it. Options:
-
-- **Deliver them first** (the recommendation, where this run wrote every one of them): commit them on a
-  branch of their own, open its merge request per `references/opening-a-merge-request.md`, and go on.
-- **The human tidies up**, and says when the run may go on.
-- **End the run.**
-
-A file this run did not write is the human's work in progress: the suite commits none of it, the
-recommendation is that the human tidies up, and an autonomous run ends here naming the files.
-
-## The run
-
-Read `references/reporting-progress.md` before the first sentence to the human.
-
-1. **Ready.** No Git repository → the run ends with that message. Find the tracker file: read `AGENTS.md`
-   and `CLAUDE.md` for it (`references/refactoring-operations.md`, *The tracker file*). A name that leaves
-   the repository → the run ends, naming it. The two name different files → a finding, and the run goes on.
-   Every call of the parser hands it this path (`references/tooling-parser.md`). Read the tracker file:
-   the `## Refactoring operations` section is missing, or lacks **Search**, **Done** or **Merge
-   requests** → run `references/onboarding-setup-interview.md` inline. Its summary is this run's first
-   decision point. The run ends after the interview whatever its outcome — it does not go on to the
-   worklist, and it does not ask who commits what. The final report says the onboarding is complete (or
-   what ended it), names the files the interview wrote and any other change in the working tree, and
-   recommends committing them and then calling the skill again; a call for a Pack adds that the Pack is still
-   to come. The section is complete but has no
-   **BC promise** bullet → `references/onboarding-setup-interview.md`, *The BC promise alone*, then go on.
-   *Done when* the section carries the three required operations, and the BC promise was asked about.
-
-2. **Worklist.** Build the worklist per `references/worklist.md`.
-   *Done when* every open ticket found has a Track and a state.
-
-3. **Reconcile.** Follow `references/reconcile.md`.
-   *Done when* every finding is acted on or left as decided, or there was none.
-
-4. **Track choice.** Follow `references/track-choice.md`. It ends the run, or names one Track:
-   - **Safety Net** or **Guardrails** → step 5.
-   - **Housekeeping** → the run continues in `../continuous-housekeeping/references/housekeeping-track.md`
-     and ends where that reference ends, unless it comes back here with Housekeeping marked as tried.
-   - **Investigation** → the run continues in `references/investigation-track.md`, which hands a selected
-     ticket to step 8.
-
-   *Done when* a Track is named or the run has ended.
-
-5. **Scan** — only when the Track has no trace yet (`references/worklist.md`, *A Track's trace*), or the
-   call asked for a scan. Follow
-   `references/track-scan.md`.
-   *Done when* that reference's last step is.
-
-6. **File tickets** — only when step 5 left proposals. Follow `references/filing-a-ticket.md`.
-   *Done when* that reference's last step is.
-
-7. **Select.** Follow `references/selection.md`.
-   *Done when* one ticket that still needs its work is handed on, or the run is back at step 4 with the
-   Track marked as tried.
-
-8. **Design.** Hand the selected ticket to `references/design-point.md`.
-   *Done when* the ticket carries an implementable plan, or the run has ended with the open question or
-   the finding named.
-
-9. **Implement.** Hand the planned ticket to `references/implement-point.md`.
-   *Done when* a branch holds the change and its checks are green.
-
-10. **Merge request.** Follow `references/opening-a-merge-request.md`.
-    *Done when* the merge request is open, or the prepared branch is handed to the human.
-
-## The end of a run
-
-A run ends when its merge request is open or its branch is handed to the human, when the review leaves no slice
-that makes the code easier to follow, when a fix does not hold after two attempts, when the design cannot
-proceed without a human answer or finds that the ticket is no refactoring, when nothing is workable, or
-at a decision point nobody answered.
-
-Close with two lines, each claim confirmed during this run:
-
-- **Status:** opens with how many things wait for the human, or that none does; then what the run did and
-  where it ended. A run that reviewed a branch also names what the review dismissed, each with its reason.
-- **Next:** what the human can do now — review and merge, answer the open question, or call again. Each
-  thing that waits gets its recommendation and what happens if nobody answers.
+Open merge requests are those of the suite's tickets, found as
+`../continuous-refactoring-run/references/worklist.md`, *A ticket's merge request*, finds them. Handed-over ones count.

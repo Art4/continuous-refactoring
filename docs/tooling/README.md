@@ -2,7 +2,7 @@
 
 # Tooling: Roles, Tools and Packs
 
-What a tool is for (Roles), which tools can play them, and the Packs the tools come in. The words are defined in the suite's glossary; the rules are in [tooling-model.md](../../skills/continuous-refactoring/references/tooling-model.md).
+What a tool is for (Roles), which tools can play them, and the Packs the tools come in. The words are defined in the suite's glossary; the rules are in [tooling-model.md](../../skills/continuous-refactoring-run/references/tooling-model.md).
 
 ## Packs
 

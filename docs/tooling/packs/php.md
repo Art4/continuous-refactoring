@@ -124,23 +124,23 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |
 | --- | --- | --- | --- | --- | --- |
-| Composer (`composer`) | recommended | Package Management | Composer | – | [packs/php/composer.md](../../../skills/continuous-refactoring/references/packs/php/composer.md) |
-| PSR-4 Autoloading (`psr-4`) | recommended | Autoloading | – | – | [packs/php/psr-4.md](../../../skills/continuous-refactoring/references/packs/php/psr-4.md) |
-| Roave Backward Compatibility Check (`roave-bc-check`) | recommended | API Compatibility | roave-backward-compatibility-check | – | [packs/php/roave-bc-check.md](../../../skills/continuous-refactoring/references/packs/php/roave-bc-check.md) |
-| PHP CS Fixer (`php-cs-fixer`) | recommended | Code Style | php-cs-fixer | php 5.3 | [packs/php/php-cs-fixer.md](../../../skills/continuous-refactoring/references/packs/php/php-cs-fixer.md) |
-| Laravel Pint (`pint`) | recognized | Code Style | Laravel Pint | – | [packs/php/pint.md](../../../skills/continuous-refactoring/references/packs/php/pint.md) |
-| Easy Coding Standard (`ecs`) | recognized | Code Style | Easy Coding Standard | – | [packs/php/ecs.md](../../../skills/continuous-refactoring/references/packs/php/ecs.md) |
-| PHP_CodeSniffer (`phpcs`) | recognized | Code Style | PHP_CodeSniffer | – | [packs/php/phpcs.md](../../../skills/continuous-refactoring/references/packs/php/phpcs.md) |
-| PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring/references/packs/php/phpmd.md) |
-| PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring/references/packs/php/phpunit.md) |
-| Test Coverage Floor (`test-coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring/references/packs/php/coverage-floor.md) |
-| Infection (`infection`) | on-request | Mutation Testing | Infection | php 7.0 | [packs/php/infection.md](../../../skills/continuous-refactoring/references/packs/php/infection.md) |
-| Pest Mutation Testing (`pest-mutate`) | recognized | Mutation Testing | Pest | – | [packs/php/pest-mutate.md](../../../skills/continuous-refactoring/references/packs/php/pest-mutate.md) |
-| PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring/references/packs/php/phpstan.md) |
-| Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
-| Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [packs/php/rector.md](../../../skills/continuous-refactoring/references/packs/php/rector.md) |
-| Psalm Taint Analysis (`psalm-taint-analysis`) | on-request | Taint Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring/references/packs/php/psalm.md) |
-| Semgrep (OWASP Top 10) (`semgrep`) | on-request | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring/references/packs/php/semgrep.md) |
+| Composer (`composer`) | recommended | Package Management | Composer | – | [packs/php/composer.md](../../../skills/continuous-refactoring-run/references/packs/php/composer.md) |
+| PSR-4 Autoloading (`psr-4`) | recommended | Autoloading | – | – | [packs/php/psr-4.md](../../../skills/continuous-refactoring-run/references/packs/php/psr-4.md) |
+| Roave Backward Compatibility Check (`roave-bc-check`) | recommended | API Compatibility | roave-backward-compatibility-check | – | [packs/php/roave-bc-check.md](../../../skills/continuous-refactoring-run/references/packs/php/roave-bc-check.md) |
+| PHP CS Fixer (`php-cs-fixer`) | recommended | Code Style | php-cs-fixer | php 5.3 | [packs/php/php-cs-fixer.md](../../../skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md) |
+| Laravel Pint (`pint`) | recognized | Code Style | Laravel Pint | – | [packs/php/pint.md](../../../skills/continuous-refactoring-run/references/packs/php/pint.md) |
+| Easy Coding Standard (`ecs`) | recognized | Code Style | Easy Coding Standard | – | [packs/php/ecs.md](../../../skills/continuous-refactoring-run/references/packs/php/ecs.md) |
+| PHP_CodeSniffer (`phpcs`) | recognized | Code Style | PHP_CodeSniffer | – | [packs/php/phpcs.md](../../../skills/continuous-refactoring-run/references/packs/php/phpcs.md) |
+| PHPMD (`phpmd`) | recommended | Code Smell Detection | PHPMD | – | [packs/php/phpmd.md](../../../skills/continuous-refactoring-run/references/packs/php/phpmd.md) |
+| PHPUnit (`phpunit`) | recommended | Testing | PHPUnit | php 5.3 | [packs/php/phpunit.md](../../../skills/continuous-refactoring-run/references/packs/php/phpunit.md) |
+| Test Coverage Floor (`test-coverage-floor`) | recommended | Test Coverage | PHPUnit | – | [packs/php/coverage-floor.md](../../../skills/continuous-refactoring-run/references/packs/php/coverage-floor.md) |
+| Infection (`infection`) | on-request | Mutation Testing | Infection | php 7.0 | [packs/php/infection.md](../../../skills/continuous-refactoring-run/references/packs/php/infection.md) |
+| Pest Mutation Testing (`pest-mutate`) | recognized | Mutation Testing | Pest | – | [packs/php/pest-mutate.md](../../../skills/continuous-refactoring-run/references/packs/php/pest-mutate.md) |
+| PHPStan (`phpstan`) | recommended | Static Analysis | PHPStan | php 7.0 | [packs/php/phpstan.md](../../../skills/continuous-refactoring-run/references/packs/php/phpstan.md) |
+| Psalm (`psalm`) | recognized | Static Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring-run/references/packs/php/psalm.md) |
+| Rector (`rector`) | recommended | Automated Refactoring | Rector | – | [packs/php/rector.md](../../../skills/continuous-refactoring-run/references/packs/php/rector.md) |
+| Psalm Taint Analysis (`psalm-taint-analysis`) | on-request | Taint Analysis | vimeo/psalm | – | [packs/php/psalm.md](../../../skills/continuous-refactoring-run/references/packs/php/psalm.md) |
+| Semgrep (OWASP Top 10) (`semgrep`) | on-request | Static Security Analysis | Semgrep | – | [packs/php/semgrep.md](../../../skills/continuous-refactoring-run/references/packs/php/semgrep.md) |
 
 ## Stages
 

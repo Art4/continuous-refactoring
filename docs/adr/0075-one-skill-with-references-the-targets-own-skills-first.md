@@ -1,5 +1,8 @@
 # One skill with references, and the target's own skills first
 
+> Amended by [ADR-0092](0092-the-driver-takes-the-main-name.md): the suite is three skills, and the run moved to
+> `continuous-refactoring-run`.
+
 > Supersedes [ADR-0057](0057-refactor-loop-and-per-track-skills.md) (the dispatcher, `refactor-loop` and
 > the per-Track skills), [ADR-0010](0010-orchestrator-explicit-data-flow.md) (the data pipe between
 > lifecycle skills, and "scan detects, learn writes"),

@@ -13,7 +13,7 @@ The ordered list of a **Track**'s tooling-tree Stages that are neither fulfilled
 _Avoid_: debt list, todo list
 
 **Run**:
-One call of the suite, from its first **decision point** to its end: reconcile → **Track** choice → scan (only when the Track needs one) → file tickets → select → design → implement → **merge request**. A run ends when the merge request is open, when the design cannot proceed without a human answer or finds that the ticket would change behavior, or when nothing is workable; more work is another call, not a longer run. Nothing limits how many merge requests or candidates are open at once. The call takes free text the suite interprets — a Track, a restriction ("only the Rector Stages"), a ticket, the mode. Text addressed to the human says "run" and "skill suite".
+One call of the suite, from its first **decision point** to its end: reconcile → **Track** choice → scan (only when the Track needs one) → file tickets → select → design → implement → **merge request**. A run ends when the merge request is open, when the design cannot proceed without a human answer or finds that the ticket would change behavior, or when nothing is workable; more work is another call, not a longer run. Nothing limits how many merge requests or candidates are open at once. The call takes free text the suite interprets — a Track, a restriction ("only the Rector Stages"), a ticket, the mode. Text addressed to the human says "run" and "skill suite". Its skill is `continuous-refactoring-run`.
 _Avoid_: loop pass, session, sprint
 
 **Decision point**:
@@ -25,8 +25,16 @@ The two modes of a **run**. **Interactive**, the default: the human decides at e
 _Avoid_: ask-each-time, human-opens, create-mode (settings that no longer exist)
 
 **Driver**:
-An agent that calls **runs** one after another on the human's behalf, each in a subagent of its own and always **autonomous**, and reviews each **merge request** — merging it, asking for changes, or asking the human — before the next call. It passes on the human's Track or restriction, and names a ticket to go on with one — reworking its merge request, its next part, a question the human answered, or the human's wish — never one that waits or is blocked. It calls the next run until a run finds nothing workable, or until an end the human set. The runs stay separate calls: the Driver keeps no state the tracker does not hold, and it never answers an open question itself.
+The skill `continuous-refactoring`: it works **rounds** one after another on the human's behalf, with a **cadence** between them, until an end. Each **run** happens in a subagent of its own and always **autonomous**, and each **merge request** is reviewed before the round ends. By default it merges nothing, ends after five rounds, and waits 30 minutes between them; it stops at more than three open merge requests. It passes on the human's Track or restriction, and names a ticket to go on with one — reworking its merge request, its next part, a question the human answered, or the human's wish — never one that waits or is blocked. The Driver keeps no state the tracker does not hold, and it never answers an open question itself.
 _Avoid_: orchestrator, loop, run loop
+
+**Round**:
+One unit of the **Driver**: a **run**, its review, and rework. It ends when the **merge request** is mergeable (`review only`), merged (`merge`), or handed to the human after two reworks, so it holds up to three runs. A run ends when its merge request is open; a round goes on until that merge request is settled. The Driver's end counts rounds, not runs.
+_Avoid_: iteration
+
+**Cadence**:
+The wait between two **rounds** of the **Driver**, counted from the end of the round before; there is none within a round. It says how fast the suite goes beside other agents and humans. It is neither the rhythm of the **Housekeeping template** (when its ticket is due) nor a schedule (when something outside calls a skill).
+_Avoid_: interval
 
 **Worklist**:
 The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. A call that names a ticket narrows the worklist to that ticket, and reconcile with it. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
@@ -48,7 +56,7 @@ The system that hosts the repository and its **merge requests** (GitHub, GitLab,
 _Avoid_: tracker (for where merge requests live)
 
 **Refactoring operations**:
-The named operations the suite needs from an **issue tracker**, one bullet each in that file's `## Refactoring operations` section. Required: **Search** (how tickets are searched, open and closed), **Done**, **Merge requests**. Optional: **Candidate** and **Priority** (hints for search and order), **Linked merge request**, **Claim**, **Ready after plan** (how a ticket is marked ready for implementation after the suite posts its plan), **Rejected** (how a rejection is recorded and found again — a closed ticket or a file, and where), **Blocked by** (how a ticket states what blocks it), **Housekeeping** (where the **Housekeeping template** lives and how the next **Housekeeping ticket** is made from it), **BC promise** (where the project's **BC promise** is written down, or `none`). A missing optional operation means the capability is absent and the suite takes its fallback — except **BC promise**, whose absence means the question is not settled yet: without **Blocked by** the dependency is a sentence in the ticket, without **Rejected** the suite proposes a place when the first rejection is recorded (`skills/continuous-refactoring/references/refactoring-operations.md`).
+The named operations the suite needs from an **issue tracker**, one bullet each in that file's `## Refactoring operations` section. Required: **Search** (how tickets are searched, open and closed), **Done**, **Merge requests**. Optional: **Candidate** and **Priority** (hints for search and order), **Linked merge request**, **Claim**, **Ready after plan** (how a ticket is marked ready for implementation after the suite posts its plan), **Rejected** (how a rejection is recorded and found again — a closed ticket or a file, and where), **Blocked by** (how a ticket states what blocks it), **Housekeeping** (where the **Housekeeping template** lives and how the next **Housekeeping ticket** is made from it), **BC promise** (where the project's **BC promise** is written down, or `none`). A missing optional operation means the capability is absent and the suite takes its fallback — except **BC promise**, whose absence means the question is not settled yet: without **Blocked by** the dependency is a sentence in the ticket, without **Rejected** the suite proposes a place when the first rejection is recorded (`skills/continuous-refactoring-run/references/refactoring-operations.md`).
 
 **Ticket**:
 An issue on the project's tracker — the word the suite uses, in its own texts and towards the human, because it is the wording of the engineering skills the suite builds on. Not a synonym for **Candidate**: a candidate is a ticket the suite works as refactoring, not every ticket is one. A ticket the suite files names its subject in plain words in title and text (the tool's name), so a later search finds it; before filing, the suite searches for an existing ticket on the subject, open or closed.
@@ -92,7 +100,7 @@ _Avoid_: housekeeping issue (dated, one per due cycle — the earlier shape), ch
 
 **Housekeeping template**:
 The file in the target a **Housekeeping ticket** is made from: the recurring tasks, the rhythm, and as its last item "create the next Housekeeping ticket". Where it lives and how the next ticket is made from it are the target's, written as the **Housekeeping** operation. Shared and committed like code. The rhythm is chosen by the human when Housekeeping is first set up, with a recommendation drawn from the target; several templates with different rhythms may exist side by side, each with its own open ticket. **Tooling tree** Tools contribute their Housekeeping line to it.
-_Avoid_: checklist file, cadence (the rhythm is a line of the template, not a setting of the suite)
+_Avoid_: checklist file
 
 **Housekeeping line**:
 The recurring task a **tooling tree** Tool contributes to the **Housekeeping template**: its **Housekeeping** field, reworded for the template's reader. It arrives through the Stage's own merge request; for a tool set up by hand, a Housekeeping run adds it.

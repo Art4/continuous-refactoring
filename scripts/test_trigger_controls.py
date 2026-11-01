@@ -12,7 +12,7 @@ import tempfile
 import unittest
 
 _REPO_ROOT = pathlib.Path(__file__).resolve().parents[1]
-_MODULE_PATH = _REPO_ROOT / "skills" / "continuous-refactoring" / "references" / "tooling_tree.py"
+_MODULE_PATH = _REPO_ROOT / "skills" / "continuous-refactoring-run" / "references" / "tooling_tree.py"
 _spec = importlib.util.spec_from_file_location("tooling_tree", _MODULE_PATH)
 tooling_tree = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tooling_tree)

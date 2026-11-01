@@ -2,10 +2,14 @@
 
 How the suite is put together, for someone who wants to understand or extend it. For steering a run as a user, see the [run playbook](playbooks/run.md); for the vocabulary, [CONTEXT.md](../CONTEXT.md).
 
-## Two skills, everything else a reference
+## Three skills, everything else a reference
 
 ```
-/continuous-refactoring            ← one run: from the open tickets to an opened merge request
+/continuous-refactoring                ← the Driver: rounds of a run, its review and rework, a cadence between them
+   └── references/
+         └── merging
+
+/continuous-refactoring-run            ← one run: from the open tickets to an opened merge request
    └── references/
          ├── onboarding, the operations and their templates
          ├── worklist, reconcile, Track choice
@@ -20,10 +24,11 @@ How the suite is put together, for someone who wants to understand or extend it.
          └── setting Housekeeping up
 ```
 
-- **`continuous-refactoring`** holds the run: how the call is read, the rules of a decision point, the ten steps, and how a run ends. Each step points to the reference that carries its detail, so a run loads only what it reaches. A call for a Pack of the project's own leaves the chain after step 1, builds that Pack and ends with its merge request.
-- **`continuous-housekeeping`** is a second entry point for one Track. It needs no Track choice, which is what makes it fit for a schedule. A run of `continuous-refactoring` that chooses Housekeeping reads the same Housekeeping reference, so there is one description of the process.
+- **`continuous-refactoring`** is the Driver. It holds no step of a run: each run happens in a subagent through `continuous-refactoring-run`, and a second subagent reviews its merge request. It keeps no state, so a later call simply starts again from the tracker.
+- **`continuous-refactoring-run`** holds the run: how the call is read, the rules of a decision point, the ten steps, and how a run ends. Each step points to the reference that carries its detail, so a run loads only what it reaches. A call for a Pack of the project's own leaves the chain after step 1, builds that Pack and ends with its merge request.
+- **`continuous-housekeeping`** is a second entry point for one Track. It needs no Track choice, which is what makes it fit for a schedule. A run of `continuous-refactoring-run` that chooses Housekeeping reads the same Housekeeping reference, so there is one description of the process.
 
-Both are typed by a human; neither is picked by the agent on its own. A step that only reads and judges — the fulfilment judgements of a scan, the exploration for structural candidates, a review — may be handed to a subagent together with its reference, so its reasoning stays out of the main conversation. A subagent asks nothing and writes nothing; every decision point stays in the conversation with you.
+A human or a schedule starts the Driver. A run and Housekeeping may also be called by an agent, a subagent included. A step that only reads and judges — the fulfilment judgements of a scan, the exploration for structural candidates, a review — may be handed to a subagent together with its reference, so its reasoning stays out of the main conversation. A subagent asks nothing and writes nothing; every decision point stays in the conversation with you.
 
 ## One run, step by step
 
@@ -85,7 +90,7 @@ The tracker and the **forge** — the system that hosts the repository and its m
 
 ## The tooling tree
 
-Safety Net and Guardrails work through the **tooling tree**: the tools a project can adopt, described as **Roles** (what a tool is for: static analysis, code style, testing …) filled by **Tools** (PHPStan, Psalm, PHP CS Fixer …) that have **Stages** — one degree of a tool, such as a PHPStan level, and the unit a ticket is filed for. Tools come in **Packs** with a condition under which they apply: every project, a project with PHP code, a Pack of the project's own ([tooling-model.md](../skills/continuous-refactoring/references/tooling-model.md) holds the rules). A Stage requires others first (a Stage, a Role, or one of several alternatives) and may wait until others are decided — fulfilled or declined.
+Safety Net and Guardrails work through the **tooling tree**: the tools a project can adopt, described as **Roles** (what a tool is for: static analysis, code style, testing …) filled by **Tools** (PHPStan, Psalm, PHP CS Fixer …) that have **Stages** — one degree of a tool, such as a PHPStan level, and the unit a ticket is filed for. Tools come in **Packs** with a condition under which they apply: every project, a project with PHP code, a Pack of the project's own ([tooling-model.md](../skills/continuous-refactoring-run/references/tooling-model.md) holds the rules). A Stage requires others first (a Stage, a Role, or one of several alternatives) and may wait until others are decided — fulfilled or declined.
 
 - **Fulfilment is judged, not detected.** Each Stage has a Fulfilment check, each Role a Purpose; an agent judges whether the project already serves the Purpose — so a tool set up by hand, or an equivalent under another name, counts. There is no list of dependency names. A Role another tool already fills takes the place of the recommended one: a project on Psalm is not offered PHPStan. A few tools are *on request*: never offered unasked, worked like any other once asked for.
 - **The parser only does graph logic.** `tooling_tree.py` is handed which Packs apply, which Stages are fulfilled, which Roles, Tools or Stages were declined and the runtime the project allows, and answers what that means: the Stages per Track, their order, what holds each one back, which Stages a rejection closes, and which declined one can come back because its runtime version is now reached. It reads the Packs and the project's tracker file, whose path the agent hands in because finding it means reading prose, and keeps no file.
@@ -94,7 +99,7 @@ Safety Net and Guardrails work through the **tooling tree**: the tools a project
 - **The Packs are drawn for humans, not read by the run.** [docs/tooling/](tooling/README.md) holds, generated from the Packs, a table of Roles and one page per Pack with its Tools, Stages and a diagram of what requires what. The generator writes the Packs' JSON in one fixed form too, and the validator fails on a Pack, a Role or a page that is out of date, so the pages cannot drift. They are not shipped with the skills.
 - **A tooling merge request is small and factual:** one Stage, and its own Fulfilment check says when it is done.
 
-The parser and the Packs ship together inside `continuous-refactoring`, so a copied or symlinked skill is complete.
+The parser and the Packs ship together inside `continuous-refactoring-run`, so a copied or symlinked skill is complete.
 
 ## Self-containment
 

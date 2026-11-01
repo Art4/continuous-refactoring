@@ -27,9 +27,9 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |
 | --- | --- | --- | --- | --- | --- |
-| CI Runner (`ci-runner`) | recommended | Continuous Integration | GitHub Actions / GitLab CI | – | [packs/generic/ci-runner.md](../../../skills/continuous-refactoring/references/packs/generic/ci-runner.md) |
-| .editorconfig (`editorconfig`) | recommended | Editor Settings | EditorConfig | – | [packs/generic/editorconfig.md](../../../skills/continuous-refactoring/references/packs/generic/editorconfig.md) |
-| Secret Detection (`secret-detection`) | on-request | Secret Scanning | any secret scanner | – | [packs/generic/secret-detection.md](../../../skills/continuous-refactoring/references/packs/generic/secret-detection.md) |
+| CI Runner (`ci-runner`) | recommended | Continuous Integration | GitHub Actions / GitLab CI | – | [packs/generic/ci-runner.md](../../../skills/continuous-refactoring-run/references/packs/generic/ci-runner.md) |
+| .editorconfig (`editorconfig`) | recommended | Editor Settings | EditorConfig | – | [packs/generic/editorconfig.md](../../../skills/continuous-refactoring-run/references/packs/generic/editorconfig.md) |
+| Secret Detection (`secret-detection`) | on-request | Secret Scanning | any secret scanner | – | [packs/generic/secret-detection.md](../../../skills/continuous-refactoring-run/references/packs/generic/secret-detection.md) |
 
 ## Stages
 

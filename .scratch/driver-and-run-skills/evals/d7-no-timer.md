@@ -27,3 +27,5 @@ Step two:
 - [ ] It reads no time of the last round from the forge.
 
 ## Results
+
+2026-11-01, skill commit 83f57b2: pass, every line, as a walk-through. An earlier round on the text before it passed too and named where the agent guessed; those gaps were closed and this is the replay.

@@ -8,7 +8,7 @@ description: Housekeeping run of the continuous-refactoring skill suite — work
 One **run** that works the Housekeeping Track alone: no worklist, no Track choice, no other ticket.
 
 The run is made of decision points, and it is interactive or autonomous. Both are defined in
-`../continuous-refactoring/SKILL.md` — how the call states the mode in *The call*, the rules in *Decision
+`../continuous-refactoring-run/SKILL.md` — how the call states the mode in *The call*, the rules in *Decision
 points* — and hold here as written; read those two sections before step 1.
 
 ## The call
@@ -27,9 +27,9 @@ Nothing stated → the run works the ticket that is due.
 
 ## The run
 
-Read `../continuous-refactoring/references/reporting-progress.md` before the first sentence to the human.
+Read `../continuous-refactoring-run/references/reporting-progress.md` before the first sentence to the human.
 
-1. **Ready.** Carry out step 1 of *The run* in `../continuous-refactoring/SKILL.md`; its `references/`
+1. **Ready.** Carry out step 1 of *The run* in `../continuous-refactoring-run/SKILL.md`; its `references/`
    folder is the one beside that file.
    *Done when* the target's `## Refactoring operations` section carries the three required operations,
    or the run has ended.
@@ -39,5 +39,5 @@ Read `../continuous-refactoring/references/reporting-progress.md` before the fir
 
 ## The end of a run
 
-Close as `../continuous-refactoring/SKILL.md`, *The end of a run*, says: the two lines **Status** and
+Close as `../continuous-refactoring-run/SKILL.md`, *The end of a run*, says: the two lines **Status** and
 **Next**. A run that found nothing due names the date from which the next ticket is due.

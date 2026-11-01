@@ -57,27 +57,47 @@ A label still helps: if your tracker section says how refactoring tickets are ma
 that as a hint to narrow its search, and it is how a freely written ticket of yours is picked up on a
 tracker full of other work.
 
-## Why only two skills?
+## Why only three skills?
 
 Earlier versions were eleven skills, all but one internal, each linked into your project and listed
 among your skills. The split existed to give each step a context of its own and to keep one skill as
 the only writer of the suite's state. The state is gone, and a step gets a context of its own by
-being handed to a subagent together with its instructions. What is left are the two things you
-call: a run, and Housekeeping alone.
+being handed to a subagent together with its instructions. What is left are the three things you
+call: the Driver, a run, and Housekeeping alone.
+
+## Why is the main command the Driver and not a single run?
+
+The name says "continuous", and a single run stops. What continues is the Driver, so it took the name, and
+one run moved to `/continuous-refactoring-run`.
+
+## Why can an agent not start the Driver?
+
+It starts without asking, works for hours and writes to your forge, so an agent that was only asked to tidy
+something should not set it off; and it needs subagents, which a subagent cannot start. Its description says
+so, and in a subagent it stops. The suite does not block it with a skill setting such as
+`disable-model-invocation`, since that would also stop a scheduled task from calling it.
+
+## Why does the Driver wait between rounds by default?
+
+The suite is meant to keep a project refactored slowly and steadily, beside other agents and humans, not as
+fast as possible. Rate limits and CI costs are real. And the wait is a chance to notice a job that still
+calls the old command, since it now starts a Driver. Thirty minutes is short enough for a session to hold;
+say "no pause" or another duration in the call. A daily rhythm is yours to set up: see
+[known limitations](known-limitations.md).
 
 ## Why does Housekeeping have a command of its own?
 
 So it can be scheduled. `/continuous-housekeeping` needs no choice between Tracks: it works the due
-ticket or reports that nothing is due. `/continuous-refactoring` still recommends Housekeeping when
+ticket or reports that nothing is due. `/continuous-refactoring-run` still recommends Housekeeping when
 its ticket is due.
 
 ## Can an agent start a run?
 
-Yes, both commands. An agent you put in charge can hand each run to a subagent of its own, so every run
-starts with a fresh context, and call the next one after it has dealt with the merge request. Such a
-run asks nobody, so say "do it yourself" in the call: without it the run ends at its first decision
-point and writes nothing. The one thing it still leaves to you is a change to your `AGENTS.md`. The
-[Driver playbook](playbooks/driver.md) describes such an agent and gives a prompt for it.
+Yes: `/continuous-refactoring-run` and `/continuous-housekeeping`. That is what the Driver does: it hands each
+run to a subagent of its own, so every run starts with a fresh context, and starts the next round once the
+merge request is dealt with. A run in a subagent asks nobody, so a call from an agent says "do it yourself":
+without it the run ends at its first decision point and writes nothing. The one thing it still
+leaves to you is a change to your `AGENTS.md`. See the [Driver playbook](playbooks/driver.md).
 
 ## Why does the suite prefer my project's own skills for planning and implementing?
 

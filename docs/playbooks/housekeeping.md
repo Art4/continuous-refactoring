@@ -16,7 +16,7 @@ One worked ticket is one cycle. It ends with a merge request holding what change
 ## Two ways in
 
 - **`/continuous-housekeeping`** runs Housekeeping and nothing else. It needs no Track choice, so it is the one to put on a schedule. It follows the same two modes as any run: it asks at each decision, or decides by itself when you say so in the call.
-- **`/continuous-refactoring`** recommends Housekeeping at Track choice when its ticket is due, or when it is not set up yet.
+- **A run** (`/continuous-refactoring-run`, or each round of `/continuous-refactoring`) recommends Housekeeping at Track choice when its ticket is due, or when it is not set up yet.
 
 ## Setting it up
 
