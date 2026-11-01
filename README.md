@@ -60,31 +60,32 @@ and one line for every change to your tracker, your forge or your repository. De
 
 | Skill | Purpose |
 |---|---|
+| `continuous-refactoring` | The **Driver**: one round after another, each a run, its review and any rework, with a cadence between them, until an end |
 | `continuous-refactoring-run` | One run, from the open tickets to an opened merge request |
 | `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule |
 
-You or an agent may start either one — an agent from a scheduled job, say, or one that hands each run
-to a subagent and reviews its merge request before calling the next — a **Driver**
-([playbook](docs/playbooks/driver.md)).
+You or an agent may start any of them. The [Driver playbook](docs/playbooks/driver.md) has its settings and what
+waits for you.
 
 Everything else — choosing a Track, scanning, selecting, planning, implementing, onboarding — is
-reference material these two load when a run reaches it. Where your project has its own skills for
+reference material these load when a run reaches it. Where your project has its own skills for
 planning and implementing, the suite recommends those and uses its own procedures only as a
 fallback.
 
 ## Installing in a target project
 
-Two symlinks, side by side in the target's skills folder:
+Three symlinks, side by side in the target's skills folder:
 
 ```bash
 mkdir -p <target>/.agents/skills
+ln -s /path/to/continuous-refactoring/skills/continuous-refactoring <target>/.agents/skills/
 ln -s /path/to/continuous-refactoring/skills/continuous-refactoring-run <target>/.agents/skills/
 ln -s /path/to/continuous-refactoring/skills/continuous-housekeeping <target>/.agents/skills/
 ```
 
-Or copy the two folders. To make the suite available everywhere, link both into your agent's global
-skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong together:
-`continuous-housekeeping` reads files of `continuous-refactoring-run`.
+Or copy the three folders. To make the suite available everywhere, link all three into your agent's global
+skills folder (e.g. `~/.config/opencode/skills/`) the same way. They belong together:
+`continuous-refactoring` and `continuous-housekeeping` read files of `continuous-refactoring-run`.
 
 > **Works with other skills, needs none.** The suite is compatible with engineering skills such as [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)): where a project has skills for planning or implementing, a run offers to use them. Without any, the first `/continuous-refactoring-run` writes the issue-tracker file itself, and plans and implements its own way.
 
@@ -92,12 +93,12 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong t
 
 ## Quick start
 
-1. **Call `/continuous-refactoring-run`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into your tracker file (`docs/agents/issue-tracker.md` unless your `AGENTS.md` names another) — commit that file. The run ends there; commit, then call it again.
-2. **Answer the decision points.** Each comes with a recommendation, so "yes" moves on. Say "carry on yourself from here" at any point and the rest of the run takes its own recommendations.
-3. **Or let it run by itself:** `/continuous-refactoring-run do it yourself`. One call then takes a ticket from selection to an opened merge request.
+1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into your tracker file (`docs/agents/issue-tracker.md` unless your `AGENTS.md` names another) — commit that file. The run ends there; commit, then call it again.
+2. **Answer the onboarding.** Each question comes with a recommendation, so "yes" moves on.
+3. **Let it work.** The next call starts the Driver: by itself it works up to five rounds, 30 minutes apart, reviews each merge request and merges none of them. Say otherwise in the call ("merge", "ten rounds", "no pause"). For one run alone, `/continuous-refactoring-run` asks at every decision; `/continuous-refactoring-run do it yourself` takes one ticket from selection to an opened merge request.
 4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), a ticket ("ticket 42"), a [Pack of your own](docs/playbooks/own-tool.md) for a tool the suite does not know ("a Pack of its own for Deptrac").
-5. **Review and merge** what the suite opens. Nothing limits how many merge requests are open at once; how much runs in parallel is your decision.
-6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at either command.
+5. **Review and merge** what the suite opens. The Driver stops once more than three of its merge requests are open; a run alone has no such limit.
+6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at any of the commands.
 
 ## Upgrading
 
@@ -122,6 +123,7 @@ Everything is in your project, your tracker and your forge — nothing in the co
 
 | Doc | For |
 |---|---|
+| [Driver playbook](docs/playbooks/driver.md) | Letting the suite go on by itself — its settings, what waits for you, how it ends |
 | [Run playbook](docs/playbooks/run.md) | Steering a run as a human — the call, the decision points, how a run ends |
 | [Track playbook](docs/playbooks/tracks.md) | How the four Tracks are chosen, scanned and worked |
 | [Own-tool playbook](docs/playbooks/own-tool.md) | Adding a tool the suite does not know, as a Pack of your own |

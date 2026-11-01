@@ -2,9 +2,13 @@
 
 How the suite is put together, for someone who wants to understand or extend it. For steering a run as a user, see the [run playbook](playbooks/run.md); for the vocabulary, [CONTEXT.md](../CONTEXT.md).
 
-## Two skills, everything else a reference
+## Three skills, everything else a reference
 
 ```
+/continuous-refactoring                ← the Driver: rounds of a run, its review and rework, a cadence between them
+   └── references/
+         └── merging
+
 /continuous-refactoring-run            ← one run: from the open tickets to an opened merge request
    └── references/
          ├── onboarding, the operations and their templates
@@ -20,10 +24,11 @@ How the suite is put together, for someone who wants to understand or extend it.
          └── setting Housekeeping up
 ```
 
+- **`continuous-refactoring`** is the Driver. It holds no step of a run: each run happens in a subagent through `continuous-refactoring-run`, and a second subagent reviews its merge request. It keeps no state, so a later call simply starts again from the tracker.
 - **`continuous-refactoring-run`** holds the run: how the call is read, the rules of a decision point, the ten steps, and how a run ends. Each step points to the reference that carries its detail, so a run loads only what it reaches. A call for a Pack of the project's own leaves the chain after step 1, builds that Pack and ends with its merge request.
 - **`continuous-housekeeping`** is a second entry point for one Track. It needs no Track choice, which is what makes it fit for a schedule. A run of `continuous-refactoring-run` that chooses Housekeeping reads the same Housekeeping reference, so there is one description of the process.
 
-Both are typed by a human; neither is picked by the agent on its own. A step that only reads and judges — the fulfilment judgements of a scan, the exploration for structural candidates, a review — may be handed to a subagent together with its reference, so its reasoning stays out of the main conversation. A subagent asks nothing and writes nothing; every decision point stays in the conversation with you.
+All three are typed by a human; none is picked by the agent on its own. A step that only reads and judges — the fulfilment judgements of a scan, the exploration for structural candidates, a review — may be handed to a subagent together with its reference, so its reasoning stays out of the main conversation. A subagent asks nothing and writes nothing; every decision point stays in the conversation with you.
 
 ## One run, step by step
 

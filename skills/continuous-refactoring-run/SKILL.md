@@ -1,9 +1,9 @@
 ---
 name: continuous-refactoring-run
-description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked to run continuous refactoring or the skill suite on this project, or to work one of its Tracks or tickets, or to build a Pack of the project's own for a tool the suite does not know.
+description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked for one run alone, to work one of its Tracks or tickets, to build a Pack of the project's own for a tool the suite does not know, or by the Driver's subagent.
 ---
 
-# Continuous Refactoring
+# Continuous Refactoring: one run
 
 One **run**: a chain of **decision points** that leads from the target's open tickets to one opened merge
 request. The suite keeps no state of its own. Tickets, merge requests and rejections are found by searching

@@ -101,6 +101,7 @@ VOCAB_ALLOW = {
     ("continuous-housekeeping", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
     ("continuous-refactoring-run", "bookkeeping"): "the onboarding interview names the old **Bookkeeping** bullet it removes from an existing section",
     ("continuous-refactoring-run", "session"): "a conversation the human opens for themselves — not a second name for a run",
+    ("continuous-refactoring", "session"): "the conversation the Driver works in and waits in — not a second name for a run",
 }
 
 # glossary_reverse_issues() false positives: bold words both skills use as a

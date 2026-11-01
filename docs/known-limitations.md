@@ -122,6 +122,23 @@ review replaced by a quick read, a plan not posted.
 **What to do:** the agent driving the runs ([Driver](playbooks/driver.md)) reviews each merge request in a subagent of its own before
 merging, and checks that the ticket carries the plan.
 
+## A session holds a short cadence only
+
+The Driver waits between rounds in its session, with your environment's timer. A session ends, and a timer
+reaches only so far: in Claude Code one wait reaches an hour. Where it cannot wait, the Driver ends and says when
+the next round is due. It sets up no schedule.
+
+**What to do:** for a longer cadence, one round a day say, point your own scheduler at
+`/continuous-refactoring`. How is up to your repository, your agent and your system.
+
+## The Driver does not know when it last ran
+
+It reads no time of the last round. A call below the cadence starts a round at once, two Drivers side by side both
+work, and each call counts its rounds from one: called once a day with an end of five rounds, each call ends after
+the rounds it can hold.
+
+**What to do:** how often it is called is yours to decide. Run one Driver per project.
+
 ## A gate your CI runs may not run locally
 
 Before it opens a merge request, the suite runs every gate your CI runs over the whole project, such

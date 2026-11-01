@@ -4,7 +4,7 @@ The playbook for humans. The skills do the work; this document explains how you 
 
 ## What a run is
 
-One call of `/continuous-refactoring-run` is one **run**. It leads from your project's open refactoring tickets to one opened merge request:
+One call of `/continuous-refactoring-run` is one **run**; [`/continuous-refactoring`](driver.md) calls them one after another for you. It leads from your project's open refactoring tickets to one opened merge request:
 
 ```
 reconcile → choose a Track → scan (only when needed) → file tickets → select a ticket → design → implement → merge request
@@ -87,9 +87,9 @@ Every run closes with two lines. **Status** opens with how many things wait for 
 
 ## Running it regularly
 
-The suite schedules nothing. Point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring-run do it yourself` and at `/continuous-housekeeping do it yourself`, as often as fits. To have an agent call runs one after another and review each merge request in between, see the [Driver playbook](driver.md).
+The suite schedules nothing from outside. Point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring`, `/continuous-refactoring-run do it yourself` or `/continuous-housekeeping do it yourself`, as often as fits. Within a session the Driver waits its own cadence between rounds ([playbook](driver.md)).
 
-Nothing limits how many merge requests are open at once. Called repeatedly, Safety Net ends at "every workable tool has a ticket and an open merge request" — from there the next step is yours: review and merge. Merge requests opened side by side may conflict with each other; resolving that is yours too.
+Nothing limits how many merge requests a run leaves open. Called repeatedly, Safety Net ends at "every workable tool has a ticket and an open merge request" — from there the next step is yours: review and merge. Merge requests opened side by side may conflict with each other; resolving that is yours too.
 
 ## Steering what gets worked on
 

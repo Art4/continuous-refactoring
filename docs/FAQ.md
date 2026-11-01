@@ -57,13 +57,26 @@ A label still helps: if your tracker section says how refactoring tickets are ma
 that as a hint to narrow its search, and it is how a freely written ticket of yours is picked up on a
 tracker full of other work.
 
-## Why only two skills?
+## Why only three skills?
 
 Earlier versions were eleven skills, all but one internal, each linked into your project and listed
 among your skills. The split existed to give each step a context of its own and to keep one skill as
 the only writer of the suite's state. The state is gone, and a step gets a context of its own by
-being handed to a subagent together with its instructions. What is left are the two things you
-call: a run, and Housekeeping alone.
+being handed to a subagent together with its instructions. What is left are the three things you
+call: the Driver, a run, and Housekeeping alone.
+
+## Why is the main command the Driver and not a single run?
+
+The name says "continuous", and a single run stops. What continues is the Driver, so it took the name, and
+one run moved to `/continuous-refactoring-run`.
+
+## Why does the Driver wait between rounds by default?
+
+The suite is meant to keep a project refactored slowly and steadily, beside other agents and humans, not as
+fast as possible. Rate limits and CI costs are real. And the wait is a chance to notice a job that still
+calls the old command, since it now starts a Driver. Thirty minutes is short enough for a session to hold;
+say "no pause" or another duration in the call. A daily rhythm is yours to set up: see
+[known limitations](known-limitations.md).
 
 ## Why does Housekeeping have a command of its own?
 
@@ -73,11 +86,11 @@ its ticket is due.
 
 ## Can an agent start a run?
 
-Yes, both commands. An agent you put in charge can hand each run to a subagent of its own, so every run
-starts with a fresh context, and call the next one after it has dealt with the merge request. Such a
-run asks nobody, so say "do it yourself" in the call: without it the run ends at its first decision
-point and writes nothing. The one thing it still leaves to you is a change to your `AGENTS.md`. The
-[Driver playbook](playbooks/driver.md) describes such an agent and gives a prompt for it.
+Yes, all three commands, and that is what the Driver does: it hands each run to a subagent of its own, so
+every run starts with a fresh context, and starts the next round once the merge request is dealt with. A
+run in a subagent asks nobody, so a call of `/continuous-refactoring-run` from an agent says "do it
+yourself": without it the run ends at its first decision point and writes nothing. The one thing it still
+leaves to you is a change to your `AGENTS.md`. See the [Driver playbook](playbooks/driver.md).
 
 ## Why does the suite prefer my project's own skills for planning and implementing?
 
@@ -371,7 +384,7 @@ Twig does not take the place of one for PHP. The [playbook](playbooks/own-tool.m
 Yes, and it is better with them. A run recommends a project's own skills for planning and implementing,
 such as those of [mattpocock/skills](https://github.com/mattpocock/skills), over its own procedures, and
 reads an issue-tracker file they wrote. Use the skills you already trust. None is needed: without any,
-the first `/continuous-refactoring-run` writes that file itself and the run plans and implements its own way.
+the first `/continuous-refactoring` writes that file itself and the run plans and implements its own way.
 
 ## Which issue trackers work?
 
