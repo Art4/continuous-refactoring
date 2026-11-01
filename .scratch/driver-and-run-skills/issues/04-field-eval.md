@@ -1,4 +1,4 @@
-# 04 — The reviewer loop becomes a field eval
+# 04 — The reviewer loop becomes a field eval, and the scenarios move in beside it
 
 Type: task
 Status: open
@@ -24,6 +24,10 @@ Part of `../spec.md`, *The field eval*.
   exempt from the citation rules.
 - `README.md`: the doc table loses the reviewer-loop row. `grep` for the old name outside `docs/adr/`.
 - `CONTRIBUTING.md` names the field eval as the way to test a suite change on a real target.
+- `../evals/` moves to `docs/agents/evals/`. Its `README.md` loses the pointers to `../spec.md` and the note on the
+  skill's name before ticket 03; a scenario then changes when the behaviour it expects is meant to change.
+- `CONTRIBUTING.md` says: a change to skill text plays the scenarios that cover it before the merge.
 
 **Done when** a round of the field eval can be played from the file alone, nothing outside `docs/adr/` names the
-old file, and tests and validator are green.
+old file, the scenarios play from `docs/agents/evals/` with no `.scratch/` file to hand, and tests and validator are
+green.

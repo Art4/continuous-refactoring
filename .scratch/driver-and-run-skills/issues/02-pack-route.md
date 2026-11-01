@@ -18,9 +18,12 @@ Part of `../spec.md`, *The Pack route*. Written against today's skill name; tick
   rather than repeating it.
 - `opening-a-merge-request.md` is handed a ticket, and this route has none. Settle how the merge request reads
   without one; a run that files a ticket first only to close it is not the way out.
+- `--own-pack` resolves a relative path against the working directory, while `tooling-parser.md` says relative to the
+  target. Called from elsewhere, it ends in exit code 2 with "holds no pack.json", which looks like a broken Pack.
+  Settle which holds, since this route calls it.
 - `docs/playbooks/own-tool.md` keeps what a human reads: what a Pack is for, the example, how to call it.
 - Docs: `docs/playbooks/run.md` (*The call*), `README.md`, `docs/architecture.md`, `docs/FAQ.md` if a "why" arises;
   a changelog fragment.
 
-**Done when** the Pack scenarios of ticket 01 pass, a Pack built this way passes `--own-pack` and is read by a
+**Done when** the scenarios `p1`, `p2` and `p3` of ticket 01 pass, a Pack built this way passes `--own-pack` and is read by a
 following run, and tests and validator are green.
