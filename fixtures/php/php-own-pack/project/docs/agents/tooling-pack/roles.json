@@ -1,5 +1,5 @@
 {
-  "$schema": "../../../.agents/skills/continuous-refactoring/references/roles.schema.json",
+  "$schema": "../../../.agents/skills/continuous-refactoring-run/references/roles.schema.json",
   "roles": [
     {
       "slug": "architecture-rules",

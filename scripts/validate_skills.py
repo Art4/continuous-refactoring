@@ -93,14 +93,14 @@ EXEMPT_LOCAL_PREFIXES = {
 # Glossary avoid-terms whose use in prose is legitimate. Keyed by (skill, term)
 # so a new occurrence anywhere else is still flagged.
 VOCAB_ALLOW = {
-    ("continuous-refactoring", "boundary"): "defines the 'seam' term — 'public boundary' is the definition, not a synonym replacement",
-    ("continuous-refactoring", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
-    ("continuous-refactoring", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
+    ("continuous-refactoring-run", "boundary"): "defines the 'seam' term — 'public boundary' is the definition, not a synonym replacement",
+    ("continuous-refactoring-run", "pain point"): "quotes a user-named direction; 'hot spot' is defined via change history, so it is not a synonym here",
+    ("continuous-refactoring-run", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("continuous-housekeeping", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
-    ("continuous-refactoring", "floor"): "the target's declared minimum PHP version ('PHP floor') and the `coverage-floor` node — real technical terms, not synonyms for 'tooling tree'",
+    ("continuous-refactoring-run", "floor"): "the target's declared minimum PHP version ('PHP floor') and the `coverage-floor` node — real technical terms, not synonyms for 'tooling tree'",
     ("continuous-housekeeping", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
-    ("continuous-refactoring", "bookkeeping"): "the onboarding interview names the old **Bookkeeping** bullet it removes from an existing section",
-    ("continuous-refactoring", "session"): "a conversation the human opens for themselves — not a second name for a run",
+    ("continuous-refactoring-run", "bookkeeping"): "the onboarding interview names the old **Bookkeeping** bullet it removes from an existing section",
+    ("continuous-refactoring-run", "session"): "a conversation the human opens for themselves — not a second name for a run",
 }
 
 # glossary_reverse_issues() false positives: bold words both skills use as a

@@ -45,8 +45,8 @@ No file in this repo names a real target project: not `skills/**`, `docs/**`, AD
 
 This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking both into a target repo's `.agents/skills/` (see `README.md`):
 
-- `continuous-refactoring` — one run: a chain of decision points from the target's open tickets to an opened merge request. Its `SKILL.md` holds the call, the decision-point rules and the steps; each step's detail is a file under its `references/`, where the tooling-tree parser and the tree docs live too.
-- `continuous-housekeeping` — the Housekeeping Track alone, with no Track choice; `continuous-refactoring` reads the same `references/housekeeping-track.md` when its Track choice lands on Housekeeping.
+- `continuous-refactoring-run` — one run: a chain of decision points from the target's open tickets to an opened merge request. Its `SKILL.md` holds the call, the decision-point rules and the steps; each step's detail is a file under its `references/`, where the tooling-tree parser and the tree docs live too.
+- `continuous-housekeeping` — the Housekeeping Track alone, with no Track choice; `continuous-refactoring-run` reads the same `references/housekeeping-track.md` when its Track choice lands on Housekeeping.
 
 Both are user-invocable, and an agent may invoke either through its skill tool — a subagent included. The suite keeps no state of its own: tickets, merge requests and rejections are found by searching the target's tracker and forge.
 

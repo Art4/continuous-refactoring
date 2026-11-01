@@ -79,7 +79,7 @@ chooses are added from *Bullets the target chooses* below.
 ```markdown
 ## Refactoring operations
 
-Used by `/continuous-refactoring`.
+Used by `/continuous-refactoring-run`.
 
 - **Search**: `gh issue list --state all --search "<words>" --json number,title,state,labels,updatedAt` searches title and text, open and closed together; `--state open` narrows it to the open ones. Raise `--limit` when the default of 30 cuts the list.
 - **Done**: an issue closed as completed: `gh api repos/{owner}/{repo}/issues/<n> --jq .state_reason` gives `completed`. Mark one finished with `gh issue close <n> --reason completed`.
@@ -95,7 +95,7 @@ Used by `/continuous-refactoring`.
 ```markdown
 ## Refactoring operations
 
-Used by `/continuous-refactoring`.
+Used by `/continuous-refactoring-run`.
 
 - **Search**: `glab issue list --all --search "<words>" -O json` searches title and text, open and closed together; without `--all` it lists the open ones only. Raise `--per-page` when the list is cut.
 - **Done**: a closed issue is done. Mark one finished with `glab issue close <n>`.
@@ -110,7 +110,7 @@ Used by `/continuous-refactoring`.
 ```markdown
 ## Refactoring operations
 
-Used by `/continuous-refactoring`. Tickets live as markdown files in `.scratch/refactor/issues/`, one file
+Used by `/continuous-refactoring-run`. Tickets live as markdown files in `.scratch/refactor/issues/`, one file
 per ticket at `<NN>-<slug>.md`, numbered from `01`. A `Status:` line sits near the top, followed by a
 `Blocked by:` line where something blocks the ticket; comments append under a `## Comments` heading at the
 bottom.

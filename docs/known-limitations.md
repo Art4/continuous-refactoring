@@ -9,7 +9,7 @@ says how refactoring tickets are marked (the **Candidate** operation) and the ti
 mark, or you name the ticket in the call.
 
 **What to do:** set a mark for refactoring tickets — the suite proposes one the first time it files a
-structural ticket on such a tracker — or name the ticket: `/continuous-refactoring ticket 42`.
+structural ticket on such a tracker — or name the ticket: `/continuous-refactoring-run ticket 42`.
 
 ## The suite cannot run a skill that only you can call
 

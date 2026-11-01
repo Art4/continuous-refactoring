@@ -4,7 +4,7 @@ The suite proposes the tools its Packs know. A project that uses a tool the suit
 
 ## Let the suite build it
 
-Say so in the call: `/continuous-refactoring a Pack of its own for Deptrac`. A wish for a tool the suite does not know is enough, and "do it yourself" works here too. The suite proposes the Tool, its Role and its Stages, builds the Pack, checks it, and ends with one merge request. It looks at no ticket on the way, and files none. The Stages are worked by the runs that follow, like any other.
+Say so in the call: `/continuous-refactoring-run a Pack of its own for Deptrac`. A wish for a tool the suite does not know is enough, and "do it yourself" works here too. The suite proposes the Tool, its Role and its Stages, builds the Pack, checks it, and ends with one merge request. It looks at no ticket on the way, and files none. The Stages are worked by the runs that follow, like any other.
 
 The rest of this playbook is what it builds, for reading its merge request or writing a Pack by hand.
 
@@ -30,7 +30,7 @@ A project that checks the dependencies between its layers with Deptrac, and want
 
 ```json
 {
-  "$schema": "../../../.agents/skills/continuous-refactoring/references/pack.schema.json",
+  "$schema": "../../../.agents/skills/continuous-refactoring-run/references/pack.schema.json",
   "pack": "house-rules",
   "scope": "php",
   "applies_when": "Always.",

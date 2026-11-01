@@ -1,4 +1,4 @@
-"""Tests for the tooling-tree parser (skills/continuous-refactoring/references/tooling_tree.py)
+"""Tests for the tooling-tree parser (skills/continuous-refactoring-run/references/tooling_tree.py)
 
 The model (Roles, Tools and Stages in Packs) and the graph outputs computed from the seed the caller
 hands in. Synthetic Packs test the rules; the suite's own Packs are loaded to test the data.
@@ -14,7 +14,7 @@ import tempfile
 import unittest
 import weakref
 
-_REFERENCES = pathlib.Path(__file__).resolve().parents[1] / "skills" / "continuous-refactoring" / "references"
+_REFERENCES = pathlib.Path(__file__).resolve().parents[1] / "skills" / "continuous-refactoring-run" / "references"
 _spec = importlib.util.spec_from_file_location("tooling_tree", _REFERENCES / "tooling_tree.py")
 tp = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tp)

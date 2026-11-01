@@ -808,21 +808,21 @@ class OrphanedReferenceTests(unittest.TestCase):
 
     def test_referenced_from_another_skill_not_flagged(self):
         # Cross-skill pointers count too -- refactor-design can be the only
-        # thing naming a file that ships under continuous-refactoring/.
-        refs = [("continuous-refactoring", "skills/continuous-refactoring/references/shared.md")]
+        # thing naming a file that ships under continuous-refactoring-run/.
+        refs = [("continuous-refactoring-run", "skills/continuous-refactoring-run/references/shared.md")]
         all_text = {
-            "skills/continuous-refactoring/references/shared.md": "Shared rule.",
-            "skills/refactor-design/SKILL.md": "See `skills/continuous-refactoring/references/shared.md`.",
+            "skills/continuous-refactoring-run/references/shared.md": "Shared rule.",
+            "skills/refactor-design/SKILL.md": "See `skills/continuous-refactoring-run/references/shared.md`.",
         }
         self.assertEqual(vs.orphaned_reference_issues(refs, all_text), [])
 
     def test_referenced_via_skill_relative_citation_not_flagged(self):
         # ADR-0061: a real citation no longer repeats the full suite-root
         # path -- only the basename is a style-independent signal now.
-        refs = [("continuous-refactoring", "skills/continuous-refactoring/references/shared.md")]
+        refs = [("continuous-refactoring-run", "skills/continuous-refactoring-run/references/shared.md")]
         all_text = {
-            "skills/continuous-refactoring/references/shared.md": "Shared rule.",
-            "skills/refactor-design/SKILL.md": "See `../continuous-refactoring/references/shared.md`.",
+            "skills/continuous-refactoring-run/references/shared.md": "Shared rule.",
+            "skills/refactor-design/SKILL.md": "See `../continuous-refactoring-run/references/shared.md`.",
         }
         self.assertEqual(vs.orphaned_reference_issues(refs, all_text), [])
 

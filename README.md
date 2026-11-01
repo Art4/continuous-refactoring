@@ -32,7 +32,7 @@ The suite keeps **no state of its own**. Your open tickets are the worklist; mer
 declined work and the standing Housekeeping ticket are found by searching your tracker and your
 forge on every run. What you change there by hand is simply what the next run finds.
 
-The core is [language-neutral](skills/continuous-refactoring/references/tooling-model.md), with tools delivered in **Packs**. A [generic Pack](docs/tooling/packs/generic.md) applies to every project; the first language Pack is a **[general PHP project](docs/tooling/packs/php.md)** (code style, Rector, PHPStan, PHPMD and more, with the diagram of what comes after what), grounded in over 20 years of PHP experience and kept up to date with current best practice; a [Twig Pack](docs/tooling/packs/twig-php.md) adds the templates of a PHP project that uses Twig. Tools you already run — Psalm instead of PHPStan, Laravel Pint instead of PHP CS Fixer — are recognised and not replaced, and a tool the suite does not know joins through a [Pack of your own](docs/playbooks/own-tool.md). The [tooling overview](docs/tooling/README.md) lists every Role, Tool and Pack.
+The core is [language-neutral](skills/continuous-refactoring-run/references/tooling-model.md), with tools delivered in **Packs**. A [generic Pack](docs/tooling/packs/generic.md) applies to every project; the first language Pack is a **[general PHP project](docs/tooling/packs/php.md)** (code style, Rector, PHPStan, PHPMD and more, with the diagram of what comes after what), grounded in over 20 years of PHP experience and kept up to date with current best practice; a [Twig Pack](docs/tooling/packs/twig-php.md) adds the templates of a PHP project that uses Twig. Tools you already run — Psalm instead of PHPStan, Laravel Pint instead of PHP CS Fixer — are recognised and not replaced, and a tool the suite does not know joins through a [Pack of your own](docs/playbooks/own-tool.md). The [tooling overview](docs/tooling/README.md) lists every Role, Tool and Pack.
 
 ## How it works
 
@@ -60,7 +60,7 @@ and one line for every change to your tracker, your forge or your repository. De
 
 | Skill | Purpose |
 |---|---|
-| `continuous-refactoring` | One run, from the open tickets to an opened merge request |
+| `continuous-refactoring-run` | One run, from the open tickets to an opened merge request |
 | `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule |
 
 You or an agent may start either one — an agent from a scheduled job, say, or one that hands each run
@@ -78,23 +78,23 @@ Two symlinks, side by side in the target's skills folder:
 
 ```bash
 mkdir -p <target>/.agents/skills
-ln -s /path/to/continuous-refactoring/skills/continuous-refactoring <target>/.agents/skills/
+ln -s /path/to/continuous-refactoring/skills/continuous-refactoring-run <target>/.agents/skills/
 ln -s /path/to/continuous-refactoring/skills/continuous-housekeeping <target>/.agents/skills/
 ```
 
 Or copy the two folders. To make the suite available everywhere, link both into your agent's global
 skills folder (e.g. `~/.config/opencode/skills/`) the same way. The two belong together:
-`continuous-housekeeping` reads files of `continuous-refactoring`.
+`continuous-housekeeping` reads files of `continuous-refactoring-run`.
 
-> **Works with other skills, needs none.** The suite is compatible with engineering skills such as [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)): where a project has skills for planning or implementing, a run offers to use them. Without any, the first `/continuous-refactoring` writes the issue-tracker file itself, and plans and implements its own way.
+> **Works with other skills, needs none.** The suite is compatible with engineering skills such as [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)): where a project has skills for planning or implementing, a run offers to use them. Without any, the first `/continuous-refactoring-run` writes the issue-tracker file itself, and plans and implements its own way.
 
 **Any issue tracker works** that your tracker file describes: `docs/agents/issue-tracker.md`, or the file your `AGENTS.md` names in its place. GitHub, GitLab and local Markdown files come with a ready-made template. For another one — Redmine, Jira — onboarding asks how the suite's few operations work there (how tickets are searched, how a finished one is recognised) and writes the answers into that file. Tickets and merge requests may live in different systems: the tracker is whatever that file describes, merge requests live where the Git remote points.
 
 ## Quick start
 
-1. **Call `/continuous-refactoring`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into your tracker file (`docs/agents/issue-tracker.md` unless your `AGENTS.md` names another) — commit that file. The run ends there; commit, then call it again.
+1. **Call `/continuous-refactoring-run`.** On a project the suite has not seen, it first asks where your tickets live and how the operations work there, and writes that as one section into your tracker file (`docs/agents/issue-tracker.md` unless your `AGENTS.md` names another) — commit that file. The run ends there; commit, then call it again.
 2. **Answer the decision points.** Each comes with a recommendation, so "yes" moves on. Say "carry on yourself from here" at any point and the rest of the run takes its own recommendations.
-3. **Or let it run by itself:** `/continuous-refactoring do it yourself`. One call then takes a ticket from selection to an opened merge request.
+3. **Or let it run by itself:** `/continuous-refactoring-run do it yourself`. One call then takes a ticket from selection to an opened merge request.
 4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), a ticket ("ticket 42"), a [Pack of your own](docs/playbooks/own-tool.md) for a tool the suite does not know ("a Pack of its own for Deptrac").
 5. **Review and merge** what the suite opens. Nothing limits how many merge requests are open at once; how much runs in parallel is your decision.
 6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at either command.
@@ -131,7 +131,7 @@ Everything is in your project, your tracker and your forge — nothing in the co
 | [Architecture](docs/architecture.md) | The two skills, their references, the tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
 | [Known limitations](docs/known-limitations.md) | Limits without a suite-side fix, plus troubleshooting |
-| [Operations reference](skills/continuous-refactoring/references/refactoring-operations.md) | The operations the suite needs from a tracker, with the templates |
+| [Operations reference](skills/continuous-refactoring-run/references/refactoring-operations.md) | The operations the suite needs from a tracker, with the templates |
 | [CONTEXT.md](CONTEXT.md) | The suite's vocabulary |
 
 ## Contributing

@@ -68,7 +68,7 @@ call: a run, and Housekeeping alone.
 ## Why does Housekeeping have a command of its own?
 
 So it can be scheduled. `/continuous-housekeeping` needs no choice between Tracks: it works the due
-ticket or reports that nothing is due. `/continuous-refactoring` still recommends Housekeeping when
+ticket or reports that nothing is due. `/continuous-refactoring-run` still recommends Housekeeping when
 its ticket is due.
 
 ## Can an agent start a run?
@@ -371,7 +371,7 @@ Twig does not take the place of one for PHP. The [playbook](playbooks/own-tool.m
 Yes, and it is better with them. A run recommends a project's own skills for planning and implementing,
 such as those of [mattpocock/skills](https://github.com/mattpocock/skills), over its own procedures, and
 reads an issue-tracker file they wrote. Use the skills you already trust. None is needed: without any,
-the first `/continuous-refactoring` writes that file itself and the run plans and implements its own way.
+the first `/continuous-refactoring-run` writes that file itself and the run plans and implements its own way.
 
 ## Which issue trackers work?
 

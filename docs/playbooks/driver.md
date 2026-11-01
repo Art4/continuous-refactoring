@@ -61,7 +61,7 @@ The Driver checks before every run whether to call another:
 ## Before you start
 
 - **The project is onboarded.** The onboarding asks you questions, and a run in a subagent can ask
-  nobody, so call `/continuous-refactoring` once yourself first. A Driver that finds no
+  nobody, so call `/continuous-refactoring-run` once yourself first. A Driver that finds no
   `## Refactoring operations` section in your tracker file stops and says so.
 - **Your `AGENTS.md` rules win.** Where they differ from your agent environment's defaults — no AI
   trailer in commits, say — the Driver hands them to every run.

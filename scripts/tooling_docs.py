@@ -23,7 +23,7 @@ import pathlib
 import sys
 
 REPO = pathlib.Path(__file__).resolve().parent.parent
-REFERENCES = pathlib.Path("skills/continuous-refactoring/references")
+REFERENCES = pathlib.Path("skills/continuous-refactoring-run/references")
 DOCS = pathlib.Path("docs/tooling")
 COMMAND = "python3 scripts/tooling_docs.py"
 
@@ -109,7 +109,7 @@ def _roles_page(model: dict) -> str:
     out.append(
         "What a tool is for (Roles), which tools can play them, and the Packs the tools come in. "
         "The words are defined in the suite's glossary; the rules are in "
-        "[tooling-model.md](../../skills/continuous-refactoring/references/tooling-model.md).\n"
+        "[tooling-model.md](../../skills/continuous-refactoring-run/references/tooling-model.md).\n"
     )
     out.append("## Packs\n")
     out.append("| Pack | Applies when |\n| --- | --- |")

@@ -1,5 +1,5 @@
 ---
-name: continuous-refactoring
+name: continuous-refactoring-run
 description: One run of the continuous-refactoring skill suite — from the project's open refactoring tickets to an opened merge request. Asks at every decision, or decides by itself when the call says so. Use when asked to run continuous refactoring or the skill suite on this project, or to work one of its Tracks or tickets, or to build a Pack of the project's own for a tool the suite does not know.
 ---
 

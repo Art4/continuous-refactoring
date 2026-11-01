@@ -28,8 +28,8 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 
 | Tool | Status | Roles | Uses | Minimum runtime | Details |
 | --- | --- | --- | --- | --- | --- |
-| Twig-CS-Fixer (`twig-cs-fixer`) | recommended | Code Style | Twig-CS-Fixer | – | [packs/twig-php/twig-cs-fixer.md](../../../skills/continuous-refactoring/references/packs/twig-php/twig-cs-fixer.md) |
-| TwigStan (`twigstan`) | recommended | Static Analysis | TwigStan | – | [packs/twig-php/twigstan.md](../../../skills/continuous-refactoring/references/packs/twig-php/twigstan.md) |
+| Twig-CS-Fixer (`twig-cs-fixer`) | recommended | Code Style | Twig-CS-Fixer | – | [packs/twig-php/twig-cs-fixer.md](../../../skills/continuous-refactoring-run/references/packs/twig-php/twig-cs-fixer.md) |
+| TwigStan (`twigstan`) | recommended | Static Analysis | TwigStan | – | [packs/twig-php/twigstan.md](../../../skills/continuous-refactoring-run/references/packs/twig-php/twigstan.md) |
 
 ## Stages
 
