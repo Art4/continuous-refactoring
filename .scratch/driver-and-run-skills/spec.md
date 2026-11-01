@@ -122,7 +122,7 @@ agent is seen reading a nested file in part.
 - `/continuous-refactoring` no longer means one run. A scheduled `/continuous-refactoring do it yourself` now
   starts a Driver: review only, five rounds, 30 minutes apart.
 - A target adds a symlink for `continuous-refactoring-run`; the existing one stays and now holds the Driver.
-- Two installed targets are affected: `continuous-refactoring.de` and `moodle-sync`.
+- Every installed target is affected and needs the symlink.
 
 ## Out of Scope
 

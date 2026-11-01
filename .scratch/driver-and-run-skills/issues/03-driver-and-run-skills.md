@@ -40,4 +40,4 @@ Driver skill belong together. Git rename first, in a commit of its own, so the r
 **Done when** the Driver scenarios of ticket 01 pass, a call with no settings runs review only with five rounds
 30 minutes apart, `/continuous-refactoring-run` behaves as the old skill did, and tests and validator are green.
 
-After the merge, outside this repository: add the symlink in `continuous-refactoring.de` and `moodle-sync`.
+After the merge, outside this repository: add the symlink in every installed target.
