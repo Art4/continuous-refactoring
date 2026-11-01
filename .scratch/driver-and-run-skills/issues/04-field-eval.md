@@ -19,7 +19,7 @@ Part of `../spec.md`, *The field eval*.
 - Rules that so far live only in the maintainer's notes go in: everything on the forge in English; a request for
   changes describes the problem and its cause and leaves the fix open, so the watched agent's own solution stays
   observable. Line 112's "concrete, actionable reason" follows.
-- All headings in English, including `## ⚠️ Auffälligkeit`. Keep the findings log's path under `.scratch/`.
+- All headings in English; the anomaly heading becomes `## ⚠️ Anomaly`. Keep the findings log's path under `.scratch/`.
 - `scripts/validate_skills.py`: drop `DOC_SCRATCH_ALLOW` and its entry, with its test. `docs/agents/` is already
   exempt from the citation rules.
 - `README.md`: the doc table loses the reviewer-loop row. `grep` for the old name outside `docs/adr/`.
