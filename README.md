@@ -64,8 +64,8 @@ and one line for every change to your tracker, your forge or your repository. De
 | `continuous-refactoring-run` | One run, from the open tickets to an opened merge request |
 | `continuous-housekeeping` | One Housekeeping run and nothing else — no Track choice, so it can be put on a schedule |
 
-You or an agent may start any of them. The [Driver playbook](docs/playbooks/driver.md) has its settings and what
-waits for you.
+You or a schedule start the Driver; an agent calls `continuous-refactoring-run` or `continuous-housekeeping`. The
+[Driver playbook](docs/playbooks/driver.md) has its settings and what waits for you.
 
 Everything else — choosing a Track, scanning, selecting, planning, implementing, onboarding — is
 reference material these load when a run reaches it. Where your project has its own skills for

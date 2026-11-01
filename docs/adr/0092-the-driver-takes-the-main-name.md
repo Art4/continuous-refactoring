@@ -20,6 +20,10 @@ pointed at a doc that never ships.
   is due. A long cadence is the user's. Nothing prevents a call below the cadence, or two Drivers.
 - **The merge checks** that proved themselves in review move into the Driver: a stacked child before a branch is
   deleted, and that the merge landed the branch's content.
+- **A human or a schedule starts the Driver,** not an agent: it starts without asking and writes to the forge, and it
+  needs subagents, which a subagent cannot start. An agent calls `continuous-refactoring-run`. The description says so,
+  and the Driver stops in a subagent. `disable-model-invocation` is not used: it also keeps a session's scheduled task
+  from firing the skill, and the slow, scheduled Driver is a purpose of the cadence.
 - **All references stay with the run.** The Driver reaches them through `../continuous-refactoring-run/`.
 
 ## Considered options

@@ -1,6 +1,6 @@
 ---
 name: continuous-refactoring
-description: The Driver of the continuous-refactoring skill suite — keeps a project refactored by calling one run after another, reviewing each merge request, and pausing between rounds until an end. Starts without asking. Use when asked to run continuous refactoring or the skill suite on this project. For one run alone, or inside a subagent the Driver started, use continuous-refactoring-run.
+description: The Driver of the continuous-refactoring skill suite — keeps a project refactored by calling one run after another, reviewing each merge request, and pausing between rounds until an end. Starts without asking. Only when a human or a schedule calls it by name. An agent that wants refactoring done, or a subagent, calls continuous-refactoring-run.
 ---
 
 # Continuous Refactoring
@@ -26,6 +26,9 @@ ticket alone, or for a Pack of the project's own is no Driver's work: invoke `co
 session with that call, and end with it.
 
 ## Before the first round
+
+Started in a subagent → stop, and say that `continuous-refactoring-run` is what an agent calls: a Driver needs
+subagents of its own, and a subagent cannot start any.
 
 1. `../continuous-refactoring-run/SKILL.md` is missing → stop, and say the skill needs its symlink beside this one.
 2. Find the tracker file (`../continuous-refactoring-run/references/refactoring-operations.md`, *The tracker file*).

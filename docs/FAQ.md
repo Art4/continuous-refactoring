@@ -70,6 +70,13 @@ call: the Driver, a run, and Housekeeping alone.
 The name says "continuous", and a single run stops. What continues is the Driver, so it took the name, and
 one run moved to `/continuous-refactoring-run`.
 
+## Why can an agent not start the Driver?
+
+It starts without asking, works for hours and writes to your forge, so an agent that was only asked to tidy
+something should not set it off; and it needs subagents, which a subagent cannot start. Its description says
+so, and in a subagent it stops. The suite does not block it with a skill setting such as
+`disable-model-invocation`, since that would also stop a scheduled task from calling it.
+
 ## Why does the Driver wait between rounds by default?
 
 The suite is meant to keep a project refactored slowly and steadily, beside other agents and humans, not as
@@ -86,10 +93,10 @@ its ticket is due.
 
 ## Can an agent start a run?
 
-Yes, all three commands, and that is what the Driver does: it hands each run to a subagent of its own, so
-every run starts with a fresh context, and starts the next round once the merge request is dealt with. A
-run in a subagent asks nobody, so a call of `/continuous-refactoring-run` from an agent says "do it
-yourself": without it the run ends at its first decision point and writes nothing. The one thing it still
+Yes: `/continuous-refactoring-run` and `/continuous-housekeeping`. That is what the Driver does: it hands each
+run to a subagent of its own, so every run starts with a fresh context, and starts the next round once the
+merge request is dealt with. A run in a subagent asks nobody, so a call from an agent says "do it yourself":
+without it the run ends at its first decision point and writes nothing. The one thing it still
 leaves to you is a change to your `AGENTS.md`. See the [Driver playbook](playbooks/driver.md).
 
 ## Why does the suite prefer my project's own skills for planning and implementing?

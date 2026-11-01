@@ -55,6 +55,10 @@ It tells you about each as it happens, through whatever notification your enviro
 - **Something broke:** a run failed, the working tree is not clean after a run, a merge did not land, or two runs in a row ended without a merge request and without a new waiting ticket.
 - **Your end:** by default the fifth round.
 
+## Who starts it
+
+You or a schedule, by its name. An agent that wants refactoring done calls `/continuous-refactoring-run`; a Driver started in a subagent stops and says so.
+
 ## The first call
 
 On a project without a `## Refactoring operations` section the onboarding asks you questions, and a run in a subagent can ask nobody. So the first call runs the onboarding right in your session, and stops: commit what it wrote, then call again.
