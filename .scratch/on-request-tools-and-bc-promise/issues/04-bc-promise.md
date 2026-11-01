@@ -20,7 +20,7 @@ Blocked by: —
 
   > **BC promise**: A project's documented commitment to code outside its repository — the users of a package, the
   > addons of an application — about which parts of its code stay stable and by which path a **Breaking change** to them
-  > is allowed: a new major version under SemVer, or a deprecation period counted in time and releases (Friendica:
+  > is allowed: a new major version under SemVer, or a deprecation period counted in time and releases (for example:
   > `@deprecated`, then a triggered deprecation notice, then removal no sooner than five months and one release later).
   > The promise is the project's own document; the suite reads it and models no variant of its own. A project without
   > one has no BC promise. A Breaking change the promise allows is still a Breaking change: never shipped under the

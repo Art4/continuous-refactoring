@@ -4,7 +4,7 @@
 
 ## Observation
 
-A Guardrails loop on webtrees-assistent (2026-10-23, 15 rounds, !67–!76): one agent started each run
+A Guardrails loop on a target (2026-10-23, 15 rounds): one agent started each run
 in a subagent (`/continuous-refactoring Track guardrails, do it yourself`), reviewed and merged its merge
 request, and started the next. Agent comments and the human's replies came from the same GitLab account
 (Art4). Replies such as "Choice: 1", "Decision: Option 2" and "Decision: out-of-scope" could not be told

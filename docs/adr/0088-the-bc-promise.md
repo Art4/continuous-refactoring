@@ -6,8 +6,8 @@
 The suite cannot tell a project with a promise to outside code from one without. `principles.md` judges it ad hoc
 ("when in doubt, treat it as depended on"), `rector-type-coverage` adds return types that break a subclass in another
 repository, and Roave BackwardCompatibilityCheck, the tool that would catch such a break, has no place in the tree
-because nothing says when it applies. "Library" is the wrong cut: Friendica is an application (`type: project`,
-calendar tags) with a promise to its addons — Symfony-style, with `@internal`, `final` and extending non-abstract
+because nothing says when it applies. "Library" is the wrong cut: an application (`type: project`,
+calendar tags) can hold a promise to its addons — Symfony-style, with `@internal`, `final` and extending non-abstract
 classes excluded, and a deprecation path counted in time and releases (`@deprecated`, then a triggered notice, then
 removal no sooner than five months and one release later). A SemVer package promises the same by major versions.
 
@@ -31,7 +31,7 @@ question is settled it acts as if a promise exists and proposes no Roave Stage.
   the same wave; *Migrate callers, then delete* holds only for code it does not cover. The suite may hard-deprecate
   by the promise's own procedure, an upgrade note included. Removal is an ordinary ticket.
 - `rector-type-coverage` gets a second path, `rector-bc-library`, taken when the promise covers extending and overriding
-  non-final classes and methods; otherwise Rector's own set, as for Friendica, whose promise excludes exactly that.
+  non-final classes and methods; otherwise Rector's own set, as for a promise that excludes exactly that.
   The package's compatibility table is not copied; the Tool file points at its README.
 - **Roave BC Check** joins the PHP Pack: Tool `roave-bc-check`, recommended, Role API Compatibility (no Signal), one
   Safety Net Stage that requires `composer` and waits for `ci-runner`. It applies when the promise follows SemVer and
@@ -41,10 +41,10 @@ question is settled it acts as if a promise exists and proposes no Roave Stage.
 
 - **Judge the promise on every run.** Five places read it, and a wrong judgement in `principles.md` or in the Rector
   path cannot be undone by a rejection. Rejected.
-- **A term "BC library" recognised by `type: library` and a SemVer tag.** Misses Friendica and every application with
+- **A term "BC library" recognised by `type: library` and a SemVer tag.** Misses every application with
   extension points. Rejected.
 - **A Housekeeping task that keeps deprecations moving** (hard-deprecate what is no longer used, propose removal past
-  the window). Fits Friendica, means nothing to a SemVer package or a project without a promise. Rejected; it stays
+  the window). Fits an application with such a path, means nothing to a SemVer package or a project without a promise. Rejected; it stays
   the target's own work.
 - **Roave in Guardrails.** The break it catches comes from the suite's own structural work, so it has to stand before
   it. Rejected.

@@ -37,6 +37,10 @@ A change to a skill's behaviour is done only when every human-facing doc that de
 
 `README.md` and `docs/**` explain in their own words: they cite no ADR numbers, ticket numbers, or `.scratch/` paths.
 
+### No target projects by name
+
+No file in this repo names a real target project: not `skills/**`, `docs/**`, ADRs, tickets, fixtures or scripts. Write "a target" or use a neutral example such as `acme/shop`. The suite's website and test repositories, its dependencies (`art4/rector-bc-library`) and products such as Redmine are not target projects and stay. No validator check: a list of forbidden names would write them into the repo.
+
 ## The continuous-refactoring suite
 
 This repo IS the skill suite. The skills live under `skills/` and are consumed by symlinking both into a target repo's `.agents/skills/` (see `README.md`):

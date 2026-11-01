@@ -12,7 +12,7 @@ Blocked by: 02, 04
   Fulfilment check (a CI job runs `roave-backward-compatibility-check`), MR scope, why it stands before the rewriters.
 - **Verify before writing:** Roave's minimum PHP (for `min_runtime`); whether dev-dependency conflicts make the Docker
   image the default; that CI fetches tags (`fetch-depth: 0`); how a next-major branch ignores intended breaks; how Roave
-  reads calendar tags such as `2026.05` (the Stage does not apply to Friendica, but the check should not crash on them).
+  reads calendar tags such as `2026.05` (the Stage does not apply to an application with calendar tags, but the check should not crash on them).
 - **`rector-type-coverage`** waits for `roave-bc-check`, and gets a second path in `rector.md`: `rector-bc-library`
   (`Set::BC_TYPE_DECLARATION`, `Set::withTypeCoverageLevel(n)`) when the promise covers extending and overriding
   non-final classes and methods; Rector's own set otherwise. Point at the package's README for the Rector versions it
@@ -20,7 +20,7 @@ Blocked by: 02, 04
 - `docs/FAQ.md`: why Roave only for a SemVer promise; regenerate `docs/tooling/`.
 
 **Done when** a fixture target with a SemVer promise and a tag gets the Roave Stage in the Safety Net, one with a
-Friendica-style promise does not, `rector-type-coverage` waits for it, and tests and validator are green.
+promise counted in time and releases does not, `rector-type-coverage` waits for it, and tests and validator are green.
 
 ## Comments
 
