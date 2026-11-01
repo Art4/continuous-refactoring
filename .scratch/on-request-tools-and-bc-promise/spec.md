@@ -12,8 +12,8 @@ spec cuts them into tickets.
 - **Composer Audit is maintenance, not a guardrail.** Its value is in repetition, which a CI gate cannot give.
 - **`php-minimal-version` legitimises a Floor raise.** A Rector PHP set above the declared floor already made the code
   need a newer PHP; the Stage then wrote that into `composer.json` under the refactor label.
-- **The suite cannot tell a project with a promise to outside code from one without.** Friendica (an application with
-  addons, calendar tags, a deprecation path in time and releases) shows that "library" is the wrong cut.
+- **The suite cannot tell a project with a promise to outside code from one without.** An application with
+  addons, calendar tags and a deprecation path in time and releases shows that "library" is the wrong cut.
 
 ## Decided
 

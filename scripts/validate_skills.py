@@ -99,7 +99,6 @@ VOCAB_ALLOW = {
     ("continuous-housekeeping", "baseline"): "PHPStan's own `phpstan-baseline.neon` file — a real tool artifact name, not a synonym for 'tooling tree'",
     ("continuous-refactoring", "floor"): "the target's declared minimum PHP version ('PHP floor') and the `coverage-floor` node — real technical terms, not synonyms for 'tooling tree'",
     ("continuous-housekeeping", "floor"): "the target's declared minimum PHP version ('PHP floor') — a real technical term, not a synonym for 'tooling tree'",
-    ("continuous-refactoring", "todo"): "incidental substring of the real composer package name `art4/legacy-todo` in a worked example, not a synonym for 'candidate'",
     ("continuous-refactoring", "bookkeeping"): "the onboarding interview names the old **Bookkeeping** bullet it removes from an existing section",
     ("continuous-refactoring", "session"): "a conversation the human opens for themselves — not a second name for a run",
 }

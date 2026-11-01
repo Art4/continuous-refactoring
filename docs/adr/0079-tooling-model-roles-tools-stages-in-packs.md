@@ -59,7 +59,7 @@ the suite does not ship.
 - The runtime floor is handed in by the agent and compared by the parser as numbers, best effort; a value it
   cannot read blocks nothing, and every block names both values. Tool versions are not compared.
 - `test-runner-if-missing` goes: the Role Testing with PHPUnit recommended does its job. A target's open
-  ticket of that Name is closed with a note that Testing takes it over (youthweb has none).
+  ticket of that Name is closed with a note that Testing takes it over.
 - The trace of a scan is kept per Stage, not per Track: a Stage with no ticket ever and no rejection is
   unknown and makes its Track's scan due, and the scan judges only unknown Stages.
 - Tracks stay built on each other; an autonomous run with the Safety Net open ends as before.

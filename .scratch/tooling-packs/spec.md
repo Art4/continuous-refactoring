@@ -216,7 +216,7 @@ Per Pack, the Tools per Role:
   table's `Ticket` column goes.
 - **D24 — `test-runner-if-missing` goes;** the Role Testing with PHPUnit recommended does its job. Ticket 1
   gives it a section in the ADR and a step that closes an open ticket of that Name with a note that the
-  Role Testing takes it over. Checked 2026-10-18: youthweb holds no such ticket.
+  Role Testing takes it over. Checked 2026-10-18: the installed target holds no such ticket.
 
 Side finding: `php_floor_precheck`'s docstring says a blocked leaf is not a rejection, while
 `tooling-tree-parser.md` and `php-tooling-tree.md` have the scan propose one with a blocker; the
