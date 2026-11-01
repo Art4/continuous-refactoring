@@ -28,3 +28,5 @@ Played twice, once with each call.
 - [ ] A run's **Next** line is not taken for an instruction to the Driver.
 
 ## Results
+
+2026-11-01, skill commit 83f57b2: pass, every line, as a walk-through. An earlier round on the text before it passed too and named where the agent guessed; those gaps were closed and this is the replay.

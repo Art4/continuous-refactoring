@@ -30,3 +30,5 @@ Round two:
 - [ ] It stops, says what it saw, and leaves the correction to a normal merge request.
 
 ## Results
+
+2026-11-01, skill commit 83f57b2: pass, every line, as a walk-through. An earlier round on the text before it passed too and named where the agent guessed; those gaps were closed and this is the replay.
