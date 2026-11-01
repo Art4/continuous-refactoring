@@ -93,7 +93,8 @@ security-focused persona go.
 
 Scenarios by hand: a situation and the expected behaviour, written before the skill text and played through by a
 fresh subagent before the merge. First for the Pack route and the Driver. They live in
-`.scratch/driver-and-run-skills/evals/`. No runner and no CI step.
+`.scratch/driver-and-run-skills/evals/` while they are the acceptance of this work, and move to `docs/agents/evals/`
+with ticket 04: they stay regression tests for later changes to the skill text. No runner and no CI step.
 
 ### Reference depth
 
