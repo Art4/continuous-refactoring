@@ -1,7 +1,7 @@
 # 01 — The Opener
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What to build** (ADR-0093, spec Q19–Q23, Q25)
@@ -29,3 +29,9 @@ Blocked by: —
 
 **Done when** r1 (an Opener line in a plan → the next scan files a waiting ticket, no merge request) and r2 (an
 Opener after a rejection → nothing filed) pass as walk-throughs, and tests and validator are green.
+
+## Comments
+
+> **2026-11-02:** Done. The seed takes no `requested` for a Tool whose only ticket waits for the yes to its Opener
+> question, so the Stage holds no Track until then. An Opener is found with **Search** over tickets and over the merge
+> requests, whose description carries the plan's decisions. r1 and r2 pass as walk-throughs.
