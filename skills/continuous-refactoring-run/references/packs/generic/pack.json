@@ -38,6 +38,23 @@
       ]
     },
     {
+      "tool": "bc-promise",
+      "name": "BC promise",
+      "uses": null,
+      "roles": ["compatibility-policy"],
+      "status": "on-request",
+      "details": "bc-promise.md",
+      "stages": [
+        {
+          "slug": "bc-promise",
+          "name": "BC promise",
+          "track": "Safety Net",
+          "requires": [],
+          "waits_for": []
+        }
+      ]
+    },
+    {
       "tool": "secret-detection",
       "name": "Secret Detection",
       "uses": "any secret scanner",

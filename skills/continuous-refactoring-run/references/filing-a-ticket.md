@@ -48,7 +48,7 @@ In the order handed in, so that a ticket's blockers exist before it does:
 - **Title** — what gets done, with the Stage's Name in it: "Introduce PHPStan Level 0", "Raise to PHPStan
   Level 3", "PHPStan Level 2: shrink the baseline".
 - **Text** — for a reader who does not know the skill suite: what the tool is and what the project gains
-  (the Role's Purpose), what the merge request will contain (its MR scope), and both of its `search` words
+  (the Role's Purpose), what the merge request will contain (its MR scope), and its `search` words
   written out. A proposal through an Opener adds the Opener's line and the link to its `Plan` comment.
 - **Blockers** — the tickets of the Stages that block it, the way **Blocked by** says; without that
   operation as one sentence in the text, `Blocked by: <ticket>, <ticket>`. A blocking Stage that has no ticket is named in that sentence by its

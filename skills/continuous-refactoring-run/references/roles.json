@@ -14,6 +14,12 @@
       "signal": null
     },
     {
+      "slug": "compatibility-policy",
+      "name": "Compatibility Policy",
+      "purpose": "The project's promise to code outside it is written down and recorded, so a run knows what it may change.",
+      "signal": null
+    },
+    {
       "slug": "package-management",
       "name": "Package Management",
       "purpose": "Dependencies are declared and installed by a package manager.",

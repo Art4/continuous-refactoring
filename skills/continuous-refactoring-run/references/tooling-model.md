@@ -109,7 +109,7 @@ in its description. Found later, it makes the next scan of the Tool's Track due 
 trace*), and that scan proposes the Tool's first Stage as a question (`track-scan.md`, *Tools on request*).
 Its ticket waits for a human's yes, in an autonomous run too (`filing-a-ticket.md`): on request stays a
 human's request, and the Opener only asks at the moment the Tool pays off. Until the yes the Tool is not
-asked for, so its Stages hold no Track.
+asked for: its ticket waits in its Track, and its Stages do not count towards the Track's fulfilment.
 
 A ticket of the Tool in any state, or a recorded rejection of the Tool, its Stage or its Role, uses every
 Opener of it up. After a rejection no Opener proposes the Tool again; a call that names it still can.

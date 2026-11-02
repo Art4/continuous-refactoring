@@ -1,7 +1,7 @@
 # 02 — The Tool `bc-promise`
 
 Type: task
-Status: open
+Status: done
 Blocked by: 01
 
 **What to build** (ADR-0093, spec Q1–Q3, Q5–Q7, Q9–Q11, Q17)
@@ -46,3 +46,10 @@ Blocked by: 01
 **Done when** a walk-through of r1 with `bc-promise` passes (a plan on an unsettled target writes the Opener; the
 next scan files a waiting ticket with a draft; an answer `none` leads to a merge request with the bullet only), an
 onboarding on a fixture asks nothing about a promise, and tests and validator are green.
+
+## Comments
+
+> **2026-11-02:** Done. Played: a live onboarding on a copy of `php-partial` asks nothing about a promise; r1 with
+> `bc-promise` on a package, as three runs. The first play asked the human twice — the Opener question, then the
+> draft — so the Opener's question now carries the draft in full and one answer settles both; the replay of runs B and
+> C passes. A question the human leaves unanswered stays in the recorded document as not settled.

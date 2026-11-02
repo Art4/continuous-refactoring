@@ -18,6 +18,7 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | --- | --- | --- | --- |
 | Editor Settings (`editor-settings`) | The basic formatting conventions (indentation, charset, line endings) are written down once, for every editor. | – | .editorconfig (recommended, generic) |
 | Continuous Integration (`continuous-integration`) | A pipeline that runs the quality jobs on every change. | – | CI Runner (recommended, generic) |
+| Compatibility Policy (`compatibility-policy`) | The project's promise to code outside it is written down and recorded, so a run knows what it may change. | – | BC promise (on-request, generic) |
 | Package Management (`package-management`) | Dependencies are declared and installed by a package manager. | – | Composer (recommended, php) |
 | Autoloading (`autoloading`) | Classes are found by a convention, not by hand-written includes. | – | PSR-4 Autoloading (recommended, php) |
 | Code Style (`code-style`) | An automatic fixer keeps the code in one style, so later automated rewrites land styled. | – | PHP CS Fixer (recommended, php); Laravel Pint (recognized, php); Easy Coding Standard (recognized, php); PHP_CodeSniffer (recognized, php); Twig-CS-Fixer (recommended, twig-php) |

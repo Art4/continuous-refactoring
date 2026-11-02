@@ -148,16 +148,16 @@ the last word on it.
 
 **What to do:** look at that gate's result in CI before you merge, or install what it needs locally.
 
-## An autonomous run does not settle the BC promise on a guess
+## Without a recorded BC promise, old APIs stay beside new ones
 
 Whether your project promises stability to code outside it — your package's users, your application's
-addons — decides whether an old API may be deleted. An autonomous run takes a promise it found in exactly
-one document, but never decides that there is none: with no document found, or several, it leaves the
-question open, and until you answer it treats code outside the project could reach as covered. Restructurings
-then keep old APIs beside new ones where a deletion would have been fine.
+addons — decides whether an old API may be deleted. Until your tracker file records the promise, the suite
+treats code outside the project could reach as covered: restructurings keep old APIs beside new ones where a
+deletion would have been fine. The first time a plan does so only for that reason, the next scan files a
+ticket that asks you to set the promise up, with a draft. An autonomous run never answers it for you.
 
-**What to do:** answer the question in an interactive run, or add the **BC promise** bullet to
-your tracker file yourself — a path, or `none`.
+**What to do:** answer that ticket, ask for the BC promise in the call ("set up the BC promise"), or add the
+**BC promise** bullet to your tracker file yourself — a path, or `none`.
 
 ## The strict coverage check needs PHPUnit 10, and does not work on Pest
 
