@@ -1,7 +1,7 @@
 # 04 — Roave and Rector with the Tool
 
 Type: task
-Status: open
+Status: done
 Blocked by: 02, 03
 
 **What to build** (ADR-0093, spec Q18)
@@ -18,3 +18,11 @@ Blocked by: 02, 03
 **Done when** the parser, given an unsettled promise, keeps `rector-type-coverage` workable (no Stage held by
 `bc-promise`), a walk-through of `rector-type-coverage` on an unsettled target writes the Opener, and tests and
 validator are green.
+
+## Comments
+
+> **2026-11-02:** Done. Parser on an onboarded copy of `php-clean`, `roave-bc-check` not applicable and nothing
+> requested: `rector-type-coverage` workable, `bc-promise` in no backlog. Walk-through of #50 on a package without a
+> promise: the BC-safe path, and the `Opener: bc-promise` line under `Decisions`. The play found that the line
+> breaks the plain-words rule for forge text; `forge-facing-writing.md` now keeps `Plan`, `Open question` and
+> `Opener: <tool>` as written.
