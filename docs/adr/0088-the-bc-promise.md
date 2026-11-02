@@ -1,5 +1,8 @@
 # The BC promise
 
+> Amended by [ADR-0093](0093-the-bc-promise-is-a-tool-on-request-with-an-opener.md): the BC promise is settled by a
+> Tool on request, proposed through an Opener, no longer in onboarding.
+
 > Amends [ADR-0071](0071-tracker-through-operations-tracker-and-forge-apart.md).
 
 

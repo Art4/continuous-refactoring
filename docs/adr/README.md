@@ -4,7 +4,7 @@
 
 Every decision with the status its banner gives. *Superseded*: nothing of it holds; *superseded in part*: some of it holds, the banner says what; *amended*: it holds with the changes the later ADRs make; *in force*: unchanged.
 
-Superseded: 34 · Superseded in part: 22 · Amended: 17 · In force: 19
+Superseded: 34 · Superseded in part: 22 · Amended: 18 · In force: 19
 
 | ADR | Decision | Status | Changed by | Changes |
 | --- | --- | --- | --- | --- |
@@ -93,10 +93,11 @@ Superseded: 34 · Superseded in part: 22 · Amended: 17 · In force: 19
 | [0083](0083-ready-after-plan-is-an-optional-operation.md) | Ready after plan is an optional operation, set only where the suite posts the plan | in force |  | [0071](0071-tracker-through-operations-tracker-and-forge-apart.md) |
 | [0084](0084-phpstan-levels-wait-for-rector-and-the-phpunit-set-is-guardrails.md) | PHPStan Levels 4 and 5 wait for Rector; the Rector PHPUnit Set is a Guardrails Stage | amended | [0086](0086-tools-on-request.md) |  |
 | [0085](0085-a-named-ticket-narrows-worklist-and-reconcile.md) | A named ticket narrows the worklist and reconcile to itself | in force |  | [0074](0074-state-lives-in-the-tracker-found-by-search.md) |
-| [0086](0086-tools-on-request.md) | Tools on request | amended | [0089](0089-secret-detection-on-request.md) | [0005](0005-tooling-tree-not-baseline-skill.md), [0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md), [0045](0045-semgrep-owasp-top-ten-node.md), [0074](0074-state-lives-in-the-tracker-found-by-search.md), [0079](0079-tooling-model-roles-tools-stages-in-packs.md), [0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md), [0084](0084-phpstan-levels-wait-for-rector-and-the-phpunit-set-is-guardrails.md) |
+| [0086](0086-tools-on-request.md) | Tools on request | amended | [0089](0089-secret-detection-on-request.md), [0093](0093-the-bc-promise-is-a-tool-on-request-with-an-opener.md) | [0005](0005-tooling-tree-not-baseline-skill.md), [0019](0019-static-analyzer-mutual-exclusion-and-taint-analysis-node.md), [0045](0045-semgrep-owasp-top-ten-node.md), [0074](0074-state-lives-in-the-tracker-found-by-search.md), [0079](0079-tooling-model-roles-tools-stages-in-packs.md), [0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md), [0084](0084-phpstan-levels-wait-for-rector-and-the-phpunit-set-is-guardrails.md) |
 | [0087](0087-rector-stops-at-the-declared-php-floor.md) | Rector stops at the declared PHP floor | in force |  | [0041](0041-php-minimal-version-only-corrects-never-raises.md) |
-| [0088](0088-the-bc-promise.md) | The BC promise | in force |  | [0071](0071-tracker-through-operations-tracker-and-forge-apart.md) |
+| [0088](0088-the-bc-promise.md) | The BC promise | amended | [0093](0093-the-bc-promise-is-a-tool-on-request-with-an-opener.md) | [0071](0071-tracker-through-operations-tracker-and-forge-apart.md) |
 | [0089](0089-secret-detection-on-request.md) | Secret Detection on request, the history scan on its own | in force |  | [0040](0040-signal-tool-nodes-and-tree-edge-simplification.md), [0043](0043-secret-history-scan-as-process-step.md), [0086](0086-tools-on-request.md) |
 | [0090](0090-coverage-metadata-stages.md) | Coverage metadata: two Stages after the coverage floor | in force |  | [0044](0044-coverage-floor-node.md) |
 | [0091](0091-the-tracker-file-may-live-elsewhere.md) | The tracker file may live elsewhere, named in `AGENTS.md` | in force |  | [0071](0071-tracker-through-operations-tracker-and-forge-apart.md) |
 | [0092](0092-the-driver-takes-the-main-name.md) | The Driver takes the main name; a run gets a skill of its own | in force |  | [0075](0075-one-skill-with-references-the-targets-own-skills-first.md) |
+| [0093](0093-the-bc-promise-is-a-tool-on-request-with-an-opener.md) | The BC promise is a Tool on request, proposed through an Opener | in force |  | [0086](0086-tools-on-request.md), [0088](0088-the-bc-promise.md) |

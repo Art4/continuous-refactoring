@@ -1,6 +1,8 @@
 # Tools on request
 
 > Amended by [ADR-0089](0089-secret-detection-on-request.md): Secret Detection is on request too.
+> Amended by [ADR-0093](0093-the-bc-promise-is-a-tool-on-request-with-an-opener.md): a Tool on request may be
+> proposed, as a question, once an Opener was seen.
 
 > Amends [ADR-0079](0079-tooling-model-roles-tools-stages-in-packs.md): a Tool has a third status, and `after` is
 > renamed `waits_for`. Amends [ADR-0082](0082-psalm-taint-analysis-is-a-guardrails-stage.md): Semgrep no longer
