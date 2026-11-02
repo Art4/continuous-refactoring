@@ -65,8 +65,21 @@ column — except **BC promise**, which is not about the tracker: absent, the qu
 | **Rejected** | How a rejection is recorded with its reason and found again: a closed ticket or a file, and where | At the decision point that records the first rejection the suite proposes a place, and writes the bullet from the answer |
 | **Blocked by** | How a ticket states which tickets block it, and when it counts as unblocked | The suite writes the dependency as a sentence in the ticket's text and reads it there |
 | **Housekeeping** | Where the **Housekeeping template** lives and how the next **Housekeeping ticket** is made from it | Housekeeping's mechanism counts as missing: the Housekeeping Track proposes to set it up and writes the bullet |
-| **BC promise** | Where the project's **BC promise** is written down — a path in the repository — or `none` when no code outside the repository relies on this one's. The suite reads the document; it models no promise of its own | Not settled yet: code outside the repository could reach counts as covered (`principles.md`, *Strangler Fig*). The Tool `bc-promise`, on request or through its Opener, settles it (`packs/generic/bc-promise.md`) |
+| **BC promise** | Where the project's **BC promise** is written down — a path in the repository or an `https://` URL — or `none` when no code outside the repository relies on this one's; or a list of parts, each with its scope (*Reading the BC promise*, below). The suite reads the document; it models no promise of its own | Not settled yet: code outside the repository could reach counts as covered (`principles.md`, *Strangler Fig*). The Tool `bc-promise`, on request or through its Opener, settles it (`packs/generic/bc-promise.md`) |
 | **Tooling Pack** | The directory in the target that holds its own **Pack**: a `pack.json` and, where the Pack adds Roles, a `roles.json`, with the Tool files beside them. Recommended place: a folder `tooling-pack` beside the tracker file | The target has no Pack of its own; only the tools of the suite's Packs are proposed |
+
+### Reading the BC promise
+
+- **One target or a list.** The bullet names one target — a path, an `https://` URL, or `none` — or a list of
+  parts, each `<scope>: <target>`. A scope is an area of the code (a path such as `packages/client/`) or a surface
+  the code serves (PHP API, HTTP API, CLI, …).
+- **The part that applies** is the one whose scope covers the code a change touches. Where scopes overlap, the
+  stricter part applies: the one that allows less of the change. Code no part covers is not settled: it counts as
+  covered. A `none` without a scope holds for the whole repository; a part `none` only for its scope.
+- **A URL** is read where the promise is needed. One that cannot be read in this run leaves its part not settled
+  for this run; the plan's `Decisions` and the closing report name the URL.
+- **One release line.** The promise is that of the release line the default branch is on; other maintained
+  branches and their promises are not the suite's.
 
 ## Templates
 
@@ -135,6 +148,6 @@ the same name.
 - **Candidate**, as a label: ``the label `<label>`. List the open ones with `<the tracker's list command, narrowed to that label>`.`` Where the tracker has no labels: the mechanism the human names (a custom field, a subject prefix, child tickets of one collecting ticket).
 - **Priority**, as a label: ``the label `<label>`, next to the **Candidate** mark.``
 - **Ready after plan**, as a label: ``the label `<label>`: `<the tracker's command to set it>`; removing a blocking label: `<command>`.`` Running it twice leaves the ticket as it is. Where the tracker uses a board column or a status field, the command that moves the ticket there.
-- **BC promise**: ``the project's promise to code outside it is `<path>`; read it before changing what it covers.`` Or: ``none — no code outside this repository relies on this one's.``
+- **BC promise**: ``the project's promise to code outside it is `<path or URL>`; read it before changing what it covers.`` Or: ``none — no code outside this repository relies on this one's.`` Or, with several parts, one sub-bullet each: ``<scope>: `<path or URL>` `` or ``<scope>: none``.
 - **Rejected**, as a closed ticket: ``a closed ticket carrying `<mark>`, the reason in its last comment. Found again with **Search**, narrowed to that mark.``
 - **Rejected**, as a file: ``one file per rejection at `<folder>/<slug>.md`, holding the reason. Found again with `grep -rli "<word>" <folder>/`.`` The engineering skills' `.out-of-scope/` folder is the natural `<folder>` when the target uses it.
