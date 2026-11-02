@@ -93,7 +93,8 @@ the last round.
 | `review only`, and more than three merge requests open | **paused**: the open merge requests, waiting for the human |
 | The End is reached | **ended**: what the rounds delivered, and what waits |
 
-A stop skips the cadence, and the next run with it.
+A stop skips the cadence, and the next run with it. It also ends the timer (Claude Code: `ScheduleWakeup` with
+`stop: true`) before the closing message, so that message is the Driver's last word.
 
 Open merge requests are those of the suite's tickets, found as
 `../continuous-refactoring-run/references/worklist.md`, *A ticket's merge request*, finds them. Handed-over ones count.
