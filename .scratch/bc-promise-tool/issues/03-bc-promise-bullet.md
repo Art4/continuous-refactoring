@@ -1,7 +1,7 @@
 # 03 — The bullet: a URL, and several promises
 
 Type: task
-Status: open
+Status: done
 Blocked by: 02
 
 **What to build** (ADR-0093, spec Q8, Q16)
@@ -24,3 +24,11 @@ Blocked by: 02
 
 **Done when** walk-throughs hold: a list with an overlapping scope picks the stricter part; an unreadable URL makes
 the run careful with a finding; and tests and validator are green.
+
+## Comments
+
+> **2026-11-02:** Done. The reading rules live once, in `refactoring-operations.md`, *Reading the BC promise*; the
+> other readers point there. Played as walk-throughs: an overlap picks the stricter part (Strangler Fig), an unreadable
+> URL leaves its part unsettled, named in the plan's `Decisions` and the closing report. Open for the human: a part
+> whose document only narrows another ("follows the PHP API promise, except …") loses its exception under the
+> stricter-part rule.
