@@ -101,7 +101,9 @@ run finds the branch or its merge request and continues there. Post it as one co
 - **Slices**, in the order they are built, each small enough for one commit or a few.
 - **Done when** — the commands that must pass.
 - **Decisions** — every question of this design that met the ADR bar, with its answer: the ticket's
-  **decision trail**; it also names each principle (`principles.md`) that changed a decision. Where the target keeps ADRs or a glossary (`implement-point.md`, *Slices every
+  **decision trail**; it also names each principle (`principles.md`) that changed a decision. For each Tool on request that is not
+  in place, has no ticket and is not rejected (the parser's `tools`), whose Opener in its `details` file this
+  plan meets, one more line: `Opener: <tool> — <why>`. Where the target keeps ADRs or a glossary (`implement-point.md`, *Slices every
   kind of ticket can have*), each decision that belongs there is also a slice.
 - **This merge request** — only when the plan covers a part of the ticket: which part, and what stays.
 

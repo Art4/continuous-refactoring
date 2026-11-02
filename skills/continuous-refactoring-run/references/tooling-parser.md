@@ -44,7 +44,7 @@ order. The seed is a JSON file written to a temporary directory outside the targ
 | `rejected` | each rejected Role, Tool or Stage, with its blocker: `null`, or the minimum runtime whose arrival lifts the rejection (`rejection.md`) |
 | `packs` | the Packs whose *Applies when* holds; missing means all of them |
 | `not_applicable` | the Stages whose own *Applies when* does not hold |
-| `requested` | the Stages of on-request Tools a human asked for: a ticket of them exists, or the call names them. Naming a Stage of another Tool ends in exit code 2 |
+| `requested` | the Stages of on-request Tools a human asked for: a ticket of them exists, or the call names them. A ticket that still waits for the yes to its Opener question (`tooling-model.md`, *An Opener*) does not count. Naming a Stage of another Tool ends in exit code 2 |
 | `runtime` | the lowest version of each runtime the target allows, read from its manifest and written as a string: for PHP the lowest version `require.php` allows, or `config.platform.php` where that is set. Left out where it is unclear: a missing or unreadable version blocks nothing |
 
 A Stage in none of the lists is undecided. `git` and `onboarding-setup` are settled by the parser itself and
@@ -82,10 +82,11 @@ For a tooling Track that has a trace, its tickets are the state. The seed holds:
 - every recorded rejection as `rejected`, with its blocker (`rejection.md`, *Finding rejections*), of a
   Role, Tool or Stage the Packs still have; a rejection of one the suite has since dropped is left out;
 - every Stage of the Track that is *known* — a ticket of it exists in some state, or a rejection of it is
-  on record — and has no open ticket as `fulfilled`, taken as done and not judged. A Stage that is not
-  known stays undecided, and its Track's scan is due (`worklist.md`);
+  on record — and has no open ticket and no rejection as `fulfilled`, taken as done and not judged; a
+  rejected one is in `rejected` alone. A Stage that is not known stays undecided, and its Track's scan
+  is due (`worklist.md`);
 - every Stage of an on-request Tool that has a ticket in some state, or that the call names, as
-  `requested`;
+  `requested` — except a Tool whose only ticket still waits for the yes to its Opener question;
 - the Packs and Stages the *Applies when* sentences hold for, and the runtime, judged this run
   (`track-scan.md`, *Judging*). No ticket stands for them, so the tracker says nothing about them.
 

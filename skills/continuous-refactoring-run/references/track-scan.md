@@ -19,6 +19,8 @@ narrows what step 4 proposes; of the Stages outside it, only those a covered Sta
   a restriction, and its Stages go into the seed's `requested`.
 - **The call asks for a scan including the on-request Tools** → all of them are in scope and `requested`.
 - **A ticket of one exists** → its Stages are `requested` (`tooling-parser.md`, *The seed from the trace*).
+- **Its Opener was found, and nothing used it up** (`tooling-model.md`, *An Opener*) → its first Stage is
+  judged and, not fulfilled, proposed as a question in step 4. It does not go into `requested`.
 
 Otherwise its Stages are not judged, except the first Stage of each such Tool, which is judged like a
 recognized Tool's to say whether it fills a Role.
@@ -69,14 +71,15 @@ Write the seed and run the parser with it. Take the Track's `backlog`, `workable
 
 ## 4. Proposals
 
-Go through the backlog in its order. Each Stage becomes one proposal — its Name, its Purpose in one line,
-and what blocks it — unless one of these applies first:
+Go through the backlog in its order, then the Stages proposed through an Opener. Each Stage becomes one
+proposal — its Name, its Purpose in one line, and what blocks it — unless one of these applies first:
 
 | The Stage | Instead |
 | --- | --- |
 | already has an open ticket (a scan the call asked for) | no proposal; the ticket stands |
 | is in `runtime_blocked` and not rejected | the proposal is to record a rejection with that runtime version as its blocker (`rejection.md`, *Below the runtime floor*) |
 | is in `withheld` as closed by a rejection | out of reach: no ticket could unblock it. Named in one line with what it hangs on, no proposal |
+| is proposed through an Opener | the proposal carries the open question "Set up <Tool>?", the default the suite recommends being to set it up, and the Opener: its line and a link to the `Plan` comment that wrote it |
 
 **What blocks a proposal** is read from `tree.stages`: every `requires` Stage that is not fulfilled; every
 required Role that is not filled, where the Tool recommended for it stands for it; and every `waits_for`
@@ -114,7 +117,7 @@ out at filing for closing with a note, as selection does at pick-up (`selection.
   why — and return to Track choice with the Track marked as tried.
 
 Either way the report ends with one line naming the Track's on-request Tools that are neither asked for
-nor in place, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis,
+nor in place nor proposed through an Opener, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis,
 Secret Detection — name one in the call to set it up." Nothing is filed for them.
 
 The scan is done when every Stage in scope is fulfilled, rejected, proposed, or named as out of reach.

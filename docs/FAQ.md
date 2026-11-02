@@ -150,9 +150,14 @@ recurring Housekeeping task re-checks the tooling, and you can ask for a scan in
 
 Because their worth depends on the project, and the suite cannot tell it reliably. A security scanner such
 as Semgrep finds a lot in code that grew for years without guardrails and almost nothing in a young project
-that had them from the start; there, its ticket is only noise. Mutation testing is costly in another way: it runs the tests hundreds of times, which is worth it once they are good enough to judge. A gate against committed secrets adds little on top of Housekeeping, which scans the Git history in every cycle, with a scanner of its own where your project has none; and a pipeline only sees a secret once it is pushed, when it has to be rotated anyway. Such a tool is never offered unasked, and
+that had them from the start; there, its ticket is only noise. Mutation testing is costly in another way: it runs the tests hundreds of times, which is worth it once they are good enough to judge. A gate against committed secrets adds little on top of Housekeeping, which scans the Git history in every cycle, with a scanner of its own where your project has none; and a pipeline only sees a secret once it is pushed, when it has to be rotated anyway. Such a tool is never set up unasked, and
 never blocks a Track. Every scan report names what is available on request; name one in the call and it is
 proposed and worked like any other tool.
+
+A tool on request may still be offered once, as a question, when a run meets the situation in which it
+would have paid off. Asking up front would come too early, and never asking would leave you to think of it
+yourself. So the run notes the moment in its plan, and the next scan files a ticket that asks you. Your yes
+starts the work; a no keeps the tool from being offered again.
 
 ## Why is the dependency audit a Housekeeping task and not a tool to set up?
 

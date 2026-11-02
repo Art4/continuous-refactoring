@@ -33,7 +33,7 @@ repository.
   careful way only because the promise is not settled.
 - **A ticket from an Opener waits for a human's yes,** in an autonomous run too: it carries the question "Set up
   <Tool>?" and the Opener with a link to its plan. On request stays a human's request; the Opener only asks at the
-  moment the Tool would pay off.
+  moment the Tool would pay off. Until the yes the Tool is not asked for, so its Stage holds no Track.
 - **The draft.** `bc-promise`'s ticket carries a draft that answers the questions of the Tool file from evidence in
   the repository, each answer with its evidence, each question without evidence left open. The draft describes
   practice; only the human's answer makes it a promise. The Tool file lists the questions, never a model text. A
