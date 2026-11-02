@@ -3,7 +3,8 @@
 Hand-written tests of the skill text, played before a change to it merges. No runner and no CI step. For a test on a
 real target, see [the field eval](../field-eval.md).
 
-Each file is one scenario: the situation, the call, the expected behaviour. A scenario passes when every line of
+Each file is one scenario: the situation, the call, the expected behaviour. Its prefix names what it tests: `p`
+the Pack route, `d` the Driver, `r` a run. A scenario passes when every line of
 its list holds.
 
 | Scenario | Covers | How it is played |
@@ -22,6 +23,8 @@ its list holds.
 | `d9-started-by-an-agent` | the Driver | live, in a real session |
 | `d10-a-stop-after-a-wake-up` | the Driver | walk-through |
 | `d11-the-human-asks-for-changes` | the Driver | walk-through |
+| `r1-opener-seen` | a run | walk-through |
+| `r2-opener-after-rejection` | a run | walk-through |
 
 ## Playing one
 

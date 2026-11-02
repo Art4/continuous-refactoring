@@ -56,7 +56,9 @@ recorded rejection of it, of its Tool or of its Role (`rejection.md`, *Finding r
 Track has a **trace** when every Stage of it that applies is known. Asked only of a Track with no open
 ticket, over the Stages of the Track's `nodes` in a call with the Packs that apply (`track-scan.md`,
 *Judging*), without the Stages whose own *Applies when* does not hold and without those marked
-`on_request`: a Stage nobody asked for is never due. where one listing of all
+`on_request`, except the first Stage of a Tool whose Opener was found and not used up: a Stage nobody asked for is never
+due otherwise. An Opener is found with **Search** for `Opener: <tool>` over open and closed tickets, and over
+the merge requests with the tool **Merge requests** names (`tooling-model.md`, *An Opener*). Where one listing of all
 tickets, open and closed, is short enough, read it once; otherwise run **Search** with each Stage's
 `search` words over open and closed tickets, and stop at the first Stage that is not known.
 

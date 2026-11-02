@@ -35,7 +35,7 @@ tooling_tree.py         the parser
 
 A Tool's `details` file holds what is prose: for each Stage its Purpose where it goes beyond the Role's, the
 Fulfilment check and MR scope, the Ratchet, the Housekeeping line, and a sentence on why the Tool comes
-after what it comes after. The JSON holds only what the parser computes with and the generated pages show.
+after what it comes after. A Tool on request may also name its **Opener** (*An Opener*, below). The JSON holds only what the parser computes with and the generated pages show.
 
 The JSON files are written in one fixed form: two-space indent, objects expanded one key per line, lists
 of plain values on one line, Stages in the order of the Pack, keys in the order of the schema.
@@ -59,7 +59,8 @@ each have a Code Style Tool and neither takes the other's place. A target's own 
 Every Tool has:
 
 - `status` — **recommended**: proposed when its Role is empty. **on-request**: counted when it is there,
-  proposed only when a human asks for it — worth having on some targets and noise on others (Semgrep finds
+  proposed only when a human asks for it, or as a question once its Opener was seen — worth having on some
+  targets and noise on others (Semgrep finds
   little in code written under guardrails). **recognized**: counted when it is there, never proposed. One
   recommended Tool per Role and Pack.
 - `roles` — at least one; `uses` — what it runs, or null for a convention; `details` — its prose file, named relative to the Pack's directory;
@@ -99,6 +100,20 @@ target's installed skills, so an editor checks it.
 - **It comes last** in the order of the Packs, so the suite's Stages are proposed first.
 - **Its *Applies when* is judged** like the suite's Packs'; the Pack of a project is usually "Always."
 
+## An Opener
+
+A Tool on request may name, in its `details` file, an **Opener**: the situation in a run where the Tool
+would have paid off, judged by the agent like an *Applies when*. A plan that meets it writes the line
+`Opener: <tool> — <why>` under `Decisions` (`design-point.md`, step 5); the plan's merge request carries it
+in its description. Found later, it makes the next scan of the Tool's Track due (`worklist.md`, *A Track's
+trace*), and that scan proposes the Tool's first Stage as a question (`track-scan.md`, *Tools on request*).
+Its ticket waits for a human's yes, in an autonomous run too (`filing-a-ticket.md`): on request stays a
+human's request, and the Opener only asks at the moment the Tool pays off. Until the yes the Tool is not
+asked for, so its Stages hold no Track.
+
+A ticket of the Tool in any state, or a recorded rejection of the Tool, its Stage or its Role, uses every
+Opener of it up. After a rejection no Opener proposes the Tool again; a call that names it still can.
+
 ## What the parser computes
 
 From the Packs and a seed (`tooling-parser.md`): which Packs and Stages apply, which Stages are fulfilled,
@@ -118,7 +133,8 @@ which subjects are rejected, and the runtime the target allows.
 - **A Stage that can never be fulfilled** is one of a recognized Tool that is not there, of an on-request
   Tool nobody asked for, or of a Tool that is out.
 - **An on-request Tool is asked for** once a Stage of it is in the seed's `requested`: a ticket of it
-  exists, or the call names it. Its Stages are then ordinary Stages.
+  exists, or the call names it. A ticket that still waits for the human's yes to its Opener question does not
+  count. Its Stages are then ordinary Stages.
 - **A rejection** names a Role, a Tool or a Stage and may carry a blocker, `{"php": "8.1"}`: the runtime
   whose arrival lifts it. Rejecting a Role closes the Tools that play it; rejecting a Tool closes its
   Stages and leaves the Role for another Tool.

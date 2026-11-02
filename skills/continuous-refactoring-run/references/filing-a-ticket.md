@@ -35,7 +35,8 @@ and settle on one:
 - **Recommendation:** file every proposal that carries no open question; record the proposed rejections;
   close the tickets whose Stage is fulfilled. A proposal with an open question is filed with it: a
   question the human answered here goes into the ticket's text; one left open — always in an autonomous
-  run — is posted on the new ticket in step 3.
+  run — is posted on the new ticket in step 3. The question of a proposal through an Opener is never answered
+  by the recommendation: its ticket waits for a human's yes (`tooling-model.md`, *An Opener*).
 - A proposal neither filed nor declined is not stored anywhere. Say so before the answer is taken: its
   Stage counts as done from now on, until a scan the call asks for or Housekeeping's re-check offers it
   again.
@@ -48,7 +49,7 @@ In the order handed in, so that a ticket's blockers exist before it does:
   Level 3", "PHPStan Level 2: shrink the baseline".
 - **Text** — for a reader who does not know the skill suite: what the tool is and what the project gains
   (the Role's Purpose), what the merge request will contain (its MR scope), and both of its `search` words
-  written out.
+  written out. A proposal through an Opener adds the Opener's line and the link to its `Plan` comment.
 - **Blockers** — the tickets of the Stages that block it, the way **Blocked by** says; without that
   operation as one sentence in the text, `Blocked by: <ticket>, <ticket>`. A blocking Stage that has no ticket is named in that sentence by its
   Name, in both cases, so the ticket reads as blocked. A blocker out of a group of alternatives adds that
