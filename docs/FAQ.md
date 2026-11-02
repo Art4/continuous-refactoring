@@ -318,15 +318,20 @@ ticket for you, when your promise allows it. Where every caller is in the projec
 cover it, the suite moves all callers and deletes the old API in the same step, so no compatibility layer is
 left behind. The plan says which case it found.
 
-## What is the BC promise, and why does the suite ask about it?
+## What is the BC promise, and when does the suite ask about it?
 
 It is your project's own document saying which parts of the code stay stable for code outside the project
 and how a breaking change is allowed: a new major version under SemVer, or a deprecation period counted in
 releases and months, as some applications promise their addons. The suite does not model either; it reads your
-document. It asks once, at onboarding or at the start of the next run, because several decisions depend on
-the answer and a wrong guess cannot be undone by declining a ticket: deleting an API your addons use is a
-break, keeping an API nobody outside uses is clutter. It proposes the document it found, or "none". Until
-you answer, it treats code reachable from outside as covered.
+document. Until it knows the document, it treats code reachable from outside as covered, which is safe but
+keeps old APIs nobody outside may use.
+
+It does not ask at onboarding, where the question would come early and without context. It asks when the
+answer starts to matter: the first time a plan keeps an old API only because the promise is open, the next
+scan files a ticket. That ticket carries what the suite found — the document, or a draft that answers the
+usual questions of such a promise from your code (who relies on it, what is covered and left out, how a
+deprecation is marked) and leaves open what only you can say, such as how long a deprecation lasts. Your
+answer on the ticket decides; decline it and the suite stays careful without asking again.
 
 ## Why is the backward-compatibility check set up only for a SemVer promise?
 

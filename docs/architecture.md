@@ -34,7 +34,7 @@ A human or a schedule starts the Driver. A run and Housekeeping may also be call
 
 | Step | What happens | Ends when |
 |---|---|---|
-| 1 Ready | No Git repository ends the run, and so does a tracker file named outside the repository. A tracker file without the suite's section, or with a required operation missing, leads into the onboarding interview. A complete section without a **BC promise** answer gets that one question, and the run goes on | the section carries the three required operations, and the BC promise was asked about |
+| 1 Ready | No Git repository ends the run, and so does a tracker file named outside the repository. A tracker file without the suite's section, or with a required operation missing, leads into the onboarding interview. | the section carries the three required operations |
 | 2 Worklist | The open tickets are searched, each sorted into a Track and given a state: workable, in review, blocked, waiting. A ticket named in the call is the worklist alone | every ticket found has both |
 | 3 Reconcile | Merge requests that were merged or closed since, and declined work whose stated blocker is now met, are laid out with what follows. With a ticket named in the call, only that ticket's merge request | every finding is acted on or left as decided |
 | 4 Track choice | One Track is recommended in the fixed order; the run may end here | a Track is named |

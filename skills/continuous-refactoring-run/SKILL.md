@@ -85,9 +85,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
    worklist, and it does not ask who commits what. The final report says the onboarding is complete (or
    what ended it), names the files the interview wrote and any other change in the working tree, and
    recommends committing them and then calling the skill again; a call for a Pack adds that the Pack is still
-   to come. The section is complete but has no
-   **BC promise** bullet → `references/onboarding-setup-interview.md`, *The BC promise alone*, then go on.
-   *Done when* the section carries the three required operations, and the BC promise was asked about.
+   to come.
+   *Done when* the section carries the three required operations.
 
 2. **Worklist.** Build the worklist per `references/worklist.md`.
    *Done when* every open ticket found has a Track and a state.

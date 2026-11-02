@@ -48,7 +48,8 @@ by file count alone, one merge request per rule.
 (`refactoring-operations.md`, **BC promise**; what it covers is the promise's own call, `@internal` code is
 often left out), or the migration is too wide to replace in one reviewable step. While the target's
 **BC promise** bullet is missing, the question is not settled: treat whatever code outside the repository
-could reach as covered.
+could reach as covered, and where that alone keeps the old path, the plan meets the Opener of the Tool
+`bc-promise` (`packs/generic/bc-promise.md`).
 
 Replace the old piece by piece, old and new working side by side until the swap is complete — never a
 big-bang rewrite. Under a promise the old path is deprecated the way the promise says — the marker, and
