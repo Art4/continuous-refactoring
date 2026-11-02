@@ -42,7 +42,8 @@ subagents of its own, and a subagent cannot start any.
 
 1. **Ready.** The default branch checked out and pulled. An open merge request comes first where, since the Driver's
    last comment on it, the human has answered its question or asked for changes, in a review or a comment: step 2
-   names its ticket. A request for changes from the human is reworked like one from the review.
+   names its ticket. A request for changes from the human is reworked like one from the review, and counts among the round's
+   reworks.
 2. **Run.** In a subagent of its own, and wait for its result:
 
    > Invoke the continuous-refactoring-run skill with the call `<the Call, if any> do it yourself` and follow it to
