@@ -333,6 +333,15 @@ usual questions of such a promise from your code (who relies on it, what is cove
 deprecation is marked) and leaves open what only you can say, such as how long a deprecation lasts. Your
 answer on the ticket decides; decline it and the suite stays careful without asking again.
 
+## My project has several APIs, or its promise lives on a website. Can the suite read that?
+
+Yes. The **BC promise** bullet in your tracker file may name a page on your website instead of a file, and it
+may list several promises, each with what it covers: a folder such as `packages/client/`, or a surface such as
+the PHP API, an HTTP API or the command line. Where two cover the same code, the suite follows the stricter one;
+code none of them covers it treats as covered. A website that keeps one page per release line gets the page of
+the line your default branch is on, and a Housekeeping task points it at the next line after such a release. A
+page the run cannot open leaves that part unsettled for the run, and the run says so.
+
 ## Why is the backward-compatibility check set up only for a SemVer promise?
 
 Because the check, Roave's Backward Compatibility Check, compares your code with the last release and

@@ -14,7 +14,9 @@ back while it is open: until it is settled, whatever code outside the repository
 - **Purpose:** the promise is written down and recorded, so that a run knows which code it may delete or reshape
   and which it may only deprecate.
 - **Fulfilment check:** the target's `## Refactoring operations` section has a **BC promise** bullet: a path that
-  exists in the repository, or `none`. A document without the bullet does not count.
+  exists in the repository, an `https://` URL (not fetched to judge the Stage), `none`, or a list of parts each
+  naming one of these with its scope (`../../refactoring-operations.md`, *Reading the BC promise*). A document
+  without the bullet does not count.
 - **Opener:** a plan that takes the careful way only because the bullet is missing: Strangler Fig, with the old path
   kept beside the new, where *Migrate callers, then delete* would apply if no code outside the repository relied on
   this one's. Its question asks more than "Set up BC promise?": the scan works out the proposal (*MR scope*,
@@ -22,13 +24,18 @@ back while it is open: until it is settled, whatever code outside the repository
   request would hold, and asks whether to record it so. One answer settles both.
 - **MR scope:** the bullet, placed after the last bullet of the section, the rest of the file unchanged, plus what
   *Finding the BC promise* led to:
-  - **one document found** → the bullet only; the description names which of the questions below the document
-    leaves open;
+  - **one document found**, in the repository or on the project's website → the bullet only, with its path or
+    URL; the description names which of the questions below the document leaves open. Where the website keeps
+    one page per release line, the URL of the line the default branch is on, and the Housekeeping line below
+    goes into the target's Housekeeping template (`../../implement-point.md`, *Slices every kind of ticket can
+    have*);
+  - **several, each for its own part** of the code or surface → the bullet as a list, one part each with its
+    scope;
   - **evidence that no code outside the repository relies on this one's** — a `project` type, no published
     package, no plugin, hook or event API → the bullet `none`, the evidence in the description;
   - **otherwise** → a draft named `bc-promise.md` in the `docs` folder, or `BC-PROMISE.md` at the root where
-    there is none; a docs convention the project has (a folder for its website, say) wins. The draft speaks to the users of the
-    project's code, not to its contributors. It answers each question below from evidence in the repository,
+    there is none; a docs convention the project has (a folder for its website, say) wins. The draft speaks to
+    the users of the project's code, not to its contributors. It answers each question below from evidence in the repository,
     names the evidence beside each answer, and leaves each question without evidence as an open question for the
     human. What the code shows is written as what the project has done so far; only the human's answer makes it
     a promise. A question still without an answer when the document is recorded stays in it as not settled,
@@ -39,6 +46,8 @@ back while it is open: until it is settled, whatever code outside the repository
   confirms the proposal, or names what to change, is planned from as it stands; the merge request holds what the
   human answered, and its review is an ordinary one.
 - **Rejection:** the careful default stays for good, and no Opener proposes the Tool again.
+- **Housekeeping:** where the bullet names a URL of one release line, after a release that starts a new line:
+  point it at the new line's page.
 
 #### Finding the BC promise
 
@@ -46,8 +55,10 @@ Read-only. Look for a document in which the project promises code outside the re
 package, the addons of its application — which parts stay stable and how a breaking change is allowed: `AGENTS.md`,
 `CLAUDE.md`, `CONTRIBUTING*`, `README*`, `UPGRADE*` and `docs/`, for words such as backward compatibility, BC
 promise, deprecation policy or semantic versioning. A pointer in `AGENTS.md` to such a document counts as finding
-it. A sentence that only names SemVer for the version numbers is no promise. The result is **one document**,
-**several** (the proposal names each, with a line from it, and asks which), or **none found**.
+it, and so does a link from those files to such a page on the project's website. A sentence that only names
+SemVer for the version numbers is no promise. The result is **one document**, **several** — each for its own
+part, or covering the same code, in which case the proposal names each with a line from it and asks which —,
+or **none found**.
 
 #### The questions a draft answers
 

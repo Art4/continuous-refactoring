@@ -39,7 +39,8 @@ The recommended Tool for the Role Automated Refactoring in the PHP Pack. One fil
 
 - **Purpose:** raise declared type coverage progressively. Uses Rector's typing suites, or the BC-safe path below.
 - **Two paths.** Adding a parameter or return type to a method a class outside the repository may override
-  breaks that class. Read the target's **BC promise** (`../../refactoring-operations.md`):
+  breaks that class. Read the target's **BC promise** (`../../refactoring-operations.md`, *Reading the BC promise*); with several
+  parts, the BC-safe path as soon as one part that covers code this Stage types asks for it:
   - **The promise covers extending and overriding non-final classes and methods** — the usual case for a
     package — or it is not settled yet → the BC-safe path: `art4/rector-bc-library` as a dev dependency,
     Rector's own type-declaration set switched off (`withPreparedSets(typeDeclarations: false)`) and

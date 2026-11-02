@@ -159,6 +159,14 @@ ticket that asks you to set the promise up, with a draft. An autonomous run neve
 **What to do:** answer that ticket, ask for the BC promise in the call ("set up the BC promise"), or add the
 **BC promise** bullet to your tracker file yourself — a path, or `none`.
 
+## Only the default branch's promise counts
+
+The suite works on your default branch, so it reads the BC promise of the release line that branch is on. A
+maintained older line with a promise of its own — security fixes for the previous major version, say — is not
+its work, and nothing it does there follows that line's promise.
+
+**What to do:** keep the suite on the default branch; changes to older lines stay yours.
+
 ## The strict coverage check needs PHPUnit 10, and does not work on Pest
 
 The second coverage-metadata step makes a test fail when it runs code it neither covers nor names as used.

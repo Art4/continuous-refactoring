@@ -45,9 +45,10 @@ by file count alone, one merge request per rule.
 ## Strangler Fig
 
 **Applies when** old and new have to live side by side: the target's **BC promise** covers the old API
-(`refactoring-operations.md`, **BC promise**; what it covers is the promise's own call, `@internal` code is
-often left out), or the migration is too wide to replace in one reviewable step. While the target's
-**BC promise** bullet is missing, the question is not settled: treat whatever code outside the repository
+(`refactoring-operations.md`, *Reading the BC promise*: the part that covers the code the change touches; what it
+covers is the promise's own call, `@internal` code is often left out), or the migration is too wide to replace in
+one reviewable step. While the target's **BC promise** bullet is missing, or no part covers that code, the
+question is not settled: treat whatever code outside the repository
 could reach as covered, and where that alone keeps the old path, the plan meets the Opener of the Tool
 `bc-promise` (`packs/generic/bc-promise.md`).
 
@@ -62,7 +63,7 @@ label: it is proposed as an ordinary ticket for the human.
 ## Migrate callers, then delete
 
 **Applies when** a new internal API replaces an old one, every caller of the old one is in this
-repository, and the target's **BC promise** does not cover it, or says `none`. The plan records that call under `Decisions`.
+repository, and the part of the target's **BC promise** that covers it leaves it out, or says `none`. The plan records that call under `Decisions`.
 
 Move every caller to the new API and delete the old one in the same wave: no shim, no parallel old and
 new path. Tests that only protected the old implementation go with it; the pin at the seam stays.
