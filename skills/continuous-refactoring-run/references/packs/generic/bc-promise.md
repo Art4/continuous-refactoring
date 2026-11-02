@@ -17,9 +17,12 @@ back while it is open: until it is settled, whatever code outside the repository
   exists in the repository, an `https://` URL (not fetched to judge the Stage), `none`, or a list of parts each
   naming one of these with its scope (`../../refactoring-operations.md`, *Reading the BC promise*). A document
   without the bullet does not count.
-- **Opener:** a plan that takes the careful way only because the bullet is missing: Strangler Fig, with the old path
-  kept beside the new, where *Migrate callers, then delete* would apply if no code outside the repository relied on
-  this one's. Its question asks more than "Set up BC promise?": the scan works out the proposal (*MR scope*,
+- **Opener:** a plan that takes the careful way only because the bullet is missing:
+  - Strangler Fig, with the old path kept beside the new, where *Migrate callers, then delete* would apply if no
+    code outside the repository relied on this one's (`../../principles.md`);
+  - the BC-safe path of `rector-type-coverage`, taken only because the promise is open (`../php/rector.md`).
+
+  The Opener's question asks more than "Set up BC promise?": the scan works out the proposal (*MR scope*,
   below) and the question holds what *Finding the BC promise* found and the draft in full or the bullet the merge
   request would hold, and asks whether to record it so. One answer settles both.
 - **MR scope:** the bullet, placed after the last bullet of the section, the rest of the file unchanged, plus what

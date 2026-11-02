@@ -47,7 +47,8 @@ The recommended Tool for the Role Automated Refactoring in the PHP Pack. One fil
     `Art4\RectorBcLibrary\Set::BC_TYPE_DECLARATION` in its place; for adoption in levels
     `Set::withTypeCoverageLevel(n)` instead of Rector's `withTypeCoverageLevel()`. Its guards skip a change
     to a public or protected member of a non-final class. The Rector versions it supports are in its
-    README; check them before adding it.
+    README; check them before adding it. Taken only because the promise is not settled, the path meets the
+    Opener of `bc-promise` (`../generic/bc-promise.md`): the plan says so under `Decisions`.
   - **No promise, or one that leaves extending non-final classes out** → Rector's own typing
     suites.
 - **Fulfilment check:** the typing suites of the path in use are enabled and fully applied at the agreed
