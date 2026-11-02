@@ -16,9 +16,12 @@ blocked by the ticket of that merge request.
 
 - [ ] It calls one run in round 2 and reviews nothing, since there is no new merge request.
 - [ ] It ends `paused`, with what each ticket needs and how to go on.
-- [ ] It ends the timer before its closing message, with what the environment has for that.
+- [ ] It ends the timer explicitly before its closing message, with the call the environment has for that. Merely
+  setting no new wake-up fails this line.
 - [ ] It sets no further wake-up.
 
 ## Results
 
 2026-11-02, skill commit 45a70ea: pass, every line, as a walk-through.
+
+2026-11-02, skill commit c018468: pass, every line, as a walk-through, with a neutral timer tool in the prompt whose description says how to end it. An earlier wording, "ends the timer, loop and all", failed the timer line: the agent only set no new wake-up. That wording was replaced.

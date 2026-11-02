@@ -19,8 +19,8 @@ its list holds.
 | `d6-not-onboarded` | the Driver | walk-through |
 | `d7-no-timer` | the Driver | walk-through |
 | `d8-merge-mode` | the Driver | walk-through |
-| `d10-a-stop-after-a-wake-up` | the Driver | walk-through |
 | `d9-started-by-an-agent` | the Driver | live, in a real session |
+| `d10-a-stop-after-a-wake-up` | the Driver | walk-through |
 
 ## Playing one
 
