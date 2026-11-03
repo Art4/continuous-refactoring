@@ -52,7 +52,7 @@
           "track": "Safety Net",
           "requires": ["composer"],
           "waits_for": ["ci-runner"],
-          "applies_when": "The project's BC promise (the BC promise operation of its tracker file) follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise does not count."
+          "applies_when": "A part of the project's BC promise (the BC promise operation of its tracker file) that covers code composer.json's autoload section names follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise, or an unsettled part, does not count."
         }
       ]
     },

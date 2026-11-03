@@ -148,7 +148,7 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | --- | --- | --- | --- | --- | --- |
 | Composer (`composer`) | `composer` | Safety Net | – | – | – |
 | PSR-4 Autoloading (`psr-4`) | `psr-4` | Safety Net | `composer` | – | – |
-| Roave Backward Compatibility Check (`roave-bc-check`) | `roave-bc-check` | Safety Net | `composer` | `ci-runner` | The project's BC promise (the BC promise operation of its tracker file) follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise does not count. |
+| Roave Backward Compatibility Check (`roave-bc-check`) | `roave-bc-check` | Safety Net | `composer` | `ci-runner` | A part of the project's BC promise (the BC promise operation of its tracker file) that covers code composer.json's autoload section names follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise, or an unsettled part, does not count. |
 | PHP CS Fixer (`php-cs-fixer-adoption`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
 | PHP CS Fixer Rollout (`php-cs-fixer-rollout`) | `php-cs-fixer` | Guardrails | `php-cs-fixer-adoption` | – | – |
 | Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |

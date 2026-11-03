@@ -13,6 +13,10 @@ Write each sentence from the thing itself:
 - **Keep every external fact as concrete as it is**: a tool's or feature's real name ("PHPStan Level 0"),
   a file and line of the target, the behaviour observed, the number of a ticket or merge request.
 
+**The words a later run searches for stay as written:** the line `Plan` opening a plan, `Open question`
+opening a question (`design-point.md`), and `Opener: <tool>` (`tooling-model.md`, *An Opener*). What follows
+each of them is written by the rules above.
+
 **Before posting,** read the draft as that stranger: a sentence that leans on a path or a term only the
 suite knows is rewritten from the rule or finding it stands for.
 
