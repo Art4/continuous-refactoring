@@ -30,3 +30,8 @@ earlier exploration that read the code.
 - [ ] In every case the run files no tooling ticket and does not set the tool up itself.
 
 ## Results
+
+2026-11-03, skill commit 9654c4b: pass, every line and case, as a walk-through. The first play named two gaps, closed in that
+commit: a design that ends on a change of behaviour wrote no plan and so lost its Opener (case C), and the line named
+the Tool by its name instead of its key (case A). In the replay both A and C judged the fix a change of behaviour and
+carried the line in the open question; B planned and carried it under `Decisions`.
