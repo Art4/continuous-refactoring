@@ -25,6 +25,9 @@ its list holds.
 | `d11-the-human-asks-for-changes` | the Driver | walk-through |
 | `r1-opener-seen` | a run | walk-through |
 | `r2-opener-after-rejection` | a run | walk-through |
+| `r3-a-security-plan-picks-its-tool` | a run | walk-through |
+| `r4-tests-that-check-little` | a run | walk-through |
+| `r5-the-tool-is-in-place` | a run | walk-through |
 
 ## Playing one
 

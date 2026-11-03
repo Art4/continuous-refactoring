@@ -8,5 +8,8 @@ The Tool for the Role Secret Scanning in the generic Pack, proposed only on requ
 
 - **Purpose:** protection against committing secrets, credentials and tokens, on every change.
 - **Fulfilment check:** a CI job runs a recognized secret scanner, the presence of the invocation, not proof that it fails the pipeline on a finding; the same conservative approximation Semgrep uses. **Or** the forge's push protection for secrets is on (GitHub's or GitLab's secret push protection), read through the forge's API. Where the run cannot read it — no forge access, a token without the right, an edition without the feature — it counts as off, and the findings say it could not be checked. A pre-commit hook alone does not fulfil it: nobody has to run it.
+- **Opener:** none. A committed secret is an urgent finding, not the moment a gate would have paid off:
+  Housekeeping's scan over the Git history finds it every cycle and files it as a ticket of its own, which no
+  plan precedes and which a public tracker does not get at all. The Tool comes only on request.
 - **MR scope:** the scanner's setup (however it installs), a CI job wiring it in, and one initial scan of the working tree: fix what it reports or explicitly baseline it, a target's own judgement call at adoption time. Where the human prefers the forge's push protection, the merge request holds nothing for it: it is a setting the human turns on, and the run says where.
 - **Out of scope:** a scan of the full git history for secrets already committed, and tickets for anything found. That is a recurring task of the Housekeeping Track, which runs this scanner once it is in place.

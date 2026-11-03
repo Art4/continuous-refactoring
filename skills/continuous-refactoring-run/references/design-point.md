@@ -69,8 +69,8 @@ does; this ticket would change it. Lay it out as a decision point — findings: 
 and why no behaviour-keeping way exists. Options:
 
 - **Leave the decision to a human** — the recommendation: post the finding as an open question (*Open
-  questions*) asking whether the ticket is declined as refactoring or becomes feature work. The ticket
-  waits until someone replies. An autonomous run takes this option, so a rejection is always a human's.
+  questions*) asking whether the ticket is declined as refactoring or becomes feature work, with the
+  `Opener:` lines the plan would have carried (step 5, *Decisions*). The ticket waits until someone replies. An autonomous run takes this option, so a rejection is always a human's.
 - **Record a rejection** with that finding as the reason (`rejection.md`): the ticket's subject is
   declined as refactoring; the reason says it is feature work.
 
@@ -103,7 +103,7 @@ run finds the branch or its merge request and continues there. Post it as one co
 - **Decisions** — every question of this design that met the ADR bar, with its answer: the ticket's
   **decision trail**; it also names each principle (`principles.md`) that changed a decision. For each Tool on request that is not
   in place, has no ticket and is not rejected (the parser's `tools`), whose Opener in its `details` file this
-  plan meets, one more line: `Opener: <tool> — <why>`. Where the target keeps ADRs or a glossary (`implement-point.md`, *Slices every
+  plan meets, one more line: `Opener: <tool> — <why>`, with the Tool's key from its Pack. Where the target keeps ADRs or a glossary (`implement-point.md`, *Slices every
   kind of ticket can have*), each decision that belongs there is also a slice.
 - **This merge request** — only when the plan covers a part of the ticket: which part, and what stays.
 

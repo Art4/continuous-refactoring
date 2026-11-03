@@ -104,8 +104,10 @@ target's installed skills, so an editor checks it.
 
 A Tool on request may name, in its `details` file, an **Opener**: the situation in a run where the Tool
 would have paid off, judged by the agent like an *Applies when*. A plan that meets it writes the line
-`Opener: <tool> — <why>` under `Decisions` (`design-point.md`, step 5); the plan's merge request carries it
-in its description. Found later, it makes the next scan of the Tool's Track due (`worklist.md`, *A Track's
+`Opener: <tool> — <why>` under `Decisions` (`design-point.md`, step 5), `<tool>` being the Tool's key in its Pack
+(`psalm-taint-analysis`, never its name), since **Search** looks for that key; the plan's merge request carries it
+in its description. A design that ends on a change of behaviour, with no plan, writes the line into that open
+question instead (`design-point.md`, step 4). Found later, it makes the next scan of the Tool's Track due (`worklist.md`, *A Track's
 trace*), and that scan proposes the Tool's first Stage as a question (`track-scan.md`, *Tools on request*).
 Its ticket waits for a human's yes, in an autonomous run too (`filing-a-ticket.md`): on request stays a
 human's request, and the Opener only asks at the moment the Tool pays off. Until the yes the Tool is not
