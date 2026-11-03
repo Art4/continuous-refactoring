@@ -15,6 +15,7 @@ subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries a
 - A call can now build a Pack of your own: `/continuous-refactoring-run a Pack of its own for Deptrac` skips the worklist and the Track choice, proposes the Tool, its Role and its Stages, checks the Pack with the parser, and ends with one merge request. The parser's `--own-pack` now takes a relative path against the target, as documented, not against the working directory.
 - The tracker file may live elsewhere: name it in your `AGENTS.md` (or `CLAUDE.md`), in your own words, and the suite reads and writes the `## Refactoring operations` section there. Without such a line nothing changes. A file named outside the repository ends the run.
 - The reviewer-loop playbook is gone: it was a tool for developing the suite, not for a project using it. Reviewing inside a project is the Driver's job.
+- The suite now installs with the `skills` installer: `npx skills@latest add https://github.com/Art4/continuous-refactoring/tree/0.11.0/skills --skill '*' -a <agent>` copies exactly the three skills of that version into the target, for OpenCode, Claude Code, Codex and other agents, and an upgrade runs the same command with the new version. A Git checkout with symlinks still works; check out a release tag instead of following `main`.
 
 ## [0.10.0] - 2026-10-28
 
