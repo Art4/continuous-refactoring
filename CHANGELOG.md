@@ -4,6 +4,18 @@ All notable changes to this project are documented here. Format inspired by
 [Keep a Changelog](https://keepachangelog.com/), kept flat (no `Added`/`Changed`/`Fixed`
 subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries are produced.
 
+## [0.11.0] - 2026-11-03
+
+- **Breaking:** `/continuous-refactoring` is now the **Driver**: it works round after round by itself, each a run, its review and any rework, 30 minutes apart, and stops after five rounds or at more than three open merge requests. It merges nothing unless the call says `merge`. One run is now `/continuous-refactoring-run`, unchanged otherwise, and the references moved with it. To upgrade: add the third symlink, `skills/continuous-refactoring-run`, beside the other two; move any call that means one run, a scheduled job above all, to `/continuous-refactoring-run`; in a Pack of your own change the `$schema` line to the new path. The line "Used by `/continuous-refactoring`" in a tracker file already written is harmless and can stay.
+- Onboarding no longer asks for the BC promise, and a run no longer asks for it at its start. The BC promise is now a tool on request of its own: the first time a plan keeps an old API only because the promise is open, the next scan files a ticket with what it found, or a draft that answers the usual questions of such a promise from the project's code and leaves open what only the human can say. The human's answer on that ticket decides; an autonomous run never answers it.
+- The **BC promise** bullet may now name a page on the project's website, and it may list several promises, each with its scope: a folder of the code or a surface such as the PHP API, an HTTP API or the command line. Where two cover the same code, the stricter one applies; code none covers stays covered. A page that cannot be read leaves its part unsettled for that run, with a finding.
+- A tool on request can now come up by itself, once, as a question: its Opener is the situation in which it would have paid off. A plan that meets it notes the Opener under its decisions, and the next scan files a ticket asking whether to set the tool up. The ticket waits for a human's yes, in an autonomous run too, and until then holds no Track back. A rejection keeps the tool from being offered again.
+- Semgrep, Psalm's taint analysis and Infection can now come up by themselves, once, as a question. Semgrep and the taint analysis come when a plan fixes a security problem found by reading the code: an injection goes to the taint analysis where PHPStan Level 4 or Psalm is reached, anything else to Semgrep. Infection comes when a plan finds tests that run the code it changes but check little of it. Secret Detection stays on request only.
+- Roave's backward-compatibility check now applies per part of the BC promise: when only some parts follow semantic versioning, the classes of the others are ignored, each entry commented with its scope. When Rector's type coverage takes its BC-safe path only because no promise is recorded, the plan notes that, and the next scan asks the human to set the promise up.
+- A call can now build a Pack of your own: `/continuous-refactoring-run a Pack of its own for Deptrac` skips the worklist and the Track choice, proposes the Tool, its Role and its Stages, checks the Pack with the parser, and ends with one merge request. The parser's `--own-pack` now takes a relative path against the target, as documented, not against the working directory.
+- The tracker file may live elsewhere: name it in your `AGENTS.md` (or `CLAUDE.md`), in your own words, and the suite reads and writes the `## Refactoring operations` section there. Without such a line nothing changes. A file named outside the repository ends the run.
+- The reviewer-loop playbook is gone: it was a tool for developing the suite, not for a project using it. Reviewing inside a project is the Driver's job.
+
 ## [0.10.0] - 2026-10-28
 
 - Semgrep and Psalm's taint analysis are no longer proposed to every project: they are now set up only when you ask for them, by naming one in the call ("set up Semgrep") or by asking for a scan including the tools on request, and each scan report names what is available. Composer Audit is no longer a tool to set up: the first Housekeeping template now carries a recurring dependency audit for any package manager, an existing template gains it on its next cycle, and an open "Composer Audit" or "PHP Version Floor" ticket is offered for closing with a note saying what took its place. The diagrams under docs/tooling now show a tool's status as the outline of its steps — dashed for on request, dotted for recognized — with a legend below.
@@ -484,6 +496,7 @@ Initial release.
   (#33)
 - Repo prepared for going public. (#37)
 
+[0.11.0]: https://github.com/Art4/continuous-refactoring/compare/0.10.0...0.11.0
 [0.10.0]: https://github.com/Art4/continuous-refactoring/compare/0.9.0...0.10.0
 [0.9.0]: https://github.com/Art4/continuous-refactoring/compare/0.8.0...0.9.0
 [0.8.0]: https://github.com/Art4/continuous-refactoring/compare/0.7.0...0.8.0
