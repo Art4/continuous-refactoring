@@ -1,6 +1,6 @@
 # Infection
 
-The Tool for the Role Mutation Testing in the PHP Pack, proposed only on request: it runs the test suite
+The Tool for the Role Mutation Testing in the PHP Pack, proposed only on request or through its Opener: it runs the test suite
 hundreds of times, and it pays off only once the tests are worth judging. Infection is no test framework of
 its own; it drives the target's — PHPUnit, Pest, PhpSpec or Codeception — through an adapter, and needs a
 coverage driver.
@@ -22,6 +22,11 @@ nothing new. A target that runs Pest's own mutation testing has the Role filled,
   CI job; an Infection config (`infection.json5`, `infection.json5.dist`, `infection.json` or
   `infection.json.dist`) is committed with a minimum score; and once `ci-runner` is fulfilled, a CI job
   invokes Infection. With no CI yet, a local run that meets the minimum fulfils it.
+- **Opener:** a plan where tests already reach the code its slices touch, so that they would be its pin
+  (`../../design-point.md`), which writes a new pin all the same because those tests check little of the
+  behaviour: they run the code and assert little or nothing of what it returns or changes. That is the gap
+  Infection measures, code a coverage report counts as tested whose tests catch no fault in it. On an old
+  codebase with tests written for coverage it comes soon, and once.
 - **MR scope:** the dependency, the config with `testFramework` set to the target's framework (`pest` on a
   Pest project) and a log the search can read back (`logs.json` or `logs.text`), and a CI job limited to the
   changed code: `--git-diff-filter=AM` against the default branch, `--threads` as the runner allows, the
