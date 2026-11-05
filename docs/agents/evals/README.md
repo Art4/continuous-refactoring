@@ -23,11 +23,13 @@ its list holds.
 | `d9-started-by-an-agent` | the Driver | live, in a real session |
 | `d10-a-stop-after-a-wake-up` | the Driver | walk-through |
 | `d11-the-human-asks-for-changes` | the Driver | walk-through |
+| `d12-a-conflict-after-a-human-merge` | the Driver | walk-through |
 | `r1-opener-seen` | a run | walk-through |
 | `r2-opener-after-rejection` | a run | walk-through |
 | `r3-a-security-plan-picks-its-tool` | a run | walk-through |
 | `r4-tests-that-check-little` | a run | walk-through |
 | `r5-the-tool-is-in-place` | a run | walk-through |
+| `r6-a-conflict-it-cannot-resolve` | a run | walk-through |
 
 ## Playing one
 

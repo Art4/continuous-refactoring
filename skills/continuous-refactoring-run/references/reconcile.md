@@ -36,7 +36,7 @@ aggregation steps) needs nothing.
 
 **In review.** The tickets whose merge request is still open are named in one line, with their merge
 requests; nothing follows for them. One whose review asks for changes is named as such; it is worked when the call names
-it.
+it. One that needs a base update is named as such; Track choice takes it first.
 
 ## 2. Lay them out
 

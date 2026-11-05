@@ -123,7 +123,23 @@ in flight than a single maintainer. The one number left is a recommendation, not
 exploration recommends filing its three strongest findings, and you may file any number.
 
 The price: merge requests opened side by side may conflict. Each starts from the default branch, so
-any one of them merges cleanly on its own; resolving a conflict between two is yours.
+any one of them merges cleanly on its own; once one is merged, the suite brings the others onto the
+default branch itself, and asks you only where a conflict needs a decision.
+
+## Why does a conflict not count as a rework, and why is there no limit on resolving them?
+
+A rework answers something wrong with the merge request; after two the Driver hands it to you, since
+it is not getting further. A conflict says nothing about the merge request: it comes from work that
+merged after it. Counting it would hand a good merge request to you only because the default branch
+moved. And it cannot loop: a new conflict needs a new merge first, so the updates stop when the
+merging does.
+
+## Why does the suite not bring every merge request up to date as soon as the default branch moves?
+
+Because every update starts CI again and asks for another look. A branch that is behind but still
+merges cleanly loses nothing by staying where it is. The suite updates a merge request only when the
+forge will not merge it as it stands: a conflict, a project that requires branches to be up to
+date, or CI that fails in code the branch never touched.
 
 ## Why four Tracks, in a fixed order?
 

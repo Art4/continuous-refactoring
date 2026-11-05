@@ -1,7 +1,7 @@
 # 01 — The base update
 
 Type: task
-Status: open
+Status: claimed
 Blocked by: —
 
 **What to build** (spec Q2–Q6, Q8–Q11, Q16–Q24; a new ADR)

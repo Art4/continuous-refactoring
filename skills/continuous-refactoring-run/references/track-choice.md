@@ -7,6 +7,12 @@ Every decision point here is laid out as `../SKILL.md`, *Decision points*, says:
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
 taken.
 
+## A base update first
+
+A ticket that **needs base update** comes before every Track, whatever Track the call names: the run continues in
+`updating-the-base.md` with the first one in that reference's order, and ends where it ends. Skipped there → the
+choice below, with that ticket counted as in review.
+
 ## What a Track has to offer
 
 | Track | It has something when |

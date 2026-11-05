@@ -35,9 +35,9 @@ A human or a schedule starts the Driver. A run and Housekeeping may also be call
 | Step | What happens | Ends when |
 |---|---|---|
 | 1 Ready | No Git repository ends the run, and so does a tracker file named outside the repository. A tracker file without the suite's section, or with a required operation missing, leads into the onboarding interview. | the section carries the three required operations |
-| 2 Worklist | The open tickets are searched, each sorted into a Track and given a state: workable, in review, blocked, waiting. A ticket named in the call is the worklist alone | every ticket found has both |
+| 2 Worklist | The open tickets are searched, each sorted into a Track and given a state: needs base update, in review, blocked, waiting, workable. A ticket named in the call is the worklist alone | every ticket found has both |
 | 3 Reconcile | Merge requests that were merged or closed since, and declined work whose stated blocker is now met, are laid out with what follows. With a ticket named in the call, only that ticket's merge request | every finding is acted on or left as decided |
-| 4 Track choice | One Track is recommended in the fixed order; the run may end here | a Track is named |
+| 4 Track choice | A merge request of the suite that the forge reports blocked comes first: the run brings it onto the default branch and ends with it. Otherwise one Track is recommended in the fixed order; the run may end here | a Track is named, or the base update is done |
 | 5 Scan | Only for a tooling Track that was never scanned, or when the call asks: each tool is judged against the project, the tree is ordered | every tool is fulfilled, declined, proposed, or named as out of reach |
 | 6 File tickets | The scan's proposals become tickets, after a search for existing ones | each proposal has a ticket or was left by decision |
 | 7 Select | The first workable ticket in the Track's order; its tool is judged once more | one ticket that still needs its work is handed on |

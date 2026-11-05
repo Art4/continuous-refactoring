@@ -1,5 +1,8 @@
 # A run is a chain of decision points, with an interactive and an autonomous mode and no caps
 
+> Amended by [ADR-0094](0094-the-suite-updates-the-base-of-its-own-merge-requests.md): the suite brings its own
+> blocked merge requests onto the default branch; only a conflict that needs a decision is the developer's.
+>
 > Supersedes [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md),
 > [ADR-0059](0059-cadence-carries-a-unit.md),
 > [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md), and

@@ -39,7 +39,8 @@ The first row that applies:
 
 | State | The ticket |
 | --- | --- |
-| **in review** | has an open merge request (below) |
+| **needs base update** | has an open merge request (below) that is blocked (`updating-the-base.md`, *A blocked merge request*) |
+| **in review** | has an open merge request |
 | **blocked** | names a blocker that is not done, or one that has no ticket yet: per **Blocked by**, or, without that operation, in the sentence `Blocked by: …` in its text |
 | **waiting** | its newest open question has no answer after it (`design-point.md`, *Open questions*); or, for this run, reconcile's question about its closed merge request went unanswered |
 | **workable** | none of the above |
