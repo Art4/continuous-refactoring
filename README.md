@@ -111,7 +111,7 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way.
 2. **Answer the onboarding.** Each question comes with a recommendation, so "yes" moves on.
 3. **Let it work.** The next call starts the Driver: by itself it works up to five rounds, 30 minutes apart, reviews each merge request and merges none of them. Say otherwise in the call ("merge", "ten rounds", "no pause"). For one run alone, `/continuous-refactoring-run` asks at every decision; `/continuous-refactoring-run do it yourself` takes one ticket from selection to an opened merge request.
 4. **Steer it in the call, in your own words:** a Track ("work on Guardrails"), a restriction ("only the Rector tools"), or, for one run alone, a ticket ("ticket 42") or a [Pack of your own](docs/playbooks/own-tool.md) for a tool the suite does not know ("a Pack of its own for Deptrac").
-5. **Review and merge** what the suite opens. The Driver stops once more than three of its merge requests are open; a run alone has no such limit. A merge request that conflicts after another one merged is brought up to date by the suite itself.
+5. **Review and merge** what the suite opens. The Driver stops once more than three of its merge requests are open; a run alone has no such limit. A merge request that conflicts after another one merged is brought up to date by the suite itself. A merge request is a draft while the suite still works on it; make one a draft yourself and the suite leaves it alone.
 6. **Housekeeping:** `/continuous-housekeeping` sets its mechanism up on the first call and works the due ticket afterwards. The suite schedules nothing itself — point your own scheduler (`/schedule`, `/loop`, cron) at any of the commands.
 
 ## Upgrading

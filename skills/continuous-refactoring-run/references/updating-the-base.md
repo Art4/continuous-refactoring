@@ -27,6 +27,7 @@ Another forge: its own merge state where its tool shows one; otherwise a conflic
 - **Behind with nothing refusing it** is not blocked: every update starts CI again, so the branch stays as it is.
 - **A state the forge is still computing** (GitHub `UNKNOWN`, GitLab `checking` or `unchecked`) → read it again
   after a minute; still computing → not blocked this time, and the closing report says so.
+- **The human's hold** — a draft the human set (`opening-a-merge-request.md`, *Draft and ready*) — is not blocked.
 - **Handed over by a base update** (step 6) is not blocked again until a commit lands on its branch or a human
   comments after the handover.
 
@@ -87,6 +88,8 @@ to fix is fixed and checked again. Under the Driver its own review follows, once
 
 - **Rebased** → `git push --force-with-lease=<branch>:<the remote tip from step 2>`.
 - **Merged** → a plain push.
+
+Draft or ready stays as it was.
 - **Refused**, because someone pushed in between → fetch, and from step 2 again: that commit is not this run's, so it
   is a merge now.
 

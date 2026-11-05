@@ -43,7 +43,7 @@ A human or a schedule starts the Driver. A run and Housekeeping may also be call
 | 7 Select | The first workable ticket in the Track's order; its tool is judged once more | one ticket that still needs its work is handed on |
 | 8 Design | A plan is written onto the ticket | the ticket carries an implementable plan |
 | 9 Implement | The plan is built on a branch of its own | the branch's checks are green |
-| 10 Merge request | The branch is pushed and the merge request opened | it is open, or the branch is handed to you |
+| 10 Merge request | The branch is pushed and the merge request opened as a draft; a run alone marks it ready once CI is green, under the Driver its review does | it is open, or the branch is handed to you |
 
 Housekeeping and Investigation replace steps 5 to 7 with their own way to a ticket; from the design point on Investigation rejoins the chain, and Housekeeping delivers through the same merge-request step.
 

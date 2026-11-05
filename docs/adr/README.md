@@ -4,7 +4,7 @@
 
 Every decision with the status its banner gives. *Superseded*: nothing of it holds; *superseded in part*: some of it holds, the banner says what; *amended*: it holds with the changes the later ADRs make; *in force*: unchanged.
 
-Superseded: 34 · Superseded in part: 22 · Amended: 19 · In force: 19
+Superseded: 34 · Superseded in part: 22 · Amended: 19 · In force: 20
 
 | ADR | Decision | Status | Changed by | Changes |
 | --- | --- | --- | --- | --- |
@@ -102,3 +102,4 @@ Superseded: 34 · Superseded in part: 22 · Amended: 19 · In force: 19
 | [0092](0092-the-driver-takes-the-main-name.md) | The Driver takes the main name; a run gets a skill of its own | in force |  | [0075](0075-one-skill-with-references-the-targets-own-skills-first.md) |
 | [0093](0093-the-bc-promise-is-a-tool-on-request-with-an-opener.md) | The BC promise is a Tool on request, proposed through an Opener | in force |  | [0086](0086-tools-on-request.md), [0088](0088-the-bc-promise.md) |
 | [0094](0094-the-suite-updates-the-base-of-its-own-merge-requests.md) | The suite updates the base of its own merge requests | in force |  | [0073](0073-a-run-is-a-chain-of-decision-points.md) |
+| [0095](0095-a-merge-request-is-a-draft-until-the-suite-thinks-it-can-merge.md) | A merge request is a draft until the suite thinks it can merge | in force |  |  |

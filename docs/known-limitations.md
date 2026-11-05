@@ -46,6 +46,16 @@ merely behind stays as it is, since every update starts CI again.
 - **Another forge** than GitHub or GitLab: where its tool shows no merge state, only a conflict Git
   itself finds is noticed — not a forge rule such as "must be up to date".
 
+## Drafts depend on the forge and its CI
+
+The suite opens each merge request as a draft and marks it ready once it thinks it can merge. Where
+the forge has no drafts, every merge request opens ready. Where your CI skips drafts, the run finds
+no pipeline for its push and marks the merge request ready so CI runs; it says so in a comment.
+
+Whose draft a draft is, the suite reads from its own steps, not from the account: it opened the
+merge request as a draft and never marked it ready, or it commented why when it made it a draft.
+Any other draft counts as yours, and the suite leaves it alone until you mark it ready or comment.
+
 ## On a tracker strangers can write to, their comments on the Housekeeping ticket are weighed like anyone's
 
 A Housekeeping run reads the comments on its ticket as refactoring ideas, whoever wrote them. On a
@@ -208,6 +218,7 @@ The closing report's **Status** line always says why. The usual reasons:
 | A run ended on a failing check or a review finding | The same check or finding came back after a fix and a second attempt; the branch stays local and the ticket carries the account as an open question | Reply on the ticket: how to go on, or take the branch over yourself |
 | A branch was handed over | No forge, or you chose to push yourself | Merge it, or push and open the merge request |
 | A merge request was brought onto the default branch | The forge reported it blocked: a conflict, a branch it refuses to merge while behind, or CI red from an outdated base | Nothing; where a conflict was resolved, its comment says how |
+| A merge request stays a draft | The Driver's review did not pass it yet, asked for changes or asked you; its comment says which. Or you made it a draft yourself | Answer its comment, or mark it ready when the suite may go on |
 | A conflict was handed to you | Both sides changed the same logic, or want opposite things; nothing was pushed | Say on the merge request what to keep, or resolve it yourself |
 | Tools named as out of reach | They wait behind something no ticket can change: a PHP version your project does not allow yet, or a project that is not PHP | Raise the PHP version, or record the rejection the suite proposes |
 | A run ends because of a Pack | The project's own Pack redefines a slug, a Role or a Pack name the suite has, or the file is not in the Pack format; the error names the file and the slug. A slug the suite added later does the same | Rename your slug or correct the file, then call again ([playbook](playbooks/own-tool.md)) |

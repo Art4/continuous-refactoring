@@ -1,7 +1,7 @@
 # 02 — The draft lifecycle
 
 Type: task
-Status: open
+Status: claimed
 Blocked by: 01
 
 **What to build** (spec Q7, Q12–Q15, Q25; a new ADR)

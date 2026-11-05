@@ -1,0 +1,1 @@
+A merge request of the suite is now a draft while the suite still works on it: it opens as a draft, and becomes ready once the Driver's review passes it — or, for a run alone, once CI is green. A request for changes or a question makes it a draft again, with a comment saying why. Make one a draft yourself and the suite leaves it alone until you mark it ready or comment.

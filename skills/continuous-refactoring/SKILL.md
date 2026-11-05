@@ -40,43 +40,54 @@ subagents of its own, and a subagent cannot start any.
 
 ## A round
 
-1. **Ready.** The default branch checked out and pulled. Then the **base updates**: each open merge request that
-   `../continuous-refactoring-run/references/updating-the-base.md`, *A blocked merge request*, finds blocked — a
-   handed-over one too — gets a run of its own, in that reference's order: step 2's prompt, with the call naming its
-   ticket. A base update is neither a round nor a rework, and has no cadence before it and no limit. Where its run
-   resolved a conflict by hand, steps 3 and 4 follow for that merge request.
-   Then an open merge request comes first where, since the Driver's
-   last comment on it, the human has answered its question or asked for changes, in a review or a comment: step 2
-   names its ticket. A request for changes from the human is reworked like one from the review, and counts among the
-   round's reworks.
+1. **Ready.** The default branch checked out and pulled. Then, in this order:
+   - **Base updates.** Each open merge request that
+     `../continuous-refactoring-run/references/updating-the-base.md`, *A blocked merge request*, finds blocked — a
+     handed-over one too — gets a run of its own, in that reference's order: step 2's prompt, with the call naming
+     its ticket. A base update is neither a round nor a rework, and has no cadence before it and no limit. Where its
+     run resolved a conflict by hand, steps 3 and 4 follow for that merge request.
+   - **A draft left behind** comes first: a draft of the suite with no comment of the Driver since its last commit,
+     as an interrupted run leaves it. With its checks green the round goes on at step 3 with it; red or missing,
+     step 2 names its ticket.
+   - **An answer or a request for changes** comes next: an open merge request where, since the Driver's last comment
+     on it, the human has answered its question or asked for changes, in a review or a comment. Step 2 names its
+     ticket. A request for changes from the human is reworked like one from the review, and counts among the
+     round's reworks.
+
+   A merge request the human holds as a draft
+   (`../continuous-refactoring-run/references/opening-a-merge-request.md`, *Draft and ready*) is left alone: none of
+   these takes it up, and no call names its ticket.
 2. **Run.** In a subagent of its own, and wait for its result:
 
-   > Invoke the continuous-refactoring-run skill with the call `<the Call, if any> do it yourself` and follow it to
-   > its end. Then return its Status and Next lines verbatim, the ticket worked, the merge request URL if any, whether
+   > Invoke the continuous-refactoring-run skill with the call `<the Call, if any> do it yourself, under the Driver`
+   > and follow it to its end. Then return its Status and Next lines verbatim, the ticket worked, the merge request URL if any, whether
    > the run ended because nothing was workable, every open ticket it found with its state (workable, waiting, in
    > review, blocked) and for a waiting one what it waits for, and the wording of any change it wants in `AGENTS.md`.
 
    A run's Next line is a report for the human, not an instruction to the Driver. The call names a ticket only
-   for a base update or a rework of its merge request, for its next part, for a question the human has answered, or at the human's wish;
-   a ticket that waits or is blocked is never named. The working tree is checked after each run. No merge request
+   for a base update or a rework of its merge request, for its next part, for a question the human has answered, or
+   at the human's wish; a ticket that waits or is blocked is never named. The working tree is checked after each run. No merge request
    came of it → step 5.
 3. **Review.** In a second subagent that returns only a verdict with its reasons: mergeable, request changes, or ask
    the human. It uses the project's review skill where there is one; otherwise it judges as an engaged human
    reviewer: in scope of its ticket, behaviour kept, checks green (run them where there is no CI), the description
    says why the change is safe. A red check is a request for changes.
 4. **Verdict.**
-   - **Mergeable** → with `review only`, comment that, and leave the merge to the human. With `merge`, follow
-     `references/merging.md`.
+   - **Mergeable** → mark it ready. With `review only`, comment that, and leave the merge to the human. With
+     `merge`, follow `references/merging.md`.
    - **Request changes** → post it on the merge request, describing the problem and its cause, then go back to step 2
      with a run that names the ticket. Rework has no cadence. After two reworks without a mergeable result, the same
      comment says so and asks the human.
    - **Ask the human** → post the question on the merge request.
 
+   Anything but mergeable keeps it a draft, or makes a ready one a draft, its comment saying why (*Draft and ready*).
+
    *Done when* the merge request is mergeable, merged, or with the human. That is one round, however many runs it
    took.
 5. **Status.** One line here, a line in the Log, and a notification, through what the environment has, of everything
-   that now waits for the human: mergeable merge requests, open questions on tickets, questions on merge requests, a
-   change a run wants in `AGENTS.md` with its wording. Then read *Stops*: they hold before the cadence, not after it.
+   that now waits for the human: mergeable merge requests, open questions on tickets, questions on merge requests,
+   merge requests the human holds as a draft, a change a run wants in `AGENTS.md` with its wording. Then read
+   *Stops*: they hold before the cadence, not after it.
 
 Forge text follows `../continuous-refactoring-run/references/forge-facing-writing.md`. An open question stays the
 human's, and a waiting ticket gets no comment: any comment there would count as the human's answer.
