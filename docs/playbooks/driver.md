@@ -25,8 +25,9 @@ For one run alone, a named ticket or [a Pack of your own](own-tool.md), call [`/
 ## What a round does
 
 - **Every run starts fresh.** A run in a subagent has a context of its own, so the hundredth run reads the tracker as clearly as the first. It is always autonomous, and your `AGENTS.md` rules go with it.
-- **It names a ticket to go on with one:** to rework a merge request it or you asked changes on, for the next part of a ticket worked in several merge requests, for a question you answered, or when you ask. It never names a ticket that waits or is blocked: naming it would work it whatever its state.
+- **It names a ticket to go on with one:** to bring its merge request onto the default branch, to rework a merge request it or you asked changes on, for the next part of a ticket worked in several merge requests, for a question you answered, or when you ask. It never names a ticket that waits or is blocked: naming it would work it whatever its state.
 - **It reviews every merge request in a subagent of its own**, with your project's review skill where there is one, otherwise as an engaged human reviewer would: in scope of its ticket, behaviour kept, checks green, the description says why the change is safe.
+- **Merge requests that can no longer merge come first.** Before each round, and before it stops, the Driver reads whether its open merge requests still merge — after a merge of yours, say — and has each blocked one brought onto the default branch in a run of its own. That is no round and no rework, and has no limit. A conflict resolved by hand is reviewed again.
 - **Rework stays in the round.** A request for changes is posted on the merge request, and a run answers it at once, with no cadence between. After two reworks without a mergeable result the merge request goes to you. A round holds up to three runs, and counts as one.
 - **With `merge`**, it waits for green CI and uses your repository's merge method. It checks for a merge request stacked on the branch before deleting it, and that the merge really landed the branch's content. If not, it stops: the correction is a normal merge request, never a rewrite of history.
 
@@ -43,6 +44,7 @@ The Driver never answers an open question itself, and it goes on with the next t
 | A question that came up while planning | an `Open question` comment on the ticket, posted by the run | answer on the ticket; the Driver names it once you have |
 | A question the Driver has about a merge request | a comment on the merge request | answer there, and call again |
 | A merge request reworked twice without passing | a comment on the merge request | as above |
+| A conflict that needs a decision | a comment on the merge request, naming the files and what each side changes | say what to keep, or resolve it yourself |
 | A mergeable merge request, with `review only` | a comment on the merge request | merge it, or ask for changes there: the next round reworks it |
 | A change a run wants in your `AGENTS.md` | the Driver's message, with the wording | make it yourself, or not |
 

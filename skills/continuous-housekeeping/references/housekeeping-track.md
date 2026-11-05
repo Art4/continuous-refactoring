@@ -40,6 +40,7 @@ For every open Housekeeping ticket that has a merge request (`worklist.md`, *A t
 
 | The merge request | The ticket |
 | --- | --- |
+| open, and blocked (`updating-the-base.md`, *A blocked merge request*) | reached from `/continuous-housekeeping`: gets a base update per that reference, and the run ends where it ends; reached from Track choice, that choice took it already |
 | open | is in review: named in one line with its merge request |
 | merged, and every task of the ticket is ticked | is to be closed per **Done** |
 | merged, with tasks still unticked — the merge request delivered a part, the setup alone for one | stays open and is worked like any ticket without a merge request |

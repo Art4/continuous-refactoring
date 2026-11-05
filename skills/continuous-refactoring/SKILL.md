@@ -40,7 +40,12 @@ subagents of its own, and a subagent cannot start any.
 
 ## A round
 
-1. **Ready.** The default branch checked out and pulled. An open merge request comes first where, since the Driver's
+1. **Ready.** The default branch checked out and pulled. Then the **base updates**: each open merge request that
+   `../continuous-refactoring-run/references/updating-the-base.md`, *A blocked merge request*, finds blocked — a
+   handed-over one too — gets a run of its own, in that reference's order: step 2's prompt, with the call naming its
+   ticket. A base update is neither a round nor a rework, and has no cadence before it and no limit. Where its run
+   resolved a conflict by hand, steps 3 and 4 follow for that merge request.
+   Then an open merge request comes first where, since the Driver's
    last comment on it, the human has answered its question or asked for changes, in a review or a comment: step 2
    names its ticket. A request for changes from the human is reworked like one from the review, and counts among the
    round's reworks.
@@ -52,7 +57,7 @@ subagents of its own, and a subagent cannot start any.
    > review, blocked) and for a waiting one what it waits for, and the wording of any change it wants in `AGENTS.md`.
 
    A run's Next line is a report for the human, not an instruction to the Driver. The call names a ticket only
-   to rework its merge request, for its next part, for a question the human has answered, or at the human's wish;
+   for a base update or a rework of its merge request, for its next part, for a question the human has answered, or at the human's wish;
    a ticket that waits or is blocked is never named. The working tree is checked after each run. No merge request
    came of it → step 5.
 3. **Review.** In a second subagent that returns only a verdict with its reasons: mergeable, request changes, or ask
@@ -95,7 +100,8 @@ the last round.
 | `review only`, and more than three merge requests open | **paused**: the open merge requests, waiting for the human |
 | The End is reached | **ended**: what the rounds delivered, and what waits |
 
-A stop skips the cadence, and the next run with it. Setting no new wake-up does not end a timer: the Driver ends
+Before **done**, **paused** or **ended**, step 1's base updates run once more, so what waits for the human can merge;
+**broken** skips them. A stop skips the cadence, and the next run with it. Setting no new wake-up does not end a timer: the Driver ends
 it explicitly, with the call its environment has for that, before the closing message, so nothing wakes it after its
 last word.
 

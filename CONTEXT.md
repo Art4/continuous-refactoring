@@ -25,12 +25,16 @@ The two modes of a **run**. **Interactive**, the default: the human decides at e
 _Avoid_: ask-each-time, human-opens, create-mode (settings that no longer exist)
 
 **Driver**:
-The skill `continuous-refactoring`: it works **rounds** one after another on the human's behalf, with a **cadence** between them, until an end. Each **run** happens in a subagent of its own and always **autonomous**, and each **merge request** is reviewed before the round ends. By default it merges nothing, ends after five rounds, and waits 30 minutes between them; it stops at more than three open merge requests. It passes on the human's Track or restriction, and names a ticket to go on with one — reworking its merge request, its next part, a question the human answered, or the human's wish — never one that waits or is blocked. The Driver keeps no state the tracker does not hold, and it never answers an open question itself.
+The skill `continuous-refactoring`: it works **rounds** one after another on the human's behalf, with a **cadence** between them, until an end. Each **run** happens in a subagent of its own and always **autonomous**, and each **merge request** is reviewed before the round ends. By default it merges nothing, ends after five rounds, and waits 30 minutes between them; it stops at more than three open merge requests. It passes on the human's Track or restriction, and names a ticket to go on with one — a **base update** of its merge request, reworking it, its next part, a question the human answered, or the human's wish — never one that waits or is blocked. The Driver keeps no state the tracker does not hold, and it never answers an open question itself.
 _Avoid_: orchestrator, loop, run loop
 
 **Round**:
-One unit of the **Driver**: a **run**, its review, and rework. It ends when the **merge request** is mergeable (`review only`), merged (`merge`), or handed to the human after two reworks, so it holds up to three runs. A run ends when its merge request is open; a round goes on until that merge request is settled. The Driver's end counts rounds, not runs.
+One unit of the **Driver**: a **run**, its review, and rework. It ends when the **merge request** is mergeable (`review only`), merged (`merge`), or handed to the human after two reworks, so it holds up to three runs. A run ends when its merge request is open; a round goes on until that merge request is settled. The Driver's end counts rounds, not runs. The **base updates** before it are no part of it.
 _Avoid_: iteration
+
+**Base update**:
+Bringing the branch of an open **merge request** of the suite onto the current default branch, by rebase or merge, its conflicts resolved, once the forge reports it blocked: a conflict, a branch behind that the forge refuses to merge, or CI red from a stale base. A **run** does it before every Track choice, ending with that merge request; the **Driver** has it done before each **round** and before it stops. It is neither a rework nor a round and has no limit: a new conflict needs someone to merge first. A conflict that cannot be resolved without a decision goes to the human, and nothing is pushed.
+_Avoid_: rebase (one of its two ways)
 
 **Cadence**:
 The wait between two **rounds** of the **Driver**, counted from the end of the round before; there is none within a round. It says how fast the suite goes beside other agents and humans. It is neither the rhythm of the **Housekeeping template** (when its ticket is due) nor a schedule (when something outside calls a skill).

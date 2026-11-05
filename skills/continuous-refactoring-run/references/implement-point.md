@@ -25,6 +25,9 @@ Check the working tree first (`../SKILL.md`, *A clean working tree*). Then the f
 | a branch for this ticket — named in one of its comments, or carrying its reference — holds commits the default branch lacks, and no merge request ever came from it | that branch; read its commits before adding to them |
 | neither | a new one from the default branch's current tip, named by the target's convention, else `refactor/<ticket reference>-<subject in two or three words>`; for a baseline ticket, or a plan cut into parts, the subject is the part's name |
 
+A branch from the first two rows that is blocked (`updating-the-base.md`, *A blocked merge request*) is first
+brought onto the default branch per that reference, steps 2 to 5.
+
 A plan that lists parts is built one part at a time: the first part whose commits are not yet on the default
 branch.
 

@@ -95,6 +95,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
    *Done when* every finding is acted on or left as decided, or there was none.
 
 4. **Track choice.** Follow `references/track-choice.md`. It ends the run, or names one Track:
+   - **A base update** comes first → the run continues in `references/updating-the-base.md` and ends where
+     that reference ends, unless it comes back here with the base update skipped.
    - **Safety Net** or **Guardrails** → step 5.
    - **Housekeeping** → the run continues in `../continuous-housekeeping/references/housekeeping-track.md`
      and ends where that reference ends, unless it comes back here with Housekeeping marked as tried.
@@ -127,7 +129,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
 
 ## The end of a run
 
-A run ends when its merge request is open or its branch is handed to the human, when the review leaves no slice
+A run ends when its merge request is open or its branch is handed to the human, when a base update is pushed or
+handed to the human, when the review leaves no slice
 that makes the code easier to follow, when a fix does not hold after two attempts, when the design cannot
 proceed without a human answer or finds that the ticket is no refactoring, when nothing is workable, or
 at a decision point nobody answered.

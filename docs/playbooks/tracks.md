@@ -18,13 +18,16 @@ Safety Net and Guardrails walk the [tooling tree](../../skills/continuous-refact
 At the start of a run the suite searches your open tickets and sorts them: a ticket about a tool of the tree belongs to that tool's Track, the open Housekeeping ticket to Housekeeping, everything else to Investigation. Each ticket also gets a state:
 
 - **workable** — open, and everything that blocks it is done;
+- **needs base update** — its open merge request can no longer merge as it stands, by your forge's verdict;
 - **in review** — it has an open merge request;
 - **blocked** — it names a blocker that is not done;
 - **waiting** — an open question for you is on it, and nobody has answered yet.
 
 ## How a Track is chosen
 
-Track choice is a decision point. The recommendation is the first Track, in the fixed order **Safety Net, Guardrails, Housekeeping, Investigation**, that has something:
+A ticket that needs a base update comes before every Track: the run brings its merge request onto the default branch and ends with it.
+
+Otherwise Track choice is a decision point. The recommendation is the first Track, in the fixed order **Safety Net, Guardrails, Housekeeping, Investigation**, that has something:
 
 | Track | It has something when |
 |---|---|

@@ -77,6 +77,7 @@ A ticket waits until that comment is answered. **Answer by commenting on the tic
 
 - **A merge request is open** — review and merge it.
 - **A branch was handed to you** — there is no forge, or you chose to push yourself. Its name is in a comment on the ticket.
+- **A merge request was brought up to date** — it could no longer merge; the run updated it and ended. Where a conflict needs your decision, the merge request asks.
 - **An open question** is on the ticket — answer there.
 - **Nothing is workable** — every open ticket is in review, blocked or waiting.
 - **"Safety Net is waiting for merges"** — an autonomous run found nothing workable in Safety Net while Safety Net is unfinished. The report lists what is in review. Merge, or name another Track.
@@ -88,7 +89,7 @@ Every run closes with two lines. **Status** opens with how many things wait for 
 
 The suite schedules nothing from outside. Point your own scheduler (a cron job, `/schedule`, `/loop`) at `/continuous-refactoring`, `/continuous-refactoring-run do it yourself` or `/continuous-housekeeping do it yourself`, as often as fits. Within a session the Driver waits its own cadence between rounds ([playbook](driver.md)).
 
-Nothing limits how many merge requests a run leaves open. Called repeatedly, Safety Net ends at "every workable tool has a ticket and an open merge request" — from there the next step is yours: review and merge. Merge requests opened side by side may conflict with each other; resolving that is yours too.
+Nothing limits how many merge requests a run leaves open. Called repeatedly, Safety Net ends at "every workable tool has a ticket and an open merge request" — from there the next step is yours: review and merge. Merge requests opened side by side may conflict with each other once one is merged. A run notices that before it picks new work: it brings the blocked merge request onto the default branch and ends with it, and asks you only where a conflict needs a decision ([known limitations](../known-limitations.md)).
 
 ## Steering what gets worked on
 

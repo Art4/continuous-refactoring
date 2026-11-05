@@ -31,8 +31,20 @@ Nothing limits how many merge requests of the suite are open at once, and each o
 default branch. Two of them may touch the same lines — two tools rewriting the same files, say.
 Each merges cleanly on its own; after the first is merged the second may conflict.
 
-**What to do:** resolving that is yours, as with any two branches. Merge in the order the tickets
-block each other, or let fewer run side by side by reviewing before calling again.
+The suite notices this itself: before it picks new work, a run reads whether its open merge requests
+can still merge, and brings a blocked one onto the default branch first, by rebase or merge as your
+history does it. A conflict in a tool's output is resolved by running the tool again; any other is
+resolved by hand and checked again. Only a merge request the forge blocks is touched: one that is
+merely behind stays as it is, since every update starts CI again.
+
+**What stays yours:**
+
+- **A conflict that needs a decision** — both sides changed the same logic, or want opposite things.
+  The suite pushes nothing and asks on the merge request what to keep.
+- **No forge.** Without merge requests there is no merge state to read: a local branch is checked
+  only when a run works on it anyway.
+- **Another forge** than GitHub or GitLab: where its tool shows no merge state, only a conflict Git
+  itself finds is noticed — not a forge rule such as "must be up to date".
 
 ## On a tracker strangers can write to, their comments on the Housekeeping ticket are weighed like anyone's
 
@@ -195,6 +207,8 @@ The closing report's **Status** line always says why. The usual reasons:
 | A run ended with no merge request after the review | The review found that no change made the code easier to follow, so the run took them all off | Read the ticket's comment; decline the ticket, or reword what it asks for |
 | A run ended on a failing check or a review finding | The same check or finding came back after a fix and a second attempt; the branch stays local and the ticket carries the account as an open question | Reply on the ticket: how to go on, or take the branch over yourself |
 | A branch was handed over | No forge, or you chose to push yourself | Merge it, or push and open the merge request |
+| A merge request was brought onto the default branch | The forge reported it blocked: a conflict, a branch it refuses to merge while behind, or CI red from an outdated base | Nothing; where a conflict was resolved, its comment says how |
+| A conflict was handed to you | Both sides changed the same logic, or want opposite things; nothing was pushed | Say on the merge request what to keep, or resolve it yourself |
 | Tools named as out of reach | They wait behind something no ticket can change: a PHP version your project does not allow yet, or a project that is not PHP | Raise the PHP version, or record the rejection the suite proposes |
 | A run ends because of a Pack | The project's own Pack redefines a slug, a Role or a Pack name the suite has, or the file is not in the Pack format; the error names the file and the slug. A slug the suite added later does the same | Rename your slug or correct the file, then call again ([playbook](playbooks/own-tool.md)) |
 | The ticket was not marked ready after its plan | The command of your **Ready after plan** operation failed; the plan stands on the ticket and the report names the command | Run the command yourself, or correct the bullet |
