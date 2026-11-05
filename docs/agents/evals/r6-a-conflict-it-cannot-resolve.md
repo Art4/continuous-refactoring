@@ -25,3 +25,6 @@ Workable tickets wait in Guardrails.
 - [ ] A second call finds !40 not blocked again while nobody has answered, and goes on to Track choice.
 
 ## Results
+
+2026-11-05, skill commit bd397e8: pass, every line, as a walk-through. A later run recognises the handover by the
+suite's comment on !40; nothing else marks it.

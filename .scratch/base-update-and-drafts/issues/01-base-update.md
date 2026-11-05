@@ -1,7 +1,7 @@
 # 01 — The base update
 
 Type: task
-Status: claimed
+Status: done
 Blocked by: —
 
 **What to build** (spec Q2–Q6, Q8–Q11, Q16–Q24; a new ADR)
@@ -41,3 +41,9 @@ Blocked by: —
 `python3 scripts/validate_skills.py .` are green.
 
 ## Comments
+
+> **2026-11-05:** Done. The procedure is `updating-the-base.md`; the blocked check lives there once and the
+> worklist, Track choice, implement point, Housekeeping Track and Driver point to it. A run alone reaches it through
+> Track choice (*A base update first*), a run that works the branch anyway through the implement point (steps 2–5,
+> the push left to the merge-request step). ADR-0094 amends ADR-0073. The walk-through of d12 found that the
+> Driver's call could not name a ticket for a base update; fixed. d12 and r6 pass.

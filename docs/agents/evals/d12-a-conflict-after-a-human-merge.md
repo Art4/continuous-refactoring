@@ -28,3 +28,6 @@ changed too. Ticket #7, PHPStan Level 3, is workable; nothing else is open. The 
       two after it.
 
 ## Results
+
+2026-11-05, skill commit bd397e8: pass, every line, as a walk-through. It named one gap: the Driver's call named a
+ticket only for a rework, its next part, an answer or the human's wish; a base update is now among them.
