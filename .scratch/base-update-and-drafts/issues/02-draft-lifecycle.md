@@ -1,0 +1,34 @@
+# 02 — The draft lifecycle
+
+Type: task
+Status: open
+Blocked by: 01
+
+**What to build** (spec Q7, Q12–Q15, Q25; a new ADR)
+
+- **Opening.** `opening-a-merge-request.md` step 3: every merge request opens as a draft (`gh pr create --draft`,
+  `glab mr create --draft`); a forge without drafts or **Merge requests** `none` skips this. Step 4: a run alone and
+  Housekeeping mark it ready once CI is green (Q7); under the Driver it stays a draft. A target whose CI does not run
+  on drafts → mark it ready so CI runs, say so in the closing report and a comment (Q14). The run needs to know
+  whether the Driver called it: the Driver's prompt says so.
+- **The Driver.** `skills/continuous-refactoring/SKILL.md`, step 4: ready only after the verdict mergeable; request
+  changes, a handover after the reworks ran out, an unresolvable conflict and "ask the human" keep or make it a
+  draft, the comment says why (Q12). *Ready*: a draft of the suite with no comment of the Driver since its last
+  commit is reviewed, or reworked where it is incomplete (Q13).
+- **The hold.** A draft the human set, read from the forge's timeline (spec, *Facts*), is a hold for the Driver and
+  a run: no review, no rework, no base update, until the human marks it ready or comments (Q15, Q25). `worklist.md`:
+  such a ticket stays in review, not workable.
+- **The base update.** `updating-the-base.md` (ticket 01): a draft during the update, afterwards the state before
+  restored — ready where it was ready and CI is green, a draft where the suite had handed it over (Q25).
+- Docs: `docs/playbooks/driver.md` (what a draft of the suite means, and the human's hold; the table of what waits
+  for the human), `docs/playbooks/run.md`, `docs/FAQ.md` (why drafts), `docs/known-limitations.md` (CI that skips
+  drafts), `README.md` and `docs/architecture.md` where they describe an opened merge request.
+- **Scenarios.** `docs/agents/evals/d13-a-draft-left-behind.md` (an interrupted run left a draft with green CI and
+  no verdict → *Ready* reviews it and marks it ready) and `d14-the-human-holds-a-draft.md` (the human made a ready
+  merge request a draft and it now conflicts → the Driver leaves it alone and lists it as waiting). Both in the
+  README's table.
+- A changelog fragment.
+
+**Done when** d13 and d14 pass as walk-throughs, d12 and r6 still pass, and tests and validator are green.
+
+## Comments
