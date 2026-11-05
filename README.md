@@ -75,7 +75,21 @@ fallback.
 
 ## Installing in a target project
 
-Three symlinks, side by side in the target's skills folder:
+With the [`skills`](https://github.com/vercel-labs/skills) installer (Node.js 22.20 or newer), run in the target:
+
+```bash
+npx skills@latest add https://github.com/Art4/continuous-refactoring/tree/0.11.0/skills --skill '*' -a <agent>
+```
+
+`<agent>` is your agent, such as `opencode`, `claude-code` or `codex`; repeat `-a` for several, or leave it out
+to choose interactively. Add `-g` to install for your user instead of one project. Only the three skills are
+installed, nothing else of this repository, and the version in the URL is recorded in `skills-lock.json`.
+
+Always install all three: `continuous-refactoring` and `continuous-housekeeping` read files of
+`continuous-refactoring-run`, which must sit beside them in the same skills folder.
+
+**Without Node.js**, or to work on the suite itself: clone this repository, check out a release tag
+(`git checkout 0.11.0`), and put three symlinks side by side in the target's skills folder:
 
 ```bash
 mkdir -p <target>/.agents/skills
@@ -85,8 +99,7 @@ ln -s /path/to/continuous-refactoring/skills/continuous-housekeeping <target>/.a
 ```
 
 Or copy the three folders. To make the suite available everywhere, link all three into your agent's global
-skills folder (e.g. `~/.config/opencode/skills/`) the same way. They belong together:
-`continuous-refactoring` and `continuous-housekeeping` read files of `continuous-refactoring-run`.
+skills folder (e.g. `~/.config/opencode/skills/`) the same way.
 
 > **Works with other skills, needs none.** The suite is compatible with engineering skills such as [mattpocock/skills](https://github.com/mattpocock/skills) (see [aihero.dev](https://www.aihero.dev/)): where a project has skills for planning or implementing, a run offers to use them. Without any, the first `/continuous-refactoring-run` writes the issue-tracker file itself, and plans and implements its own way.
 
@@ -103,10 +116,12 @@ skills folder (e.g. `~/.config/opencode/skills/`) the same way. They belong toge
 
 ## Upgrading
 
-Pull the suite's checkout; the symlinks follow it, and a new skill needs a symlink of its own: `continuous-refactoring-run`
-is one. What a version changes, and the steps a breaking
-change needs in your project, are in the [CHANGELOG](CHANGELOG.md) — coming from 0.6.0 or earlier,
-read the 0.7.0 entry first.
+Read the new version's entries in the [CHANGELOG](CHANGELOG.md) first: they name the steps a breaking change
+needs in your project — coming from 0.6.0 or earlier, read the 0.7.0 entry first. Then run the `npx skills add`
+command again with the new version in the URL; `--skill '*'` also brings a skill the new version adds.
+
+With a checkout, fetch and check out the new tag (`git fetch --tags && git checkout X.Y.Z`); the symlinks follow
+it, and a new skill needs a symlink of its own: `continuous-refactoring-run` is one.
 
 ## Where things live
 

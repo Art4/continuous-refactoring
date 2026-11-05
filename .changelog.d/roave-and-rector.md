@@ -1,1 +1,0 @@
-Roave's backward-compatibility check now applies per part of the BC promise: when only some parts follow semantic versioning, the classes of the others are ignored, each entry commented with its scope. When Rector's type coverage takes its BC-safe path only because no promise is recorded, the plan notes that, and the next scan asks the human to set the promise up.

@@ -82,7 +82,8 @@ CI enforces this: a PR touching `skills/**`, `docs/**` (outside `docs/adr/**`), 
    ```
    Without this, `[X.Y.Z]` in the heading is inert text, not a link.
 3. Delete the fragment files that section was built from.
-4. Commit, tag `X.Y.Z`, push the tag.
-5. `gh release create X.Y.Z --title X.Y.Z --notes-file -` (piping in the same section's body,
+4. Set the version in `README.md`'s install command and `git checkout` example to `X.Y.Z`.
+5. Commit, tag `X.Y.Z`, push the tag.
+6. `gh release create X.Y.Z --title X.Y.Z --notes-file -` (piping in the same section's body,
    minus the heading) — or `gh release edit` if the release already exists — so the GitHub
    release page carries the same text instead of staying empty.
