@@ -22,3 +22,5 @@ else is open.
 - [ ] Round 2 works #10, and its merge request opens as a draft.
 
 ## Results
+
+2026-11-06, skill commit 9edb93c: pass, every line, as a walk-through.
