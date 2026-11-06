@@ -1,7 +1,7 @@
 # 02 — Backfill the field record
 
 Type: task
-Status: open
+Status: done
 Blocked by: 01
 
 **What to build** (spec S1.3; Q3, Q15, Q17, Q19)
@@ -17,3 +17,10 @@ Blocked by: 01
 
 **Done when** the maintainer has reviewed the rows, they are in `docs/agents/field-results.md`, and tests and
 validator are green.
+
+## Comments
+
+> **2026-11-06:** Done. Three environments, 27 rows, reviewed row by row with the maintainer; the base update row is
+> covered by d12 (the conflict came from the maintainer's merge). The traces before 0.5.0 and a library with no suite
+> traces stay out. Under the table: what is not evidenced, and that the Driver's review miss has no ticket or scenario
+> yet.
