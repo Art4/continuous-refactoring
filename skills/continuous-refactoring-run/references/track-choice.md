@@ -32,9 +32,16 @@ The first Track in the fixed order that has something.
 fulfilled from the parser (`tooling-parser.md`, *Is Safety Net fulfilled?*); the answer is computed:
 
 - **Fulfilled** → the recommendation moves on down the order.
-- **Not fulfilled** → the recommendation is to end the run. An autonomous run ends here with "Safety Net is
-  waiting for merges", followed by the tickets in review with their merge requests and the tickets that
-  cannot be worked with their reasons. A human may choose another Track instead.
+- **Not fulfilled, read from the seed from the trace, and a Stage of the Safety Net's `backlog` has no open
+  ticket** → that Stage is not known: the Track has no trace after all, its scan is due, and Safety Net has
+  something. The recommendation is Safety Net.
+- **Not fulfilled** otherwise → the recommendation is to end the run. An autonomous run ends here with
+  "Safety Net is unfinished", followed by the Safety Net's tickets alone: those in review with their merge
+  requests, those blocked with what blocks them, those waiting with what they wait for. A human may choose
+  another Track instead.
+
+The answer read from this run's scan needs no such check: the scan judged every Stage, and a proposal declined
+at filing is a rejection.
 
 No Track has anything → the run ends: nothing is workable.
 

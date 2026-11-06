@@ -80,7 +80,7 @@ A ticket waits until that comment is answered. **Answer by commenting on the tic
 - **A merge request was brought up to date** — it could no longer merge; the run updated it and ended. Where a conflict needs your decision, the merge request asks.
 - **An open question** is on the ticket — answer there.
 - **Nothing is workable** — every open ticket is in review, blocked or waiting.
-- **"Safety Net is waiting for merges"** — an autonomous run found nothing workable in Safety Net while Safety Net is unfinished. The report lists what is in review. Merge, or name another Track.
+- **"Safety Net is unfinished"** — an autonomous run found nothing workable in Safety Net while Safety Net is unfinished. The report lists the Safety Net's tickets alone: in review with their merge requests, blocked and waiting with their reasons. Merge or answer them, or name another Track.
 - **Nobody answered** a decision point of an interactive run.
 
 Every run closes with two lines. **Status** opens with how many things wait for you, or that none does, and says what happened and where it ended; **Next** says what you can do now, and for each thing that waits what the suite recommends and what happens if you do not answer. Where a claim could not be confirmed — CI still running, checks unreadable — the report says so.

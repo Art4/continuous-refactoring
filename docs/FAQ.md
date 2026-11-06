@@ -167,7 +167,9 @@ tracker alone, without knowing when anything last ran.
 The Safety Net is what catches a regression before an agent's judgement has to. While it is
 unfinished and all of its tickets wait for review, the useful next step is yours — review and merge —
 not more work stacked on foundations that are not there yet. So an autonomous run says "Safety Net
-is waiting for merges" and ends. You can always decide otherwise: name another Track in the call.
+is unfinished", lists the Safety Net's tickets that hold it up, and ends. It ends only when those
+tickets account for everything left: a tool of the Safety Net without an open ticket makes the run scan
+for it instead. You can always decide otherwise: name another Track in the call.
 
 ## Why is a Track scanned only once?
 

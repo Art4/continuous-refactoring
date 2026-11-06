@@ -32,6 +32,7 @@ its list holds.
 | `r4-tests-that-check-little` | a run | walk-through |
 | `r5-the-tool-is-in-place` | a run | walk-through |
 | `r6-a-conflict-it-cannot-resolve` | a run | walk-through |
+| `r7-safety-net-met-guardrails-open` | a run | walk-through |
 
 ## Playing one
 
