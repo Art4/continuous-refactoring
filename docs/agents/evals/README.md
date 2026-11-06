@@ -1,7 +1,7 @@
 # Scenarios
 
 Hand-written tests of the skill text, played before a change to it merges. No runner and no CI step. For a test on a
-real target, see [the field eval](../field-eval.md).
+real target, see [the field eval](../field-eval.md); what held in the field is in [the field record](../field-results.md).
 
 Each file is one scenario: the situation, the call, the expected behaviour. Its prefix names what it tests: `p`
 the Pack route, `d` the Driver, `r` a run. A scenario passes when every line of
