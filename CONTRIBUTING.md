@@ -46,7 +46,8 @@ records why past design decisions were made; check it before re-litigating one.
 
 **Test a change to skill text.** Before it merges, play the scenarios that cover it
 ([docs/agents/evals/](docs/agents/evals/README.md)), and write new ones first for new behaviour. To test a change on a
-real target, use the [field eval](docs/agents/field-eval.md).
+real target, use the [field eval](docs/agents/field-eval.md); what it confirms goes into the
+[field record](docs/agents/field-results.md).
 
 **A rule broken twice becomes a check.** When the same rule is violated a second time, or a review
 raises it a second time, do not add another paragraph: encode it as a check in `scripts/validate_skills.py`

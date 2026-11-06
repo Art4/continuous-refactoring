@@ -20,6 +20,9 @@ Before round 1, ask the human three questions, together in one `AskUserQuestion`
 A round here is the eval's own, not a Driver's. The watched agent runs `continuous-refactoring-run`, or the Driver with
 `review only`; with `merge` the reviewer has nothing left to decide.
 
+An old log still there that ends without `Recorded: <date>` was never closed: run *Closing* on it first, before the
+three questions, and delete it only once its rows are confirmed.
+
 Answering **configures** the eval and does not start it. Say that it is set up and wait for a separate signal from the
 human ("los", "start") before round 1.
 
@@ -52,7 +55,7 @@ the human.
 ## The log
 
 `.scratch/<owner>-<repo>-loop-observation/findings.md`, here in this repository. The repository ignores these folders:
-they name the target, and no committed file does. A fresh eval deletes the old log.
+they name the target, and no committed file does. A fresh eval deletes the old log, once it is recorded (*Closing*).
 
 One entry per round: a timestamp, the verdict, and what the list showed. Anything outside the normal rhythm gets a
 `### Finding …` or `## ⚠️ Anomaly` section of its own. Delete a finding once the suite is fixed for it; the log is no second backlog. A
@@ -61,7 +64,7 @@ violation that stands in the log for the second time is named to the maintainer 
 ## Rounds
 
 Wait the confirmed time between rounds. A quiet round shows no new activity on the target. After 6 in a row the eval stops, with a closing summary in the
-log. The human may stop it at any time, to fix the suite first, say. Carried between rounds: the last-seen numbers,
+log. The human may stop it at any time, to fix the suite first, say. Both ends go to *Closing*. Carried between rounds: the last-seen numbers,
 `mergedBy`, `updatedAt` and comment counts, and what was commented on or rejected and why. The log and a fresh query
 are the state; there is no other file.
 
@@ -119,6 +122,21 @@ suite or the watched agent. **Anomaly**: log it at once under `## ⚠️ Anomaly
 
 A revert is a normal merge request: `git revert -m 1 <merge-commit>` on a new branch, with the reasoning in its body so
 the watched agent can take it in, merged by the reviewer. That goes for a correction of the reviewer's own too.
+
+## Closing
+
+An eval ends after six quiet rounds or when the human stops it. Either way, before anything else:
+
+1. **Draft the rows** for [the field record](field-results.md) from the log, by its *Writing a row*: one per path the
+   eval saw hold, fail or be rejected, with the environment described and never named. A path already in the record
+   for the same environment gets its version and dates widened instead of a new row.
+2. **Hand them to the human** in one message, with the paths the eval meant to see and did not. The human confirms,
+   corrects or strikes each row.
+3. **Land them** through a pull request of this repository, as any change.
+4. **A field case becomes a scenario.** A miss becomes a ticket *and* a scenario under `evals/`, anonymised. A path
+   confirmed for the first time becomes a scenario where it is cheap to rebuild on a fixture. Name both in the
+   message of step 2, so the human decides which to file.
+5. **Mark the log**: a last line `Recorded: <date>`. Only now may a later eval delete it.
 
 ## Asking the human
 

@@ -1,7 +1,7 @@
 # 01 — The field record and the field eval's closing step
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What to build** (spec S1.1, S1.2, S1.4; Q1, Q2, Q11)
@@ -19,3 +19,11 @@ Blocked by: —
 
 **Done when** the record exists with its head and an empty table, `field-eval.md` carries the closing step and the
 start check, and tests and validator are green.
+
+## Comments
+
+> **2026-11-06:** Done. `docs/agents/field-results.md` with *Writing a row* (path, environment by label, version,
+> dates, result, scenario, source: trace or maintainer) and empty tables. `field-eval.md` gains *Closing* (draft rows,
+> hand them to the human with the paths not seen, land them by PR, name the miss's ticket and scenario, mark the log
+> `Recorded: <date>`), a start check for an unrecorded old log, and pointers from *The log* and *Rounds*. Pointers
+> from `evals/README.md` and `CONTRIBUTING.md`.
