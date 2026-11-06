@@ -1,5 +1,9 @@
 # The tooling tree becomes Roles, Tools and Stages in Packs
 
+> Amended by [ADR-0096](0096-the-safety-net-gate-answers-only-from-a-judged-state.md): an autonomous run with the
+> Safety Net open ends only once its open tickets account for every Stage left, and names the Safety Net's tickets
+> alone.
+
 > Amended by [ADR-0086](0086-tools-on-request.md): a Tool may be *on request*, and `after` is renamed `waits_for`.
 
 > Amended by [ADR-0080](0080-a-role-is-filled-per-scope.md): a Role is filled per scope, not once for the target.
