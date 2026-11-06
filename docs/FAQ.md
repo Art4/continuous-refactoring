@@ -126,6 +126,20 @@ The price: merge requests opened side by side may conflict. Each starts from the
 any one of them merges cleanly on its own; once one is merged, the suite brings the others onto the
 default branch itself, and asks you only where a conflict needs a decision.
 
+## Why does the suite open its merge requests as drafts?
+
+So that you can tell at a glance whether it is still on one. A draft means the suite does not think
+it can merge yet: its review has not passed it, asked for changes, or asked you something. Ready
+means it does. Only then is your review worth the time, and a bot or a reviewer that skips drafts
+waits for the right moment by itself.
+
+## How do I stop the suite working on one of its merge requests?
+
+Make it a draft yourself. The suite tells its own drafts from yours by its own steps — it opened
+the merge request as a draft, or commented why it made it one — not by the account, since it often
+runs under yours. Any other draft is your hold: no review, no rework, no update onto the default
+branch, until you mark it ready or comment.
+
 ## Why does a conflict not count as a rework, and why is there no limit on resolving them?
 
 A rework answers something wrong with the merge request; after two the Driver hands it to you, since

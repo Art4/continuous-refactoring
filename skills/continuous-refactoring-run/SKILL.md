@@ -21,6 +21,7 @@ understood.
 | a **Track** | the Track choice is answered; the run stays in that Track and ends when it has nothing workable |
 | a **ticket** | Track and ticket are chosen: the worklist and reconcile hold that ticket alone, the run works it, and ends if it turns out not to need work |
 | a **restriction** ("only the Rector Stages") | the worklist, the scan, the filing and the selection hold only what it covers |
+| `under the Driver` | the merge request stays a draft for the Driver's verdict (`references/opening-a-merge-request.md`, *Draft and ready*) |
 | a **Pack** of the target's own, or a tool the suite does not know | after step 1 the run continues in `references/own-pack.md` instead of step 2, and ends where that reference ends |
 
 Nothing stated → the run is **interactive** and unrestricted.

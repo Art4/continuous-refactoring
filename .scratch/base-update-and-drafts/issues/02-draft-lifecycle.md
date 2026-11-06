@@ -1,7 +1,7 @@
 # 02 — The draft lifecycle
 
 Type: task
-Status: open
+Status: done
 Blocked by: 01
 
 **What to build** (spec Q7, Q12–Q15, Q25; a new ADR)
@@ -32,3 +32,19 @@ Blocked by: 01
 **Done when** d13 and d14 pass as walk-throughs, d12 and r6 still pass, and tests and validator are green.
 
 ## Comments
+
+> **2026-11-06:** Done. *Draft and ready* in `opening-a-merge-request.md` holds the commands and whose draft a
+> draft is; ADR-0095. The human chose (spec Q26) to tell the suite's drafts by its own steps rather than the
+> timeline's actor, since the suite often shares the human's account; so a base update no longer toggles the draft
+> state (Q25 changed). A run alone also marks ready when CI is still running or unreadable at its end, otherwise its
+> draft would wait for nobody. The Driver's call says `under the Driver`. d13 and d14 pass, d12 and r6 still do.
+
+> **2026-11-06 (field):** On a test target two of three merge requests were reviewed mergeable and stayed drafts. The
+> Driver's verdict said only "mark it ready", without a command, and its *Done when* asked for the verdict, not the
+> forge's state. Fixed: the commands are in the verdict, and the round ends only once the forge shows it ready. d13
+> checks it.
+
+> **2026-11-06 (field):** Merge requests did not open as drafts every time. Step 3 named the draft in a clause
+> without a command, its *Done when* did not check it, and a merge request the implementing skill had opened stayed
+> ready unless new commits were pushed. Fixed: the commands in step 3, the draft read back from the forge in its
+> *Done when*, and step 1 makes any open one that is not a draft a draft, with its comment.

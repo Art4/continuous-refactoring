@@ -63,6 +63,7 @@ leaves a draft nothing picks up again, unless something looks for it.
 | Q23 | `worklist.md` gets the state **needs base update**: a ticket in review whose merge request is blocked (Q16). It is workable and comes before every Track choice; the run updates and ends with that merge request (one run, one merge request). Several → Q11's order. Under the Driver, *Ready* has cleared them, so its run finds none (Q8 holds) |
 | Q24 | In an interactive run it is a decision point: findings (the merge request, the trigger, the colliding files); options update (the recommendation), skip it and go on as usual, stop. An autonomous run takes the recommendation |
 | Q25 | The human's draft hold (Q15) holds for a run too: the ticket stays in review, not workable. During the update the run makes the merge request a draft and afterwards restores its state: ready where it was ready and CI is green, a draft where the suite had handed it over (Q12) |
+| Q26 | Decided 2026-11-06 while building 02, amending Q15 and Q25: the timeline's actor cannot tell the suite from the human, who often share an account. A draft is the suite's when it opened the merge request as a draft and it was never ready since, or when its newest change to draft came with the suite's comment saying why; any other draft is the human's hold. A base update leaves draft or ready as it found it |
 
 ## Facts
 

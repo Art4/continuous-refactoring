@@ -24,6 +24,8 @@ its list holds.
 | `d10-a-stop-after-a-wake-up` | the Driver | walk-through |
 | `d11-the-human-asks-for-changes` | the Driver | walk-through |
 | `d12-a-conflict-after-a-human-merge` | the Driver | walk-through |
+| `d13-a-draft-left-behind` | the Driver | walk-through |
+| `d14-the-human-holds-a-draft` | the Driver | walk-through |
 | `r1-opener-seen` | a run | walk-through |
 | `r2-opener-after-rejection` | a run | walk-through |
 | `r3-a-security-plan-picks-its-tool` | a run | walk-through |

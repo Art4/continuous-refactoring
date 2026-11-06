@@ -75,7 +75,7 @@ A ticket waits until that comment is answered. **Answer by commenting on the tic
 
 ## How a run ends
 
-- **A merge request is open** — review and merge it.
+- **A merge request is open** — review and merge it. A run alone marks it ready once CI is green; under the Driver it stays a draft until the Driver's review passes it.
 - **A branch was handed to you** — there is no forge, or you chose to push yourself. Its name is in a comment on the ticket.
 - **A merge request was brought up to date** — it could no longer merge; the run updated it and ended. Where a conflict needs your decision, the merge request asks.
 - **An open question** is on the ticket — answer there.

@@ -28,3 +28,5 @@ Workable tickets wait in Guardrails.
 
 2026-11-05, skill commit bd397e8: pass, every line, as a walk-through. A later run recognises the handover by the
 suite's comment on !40; nothing else marks it.
+
+2026-11-06, skill commit 9edb93c: still passes.
