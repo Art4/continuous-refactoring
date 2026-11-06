@@ -38,3 +38,8 @@ Blocked by: 01
 > timeline's actor, since the suite often shares the human's account; so a base update no longer toggles the draft
 > state (Q25 changed). A run alone also marks ready when CI is still running or unreadable at its end, otherwise its
 > draft would wait for nobody. The Driver's call says `under the Driver`. d13 and d14 pass, d12 and r6 still do.
+
+> **2026-11-06 (field):** On a test target two of three merge requests were reviewed mergeable and stayed drafts. The
+> Driver's verdict said only "mark it ready", without a command, and its *Done when* asked for the verdict, not the
+> forge's state. Fixed: the commands are in the verdict, and the round ends only once the forge shows it ready. d13
+> checks it.

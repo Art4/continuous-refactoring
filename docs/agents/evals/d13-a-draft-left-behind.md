@@ -18,7 +18,8 @@ else is open.
 - [ ] *Ready* finds !21 a draft of the suite — opened as a draft and never ready — with no comment of the Driver
       since its last commit.
 - [ ] With its checks green, the round goes on at the review with !21; no new run starts for #9.
-- [ ] A mergeable verdict marks !21 ready and comments that; the merge stays the human's.
+- [ ] A mergeable verdict marks !21 ready with `gh pr ready`, and the round ends only once the forge shows it ready;
+      the comment says it is mergeable, and the merge stays the human's.
 - [ ] Round 2 works #10, and its merge request opens as a draft.
 
 ## Results

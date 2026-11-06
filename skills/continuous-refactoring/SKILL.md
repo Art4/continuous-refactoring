@@ -73,19 +73,22 @@ subagents of its own, and a subagent cannot start any.
    reviewer: in scope of its ticket, behaviour kept, checks green (run them where there is no CI), the description
    says why the change is safe. A red check is a request for changes.
 4. **Verdict.**
-   - **Mergeable** → mark it ready. With `review only`, comment that, and leave the merge to the human. With
-     `merge`, follow `references/merging.md`.
+   - **Mergeable** → mark it ready on the forge (`gh pr ready <n>`, `glab mr update <n> --ready`, or the forge's
+     own command). With `review only`, comment that it is mergeable, and leave the merge to the human. With `merge`,
+     follow `references/merging.md`.
    - **Request changes** → post it on the merge request, describing the problem and its cause, then go back to step 2
      with a run that names the ticket. Rework has no cadence. After two reworks without a mergeable result, the same
      comment says so and asks the human.
    - **Ask the human** → post the question on the merge request.
 
-   Anything but mergeable keeps it a draft, or makes a ready one a draft, its comment saying why (*Draft and ready*).
+   Anything but mergeable keeps it a draft, or makes a ready one a draft, its comment saying why
+   (`../continuous-refactoring-run/references/opening-a-merge-request.md`, *Draft and ready*).
 
-   *Done when* the merge request is mergeable, merged, or with the human. That is one round, however many runs it
+   *Done when* the forge shows the merge request ready and mergeable, merged, or with the human as a draft — read
+   from the forge after the last write. That is one round, however many runs it
    took.
 5. **Status.** One line here, a line in the Log, and a notification, through what the environment has, of everything
-   that now waits for the human: mergeable merge requests, open questions on tickets, questions on merge requests,
+   that now waits for the human: mergeable merge requests, each ready on the forge, open questions on tickets, questions on merge requests,
    merge requests the human holds as a draft, a change a run wants in `AGENTS.md` with its wording. Then read
    *Stops*: they hold before the cadence, not after it.
 
