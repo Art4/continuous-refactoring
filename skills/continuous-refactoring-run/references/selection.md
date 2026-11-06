@@ -23,7 +23,8 @@ review's comments.
 ## 2. Pick-up check
 
 Starting with the first ticket, judge its Stage's Fulfilment check again (`track-scan.md`, *Judging a
-Stage*), together with its Pack's and its own *Applies when* and which Tool fills the Role of its Tool. For
+Stage*), together with its Pack's and its own *Applies when* — as the worklist judged them this run
+(`worklist.md`, *5. Judge what applies*), judged here where it did not — and which Tool fills the Role of its Tool. For
 a baseline ticket the check is the baseline: with no entries left the ticket is fulfilled, otherwise it is
 the one to work.
 

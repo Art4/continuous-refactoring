@@ -36,6 +36,9 @@ recognized Tool's to say whether it fills a Role.
   handed in and nothing is blocked.
 - **Every other Stage in scope** whose Pack applies — judged, below. A Stage whose own *Applies when* does
   not hold goes into `not_applicable`.
+
+Where this run's worklist judged the Packs, the runtime and the Stages' own *Applies when* (`worklist.md`,
+*5. Judge what applies*), take them from there instead of judging again.
 - **The other tooling Track's Stages.** In a Safety Net scan they stay undecided. In a Guardrails scan the
   Safety Net decides what blocks a Guardrails Stage: one with an open ticket stays undecided, every other
   is judged unless this run already judged it.

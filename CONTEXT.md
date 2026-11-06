@@ -41,7 +41,7 @@ The wait between two **rounds** of the **Driver**, counted from the end of the r
 _Avoid_: interval
 
 **Worklist**:
-The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. A call that names a ticket narrows the worklist to that ticket, and reconcile with it. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
+The open **tickets** of a target, found by searching the tracker and sorted into **Tracks**: a ticket matching a tooling-tree Stage belongs to that Stage's Track, the open **Housekeeping ticket** to Housekeeping, everything else to Investigation. A ticket is _workable_ when it is open and its blockers are all done. Building it also judges, once per run, which Packs and Stages apply and the lowest runtime the target allows; every later step of the run takes that judgement. A call that names a ticket narrows the worklist to that ticket, and reconcile with it, and judges nothing there. The suite keeps no list of its own: a ticket's merge request, a rejection and the Housekeeping ticket are found by search each time.
 _Avoid_: bookkeeping, open list, state file
 
 **Merge request**:

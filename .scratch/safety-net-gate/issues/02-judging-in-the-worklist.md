@@ -1,7 +1,7 @@
 # 02 — The worklist judges what applies, once per run
 
 Type: task
-Status: open
+Status: done
 Blocked by: 01
 
 **What to build** (spec Q3, Q10; ADR-0096)
@@ -20,3 +20,7 @@ Blocked by: 01
 **Done when** r5 and r1 still pass as walk-throughs, and tests and validator are green.
 
 ## Comments
+
+> **2026-11-06:** Done. *5. Judge what applies* in `worklist.md`; *A Track's trace*, the seed from the trace,
+> `track-scan.md`'s *Judging* and the pick-up check take it, and judge themselves where it did not run (a named
+> ticket, a `continuous-housekeeping` run). `SKILL.md` step 2's *Done when* names it. r1 and r5 pass.

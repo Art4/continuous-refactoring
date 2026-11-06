@@ -50,13 +50,27 @@ The first row that applies:
 A restriction in the call removes every ticket and every Stage it does not cover, before any later step
 counts them.
 
+## 5. Judge what applies
+
+Once per run, before any Track's trace is asked. Skipped where the call names a ticket: there is no Track choice
+and no trace.
+
+- **The Packs.** Each Pack's *Applies when*, against the target; the generic Pack always applies → `packs`.
+- **The Stages.** The own *Applies when* of each Stage in both tooling Tracks' `nodes` whose Pack applies; each
+  that does not hold → `not_applicable`.
+- **The runtime.** As `track-scan.md`, *Judging*, says → `runtime`.
+
+This may run in a subagent handed this step, `track-scan.md`, *Judging*, and the Packs; it returns the three.
+Every later step of this run takes them as they are: the trace below, the seed from the trace
+(`tooling-parser.md`), the scan, and the pick-up check (`selection.md`).
+
 ## A Track's trace
 
 A Stage is **known** once the tracker shows it was dealt with before: a ticket of it in any state, or a
 recorded rejection of it, of its Tool or of its Role (`rejection.md`, *Finding rejections*). A tooling
 Track has a **trace** when every Stage of it that applies is known. Asked only of a Track with no open
-ticket, over the Stages of the Track's `nodes` in a call with the Packs that apply (`track-scan.md`,
-*Judging*), without the Stages whose own *Applies when* does not hold and without those marked
+ticket, over the Stages of the Track's `nodes` whose Pack applies (step 5), without those step 5 found
+not applicable and without those marked
 `on_request`, except the first Stage of a Tool whose Opener was found and not used up: a Stage nobody asked for is never
 due otherwise. An Opener is found with **Search** for `Opener: <tool>` over open and closed tickets, and over
 the merge requests with the tool **Merge requests** names (`tooling-model.md`, *An Opener*). Where one listing of all
