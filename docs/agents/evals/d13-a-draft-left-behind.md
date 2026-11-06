@@ -20,7 +20,8 @@ else is open.
 - [ ] With its checks green, the round goes on at the review with !21; no new run starts for #9.
 - [ ] A mergeable verdict marks !21 ready with `gh pr ready`, and the round ends only once the forge shows it ready;
       the comment says it is mergeable, and the merge stays the human's.
-- [ ] Round 2 works #10, and its merge request opens as a draft.
+- [ ] Round 2 works #10; its merge request opens with `gh pr create --draft`, and the run reads it back from the
+      forge as a draft before it reports the link.
 
 ## Results
 

@@ -43,3 +43,8 @@ Blocked by: 01
 > Driver's verdict said only "mark it ready", without a command, and its *Done when* asked for the verdict, not the
 > forge's state. Fixed: the commands are in the verdict, and the round ends only once the forge shows it ready. d13
 > checks it.
+
+> **2026-11-06 (field):** Merge requests did not open as drafts every time. Step 3 named the draft in a clause
+> without a command, its *Done when* did not check it, and a merge request the implementing skill had opened stayed
+> ready unless new commits were pushed. Fixed: the commands in step 3, the draft read back from the forge in its
+> *Done when*, and step 1 makes any open one that is not a draft a draft, with its comment.

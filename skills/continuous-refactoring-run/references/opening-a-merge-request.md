@@ -16,8 +16,9 @@ taken.
 Search the forge's merge requests for one from this branch — the implementing skill may have opened it,
 or the ticket came in review.
 
-- **An open one** → the decision point is only about pushing the new commits. One that is ready is made a draft
-  first (*Draft and ready*); then step 4.
+- **An open one** → the decision point is only about pushing the new commits. One that is not a draft — opened
+  by the implementing skill, or ready from an earlier verdict — is made a draft first, new commits or not, with
+  its comment (*Draft and ready*); then step 4.
 - **None** → step 2.
 - **No forge** — **Merge requests** says `none`, or the remote cannot be reached → step 5.
 
@@ -27,7 +28,7 @@ or the ticket came in review.
 
 - **Findings:** the branch, its commits in one line each, the checks that ran, the title and the
   description as they would be posted.
-- **Options:** push and open it (the recommendation); change title or description; leave the branch
+- **Options:** push and open it as a draft (the recommendation); change title or description; leave the branch
   unpushed for the human.
 - **Left for the human** → step 5.
 
@@ -35,7 +36,8 @@ or the ticket came in review.
 
 ## 3. Push and open
 
-Push the branch and open the merge request against the default branch, as a draft (*Draft and ready*).
+Push the branch and open the merge request against the default branch as a draft: `gh pr create --draft`,
+`glab mr create --draft`, or the forge's own way (*Draft and ready*).
 
 **Title** — what the change does for the project, in the target's own convention for titles.
 
@@ -60,7 +62,9 @@ Push the branch and open the merge request against the default branch, as a draf
 6. A recurring task this branch added to the Housekeeping template, in one line; where the branch created
    the template, say that too.
 
-*Done when* the merge request is open and reported with its link.
+*Done when* the merge request is open, the forge shows it as a draft (`gh pr view <n> --json isDraft`,
+`glab mr view <n> -F json`, field `draft`), and it is reported with its link. Opened ready all the same → make it a
+draft now.
 
 ## 4. The forge's checks
 
