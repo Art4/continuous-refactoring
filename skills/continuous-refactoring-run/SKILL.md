@@ -90,7 +90,8 @@ Read `references/reporting-progress.md` before the first sentence to the human.
    *Done when* the section carries the three required operations.
 
 2. **Worklist.** Build the worklist per `references/worklist.md`.
-   *Done when* every open ticket found has a Track and a state.
+   *Done when* every open ticket found has a Track and a state, and what applies is judged — unless the
+   call names a ticket.
 
 3. **Reconcile.** Follow `references/reconcile.md`.
    *Done when* every finding is acted on or left as decided, or there was none.

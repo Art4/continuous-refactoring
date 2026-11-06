@@ -96,8 +96,9 @@ For a tooling Track that has a trace, its tickets are the state. The seed holds:
   is due (`worklist.md`);
 - every Stage of an on-request Tool that has a ticket in some state, or that the call names, as
   `requested` — except a Tool whose only ticket still waits for the yes to its Opener question;
-- the Packs and Stages the *Applies when* sentences hold for, and the runtime, judged this run
-  (`track-scan.md`, *Judging*). No ticket stands for them, so the tracker says nothing about them.
+- `packs`, `not_applicable` and `runtime` as the worklist judged them this run (`worklist.md`, *5. Judge
+  what applies*); where it did not judge them, they are judged per `track-scan.md`, *Judging*. No ticket stands for
+  them, so the tracker says nothing about them, and a seed without them lets every Pack and Stage apply.
 
 Every step that calls the parser outside a scan uses this seed: the gate question above, and the calls
 that follow a rejection (`rejection.md`).
