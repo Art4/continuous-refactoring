@@ -1,7 +1,7 @@
 # 03 — Track choice checks its stop, and names only the Safety Net's tickets
 
 Type: task
-Status: open
+Status: done
 Blocked by: 01
 
 **What to build** (spec Q4, Q5, Q6, Q11, Q12, Q14; ADR-0096)
@@ -25,3 +25,10 @@ Blocked by: 01
 **Done when** r7 passes in both variants, r5 still passes, and tests and validator are green.
 
 ## Comments
+
+> **2026-11-06:** Done. The check and "Safety Net is unfinished" in `track-choice.md`; `CONTEXT.md`, FAQ, run and
+> tracks playbooks and the troubleshooting row follow. r7 passes in both variants; r5 untouched by this change
+> (passed with ticket 02). The play found that `selection.md`'s pick-up check asked for the seed from the trace,
+> which a Track with open tickets never has; it now takes a seed with the Packs and runtime the worklist judged.
+> Left as they were, named by the play and outside #234: a Stage fulfilled at its first scan never becomes known
+> (ADR-0079, by design); reconcile's parser call with no rejection recorded.

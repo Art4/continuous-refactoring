@@ -1,8 +1,9 @@
 # Reference: selecting a ticket
 
 Picks the one ticket of a tooling Track this run works, and makes sure its Stage still needs the work.
-Reads the worklist (`worklist.md`), the parser's seedless call for the tree's order, and a call with the seed
-from the trace for what blocks a Stage (`tooling-parser.md`).
+Reads the worklist (`worklist.md`), the parser's seedless call for the tree's order, and a call whose seed holds
+the Packs and the runtime judged this run (`worklist.md`, *5. Judge what applies*) for what the runtime blocks
+(`tooling-parser.md`).
 
 Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
@@ -32,7 +33,7 @@ the one to work.
 | --- | --- |
 | the Stage fulfilled — typically set up by hand since the ticket was filed | **fulfilled at pick-up**: to be closed with a note saying what serves the Stage now; go to the next ticket |
 | its Pack's or its own *Applies when* no longer holding, or another Tool filling its Tool's Role | not workable now, named with the reason (the ticket's Stage no longer applies, or Psalm now fills Static Analysis); go to the next ticket |
-| the Stage in `runtime_blocked` of the call with the seed from the trace | not workable: a rejection with the runtime version as blocker is proposed (`rejection.md`, *Below the runtime floor*); go to the next ticket |
+| the Stage in `runtime_blocked` of that call | not workable: a rejection with the runtime version as blocker is proposed (`rejection.md`, *Below the runtime floor*); go to the next ticket |
 | the Stage unfulfilled and free | the one to work |
 
 Step 2 is done at the first ticket that is the one to work, or when the list is used up.

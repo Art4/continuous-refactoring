@@ -38,7 +38,8 @@ Otherwise Track choice is a decision point. The recommendation is the first Trac
 **Safety Net comes first while it is unfinished.** When Safety Net has nothing workable, the suite reads whether it is *fulfilled*. That answer is computed from the tree, not judged: every tool that structural work depends on is in place or declined.
 
 - fulfilled → the recommendation moves on down the order;
-- not fulfilled → the recommendation is to end the run. An autonomous run ends here with "Safety Net is waiting for merges", followed by what is in review and what cannot be worked and why. In an interactive run you may choose another Track instead.
+- not fulfilled, and a Safety Net tool still to set up has no open ticket → that tool was never dealt with, so the Safety Net is scanned instead;
+- not fulfilled otherwise → the recommendation is to end the run. An autonomous run ends here with "Safety Net is unfinished", followed by the Safety Net's tickets alone: what is in review with its merge request, what is blocked or waiting and why. In an interactive run you may choose another Track instead.
 
 Once Safety Net is fulfilled, a Track that turns out to have nothing workable is skipped within the same run, and the next one in the order is tried. A call therefore does not end empty while another Track has work.
 
