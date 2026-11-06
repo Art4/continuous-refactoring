@@ -26,8 +26,14 @@ Where the target's tracker file (`refactoring-operations.md`, *The tracker file*
 every call hands `--tracker-file` its path, relative to the target. The parser reads no prose: it takes the
 path as handed in, and without the flag reads the default. A file missing at that path counts as no section.
 
-`--packs` replaces the directory of the suite's Packs; it is for tests. Without `--seed` nothing is decided and every Pack applies, the target's own included: the call for the Stages and the tree's
-order. The seed is a JSON file written to a temporary directory outside the target:
+`--packs` replaces the directory of the suite's Packs; it is for tests.
+
+**Without `--seed`** nothing is judged and every Pack applies, the target's own included: the call for the
+Stages, the tree's order, the Tools and the Roles. It answers nothing about fulfilment — no
+`safety_net_fulfilled`, and of each Track only its `nodes` (*What it returns*). Every verdict needs a seed.
+
+**With `--seed`** the parser answers from what was judged. The seed is a JSON file written to a temporary
+directory outside the target:
 
 ```json
 {"fulfilled": ["<stage>", "..."],
@@ -63,6 +69,9 @@ again.
 | `roles`, `tools` | each Role, in each scope its Tools are in, as `{role, name, scope, filled_by}` with the Tool that fills it; each Tool with its Roles, its status (recommended, on-request or recognized), and whether another Tool took its place |
 | `prerequisites`, `packs` | whether `git` and `onboarding-setup` hold; the Packs that applied |
 | `tree.stages` | every Stage with its Tool, Roles, Pack, Track, `requires` and `waits_for` |
+
+The seedless call returns `tracks` with `nodes` alone, `roles` without `filled_by`, `tools` without whether
+another Tool took their place, `prerequisites`, `packs` and `tree.stages`; none of the other keys.
 
 A Stage of a recognized Tool, or of a Tool another Tool took the place of, is in no `nodes` list and gets
 no ticket. A Stage of an on-request Tool nobody asked for is in `nodes` with `on_request`, and in no

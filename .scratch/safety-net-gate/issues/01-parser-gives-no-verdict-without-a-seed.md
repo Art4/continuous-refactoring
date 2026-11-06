@@ -1,7 +1,7 @@
 # 01 — The parser gives no verdict without a seed
 
 Type: task
-Status: open
+Status: done
 
 **What to build** (spec Q2, Q7, Q8; ADR-0096)
 
@@ -20,3 +20,9 @@ Status: open
 **Done when** tests and validator are green, and no reference reads a verdict from the seedless call.
 
 ## Comments
+
+> **2026-11-06:** Done. Without a seed `compute()` drops `safety_net_fulfilled`, `runtime_blocked`, `reversals`,
+> `closed_by_rejection`, every Track key but `nodes`, a Role's `filled_by` and a Tool's `out`: each depends on what
+> was judged. `prerequisites` stays, the parser reads it from the file itself. Found on the way: the pick-up check in
+> `selection.md` read `runtime_blocked` from the seedless call, where it was always empty; it now reads it from the
+> call with the seed from the trace.

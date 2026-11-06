@@ -1,7 +1,8 @@
 # Reference: selecting a ticket
 
 Picks the one ticket of a tooling Track this run works, and makes sure its Stage still needs the work.
-Reads the worklist (`worklist.md`) and the parser's seedless call (`tooling-parser.md`).
+Reads the worklist (`worklist.md`), the parser's seedless call for the tree's order, and a call with the seed
+from the trace for what blocks a Stage (`tooling-parser.md`).
 
 Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
 conversation as a message of their own, then the question — in an autonomous run, then the recommendation
@@ -12,7 +13,7 @@ taken.
 Take the Track's workable tickets, within the call's restriction.
 
 1. Tickets carrying the **Priority** mark come first, where the target has that operation.
-2. Then the tree's order: the position of each ticket's Stage in the Track's `backlog`. A baseline ticket
+2. Then the tree's order: the position of each ticket's Stage in the Track's `nodes`. A baseline ticket
    stands at its level's position.
 
 The call named a ticket → that ticket is the only one in the list, whatever its state, and step 3 is laid
@@ -30,7 +31,7 @@ the one to work.
 | --- | --- |
 | the Stage fulfilled — typically set up by hand since the ticket was filed | **fulfilled at pick-up**: to be closed with a note saying what serves the Stage now; go to the next ticket |
 | its Pack's or its own *Applies when* no longer holding, or another Tool filling its Tool's Role | not workable now, named with the reason (the ticket's Stage no longer applies, or Psalm now fills Static Analysis); go to the next ticket |
-| the Stage in `runtime_blocked` | not workable: a rejection with the runtime version as blocker is proposed (`rejection.md`, *Below the runtime floor*); go to the next ticket |
+| the Stage in `runtime_blocked` of the call with the seed from the trace | not workable: a rejection with the runtime version as blocker is proposed (`rejection.md`, *Below the runtime floor*); go to the next ticket |
 | the Stage unfulfilled and free | the one to work |
 
 Step 2 is done at the first ticket that is the one to work, or when the list is used up.

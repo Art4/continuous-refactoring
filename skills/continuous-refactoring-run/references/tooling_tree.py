@@ -4,7 +4,8 @@ Reads the Packs (``packs/*/pack.json``) and ``roles.json`` beside this file and
 the tracker file of the target repository. What an agent can judge — which
 Stages are fulfilled, which subjects are rejected, which Packs apply, the
 target's runtime — is handed in as a seed; everything else is computed from it.
-Emits, per Track, whether it is fulfilled, the Stages a ticket can be filed
+Without a seed it emits the structure alone and no verdict. With one it emits,
+per Track, whether it is fulfilled, the Stages a ticket can be filed
 for with name, tool and search words, the ordered backlog, and why a Stage is
 withheld — without invoking an LLM, keeping a file of its own, or mutating
 the repo. Standard library only.
@@ -743,10 +744,30 @@ def compute(
     tracker_file: str | pathlib.PurePath = TRACKER_FILE,
 ) -> dict:
     """The graph outputs for *repo* from the handed-in *seed* (see
-    ``load_seed``; without one, every Stage of every Pack is undecided)."""
+    ``load_seed``). Without one nothing is judged: only the structure is
+    returned — Stages, order, Tools, Roles, Packs, prerequisites — and no
+    verdict about what is fulfilled, workable, withheld or blocked."""
     repo = pathlib.Path(repo)
     model = model or load_model()
-    seed = seed or {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
+    if seed is None:
+        return _structure_only(_compute(repo, model, _EMPTY_SEED, tracker_file))
+    return _compute(repo, model, seed, tracker_file)
+
+
+_EMPTY_SEED = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
+
+
+def _structure_only(out: dict) -> dict:
+    """Drop every key of *out* that only a judgement could make true."""
+    for key in ("safety_net_fulfilled", "runtime_blocked", "reversals", "closed_by_rejection"):
+        del out[key]
+    out["tracks"] = {track: {"nodes": t["nodes"]} for track, t in out["tracks"].items()}
+    out["roles"] = [{k: v for k, v in r.items() if k != "filled_by"} for r in out["roles"]]
+    out["tools"] = [{k: v for k, v in t.items() if k != "out"} for t in out["tools"]]
+    return out
+
+
+def _compute(repo: pathlib.Path, model: dict, seed: dict, tracker_file) -> dict:
     state = _State(model, seed, _has_refactoring_operations(repo, tracker_file))
     stages, tools = model["stages"], model["tools"]
 
@@ -841,7 +862,7 @@ if __name__ == "__main__":
     ap.add_argument(
         "--seed", type=str, default=None,
         help='path to a JSON file holding what the caller judged: {"fulfilled": [stage, ...], "rejected": {role|tool|stage: null | {"php": "X.Y"}}, '
-             '"packs": [pack, ...], "not_applicable": [stage, ...], "runtime": {"php": "X.Y"}} — without it, every Stage is undecided',
+             '"packs": [pack, ...], "not_applicable": [stage, ...], "runtime": {"php": "X.Y"}} — without it, nothing is judged: the structure alone, no verdict',
     )
     args = ap.parse_args()
     try:
