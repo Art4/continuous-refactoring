@@ -1,0 +1,1 @@
+The tooling-tree parser called without a seed now returns the tree's structure alone: its Stages, their order, the Tools and Roles. It no longer reports whether the Safety Net is fulfilled or what is workable, because without a seed nothing has been judged. That seedless answer could end a run with "Safety Net is waiting for merges" on a target whose Safety Net was met.

@@ -1123,6 +1123,52 @@ class TrackerFileTests(unittest.TestCase):
             self.assertFalse(tp.compute(repo, tp.load_model(), tracker_file="elsewhere.md")["prerequisites"]["onboarding-setup"])
 
 
+class SeedlessCallTests(unittest.TestCase):
+    """Without a seed nothing is judged, so the parser gives the structure and no verdict."""
+
+    VERDICT_KEYS = {"safety_net_fulfilled", "runtime_blocked", "reversals", "closed_by_rejection"}
+    TRACK_VERDICT_KEYS = {"backlog", "workable", "withheld", "fulfilled"}
+
+    def test_a_seedless_call_gives_no_verdict(self):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            out = tp.compute(repo, tp.load_model())
+        self.assertEqual(self.VERDICT_KEYS & out.keys(), set())
+        for track in out["tracks"].values():
+            self.assertEqual(set(track), {"nodes"})
+        self.assertTrue(all("filled_by" not in r for r in out["roles"]))
+        self.assertTrue(all("out" not in t for t in out["tools"]))
+
+    def test_a_seedless_call_keeps_the_structure(self):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            out = tp.compute(repo, tp.load_model())
+        self.assertIn("phpunit", {n["node"] for n in out["tracks"]["Safety Net"]["nodes"]})
+        self.assertIn("phpunit", {s["stage"] for s in out["tree"]["stages"]})
+        self.assertTrue(out["prerequisites"]["onboarding-setup"])
+        self.assertIn("php", out["packs"])
+
+    def test_an_empty_seed_file_is_a_judgement_and_gets_a_verdict(self):
+        script = str(_REFERENCES / "tooling_tree.py")
+        repo_tmp, repo = make_repo()
+        with repo_tmp, tempfile.TemporaryDirectory() as d:
+            seed = pathlib.Path(d) / "seed.json"
+            seed.write_text("{}")
+            done = subprocess.run([sys.executable, script, "--seed", str(seed), str(repo)], capture_output=True, text=True)
+            self.assertEqual(done.returncode, 0, done.stderr)
+            out = json.loads(done.stdout)
+        self.assertFalse(out["safety_net_fulfilled"])
+        self.assertIn("backlog", out["tracks"]["Safety Net"])
+
+    def test_the_command_line_without_a_seed_gives_no_verdict(self):
+        script = str(_REFERENCES / "tooling_tree.py")
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            done = subprocess.run([sys.executable, script, str(repo)], capture_output=True, text=True)
+        self.assertEqual(done.returncode, 0, done.stderr)
+        self.assertNotIn("safety_net_fulfilled", json.loads(done.stdout))
+
+
 class PortabilityTests(unittest.TestCase):
     def test_the_model_loads_whatever_the_working_directory(self):
         import os
