@@ -17,7 +17,7 @@ choice below, with that ticket counted as in review.
 
 | Track | It has something when |
 | --- | --- |
-| Safety Net, Guardrails | it has a workable ticket; or it has no trace yet, which makes its scan due (`worklist.md`, *A Track's trace*) |
+| Safety Net, Guardrails | it has a workable ticket; or it has none and no trace, which makes its scan due (`worklist.md`, *A Track's trace*) |
 | Housekeeping | an open ticket of it that is not in review states a due date that is reached; or its mechanism is missing: no **Housekeeping** operation, no template, or no open ticket |
 | Investigation | always — with open tickets it works them, without it explores |
 

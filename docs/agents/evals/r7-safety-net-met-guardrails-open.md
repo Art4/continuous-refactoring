@@ -53,3 +53,6 @@ are older gaps of the vocabulary, not of the move.
 
 2026-11-07, with the pointer reworded to look a term up only where the text leaves it unclear: variant A passes,
 every line, as a walk-through; the player did not open the glossary, every term it met was clear where it was used.
+
+2026-11-07, with the rule that a tooling Track's trace is asked once it has no workable ticket: variant A passes,
+every line, as a walk-through; #53 is workable, so no Guardrails scan runs.

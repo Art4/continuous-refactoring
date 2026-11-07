@@ -1,7 +1,7 @@
 # 01 — Is a tooling Track's scan due while it has open tickets?
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What happened.** A walk-through of r7 (2026-11-07) and an earlier field observation of the maintainer hit the
@@ -30,3 +30,12 @@ is closed. If it is read as "due", the run scans beside open work.
   fragment if the behaviour changes.
 
 **Done when** the three places agree, the scenario passes, and tests and validator are green.
+
+## Comments
+
+- 2026-11-07: Decided with the maintainer: the trace is asked, and a scan can be due, once the Track has no
+  workable ticket. A ticket in review, blocked or waiting no longer holds back the Stages nobody filed; a workable
+  one keeps the run on the open work first. `worklist.md`, the run's step 5 and `track-choice.md` say so;
+  `track-scan.md`'s "already has an open ticket" row now holds for every scan, since an ordinary scan can now run
+  beside open tickets. Scenario r8, both variants pass; r7 A still passes. README, architecture and the Track
+  playbook follow.

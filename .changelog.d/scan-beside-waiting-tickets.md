@@ -1,0 +1,1 @@
+A tooling Track is now scanned for the tools nobody has filed yet as soon as none of its tickets can be worked; before, a single open ticket — one waiting for your merge or your answer, say — kept tools like PHPMD or the coverage floor from ever getting a ticket until that ticket closed.
