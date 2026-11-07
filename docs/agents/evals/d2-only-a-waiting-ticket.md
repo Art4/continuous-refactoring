@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 An onboarded project with one open ticket, whose newest open question has no answer. The run reports nothing

@@ -2,6 +2,8 @@
 
 Played as a walk-through: the onboarding asks a human.
 
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/onboarding-setup-interview.md`
+
 ## Situation
 
 The fixture `php-clean`, with no tracker file and no `## Refactoring operations` section. A human is there and

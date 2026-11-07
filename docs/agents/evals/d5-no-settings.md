@@ -2,6 +2,8 @@
 
 Played as a walk-through. This also covers a call left over from before the breaking change.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 An onboarded project with enough workable tickets for more than five rounds. Each round ends with a mergeable merge

@@ -1,0 +1,1 @@
+Every scenario now names the skill files it tests, so a maintainer who changes one of them knows which scenarios to play before the change merges; the validator checks that the line is there and that its paths exist.

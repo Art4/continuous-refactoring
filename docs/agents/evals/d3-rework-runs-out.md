@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 `review only`. Run 1 opens a merge request. The review asks for changes. Rework 1 pushes; a check is red. Rework 2

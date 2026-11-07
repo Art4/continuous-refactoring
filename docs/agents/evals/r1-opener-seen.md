@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/tooling-model.md`
+
 ## Situation
 
 An onboarded PHP project; its Safety Net is fulfilled, and no tooling ticket is open. The generic Pack has a Tool on

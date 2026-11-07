@@ -3,6 +3,8 @@
 Played live, in two parts, in a real session on a target where nothing can land: the choice of a skill shows only
 when the skill is really on offer. Part two is played three times, since that choice can vary.
 
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/SKILL.md`
+
 ## Situation
 
 An onboarded project with the suite installed.

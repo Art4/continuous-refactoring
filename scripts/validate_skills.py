@@ -716,6 +716,35 @@ def adr_banner_issues(repo_root):
     return [Issue(where, problem) for where, problem in adr_index.check(repo_root)]
 
 
+SCENARIO_DIR = "docs/agents/evals"
+_COVERS_LINE = re.compile(r"^Covers:(.*)$", re.MULTILINE)
+_BACKTICKED = re.compile(r"`([^`]+)`")
+
+
+def scenario_covers_issues(repo_root):
+    """Every scenario names the skill files whose behaviour it tests, in one
+    `Covers:` line of backticked paths under skills/ that exist — so a change
+    to a skill file finds the scenarios to play."""
+    issues = []
+    for f in sorted((repo_root / SCENARIO_DIR).glob("*.md")):
+        if f.name == "README.md":
+            continue
+        rel = f.relative_to(repo_root).as_posix()
+        match = _COVERS_LINE.search(f.read_text())
+        if match is None:
+            issues.append(Issue(rel, "scenario has no `Covers:` line naming the skill files it tests"))
+            continue
+        paths = _BACKTICKED.findall(match.group(1))
+        if not paths:
+            issues.append(Issue(rel, "`Covers:` names no skill file"))
+        for path in paths:
+            if not path.startswith("skills/"):
+                issues.append(Issue(rel, f"`Covers:` path '{path}' is not under skills/"))
+            elif not (repo_root / path).is_file():
+                issues.append(Issue(rel, f"`Covers:` path '{path}' does not exist"))
+    return issues
+
+
 def validate_repo(repo_root):
     repo_root = pathlib.Path(repo_root)
     issues = []
@@ -828,6 +857,9 @@ def validate_repo(repo_root):
         if rel.startswith(DOC_CITATION_EXEMPT_DIRS):
             continue
         issues += doc_citation_issues(f.read_text(), rel)
+
+    # --- scenarios: each names the skill files it covers ---
+    issues += scenario_covers_issues(repo_root)
 
     # --- the tooling model: schemas, fixed form, generated docs ---
     issues += tooling_model_issues(repo_root)

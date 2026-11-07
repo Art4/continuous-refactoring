@@ -7,7 +7,11 @@ Each file is one scenario: the situation, the call, the expected behaviour. Its 
 the Pack route, `d` the Driver, `r` a run. A scenario passes when every line of
 its list holds.
 
-| Scenario | Covers | How it is played |
+Under its title, a `Covers:` line names the skill files whose behaviour the scenario tests, as paths under
+`skills/`. A change to one of those files plays the scenarios that name it. The validator checks that every scenario
+has the line and that each path exists; which files belong on it is the author's judgement.
+
+| Scenario | Tests | How it is played |
 |---|---|---|
 | `p1-unknown-tool` | the Pack route | live |
 | `p2-slug-clash` | the Pack route | live |

@@ -2,6 +2,8 @@
 
 Played as a walk-through, in two rounds.
 
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring/references/merging.md`
+
 ## Situation
 
 The repository merges with merge commits, and CI exists. In round one the review passes, CI is green, and another

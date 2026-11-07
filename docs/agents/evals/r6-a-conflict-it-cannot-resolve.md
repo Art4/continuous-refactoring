@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/updating-the-base.md`
+
 ## Situation
 
 An onboarded PHP project on GitLab, `acme/shop`. Its Safety Net is fulfilled. Investigation ticket #21 has open merge

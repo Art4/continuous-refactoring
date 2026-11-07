@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 An onboarded project. The first run returns that nothing is workable and lists no open ticket. No merge request of

@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/rejection.md`, `skills/continuous-refactoring-run/references/track-scan.md`
+
 ## Situation
 
 The project of r1, a week later. The human answered the open question on the *Example Policy* ticket with "No, we

@@ -450,6 +450,45 @@ class ShippedGlossaryTests(unittest.TestCase):
         self.assertFalse(any("avoid-term 'gadget'" in i.message for i in issues))
 
 
+class ScenarioCoversTests(unittest.TestCase):
+    """Every scenario names the skill files it tests in a `Covers:` line."""
+
+    def _issues(self, scenario):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, {
+            "skills/a-skill/SKILL.md": "x\n",
+            "docs/agents/evals/README.md": "No Covers line here.\n",
+            "docs/agents/evals/x1-case.md": scenario,
+        })
+        try:
+            return vs.scenario_covers_issues(root)
+        finally:
+            tmp.cleanup()
+
+    def test_existing_path_ok(self):
+        self.assertEqual(self._issues("# x1\n\nCovers: `skills/a-skill/SKILL.md`\n"), [])
+
+    def test_missing_line_flagged(self):
+        issues = self._issues("# x1\n\nPlayed as a walk-through.\n")
+        self.assertEqual(len(issues), 1)
+        self.assertIn("no `Covers:` line", issues[0].message)
+        self.assertEqual(issues[0].skill, "docs/agents/evals/x1-case.md")
+
+    def test_line_without_path_flagged(self):
+        issues = self._issues("# x1\n\nCovers: the Driver\n")
+        self.assertTrue(any("names no skill file" in i.message for i in issues))
+
+    def test_missing_path_flagged(self):
+        issues = self._issues("# x1\n\nCovers: `skills/a-skill/SKILL.md`, `skills/a-skill/references/gone.md`\n")
+        self.assertEqual(len(issues), 1)
+        self.assertIn("'skills/a-skill/references/gone.md' does not exist", issues[0].message)
+
+    def test_path_outside_skills_flagged(self):
+        issues = self._issues("# x1\n\nCovers: `docs/architecture.md`\n")
+        self.assertTrue(any("not under skills/" in i.message for i in issues))
+
+
 class ADR0004PropagationTests(unittest.TestCase):
     ALL = "behavior-preserving, Strangler Fig, Kent Beck, deterministic tools, own branch"
 

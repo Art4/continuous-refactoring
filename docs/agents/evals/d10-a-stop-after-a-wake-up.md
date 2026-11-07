@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 An onboarded project, in an environment with a timer. Round 1 opened a merge request, and it is mergeable. The Driver
