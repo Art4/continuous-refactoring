@@ -23,7 +23,7 @@ Tier 1 — structural:
 - ``.scratch/`` file references and ``ticket N`` / ``PR #N`` citations are
   forbidden the same way — this suite's own internal issue tracker and forge
   history, never shipped with a skill; state the fact inline instead
-- glossary vocabulary: every ``CONTEXT.md`` term is in use; avoid-synonyms are
+- glossary vocabulary: every term of the glossary (``skills/continuous-refactoring-run/references/glossary.md``) is in use; avoid-synonyms are
   flagged unless explicitly allowlisted (the allowlist documents legitimate
   prose uses, e.g. defining the seam or quoting a user's words)
 
@@ -31,7 +31,7 @@ Tier 2 — semantic:
 - ADR-0004 rule propagation: every rule keyword from ADR-0004 appears
   somewhere in the suite's skill texts
 - Glossary reverse check: domain vocabulary used in 2+ skills but absent from
-  ``CONTEXT.md`` is flagged
+  the glossary is flagged
 - ADR staleness: ADRs containing ``retired``/``supersedes``/``amends`` are
   parsed into a dependency graph; skills referencing a superseded ADR without
   noting the successor are flagged
@@ -75,7 +75,8 @@ MAX_DESC = 1024
 NAME_RE = re.compile(r"[a-z0-9]+(?:-[a-z0-9]+)*")
 
 LEDGER_PATH = "docs/agents/skill-references.md"
-CONTEXT_PATH = "CONTEXT.md"
+# The suite's glossary ships with the skills; CONTEXT.md only points to it.
+GLOSSARY_PATH = "skills/continuous-refactoring-run/references/glossary.md"
 
 EXEMPT_LOCAL_REFS = {
     "CODING_STANDARDS.md": "target-repo artifact (optional)",
@@ -395,13 +396,13 @@ def vocab_issues(terms, avoid, skills, allow):
     for term in terms:
         pattern = re.compile(r"\b" + re.escape(term) + r"s?\b", re.I)
         if not any(pattern.search(body) for body in skills.values()):
-            issues.append(Issue("CONTEXT.md", f"glossary term '{term}' is defined but never used in the suite"))
+            issues.append(Issue(GLOSSARY_PATH, f"glossary term '{term}' is defined but never used in the suite"))
     for skill, body in skills.items():
         for term in avoid:
             if (skill, term) in allow:
                 continue
             if re.search(r"\b" + re.escape(term) + r"s?\b", body, re.I):
-                issues.append(Issue(skill, f"glossary avoid-term '{term}' used — CONTEXT.md says to use the preferred term instead"))
+                issues.append(Issue(skill, f"glossary avoid-term '{term}' used — the glossary says to use the preferred term instead"))
     return issues
 
 
@@ -453,7 +454,7 @@ def is_advisory(issue):
 
 
 def glossary_reverse_issues(skills_text, context_text):
-    """Flag domain vocabulary used in 2+ skills but absent from CONTEXT.md.
+    """Flag domain vocabulary used in 2+ skills but absent from the glossary.
 
     Checks bold/emphasised terms (``**term**``) in skill files — these are
     the terms authors explicitly mark as domain jargon.  The check catches
@@ -483,7 +484,7 @@ def glossary_reverse_issues(skills_text, context_text):
             user_list = ", ".join(sorted(users))
             issues.append(
                 Issue(
-                    "CONTEXT.md",
+                    GLOSSARY_PATH,
                     f"domain term '{term}' used in {len(users)} skills "
                     f"({user_list}) but missing from glossary",
                 )
@@ -728,9 +729,9 @@ def validate_repo(repo_root):
     else:
         ledger = parse_ledger(ledger_text)
 
-    context_text = (repo_root / CONTEXT_PATH).read_text() if (repo_root / CONTEXT_PATH).exists() else None
+    context_text = (repo_root / GLOSSARY_PATH).read_text() if (repo_root / GLOSSARY_PATH).exists() else None
     if context_text is None:
-        issues.append(Issue(CONTEXT_PATH, f"missing glossary — required at {CONTEXT_PATH}"))
+        issues.append(Issue(GLOSSARY_PATH, f"missing glossary — required at {GLOSSARY_PATH}"))
         glossary = Glossary(terms=[], avoid=[])
     else:
         glossary = parse_glossary(context_text)
@@ -789,7 +790,11 @@ def validate_repo(repo_root):
             issues += adr_issues(ref_text, skill=ref_skill)
             issues += scratch_ref_issues(ref_text, skill=ref_skill)
             issues += ticket_ref_issues(ref_text, skill=ref_skill)
-            full_parts.append(ref_text)
+            # The glossary defines every term and lists every avoid-word, so
+            # it stays out of the text the vocabulary checks read: a term
+            # counts as used only where a skill uses it.
+            if ref_rel_path != GLOSSARY_PATH:
+                full_parts.append(ref_text)
             all_text_by_path[ref_rel_path] = ref_text
             reference_files.append((d.name, ref_rel_path))
 

@@ -39,7 +39,7 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q2 | The observing agent drafts the rows in a closing step of the field eval; the maintainer confirms them; they land through a PR |
 | Q3 | A one-time backfill from the traces on the maintainer's targets, confirmed row by row by the maintainer |
 | Q4 | A local runner, no CI (cost). Playing the affected scenarios before a merge is mandatory |
-| Q5 | The shipped glossary is generated from `CONTEXT.md` by a script; `--check` in the validator keeps it current, as `adr_index.py` does for the ADR index. Definitions that carry rules in place stay there |
+| Q5 | Superseded by Q23. The shipped glossary is generated from `CONTEXT.md` by a script; `--check` in the validator keeps it current, as `adr_index.py` does for the ADR index. Definitions that carry rules in place stay there |
 | Q6 | The second language Pack is for a language with a real target |
 | Q7 | That target is the frontend (JS) of a PHP application on GitLab already in field use; it also tests a language Pack beside `php` and `twig-php` in one target |
 | Q8 | Each scenario gets a `Covers:` line naming the skill files it tests; a PR changing one of them plays the scenarios that cover it, notes the results at its head commit under `## Results`, and names them in its description. The validator checks only that every scenario has the line; the duty is written in `AGENTS.md` and becomes a check when broken twice |
@@ -54,7 +54,10 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q18 | The PHP Pack applying to a repository whose only PHP file is a deploy script is a ticket of its own, outside this plan, and S1.4's first case |
 | Q19 | The suite's website stays out of the record: its traces predate 0.5.0 |
 | Q20 | Where rationale goes that a model needs is decided in S4; until then it stays where a scenario fails without it |
-| Q12 | A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
+| Q21 | Every term ships, none is left out: all 55 occur under `skills/`, the rarest are the ones lacking a definition there. No marker |
+| Q22 | Each of the three `SKILL.md` points to the glossary in one line; `tooling-model.md` and the two Pack files that named `CONTEXT.md` point to it too |
+| Q23 | Supersedes Q5 and Q12: the shipped glossary is the single source. `CONTEXT.md`'s *Language* moves into `skills/continuous-refactoring-run/references/glossary.md` with its *Avoid* lines; `CONTEXT.md` keeps its head and points there. No generator, no `--check`; the validator's vocabulary checks read the glossary and leave it out of the text they count as use |
+| Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
 
@@ -80,9 +83,9 @@ Grilled on 2026-11-06 (`/grilling`).
 
 ### S3 — A shipped glossary (weakness 2, part A)
 
-`scripts/` generates `skills/continuous-refactoring-run/references/glossary.md` from the terms `CONTEXT.md` marks
-explicitly; `--check` runs in the validator; the pointer in `tooling-model.md` aims at it; definitions that carry
-rules in place stay there (Q5, Q12).
+The glossary moves from `CONTEXT.md` into `skills/continuous-refactoring-run/references/glossary.md`, every term with
+its *Avoid* line; `CONTEXT.md` points there. Every `SKILL.md` names it; the validator's vocabulary checks read it
+(Q21–Q23).
 
 ### S4 — Lighter skill texts (weakness 1, and part C of weakness 2) — after S2
 

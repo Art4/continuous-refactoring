@@ -33,7 +33,7 @@ A change to a skill's behaviour is done only when every human-facing doc that de
 - A Track's own process → its playbook (`docs/playbooks/housekeeping.md`)
 - New limits, fallbacks, or reasons a run ends early → `docs/known-limitations.md` (troubleshooting table)
 - A design choice a user would ask "why?" about → `docs/FAQ.md`
-- New or changed vocabulary → `CONTEXT.md`
+- New or changed vocabulary → the glossary, `skills/continuous-refactoring-run/references/glossary.md` (`CONTEXT.md` only points to it)
 
 `README.md` and `docs/**` explain in their own words: they cite no ADR numbers, ticket numbers, or `.scratch/` paths.
 
@@ -51,4 +51,4 @@ This repo IS the skill suite. The skills live under `skills/` and are consumed b
 
 All three are user-invocable. An agent may invoke `continuous-refactoring-run` and `continuous-housekeeping` through its skill tool, a subagent included; the Driver is started by a human or a schedule. The suite keeps no state of its own: tickets, merge requests and rejections are found by searching the target's tracker and forge.
 
-The suite's vocabulary lives in `CONTEXT.md` (run, decision point, worklist, candidate, tooling tree, Track, merge request, signal, proposals, findings). Human-facing docs live in `docs/playbooks/`. A reference doc a skill needs at runtime lives under `skills/<owning-skill>/references/` instead — `docs/playbooks/`, like `docs/adr/` and `docs/agents/`, never ships with the skills.
+The suite's vocabulary lives in the shipped glossary, `skills/continuous-refactoring-run/references/glossary.md`, which `CONTEXT.md` points to (run, decision point, worklist, candidate, tooling tree, Track, merge request, signal, proposals, findings). Human-facing docs live in `docs/playbooks/`. A reference doc a skill needs at runtime lives under `skills/<owning-skill>/references/` instead — `docs/playbooks/`, like `docs/adr/` and `docs/agents/`, never ships with the skills.

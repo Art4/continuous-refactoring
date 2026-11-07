@@ -8,7 +8,7 @@ description: One run of the continuous-refactoring skill suite — from the proj
 One **run**: a chain of **decision points** that leads from the target's open tickets to one opened merge
 request. The suite keeps no state of its own. Tickets, merge requests and rejections are found by searching
 the target's tracker and forge on every run, through the **Refactoring operations** in the target's tracker
-file (`references/refactoring-operations.md`).
+file (`references/refactoring-operations.md`). A term in bold is defined in `references/glossary.md`.
 
 ## The call
 

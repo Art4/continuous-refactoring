@@ -2,7 +2,7 @@
 
 How the tools a target can adopt are described and what the parser (`tooling_tree.py`, beside this file)
 computes from them: **Roles** filled by **Tools** that have **Stages**, delivered in **Packs**. Vocabulary
-the rest of the suite shares: `CONTEXT.md`.
+the rest of the suite shares: `glossary.md`.
 
 ## The terms
 

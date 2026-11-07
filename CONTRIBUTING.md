@@ -39,7 +39,7 @@ where external reports go.)
 ## Skill suite conventions
 
 If your change touches the skills themselves (`skills/**`), skim
-[AGENTS.md](AGENTS.md), [CONTEXT.md](CONTEXT.md) and [docs/architecture.md](docs/architecture.md) first —
+[AGENTS.md](AGENTS.md), the [glossary](skills/continuous-refactoring-run/references/glossary.md) and [docs/architecture.md](docs/architecture.md) first —
 they define the vocabulary and the shape of the suite: three skills, a run as a chain of decision points,
 and everything else a reference one of them loads. The `docs/adr/` directory
 records why past design decisions were made; check it before re-litigating one.

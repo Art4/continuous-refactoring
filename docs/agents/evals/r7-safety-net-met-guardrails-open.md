@@ -43,3 +43,8 @@ was installed, and the first Safety Net scan found it in place.
 named two gaps, closed in the same change: the pick-up check in `selection.md` asked for the seed from the trace,
 which a Track with open tickets never has — it now takes a seed with the Packs and runtime the worklist judged; and
 the situation now says that no `Opener:` line exists and that the open pull request is GitHub's #52.
+
+2026-11-07, on the shipped glossary (ticket 03 of quality-review): variant A passes, every line, as a walk-through;
+the player looked bold terms up in the glossary. It found no entry for **Investigation**, which the **Track** entry
+promises below, nor for **MR scope**, and the **Refactoring operations** entry does not list **Tooling Pack**; all three
+are older gaps of the vocabulary, not of the move.
