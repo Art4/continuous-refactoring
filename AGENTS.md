@@ -6,6 +6,12 @@ All changes go through feature branches and pull requests — never direct commi
 
 **Run the relevant tests locally before pushing, every time — not just for code changes.** A change to `skills/**` or `docs/**` still needs `python3 -m unittest discover -s scripts -p 'test_*.py'` and `python3 scripts/validate_skills.py .` green locally first (see `.github/workflows/skills-validation.yml`). Pushing untested and then iterating on red CI is not an acceptable substitute for running it yourself first.
 
+**Play the scenarios a skill change touches before it merges.** Start from the scenarios whose `Covers:` line names a
+changed skill file (`docs/agents/evals/`), and play, with `/play-scenarios`, each whose expected lines bear on the
+behaviour the change moves. Note the results at the PR's head commit under the scenarios' `## Results`, and name in
+the description the scenarios played and those left out, each with its reason. Wording that moves no behaviour plays
+none and says so.
+
 ### Issue tracker
 
 Issues live as markdown files under `.scratch/`. See `docs/agents/issue-tracker.md`.

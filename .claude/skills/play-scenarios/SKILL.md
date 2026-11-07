@@ -13,8 +13,9 @@ judge sees the list and the player's record, never the conversation that changed
 ## 1. Pick
 
 - **A list is named** ("r7 r8", "all") → those scenarios.
-- **Otherwise** → the branch: `git diff --name-only main...HEAD -- skills/`, and every scenario whose `Covers:`
-  line names one of those files.
+- **Otherwise** → the branch: `git diff --name-only main...HEAD -- skills/`, the scenarios whose `Covers:` line
+  names one of those files, and of them each whose *Expected* lines bear on the behaviour the diff moves. Name the
+  ones left out, each with its reason, for the pull request.
 
 Then a **play** per what the scenario's opening line and *Situation* say: one per variant, per case, per call, or
 the number of times it names. Note `git rev-parse --short HEAD`, and whether `git status --porcelain -- skills/`
