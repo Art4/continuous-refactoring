@@ -44,8 +44,10 @@ they define the vocabulary and the shape of the suite: three skills, a run as a 
 and everything else a reference one of them loads. The `docs/adr/` directory
 records why past design decisions were made; check it before re-litigating one.
 
-**Test a change to skill text.** Before it merges, play the scenarios that cover it
-([docs/agents/evals/](docs/agents/evals/README.md)), and write new ones first for new behaviour. To test a change on a
+**Test a change to skill text.** Before it merges, play the scenarios it touches
+([docs/agents/evals/](docs/agents/evals/README.md)): of those whose `Covers:` line names a changed file, each whose
+expected lines bear on the behaviour that moves. Note their results under `## Results`, and name in the pull request
+the scenarios played and those left out, with the reason. Write new ones first for new behaviour. To test a change on a
 real target, use the [field eval](docs/agents/field-eval.md); what it confirms goes into the
 [field record](docs/agents/field-results.md).
 

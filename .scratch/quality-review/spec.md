@@ -59,6 +59,7 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q23 | Supersedes Q5 and Q12: the shipped glossary is the single source. `CONTEXT.md`'s *Language* moves into `skills/continuous-refactoring-run/references/glossary.md` with its *Avoid* lines; `CONTEXT.md` keeps its head and points there. No generator, no `--check`; the validator's vocabulary checks read the glossary and leave it out of the text they count as use |
 | Q24 | The pointer to the glossary says to look a term up only where the text does not make its meaning clear |
 | Q25 | Ticket 08 cuts the glossary to the meaning at runtime, one to three sentences per entry, *Avoid* without history; ticket 07 measures the glossary's share on its own |
+| Q26 | Supersedes part of Q8: the `Covers:` line is where the choice starts, not the whole list. A PR plays those covering scenarios whose expected lines bear on the behaviour it moves, and names the ones it left out with the reason; wording that moves no behaviour plays none. Why: the first full playing showed a one-sentence Driver change would replay all 14 d-scenarios, about 1.2M tokens |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
