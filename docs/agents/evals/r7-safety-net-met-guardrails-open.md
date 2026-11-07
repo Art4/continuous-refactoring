@@ -48,3 +48,6 @@ the situation now says that no `Opener:` line exists and that the open pull requ
 the player looked bold terms up in the glossary. It found no entry for **Investigation**, which the **Track** entry
 promises below, nor for **MR scope**, and the **Refactoring operations** entry does not list **Tooling Pack**; all three
 are older gaps of the vocabulary, not of the move.
+
+2026-11-07, with the pointer reworded to look a term up only where the text leaves it unclear: variant A passes,
+every line, as a walk-through; the player did not open the glossary, every term it met was clear where it was used.

@@ -5,8 +5,8 @@ description: Housekeeping run of the continuous-refactoring skill suite — work
 
 # Continuous Housekeeping
 
-One **run** that works the Housekeeping Track alone: no worklist, no Track choice, no other ticket. A term in bold
-is defined in `../continuous-refactoring-run/references/glossary.md`.
+One **run** that works the Housekeeping Track alone: no worklist, no Track choice, no other ticket. Look a term up
+in `../continuous-refactoring-run/references/glossary.md` only where the text does not make its meaning clear.
 
 The run is made of decision points, and it is interactive or autonomous. Both are defined in
 `../continuous-refactoring-run/SKILL.md` — how the call states the mode in *The call*, the rules in *Decision

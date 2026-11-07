@@ -7,8 +7,8 @@ description: The Driver of the continuous-refactoring skill suite — keeps a pr
 
 The **Driver**: one **round** after another, with a **cadence** between them, until an end. A round is a run, its
 review, and any rework. Each run happens in a subagent of its own, always autonomous, and starts fresh: the Driver
-keeps no state the tracker and forge do not hold. A term in bold is defined in
-`../continuous-refactoring-run/references/glossary.md`.
+keeps no state the tracker and forge do not hold. Look a term up in
+`../continuous-refactoring-run/references/glossary.md` only where the text does not make its meaning clear.
 
 ## The call
 

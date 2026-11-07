@@ -57,6 +57,8 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q21 | Every term ships, none is left out: all 55 occur under `skills/`, the rarest are the ones lacking a definition there. No marker |
 | Q22 | Each of the three `SKILL.md` points to the glossary in one line; `tooling-model.md` and the two Pack files that named `CONTEXT.md` point to it too |
 | Q23 | Supersedes Q5 and Q12: the shipped glossary is the single source. `CONTEXT.md`'s *Language* moves into `skills/continuous-refactoring-run/references/glossary.md` with its *Avoid* lines; `CONTEXT.md` keeps its head and points there. No generator, no `--check`; the validator's vocabulary checks read the glossary and leave it out of the text they count as use |
+| Q24 | The pointer to the glossary says to look a term up only where the text does not make its meaning clear |
+| Q25 | Ticket 08 cuts the glossary to the meaning at runtime, one to three sentences per entry, *Avoid* without history; ticket 07 measures the glossary's share on its own |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

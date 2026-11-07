@@ -28,3 +28,6 @@ are green.
 > instead of `CONTEXT.md`, which no shipped file names any more. `validate_skills.py` reads the glossary from its new
 > path and leaves it out of the text its vocabulary checks count as use; four tests. `AGENTS.md`,
 > `docs/agents/domain.md`, `CONTRIBUTING.md`, `README.md` and `docs/architecture.md` name the new place.
+
+> **2026-11-07:** Spec Q24: the three `SKILL.md` now say to look a term up only where the text leaves it unclear. r7
+> replayed: passes, the glossary not opened. Q25 extends tickets 07 and 08 to measure and cut the glossary.
