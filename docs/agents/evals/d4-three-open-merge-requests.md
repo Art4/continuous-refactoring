@@ -24,3 +24,5 @@ remain.
 ## Results
 
 2026-11-01, skill commit 83f57b2: pass, every line, as a walk-through. An earlier round on the text before it passed too and named where the agent guessed; those gaps were closed and this is the replay. The count before the first run has no ticket list to read from yet, so the agent has to match the forge's open merge requests to tickets itself.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

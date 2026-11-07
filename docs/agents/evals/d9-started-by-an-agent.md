@@ -31,3 +31,5 @@ Part two, each time:
 2026-11-01, skill commit 6a1590c, Claude Code, on a real target: pass, every line. In part two a run was started each
 time and the human ended it at its first question, so what such a run does after that was not seen. Both parts rest on
 the human's report; the target's state was not read here.
+
+2026-11-07, on 0e29b63: not played — it needs a real top-level session.

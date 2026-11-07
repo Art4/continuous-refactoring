@@ -1,0 +1,1 @@
+Maintainers now play the scenarios with a runner skill of this repository: each play goes to a fresh player that never sees the expected behaviour, and a separate fresh judge holds its record against the list line by line; every scenario has been played once this way.

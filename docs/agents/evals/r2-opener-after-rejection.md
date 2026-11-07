@@ -26,3 +26,5 @@ ticket is open.
 2026-11-02, skill commit 43b505b: pass, every line, as a walk-through. The play named two gaps, closed in that
 commit: an Opener already used up does not count in a Track's trace, and a Stage known only through a rejection goes
 into the seed as rejected, not as fulfilled.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

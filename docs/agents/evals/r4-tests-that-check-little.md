@@ -32,3 +32,5 @@ and none compares a returned price. The coverage report counts `PriceCalculator`
 
 2026-11-03, skill commit 9654c4b: pass, every line, as a walk-through, played before the situation named the BC promise
 bullet; the play also wrote `Opener: bc-promise`, which a project without that bullet meets.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

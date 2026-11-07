@@ -4,8 +4,9 @@ __pycache__/
 # Test harness baselines (generated, not committed)
 fixtures/baselines/
 
-# Local Claude Code project settings
-.claude/
+# Local Claude Code project settings; the repository's own skills are committed
+.claude/*
+!.claude/skills/
 
 # Field eval logs: they name their target
 .scratch/*-loop-observation/

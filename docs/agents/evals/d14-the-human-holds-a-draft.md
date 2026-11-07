@@ -27,3 +27,5 @@ ready. During the cadence the human made !30 a draft again, with no comment, and
 
 2026-11-06, skill commit 9edb93c: pass, every line, as a walk-through. The run of round 2 does not take !30 up
 either: its worklist reads the hold through the same base update check, so #4 stays in review.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

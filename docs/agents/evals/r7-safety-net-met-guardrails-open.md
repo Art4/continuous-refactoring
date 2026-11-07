@@ -56,3 +56,5 @@ every line, as a walk-through; the player did not open the glossary, every term 
 
 2026-11-07, with the rule that a tooling Track's trace is asked once it has no workable ticket: variant A passes,
 every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, both variants, as a walk-through, by one player.
