@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/packs/php/infection.md`
+
 ## Situation
 
 An onboarded PHP project on GitHub, `acme/shop`, tested with PHPUnit 11. Its Safety Net is fulfilled; the Test

@@ -2,6 +2,8 @@
 
 Played live.
 
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/own-pack.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+
 ## Situation
 
 A copy of the fixture `php-own-pack`, without a Pack: delete `docs/agents/tooling-pack/` and the **Tooling Pack**

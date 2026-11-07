@@ -2,6 +2,8 @@
 
 Played as a walk-through: the onboarding asks a human.
 
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/onboarding-setup-interview.md`
+
 ## Situation
 
 No `## Refactoring operations` section in the tracker file. A human is in the session and answers.

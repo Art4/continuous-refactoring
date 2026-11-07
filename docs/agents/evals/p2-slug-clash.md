@@ -2,6 +2,8 @@
 
 Played live.
 
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/own-pack.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+
 ## Situation
 
 A copy of the fixture `php-own-pack-clash`: its Pack reuses the slug `phpunit` of the suite's, and the parser ends in

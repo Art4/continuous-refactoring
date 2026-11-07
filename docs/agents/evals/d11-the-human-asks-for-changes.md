@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/SKILL.md`
+
 ## Situation
 
 An onboarded project, settings `review only`, five rounds, in an environment with a timer. Round 1 opened merge

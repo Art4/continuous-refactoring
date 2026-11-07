@@ -2,6 +2,8 @@
 
 Played as a walk-through. The limit is "more than three", so this is its boundary.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 `review only`. Three merge requests of the Driver are open and mergeable; none has been merged. Workable tickets

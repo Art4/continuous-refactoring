@@ -2,6 +2,8 @@
 
 Played as a walk-through, once per variant.
 
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+
 ## Situation
 
 An onboarded PHP application on GitHub, `acme/shop`: `composer.json` has `"type": "project"` and requires

@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/references/opening-a-merge-request.md`
+
 ## Situation
 
 An onboarded PHP project on GitLab, `acme/shop`, settings `review only`, five rounds, in an environment with a timer.

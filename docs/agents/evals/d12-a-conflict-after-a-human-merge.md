@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/references/updating-the-base.md`
+
 ## Situation
 
 An onboarded PHP project on GitHub, `acme/shop`, settings `review only`, five rounds, in an environment with a timer.

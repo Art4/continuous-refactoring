@@ -2,6 +2,8 @@
 
 Played as a walk-through, in two steps.
 
+Covers: `skills/continuous-refactoring/SKILL.md`
+
 ## Situation
 
 An onboarded project with workable tickets. The environment offers no way to wake a session. Step one is the first

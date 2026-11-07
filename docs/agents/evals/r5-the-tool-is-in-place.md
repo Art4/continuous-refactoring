@@ -2,6 +2,8 @@
 
 Played as a walk-through.
 
+Covers: `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/packs/php/psalm.md`, `skills/continuous-refactoring-run/references/packs/php/semgrep.md`
+
 ## Situation
 
 An onboarded PHP project on GitHub, `acme/shop`. Its Safety Net is fulfilled, and so are PHPStan Level 5 and Psalm
