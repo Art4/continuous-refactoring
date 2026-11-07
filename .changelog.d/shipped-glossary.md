@@ -1,0 +1,1 @@
+The suite's glossary now ships with the skills, so an agent in your project can look up what a term like Stage, Track or Opener means, and which words to avoid for it; before, the skills pointed to a file that never reached your project.

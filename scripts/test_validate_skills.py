@@ -412,6 +412,44 @@ class VocabTests(unittest.TestCase):
         self.assertEqual(vs.vocab_issues(["Hot spot"], [], skills, set()), [])
 
 
+class ShippedGlossaryTests(unittest.TestCase):
+    """The glossary ships under the run's references/; the vocabulary checks
+    read it as the term list, never as a use of its own terms."""
+
+    SKILL = "---\nname: continuous-refactoring-run\ndescription: test\n---\n\n## Process\n\n## Completion criterion\n"
+
+    def _issues(self, glossary, skill_body=""):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        files = {
+            "docs/agents/skill-references.md": "# ledger\n",
+            "skills/continuous-refactoring-run/SKILL.md": self.SKILL + skill_body,
+        }
+        if glossary is not None:
+            files[vs.GLOSSARY_PATH] = glossary
+        write_tree(root, files)
+        try:
+            return vs.validate_repo(root)
+        finally:
+            tmp.cleanup()
+
+    def test_missing_glossary_flagged(self):
+        issues = self._issues(None)
+        self.assertTrue(any(i.skill == vs.GLOSSARY_PATH and "missing glossary" in i.message for i in issues))
+
+    def test_term_used_only_in_glossary_flagged(self):
+        issues = self._issues("**Widget**:\nA thing.\n_Avoid_: gadget\n")
+        self.assertTrue(any("glossary term 'Widget'" in i.message for i in issues))
+
+    def test_term_used_in_a_skill_ok(self):
+        issues = self._issues("**Widget**:\nA thing.\n_Avoid_: gadget\n", "Find the widget.\n")
+        self.assertFalse(any("glossary term 'Widget'" in i.message for i in issues))
+
+    def test_avoid_word_in_glossary_itself_not_flagged(self):
+        issues = self._issues("**Widget**:\nA thing.\n_Avoid_: gadget\n", "Find the widget.\n")
+        self.assertFalse(any("avoid-term 'gadget'" in i.message for i in issues))
+
+
 class ADR0004PropagationTests(unittest.TestCase):
     ALL = "behavior-preserving, Strangler Fig, Kent Beck, deterministic tools, own branch"
 

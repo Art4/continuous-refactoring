@@ -150,7 +150,7 @@ Everything is in your project, your tracker and your forge — nothing in the co
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
 | [Known limitations](docs/known-limitations.md) | Limits without a suite-side fix, plus troubleshooting |
 | [Operations reference](skills/continuous-refactoring-run/references/refactoring-operations.md) | The operations the suite needs from a tracker, with the templates |
-| [CONTEXT.md](CONTEXT.md) | The suite's vocabulary |
+| [glossary](skills/continuous-refactoring-run/references/glossary.md) | The suite's vocabulary, shipped with the skills |
 
 ## Contributing
 

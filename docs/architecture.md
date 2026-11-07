@@ -1,6 +1,6 @@
 # Architecture
 
-How the suite is put together, for someone who wants to understand or extend it. For steering a run as a user, see the [run playbook](playbooks/run.md); for the vocabulary, [CONTEXT.md](../CONTEXT.md).
+How the suite is put together, for someone who wants to understand or extend it. For steering a run as a user, see the [run playbook](playbooks/run.md); for the vocabulary, [glossary](../skills/continuous-refactoring-run/references/glossary.md).
 
 ## Three skills, everything else a reference
 
