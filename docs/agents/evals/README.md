@@ -37,6 +37,7 @@ has the line and that each path exists; which files belong on it is the author's
 | `r5-the-tool-is-in-place` | a run | walk-through |
 | `r6-a-conflict-it-cannot-resolve` | a run | walk-through |
 | `r7-safety-net-met-guardrails-open` | a run | walk-through |
+| `r8-guardrails-has-nothing-workable` | a run | walk-through |
 
 ## Playing one
 

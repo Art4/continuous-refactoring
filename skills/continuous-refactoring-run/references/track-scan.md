@@ -79,7 +79,7 @@ proposal — its Name, its Purpose in one line, and what blocks it — unless on
 
 | The Stage | Instead |
 | --- | --- |
-| already has an open ticket (a scan the call asked for) | no proposal; the ticket stands |
+| already has an open ticket | no proposal; the ticket stands |
 | is in `runtime_blocked` and not rejected | the proposal is to record a rejection with that runtime version as its blocker (`rejection.md`, *Below the runtime floor*) |
 | is in `withheld` as closed by a rejection | out of reach: no ticket could unblock it. Named in one line with what it hangs on, no proposal |
 | is proposed through an Opener | the proposal carries the open question "Set up <Tool>?" — or the fuller one its Tool file's *Opener* names —, the default the suite recommends being to set it up, and the Opener: its line and a link to the comment that wrote it, a `Plan` or an open question |
