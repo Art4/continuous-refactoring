@@ -23,3 +23,5 @@ answers the interview.
 ## Results
 
 2026-11-01, skill commit d53ce5f: pass, every line.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

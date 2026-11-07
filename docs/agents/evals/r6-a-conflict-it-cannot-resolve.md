@@ -32,3 +32,5 @@ Workable tickets wait in Guardrails.
 suite's comment on !40; nothing else marks it.
 
 2026-11-06, skill commit 9edb93c: still passes.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: fails "One comment on !40 … asks which order to keep": the comment says what each side changes but asks where the voucher step belongs; the other lines hold, the second call on a replay, as a walk-through.

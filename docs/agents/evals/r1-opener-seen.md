@@ -36,3 +36,5 @@ repository calls it.` Its merge request !15 carries the same line and was merged
 the ticket's text carries the Opener's line and the link to its `Plan` comment.
 
 2026-11-06, on a3c2d7a with the worklist's judging step (safety-net-gate, ticket 02): pass, every line, as a walk-through.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: fails "The worklist finds the Opener through **Search**": taking the tracker's search to miss comments, the player found the Opener through the merge request search instead; the scan was due, and the other lines hold, as a walk-through.

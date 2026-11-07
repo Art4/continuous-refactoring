@@ -28,3 +28,5 @@ else is open.
 ## Results
 
 2026-11-06, skill commit 9edb93c: pass, every line, as a walk-through.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through, on a replay; the first play reported round 2's run only by its outcome, from the player's brief.

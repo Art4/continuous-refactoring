@@ -35,3 +35,5 @@ changed too. Ticket #7, PHPStan Level 3, is workable; nothing else is open. The 
 ticket only for a rework, its next part, an answer or the human's wish; a base update is now among them.
 
 2026-11-06, skill commit 9edb93c: still passes; the base update leaves !13's draft or ready state as it was.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

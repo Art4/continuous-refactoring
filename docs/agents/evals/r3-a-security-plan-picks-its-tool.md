@@ -37,3 +37,5 @@ earlier exploration that read the code.
 commit: a design that ends on a change of behaviour wrote no plan and so lost its Opener (case C), and the line named
 the Tool by its name instead of its key (case A). In the replay both A and C judged the fix a change of behaviour and
 carried the line in the open question; B planned and carried it under `Decisions`.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, every case, as a walk-through, the three cases by one player.

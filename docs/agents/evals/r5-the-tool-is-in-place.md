@@ -29,3 +29,5 @@ finding's line in the CI log.
 2026-11-03, skill commit 9654c4b: pass, every line, as a walk-through.
 
 2026-11-06, on a3c2d7a with the worklist's judging step (safety-net-gate, ticket 02): pass, every line, as a walk-through.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: fails "The run works the ticket and posts a `Plan` comment." The design judged the fix a change of behaviour and posted an open question, as r3 allows; no Opener line, which holds, as a walk-through.

@@ -29,3 +29,5 @@ is blocked by #5; nothing else is open. The wake-up has just arrived.
 
 2026-11-02, skill commit 9c02368: pass, every line, as a walk-through. It named one gap: whether a rework for the human counts
 among the round's two. 057d1cb says it does.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.

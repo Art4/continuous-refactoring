@@ -49,3 +49,5 @@ every line, as a walk-through. Variant A failed one line on the first play: `tra
 open ticket only in "a scan the call asked for", so the scan proposed PHPStan Level 6 and the PHP CS Fixer rollout
 again and filing caught them by search. The row now holds for every scan; the replay passes every line, filing ten
 tickets and picking PHPMD.
+
+2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, both variants, as a walk-through, by one player.
