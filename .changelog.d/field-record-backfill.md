@@ -1,0 +1,1 @@
+The field record now holds what the suite has done on real targets since 0.5.0: three anonymised environments, among them GitLab, a library with a BC promise and a second agent, and what no field run has shown yet.
