@@ -1,0 +1,1 @@
+On a tracker whose search does not reach comments, a run now also reads the comments of the open tickets and of the ten tickets closed last when it looks for a plan's note that a tool you can ask for would have paid off. Before, that note was found only through the plan's merge request, so a target without merge requests, or a note in an open question, missed it.
