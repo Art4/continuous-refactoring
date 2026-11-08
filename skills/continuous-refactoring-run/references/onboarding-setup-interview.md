@@ -2,8 +2,8 @@
 
 Asks where a target's tickets live and how the **Refactoring operations** work there, and writes the answer
 as the `## Refactoring operations` section of the target's tracker file (`refactoring-operations.md`, *The
-tracker file*). That file is the interview's only write. `refactoring-operations.md` names the operations, their fallbacks and the
-templates; read it before step 1.
+tracker file*). That file is the interview's only write. `refactoring-operations.md` names the operations and their fallbacks,
+`tracker-file-templates.md` the templates; read both before step 1.
 
 Run the interview inline, where the human can answer. Six steps, in order: Explore, Ask, Check, Summarize,
 Write, Report. The commands are checked before the summary, so the one confirmation covers a section that

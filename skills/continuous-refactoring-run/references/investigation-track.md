@@ -63,7 +63,7 @@ One decision point:
 - **The tracker also holds other work and the target has no Candidate operation** → the same decision
   point asks how these tickets are marked. Options: a label, named by the human or proposed here (the
   recommendation); no mark. Write the answer as the **Candidate** bullet into the target's
-  `## Refactoring operations` section, in the shape `refactoring-operations.md` gives under *Bullets the
+  `## Refactoring operations` section, in the shape `tracker-file-templates.md` gives under *Bullets the
   target chooses*. With no mark, say that a later run works these tickets when the call names them.
 
 Write each ticket chosen, strongest first, following `forge-facing-writing.md`:
