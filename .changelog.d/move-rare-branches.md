@@ -1,0 +1,1 @@
+Two parts of the run's references that only some runs need now live in files of their own: how a baseline ticket is planned part by part, and the tracker file templates with the bullets a target chooses. A run reads about 1,350 words less on a typical path; the wording is unchanged.
