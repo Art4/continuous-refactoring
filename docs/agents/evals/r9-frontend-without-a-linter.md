@@ -33,3 +33,5 @@ ticket, plan or pull request carries an `Opener:` line.
 - [ ] The plan does not take in `no-var` or `eqeqeq`, though `cart.js` would break both.
 
 ## Results
+
+2026-11-08, on b36de5e, the scenario's first playing: pass, every line, as a walk-through. Then `eslint.md` was made explicit where the play had to infer: the adoption's config carries the rollout's rules as `Not yet:`, and an existing config without them fulfils the rollout.

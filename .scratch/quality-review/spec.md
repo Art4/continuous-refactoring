@@ -67,6 +67,12 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q31 | No sweep for rationale: the references hold little (about 40 "because"/"since"/"so that" in the 25 largest). A reason a model needs stays as a half-sentence in the text; any other moves to the ADR when its passage is touched anyway, as `CONTRIBUTING.md` says. Section pointers stay |
 | Q32 | The decision-point preamble, copied into eleven references, becomes a one-line pointer to the run's `SKILL.md`, *Decision points*; played on r8 and r3 |
 | Q33 | The word budget is one limit per file under `skills/`, its size plus a tenth when the check came in; a change that needs more raises the number in `WORD_BUDGET`, visibly in the diff |
+| Q34 | The `js` Pack applies where the repository holds JavaScript of its own: a `package.json`, or a `*.js`/`*.mjs`/`*.cjs` file outside `node_modules/` and `vendor/`; minified files and build output are not its own |
+| Q35 | TypeScript stays out of the first `js` Pack |
+| Q36 | Every ESLint Stage is Guardrails: a frontend without a linter never holds the Safety Net back |
+| Q37 | Three ESLint Stages: adoption with `js.configs.recommended` and bulk suppressions, clearing the suppressions, and a rollout of `no-var`, `prefer-const`, `object-shorthand`; no `ecmaVersion` Stage, its concern is the rollout's browser question |
+| Q38 | The Pack, fixtures and scenarios go in one PR; the field test follows on the maintainer's real target, its row in a small PR of its own; ticket 10 stays open until then |
+| Q39 | A language Pack follows, after `generic`, the Packs of the languages it builds on (`js` and `twig-php` after `php`), through a field in `pack.json`; its name (`after` or `recommends`) is settled in that PR, a small one after the `js` Pack |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

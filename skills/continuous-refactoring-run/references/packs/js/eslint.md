@@ -28,7 +28,8 @@ lands on code whose old findings are still suppressed.
      dependencies, the lock file, and `node_modules/` in `.gitignore`.
   2. The flat config: `js.configs.recommended`, the globals of where the code runs (`globals.browser` for a frontend,
      `globals.node` for scripts), `sourceType` as the files are written (`script` where they are loaded by a
-     `<script>` tag without `type="module"`), and `ignores` for minified files, vendored copies and build output.
+     `<script>` tag without `type="module"`), `ignores` for minified files, vendored copies and build output, and the
+     rollout's rules switched off, each marked `Not yet:` with its count (`eslint-rollout`).
   3. The suppressions file, written by `npx eslint . --suppress-all`, so the run is green from this merge request on
      (*Suppressions*). A target with no findings has none.
   4. Once `ci-runner` is fulfilled, the CI job.
@@ -62,7 +63,8 @@ lands on code whose old findings are still suppressed.
   exists.
 - **The rules** a fresh adoption marks `Not yet:` with their count: `no-var`, `prefer-const`, `object-shorthand`.
   Each is fixed by `npx eslint --fix` without a change of behaviour. `eqeqeq` is not among them: replacing `==`
-  changes what the code does. A target that already runs one of these keeps its setting.
+  changes what the code does. A target that already runs one of these keeps its setting; an existing config without them fulfils this Stage as
+  well, its rules being its own choice.
 - **Its ticket** is "ESLint: take in the remaining rules", the shape of a baseline ticket.
 - **A part** is one path step of one rule: an override block in the config that turns the rule on for the paths done
   so far, or a rollout file of that shape. The fix is the tool's `--fix` run, with nothing typed by hand. The last

@@ -22,3 +22,9 @@ Blocked by: 05
 
 **Done when** the Pack, its fixtures and scenarios are in, the scenarios pass, the field test has a row in the record,
 and tests and validator are green.
+
+## Comments
+
+**2026-11-08 — Pack, fixtures and scenarios in.** Decided in Q34–Q39 (spec). r9 and r10 pass at b36de5e (players
+117k and 110k, judge for both). The field test on the maintainer's target is still to come; this ticket stays open
+until its row is in the field record. The order of language Packs (Q39) follows in a PR of its own.
