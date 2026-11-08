@@ -1,0 +1,1 @@
+A scan that finds a tool already in place, with no ticket about it, now files one and closes it at once as done, naming what it found. Before, nothing on the tracker showed the tool was dealt with, so the same scan ran again on every run and found nothing new.

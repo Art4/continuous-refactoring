@@ -84,6 +84,14 @@ proposal — its Name, its Purpose in one line, and what blocks it — unless on
 | is in `withheld` as closed by a rejection | out of reach: no ticket could unblock it. Named in one line with what it hangs on, no proposal |
 | is proposed through an Opener | the proposal carries the open question "Set up <Tool>?" — or the fuller one its Tool file's *Opener* names —, the default the suite recommends being to set it up, and the Opener: its line and a link to the comment that wrote it, a `Plan` or an open question |
 
+**A Tool in place with no ticket.** Where the scan judged Stages of a Tool fulfilled that have no ticket in any
+state and no rejection, nothing on the tracker says they were dealt with, and the Track's scan would be due again on
+every run. They get one **in-place ticket** per Tool, filed and closed at once as done, so they become known
+(`worklist.md`, *A Track's trace*). Its title names the Tool and that it is in place ("Rector type coverage: in
+place", "PHPStan Levels 0 to 5: in place"); its text gives the evidence in one line and names each Stage by its
+Name and `search` words. Where a recognized Tool fills the Role, the ticket also names the Stages of the
+recommended Tool it took the place of ("PHP CS Fixer: in place as Laravel Pint").
+
 **What blocks a proposal** is read from `tree.stages`: every `requires` Stage that is not fulfilled; every
 required Role that is not filled, where the Tool recommended for it stands for it; and every `waits_for`
 Stage or Role that is undecided, a Role again stood for by its recommended Tool. Where a `requires` item is a group of alternatives, its members block together,
@@ -115,7 +123,9 @@ out at filing for closing with a note, as selection does at pick-up (`selection.
 
 ## 5. Hand on
 
-- **Proposals** → the filing step, in backlog order.
+- **Proposals** → the filing step, in backlog order, the in-place tickets first.
+- **In-place tickets alone** → the filing step for them; then back to Track choice with the Track marked as
+  tried, since nothing was filed to work.
 - **None** → say what the scan found — every Stage fulfilled or rejected, or which are out of reach and
   why — and return to Track choice with the Track marked as tried.
 

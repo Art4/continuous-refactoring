@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
 
 ## Situation
 
@@ -36,8 +36,10 @@ was installed, and the first Safety Net scan found it in place.
 - [ ] The run does not end on the Safety Net; no "Safety Net is waiting for merges" or "Safety Net is unfinished".
 - [ ] Track choice recommends Guardrails, and selection picks #53, not #51.
 - [ ] Variant A: Safety Net has a trace, and no Safety Net scan runs.
-- [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, files nothing, and
-      the run goes on to Guardrails within the same run.
+- [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, and proposes no
+      ticket to work for it.
+- [ ] Variant B: filing creates one ticket for Rector type coverage and closes it at once as done, its text naming
+      what was found in place; the run goes on to Guardrails within the same run.
 
 ## Results
 
@@ -58,3 +60,5 @@ every line, as a walk-through; the player did not open the glossary, every term 
 every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, both variants, as a walk-through, by one player.
+
+2026-11-08, on c11f6d4 with the in-place ticket for a tool a scan finds with no ticket: pass, every line, both variants, as a walk-through, by one player. The hand-on line for in-place tickets alone was then written out (back to Track choice, the Track marked as tried), wording only.
