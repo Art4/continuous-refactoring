@@ -25,3 +25,5 @@ answers the interview.
 2026-11-01, skill commit d53ce5f: pass, every line.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.
+
+2026-11-08, on d559478 with the tracker file templates moved into a file of their own: pass, every line, as a walk-through; the interview read the templates from the new file.

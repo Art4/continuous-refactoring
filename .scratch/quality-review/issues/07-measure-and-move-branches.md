@@ -1,7 +1,7 @@
 # 07 — Measure what runs read, and move rare branches out
 
 Type: task
-Status: open
+Status: done
 Blocked by: 05
 
 **What to build** (spec S4.1, S4.2)
