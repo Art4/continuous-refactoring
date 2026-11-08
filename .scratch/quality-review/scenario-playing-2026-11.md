@@ -163,3 +163,18 @@ by the rule on single misses no skill change follows from it alone.
 
 **About the scenarios themselves:** d3's brief names no forge; d4's "mergeable" can be read as the forge's state
 or the Driver's verdict; d5-a's player played both calls in one path.
+
+## After the playing (2026-11-08)
+
+Decided in Q27–Q29 and played: r7 both variants (player 120k, judge 51k) and r1 both variants (player 115k, judge
+about 50k), all pass. Unclear places named on the way, for later:
+
+- The scan judges "the Stages not known" (`worklist.md`) or "every Stage in scope" (`track-scan.md`): named again in
+  r7 and r1.
+- Filing's search for an in-place ticket or an Opener's Tool hits sibling tickets (Rector's) or the ticket the Opener
+  came from (#14); the rule for dropping such hits lives only in `worklist.md`.
+- No command for "the ten tickets closed last" or for reading comments; GitLab lists by update, not by close. On
+  GitHub, a query for `Opener: <tool>` may read the colon as a qualifier.
+- `track-scan.md`, *Tools on request*: "a ticket exists → requested" against the parser's exception for a ticket
+  still waiting on the Opener's yes.
+- The scan report has no form for a Role left unfilled by design.

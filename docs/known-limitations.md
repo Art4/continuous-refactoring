@@ -86,6 +86,16 @@ offers it again; a structural finding may or may not come up in a later explorat
 **What to do:** file what you want kept, decline what you never want, and ask for a scan when you
 want to see the rest again.
 
+## A tool's moment to pay off is looked for in recent comments only, on some trackers
+
+When a plan finds that a tool you can ask for would have paid off, it says so in a comment on its ticket, and the
+next scan asks you whether to set that tool up. GitHub's issue search and the local ticket files reach comments;
+other trackers' searches may not. There the suite finds the line through the plan's merge request, or else reads the
+comments of the open tickets and of the ten closed last. A line older than that, with no merge request carrying it,
+is not found, and the tool is not offered.
+
+**What to do:** ask for the tool by name in the call when you want it.
+
 ## GitHub App: CI/checks status may be unreadable even after granting "Actions" access
 
 GitHub Apps scope **Actions** (workflow-run access) separately from **Checks** (the Checks API

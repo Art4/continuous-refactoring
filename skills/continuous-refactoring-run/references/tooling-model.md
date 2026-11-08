@@ -113,6 +113,12 @@ Its ticket waits for a human's yes, in an autonomous run too (`filing-a-ticket.m
 human's request, and the Opener only asks at the moment the Tool pays off. Until the yes the Tool is not
 asked for: its ticket waits in its Track, and its Stages do not count towards the Track's fulfilment.
 
+**Finding it.** The line sits in a comment. GitHub's issue search and a search of the local files reach comments;
+another tracker's may stop at title and text, and the merge request search misses a line no merge request carries:
+an open question, a plan whose merge request was never opened, a target whose **Merge requests** is `none`. On such
+a tracker the worklist also reads the comments of the open tickets and of the ten tickets closed last for an
+`Opener:` line.
+
 A ticket of the Tool in any state, or a recorded rejection of the Tool, its Stage or its Role, uses every
 Opener of it up. After a rejection no Opener proposes the Tool again; a call that names it still can.
 

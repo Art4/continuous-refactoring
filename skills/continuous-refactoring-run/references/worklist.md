@@ -74,7 +74,8 @@ that ticket waits. Asked over the Stages of the Track's `nodes` whose Pack appli
 not applicable and without those marked
 `on_request`, except the first Stage of a Tool whose Opener was found and not used up: a Stage nobody asked for is never
 due otherwise. An Opener is found with **Search** for `Opener: <tool>` over open and closed tickets, and over
-the merge requests with the tool **Merge requests** names (`tooling-model.md`, *An Opener*). Where one listing of all
+the merge requests with the tool **Merge requests** names, and on a tracker whose search misses comments in the
+comments `tooling-model.md`, *An Opener*, names. Where one listing of all
 tickets, open and closed, is short enough, read it once; otherwise run **Search** with each Stage's
 `search` words over open and closed tickets, and stop at the first Stage that is not known.
 
