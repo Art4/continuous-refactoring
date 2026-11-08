@@ -30,7 +30,7 @@ lands on code whose old findings are still suppressed.
      `globals.node` for scripts), `sourceType` as the files are written (`script` where they are loaded by a
      `<script>` tag without `type="module"`), `ignores` for minified files, vendored copies and build output, and the
      rollout's rules that find something switched off, each marked `Not yet:` with its count (`eslint-rollout`).
-     A rule that finds nothing is on from here.
+     A rule that finds nothing is on from here, `prefer-const` aside.
   3. The suppressions file, written by `npx eslint . --suppress-all`, so the run is green from this merge request on
      (*Suppressions*). A target with no findings has none.
   4. Once `ci-runner` is fulfilled, the CI job.

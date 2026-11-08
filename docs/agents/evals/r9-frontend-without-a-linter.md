@@ -35,3 +35,4 @@ ticket, plan or pull request carries an `Opener:` line.
 ## Results
 
 2026-11-08, on b36de5e, the scenario's first playing: pass, every line, as a walk-through. Then `eslint.md` was made explicit where the play had to infer: the adoption's config carries the rollout's rules as `Not yet:`, and an existing config without them fulfils the rollout.
+2026-11-08, on 5def696 with the field test's fixes to `eslint.md`: pass, every line, as a walk-through. Then `prefer-const` was named as the exception to "a rule that finds nothing is on from the adoption".
