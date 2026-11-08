@@ -773,7 +773,7 @@ class SuiteDataTests(unittest.TestCase):
     def test_the_tracks_hold_the_stages_a_ticket_is_filed_for(self):
         out = self.compute({})
         self.assertEqual(len(out["tracks"]["Safety Net"]["nodes"]), 18)
-        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 19)
+        self.assertEqual(len(out["tracks"]["Guardrails"]["nodes"]), 22)
         listed = {n["node"] for t in out["tracks"].values() for n in t["nodes"]}
         self.assertNotIn("psalm", listed)
 
@@ -983,6 +983,49 @@ class TwigPackTests(unittest.TestCase):
         self.assertIn("twig/twig", composer["require"])
 
 
+class JsPackTests(unittest.TestCase):
+    """The JavaScript Pack: a third Pack beside generic and php, its Tools in a scope of their own."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model = tp.load_model()
+
+    def compute(self, seed=None):
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            full = {"fulfilled": [], "rejected": {}, "packs": None, "not_applicable": [], "requested": [], "runtime": {}}
+            full.update(seed or {})
+            return tp.compute(repo, self.model, full)
+
+    def safety_net(self):
+        out = self.compute({"packs": ["generic", "php"]})
+        return [n["node"] for n in out["tracks"]["Safety Net"]["nodes"]]
+
+    def test_its_stages_are_guardrails_alone(self):
+        out = self.compute({"packs": ["generic", "php", "js"]})
+        self.assertEqual([n["node"] for n in out["tracks"]["Guardrails"]["nodes"] if n["node"].startswith("eslint")],
+                         ["eslint-adoption", "eslint-suppressions", "eslint-rollout"])
+        self.assertFalse([n for n in out["tracks"]["Safety Net"]["nodes"] if n["node"].startswith("eslint")])
+
+    def test_it_holds_the_safety_net_back_in_nothing(self):
+        fulfilled = [s for s in self.safety_net() if s != "roave-bc-check"]
+        seed = {"packs": ["generic", "php", "js"], "fulfilled": fulfilled, "not_applicable": ["roave-bc-check"]}
+        out = self.compute(seed)
+        self.assertTrue(out["safety_net_fulfilled"])
+        self.assertIn("eslint-adoption", out["tracks"]["Guardrails"]["workable"])
+        self.assertNotIn("eslint-rollout", out["tracks"]["Guardrails"]["workable"])
+
+    def test_it_fills_static_analysis_beside_phpstan(self):
+        out = self.compute({"packs": ["generic", "php", "js"], "fulfilled": ["composer", "phpstan-level-0", "eslint-adoption"]})
+        filled = {(r["role"], r["scope"]): r["filled_by"] for r in out["roles"]}
+        self.assertEqual(filled[("static-analysis", "php")], "phpstan")
+        self.assertEqual(filled[("static-analysis", "js")], "eslint")
+
+    def test_its_stages_do_not_appear_where_it_does_not_apply(self):
+        out = self.compute({"packs": ["generic", "php"]})
+        self.assertFalse([b for b in out["tracks"]["Guardrails"]["backlog"] if b.startswith("eslint")])
+
+
 class OwnPackTests(unittest.TestCase):
     """A target's own Pack: added after the suite's, never redefining one of theirs."""
 
@@ -998,7 +1041,7 @@ class OwnPackTests(unittest.TestCase):
             return tp.compute(repo, self.model, full)
 
     def test_it_comes_after_the_suites_packs_and_adds_stages_and_a_role(self):
-        self.assertEqual(list(self.model["packs"]), ["generic", "php", "twig-php", "example-house-rules"])
+        self.assertEqual(list(self.model["packs"]), ["generic", "js", "php", "twig-php", "example-house-rules"])
         self.assertEqual(self.model["stage_order"][-3:], ["deptrac-layers", "deptrac-strict", "mago"])
         self.assertIn("architecture-rules", self.model["roles"])
         out = self.compute()

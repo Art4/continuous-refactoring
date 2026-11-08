@@ -16,6 +16,8 @@ suite against by hand.
 | `php-own-pack` | A project with a Pack of its own: Deptrac with a Role the suite does not have, and Mago in place of PHPStan |
 | `php-own-pack-clash` | The same kind of project, whose Pack reuses the slug `phpunit` of the suite's: the parser refuses it |
 | `php-twig` | Composer requiring `twig/twig`, with one template named `page.html.twig` |
+| `php-js-eslint` | A PHP application whose frontend JavaScript is linted by ESLint in CI, with a vendored minified copy left out |
+| `php-js-plain` | A PHP application with plain frontend JavaScript loaded by `<script>` tags, no `package.json`, no linter |
 | `php-clean` | A well-kept project: `.editorconfig`, CI, PHP CS Fixer, PHPUnit with a coverage floor, PHPStan, PHPMD, Rector |
 
 Where a fixture has `expected/issues/`, those files describe the structural problems planted in its

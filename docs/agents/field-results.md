@@ -32,6 +32,7 @@ No row names a project, a repository, a person, or a ticket or merge request num
 | E1 | PHP application, Symfony, PHP 8.2; GitLab merge requests, tickets in an external tracker; Claude Code |
 | E2 | PHP library, PHP 8.2; GitHub; Claude Code |
 | E3 | PHP application without a framework, PHP 8.2, migrated from 5.6; GitHub; Claude Code, later OpenCode |
+| E4 | Static website: plain JavaScript loaded by a `<script>` tag, PHP as build tooling only; GitLab; Claude Code |
 
 ## Results
 
@@ -64,6 +65,7 @@ No row names a project, a repository, a person, or a ticket or merge request num
 | Base update after a conflict the human's merge caused | E1 | 0.10–0.11 | 2026-11-05 – 2026-11-06 | confirmed | d12 | trace |
 | Draft set to ready by the review | E1 | 0.11 | 2026-11-06 | confirmed | — | trace |
 | End after N rounds, timer stopped | E3 | 0.10 | 2026-11-02 | confirmed | — | trace |
+| Guardrails: ESLint adopted fresh, its suppressions and remaining rules filed, the browser question asked at filing | E4 | after 0.11 | 2026-11-08 | confirmed | r9 | trace |
 
 ## Not evidenced
 

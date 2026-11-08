@@ -26,6 +26,8 @@ The ticket "PHPMD: take in the remaining rules" is planned the same way, with th
 
 The ticket "PHP CS Fixer: take in the remaining rules" is planned the same way, with the rule in progress in place of the group (`packs/php/php-cs-fixer.md`, *Taking in a rule*). A rollout file exists → its rule is this merge request's; otherwise measure the rules marked `Not yet:` in the main config and take the one in the fewest files. The part is the next path step of that rule, or its last. *Done when* `check` reports zero diffs with the main config and with the rollout file where it is left, `php -l` on the floor PHP passes over the changed files, and the test suite is green. `This merge request` names the rule, the paths of the part, and the paths and rules that stay.
 
+The tickets "ESLint: clear the suppressions" and "ESLint: take in the remaining rules" are planned the same way, with a rule's suppressions or a rule's path step as the part (`packs/js/eslint.md`). *Done when* `npx eslint .` exits 0, the part's entries are gone from the suppressions file or its rule is on for the part's paths, and the test suite is green.
+
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies (`design-point.md`, step 4): the baseline cannot become
 empty, so the level above cannot be raised. The open question names what follows from each answer. Where a

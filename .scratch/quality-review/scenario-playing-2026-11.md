@@ -183,3 +183,7 @@ about 50k), all pass. Unclear places named on the way, for later:
 Guardrails Stages from a scan, and nothing tells the human (r8 B); filing a whole chain at once, PHPStan Levels 7–10
 blocked behind 6 in review, may be more than a human expects; whether a Tool closed by a rejection of what it requires
 counts as rejected (r3); whether closing an injection is a change of behaviour has no rule (r3, as in r5).
+
+**From the field test of the JavaScript Pack:** on a site whose `composer.json` serves the build alone, the `php` Pack
+applies and its Safety Net (14 Stages) holds the ESLint Stages back; only a call naming Guardrails reached them.
+Whether `php`'s *Applies when* should leave out PHP that is build tooling only is open.

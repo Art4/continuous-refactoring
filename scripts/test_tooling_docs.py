@@ -212,7 +212,7 @@ class DocsTests(unittest.TestCase):
     def test_the_pages(self):
         model = td.tooling_tree.load_model()
         docs = td.render_docs(model)
-        self.assertEqual(sorted(docs), ["docs/tooling/README.md", "docs/tooling/packs/generic.md", "docs/tooling/packs/php.md", "docs/tooling/packs/twig-php.md"])
+        self.assertEqual(sorted(docs), ["docs/tooling/README.md", "docs/tooling/packs/generic.md", "docs/tooling/packs/js.md", "docs/tooling/packs/php.md", "docs/tooling/packs/twig-php.md"])
         php = docs["docs/tooling/packs/php.md"]
         self.assertIn("```mermaid\nflowchart TD", php)
         self.assertIn("subgraph t_safety_net", php)

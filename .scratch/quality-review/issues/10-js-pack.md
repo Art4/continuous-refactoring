@@ -1,7 +1,7 @@
 # 10 — A Pack for JavaScript
 
 Type: task
-Status: open
+Status: done
 Blocked by: 05
 
 **What to build** (spec S6; Q6, Q7, Q14)
@@ -22,3 +22,17 @@ Blocked by: 05
 
 **Done when** the Pack, its fixtures and scenarios are in, the scenarios pass, the field test has a row in the record,
 and tests and validator are green.
+
+## Comments
+
+**2026-11-08 — Pack, fixtures and scenarios in.** Decided in Q34–Q39 (spec). r9 and r10 pass at b36de5e (players
+117k and 110k, judge for both). The field test on the maintainer's target is still to come; this ticket stays open
+until its row is in the field record. The order of language Packs (Q39) follows in a PR of its own.
+
+**2026-11-08 — Field test.** A static website (E4 in the field record), call "Guardrails, only the ESLint Stages":
+three tickets filed, the browser question asked at filing and answered, the adoption's merge request with
+`package.json`, flat config (`sourceType: "script"`, browser globals, vendored copy ignored), two suppressed findings
+and a CI job; green. It confirms the fresh-adoption path; "already linted" stays covered by r10 alone. Three fixes to
+`eslint.md` followed: the Node.js version is read from the installed release's `engines` (the run had copied
+"ESLint 9 needs 18.18" into a ticket while installing ESLint 10), a rule that finds nothing is on from the adoption
+and `prefer-const` is counted again after `no-var`, and current browsers keep the default `ecmaVersion`.
