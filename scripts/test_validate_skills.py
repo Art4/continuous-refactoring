@@ -450,6 +450,42 @@ class ShippedGlossaryTests(unittest.TestCase):
         self.assertFalse(any("avoid-term 'gadget'" in i.message for i in issues))
 
 
+class WordBudgetTests(unittest.TestCase):
+    """Every skill file has a word budget and stays within it."""
+
+    def _issues(self, files, budget):
+        tmp = tempfile.TemporaryDirectory()
+        root = pathlib.Path(tmp.name)
+        write_tree(root, files)
+        try:
+            return vs.word_budget_issues(root, budget)
+        finally:
+            tmp.cleanup()
+
+    def test_within_budget_ok(self):
+        self.assertEqual(self._issues({"skills/a/SKILL.md": "one two three\n"}, {"skills/a/SKILL.md": 3}), [])
+
+    def test_over_budget_flagged(self):
+        issues = self._issues({"skills/a/SKILL.md": "one two three four\n"}, {"skills/a/SKILL.md": 3})
+        self.assertEqual(len(issues), 1)
+        self.assertIn("over its word budget: 4 words, limit 3", issues[0].message)
+
+    def test_file_without_budget_flagged(self):
+        issues = self._issues({"skills/a/references/new.md": "x\n"}, {})
+        self.assertEqual(len(issues), 1)
+        self.assertIn("no word budget", issues[0].message)
+        self.assertEqual(issues[0].skill, "skills/a/references/new.md")
+
+    def test_budget_for_missing_file_flagged(self):
+        issues = self._issues({"skills/a/SKILL.md": "x\n"}, {"skills/a/SKILL.md": 5, "skills/a/gone.md": 5})
+        self.assertEqual(len(issues), 1)
+        self.assertIn("does not exist", issues[0].message)
+
+    def test_repo_within_budget(self):
+        root = pathlib.Path(__file__).resolve().parent.parent
+        self.assertEqual(vs.word_budget_issues(root), [])
+
+
 class ScenarioCoversTests(unittest.TestCase):
     """Every scenario names the skill files it tests in a `Covers:` line."""
 
@@ -734,7 +770,7 @@ class ReferencesDirTests(unittest.TestCase):
         tmp, root = self._repo("No decisions or dangling paths here.")
         try:
             issues = vs.validate_repo(root)
-            self.assertFalse(any("references/tree.md" in i.skill for i in issues))
+            self.assertFalse(any("references/tree.md" in i.skill and "word budget" not in i.message for i in issues))
         finally:
             tmp.cleanup()
 

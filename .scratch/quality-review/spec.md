@@ -63,6 +63,10 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q27 | A Stage a scan finds fulfilled with no ticket of its own, under its Tool's name or another, gets a ticket filed and closed at once as done, its text naming the evidence, so the Stage is known and the Track's trace holds. Why: a Stage in place left no record, so the scan was due again on every run with an empty result (r7 B) |
 | Q28 | Where the tracker's **Search** does not reach comments, the worklist also reads the comments of a bounded set of tickets for an `Opener:` line, as `tooling-model.md`, *An Opener*, says; the Opener stays where design writes it. Why: r1 found an Opener in a `Plan` comment only through its merge request, which a target without one would not have |
 | Q29 | r5's first line takes r3's wording: a `Plan`, or an open question where the design judges the fix a change of behaviour. r5 tests the Opener, not that boundary; the skill says nothing new about it until the field shows a need |
+| Q30 | Ticket 08 leaves the glossary as it is: no play opened it since its pointer was reworded (ticket 07), so a cut saves almost nothing at runtime. Revisit when a play shows runs opening it again |
+| Q31 | No sweep for rationale: the references hold little (about 40 "because"/"since"/"so that" in the 25 largest). A reason a model needs stays as a half-sentence in the text; any other moves to the ADR when its passage is touched anyway, as `CONTRIBUTING.md` says. Section pointers stay |
+| Q32 | The decision-point preamble, copied into eleven references, becomes a one-line pointer to the run's `SKILL.md`, *Decision points*; played on r8 and r3 |
+| Q33 | The word budget is one limit per file under `skills/`, its size plus a tenth when the check came in; a change that needs more raises the number in `WORD_BUDGET`, visibly in the diff |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

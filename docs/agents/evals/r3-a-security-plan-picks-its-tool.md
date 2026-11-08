@@ -39,3 +39,5 @@ the Tool by its name instead of its key (case A). In the replay both A and C jud
 carried the line in the open question; B planned and carried it under `Decisions`.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, every case, as a walk-through, the three cases by one player.
+
+2026-11-08, on cecafc1 with the decision-point paragraph replaced by a pointer to the run's `SKILL.md`: pass, every line, every case, as a walk-through, by one player; the decision points keep findings, options and one recommendation.

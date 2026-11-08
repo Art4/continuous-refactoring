@@ -6,9 +6,7 @@ base update first*), and from the implement point, step 2, for a branch it works
 merge request or branch, and what blocks it. Commands come from the tool the target's **Merge requests** operation
 names; every text for the forge follows `forge-facing-writing.md`.
 
-Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
-conversation as a message of their own, then the question — in an autonomous run, then the recommendation
-taken.
+Decision points here are laid out as `../SKILL.md`, *Decision points*, says.
 
 ## A blocked merge request
 

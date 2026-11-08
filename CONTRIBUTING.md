@@ -51,6 +51,11 @@ the scenarios played and those left out, with the reason. Write new ones first f
 real target, use the [field eval](docs/agents/field-eval.md); what it confirms goes into the
 [field record](docs/agents/field-results.md).
 
+**Skill text says what to do, not why.** A reason stays in the text, as a half-sentence, only where an agent
+decides wrongly without it; every other reason belongs in the ADR. Move one out when you touch its passage anyway.
+Every file under `skills/` has a word budget in `scripts/validate_skills.py` (`WORD_BUDGET`); a change that needs more
+raises its number there, so the growth is decided in review.
+
 **A rule broken twice becomes a check.** When the same rule is violated a second time, or a review
 raises it a second time, do not add another paragraph: encode it as a check in `scripts/validate_skills.py`
 (or a test beside it), with a unit test of its own. What no tool can decide stays a written rule.

@@ -1,7 +1,7 @@
 # 08 — Cut rationale and repeated preambles, then a word budget
 
 Type: task
-Status: open
+Status: done
 Blocked by: 07
 
 **What to build** (spec S4.3, S4.4; Q20)
@@ -20,3 +20,10 @@ Blocked by: 07
 - A changelog fragment.
 
 **Done when** the cuts are in, the affected scenarios pass, the budget check is in, and tests and validator are green.
+
+## Comments
+
+**2026-11-08 — narrowed** by Q30–Q33 after ticket 07's numbers: the glossary stays as it is (no run opens it), no
+rationale sweep (little to cut; the rule is in `CONTRIBUTING.md`), section pointers stay. Done here: the eleven
+preamble copies became a one-line pointer (about 400 words); `word_budget_issues` checks one limit per skill file,
+its size plus a tenth, with unit tests. Plays: r8 and r3, on the maintainer's go.

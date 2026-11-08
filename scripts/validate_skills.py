@@ -745,6 +745,94 @@ def scenario_covers_issues(repo_root):
     return issues
 
 
+# --------------------------------------------------------------------------
+# Word budget: every Markdown file under skills/ has a ceiling, set at its
+# size plus a tenth when the budget came in. A change that needs more raises
+# the number here, so the growth shows in the diff and is decided in review.
+# --------------------------------------------------------------------------
+
+WORD_BUDGET = {
+    "skills/continuous-housekeeping/SKILL.md": 400,
+    "skills/continuous-housekeeping/references/housekeeping-setup.md": 1370,
+    "skills/continuous-housekeeping/references/housekeeping-track.md": 2850,
+    "skills/continuous-refactoring/SKILL.md": 1690,
+    "skills/continuous-refactoring/references/merging.md": 320,
+    "skills/continuous-refactoring-run/SKILL.md": 1670,
+    "skills/continuous-refactoring-run/references/design-point.md": 2570,
+    "skills/continuous-refactoring-run/references/filing-a-ticket.md": 820,
+    "skills/continuous-refactoring-run/references/forge-facing-writing.md": 290,
+    "skills/continuous-refactoring-run/references/foundational-refactoring-rules.md": 310,
+    "skills/continuous-refactoring-run/references/glossary.md": 5760,
+    "skills/continuous-refactoring-run/references/implement-point.md": 2580,
+    "skills/continuous-refactoring-run/references/investigation-track.md": 1190,
+    "skills/continuous-refactoring-run/references/local-issue-tracker-template.md": 120,
+    "skills/continuous-refactoring-run/references/onboarding-setup-interview.md": 2000,
+    "skills/continuous-refactoring-run/references/opening-a-merge-request.md": 1490,
+    "skills/continuous-refactoring-run/references/own-pack.md": 750,
+    "skills/continuous-refactoring-run/references/packs/generic/bc-promise.md": 1370,
+    "skills/continuous-refactoring-run/references/packs/generic/ci-runner.md": 160,
+    "skills/continuous-refactoring-run/references/packs/generic/editorconfig.md": 200,
+    "skills/continuous-refactoring-run/references/packs/generic/secret-detection.md": 420,
+    "skills/continuous-refactoring-run/references/packs/php/README.md": 380,
+    "skills/continuous-refactoring-run/references/packs/php/composer.md": 160,
+    "skills/continuous-refactoring-run/references/packs/php/coverage-floor.md": 1460,
+    "skills/continuous-refactoring-run/references/packs/php/ecs.md": 100,
+    "skills/continuous-refactoring-run/references/packs/php/infection.md": 610,
+    "skills/continuous-refactoring-run/references/packs/php/pest-mutate.md": 140,
+    "skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md": 2100,
+    "skills/continuous-refactoring-run/references/packs/php/phpcs.md": 110,
+    "skills/continuous-refactoring-run/references/packs/php/phpmd.md": 3170,
+    "skills/continuous-refactoring-run/references/packs/php/phpstan.md": 1840,
+    "skills/continuous-refactoring-run/references/packs/php/phpunit.md": 760,
+    "skills/continuous-refactoring-run/references/packs/php/pint.md": 100,
+    "skills/continuous-refactoring-run/references/packs/php/psalm.md": 820,
+    "skills/continuous-refactoring-run/references/packs/php/psr-4.md": 1110,
+    "skills/continuous-refactoring-run/references/packs/php/rector.md": 1300,
+    "skills/continuous-refactoring-run/references/packs/php/roave-bc-check.md": 580,
+    "skills/continuous-refactoring-run/references/packs/php/semgrep.md": 520,
+    "skills/continuous-refactoring-run/references/packs/twig-php/twig-cs-fixer.md": 250,
+    "skills/continuous-refactoring-run/references/packs/twig-php/twigstan.md": 200,
+    "skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md": 730,
+    "skills/continuous-refactoring-run/references/prerequisites/git.md": 80,
+    "skills/continuous-refactoring-run/references/prerequisites/onboarding-setup.md": 100,
+    "skills/continuous-refactoring-run/references/principles.md": 1070,
+    "skills/continuous-refactoring-run/references/reconcile.md": 590,
+    "skills/continuous-refactoring-run/references/refactoring-operations.md": 1350,
+    "skills/continuous-refactoring-run/references/rejection.md": 900,
+    "skills/continuous-refactoring-run/references/reporting-progress.md": 320,
+    "skills/continuous-refactoring-run/references/reviewing-a-change.md": 960,
+    "skills/continuous-refactoring-run/references/selection.md": 680,
+    "skills/continuous-refactoring-run/references/signals.md": 870,
+    "skills/continuous-refactoring-run/references/structural-candidate-search.md": 600,
+    "skills/continuous-refactoring-run/references/tooling-model.md": 2440,
+    "skills/continuous-refactoring-run/references/tooling-parser.md": 1400,
+    "skills/continuous-refactoring-run/references/track-choice.md": 660,
+    "skills/continuous-refactoring-run/references/track-scan.md": 1810,
+    "skills/continuous-refactoring-run/references/tracker-file-templates.md": 840,
+    "skills/continuous-refactoring-run/references/updating-the-base.md": 1300,
+    "skills/continuous-refactoring-run/references/worklist.md": 1260,
+}
+
+
+def word_budget_issues(repo_root, budget=None):
+    """Every skill file stays within its word budget, and every skill file has one."""
+    budget = WORD_BUDGET if budget is None else budget
+    issues = []
+    skills_dir = pathlib.Path(repo_root) / "skills"
+    for f in sorted(skills_dir.rglob("*.md")):
+        rel = f.relative_to(repo_root).as_posix()
+        words = len(f.read_text().split())
+        limit = budget.get(rel)
+        if limit is None:
+            issues.append(Issue(rel, f"no word budget: add `\"{rel}\": <limit>` to WORD_BUDGET ({words} words now)"))
+        elif words > limit:
+            issues.append(Issue(rel, f"over its word budget: {words} words, limit {limit} — cut, or raise the limit in WORD_BUDGET"))
+    for rel in sorted(budget):
+        if not (pathlib.Path(repo_root) / rel).is_file():
+            issues.append(Issue(rel, "WORD_BUDGET names a file that does not exist"))
+    return issues
+
+
 def validate_repo(repo_root):
     repo_root = pathlib.Path(repo_root)
     issues = []
@@ -860,6 +948,9 @@ def validate_repo(repo_root):
 
     # --- scenarios: each names the skill files it covers ---
     issues += scenario_covers_issues(repo_root)
+
+    # --- word budget per skill file ---
+    issues += word_budget_issues(repo_root)
 
     # --- the tooling model: schemas, fixed form, generated docs ---
     issues += tooling_model_issues(repo_root)

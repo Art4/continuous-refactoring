@@ -178,3 +178,8 @@ about 50k), all pass. Unclear places named on the way, for later:
 - `track-scan.md`, *Tools on request*: "a ticket exists → requested" against the parser's exception for a ticket
   still waiting on the Opener's yes.
 - The scan report has no form for a Role left unfilled by design.
+
+**From the plays for ticket 08** (r8 137k, r3 109k, judge for both; all pass): a workable ticket keeps unfiled
+Guardrails Stages from a scan, and nothing tells the human (r8 B); filing a whole chain at once, PHPStan Levels 7–10
+blocked behind 6 in review, may be more than a human expects; whether a Tool closed by a rejection of what it requires
+counts as rejected (r3); whether closing an injection is a change of behaviour has no rule (r3, as in r5).
