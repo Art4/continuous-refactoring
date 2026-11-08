@@ -1,6 +1,6 @@
 # r9 — The frontend has no linter
 
-Played as a walk-through.
+Played as a walk-through, once per variant.
 
 Covers: `skills/continuous-refactoring-run/references/packs/js/pack.json`, `skills/continuous-refactoring-run/references/packs/js/eslint.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/design-point.md`
 
@@ -15,22 +15,31 @@ Every Stage of the generic and the PHP Pack, Safety Net and Guardrails, except `
 whose merge request was merged, and what they set up runs in CI. No rejection is recorded, no ticket is open, and no
 ticket, plan or pull request carries an `Opener:` line.
 
+**Variant A.** No ESLint ticket exists.
+
+**Variant B.** A run before filed the three ESLint tickets, all open, none in review: the adoption's, the
+suppressions' blocked by it, and the rollout's blocked by both. The rollout's ticket carries the browser question,
+and the maintainer answered under it: the shop must still run in Internet Explorer 11. No other ticket is open.
+
 ## Call
 
 `/continuous-refactoring-run autonomous`
 
 ## Expected
 
-- [ ] The worklist judges that the generic, the PHP and the JavaScript Pack apply, and that the vendored
+- [ ] Variant A: the worklist judges that the generic, the PHP and the JavaScript Pack apply, and that the vendored
       `chart.min.js` is not the project's own JavaScript.
-- [ ] The Safety Net counts as fulfilled; Guardrails has no trace, since no ESLint Stage is known, and its scan is due.
-- [ ] The scan proposes `eslint-adoption`, `eslint-suppressions` blocked by it, and `eslint-rollout` blocked by
+- [ ] Variant A: the Safety Net counts as fulfilled; Guardrails has no trace, since no ESLint Stage is known, and its scan is due.
+- [ ] Variant A: the scan proposes `eslint-adoption`, `eslint-suppressions` blocked by it, and `eslint-rollout` blocked by
       both, the rollout carrying the question which browsers the code must run in. No PHP Stage is proposed.
-- [ ] Filing creates three tickets, posts the browser question on the rollout's, and marks the blocked ones.
-- [ ] Selection picks the adoption ticket. Its plan creates a `package.json` with `eslint`, `@eslint/js` and
+- [ ] Variant A: filing creates three tickets, posts the browser question on the rollout's, and marks the blocked ones.
+- [ ] Variant A: selection picks the adoption ticket. Its plan creates a `package.json` with `eslint`, `@eslint/js` and
       `globals`, and a flat config with `js.configs.recommended`, `globals.browser`, `sourceType: "script"` and the
       minified copy ignored, and records today's findings with `--suppress-all`.
-- [ ] The plan does not take in `no-var` or `eqeqeq`, though `cart.js` would break both.
+- [ ] Variant A: the plan does not take in `no-var` or `eqeqeq`, though `cart.js` would break both.
+- [ ] Variant B: the worklist judges that the rollout's Stage does not apply, since Internet Explorer 11 has no
+      ES2015. Selection picks the adoption ticket; its plan sets `languageOptions.ecmaVersion` to `5` and marks no
+      rule `Not yet:`, and it does not plan `no-var`, `prefer-const` or `object-shorthand`.
 
 ## Results
 

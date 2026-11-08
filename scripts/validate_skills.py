@@ -775,7 +775,7 @@ WORD_BUDGET = {
     "skills/continuous-refactoring-run/references/packs/generic/secret-detection.md": 420,
     "skills/continuous-refactoring-run/references/packs/php/README.md": 380,
     "skills/continuous-refactoring-run/references/packs/php/composer.md": 160,
-    "skills/continuous-refactoring-run/references/packs/js/eslint.md": 1060,
+    "skills/continuous-refactoring-run/references/packs/js/eslint.md": 1100,
     "skills/continuous-refactoring-run/references/packs/php/coverage-floor.md": 1460,
     "skills/continuous-refactoring-run/references/packs/php/ecs.md": 100,
     "skills/continuous-refactoring-run/references/packs/php/infection.md": 610,
