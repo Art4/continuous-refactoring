@@ -9,6 +9,7 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Pack | Applies when |
 | --- | --- |
 | [generic](packs/generic.md) | Always. |
+| [js](packs/js.md) | The repository holds JavaScript of its own: a package.json, or at least one *.js, *.mjs or *.cjs file outside node_modules/ and vendor/. Minified files (*.min.js) and the folders a build writes to are not its own; TypeScript is not covered yet. |
 | [php](packs/php.md) | The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/. |
 | [twig-php](packs/twig-php.md) | The PHP Pack applies and composer.json (or, for an indirect requirement, composer.lock) requires twig/twig or a package that brings Twig along, such as symfony/twig-bundle. The file extension of the templates does not decide. |
 
@@ -25,7 +26,7 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Testing (`testing`) | A test suite that runs locally and catches regressions. | – | PHPUnit (recommended, php) |
 | Test Coverage (`test-coverage`) | The share of the code the tests reach is measured and may not fall. | Untested / hard-to-test | Test Coverage Floor (recommended, php) |
 | Mutation Testing (`mutation-testing`) | Small faults are planted in the code one at a time, and the tests must notice each: they are judged by what they catch, not by what they reach. | Untested / hard-to-test | Infection (on-request, php); Pest Mutation Testing (recognized, php) |
-| Static Analysis (`static-analysis`) | A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step. | – | PHPStan (recommended, php); Psalm (recognized, php); TwigStan (recommended, twig-php) |
+| Static Analysis (`static-analysis`) | A tool reads the code without running it and reports defects, at a level of strictness the project raises step by step. | – | ESLint (recommended, js); PHPStan (recommended, php); Psalm (recognized, php); TwigStan (recommended, twig-php) |
 | Taint Analysis (`taint-analysis`) | A tool follows data from untrusted input to dangerous operations. | Security | Psalm Taint Analysis (on-request, php) |
 | API Compatibility (`api-compatibility`) | A check compares the code with the last release and fails on a break of what the project's BC promise covers. | – | Roave Backward Compatibility Check (recommended, php) |
 | Automated Refactoring (`automated-refactoring`) | Rule sets rewrite code mechanically, one reviewable set at a time. | – | Rector (recommended, php) |

@@ -1,0 +1,39 @@
+{
+  "$schema": "../../pack.schema.json",
+  "pack": "js",
+  "scope": "js",
+  "applies_when": "The repository holds JavaScript of its own: a package.json, or at least one *.js, *.mjs or *.cjs file outside node_modules/ and vendor/. Minified files (*.min.js) and the folders a build writes to are not its own; TypeScript is not covered yet.",
+  "tools": [
+    {
+      "tool": "eslint",
+      "name": "ESLint",
+      "uses": "ESLint",
+      "roles": ["static-analysis"],
+      "status": "recommended",
+      "details": "eslint.md",
+      "stages": [
+        {
+          "slug": "eslint-adoption",
+          "name": "ESLint",
+          "track": "Guardrails",
+          "requires": [],
+          "waits_for": ["editorconfig"]
+        },
+        {
+          "slug": "eslint-suppressions",
+          "name": "ESLint: clear the suppressions",
+          "track": "Guardrails",
+          "requires": ["eslint-adoption"],
+          "waits_for": []
+        },
+        {
+          "slug": "eslint-rollout",
+          "name": "ESLint: take in the remaining rules",
+          "track": "Guardrails",
+          "requires": ["eslint-adoption"],
+          "waits_for": ["eslint-suppressions"]
+        }
+      ]
+    }
+  ]
+}
