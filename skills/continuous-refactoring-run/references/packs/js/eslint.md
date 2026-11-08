@@ -29,7 +29,8 @@ lands on code whose old findings are still suppressed.
   2. The flat config: `js.configs.recommended`, the globals of where the code runs (`globals.browser` for a frontend,
      `globals.node` for scripts), `sourceType` as the files are written (`script` where they are loaded by a
      `<script>` tag without `type="module"`), `ignores` for minified files, vendored copies and build output, and the
-     rollout's rules switched off, each marked `Not yet:` with its count (`eslint-rollout`).
+     rollout's rules that find something switched off, each marked `Not yet:` with its count (`eslint-rollout`).
+     A rule that finds nothing is on from here.
   3. The suppressions file, written by `npx eslint . --suppress-all`, so the run is green from this merge request on
      (*Suppressions*). A target with no findings has none.
   4. Once `ci-runner` is fulfilled, the CI job.
@@ -37,8 +38,9 @@ lands on code whose old findings are still suppressed.
      entry.
 - The merge request reads in its description the paths it lints, the globals and `sourceType` with their reason, and
   the count of suppressed findings per rule.
-- **Node.js:** ESLint 9 runs on Node.js 18.18 or newer. That is the developer's and CI's runtime, not the browser's;
-  where neither has it, the run names that and the Stage is not set up.
+- **Node.js:** the version ESLint needs is the `engines` field of the release installed, read from the lock file,
+  never from memory. That is the developer's and CI's runtime, not the browser's; where neither has it, the run names
+  that and the Stage is not set up.
 
 ### `eslint-suppressions`
 
@@ -58,10 +60,13 @@ lands on code whose old findings are still suppressed.
 - **Applies when:** the code may use the syntax the rules bring (ES2015: `let`, `const`, shorthand properties). It
   does where the code is built or transpiled, where the project names its browsers (a `browserslist`) and they all
   have it, or where the code already uses that syntax. Where none of this is known, the proposal carries the question
-  which browsers the code must run in, and the answer sets the config's `languageOptions.ecmaVersion`.
+  which browsers the code must run in. Current browsers only → `ecmaVersion` stays at ESLint's default; older ones →
+  the config sets `languageOptions.ecmaVersion` to what they all have.
 - **Fulfilment check:** `eslint-adoption` is fulfilled, the config holds no rule marked `Not yet:`, and no rollout file
   exists.
-- **The rules** a fresh adoption marks `Not yet:` with their count: `no-var`, `prefer-const`, `object-shorthand`.
+- **The rules** a fresh adoption marks `Not yet:` with their count: `no-var`, `prefer-const`, `object-shorthand`,
+  taken in in this order. `prefer-const` finds nothing in code written with `var`; it is counted again once `no-var`
+  is on, and switched on at once where it still finds nothing.
   Each is fixed by `npx eslint --fix` without a change of behaviour. `eqeqeq` is not among them: replacing `==`
   changes what the code does. A target that already runs one of these keeps its setting; an existing config without them fulfils this Stage as
   well, its rules being its own choice.
