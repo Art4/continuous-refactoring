@@ -1,7 +1,7 @@
 # 10 — A Pack for JavaScript
 
 Type: task
-Status: open
+Status: done
 Blocked by: 05
 
 **What to build** (spec S6; Q6, Q7, Q14)
