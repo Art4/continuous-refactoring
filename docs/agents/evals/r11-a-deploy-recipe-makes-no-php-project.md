@@ -23,3 +23,4 @@ rejection is recorded, and no ticket, plan or pull request carries an `Opener:` 
 - [ ] The tickets filed are for Stages of the generic Pack only, and no Housekeeping line of a PHP Tool is planned.
 
 ## Results
+2026-11-08, on 6a475fe, the scenario's first playing: pass, every line, as a walk-through.
