@@ -124,7 +124,8 @@ out at filing for closing with a note, as selection does at pick-up (`selection.
 ## 5. Hand on
 
 - **Proposals** → the filing step, in backlog order, the in-place tickets first.
-- **In-place tickets alone** → the filing step for them; then, as with none, back to Track choice.
+- **In-place tickets alone** → the filing step for them; then back to Track choice with the Track marked as
+  tried, since nothing was filed to work.
 - **None** → say what the scan found — every Stage fulfilled or rejected, or which are out of reach and
   why — and return to Track choice with the Track marked as tried.
 

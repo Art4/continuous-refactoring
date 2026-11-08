@@ -60,3 +60,5 @@ every line, as a walk-through; the player did not open the glossary, every term 
 every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, both variants, as a walk-through, by one player.
+
+2026-11-08, on c11f6d4 with the in-place ticket for a tool a scan finds with no ticket: pass, every line, both variants, as a walk-through, by one player. The hand-on line for in-place tickets alone was then written out (back to Track choice, the Track marked as tried), wording only.
