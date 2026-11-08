@@ -60,8 +60,10 @@ lands on code whose old findings are still suppressed.
 - **Applies when:** the code may use the syntax the rules bring (ES2015: `let`, `const`, shorthand properties). It
   does where the code is built or transpiled, where the project names its browsers (a `browserslist`) and they all
   have it, or where the code already uses that syntax. Where none of this is known, the proposal carries the question
-  which browsers the code must run in. Current browsers only → `ecmaVersion` stays at ESLint's default; older ones →
-  the config sets `languageOptions.ecmaVersion` to what they all have.
+  which browsers the code must run in. Current browsers only → `ecmaVersion` stays at ESLint's default. Browsers
+  without ES2015 → the Stage does not apply: the config sets `languageOptions.ecmaVersion` to `5` and holds no
+  `Not yet:` entry. The adoption then leaves them out, and the rollout's ticket is closed with the answer; where the
+  adoption wrote them already, that ticket first removes them in one merge request.
 - **Fulfilment check:** `eslint-adoption` is fulfilled, the config holds no rule marked `Not yet:`, and no rollout file
   exists.
 - **The rules** a fresh adoption marks `Not yet:` with their count: `no-var`, `prefer-const`, `object-shorthand`,

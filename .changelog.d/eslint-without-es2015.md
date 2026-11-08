@@ -1,0 +1,1 @@
+Where a frontend must still run in browsers without ES2015, the ESLint rollout of `no-var`, `prefer-const` and `object-shorthand` no longer applies: the config sets `ecmaVersion` to 5 and carries no rule waiting to be taken in.
