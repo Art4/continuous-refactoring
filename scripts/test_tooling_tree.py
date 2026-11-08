@@ -187,6 +187,32 @@ class LoadModelTests(unittest.TestCase):
         self.assertEqual(list(model["packs"]), ["generic", "zeta"])
         self.assertEqual(model["stage_order"], ["g1", "z1"])
 
+    def test_a_pack_comes_after_the_packs_it_follows(self):
+        follower = pack("alpha", [tool("a", [stage("a1")])])
+        follower["follows"] = ["php"]
+        model = Model([follower, pack("php", [tool("p", [stage("p1")], roles=["beta"])]),
+                       pack("generic", [tool("g", [stage("g1")], roles=["gamma"])])]).load()
+        self.assertEqual(list(model["packs"]), ["generic", "php", "alpha"])
+        self.assertEqual(model["stage_order"], ["g1", "p1", "a1"])
+
+    def test_follows_only_orders(self):
+        follower = pack("alpha", [tool("a", [stage("a1")])])
+        follower["follows"] = ["php"]
+        out = Model([follower, pack("php", [tool("p", [stage("p1")], roles=["beta"])])]).compute({"packs": ["alpha"]})
+        self.assertEqual(out["tracks"]["Safety Net"]["workable"], ["a1"])
+
+    def test_follows_that_names_no_pack_or_closes_a_cycle_is_refused(self):
+        lost = pack("alpha", [tool("a", [stage("a1")])])
+        lost["follows"] = ["nope"]
+        with self.assertRaises(tp.PackError) as caught:
+            Model([lost]).load()
+        self.assertIn("follows the unknown pack 'nope'", str(caught.exception))
+        one, two = pack("one", [tool("a", [stage("a1")])]), pack("two", [tool("b", [stage("b1")], roles=["beta"])])
+        one["follows"], two["follows"] = ["two"], ["one"]
+        with self.assertRaises(tp.PackError) as caught:
+            Model([one, two]).load()
+        self.assertIn("form a cycle: one, two", str(caught.exception))
+
     def test_broken_models_are_refused(self):
         cases = {
             "unknown role": [pack("m", [tool("a", [stage("a1")], roles=["nope"])])],
@@ -1041,7 +1067,7 @@ class OwnPackTests(unittest.TestCase):
             return tp.compute(repo, self.model, full)
 
     def test_it_comes_after_the_suites_packs_and_adds_stages_and_a_role(self):
-        self.assertEqual(list(self.model["packs"]), ["generic", "js", "php", "twig-php", "example-house-rules"])
+        self.assertEqual(list(self.model["packs"]), ["generic", "php", "js", "twig-php", "example-house-rules"])
         self.assertEqual(self.model["stage_order"][-3:], ["deptrac-layers", "deptrac-strict", "mago"])
         self.assertIn("architecture-rules", self.model["roles"])
         out = self.compute()

@@ -3,6 +3,7 @@
   "pack": "js",
   "scope": "js",
   "applies_when": "The repository holds JavaScript of its own: a package.json, or at least one *.js, *.mjs or *.cjs file outside node_modules/ and vendor/. Minified files (*.min.js) and the folders a build writes to are not its own; TypeScript is not covered yet.",
+  "follows": ["php"],
   "tools": [
     {
       "tool": "eslint",

@@ -10,6 +10,7 @@
     "pack": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"},
     "scope": {"type": "string", "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$", "description": "The language or area the Pack's Tools work on. Tools compete for a Role only with Tools of their own scope; a Pack without one is general."},
     "applies_when": {"type": "string", "minLength": 1, "description": "A sentence the agent judges against the target, once per run."},
+    "follows": {"type": "array", "items": {"$ref": "#/$defs/slug"}, "description": "Packs of the suite this Pack comes after in the order of the Packs; only the order changes, nothing waits."},
     "tools": {
       "type": "array",
       "minItems": 1,

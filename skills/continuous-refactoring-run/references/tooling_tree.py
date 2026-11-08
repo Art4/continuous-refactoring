@@ -117,9 +117,27 @@ def load_roles(roles_json: pathlib.Path | None = None) -> dict[str, dict]:
 
 
 def _pack_paths(packs_dir: pathlib.Path) -> list[pathlib.Path]:
-    """``generic`` first, the other Packs in name order."""
+    """``generic`` first, then the other Packs in name order, each after the
+    Packs its ``follows`` names. Raises ``PackError`` for a ``follows`` that
+    names no Pack or closes a cycle."""
     paths = sorted(packs_dir.glob("*/pack.json"), key=lambda p: (p.parent.name != "generic", p.parent.name))
-    return paths
+    follows: dict[pathlib.Path, list] = {}
+    for path in paths:
+        data = _read_json(path)
+        after = data.get("follows", []) if isinstance(data, dict) else []
+        _need(isinstance(after, list) and all(_is_slug(x) for x in after), str(path), "follows must be a list of pack names")
+        follows[path] = after
+    by_name = {p.parent.name: p for p in paths}
+    for path, after in follows.items():
+        for name in after:
+            _need(name in by_name, str(path), f"follows the unknown pack {name!r}")
+    ordered: list[pathlib.Path] = []
+    while len(ordered) < len(paths):
+        ready = next((p for p in paths if p not in ordered and all(by_name[n] in ordered for n in follows[p])), None)
+        _need(ready is not None, str(packs_dir), "the packs' follows form a cycle: " + ", ".join(
+            p.parent.name for p in paths if p not in ordered))
+        ordered.append(ready)
+    return ordered
 
 
 def load_model(

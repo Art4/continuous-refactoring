@@ -3,6 +3,7 @@
   "pack": "twig-php",
   "scope": "twig-php",
   "applies_when": "The PHP Pack applies and composer.json (or, for an indirect requirement, composer.lock) requires twig/twig or a package that brings Twig along, such as symfony/twig-bundle. The file extension of the templates does not decide.",
+  "follows": ["php"],
   "tools": [
     {
       "tool": "twig-cs-fixer",
