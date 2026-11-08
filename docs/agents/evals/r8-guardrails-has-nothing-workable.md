@@ -51,3 +51,5 @@ again and filing caught them by search. The row now holds for every scan; the re
 tickets and picking PHPMD.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, both variants, as a walk-through, by one player.
+
+2026-11-08, on cecafc1 with the decision-point paragraph replaced by a pointer to the run's `SKILL.md`: pass, every line, every variant, as a walk-through, by one player; the decision points keep findings, options and one recommendation.

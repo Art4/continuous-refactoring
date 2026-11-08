@@ -1,7 +1,7 @@
 # 08 — Cut rationale and repeated preambles, then a word budget
 
 Type: task
-Status: open
+Status: done
 Blocked by: 07
 
 **What to build** (spec S4.3, S4.4; Q20)
