@@ -60,6 +60,9 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q24 | The pointer to the glossary says to look a term up only where the text does not make its meaning clear |
 | Q25 | Ticket 08 cuts the glossary to the meaning at runtime, one to three sentences per entry, *Avoid* without history; ticket 07 measures the glossary's share on its own |
 | Q26 | Supersedes part of Q8: the `Covers:` line is where the choice starts, not the whole list. A PR plays those covering scenarios whose expected lines bear on the behaviour it moves, and names the ones it left out with the reason; wording that moves no behaviour plays none. Why: the first full playing showed a one-sentence Driver change would replay all 14 d-scenarios, about 1.2M tokens |
+| Q27 | A Stage a scan finds fulfilled with no ticket of its own, under its Tool's name or another, gets a ticket filed and closed at once as done, its text naming the evidence, so the Stage is known and the Track's trace holds. Why: a Stage in place left no record, so the scan was due again on every run with an empty result (r7 B) |
+| Q28 | Where the tracker's **Search** does not reach comments, the worklist also reads the comments of a bounded set of tickets for an `Opener:` line, as `tooling-model.md`, *An Opener*, says; the Opener stays where design writes it. Why: r1 found an Opener in a `Plan` comment only through its merge request, which a target without one would not have |
+| Q29 | r5's first line takes r3's wording: a `Plan`, or an open question where the design judges the fix a change of behaviour. r5 tests the Opener, not that boundary; the skill says nothing new about it until the field shows a need |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
