@@ -1,7 +1,7 @@
 # 01 — A deploy script makes no PHP project
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What happened.** In the field, a static website with no `composer.json` got the PHP Pack because of one PHP file,
@@ -18,3 +18,9 @@ file outside vendor/", so it would happen today.
 - A changelog fragment.
 
 **Done when** the fixture gets only the generic Pack, the scenario passes, and tests and validator are green.
+
+## Comments
+
+**2026-11-08 — Done.** Decided in quality-review Q48 and Q49: a file that only configures a tool, with no
+`composer.json` beside it, makes no PHP project; code of the project's own, a build script included, still does
+(Q46). Fixture `static-site-deploy-script`, scenario r11; r11 and r9 pass at 6a475fe.

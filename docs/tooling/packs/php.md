@@ -2,7 +2,7 @@
 
 # Pack `php`
 
-Applies when: The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/.
+Applies when: The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/ that is more than a tool's configuration. A Deployer recipe (deploy.php) or another file that only configures a tool, with no composer.json beside it, makes no PHP project.
 
 ## Diagram
 

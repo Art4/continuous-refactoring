@@ -41,6 +41,7 @@ has the line and that each path exists; which files belong on it is the author's
 | `r8-guardrails-has-nothing-workable` | a run | walk-through |
 | `r9-frontend-without-a-linter` | a run | walk-through |
 | `r10-frontend-already-linted` | a run | walk-through |
+| `r11-a-deploy-recipe-makes-no-php-project` | a run | walk-through |
 
 ## Playing one
 

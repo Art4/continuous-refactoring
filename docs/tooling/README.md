@@ -9,7 +9,7 @@ What a tool is for (Roles), which tools can play them, and the Packs the tools c
 | Pack | Applies when |
 | --- | --- |
 | [generic](packs/generic.md) | Always. |
-| [php](packs/php.md) | The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/. |
+| [php](packs/php.md) | The repository contains PHP code: a composer.json (or composer/composer.json), or at least one *.php file outside vendor/ that is more than a tool's configuration. A Deployer recipe (deploy.php) or another file that only configures a tool, with no composer.json beside it, makes no PHP project. |
 | [js](packs/js.md) | The repository holds JavaScript of its own: a package.json, or at least one *.js, *.mjs or *.cjs file outside node_modules/ and vendor/. Minified files (*.min.js) and the folders a build writes to are not its own; TypeScript is not covered yet. |
 | [twig-php](packs/twig-php.md) | The PHP Pack applies and composer.json (or, for an indirect requirement, composer.lock) requires twig/twig or a package that brings Twig along, such as symfony/twig-bundle. The file extension of the templates does not decide. |
 
