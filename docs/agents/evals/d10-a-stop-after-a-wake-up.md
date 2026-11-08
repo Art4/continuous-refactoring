@@ -29,3 +29,5 @@ blocked by the ticket of that merge request.
 2026-11-02, skill commit c018468: pass, every line, as a walk-through, with a neutral timer tool in the prompt whose description says how to end it. An earlier wording, "ends the timer, loop and all", failed the timer line: the agent only set no new wake-up. That wording was replaced.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: fails "It ends the timer explicitly before its closing message, with the call the environment has for that." The player found no call named for ending a timer and relied on setting no new wake-up; the other lines hold, as a walk-through.
+
+2026-11-07, on b83cebb with the Driver naming `ScheduleWakeup` with `stop: true` for ending its timer: pass, every line, as a walk-through.

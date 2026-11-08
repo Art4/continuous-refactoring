@@ -117,7 +117,8 @@ the last round.
 
 Before **done**, **paused** or **ended**, step 1's base updates run once more, so what waits for the human can merge;
 **broken** skips them. A stop skips the cadence, and the next run with it. Setting no new wake-up does not end a timer: the Driver ends
-it explicitly, with the call its environment has for that, before the closing message, so nothing wakes it after its
+it explicitly, with the call its environment has for that (Claude Code: `ScheduleWakeup` with `stop: true`), before
+the closing message, so nothing wakes it after its
 last word.
 
 Open merge requests are those of the suite's tickets, found as
