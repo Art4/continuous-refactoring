@@ -28,7 +28,7 @@ line of its own: `Blocker: PHP >= 7.4`, a runtime and a version.
 - **Recommendation:** `.out-of-scope/` where the target has it, a closed ticket otherwise.
 
 Write the answer as the **Rejected** bullet into the target's `## Refactoring operations` section, in
-the shape `refactoring-operations.md` gives under *Bullets the target chooses*, then record the rejection.
+the shape `tracker-file-templates.md` gives under *Bullets the target chooses*, then record the rejection.
 
 ## Below the runtime floor
 

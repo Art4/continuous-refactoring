@@ -149,7 +149,8 @@ Everything is in your project, your tracker and your forge — nothing in the co
 | [Architecture](docs/architecture.md) | The three skills, their references, the tooling tree |
 | [FAQ](docs/FAQ.md) | Why the suite is designed the way it is |
 | [Known limitations](docs/known-limitations.md) | Limits without a suite-side fix, plus troubleshooting |
-| [Operations reference](skills/continuous-refactoring-run/references/refactoring-operations.md) | The operations the suite needs from a tracker, with the templates |
+| [Operations reference](skills/continuous-refactoring-run/references/refactoring-operations.md) | The operations the suite needs from a tracker |
+| [Tracker file templates](skills/continuous-refactoring-run/references/tracker-file-templates.md) | The section as written for GitHub, GitLab and Local Markdown, and the bullets a target chooses |
 | [glossary](skills/continuous-refactoring-run/references/glossary.md) | The suite's vocabulary, shipped with the skills |
 
 ## Contributing

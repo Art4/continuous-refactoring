@@ -2,7 +2,7 @@
 
 Played as a walk-through: the onboarding asks a human.
 
-Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/onboarding-setup-interview.md`
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/onboarding-setup-interview.md`, `skills/continuous-refactoring-run/references/tracker-file-templates.md`
 
 ## Situation
 
