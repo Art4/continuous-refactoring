@@ -209,6 +209,16 @@ only when it collects coverage, so a test run without coverage passes where the 
 **What to do:** on PHPUnit 9, the step is proposed once you move to PHPUnit 10. Locally, run the tests the
 way your coverage job does before you push.
 
+## A frontend linter waits for the PHP Safety Net
+
+Every Guardrails step waits until the Safety Net is in place, and the PHP Safety Net counts wherever the project has
+PHP, even when that PHP only builds or deploys the site. So a project with a JavaScript frontend gets ESLint proposed
+only after PHPUnit, PHPStan's first levels and Rector's first sets, though linting the frontend touches none of them.
+
+**What to do:** name the Track to lint the frontend sooner: `/continuous-refactoring-run Guardrails, only the ESLint
+Stages`. Where a PHP tool is not wanted for code that only builds the site, decline it when a run proposes it or picks
+its ticket, and give the reason; the suite records the rejection and does not propose that tool again.
+
 ## Troubleshooting: why did the run end without a merge request?
 
 The closing report's **Status** line always says why. The usual reasons:

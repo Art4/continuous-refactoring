@@ -186,4 +186,4 @@ counts as rejected (r3); whether closing an injection is a change of behaviour h
 
 **From the field test of the JavaScript Pack:** on a site whose `composer.json` serves the build alone, the `php` Pack
 applies and its Safety Net (14 Stages) holds the ESLint Stages back; only a call naming Guardrails reached them.
-Whether `php`'s *Applies when* should leave out PHP that is build tooling only is open.
+Decided in Q46 and Q47: `php` still applies, and the wait stays; a known limitation says how to go sooner.

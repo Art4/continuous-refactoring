@@ -79,6 +79,8 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q43 | The field for Q39 is named `follows`: `after` was the Stages' old name for `waits_for`, `recommends` was rejected in ADR-0086 |
 | Q44 | `follows` only orders; a Pack it names that does not apply is passed over; an unknown name and a cycle are refused by the parser |
 | Q45 | The rollout's gap for browsers without ES2015 goes in a small PR of its own, not with Q39 |
+| Q46 | PHP that only builds or deploys a site counts for the `php` Pack: its `applies_when` stays; a tool not wanted there is rejected |
+| Q47 | Guardrails keep waiting for the whole Safety Net, the PHP one included; a known limitation says to name the Track to lint a frontend sooner. Taken up again if the field shows it more often |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
