@@ -35,7 +35,8 @@ and settle on one:
 - **Recommendation:** file every proposal that carries no open question; record the proposed rejections;
   close the tickets whose Stage is fulfilled. A proposal with an open question is filed with it: a
   question the human answered here goes into the ticket's text; one left open — always in an autonomous
-  run — is posted on the new ticket in step 3. The question of a proposal through an Opener is never answered
+  run — is posted on the new ticket in step 3. An in-place ticket (`track-scan.md`, step 4) is filed, in an
+  autonomous run too. The question of a proposal through an Opener is never answered
   by the recommendation: its ticket waits for a human's yes (`tooling-model.md`, *An Opener*).
 - A proposal neither filed nor declined is not stored anywhere. Say so before the answer is taken: its
   Stage counts as done from now on, until a scan the call asks for or Housekeeping's re-check offers it
@@ -56,7 +57,8 @@ In the order handed in, so that a ticket's blockers exist before it does:
   one of them is enough.
 - **Marks** — the **Candidate** mark, where the target has that operation.
 
-Create each ticket the way the tracker file says, report it by itself, and add it to the worklist. A
+Create each ticket the way the tracker file says, report it by itself, and add it to the worklist. An in-place
+ticket is closed as done right after it is created, with no note: its text says it all. A
 ticket filed with a question still open gets it as its first comment, an open question
 (`design-point.md`, *Open questions*); the ticket is waiting until someone answers.
 

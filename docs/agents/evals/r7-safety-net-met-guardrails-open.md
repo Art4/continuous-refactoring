@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
 
 ## Situation
 
@@ -36,8 +36,10 @@ was installed, and the first Safety Net scan found it in place.
 - [ ] The run does not end on the Safety Net; no "Safety Net is waiting for merges" or "Safety Net is unfinished".
 - [ ] Track choice recommends Guardrails, and selection picks #53, not #51.
 - [ ] Variant A: Safety Net has a trace, and no Safety Net scan runs.
-- [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, files nothing, and
-      the run goes on to Guardrails within the same run.
+- [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, and proposes no
+      ticket to work for it.
+- [ ] Variant B: filing creates one ticket for Rector type coverage and closes it at once as done, its text naming
+      what was found in place; the run goes on to Guardrails within the same run.
 
 ## Results
 
