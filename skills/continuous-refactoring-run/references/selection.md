@@ -5,9 +5,7 @@ Reads the worklist (`worklist.md`), the parser's seedless call for the tree's or
 the Packs and the runtime judged this run (`worklist.md`, *5. Judge what applies*) for what the runtime blocks
 (`tooling-parser.md`).
 
-Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
-conversation as a message of their own, then the question — in an autonomous run, then the recommendation
-taken.
+Decision points here are laid out as `../SKILL.md`, *Decision points*, says.
 
 ## 1. Order the workable tickets
 

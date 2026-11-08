@@ -1,0 +1,1 @@
+The paragraph on how a decision point is laid out, repeated at the top of eleven references, is now a one-line pointer to the run's own rule. Every skill file now has a word budget that the validator checks; growing past it means raising the number on purpose, in review.

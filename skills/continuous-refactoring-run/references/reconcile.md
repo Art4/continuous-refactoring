@@ -7,9 +7,7 @@ Where the call names a ticket, the worklist holds that ticket alone, and so do t
 request and whether its Stage was dropped. Rejections and every other ticket are left to a run whose call
 names none.
 
-Every decision point here is laid out as `../SKILL.md`, *Decision points*, says: the findings go into the
-conversation as a message of their own, then the question — in an autonomous run, then the recommendation
-taken.
+Decision points here are laid out as `../SKILL.md`, *Decision points*, says.
 
 ## 1. Collect the findings
 
