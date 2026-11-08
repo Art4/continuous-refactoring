@@ -73,6 +73,12 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q37 | Three ESLint Stages: adoption with `js.configs.recommended` and bulk suppressions, clearing the suppressions, and a rollout of `no-var`, `prefer-const`, `object-shorthand`; no `ecmaVersion` Stage, its concern is the rollout's browser question |
 | Q38 | The Pack, fixtures and scenarios go in one PR; the field test follows on the maintainer's real target, its row in a small PR of its own; ticket 10 stays open until then |
 | Q39 | A language Pack follows, after `generic`, the Packs of the languages it builds on (`js` and `twig-php` after `php`), through a field in `pack.json`; its name (`after` or `recommends`) is settled in that PR, a small one after the `js` Pack |
+| Q40 | The field test of the `js` Pack runs on the suite's website; the maintainer's session prepares its merge request for the skill links |
+| Q41 | Its second session is interactive: `/continuous-refactoring-run Guardrails, only the ESLint Stages` |
+| Q42 | The maintainer reviews the merge request as any reviewer; the evaluation against the expectation follows once |
+| Q43 | The field for Q39 is named `follows`: `after` was the Stages' old name for `waits_for`, `recommends` was rejected in ADR-0086 |
+| Q44 | `follows` only orders; a Pack it names that does not apply is passed over; an unknown name and a cycle are refused by the parser |
+| Q45 | The rollout's gap for browsers without ES2015 goes in a small PR of its own, not with Q39 |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

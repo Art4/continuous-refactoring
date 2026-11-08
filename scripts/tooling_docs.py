@@ -32,7 +32,7 @@ import tooling_tree  # noqa: E402
 
 # Keys in the order of the schemas; a key the schema does not know keeps its place after these.
 ORDER = {
-    "pack": ["$schema", "pack", "scope", "applies_when", "tools"],
+    "pack": ["$schema", "pack", "scope", "applies_when", "follows", "tools"],
     "tool": ["tool", "name", "uses", "roles", "status", "details", "min_runtime", "stages"],
     "stage": ["slug", "name", "track", "requires", "waits_for", "applies_when"],
     "roles": ["$schema", "roles"],

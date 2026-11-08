@@ -1,5 +1,8 @@
 # The tooling tree becomes Roles, Tools and Stages in Packs
 
+> Amended by [ADR-0097](0097-a-language-pack-follows-the-packs-it-builds-on.md): the Packs are ordered `generic`
+> first, then by name, each after the Packs its `follows` names.
+
 > Amended by [ADR-0096](0096-the-safety-net-gate-answers-only-from-a-judged-state.md): an autonomous run with the
 > Safety Net open ends only once its open tickets account for every Stage left, and names the Safety Net's tickets
 > alone.

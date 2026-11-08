@@ -1,0 +1,1 @@
+A Pack can name the Packs it follows: the JavaScript and Twig Packs come after the PHP Pack, so a PHP application takes its PHP Guardrails before ESLint and Twig, instead of whatever the Pack names' alphabetical order gave.

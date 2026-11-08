@@ -56,6 +56,9 @@ none. Tools compete for a Role only with Tools of their own scope, so a Pack for
 each have a Code Style Tool and neither takes the other's place. A target's own Pack for PHP names the scope
 `php` to stand among the PHP Tools.
 
+**The order of the Packs** is `generic` first, then the others by name, each after the Packs its `follows` names
+(`js` and `twig-php` follow `php`). It changes only the order; nothing waits for the Pack it follows.
+
 Every Tool has:
 
 - `status` — **recommended**: proposed when its Role is empty. **on-request**: counted when it is there,
