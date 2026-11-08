@@ -81,6 +81,8 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q45 | The rollout's gap for browsers without ES2015 goes in a small PR of its own, not with Q39 |
 | Q46 | PHP that only builds or deploys a site counts for the `php` Pack: its `applies_when` stays; a tool not wanted there is rejected |
 | Q47 | Guardrails keep waiting for the whole Safety Net, the PHP one included; a known limitation says to name the Track to lint a frontend sooner. Taken up again if the field shows it more often |
+| Q48 | A PHP file that only configures a tool (a Deployer recipe), with no `composer.json` beside it, makes no PHP project; code of the project's own, a build script included, still does (Q46) |
+| Q49 | A fixture `static-site-deploy-script` and a scenario r11; played with r9 as the counter-check |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

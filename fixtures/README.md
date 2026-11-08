@@ -7,6 +7,7 @@ suite against by hand.
 | Fixture | The project |
 | --- | --- |
 | `non-php-project` | A static site: HTML, CSS, JavaScript. No `composer.json` |
+| `static-site-deploy-script` | A static site whose only PHP file is a Deployer recipe. No `composer.json` |
 | `php-empty` | PHP source files and nothing else: no Composer, no tooling |
 | `php-partial` | Composer, PHPUnit and PHP CS Fixer; no static analysis, no CI |
 | `php-project-with-candidates` | Composer only, with five planted structural problems |
