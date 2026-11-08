@@ -187,3 +187,27 @@ counts as rejected (r3); whether closing an injection is a change of behaviour h
 **From the field test of the JavaScript Pack:** on a site whose `composer.json` serves the build alone, the `php` Pack
 applies and its Safety Net (14 Stages) holds the ESLint Stages back; only a call naming Guardrails reached them.
 Decided in Q46 and Q47: `php` still applies, and the wait stays; a known limitation says how to go sooner.
+
+**From the plays of the JavaScript Pack and the deploy recipe** (r9 four times, r11 once; all pass; none forced a
+wrong decision):
+
+- The browser question has no recommended default, and nothing says whether the adoption waits for the answer or
+  goes on with "current browsers"; the players went on.
+- An answer given on the rollout's ticket reaches the adoption's plan only through the worklist's judging; the
+  design point reads the selected ticket alone. No step says when the rollout's ticket is closed, nor with what
+  reason ("not planned" reads as a rejection, "completed" as fulfilled).
+- Whether `prefer-const` gets a `Not yet: 0` entry or none is open; partial ES2015 support (Internet Explorer 11 has
+  `let` and `const`) is not counted anywhere.
+- The Node.js version is read from a lock file the plan only proposes to write; where in the run Node.js is checked,
+  and what a ticket's state is without it, is not said.
+- `eslint.md` asks for a commit "before the changelog entry" that no reference asks for; whether Composer's
+  `vendor/` is among the ignores, and which config extension to write, is left open.
+- The rollout's *Applies when* lives in prose only; the parser's seed knows "applies" or `not_applicable`, not "not
+  known, ask".
+- `eslint-adoption`'s one search word "ESLint" also finds the two sibling tickets.
+- CI Runner's MR scope does not say what the first job holds where no check applies yet.
+- "Available on request: BC promise" is listed for a static site too.
+- `track-scan.md` does not say outright that the Stages of a Pack that does not apply go unjudged.
+- About the scenarios: "no ticket is open" against Housekeeping set up, which keeps one open (r9, r11); "every Stage
+  has a closed ticket" read literally takes in the on-request ones (r9, r10); the fixtures have no tracker file, so
+  players hand the parser a stand-in.
