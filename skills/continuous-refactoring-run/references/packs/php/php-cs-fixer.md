@@ -27,7 +27,7 @@ The recommended Tool for the Role Code Style in the PHP Pack. Laravel Pint (`pin
 
 - **Purpose:** take in every rule the adoption left `Not yet:`, in merge requests a person can review.
 - **Fulfilment check:** `php-cs-fixer-adoption` is fulfilled, the main config holds no `Not yet:`, and no rollout file exists (*Taking in a rule*), whoever created it.
-- **Its ticket** is "PHP CS Fixer: take in the remaining rules", the shape of a baseline ticket: it stays open across many merge requests, each run plans the next part (`../../planning-a-baseline-ticket.md`), and each merge request delivers a part and carries no closing reference.
+- **Its ticket** is "PHP CS Fixer: take in the remaining rules", a baseline ticket: it stays open across many merge requests, each run plans the next part (`../../planning-a-baseline-ticket.md`), and each merge request delivers a part and carries no closing reference.
 - **A part** is one path step of one rule (*Taking in a rule*). Several tiny rules may share a part.
 - **MR scope** of a part: the rollout file widened by the part's paths, or created for the next rule, and the tool's formatting run, one commit with nothing typed by hand. The last part of a rule deletes the rollout file and the rule's `false` line in the main config instead.
 

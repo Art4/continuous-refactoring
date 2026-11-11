@@ -1,6 +1,7 @@
 # Reference: planning a baseline ticket
 
-The design point's plan for a baseline ticket (`design-point.md`, steps 1 and 2).
+The design point's plan for a baseline ticket (`design-point.md`, steps 1 and 2). A part has no Housekeeping slice:
+the adoption carried it.
 
 "PHPStan Level N: shrink the baseline" stays open until the baseline is empty, and takes one merge
 request after another. Each run plans the next **part**.

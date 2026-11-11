@@ -88,6 +88,10 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q52 | Without ES2015, the adoption's merge request also closes the rollout's ticket, quoting the answer; an answer after the adoption is merged goes to the Housekeeping ticket as a comment (the plays showed the worklist cannot close a ticket) |
 | Q53 | The scenarios' slips (no ticket open beside Housekeeping, closed tickets for on-request Stages, fixtures without a tracker file) are fixed in a PR of their own, with no play |
 | Q54 | The unclear places named once, that forced no wrong decision, stay in the log as left as is |
+| Q55 | The trace is asked beside a workable ticket too, where that ticket has delivered a part already (ticket 11) |
+| Q56 | "Baseline ticket" is widened and gets a glossary entry: a tooling ticket whose remaining work is a recorded list that shrinks (a baseline, a suppressions file, rules marked `Not yet:`) (ticket 12) |
+| Q57 | A part of a baseline ticket has no pin and no Housekeeping slice; `implement-point.md` gives its commits by the kind of list (ticket 12) |
+| Q58 | The search test for markers in HTML comments runs on one issue per forge, closed at once (marker ticket) |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

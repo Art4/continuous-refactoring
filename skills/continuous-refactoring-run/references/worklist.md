@@ -69,7 +69,7 @@ Every later step of this run takes them as they are: the trace below, the seed f
 A Stage is **known** once the tracker shows it was dealt with before: a ticket of it in any state, or a
 recorded rejection of it, of its Tool or of its Role (`rejection.md`, *Finding rejections*). A tooling
 Track has a **trace** when every Stage of it that applies is known. Asked only of a Track with no workable
-ticket: one in review, blocked or waiting does not hold it back, so a Stage nobody filed yet is found while
+ticket, a workable one that has delivered a part already aside: one in review, blocked or waiting does not hold it back either, so a Stage nobody filed yet is found while
 that ticket waits. Asked over the Stages of the Track's `nodes` whose Pack applies (step 5), without those step 5 found
 not applicable and without those marked
 `on_request`, except the first Stage of a Tool whose Opener was found and not used up: a Stage nobody asked for is never

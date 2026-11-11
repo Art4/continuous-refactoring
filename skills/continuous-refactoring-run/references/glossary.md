@@ -110,8 +110,12 @@ _Avoid_: checklist file
 The recurring task a **tooling tree** Tool contributes to the **Housekeeping template**: its **Housekeeping** field, reworded for the template's reader. It arrives through the Stage's own merge request; for a tool set up by hand, a Housekeeping run adds it.
 _Avoid_: checklist line
 
+**Baseline ticket**:
+A tooling **ticket** whose remaining work is a recorded list that shrinks with every merge request: a PHPStan level's baseline, ESLint's suppressions file, the rules a config marks `Not yet:` (PHPMD, PHP CS Fixer, ESLint). It stays open across many merge requests, each a **part**, and is fulfilled when the list is empty. Planned as `planning-a-baseline-ticket.md` says; a part has no pin and no Housekeeping slice.
+_Avoid_: rollout ticket, long-running ticket
+
 **Part**:
-What one merge request delivers of a **ticket** that takes several: one group of a PHPStan baseline's entries, or a Housekeeping setup without its first cycle. Its merge request names the ticket without a closing reference and says what stays; the ticket stays open and is worked again.
+What one merge request delivers of a **ticket** that takes several: one group of a **baseline ticket**'s list, or a Housekeeping setup without its first cycle. Its merge request names the ticket without a closing reference and says what stays; the ticket stays open and is worked again.
 _Avoid_: partial fix, chunk
 
 **Housekeeping** (recurring maintenance):
