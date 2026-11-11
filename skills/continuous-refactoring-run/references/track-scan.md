@@ -35,13 +35,15 @@ recognized Tool's to say whether it fills a Role.
   the target's manifest allows, as the seed's `runtime` (`tooling-parser.md`). Where it is unclear, none is
   handed in and nothing is blocked.
 - **Every other Stage in scope** whose Pack applies — judged, below. A Stage whose own *Applies when* does
-  not hold goes into `not_applicable`.
+  not hold goes into `not_applicable`. A scan that is due because a Stage is not known searches each Stage's `search` words, as the
+  trace does without stopping, and judges only the Stages not known; a known one goes into the seed as the seed from the trace takes it (`tooling-parser.md`). A scan the call
+  asks for, and the Housekeeping re-check, judge them all.
 
 Where this run's worklist judged the Packs, the runtime and the Stages' own *Applies when* (`worklist.md`,
 *5. Judge what applies*), take them from there instead of judging again.
 - **The other tooling Track's Stages.** In a Safety Net scan they stay undecided. In a Guardrails scan the
   Safety Net decides what blocks a Guardrails Stage: one with an open ticket stays undecided, every other
-  is judged unless this run already judged it.
+  is judged unless this run already judged it or, in a scan that is due, it is known.
 
 Judging may run in a subagent handed this section and the Packs; it returns the seed and, per Stage
 judged fulfilled under another name than its Tool, the evidence in one line.
@@ -133,4 +135,4 @@ Either way the report ends with one line naming the Track's on-request Tools tha
 nor in place nor proposed through an Opener, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis,
 Secret Detection — name one in the call to set it up." Nothing is filed for them.
 
-The scan is done when every Stage in scope is fulfilled, rejected, proposed, or named as out of reach.
+The scan is done when every Stage in scope is fulfilled, rejected, proposed, has an open ticket, or is named as out of reach.

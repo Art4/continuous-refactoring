@@ -211,3 +211,7 @@ wrong decision):
 - About the scenarios: "no ticket is open" against Housekeeping set up, which keeps one open (r9, r11); "every Stage
   has a closed ticket" read literally takes in the on-request ones (r9, r10); the fixtures have no tracker file, so
   players hand the parser a stand-in.
+
+**Sorted on 2026-11-11** (Q50–Q54): the scan's judging of known Stages (Q50), filing's sibling hits (Q51) and the
+closing of the rollout's ticket (Q52) are fixed; the scenarios' own slips get a PR of their own (Q53). Everything
+else above, named once and forcing no wrong decision, is left as is (Q54) and becomes a ticket if it comes back.
