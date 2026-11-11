@@ -38,3 +38,12 @@ the acute case with the Name: filing keeps only hits that match the Stage as the
 ticket with and one without a marker; a changelog fragment.
 
 **Done when** the search test is recorded, the decisions are in an ADR, and the scenarios pass.
+
+## Comments
+
+**2026-11-11 — Search test on GitHub** (Q58). A test issue held a visible control word and, only inside an HTML
+comment, `<!-- continuous-refactoring:stage:zqhiddenmarker7731 -->`. Once the issue was indexed (within a minute),
+`gh issue list --state all --search` found it by the hidden word alone, by the marker as a quoted phrase, and by its
+words unquoted. It did not find it by a prefix of the word (`zqhiddenmarker`), nor by the phrase with another kind
+(`continuous-refactoring:tool:zqhiddenmarker7731`): words match whole, and a quoted phrase keeps their order. So on
+GitHub point 1 holds, and point 4 holds for whole slugs. The issue was closed as not planned. GitLab is still to test.
