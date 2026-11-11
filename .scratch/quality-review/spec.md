@@ -83,6 +83,11 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q47 | Guardrails keep waiting for the whole Safety Net, the PHP one included; a known limitation says to name the Track to lint a frontend sooner. Taken up again if the field shows it more often |
 | Q48 | A PHP file that only configures a tool (a Deployer recipe), with no `composer.json` beside it, makes no PHP project; code of the project's own, a build script included, still does (Q46) |
 | Q49 | A fixture `static-site-deploy-script` and a scenario r11; played with r9 as the counter-check |
+| Q50 | A scan that is due because a Stage is not known judges only the Stages not known; known ones go into the seed as the seed from the trace takes them. A scan the call asks for, and the Housekeeping re-check, judge all |
+| Q51 | Filing's search keeps only hits that match the Stage as the worklist's rule says, so a sibling's ticket is no hit. Unique markers in ticket text are weighed separately |
+| Q52 | Without ES2015, the run whose worklist reads the answer closes the rollout's ticket, quoting it; where the adoption wrote `Not yet:` entries, the ticket removes them first |
+| Q53 | The scenarios' slips (no ticket open beside Housekeeping, closed tickets for on-request Stages, fixtures without a tracker file) are fixed in a PR of their own, with no play |
+| Q54 | The unclear places named once, that forced no wrong decision, stay in the log as left as is |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands

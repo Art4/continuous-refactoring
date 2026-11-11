@@ -9,8 +9,9 @@ Decision points here are laid out as `../SKILL.md`, *Decision points*, says.
 ## 1. Search first
 
 For every proposal, run **Search** over open and closed tickets with the Stage's `search` words — for a
-proposal without a Stage, with the words that name its subject. Keep every hit that is about the subject,
-and settle on one:
+proposal without a Stage, with the words that name its subject. Keep every hit that is about the subject
+— for a Stage, one that matches it as `worklist.md`, *1. Find the open tickets*, says, so a sibling's ticket
+("ESLint: clear the suppressions" for "ESLint") is no hit — and settle on one:
 
 | The hits | The proposal |
 | --- | --- |

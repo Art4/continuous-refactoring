@@ -62,8 +62,8 @@ lands on code whose old findings are still suppressed.
   have it, or where the code already uses that syntax. Where none of this is known, the proposal carries the question
   which browsers the code must run in. Current browsers only → `ecmaVersion` stays at ESLint's default. Browsers
   without ES2015 → the Stage does not apply: the config sets `languageOptions.ecmaVersion` to `5` and holds no
-  `Not yet:` entry. The adoption then leaves them out, and the rollout's ticket is closed with the answer; where the
-  adoption wrote them already, that ticket first removes them in one merge request.
+  `Not yet:` entry. Where the adoption wrote them, the rollout's ticket removes them in one merge request;
+  otherwise the run whose worklist reads the answer closes that ticket, quoting it.
 - **Fulfilment check:** `eslint-adoption` is fulfilled, the config holds no rule marked `Not yet:`, and no rollout file
   exists.
 - **The rules** a fresh adoption marks `Not yet:` with their count: `no-var`, `prefer-const`, `object-shorthand`,

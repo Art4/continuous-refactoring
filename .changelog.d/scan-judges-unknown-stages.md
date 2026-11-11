@@ -1,0 +1,1 @@
+A scan that runs because a tool was never dealt with now judges only such tools, and takes the rest from the tickets; a scan you ask for still judges them all. Filing no longer mistakes a sibling's ticket ("ESLint: clear the suppressions") for the one it is about to file.
