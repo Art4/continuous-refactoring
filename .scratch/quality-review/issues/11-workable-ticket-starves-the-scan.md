@@ -1,7 +1,7 @@
 # 11 — A workable ticket keeps the rest of a tooling Track from being filed
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r8 B on 2026-11-08, r7 and r8 on 2026-11-11; named three times, so a ticket under Q54).
@@ -20,3 +20,7 @@ floor, …) from ever being proposed, and nothing tells the human.
 
 **Done when** the rule is decided, written in `worklist.md` (and `track-scan.md` where it moves), r8 B and r7 play it,
 and tests and validator are green.
+
+## Comments
+
+**2026-11-11 — Done** (Q55–Q57). r7 and r8 pass at 6011078.
