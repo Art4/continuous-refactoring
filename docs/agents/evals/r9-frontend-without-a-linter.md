@@ -11,15 +11,15 @@ JavaScript under `public/js/`, loaded by `<script>` tags in `templates/cart.php`
 under `public/js/lib/`. No `package.json`, no build step, no `browserslist`; its tracker file has no **BC promise**
 operation. Housekeeping is set up, and its ticket is not due. No Tooling Pack of its own.
 
-Every Stage of the generic and the PHP Pack, Safety Net and Guardrails, except `roave-bc-check`, has a closed ticket
-whose merge request was merged, and what they set up runs in CI. No rejection is recorded, no ticket is open, and no
+Every Stage of the generic and the PHP Pack, Safety Net and Guardrails, that is not on request, except `roave-bc-check`, has a closed ticket
+whose merge request was merged, and what they set up runs in CI. No rejection is recorded, no ticket but the Housekeeping ticket is open, and no
 ticket, plan or pull request carries an `Opener:` line.
 
 **Variant A.** No ESLint ticket exists.
 
 **Variant B.** A run before filed the three ESLint tickets, all open, none in review: the adoption's, the
 suppressions' blocked by it, and the rollout's blocked by both. The rollout's ticket carries the browser question,
-and the maintainer answered under it: the shop must still run in Internet Explorer 11. No other ticket is open.
+and the maintainer answered under it: the shop must still run in Internet Explorer 11. No other ticket but the Housekeeping ticket is open.
 
 ## Call
 
