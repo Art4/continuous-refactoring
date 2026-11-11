@@ -38,7 +38,7 @@ fulfilled from the parser (`tooling-parser.md`, *Is Safety Net fulfilled?*); the
   requests, those blocked with what blocks them, those waiting with what they wait for. A human may choose
   another Track instead.
 
-The answer read from this run's scan needs no such check: the scan judged every Stage, and a proposal declined
+The answer read from this run's scan needs no such check: the scan accounted for every Stage, judged or known, and a proposal declined
 at filing is a rejection.
 
 No Track has anything → the run ends: nothing is workable.

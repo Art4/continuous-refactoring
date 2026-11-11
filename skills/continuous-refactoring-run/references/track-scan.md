@@ -35,8 +35,8 @@ recognized Tool's to say whether it fills a Role.
   the target's manifest allows, as the seed's `runtime` (`tooling-parser.md`). Where it is unclear, none is
   handed in and nothing is blocked.
 - **Every other Stage in scope** whose Pack applies — judged, below. A Stage whose own *Applies when* does
-  not hold goes into `not_applicable`. A scan that is due because a Stage is not known judges only the Stages not
-  known; a known one goes into the seed as the seed from the trace takes it (`tooling-parser.md`). A scan the call
+  not hold goes into `not_applicable`. A scan that is due because a Stage is not known searches each Stage's `search` words, as the
+  trace does without stopping, and judges only the Stages not known; a known one goes into the seed as the seed from the trace takes it (`tooling-parser.md`). A scan the call
   asks for, and the Housekeeping re-check, judge them all.
 
 Where this run's worklist judged the Packs, the runtime and the Stages' own *Applies when* (`worklist.md`,

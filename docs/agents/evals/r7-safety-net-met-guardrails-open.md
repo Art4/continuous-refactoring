@@ -62,3 +62,4 @@ every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, both variants, as a walk-through, by one player.
 
 2026-11-08, on c11f6d4 with the in-place ticket for a tool a scan finds with no ticket: pass, every line, both variants, as a walk-through, by one player. The hand-on line for in-place tickets alone was then written out (back to Track choice, the Track marked as tried), wording only.
+2026-11-11, on f053957 with a due scan judging only the Stages not known and filing keeping a sibling's ticket out of its hits: pass, every line, both variants, as a walk-through, by one player. Then the text said that such a scan searches every Stage, and that the adoption's merge request closes the rollout's ticket where the code must run without ES2015.

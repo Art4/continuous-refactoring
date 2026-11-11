@@ -80,7 +80,7 @@ backlog.
 ## Is Safety Net fulfilled?
 
 The answer is `safety_net_fulfilled`. Within one run a Stage is judged once, and the result is reused.
-Where this run's Safety Net scan judged the whole Track, read the answer from that call. Otherwise the
+Where this run's Safety Net scan accounted for the whole Track, read the answer from that call. Otherwise the
 Track has a trace (`worklist.md`, *A Track's trace*): read the answer from a call with the seed from the
 trace.
 
