@@ -92,6 +92,17 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q56 | "Baseline ticket" is widened and gets a glossary entry: a tooling ticket whose remaining work is a recorded list that shrinks (a baseline, a suppressions file, rules marked `Not yet:`) (ticket 12) |
 | Q57 | A part of a baseline ticket has no pin and no Housekeeping slice; `implement-point.md` gives its commits by the kind of list (ticket 12) |
 | Q58 | The search test for markers in HTML comments runs on one issue per forge, closed at once (marker ticket) |
+| Q59 | A baseline ticket with no plan that stands goes on to *Who plans* and then steps 3 to 5; `planning-a-baseline-ticket.md` names steps 1 and 3 (ticket 13) |
+| Q60 | Interactive, *Who plans* recommends the suite's own planning for a baseline ticket; a target's skill found stays an option, and is handed no rule for cutting a part (ticket 13) |
+| Q61 | Autonomous, the suite plans unless the call names a skill; the probe p1 showed this works today through the call's rule, so no row is added and step 3's sentence on an autonomous run stays (ticket 13) |
+| Q62 | Reconcile's "In review" line, a review asking for changes and a base update included, is information, never a finding; step 2's sentence names it (ticket 14) |
+| Q63 | A scan files a chain at most two levels deep, counted over the whole tracker: level 1 has nothing unfulfilled blocking it, level n is blocked by level n−1 at its deepest, open tickets counted at their own level (ticket 15) |
+| Q64 | The parser computes the levels and returns `beyond_horizon` per Track, each Stage with what holds it back (ticket 15) |
+| Q65 | A Stage beyond the horizon is accounted for in the trace; the scan is not due for it (ticket 15) |
+| Q66 | The horizon is a fixed 2, no setting; a new ADR amends ADR-0073 (ticket 15) |
+| Q67 | The scan report names the Stages held back in one line, chains summed up: "Later, once what blocks them is filed: …" (ticket 15) |
+| Q68 | A call that names a Stage beyond the horizon files it, with the blockers between it and the horizon that have no ticket (ticket 15) |
+| Q69 | A rollout Stage is always titled "<Tool>: take in the remaining rules", also when filed before its adoption (ticket 15) |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
