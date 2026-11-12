@@ -20,3 +20,8 @@ the tickets in the sentence of step 2.
 
 **Done when** `reconcile.md` says it in its own text, the scenarios that cover reconcile pass, and tests and
 validator are green.
+
+## Comments
+
+**2026-11-12 — Decided** (Q62). The "In review" line, a review asking for changes and a base update included, is
+information, never a finding; step 2's sentence for no finding names it.

@@ -223,3 +223,11 @@ finding (ticket 14); a scan files whole chains at once, with the title of a roll
 (ticket 15). Named once and left as is: a single-part rule
 creates no rollout file, "nothing typed by hand" beside a config change, CI for a new rollout file, the Status count
 of a pull request the run did not touch.
+
+**Probe p1 on 2026-11-12** (r7's situation, a call naming the target's planning skill, autonomous and interactive;
+player 93k, judge 47k; pass): the run let the named skill plan in both modes, reading the call as the human's answer
+to *Who plans*, against step 2's literal "plans by itself" and "a decision point, every time". Named once, left as is
+(Q61). Also named once: a target skill's plan may lack the `Plan` line; who adds `Opener:` lines to it; step 5's choice
+is skipped when the target's skill posts the plan; Track choice's five options against a question tool that takes four;
+the Stage Name "PHP CS Fixer Rollout" against its ticket title; `selection.md`'s pick-up check worded for PHPStan's
+baseline alone.

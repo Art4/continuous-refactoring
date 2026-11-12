@@ -20,3 +20,12 @@ went 1 → 2 → 3 → 4 → 5, which is presumably meant; no wrong decision was
 
 **Done when** the route reads one way in both files, the scenarios that cover them (r7, r8) pass, and tests and
 validator are green.
+
+## Comments
+
+**2026-11-12 — Decided** (Q59–Q61). A baseline ticket with no plan that stands goes on to *Who plans*, then steps 3
+to 5; `planning-a-baseline-ticket.md` names steps 1 and 3. Interactive, *Who plans* recommends the suite's own
+planning for a baseline ticket, a target's skill found staying an option; a target's skill gets no rule for cutting
+a part. Autonomous, the suite plans unless the call names a skill: probe p1 (both modes, 93k player, 47k judge,
+pass) showed that a call naming the skill already works through `SKILL.md`'s rule that the call answers a choice,
+so no row is added, and step 3's sentence on an autonomous run stays.

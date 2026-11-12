@@ -22,3 +22,11 @@ player improvised one.
 
 **Done when** the scan's text says which members of a chain it files, the title rule covers what is filed, the
 scenarios that cover the scan (r8 among them) pass, and tests and validator are green.
+
+## Comments
+
+**2026-11-12 — Decided** (Q63–Q69). A scan files a chain at most two levels deep, counted over the whole tracker
+(open tickets at their own level). The parser computes the levels and returns `beyond_horizon` per Track; a Stage
+beyond it is accounted for in the trace. The horizon is a fixed 2, with a new ADR amending ADR-0073. The scan report
+names the held-back Stages in one line; a call naming such a Stage files it with the blockers between. A rollout
+Stage is always titled "<Tool>: take in the remaining rules".
