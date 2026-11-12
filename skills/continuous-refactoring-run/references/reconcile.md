@@ -34,11 +34,12 @@ aggregation steps) needs nothing.
 
 **In review.** The tickets whose merge request is still open are named in one line, with their merge
 requests; nothing follows for them. One whose review asks for changes is named as such; it is worked when the call names
-it. One that needs a base update is named as such; Track choice takes it first.
+it. One that needs a base update is named as such; Track choice takes it first. The line is information, never a
+finding: it goes into step 2's sentence, or beside its decision point.
 
 ## 2. Lay them out
 
-No finding → say so in one sentence and go on; this is no decision point.
+No finding → say so in one sentence, with the *In review* line, and go on; this is no decision point.
 
 Otherwise one decision point for all of them: each finding with what follows. Options: **do all as
 recommended** (the recommendation), **decide one by one**, **leave everything as it is**.
