@@ -631,6 +631,89 @@ class RolesAndToolsTests(unittest.TestCase):
         self.assertEqual(m.compute({"rejected": {"b1": None}})["tracks"]["Safety Net"]["backlog"], [])
 
 
+class HorizonTests(unittest.TestCase):
+    """A Stage more than two levels of unfulfilled blockers deep is beyond the horizon: no ticket is filed for it yet."""
+
+    def beyond(self, model, seed=None, track="Safety Net"):
+        return model.compute(seed)["tracks"][track]["beyond_horizon"]
+
+    def straight(self):
+        return Model([pack("m", [
+            tool("s", [stage("s1"), stage("s2", requires=["s1"]), stage("s3", requires=["s2"]), stage("s4", requires=["s3"])]),
+        ])])
+
+    def test_a_chain_is_cut_after_two_levels(self):
+        self.assertEqual(self.beyond(self.straight()), [
+            {"node": "s3", "level": 3, "behind": "s2"},
+            {"node": "s4", "level": 4, "behind": "s3"},
+        ])
+
+    def test_a_fulfilled_stage_moves_the_horizon(self):
+        self.assertEqual(self.beyond(self.straight(), {"fulfilled": ["s1"]}), [{"node": "s4", "level": 3, "behind": "s3"}])
+        self.assertEqual(self.beyond(self.straight(), {"fulfilled": ["s1", "s2"]}), [])
+
+    def test_the_backlog_still_holds_what_lies_beyond(self):
+        out = self.straight().compute()
+        self.assertEqual(out["tracks"]["Safety Net"]["backlog"], ["s1", "s2", "s3", "s4"])
+        self.assertFalse(out["tracks"]["Safety Net"]["fulfilled"])
+
+    def test_waits_for_counts_as_a_level(self):
+        m = Model([pack("m", [
+            tool("a", [stage("a1")], roles=["alpha"]),
+            tool("b", [stage("b1", waits_for=["a1"])], roles=["beta"]),
+            tool("c", [stage("c1", waits_for=["b1"])], roles=["gamma"]),
+        ])])
+        self.assertEqual(self.beyond(m), [{"node": "c1", "level": 3, "behind": "b1"}])
+        self.assertEqual(self.beyond(m, {"rejected": {"a1": None}}), [])
+
+    def test_an_any_of_group_counts_its_nearest_member(self):
+        m = Model([pack("m", [
+            tool("p", [stage("p1"), stage("p2", requires=["p1"])], roles=["alpha"]),
+            tool("q", [stage("q1")], roles=["beta"]),
+            tool("x", [stage("x1", requires=[["p2", "q1"]]), stage("x2", requires=["x1"])], roles=["gamma"]),
+        ])])
+        self.assertEqual(self.beyond(m), [{"node": "x2", "level": 3, "behind": "x1"}])
+
+    def test_a_required_role_counts_through_the_first_stage_of_a_tool_that_can_fill_it(self):
+        m = Model([pack("m", [
+            tool("p", [stage("p1"), stage("p2", requires=["p1"])], roles=["alpha"]),
+            tool("q", [stage("q1")], roles=["alpha"], status="recognized"),
+            tool("r", [stage("r1", requires=["alpha"]), stage("r2", requires=["r1"])], roles=["beta"]),
+        ])])
+        self.assertEqual(self.beyond(m), [{"node": "r2", "level": 3, "behind": "r1"}])
+        self.assertEqual(self.beyond(m, {"fulfilled": ["q1"]}), [])
+
+    def test_levels_are_counted_across_tracks(self):
+        m = Model([pack("m", [
+            tool("s", [stage("s1"), stage("s2", requires=["s1"])], roles=["alpha"]),
+            tool("g", [stage("g1", track="Guardrails", requires=["s2"])], roles=["beta"]),
+        ])])
+        self.assertEqual(self.beyond(m, track="Guardrails"), [{"node": "g1", "level": 3, "behind": "s2"}])
+
+    def test_without_a_seed_nothing_is_beyond(self):
+        model = self.straight().load()
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            out = tp.compute(repo, model)
+        self.assertNotIn("beyond_horizon", out["tracks"]["Safety Net"])
+
+    def test_the_suites_phpstan_levels_stop_two_levels_ahead(self):
+        model = tp.load_model()
+        safety_net = [s for s in model["stage_order"] if model["stages"][s]["track"] == "Safety Net"]
+        levels = [f"phpstan-level-{n}" for n in range(0, 6)]
+        repo_tmp, repo = make_repo()
+        with repo_tmp:
+            out = tp.compute(repo, model, {
+                "fulfilled": sorted(set(safety_net) | set(levels)), "rejected": {}, "packs": ["generic", "php"],
+                "not_applicable": [], "requested": [], "runtime": {"php": "8.2"},
+            })
+        beyond = {b["node"]: b for b in out["tracks"]["Guardrails"]["beyond_horizon"]}
+        self.assertNotIn("phpstan-level-6", beyond)
+        self.assertNotIn("phpstan-level-7", beyond)
+        self.assertEqual(beyond["phpstan-level-8"], {"node": "phpstan-level-8", "level": 3, "behind": "phpstan-level-7"})
+        self.assertIn("phpstan-level-10", beyond)
+
+
 class OnRequestTests(unittest.TestCase):
     def model(self):
         """Role alpha: tool p (recommended) or tool o (on request). Guardrails: tool m on request, which

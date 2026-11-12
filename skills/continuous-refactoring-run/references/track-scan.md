@@ -2,7 +2,7 @@
 
 The scan of Safety Net or Guardrails: judge the Track's Stages against the target, let the parser order
 them, and turn every Stage that is neither fulfilled nor closed by a rejection into a **proposal** for a
-ticket. It runs when a Stage of the Track is not known yet (`worklist.md`, *A Track's trace*), when the
+ticket, up to two levels of blockers deep: what lies **beyond the horizon** waits for a later scan. It runs when a Stage of the Track is not known yet (`worklist.md`, *A Track's trace*), when the
 call asked for it, or as the Housekeeping task that re-checks the tooling Tracks. The scan reads; its
 proposals reach the tracker through the filing step.
 
@@ -82,6 +82,7 @@ proposal — its Name, its Purpose in one line, and what blocks it — unless on
 | The Stage | Instead |
 | --- | --- |
 | already has an open ticket | no proposal; the ticket stands |
+| is in the Track's `beyond_horizon`, and the call names neither it nor a Stage behind it | no proposal; named in the report's *Later* line |
 | is in `runtime_blocked` and not rejected | the proposal is to record a rejection with that runtime version as its blocker (`rejection.md`, *Below the runtime floor*) |
 | is in `withheld` as closed by a rejection | out of reach: no ticket could unblock it. Named in one line with what it hangs on, no proposal |
 | is proposed through an Opener | the proposal carries the open question "Set up <Tool>?" — or the fuller one its Tool file's *Opener* names —, the default the suite recommends being to set it up, and the Opener: its line and a link to the comment that wrote it, a `Plan` or an open question |
@@ -108,14 +109,9 @@ a baseline ticket is whether the baseline still has entries.
 got there. Its proposal is titled "PHPMD: replace the baseline"; the merge request is one, not a series
 (`packs/php/phpmd.md`, *MR scope*).
 
-**A PHPMD with rules not taken in yet.** The Stage `phpmd-rollout` is not fulfilled while the config holds
-an `<exclude>` commented `Not yet:` or a rollout ruleset exists. Its proposal is titled "PHPMD: take in the
-remaining rules"; the check of that ticket is whether either is left (`packs/php/phpmd.md`).
-
-**A PHP CS Fixer with rules not taken in yet.** The Stage `php-cs-fixer-rollout` is not fulfilled while the
-main config switches a rule off with `Not yet:` or a rollout file exists. Its proposal is titled "PHP CS
-Fixer: take in the remaining rules"; the check of that ticket is whether either is left
-(`packs/php/php-cs-fixer.md`).
+**A rollout Stage** (PHPMD, PHP CS Fixer, ESLint) is not fulfilled while its config marks a rule `Not yet:` or a
+rollout file or ruleset exists; the check of its ticket is whether either is left. Its proposal is titled as its
+Tool file names the ticket, "<Tool>: take in the remaining rules", also when proposed before the adoption.
 
 **Which Tool fills a Role.** The report says, per Role the Track's Stages need, which Tool fills it, and
 which Tool is not proposed because another took its place (`tools` marks it `out`).
@@ -135,4 +131,8 @@ Either way the report ends with one line naming the Track's on-request Tools tha
 nor in place nor proposed through an Opener, and how to ask for one: "Available on request: Semgrep (OWASP Top 10), Psalm Taint Analysis,
 Secret Detection — name one in the call to set it up." Nothing is filed for them.
 
-The scan is done when every Stage in scope is fulfilled, rejected, proposed, has an open ticket, or is named as out of reach.
+A line before it names the Stages beyond the horizon, chains summed up, each with the Stage it is `behind`: "Later,
+once the Stages before them are done: PHPStan Level 8 to 10 (behind Level 7) — name one in the call to file it now."
+A call that names one files it, with each Stage between it and the horizon that has no ticket.
+
+The scan is done when every Stage in scope is fulfilled, rejected, proposed, has an open ticket, or is named as out of reach or beyond the horizon.

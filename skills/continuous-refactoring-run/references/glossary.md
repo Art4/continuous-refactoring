@@ -114,6 +114,10 @@ _Avoid_: checklist line
 A tooling **ticket** whose remaining work is a recorded list that shrinks with every merge request: a PHPStan level's baseline, ESLint's suppressions file, the rules a config marks `Not yet:` (PHPMD, PHP CS Fixer, ESLint). It stays open across many merge requests, each a **part**, and is fulfilled when the list is empty. Planned as `planning-a-baseline-ticket.md` says; a part has no pin and no Housekeeping slice.
 _Avoid_: rollout ticket, long-running ticket
 
+**Horizon**:
+How deep a scan files: two levels of unfulfilled blockers. A Stage with none is on level 1, every other one deeper than its deepest blocker; a Stage deeper than two is **beyond the horizon**, gets no ticket yet, and is named in the scan report's *Later* line. The parser returns it as `beyond_horizon`; the trace counts such a Stage as accounted for.
+_Avoid_: cap, lookahead
+
 **Part**:
 What one merge request delivers of a **ticket** that takes several: one group of a **baseline ticket**'s list, or a Housekeeping setup without its first cycle. Its merge request names the ticket without a closing reference and says what stays; the ticket stays open and is worked again.
 _Avoid_: partial fix, chunk

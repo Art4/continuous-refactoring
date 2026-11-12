@@ -3,6 +3,9 @@
 > Amended by [ADR-0094](0094-the-suite-updates-the-base-of-its-own-merge-requests.md): the suite brings its own
 > blocked merge requests onto the default branch; only a conflict that needs a decision is the developer's.
 >
+> Amended by [ADR-0098](0098-a-scan-files-two-levels-of-a-chain.md): a scan files a chain of blocked Stages only two
+> levels deep.
+>
 > Supersedes [ADR-0063](0063-loop-creates-tickets-and-ticket-create-mode.md),
 > [ADR-0059](0059-cadence-carries-a-unit.md),
 > [ADR-0070](0070-no-bootstrap-exception-in-track-selection.md), and
