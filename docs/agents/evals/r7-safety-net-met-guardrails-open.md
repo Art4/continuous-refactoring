@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
 
 ## Situation
 
@@ -36,6 +36,8 @@ was installed, and the first Safety Net scan found it in place.
       fulfilled.
 - [ ] The run does not end on the Safety Net; no "Safety Net is waiting for merges" or "Safety Net is unfinished".
 - [ ] Track choice recommends Guardrails, and selection picks #53, not #51.
+- [ ] Variant A: the design point finds no plan on #53 that stands and goes on to *Who plans*, which says in one
+      sentence that the suite plans, as the run is autonomous; the plan follows `planning-a-baseline-ticket.md`.
 - [ ] Variant A: Safety Net has a trace, and no Safety Net scan runs.
 - [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, and proposes no
       ticket to work for it.
@@ -66,3 +68,4 @@ every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 2026-11-11, on f053957 with a due scan judging only the Stages not known and filing keeping a sibling's ticket out of its hits: pass, every line, both variants, as a walk-through, by one player. Then the text said that such a scan searches every Stage, and that the adoption's merge request closes the rollout's ticket where the code must run without ES2015.
 2026-11-11, on 6011078 with the trace asked beside a ticket that has delivered a part, and the baseline ticket defined: pass, every line, both variants, as a walk-through, by one player. Then the trace's sentence was split for reading, and its search keeps only hits that match the Stage.
 2026-11-12, on 882656b with reconcile's In review line as information, never a finding: variant A passes, every line, as a walk-through, by one player.
+2026-11-12, on 14d424b with a baseline ticket with no plan that stands going on to *Who plans*: variant A passes, every line, as a walk-through, by one player. The interactive recommendation was played as a probe beside it (p1 B: pass).

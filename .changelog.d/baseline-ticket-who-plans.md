@@ -1,0 +1,1 @@
+A ticket worked in parts, such as shrinking a baseline, now goes through the question of who plans like any other ticket. When you are asked, the suite recommends its own planning for it, since it knows how a part is cut; a planning skill of your project stays an option, and a call that names one is followed.

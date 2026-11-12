@@ -30,3 +30,9 @@ scenarios that cover the scan (r8 among them) pass, and tests and validator are 
 beyond it is accounted for in the trace. The horizon is a fixed 2, with a new ADR amending ADR-0073. The scan report
 names the held-back Stages in one line; a call naming such a Stage files it with the blockers between. A rollout
 Stage is always titled "<Tool>: take in the remaining rules".
+
+**2026-11-12 — Also named** (p1 on 2026-11-12, r7 A on 2026-11-12; twice). A rollout ticket titled after its Stage
+Name ("PHP CS Fixer rollout") does not match the title `planning-a-baseline-ticket.md` keys its paragraph to ("PHP CS
+Fixer: take in the remaining rules"); `selection.md`'s pick-up check is worded for PHPStan's baseline alone. With Q69
+the suite's own titles agree, but a ticket filed before, or by a human, still carries the other one. To build with
+Q69: the planning reference and the pick-up check find their paragraph by the ticket's Stage, not by its title.

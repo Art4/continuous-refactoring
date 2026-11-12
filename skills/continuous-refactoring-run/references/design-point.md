@@ -17,7 +17,7 @@ Read its text and all its comments, oldest first. The first row that applies:
 | arrived with its merge request and the review's comments | the plan it carries stands → the implement point |
 | is waiting on an open question (*Open questions*, below) | interactive: put the question to the human here, and treat the reply as *An answer arrived*. Autonomous, or unanswered: the run ends with the question named |
 | has an answer after its open question (*Open questions*) | *Open questions*, *An answer arrived* |
-| is a baseline ticket | `planning-a-baseline-ticket.md` decides whether its newest plan still stands |
+| is a baseline ticket | `planning-a-baseline-ticket.md` decides whether its newest plan still stands: it stands → the implement point; else step 2 |
 | carries a plan, and no newer comment asks for a change to it | the plan stands → the implement point |
 | anything else | step 2 |
 
@@ -36,7 +36,7 @@ turns a piece of work into a plan or a specified ticket.
 - **Autonomous** → the suite plans by itself. Say so in one sentence; this is no decision point.
 - **Interactive** → a decision point, every time. Findings: each fitting skill with its description in a
   few words, the `AGENTS.md` sentence, or that neither exists. Options: each of them; the suite's own
-  planning; **the human plans in a session of their own**. Recommendation: what `AGENTS.md` names; else
+  planning; **the human plans in a session of their own**. Recommendation: for a baseline ticket, the suite's own planning, which knows how a part is cut; else what `AGENTS.md` names; else
   the fitting skill installed in the target itself; else the fitting skill that comes from elsewhere;
   else the suite's own planning.
 - **The human plans** → the run ends. The closing report names the ticket, what a plan on it has to state
