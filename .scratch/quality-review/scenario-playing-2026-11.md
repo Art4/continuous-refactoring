@@ -219,7 +219,7 @@ else above, named once and forcing no wrong decision, is left as is (Q54) and be
 **From the plays for tickets 11 and 12** (r7 127k, r8 129k, judge 70k; both pass): the trace's sentence was hard to
 parse and its search did not say that a hit must match the Stage (fixed before merge). Named again, so tickets under
 Q54: design step 1's route for a baseline ticket without a plan (ticket 13); whether reconcile's "In review" line is a
-finding (ticket 14). Named once and left as is: a scan files whole chains at once (PHPStan 7–10, PHPMD Rollout before
-PHPMD; also named in r8 earlier), a rollout Stage proposed before its adoption has no title rule, a single-part rule
+finding (ticket 14); a scan files whole chains at once, with the title of a rollout Stage before its adoption
+(ticket 15). Named once and left as is: a single-part rule
 creates no rollout file, "nothing typed by hand" beside a config change, CI for a new rollout file, the Status count
 of a pull request the run did not touch.
