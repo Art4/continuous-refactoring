@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
 
 ## Situation
 
@@ -25,6 +25,9 @@ ticket is open.
 
 **Variant B.** As above, except that #53 carries no open question: it is workable.
 
+**Variant C.** As variant A, a run later: that run's scan filed its tickets, and each of them that was workable now
+has an open pull request of the suite, mergeable, CI green. PHPStan Levels 8, 9 and 10 have no ticket.
+
 ## Call
 
 `/continuous-refactoring-run autonomous`
@@ -40,7 +43,12 @@ ticket is open.
       blocked ones as blocked.
 - [ ] Variant A: selection picks one of the new tickets whose blockers are done, not #51 or #53; nothing is posted
       on #53.
+- [ ] Variant A: the scan proposes PHPStan Level 7, blocked by #51, and no ticket for Levels 8 to 10; its report
+      names them in a *Later* line, behind Level 7.
 - [ ] Variant B: no Guardrails scan runs; Track choice recommends Guardrails, and selection picks #53.
+- [ ] Variant C: the trace finds PHPStan Levels 8 to 10 not known but beyond the horizon, from a parser call with the
+      seed from the trace, and counts them as accounted for; no Guardrails scan runs.
+- [ ] Variant C: the run finds nothing workable and ends, naming the pull requests that wait for the human.
 
 ## Results
 
