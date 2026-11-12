@@ -48,10 +48,12 @@ merge request is its own matter. Then go to step 4.
 - **A tooling ticket** → make the change the plan's slices name: a dependency, configuration, a CI job.
   Where the tool rewrites code (Rector, a code-style fixer), the tool's own run is one commit and holds
   nothing typed by hand. No test is written.
-- **A baseline ticket** → fix file by file, one commit per file, following the tool's diagnosis. Then
-  regenerate the baseline with the command the plan names and commit it by itself. No test is written:
-  the existing suite is what notices a behaviour change. "PHP CS Fixer: take in the remaining rules" is
-  built like a tooling ticket instead: the fixer's run is the commit.
+- **A baseline ticket** → no test is written: the existing suite is what notices a behaviour change. By its list:
+  - a baseline: fix file by file, one commit per file, following the tool's diagnosis; then regenerate the
+    baseline with the command the plan names and commit it by itself;
+  - suppressions: fix the part's rule at its cause, then prune the suppressions file and commit it by itself;
+  - rules marked `Not yet:`: the tool's own run is the commit, where the tool fixes; PHPMD's findings are fixed
+    by hand, file by file.
 - **Any other ticket** → first the pin: where the plan's pin is new, write it, run it on the code as it
   stands and see it pass, and commit it before any commit moves structure; where it names existing tests,
   run them the same way. Then slice by slice, test-first at the plan's seam: write one failing test through the

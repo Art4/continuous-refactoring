@@ -38,3 +38,20 @@ the acute case with the Name: filing keeps only hits that match the Stage as the
 ticket with and one without a marker; a changelog fragment.
 
 **Done when** the search test is recorded, the decisions are in an ADR, and the scenarios pass.
+
+## Comments
+
+**2026-11-11 — Search test on GitHub** (Q58). A test issue held a visible control word and, only inside an HTML
+comment, `<!-- continuous-refactoring:stage:zqhiddenmarker7731 -->`. Once the issue was indexed (within a minute),
+`gh issue list --state all --search` found it by the hidden word alone, by the marker as a quoted phrase, and by its
+words unquoted. It did not find it by a prefix of the word (`zqhiddenmarker`), nor by the phrase with another kind
+(`continuous-refactoring:tool:zqhiddenmarker7731`): words match whole, and a quoted phrase keeps their order. So on
+GitHub point 1 holds, and point 4 holds for whole slugs. The issue was closed as not planned. GitLab is still to test.
+
+**2026-11-11 — Search test on GitLab** (Q58), the same issue on gitlab.com, searched with `glab issue list --all
+--search`: found at once by the hidden word, by the quoted marker and by its words unquoted, and not by the phrase
+with another kind. Unlike GitHub, it **also matched a prefix** (`zqhiddenmarker`): GitLab's basic search matches
+substrings. So point 4 does not hold on GitLab as it stands: `continuous-refactoring:stage:phpstan-level-1` would
+find the ticket of `phpstan-level-10`. A marker needs an end that no slug continues, searched with it, e.g. the
+closing ` -->` or a trailing `;`, or the search results are checked against the whole marker. The issue was closed.
+Both forges reach HTML comments; trackers that escape HTML (point 2) are untested.

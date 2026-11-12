@@ -46,7 +46,7 @@ lands on code whose old findings are still suppressed.
 
 - **Purpose:** clear the findings the adoption recorded, so the recommended rules hold for all the code.
 - **Fulfilment check:** `eslint-adoption` is fulfilled and no suppressions file exists, or it is empty.
-- **Its ticket** is "ESLint: clear the suppressions", the shape of a baseline ticket: it stays open across many merge
+- **Its ticket** is "ESLint: clear the suppressions", a baseline ticket: it stays open across many merge
   requests, and each run plans the next part (`../../planning-a-baseline-ticket.md`).
 - **A part** is one rule's suppressions, or a group of its files where they are too many to review at once: the rule
   with the fewest suppressed findings first. The fix removes the finding at its cause; an `eslint-disable` comment is
@@ -72,7 +72,7 @@ lands on code whose old findings are still suppressed.
   Each is fixed by `npx eslint --fix` without a change of behaviour. `eqeqeq` is not among them: replacing `==`
   changes what the code does. A target that already runs one of these keeps its setting; an existing config without them fulfils this Stage as
   well, its rules being its own choice.
-- **Its ticket** is "ESLint: take in the remaining rules", the shape of a baseline ticket.
+- **Its ticket** is "ESLint: take in the remaining rules", a baseline ticket.
 - **A part** is one path step of one rule: an override block in the config that turns the rule on for the paths done
   so far, or a rollout file of that shape. The fix is the tool's `--fix` run, with nothing typed by hand. The last
   part of a rule turns it on for every path and deletes its `Not yet:` entry.

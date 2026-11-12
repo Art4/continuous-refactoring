@@ -34,7 +34,7 @@ The Tool for the Role Code Smell Detection in the PHP Pack. Two Stages: `phpmd-a
 
 - **Purpose:** take in every rule the adoption left `Not yet:`, in merge requests a person can review.
 - **Fulfilment check:** `phpmd-adoption` is fulfilled, the config holds no `<exclude>` commented `Not yet:`, and no rollout ruleset exists (*Taking in a rule*), whoever created them.
-- **Its ticket** is "PHPMD: take in the remaining rules", the shape of a PHPStan baseline ticket: it stays open across many merge requests, each run plans the next part (`../../planning-a-baseline-ticket.md`), and each merge request delivers a part and carries no closing reference.
+- **Its ticket** is "PHPMD: take in the remaining rules", a baseline ticket: it stays open across many merge requests, each run plans the next part (`../../planning-a-baseline-ticket.md`), and each merge request delivers a part and carries no closing reference.
 - **A part** is one rule, or one path step of a rule too large for one merge request (*Taking in a rule*).
 
 ### Taking in a rule

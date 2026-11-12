@@ -1,7 +1,7 @@
 # 12 — "Baseline ticket" has no definition
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r7 and r8 on 2026-11-11, named by both, so a ticket under Q54). Several Tool files give
@@ -20,3 +20,7 @@ slice `design-point.md` asks of a Tool with a Housekeeping field.
 
 **Done when** the entry is in, the references agree, the scenarios that cover them pass, and tests and validator are
 green.
+
+## Comments
+
+**2026-11-11 — Done** (Q55–Q57). r7 and r8 pass at 6011078.

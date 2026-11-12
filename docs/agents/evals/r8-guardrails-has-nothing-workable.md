@@ -54,3 +54,4 @@ tickets and picking PHPMD.
 
 2026-11-08, on cecafc1 with the decision-point paragraph replaced by a pointer to the run's `SKILL.md`: pass, every line, every variant, as a walk-through, by one player; the decision points keep findings, options and one recommendation.
 2026-11-11, on f053957 with a due scan judging only the Stages not known and filing keeping a sibling's ticket out of its hits: pass, every line, both variants, as a walk-through, by one player. Then the text said that such a scan searches every Stage, and that the adoption's merge request closes the rollout's ticket where the code must run without ES2015.
+2026-11-11, on 6011078 with the trace asked beside a ticket that has delivered a part, and the baseline ticket defined: pass, every line, both variants, as a walk-through, by one player. Then the trace's sentence was split for reading, and its search keeps only hits that match the Stage.

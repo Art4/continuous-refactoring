@@ -68,16 +68,16 @@ Every later step of this run takes them as they are: the trace below, the seed f
 
 A Stage is **known** once the tracker shows it was dealt with before: a ticket of it in any state, or a
 recorded rejection of it, of its Tool or of its Role (`rejection.md`, *Finding rejections*). A tooling
-Track has a **trace** when every Stage of it that applies is known. Asked only of a Track with no workable
-ticket: one in review, blocked or waiting does not hold it back, so a Stage nobody filed yet is found while
-that ticket waits. Asked over the Stages of the Track's `nodes` whose Pack applies (step 5), without those step 5 found
+Track has a **trace** when every Stage of it that applies is known. Asked of a Track with no workable
+ticket, and of one whose only workable tickets have each delivered a part already. A ticket in review, blocked
+or waiting does not hold the trace back, so a Stage nobody filed yet is found while that ticket waits. Asked over the Stages of the Track's `nodes` whose Pack applies (step 5), without those step 5 found
 not applicable and without those marked
 `on_request`, except the first Stage of a Tool whose Opener was found and not used up: a Stage nobody asked for is never
 due otherwise. An Opener is found with **Search** for `Opener: <tool>` over open and closed tickets, and over
 the merge requests with the tool **Merge requests** names, and on a tracker whose search misses comments in the
 comments `tooling-model.md`, *An Opener*, names. Where one listing of all
 tickets, open and closed, is short enough, read it once; otherwise run **Search** with each Stage's
-`search` words over open and closed tickets, and stop at the first Stage that is not known.
+`search` words over open and closed tickets, keeping the hits that match the Stage (step 1), and stop at the first Stage that is not known.
 
 - **A Stage is not known** → the Track's scan is due, and it judges the Stages that are not known.
 - **Every Stage is known** → the Track is not scanned again by itself. A Stage of it without an open
