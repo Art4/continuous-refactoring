@@ -1,7 +1,7 @@
 # 14 — Is reconcile's "In review" line a finding?
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (d11, then r7 and r8 on 2026-11-11; named three times, so a ticket under Q54).
@@ -25,3 +25,5 @@ validator are green.
 
 **2026-11-12 — Decided** (Q62). The "In review" line, a review asking for changes and a base update included, is
 information, never a finding; step 2's sentence for no finding names it.
+
+**2026-11-12 — Done.** `reconcile.md` says the line is information, never a finding. r7 A and d11 pass at 882656b, each with a new line for it.

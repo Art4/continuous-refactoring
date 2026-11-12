@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
 
 ## Situation
 
@@ -29,6 +29,7 @@ was installed, and the first Safety Net scan found it in place.
 ## Expected
 
 - [ ] The worklist gives #51 the state in review and #53 workable, both in Guardrails.
+- [ ] Reconcile names #51 as in review in one sentence and lays out no decision point for it.
 - [ ] The worklist judges, before any trace is asked, that the generic and the PHP Pack apply and that
       `roave-bc-check` does not, putting it into `not_applicable`.
 - [ ] The Safety Net's fulfilment is read from a call with a seed — never from the seedless call — and is
@@ -64,3 +65,4 @@ every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 2026-11-08, on c11f6d4 with the in-place ticket for a tool a scan finds with no ticket: pass, every line, both variants, as a walk-through, by one player. The hand-on line for in-place tickets alone was then written out (back to Track choice, the Track marked as tried), wording only.
 2026-11-11, on f053957 with a due scan judging only the Stages not known and filing keeping a sibling's ticket out of its hits: pass, every line, both variants, as a walk-through, by one player. Then the text said that such a scan searches every Stage, and that the adoption's merge request closes the rollout's ticket where the code must run without ES2015.
 2026-11-11, on 6011078 with the trace asked beside a ticket that has delivered a part, and the baseline ticket defined: pass, every line, both variants, as a walk-through, by one player. Then the trace's sentence was split for reading, and its search keeps only hits that match the Stage.
+2026-11-12, on 882656b with reconcile's In review line as information, never a finding: variant A passes, every line, as a walk-through, by one player.
