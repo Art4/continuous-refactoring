@@ -242,3 +242,14 @@ PHPStan level checks use while Level 6 is unmerged. d11: which round a human's r
 ready merge request ready during the rework; the subagent prompt has no slot for the ticket; reply and push unordered;
 the description after a rework; GitLab's unresolved threads; a run naming a ticket hides the blocked one from the
 Driver's pause list; the review does not check the human's request was met.
+
+**From the plays for ticket 13** (r7 A 114k, probe p1 B 91k, judge 55k; both pass). Named a second time, so
+candidates for tickets under Q54: when a PHP CS Fixer part's earlier plan still stands, which only PHPStan's paragraph
+says (r7 A, p1 B); selection lays out a decision point for one workable ticket with nothing to close (r7 A on
+2026-11-12, p1 B); whether a merge request in review the run did not touch counts among what waits for the human (r8
+on 2026-11-11, r7 A); a rule whose first part is its last creates no rollout file, said only by inference (r7 on
+2026-11-11, r7 A). Already in tickets: CI and the cache entry for a rollout file (16); the ticket's three names (15).
+Named once: a target's skill the human picks for a baseline ticket loses the cut (decided so in Q60); when the suite
+writes a changelog entry; selection's seed; the clean-tree check not a step of its own. About the scenarios: the
+briefs leave the tracker file's operations unsaid, and no fixture matches r7, so the parser holds Guardrails back on
+the stand-in.

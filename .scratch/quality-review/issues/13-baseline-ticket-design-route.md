@@ -1,7 +1,7 @@
 # 13 — Where the design point goes for a baseline ticket without a plan
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r7 and r8 on 2026-11-11, named by both, so a ticket under Q54). `design-point.md` step 1
@@ -29,3 +29,5 @@ planning for a baseline ticket, a target's skill found staying an option; a targ
 a part. Autonomous, the suite plans unless the call names a skill: probe p1 (both modes, 93k player, 47k judge,
 pass) showed that a call naming the skill already works through `SKILL.md`'s rule that the call answers a choice,
 so no row is added, and step 3's sentence on an autonomous run stays.
+
+**2026-11-12 — Done.** `design-point.md` step 1 sends a baseline ticket with no plan that stands to step 2, which, interactive, recommends the suite's own planning for it; `planning-a-baseline-ticket.md` names steps 1 and 3; the run playbook says so. r7 A and the probe p1 B (interactive, a target's skill on offer) pass at 14d424b.
