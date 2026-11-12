@@ -2,7 +2,7 @@
 
 Played as a walk-through.
 
-Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/SKILL.md`
+Covers: `skills/continuous-refactoring/SKILL.md`, `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/reconcile.md`
 
 ## Situation
 
@@ -19,6 +19,7 @@ is blocked by #5; nothing else is open. The wake-up has just arrived.
 ## Expected
 
 - [ ] Round 2 takes !12 first and names #5 in the call of its run.
+- [ ] The run's reconcile names !12's review as asking for changes and lays out no decision point for it.
 - [ ] The run reworks !12 for the human's request, with its reasoning, and pushes to the same merge request.
 - [ ] The review runs again on the reworked merge request, and the round ends mergeable, with the human, or in a
       further rework, counted as reworks of this round.
@@ -31,3 +32,5 @@ is blocked by #5; nothing else is open. The wake-up has just arrived.
 among the round's two. 057d1cb says it does.
 
 2026-11-07, on 0e29b63, the first playing of every scenario with the runner and a separate judge: pass, every line, as a walk-through.
+
+2026-11-12, on 882656b with reconcile's In review line as information, never a finding: pass, every line, as a walk-through.

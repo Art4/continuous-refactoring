@@ -231,3 +231,14 @@ to *Who plans*, against step 2's literal "plans by itself" and "a decision point
 is skipped when the target's skill posts the plan; Track choice's five options against a question tool that takes four;
 the Stage Name "PHP CS Fixer Rollout" against its ticket title; `selection.md`'s pick-up check worded for PHPStan's
 baseline alone.
+
+**From the plays for ticket 14** (r7 A 105k, d11 84k, judge for both; both pass). Named a second time, so candidates
+for tickets under Q54: CI for a part that creates the first rollout file, against the one commit with nothing typed by
+hand (r7 on 2026-11-11, r7 A now); a rollout ticket's title against its Stage Name and `planning-a-baseline-ticket.md`'s
+paragraph keyed to "take in the remaining rules" (p1, r7 A). Named once: optional operations the brief leaves out;
+`roave-bc-check` not applicable may read as BC guarded; whether a ticket in review that delivered a part counts for the
+trace; #52 named twice, in reconcile and Track choice; selection lays out a decision point for one workable ticket; the
+PHPStan level checks use while Level 6 is unmerged. d11: which round a human's request counts in; the Driver leaves a
+ready merge request ready during the rework; the subagent prompt has no slot for the ticket; reply and push unordered;
+the description after a rework; GitLab's unresolved threads; a run naming a ticket hides the blocked one from the
+Driver's pause list; the review does not check the human's request was met.
