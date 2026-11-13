@@ -1,7 +1,7 @@
 # 15 — A scan files a whole chain at once
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r8 for ticket 08, then r8 on 2026-11-11; named twice, so a ticket under Q54). A due scan
@@ -36,3 +36,5 @@ Name ("PHP CS Fixer rollout") does not match the title `planning-a-baseline-tick
 Fixer: take in the remaining rules"); `selection.md`'s pick-up check is worded for PHPStan's baseline alone. With Q69
 the suite's own titles agree, but a ticket filed before, or by a human, still carries the other one. To build with
 Q69: the planning reference and the pick-up check find their paragraph by the ticket's Stage, not by its title.
+
+**2026-11-13 — Done** (ADR-0098). The parser returns `beyond_horizon`; the trace, the scan, filing, the planning reference, the glossary and the playbooks follow. r8 A, B and the new C pass at 6fe1dd2.

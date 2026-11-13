@@ -255,3 +255,12 @@ Named once: a target's skill the human picks for a baseline ticket loses the cut
 writes a changelog entry; selection's seed; the clean-tree check not a step of its own. About the scenarios: the
 briefs leave the tracker file's operations unsaid, and no fixture matches r7, so the parser holds Guardrails back on
 the stand-in.
+
+**From the plays for ticket 15** (r8 A and C 148k, r8 B 114k, judge 69k; pass, after r8 C's last line was corrected:
+it expected the run to end, but Investigation always has something). Fixed before merge: the trace's closing bullets
+did not say "within the horizon", and its seed was named for the search alone. Named a second or third time, already
+in tickets: a part's plan that stands and the single-part rule (16), selection with one entry (17). Named once: how the
+human hears of the *Later* Stages when no scan runs; a Candidate mark added mid-life; whether an autonomous run picks
+the Candidate label; the BC-promise Opener's list; `bc-promise` against "every Safety Net Stage has a merged ticket"
+(r9, r10, r7, r8 before: a scenario slip, for ticket 19); the PHPUnit version; reconcile has no place for waiting
+tickets; `gh pr ready` with no decision point of its own.
