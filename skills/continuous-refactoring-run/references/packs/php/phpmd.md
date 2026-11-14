@@ -68,7 +68,8 @@ Such an `<exclude>` is `phpmd-rollout`'s. One rule at a time, the one with the f
 
 - **The paths already done** are in the command that runs the rollout ruleset, since PHPMD reads no paths from a ruleset passed to it: `vendor/bin/phpmd analyze lib/Legacy src/Billing --ruleset phpmd.rollout.xml` on 3.x, `vendor/bin/phpmd lib/Legacy,src/Billing text phpmd.rollout.xml` on 2.x. The command lives where the main config's does: in the CI job, or in the script the CI job calls.
 - **The path steps:** the directories changed least recently first (`git log`), to keep merge conflicts with parallel work low; a big directory is cut into groups of files. The agent sizes each step by `../../principles.md`, *A merge request a person can review*; there is no fixed threshold. A part widens the paths in the command and fixes the rule's findings in them.
-- **The last part** of a rule: its paths would cover every path of the main config. The rollout ruleset and its command are deleted, the rule's `<exclude>` and its comment in the main config with them. The next rule too large for one merge request gets a new rollout ruleset.
+- **The last part** of a rule: its paths would cover every path of the main config. The next rule too large for one merge request gets a new rollout ruleset.
+- **Setting up and taking down** is a part's first commit, before its fixes: the part that creates the rollout ruleset adds it and its command; the last part deletes both, the rule's `<exclude>` and its comment in the main config with them. CI gets no command ahead of a rollout ruleset.
 - **CI** runs PHPMD with the main config, and with the rollout ruleset wherever it exists.
 
 **Names and places.** The rollout ruleset's name is a default; the plan or the target may set another.

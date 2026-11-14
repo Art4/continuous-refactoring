@@ -1,7 +1,7 @@
 # ESLint
 
 The recommended Tool for the Role Static Analysis in the JavaScript Pack. It plays the Role in its own scope, so
-PHPStan and Psalm keep theirs on the PHP code and neither takes the other's place. Three Stages: `eslint-adoption`
+PHPStan and Psalm keep theirs on the PHP code. Three Stages: `eslint-adoption`
 sets ESLint up with its recommended rules and records what they find today, `eslint-suppressions` clears that record
 part by part, and `eslint-rollout` takes in stricter rules one by one.
 
@@ -19,7 +19,7 @@ lands on code whose old findings are still suppressed.
   - a flat config is committed (`eslint.config.js`, `.mjs` or `.cjs`) that takes in `js.configs.recommended`
     (`@eslint/js`) and names the project's own JavaScript paths, leaving out minified files and build output;
   - `npx eslint .` exits 0, with the suppressions file where there is one (*Suppressions*);
-  - once `ci-runner` is fulfilled, a CI job runs it. With no CI yet, the local run alone still fulfils the Stage.
+  - once `ci-runner` is fulfilled, a CI job runs it. Without CI, the local run fulfils it.
 - **An existing config.** A target that already runs ESLint keeps its config, whatever it extends: its rules are its
   own choice. A legacy `.eslintrc*` fulfils the Stage as well; moving it to a flat config is Housekeeping's, when the
   target's ESLint version needs it.
@@ -74,8 +74,9 @@ lands on code whose old findings are still suppressed.
   well, its rules being its own choice.
 - **Its ticket** is "ESLint: take in the remaining rules", a baseline ticket.
 - **A part** is one path step of one rule: an override block in the config that turns the rule on for the paths done
-  so far, or a rollout file of that shape. The fix is the tool's `--fix` run, with nothing typed by hand. The last
-  part of a rule turns it on for every path and deletes its `Not yet:` entry.
+  so far, or a rollout file of that shape. The fix is the tool's `--fix` run, with nothing typed by hand. Creating the block or
+  file, and the last part's removing it with the `Not yet:` entry, is a first commit before the run; a rule one part
+  takes in whole needs neither.
 
 ### Suppressions
 
