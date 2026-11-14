@@ -77,10 +77,13 @@ due otherwise. An Opener is found with **Search** for `Opener: <tool>` over open
 the merge requests with the tool **Merge requests** names, and on a tracker whose search misses comments in the
 comments `tooling-model.md`, *An Opener*, names. Where one listing of all
 tickets, open and closed, is short enough, read it once; otherwise run **Search** with each Stage's
-`search` words over open and closed tickets, keeping the hits that match the Stage (step 1), and stop at the first Stage that is not known.
+`search` words over open and closed tickets, keeping the hits that match the Stage (step 1), and stop at the first Stage that is not known
+and not **beyond the horizon**: called with the seed from the trace of the Stages known so far, the parser puts it in
+the Track's `beyond_horizon`. Such a Stage is accounted for: its ticket is filed once what blocks it comes within two
+levels (`track-scan.md`, *4. Proposals*).
 
-- **A Stage is not known** → the Track's scan is due, and it judges the Stages that are not known.
-- **Every Stage is known** → the Track is not scanned again by itself. A Stage of it without an open
+- **A Stage is not known, within the horizon** → the Track's scan is due, and it judges the Stages that are not known.
+- **Every Stage is known or beyond the horizon** → the Track is not scanned again by itself. A Stage of it without an open
   ticket counts as done; a tool that went missing since is found by a scan the call asks for or by the
   Housekeeping task that re-checks the tooling Tracks.
 

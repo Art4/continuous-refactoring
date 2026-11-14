@@ -1,7 +1,7 @@
 # Reference: planning a baseline ticket
 
-The design point's plan for a baseline ticket (`design-point.md`, steps 1 and 3). A part has no Housekeeping slice:
-the adoption carried it.
+The design point's plan for a baseline ticket (`design-point.md`, steps 1 and 3), found below by its Stage, whatever
+its title. A part has no Housekeeping slice: the adoption carried it.
 
 "PHPStan Level N: shrink the baseline" stays open until the baseline is empty, and takes one merge
 request after another. Each run plans the next **part**.
@@ -23,11 +23,11 @@ it is shorter overall. The merge request names each new entry and its reason. Wh
 become shorter, or a finding is to be ignored for good, the ignore rule goes into `phpstan.neon` instead,
 and only after the human allows it: that is an open question, and the run ends with it named.
 
-The ticket "PHPMD: take in the remaining rules" is planned the same way, with the rules in place of the groups: a rollout ruleset exists → its rule is this merge request's; otherwise read the `<exclude>` entries marked `Not yet:` in the PHPMD config, count the findings of each rule with the rule included, and take the one with the fewest (`packs/php/phpmd.md`, *Taking in a rule*). The part is that rule whole, or its next path step, or its last. *Done when* PHPMD reports nothing with the main config and with the rollout ruleset where it is left, the rule's `<exclude>` is gone after its last part, and the test suite is green. `This merge request` names the rule, the paths of the part, and the paths and rules that stay.
+PHPMD's rollout is planned the same way, with the rules in place of the groups: a rollout ruleset exists → its rule is this merge request's; otherwise read the `<exclude>` entries marked `Not yet:` in the PHPMD config, count the findings of each rule with the rule included, and take the one with the fewest (`packs/php/phpmd.md`, *Taking in a rule*). The part is that rule whole, or its next path step, or its last. *Done when* PHPMD reports nothing with the main config and with the rollout ruleset where it is left, the rule's `<exclude>` is gone after its last part, and the test suite is green. `This merge request` names the rule, the paths of the part, and the paths and rules that stay.
 
-The ticket "PHP CS Fixer: take in the remaining rules" is planned the same way, with the rule in progress in place of the group (`packs/php/php-cs-fixer.md`, *Taking in a rule*). A rollout file exists → its rule is this merge request's; otherwise measure the rules marked `Not yet:` in the main config and take the one in the fewest files. The part is the next path step of that rule, or its last. *Done when* `check` reports zero diffs with the main config and with the rollout file where it is left, `php -l` on the floor PHP passes over the changed files, and the test suite is green. `This merge request` names the rule, the paths of the part, and the paths and rules that stay.
+PHP CS Fixer's rollout is planned the same way, with the rule in progress in place of the group (`packs/php/php-cs-fixer.md`, *Taking in a rule*). A rollout file exists → its rule is this merge request's; otherwise measure the rules marked `Not yet:` in the main config and take the one in the fewest files. The part is the next path step of that rule, or its last. *Done when* `check` reports zero diffs with the main config and with the rollout file where it is left, `php -l` on the floor PHP passes over the changed files, and the test suite is green. `This merge request` names the rule, the paths of the part, and the paths and rules that stay.
 
-The tickets "ESLint: clear the suppressions" and "ESLint: take in the remaining rules" are planned the same way, with a rule's suppressions or a rule's path step as the part (`packs/js/eslint.md`). *Done when* `npx eslint .` exits 0, the part's entries are gone from the suppressions file or its rule is on for the part's paths, and the test suite is green.
+ESLint's suppressions and rollout are planned the same way, with a rule's suppressions or a rule's path step as the part (`packs/js/eslint.md`). *Done when* `npx eslint .` exits 0, the part's entries are gone from the suppressions file or its rule is on for the part's paths, and the test suite is green.
 
 A group that only a behaviour change could remove is skipped and named in the plan under `Decisions`.
 When only such groups are left, the first of the *Two findings* applies (`design-point.md`, step 4): the baseline cannot become

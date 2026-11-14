@@ -20,3 +20,10 @@ player assumes them.
 
 **Done when** the fixture is in, the parser on it gives the Safety Net fulfilled with the seed the scenarios imply,
 r7 and r8 name it, and tests and validator are green. Scenario-only, so no changelog fragment.
+
+## Comments
+
+**2026-11-13 — Also for this ticket.** r7 and r8 say every Safety Net Stage but `roave-bc-check` has a merged ticket,
+which would include `bc-promise`, whose merge request writes the **BC promise** bullet the tracker file is said not to
+have (named by r8 on 2026-11-11, r8 A on 2026-11-13, and in r9 and r10 before). The *Situation* names `bc-promise` as
+never asked for, alongside the fixture.

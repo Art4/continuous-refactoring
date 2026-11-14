@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
 
 ## Situation
 
@@ -25,6 +25,9 @@ ticket is open.
 
 **Variant B.** As above, except that #53 carries no open question: it is workable.
 
+**Variant C.** As variant A, a run later: that run's scan filed its tickets, and each of them that was workable now
+has an open pull request of the suite, mergeable, CI green. PHPStan Levels 8, 9 and 10 have no ticket.
+
 ## Call
 
 `/continuous-refactoring-run autonomous`
@@ -40,7 +43,12 @@ ticket is open.
       blocked ones as blocked.
 - [ ] Variant A: selection picks one of the new tickets whose blockers are done, not #51 or #53; nothing is posted
       on #53.
+- [ ] Variant A: the scan proposes PHPStan Level 7, blocked by #51, and no ticket for Levels 8 to 10; its report
+      names them in a *Later* line, behind Level 7.
 - [ ] Variant B: no Guardrails scan runs; Track choice recommends Guardrails, and selection picks #53.
+- [ ] Variant C: the trace finds PHPStan Levels 8 to 10 not known but beyond the horizon, from a parser call with the
+      seed from the trace, and counts them as accounted for; no Guardrails scan runs.
+- [ ] Variant C: Track choice does not recommend Guardrails, which has nothing workable.
 
 ## Results
 
@@ -55,3 +63,5 @@ tickets and picking PHPMD.
 2026-11-08, on cecafc1 with the decision-point paragraph replaced by a pointer to the run's `SKILL.md`: pass, every line, every variant, as a walk-through, by one player; the decision points keep findings, options and one recommendation.
 2026-11-11, on f053957 with a due scan judging only the Stages not known and filing keeping a sibling's ticket out of its hits: pass, every line, both variants, as a walk-through, by one player. Then the text said that such a scan searches every Stage, and that the adoption's merge request closes the rollout's ticket where the code must run without ES2015.
 2026-11-11, on 6011078 with the trace asked beside a ticket that has delivered a part, and the baseline ticket defined: pass, every line, both variants, as a walk-through, by one player. Then the trace's sentence was split for reading, and its search keeps only hits that match the Stage.
+
+2026-11-13, on 6fe1dd2 with a scan that files a chain only two levels deep: pass, every line, all three variants, as walk-throughs, A and C by one player. Variant C's last line had expected the run to end, but Track choice rightly went on to Investigation, which always has something; the line now asks only that Guardrails is not recommended. Then the trace's two closing bullets said "within the horizon" and "or beyond the horizon", and its seed takes the Stages known so far, wording only.

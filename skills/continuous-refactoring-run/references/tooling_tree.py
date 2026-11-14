@@ -6,8 +6,8 @@ Stages are fulfilled, which subjects are rejected, which Packs apply, the
 target's runtime — is handed in as a seed; everything else is computed from it.
 Without a seed it emits the structure alone and no verdict. With one it emits,
 per Track, whether it is fulfilled, the Stages a ticket can be filed
-for with name, tool and search words, the ordered backlog, and why a Stage is
-withheld — without invoking an LLM, keeping a file of its own, or mutating
+for with name, tool and search words, the ordered backlog, why a Stage is
+withheld, and which lie beyond the horizon of two levels of blockers — without invoking an LLM, keeping a file of its own, or mutating
 the repo. Standard library only.
 
 Vocabulary and rules: tooling-model.md (beside this file).
@@ -37,6 +37,9 @@ PREREQUISITES = ("git", "onboarding-setup")
 # In the order a Role prefers its Tools: a recommended one before one on
 # request, both before a recognized one.
 STATUSES = ("recommended", "on-request", "recognized")
+# How many levels of unfulfilled blockers a scan files tickets for; a Stage
+# deeper than that is beyond the horizon.
+HORIZON = 2
 
 _SLUG = re.compile(r"^[a-z0-9]+(-[a-z0-9]+)*$")
 _VERSION = re.compile(r"\d+(?:\.\d+)*")
@@ -493,6 +496,7 @@ class _State:
         self.filled_by = {slot: self._filled_by(slot) for slot in self.tools_of_slot}
         self.out = self._out_tools()
         self._closed: dict[str, bool] = {}
+        self._levels: dict[str, tuple[int, str | None]] = {}
 
     # -- roles and tools ----------------------------------------------------
 
@@ -674,6 +678,58 @@ class _State:
             and not self.closed(s)
         ]
 
+    # -- the horizon ----------------------------------------------------------
+
+    def level(self, stage: str) -> tuple[int, str | None]:
+        """How deep *stage* sits behind unfulfilled blockers, and the blocker
+        that sets it: 1 with nothing blocking it, else one more than its
+        deepest blocker. An any-of group and a required Role count through
+        their nearest Stage that could still be fulfilled."""
+        if stage in self._levels:
+            return self._levels[stage]
+        s = self.model["stages"][stage]
+        blockers = []
+        for item in s["requires"]:
+            if isinstance(item, list):
+                if not any(m in self.fulfilled for m in item):
+                    blockers.append(self._nearest(m for m in item if not self._stage_dead(m) and not self.never_fulfilled(m)))
+            elif item in self.model["stages"]:
+                if item not in self.fulfilled:
+                    blockers.append(item)
+            elif not self.filled(item, s["scope"]):
+                blockers.append(self._stand_in(item, s["scope"]))
+        for item in s["waits_for"]:
+            if not self.awaited_decided(item, s["scope"]):
+                blockers.append(item if item in self.model["stages"] else self._stand_in(item, s["scope"]))
+        blockers = [b for b in blockers if b is not None]
+        if not blockers:
+            result = (1, None)
+        else:
+            behind = max(blockers, key=lambda b: self.level(b)[0])
+            result = (self.level(behind)[0] + 1, behind)
+        self._levels[stage] = result
+        return result
+
+    def _nearest(self, candidates) -> str | None:
+        candidates = list(candidates)
+        return min(candidates, key=lambda c: self.level(c)[0]) if candidates else None
+
+    def _stand_in(self, role: str, scope: str | None) -> str | None:
+        """The first Stage, nearest first, of a Tool that could still fill *role*."""
+        tools = [t for t in self.tools_of_role[role] if scope is None or self.model["tools"][t]["scope"] == scope]
+        return self._nearest(
+            self.first(t) for t in tools
+            if self.first(t) in self.active and not self.closed(self.first(t)) and not self.never_fulfilled(self.first(t))
+        )
+
+    def beyond_horizon(self, backlog: list[str]) -> list[dict]:
+        found = []
+        for stage in backlog:
+            depth, behind = self.level(stage)
+            if depth > HORIZON:
+                found.append({"node": stage, "level": depth, "behind": behind})
+        return found
+
     # -- runtime --------------------------------------------------------------
 
     def runtime_blocked(self) -> list[dict]:
@@ -827,6 +883,7 @@ def _compute(repo: pathlib.Path, model: dict, seed: dict, tracker_file) -> dict:
             "backlog": backlogs[track],
             "workable": [s for s in backlogs[track] if s not in waiting],
             "withheld": withheld,
+            "beyond_horizon": state.beyond_horizon(backlogs[track]),
         }
 
     closed = [
