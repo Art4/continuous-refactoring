@@ -6,14 +6,16 @@ Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/cont
 
 ## Situation
 
-An onboarded PHP application on GitHub, `acme/shop`: `composer.json` has `"type": "project"` and requires
-`php: ^8.2`; its tracker file has no **BC promise** operation. Housekeeping is set up, and its ticket is not due. No
-Tooling Pack of its own.
+An onboarded PHP application on GitHub, `acme/shop`, as the fixture `fixtures/php/php-app-onboarded/project`
+holds it: `composer.json` has `"type": "project"` and requires `php: ^8.2`, and no release is tagged. Its tracker
+file holds the GitHub template's operations (Claim, Linked merge request, Rejected as an issue closed as not planned)
+and a **Housekeeping** bullet; no Candidate, Priority, Ready after plan or **BC promise**. Housekeeping is set up, and
+its ticket is not due. No Tooling Pack of its own.
 
-Every Safety Net Stage of the generic and the PHP Pack except `roave-bc-check` has a closed ticket whose merge
+Every Safety Net Stage of the generic and the PHP Pack except `roave-bc-check` and `bc-promise` has a closed ticket whose merge
 request was merged: CI Runner, EditorConfig, Composer, PSR-4, PHP CS Fixer adoption, PHPUnit, PHPStan Levels 0 to
 5, and the Rector PHP set, dead code, code quality and type coverage Stages. What those tickets set up is in the
-repository and runs in CI. `roave-bc-check` has no ticket and no rejection. No rejection is recorded at all, and no
+repository and runs in CI. `bc-promise`, a Tool on request, was never asked for, and neither it nor `roave-bc-check` has a ticket or a rejection. No rejection is recorded at all, and no
 ticket, plan or pull request carries an `Opener:` line.
 
 Two Guardrails tickets are open: #51 "PHPStan Level 6", with open pull request #52, mergeable, CI green; and #53
