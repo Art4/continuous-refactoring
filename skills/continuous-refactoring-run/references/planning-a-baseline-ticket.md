@@ -8,8 +8,8 @@ request after another. Each run plans the next **part**.
 
 1. Read `phpstan-baseline.neon` and group its entries by root cause: the same message pattern and
    identifier, across files. `$db might not be defined` in nine files is one group.
-2. The ticket's newest plan names a group that still has all its entries → that plan stands, and no new
-   one is written.
+2. The ticket's newest plan names a group that still has all its entries, or a rollout's rule and paths not yet
+   taken in → that plan stands, and no new one is written.
 3. Otherwise pick this merge request's part, and give it a name of two or three words: the group that touches input from outside the application
    first; else the group one fix removes the most entries of. A group too large to review in one merge
    request is cut by file, and the plan names the files of this part.

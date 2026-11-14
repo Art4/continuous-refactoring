@@ -29,7 +29,7 @@ The recommended Tool for the Role Code Style in the PHP Pack. Laravel Pint (`pin
 - **Fulfilment check:** `php-cs-fixer-adoption` is fulfilled, the main config holds no `Not yet:`, and no rollout file exists (*Taking in a rule*), whoever created it.
 - **Its ticket** is "PHP CS Fixer: take in the remaining rules", a baseline ticket: it stays open across many merge requests, each run plans the next part (`../../planning-a-baseline-ticket.md`), and each merge request delivers a part and carries no closing reference.
 - **A part** is one path step of one rule (*Taking in a rule*). Several tiny rules may share a part.
-- **MR scope** of a part: the rollout file widened by the part's paths, or created for the next rule, and the tool's formatting run, one commit with nothing typed by hand. The last part of a rule deletes the rollout file and the rule's `false` line in the main config instead.
+- **MR scope** of a part: the rollout file widened by the part's paths and the tool's formatting run, one commit in which the code changes by the run alone. A part that creates the rollout file or deletes it has more commits, and a rule one part takes in whole has one commit and no rollout file (*Taking in a rule*).
 
 ### Preset
 
@@ -92,7 +92,9 @@ One rule at a time, through a second config beside the main one.
 - **The order of the rules:** the fewest files first, by a fresh measurement (*Measuring*).
 - **The path steps:** the directories changed least recently first (`git log`), to keep merge conflicts with parallel work low; a big directory is cut into groups of files. The agent sizes each step by `../../principles.md`, *A merge request a person can review*; there is no fixed threshold.
 - **The formatting run** of a part is the rollout file, then the main config, so the rules already on tidy what the rule left; both outputs go into one commit.
-- **The last part** of a rule: its Finder would cover every path of the main config. The rollout file is deleted, the rule's `false` line in the main config with it, and the main config's run is the commit. The next rule gets a new rollout file.
+- **The last part** of a rule: its Finder would cover every path of the main config. The next rule gets a new rollout file.
+- **Setting up and taking down**, so that every commit leaves `check` green: what only sets up or takes down is a commit typed by hand, and what switches the rule on goes with the run that satisfies it, as at the adoption. The part that creates the rollout file has three: the file, its cache file in `.gitignore` and `rolled out via <path>` on the rule's `Not yet:` line; the formatting run, with nothing typed by hand; the CI step running `check` with it. The last part has two: the CI step, the rollout file and its `.gitignore` entry deleted; the rule's `false` line deleted with the main config's run. CI gets no step ahead of a rollout file.
+- **A rule one part takes in whole** gets no rollout file: its `false` line is deleted and the main config's run is in the same commit.
 - **CI** runs `check` with the main config, and with the rollout file wherever it exists.
 
 **Names and places.** The main config's name, the rollout file's and the cache files' are defaults. The plan or the target may set others; a config the target already has always wins.

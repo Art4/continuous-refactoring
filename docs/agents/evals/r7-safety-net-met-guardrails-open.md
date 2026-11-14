@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`
+Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`
 
 ## Situation
 
@@ -19,7 +19,11 @@ repository and runs in CI. `bc-promise`, a Tool on request, was never asked for,
 ticket, plan or pull request carries an `Opener:` line.
 
 Two Guardrails tickets are open: #51 "PHPStan Level 6", with open pull request #52, mergeable, CI green; and #53
-"PHP CS Fixer rollout", with no merge request, no blocker and no open question. No Investigation ticket is open.
+"PHP CS Fixer: take in the remaining rules", with no merge request, no blocker and no open question. No Investigation ticket is open.
+
+**Variant C.** As variant A, except that #53 carries the suite's plan from an earlier run, its newest comment: take in
+`single_quote` for `src/` first. No merge request came of it, and the main config still marks `single_quote`
+`Not yet:`, with no rollout file.
 
 **Variant B.** As above, except that Rector type coverage never had a ticket: CI already ran it before the suite
 was installed, and the first Safety Net scan found it in place.
@@ -40,6 +44,14 @@ was installed, and the first Safety Net scan found it in place.
 - [ ] Track choice recommends Guardrails, and selection picks #53, not #51.
 - [ ] Variant A: the design point finds no plan on #53 that stands and goes on to *Who plans*, which says in one
       sentence that the suite plans, as the run is autonomous; the plan follows `planning-a-baseline-ticket.md`.
+- [ ] Variant A: the plan takes in `native_function_casing`, the rule in the fewest files. A part that takes it whole
+      plans no rollout file and one commit; a part that cuts it creates the rollout file in three commits, each
+      leaving `check` green: by hand the file, its cache in `.gitignore` and `rolled out via` on the `Not yet:`
+      line; the formatting run; by hand the CI step running `check` with it.
+- [ ] Variant C: the design point finds that #53's plan stands, since `single_quote` and `src/` are not taken in yet;
+      no new plan is written, and the run goes on to the implement point with it.
+- [ ] Variant C: the implementation creates the rollout file in the three commits variant A's line lists, its
+      formatting run being the rollout file's, then the main config's.
 - [ ] Variant A: Safety Net has a trace, and no Safety Net scan runs.
 - [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, and proposes no
       ticket to work for it.
@@ -71,3 +83,4 @@ every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 2026-11-11, on 6011078 with the trace asked beside a ticket that has delivered a part, and the baseline ticket defined: pass, every line, both variants, as a walk-through, by one player. Then the trace's sentence was split for reading, and its search keeps only hits that match the Stage.
 2026-11-12, on 882656b with reconcile's In review line as information, never a finding: variant A passes, every line, as a walk-through, by one player.
 2026-11-12, on 14d424b with a baseline ticket with no plan that stands going on to *Who plans*: variant A passes, every line, as a walk-through, by one player. The interactive recommendation was played as a probe beside it (p1 B: pass).
+2026-11-14, on faadd3a with a rollout part's commits each green, a standing rollout plan and the fixture `php-app-onboarded`: variants A and C pass, every line, as a walk-through, by one player. An earlier play on ce3497e passed too and showed the set-up commit red under its own CI step, which the change then fixed.
