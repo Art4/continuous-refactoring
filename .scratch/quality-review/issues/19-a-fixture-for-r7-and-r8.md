@@ -1,7 +1,7 @@
 # 19 — No fixture matches r7 and r8
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r7 and r8 on 2026-11-11, r7 A and p1 B on 2026-11-12). r7 and r8 describe an onboarded PHP

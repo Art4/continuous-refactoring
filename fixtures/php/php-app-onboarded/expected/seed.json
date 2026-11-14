@@ -1,0 +1,31 @@
+{
+  "fulfilled": [
+    "ci-runner",
+    "editorconfig",
+    "composer",
+    "psr-4",
+    "php-cs-fixer-adoption",
+    "phpunit",
+    "phpstan-level-0",
+    "phpstan-level-1",
+    "phpstan-level-2",
+    "phpstan-level-3",
+    "phpstan-level-4",
+    "phpstan-level-5",
+    "rector-php-set",
+    "rector-dead-code",
+    "rector-code-quality",
+    "rector-type-coverage"
+  ],
+  "rejected": {},
+  "packs": [
+    "generic",
+    "php"
+  ],
+  "not_applicable": [
+    "roave-bc-check"
+  ],
+  "runtime": {
+    "php": "8.2"
+  }
+}

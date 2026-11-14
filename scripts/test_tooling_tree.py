@@ -1092,6 +1092,42 @@ class TwigPackTests(unittest.TestCase):
         self.assertIn("twig/twig", composer["require"])
 
 
+class OnboardedFixtureTests(unittest.TestCase):
+    """`php-app-onboarded`, the state r7 and r8 share: with its seed the Safety Net is met and Guardrails opens."""
+
+    FIXTURE = _FIXTURES / "php-app-onboarded"
+
+    @classmethod
+    def setUpClass(cls):
+        script = str(_REFERENCES / "tooling_tree.py")
+        done = subprocess.run(
+            [sys.executable, script, "--seed", str(cls.FIXTURE / "expected" / "seed.json"), str(cls.FIXTURE / "project")],
+            capture_output=True, text=True,
+        )
+        assert done.returncode == 0, done.stderr
+        cls.out = json.loads(done.stdout)
+
+    def test_its_tracker_file_holds_the_onboarding(self):
+        self.assertTrue(self.out["prerequisites"]["onboarding-setup"])
+
+    def test_the_safety_net_is_met(self):
+        self.assertEqual(self.out["tracks"]["Safety Net"]["backlog"], [])
+
+    def test_guardrails_opens_with_level_6_and_the_rollout(self):
+        workable = self.out["tracks"]["Guardrails"]["workable"]
+        self.assertLessEqual({"phpstan-level-6", "php-cs-fixer-rollout"}, set(workable))
+
+    def test_levels_8_to_10_lie_beyond_the_horizon(self):
+        beyond = {b["node"] for b in self.out["tracks"]["Guardrails"]["beyond_horizon"]}
+        self.assertLessEqual({"phpstan-level-8", "phpstan-level-9", "phpstan-level-10"}, beyond)
+        self.assertNotIn("phpstan-level-7", beyond)
+
+    def test_its_config_marks_rules_not_yet(self):
+        config = (self.FIXTURE / "project" / ".php-cs-fixer.php").read_text()
+        self.assertIn("// Not yet:", config)
+        self.assertIn("level: 5", (self.FIXTURE / "project" / "phpstan.neon").read_text())
+
+
 class JsPackTests(unittest.TestCase):
     """The JavaScript Pack: a third Pack beside generic and php, its Tools in a scope of their own."""
 

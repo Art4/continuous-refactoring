@@ -1,0 +1,24 @@
+{
+    "name": "acme/shop",
+    "description": "An onboarded PHP application whose Safety Net is met: the state the scenarios r7 and r8 share",
+    "type": "project",
+    "require": {
+        "php": "^8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0",
+        "friendsofphp/php-cs-fixer": "^3.75",
+        "phpstan/phpstan": "^2.1",
+        "rector/rector": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Acme\\Shop\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Acme\\Shop\\Tests\\": "tests/"
+        }
+    }
+}
