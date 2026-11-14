@@ -19,7 +19,7 @@ repository and runs in CI. `bc-promise`, a Tool on request, was never asked for,
 ticket, plan or pull request carries an `Opener:` line.
 
 Two Guardrails tickets are open: #51 "PHPStan Level 6", with open pull request #52, mergeable, CI green; and #53
-"PHP CS Fixer rollout", with no merge request, no blocker and no open question. No Investigation ticket is open.
+"PHP CS Fixer: take in the remaining rules", with no merge request, no blocker and no open question. No Investigation ticket is open.
 
 **Variant C.** As variant A, except that #53 carries the suite's plan from an earlier run, its newest comment: take in
 `single_quote` for `src/` first. No merge request came of it, and the main config still marks `single_quote`
@@ -45,13 +45,13 @@ was installed, and the first Safety Net scan found it in place.
 - [ ] Variant A: the design point finds no plan on #53 that stands and goes on to *Who plans*, which says in one
       sentence that the suite plans, as the run is autonomous; the plan follows `planning-a-baseline-ticket.md`.
 - [ ] Variant A: the plan takes in `native_function_casing`, the rule in the fewest files. A part that takes it whole
-      plans no rollout file and one commit; a part that cuts it creates the rollout file in a first commit typed by
-      hand (the file, its cache in `.gitignore`, a CI step running `check` with it, `rolled out via` on the
-      `Not yet:` line) and has the formatting run in a second.
+      plans no rollout file and one commit; a part that cuts it creates the rollout file in three commits, each
+      leaving `check` green: by hand the file, its cache in `.gitignore` and `rolled out via` on the `Not yet:`
+      line; the formatting run; by hand the CI step running `check` with it.
 - [ ] Variant C: the design point finds that #53's plan stands, since `single_quote` and `src/` are not taken in yet;
       no new plan is written, and the run goes on to the implement point with it.
-- [ ] Variant C: the implementation creates the rollout file in a first commit typed by hand, as variant A's line
-      lists it, and has the formatting run, rollout file then main config, in a second.
+- [ ] Variant C: the implementation creates the rollout file in the three commits variant A's line lists, its
+      formatting run being the rollout file's, then the main config's.
 - [ ] Variant A: Safety Net has a trace, and no Safety Net scan runs.
 - [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, and proposes no
       ticket to work for it.

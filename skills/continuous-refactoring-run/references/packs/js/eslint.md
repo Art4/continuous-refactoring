@@ -74,9 +74,8 @@ lands on code whose old findings are still suppressed.
   well, its rules being its own choice.
 - **Its ticket** is "ESLint: take in the remaining rules", a baseline ticket.
 - **A part** is one path step of one rule: an override block in the config that turns the rule on for the paths done
-  so far, or a rollout file of that shape. The fix is the tool's `--fix` run, with nothing typed by hand. Creating the block or
-  file, and the last part's removing it with the `Not yet:` entry, is a first commit before the run; a rule one part
-  takes in whole needs neither.
+  so far, or a rollout file of that shape. The fix is the tool's `--fix` run, with nothing typed by hand, in the commit that turns
+  the rule on, so that every commit leaves `npx eslint .` green; a rule one part takes in whole needs no block.
 
 ### Suppressions
 

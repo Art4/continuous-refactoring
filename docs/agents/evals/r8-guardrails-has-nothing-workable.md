@@ -19,7 +19,7 @@ No rejection is recorded, and no ticket, plan or pull request carries an `Opener
 Two Guardrails tickets are open, and no other Guardrails Stage has ever had a ticket:
 
 - #51 "PHPStan Level 6", with open pull request #52, mergeable, CI green.
-- #53 "PHP CS Fixer rollout", with no merge request. Its newest comment is an open question of the suite, "Take in
+- #53 "PHP CS Fixer: take in the remaining rules", with no merge request. Its newest comment is an open question of the suite, "Take in
   the `@PER-CS2.0` set rule by rule, or the rules your old config listed first?", with no answer after it.
 
 No PHPMD, coverage floor or coverage metadata is in place; nothing else of Guardrails runs in CI. No Investigation
