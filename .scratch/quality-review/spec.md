@@ -103,6 +103,16 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q67 | The scan report names the Stages held back in one line, chains summed up: "Later, once what blocks them is filed: …" (ticket 15) |
 | Q68 | A call that names a Stage beyond the horizon files it, with the blockers between it and the horizon that have no ticket (ticket 15) |
 | Q69 | A rollout Stage is always titled "<Tool>: take in the remaining rules", also when filed before its adoption (ticket 15) |
+| Q70 | A rollout part that creates its rollout file or ruleset has two commits: by hand the rollout file, the CI line, the `.gitignore` entry and the `Not yet:` comment's "rolled out via …"; then the tool's run with nothing typed by hand. All three rollout Tools alike (ticket 16) |
+| Q71 | No fixed CI invocation set up at the adoption: CI changes with the part that needs it, as in Q70; PHPMD's paths live in the command anyway (ticket 16) |
+| Q72 | An earlier plan of a rollout part stands while its rule and paths are still not taken in; no new plan is written. All three rollout Tools alike (ticket 16) |
+| Q73 | A rule whose first part is also its last gets no rollout file: its `false` line or `<exclude>` goes and the tool runs, one commit; the *MR scope* says so (ticket 16) |
+| Q74 | The last part of a rule also has two commits: by hand the rollout file or ruleset deleted with its CI command, its `.gitignore` entry and the rule's `false` line or `<exclude>`; then the main config's run. PHPMD has no tool run: its fixes and that commit (ticket 16) |
+| Q75 | Selection with one workable ticket stays a decision point, since declining or ending is a real choice; step 3 says so in one sentence (ticket 17) |
+| Q76 | The **Status** line counts everything that needs a human now and that the run saw: its own merge request and open question, the merge requests of reconcile's *In review* line, unanswered questions on tickets; each gets its recommendation in **Next**, the Driver's pause list as the model (ticket 18) |
+| Q77 | A Housekeeping ticket that is not due does not count and is not named in the **Status** line (ticket 18) |
+| Q78 | The fixture for r7 and r8 is `fixtures/php/php-app-onboarded`, with the GitHub template's operations and a **Housekeeping** bullet; their *Situation* names `roave-bc-check` and `bc-promise` as on request and never asked for (ticket 19) |
+| Q79 | Order: this decisions PR, then one PR per ticket in the order 19, 16, 17, 18; each plays its scenarios on the human's go (tickets 16–19) |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
