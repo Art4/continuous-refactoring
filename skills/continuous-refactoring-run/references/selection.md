@@ -1,9 +1,10 @@
 # Reference: selecting a ticket
 
 Picks the one ticket of a tooling Track this run works, and makes sure its Stage still needs the work.
-Reads the worklist (`worklist.md`), the parser's seedless call for the tree's order, and a call whose seed holds
-the Packs and the runtime judged this run (`worklist.md`, *5. Judge what applies*) for what the runtime blocks
-(`tooling-parser.md`).
+Reads the worklist (`worklist.md`), the parser's seedless call for the tree's order, and for what the runtime
+blocks (`tooling-parser.md`) a call whose seed holds the Packs and the runtime judged this run (`worklist.md`,
+*5. Judge what applies*): one this run made, such as the call with the seed from the trace, or else one of its
+own with `packs`, `not_applicable`, `runtime`, and in `requested` the Stages of an open ticket's Tool on request.
 
 Decision points here are laid out as `../SKILL.md`, *Decision points*, says.
 

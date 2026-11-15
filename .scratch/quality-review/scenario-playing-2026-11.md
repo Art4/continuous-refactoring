@@ -302,3 +302,11 @@ Safety Net check and the other Track's Stages; the Opener search only inside the
 "in review" counting pull requests or tickets; naming a principle in a forge-facing plan; "judged once" against the
 pick-up check's "again"; a title form for Stages with no verb; where the new Housekeeping line goes; whether blocked
 tickets filed this run wait for the human; `search` words naming a sibling's Tool.
+
+**From the play for ticket 21** (r7 A on d733650: player 114k, judge 51k, pass). Fixed before merge, wording only:
+"such as the trace's" read as if the trace were a parser call; it now names the call with the seed from the trace.
+Named a third time, a ticket under Q81: `implement-point.md`'s "nothing typed by hand" against the `false` line
+deleted by hand in the tool's commit (tickets 11 and 12, ticket 17, here); filed as ticket 22. Named a second time:
+`gh pr ready` with no decision point of its own; the trace's "delivered a part" condition missing from Track
+choice's table (ticket 18's r7 A). Named once: the part's name for the branch of a rollout part; no fallback to the
+`Not yet:` counts where the fresh measurement's temporary config may not be written.

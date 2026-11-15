@@ -43,6 +43,8 @@ was installed, and the first Safety Net scan found it in place.
       fulfilled.
 - [ ] The run does not end on the Safety Net; no "Safety Net is waiting for merges" or "Safety Net is unfinished".
 - [ ] Track choice recommends Guardrails, and selection picks #53, not #51.
+- [ ] Variant A: selection's check for what the runtime blocks reads a seeded call this run already made, and makes
+      none of its own.
 - [ ] Selection, with #53 its only workable ticket and nothing to close, still lays out its decision point: working
       #53 recommended, declining its Stage, Tool or Role, or ending the run as options.
 - [ ] Variant A: the design point finds no plan on #53 that stands and goes on to *Who plans*, which says in one
@@ -92,3 +94,4 @@ every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 2026-11-15, on 24796f1 with selection's decision point for one workable ticket and nothing to close: variant A passes, every line, as a walk-through, by one player.
 2026-11-15, on 060f874 with the Status line counting every merge request in review and unanswered question the run saw: variant A passes, every line, as a walk-through, by one player.
 2026-11-15, on 43a5b88 with the rollout Stages named as their tickets are titled: variant A passes, every line, as a walk-through, by one player.
+2026-11-15, on d733650 with selection's runtime check reading a seeded call the run already made: variant A passes, every line, as a walk-through, by one player. Then the text named that call as the one with the seed from the trace, wording only.

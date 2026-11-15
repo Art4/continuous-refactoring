@@ -1,0 +1,1 @@
+Selection now says which parser call its check for what the runtime blocks reads: a seeded call the run already made, or else one of its own with the Packs, the Stages that do not apply and the runtime.
