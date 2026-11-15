@@ -76,7 +76,7 @@
         },
         {
           "slug": "php-cs-fixer-rollout",
-          "name": "PHP CS Fixer Rollout",
+          "name": "PHP CS Fixer: take in the remaining rules",
           "track": "Guardrails",
           "requires": ["php-cs-fixer-adoption"],
           "waits_for": []
@@ -151,7 +151,7 @@
         },
         {
           "slug": "phpmd-rollout",
-          "name": "PHPMD Rollout",
+          "name": "PHPMD: take in the remaining rules",
           "track": "Guardrails",
           "requires": ["phpmd-adoption"],
           "waits_for": []

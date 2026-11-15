@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`, `skills/continuous-refactoring-run/references/packs/php/pack.json`
 
 ## Situation
 
@@ -35,6 +35,7 @@ was installed, and the first Safety Net scan found it in place.
 ## Expected
 
 - [ ] The worklist gives #51 the state in review and #53 workable, both in Guardrails.
+- [ ] The worklist matches #53 to `php-cs-fixer-rollout` by that Stage's Name, which its title holds.
 - [ ] Reconcile names #51 as in review in one sentence and lays out no decision point for it.
 - [ ] The worklist judges, before any trace is asked, that the generic and the PHP Pack apply and that
       `roave-bc-check` does not, putting it into `not_applicable`.

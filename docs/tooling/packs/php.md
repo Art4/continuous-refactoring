@@ -33,9 +33,9 @@ flowchart TD
     r_code_style(["Code Style"])
   end
   subgraph t_guardrails["Guardrails"]
-    s_php_cs_fixer_rollout["PHP CS Fixer Rollout"]
+    s_php_cs_fixer_rollout["PHP CS Fixer: take in the remaining rules"]
     s_phpmd_adoption["PHPMD"]
-    s_phpmd_rollout["PHPMD Rollout"]
+    s_phpmd_rollout["PHPMD: take in the remaining rules"]
     s_coverage_floor["Test Coverage Floor"]
     s_coverage_metadata_required["Test Coverage: Metadata Required"]
     s_coverage_metadata_strict["Test Coverage: Strict Metadata"]
@@ -150,12 +150,12 @@ Solid arrow: requires · dashed arrow: waits for · solid outline: recommended �
 | PSR-4 Autoloading (`psr-4`) | `psr-4` | Safety Net | `composer` | – | – |
 | Roave Backward Compatibility Check (`roave-bc-check`) | `roave-bc-check` | Safety Net | `composer` | `ci-runner` | A part of the project's BC promise (the BC promise operation of its tracker file) that covers code composer.json's autoload section names follows semantic versioning, and the repository has at least one Git tag in the form x.y.z. An unsettled BC promise, or an unsettled part, does not count. |
 | PHP CS Fixer (`php-cs-fixer-adoption`) | `php-cs-fixer` | Safety Net | `composer` | `editorconfig` | – |
-| PHP CS Fixer Rollout (`php-cs-fixer-rollout`) | `php-cs-fixer` | Guardrails | `php-cs-fixer-adoption` | – | – |
+| PHP CS Fixer: take in the remaining rules (`php-cs-fixer-rollout`) | `php-cs-fixer` | Guardrails | `php-cs-fixer-adoption` | – | – |
 | Laravel Pint (`pint`) | `pint` | Safety Net | `composer` | – | – |
 | Easy Coding Standard (`ecs`) | `ecs` | Safety Net | `composer` | – | – |
 | PHP_CodeSniffer (`phpcs`) | `phpcs` | Safety Net | `composer` | – | – |
 | PHPMD (`phpmd-adoption`) | `phpmd` | Guardrails | `composer` | – | – |
-| PHPMD Rollout (`phpmd-rollout`) | `phpmd` | Guardrails | `phpmd-adoption` | – | – |
+| PHPMD: take in the remaining rules (`phpmd-rollout`) | `phpmd` | Guardrails | `phpmd-adoption` | – | – |
 | PHPUnit (`phpunit`) | `phpunit` | Safety Net | `composer` | – | – |
 | Test Coverage Floor (`coverage-floor`) | `test-coverage-floor` | Guardrails | `phpunit` | – | – |
 | Test Coverage: Metadata Required (`coverage-metadata-required`) | `test-coverage-floor` | Guardrails | `coverage-floor` | – | – |
