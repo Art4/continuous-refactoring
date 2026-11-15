@@ -275,3 +275,10 @@ Already in tickets: selection with one entry (17), the Status count (18). Named 
 part" has no measure; the `Not yet:` count after a partial part; the worklist's Search by Name against a title
 without "Rollout" (the ticket's text carries its `search` words); the pick-up check of a rollout read by analogy to the
 baseline; the fixture's Housekeeping template lacks the adoptions' lines.
+
+**From the play for ticket 17** (r7 A on 24796f1: player 108k, judge ~50k, pass). Named a second time, no ticket yet
+under Q81: matching #53 to its Stage when the title lacks the Name's "Rollout" (ticket 16's second play); the
+fixture's Housekeeping template lacks the adoptions' lines (ticket 16's first play); which seed selection's runtime call
+takes (ticket 13's plays). Already in tickets: the Status count (18). Named once: `implement-point.md`'s "nothing
+typed by hand" against the `false` line deleted with the run; the on-request Tools never shown to the human in a run
+without a scan; the PHPStan Levels' shared search word bringing back the siblings' tickets.

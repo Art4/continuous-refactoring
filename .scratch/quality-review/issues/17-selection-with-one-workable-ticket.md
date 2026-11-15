@@ -1,7 +1,7 @@
 # 17 — Selection lays out a decision point for one workable ticket
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r7 A and the probe p1 B on 2026-11-12; named twice, so a ticket under Q54).
