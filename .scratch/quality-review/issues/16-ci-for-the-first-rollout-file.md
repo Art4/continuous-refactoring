@@ -1,7 +1,7 @@
 # 16 — The part that creates a rollout file does not say it adds it to CI
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r7 on 2026-11-11, r7 A on 2026-11-12; named twice, so a ticket under Q54).

@@ -113,6 +113,7 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q77 | A Housekeeping ticket that is not due does not count and is not named in the **Status** line (ticket 18) |
 | Q78 | The fixture for r7 and r8 is `fixtures/php/php-app-onboarded`, with the GitHub template's operations and a **Housekeeping** bullet; their *Situation* names `roave-bc-check` and `bc-promise` as on request and never asked for (ticket 19) |
 | Q79 | Order: this decisions PR, then one PR per ticket in the order 19, 16, 17, 18; each plays its scenarios on the human's go (tickets 16–19) |
+| Q80 | Sharpens Q70 and Q74: every commit of a rollout part stays green. What only sets up or takes down is a commit by hand; what switches a rule on goes with the run that satisfies it, as at the adoption. PHP CS Fixer creating: file, `.gitignore`, `rolled out via` / run / CI step; last: CI step and file gone / `false` line with the main config's run. PHPMD creating: ruleset / fixes / command; last: command and ruleset gone / fixes with the `<exclude>`. ESLint: the block with its `--fix` run, one commit (ticket 16, from the r7 C play) |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
