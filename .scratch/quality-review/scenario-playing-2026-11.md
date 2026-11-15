@@ -282,3 +282,13 @@ fixture's Housekeeping template lacks the adoptions' lines (ticket 16's first pl
 takes (ticket 13's plays). Already in tickets: the Status count (18). Named once: `implement-point.md`'s "nothing
 typed by hand" against the `false` line deleted with the run; the on-request Tools never shown to the human in a run
 without a scan; the PHPStan Levels' shared search word bringing back the siblings' tickets.
+
+**From the plays for ticket 18** (r7 A 111k, r8 A 126k, judge for both; both pass on 060f874). Named a third time or
+more, tickets under Q81: matching #53 to the rollout Stage when its title, as the Tool file names it, lacks the Name's
+"Rollout" (ticket 16's second play, ticket 17's play, r7 A and r8 A here); which seed selection's runtime check takes
+(ticket 13's plays, ticket 17's play, r7 A here). Named a second time: "several tiny rules may share a part" with no
+measure (ticket 16's first play, r7 A). Named once: the not-due Housekeeping ticket read as "workable"; how a ticket
+that delivered a part is recognised for the trace; no fallback for a pull request title convention; the trace's seed
+reading as circular before a Track has a trace; r8's question naming `@PER-CS2.0` against the config's `@PER-CS3x0`
+(a scenario point); a Housekeeping slice "before the changelog entry" where the target has no changelog; judging the
+recognized Tools' first Stages in a due scan; PHPMD 3.x assumed stable; what the scan's count totals.
