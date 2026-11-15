@@ -42,6 +42,8 @@ was installed, and the first Safety Net scan found it in place.
       fulfilled.
 - [ ] The run does not end on the Safety Net; no "Safety Net is waiting for merges" or "Safety Net is unfinished".
 - [ ] Track choice recommends Guardrails, and selection picks #53, not #51.
+- [ ] Selection, with #53 its only workable ticket and nothing to close, still lays out its decision point: working
+      #53 recommended, declining its Stage, Tool or Role, or ending the run as options.
 - [ ] Variant A: the design point finds no plan on #53 that stands and goes on to *Who plans*, which says in one
       sentence that the suite plans, as the run is autonomous; the plan follows `planning-a-baseline-ticket.md`.
 - [ ] Variant A: the plan takes in `native_function_casing`, the rule in the fewest files. A part that takes it whole

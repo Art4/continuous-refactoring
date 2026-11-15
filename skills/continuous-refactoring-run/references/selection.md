@@ -44,6 +44,8 @@ Step 2 is done at the first ticket that is the one to work, or when the list is 
   recommendation); work another of the remaining ones; decline a ticket's Stage, its Tool or its Role, which records a rejection
   (`rejection.md`); end the run.
 - A ticket the human chooses that step 2 has not checked gets its pick-up check before the hand-over.
+- **One workable ticket and nothing to close** is still a decision point: declining it or ending the run is a real
+  choice beside working it.
 
 Close each fulfilled ticket per **Done** with its note — no merge request belongs to it — and report each.
 
