@@ -118,6 +118,10 @@ Grilled on 2026-11-06 (`/grilling`).
 | Q82 | The rollout Stages of PHP CS Fixer and PHPMD are named as their tickets are titled, as ESLint's already is: "PHP CS Fixer: take in the remaining rules", "PHPMD: take in the remaining rules". Name, title and search word are one, the Name stands in the title, and Q69's exception falls away (ticket 20) |
 | Q83 | Selection's runtime check reuses a call of this run whose seed holds the Packs and the runtime judged, such as the trace's; only where none was made does it make its own, with `packs`, `not_applicable` and `runtime` (ticket 21) |
 | Q84 | Order: this decisions PR, then ticket 20, then ticket 21, one PR each; r7 and r8 played on the human's go (tickets 20, 21) |
+| Q85 | "Nothing typed by hand" in a tool's commit means no code: `implement-point.md` says the tool's run holds no code typed by hand, only the tool's changes and the configuration line that switches them on, as Q80 decided (ticket 22) |
+| Q86 | The Tool files say the same: `php-cs-fixer.md`'s adoption commit and `eslint.md`'s rollout part read "with no code typed by hand"; the pure formatting run of a rollout file's part keeps "nothing typed by hand" (ticket 22) |
+| Q87 | Wording only, no behaviour moves: the players already followed the Tool files, so ticket 22 plays no scenario and says so (ticket 22) |
+| Q88 | Order: this decisions PR, then ticket 22, one PR each (ticket 22) |
 | Q12 | Superseded by Q23. A term ships in the glossary when `CONTEXT.md` marks it explicitly; the glossary is `skills/continuous-refactoring-run/references/glossary.md`; the pointer in `tooling-model.md` aims at it; the Driver and Housekeeping reach it through `../continuous-refactoring-run/` |
 
 ## Strands
