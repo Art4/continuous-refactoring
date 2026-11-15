@@ -70,3 +70,4 @@ tickets and picking PHPMD.
 
 2026-11-13, on 6fe1dd2 with a scan that files a chain only two levels deep: pass, every line, all three variants, as walk-throughs, A and C by one player. Variant C's last line had expected the run to end, but Track choice rightly went on to Investigation, which always has something; the line now asks only that Guardrails is not recommended. Then the trace's two closing bullets said "within the horizon" and "or beyond the horizon", and its seed takes the Stages known so far, wording only.
 2026-11-15, on 060f874 with the Status line counting every merge request in review and unanswered question the run saw: variant A passes, every line, as a walk-through, by one player.
+2026-11-15, on 43a5b88 with the rollout Stages named as their tickets are titled: variant A passes, every line, as a walk-through, by one player.

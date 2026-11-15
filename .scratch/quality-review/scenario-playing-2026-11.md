@@ -292,3 +292,13 @@ that delivered a part is recognised for the trace; no fallback for a pull reques
 reading as circular before a Track has a trace; r8's question naming `@PER-CS2.0` against the config's `@PER-CS3x0`
 (a scenario point); a Housekeeping slice "before the changelog entry" where the target has no changelog; judging the
 recognized Tools' first Stages in a due scan; PHPMD 3.x assumed stable; what the scan's count totals.
+
+**From the plays for ticket 20** (r7 A 109k, r8 A 122k, judge 71k; both pass on 43a5b88). Fixed before merge:
+`planning-a-baseline-ticket.md` named a PHP CS Fixer part only as a path step or the last, leaving out the rule taken
+in whole that Q73 decided; it now reads like PHPMD's paragraph. Named a second time: the changelog entry a Housekeeping
+slice goes before, where the target keeps none (ticket 18's r8 A); the fixture's `Not yet:` counts against a
+measurement of its two files (ticket 18's r7 A). Named once: a title holding two Stages' full Names; the seed for the
+Safety Net check and the other Track's Stages; the Opener search only inside the trace; the Housekeeping due date;
+"in review" counting pull requests or tickets; naming a principle in a forge-facing plan; "judged once" against the
+pick-up check's "again"; a title form for Stages with no verb; where the new Housekeeping line goes; whether blocked
+tickets filed this run wait for the human; `search` words naming a sibling's Tool.
