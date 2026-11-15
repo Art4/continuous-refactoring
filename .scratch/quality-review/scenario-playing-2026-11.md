@@ -268,8 +268,8 @@ tickets; `gh pr ready` with no decision point of its own.
 **From the plays for ticket 16** (r7 A and C on ce3497e: player 124k, judge 51k, pass; again on faadd3a: player 119k,
 judge 54k, pass). Fixed before merge: the first play showed a part's set-up commit with the CI step red until the
 formatting run, so every commit now stays green (Q80); "has none" for a single-part rule now says one commit and no
-rollout file; #53 in r7 and r8 is titled as the Tool file names it. Named a second time, candidates for a ticket under
-Q54: the options a rollout file gives an extra rule the preset does not hold (both plays); a standing plan from an
+rollout file; #53 in r7 and r8 is titled as the Tool file names it. Named a second time, no ticket yet under
+Q81 (three times needed): the options a rollout file gives an extra rule the preset does not hold (both plays); a standing plan from an
 earlier run that names no slices, and whether it wins over a fresh measurement of the fewest files (both plays).
 Already in tickets: selection with one entry (17), the Status count (18). Named once: "several tiny rules may share a
 part" has no measure; the `Not yet:` count after a partial part; the worklist's Search by Name against a title
