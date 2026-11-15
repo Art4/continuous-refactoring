@@ -47,6 +47,8 @@ has an open pull request of the suite, mergeable, CI green. PHPStan Levels 8, 9 
       on #53.
 - [ ] Variant A: the scan proposes PHPStan Level 7, blocked by #51, and no ticket for Levels 8 to 10; its report
       names them in a *Later* line, behind Level 7.
+- [ ] Variant A: **Status** opens with three things that wait for the human — #52, the open question on #53 and the
+      run's own pull request — and does not count the Housekeeping ticket.
 - [ ] Variant B: no Guardrails scan runs; Track choice recommends Guardrails, and selection picks #53.
 - [ ] Variant C: the trace finds PHPStan Levels 8 to 10 not known but beyond the horizon, from a parser call with the
       seed from the trace, and counts them as accounted for; no Guardrails scan runs.

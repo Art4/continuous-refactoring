@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`
 
 ## Situation
 
@@ -55,6 +55,8 @@ was installed, and the first Safety Net scan found it in place.
 - [ ] Variant C: the implementation creates the rollout file in the three commits variant A's line lists, its
       formatting run being the rollout file's, then the main config's.
 - [ ] Variant A: Safety Net has a trace, and no Safety Net scan runs.
+- [ ] Variant A: **Status** opens with two things that wait for the human, #52 and the run's own pull request, and
+      does not count the Housekeeping ticket; **Next** gives each of the two its recommendation.
 - [ ] Variant B: Safety Net has no trace, its scan runs, judges Rector type coverage fulfilled, and proposes no
       ticket to work for it.
 - [ ] Variant B: filing creates one ticket for Rector type coverage and closes it at once as done, its text naming

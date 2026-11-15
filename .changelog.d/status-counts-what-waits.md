@@ -1,0 +1,1 @@
+A run's closing **Status** line now says what it counts as waiting for you: every merge request in review and every unanswered question of the suite the run came across, its own among them. A Housekeeping ticket that is not due yet is not counted.
