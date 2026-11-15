@@ -1,7 +1,7 @@
 # 21 — Which call selection's runtime check takes
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (ticket 13's plays, ticket 17's play, r7 A for ticket 18; named three times, so a ticket
