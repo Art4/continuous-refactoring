@@ -110,8 +110,8 @@ got there. Its proposal is titled "PHPMD: replace the baseline"; the merge reque
 (`packs/php/phpmd.md`, *MR scope*).
 
 **A rollout Stage** (PHPMD, PHP CS Fixer, ESLint) is not fulfilled while its config marks a rule `Not yet:` or a
-rollout file or ruleset exists; the check of its ticket is whether either is left. Its proposal is titled as its
-Tool file names the ticket, "<Tool>: take in the remaining rules", also when proposed before the adoption.
+rollout file or ruleset exists; the check of its ticket is whether either is left. Its proposal is titled by its Name,
+"<Tool>: take in the remaining rules", also when proposed before the adoption.
 
 **Which Tool fills a Role.** The report says, per Role the Track's Stages need, which Tool fills it, and
 which Tool is not proposed because another took its place (`tools` marks it `out`).

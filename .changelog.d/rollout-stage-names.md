@@ -1,0 +1,1 @@
+The rollout Stages of PHP CS Fixer and PHPMD are now named as their tickets are titled — "PHP CS Fixer: take in the remaining rules", "PHPMD: take in the remaining rules" — as ESLint's already was, so a run finds an open rollout ticket by its Stage's Name.

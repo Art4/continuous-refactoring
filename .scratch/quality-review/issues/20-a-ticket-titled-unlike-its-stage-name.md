@@ -1,7 +1,7 @@
 # 20 — A ticket titled as its Tool file names it does not carry its Stage's Name
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (ticket 16's second play, ticket 17's play, r7 A and r8 A for ticket 18; named four times,

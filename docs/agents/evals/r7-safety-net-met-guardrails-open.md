@@ -2,7 +2,7 @@
 
 Played as a walk-through, once per variant.
 
-Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`
+Covers: `skills/continuous-refactoring-run/SKILL.md`, `skills/continuous-refactoring-run/references/worklist.md`, `skills/continuous-refactoring-run/references/reconcile.md`, `skills/continuous-refactoring-run/references/design-point.md`, `skills/continuous-refactoring-run/references/track-choice.md`, `skills/continuous-refactoring-run/references/track-scan.md`, `skills/continuous-refactoring-run/references/filing-a-ticket.md`, `skills/continuous-refactoring-run/references/selection.md`, `skills/continuous-refactoring-run/references/tooling-parser.md`, `skills/continuous-refactoring-run/references/planning-a-baseline-ticket.md`, `skills/continuous-refactoring-run/references/packs/php/php-cs-fixer.md`, `skills/continuous-refactoring-run/references/packs/php/pack.json`
 
 ## Situation
 
@@ -35,6 +35,7 @@ was installed, and the first Safety Net scan found it in place.
 ## Expected
 
 - [ ] The worklist gives #51 the state in review and #53 workable, both in Guardrails.
+- [ ] The worklist matches #53 to `php-cs-fixer-rollout` by that Stage's Name, which its title holds.
 - [ ] Reconcile names #51 as in review in one sentence and lays out no decision point for it.
 - [ ] The worklist judges, before any trace is asked, that the generic and the PHP Pack apply and that
       `roave-bc-check` does not, putting it into `not_applicable`.
@@ -90,3 +91,4 @@ every line, as a walk-through; #53 is workable, so no Guardrails scan runs.
 2026-11-14, on faadd3a with a rollout part's commits each green, a standing rollout plan and the fixture `php-app-onboarded`: variants A and C pass, every line, as a walk-through, by one player. An earlier play on ce3497e passed too and showed the set-up commit red under its own CI step, which the change then fixed.
 2026-11-15, on 24796f1 with selection's decision point for one workable ticket and nothing to close: variant A passes, every line, as a walk-through, by one player.
 2026-11-15, on 060f874 with the Status line counting every merge request in review and unanswered question the run saw: variant A passes, every line, as a walk-through, by one player.
+2026-11-15, on 43a5b88 with the rollout Stages named as their tickets are titled: variant A passes, every line, as a walk-through, by one player.
