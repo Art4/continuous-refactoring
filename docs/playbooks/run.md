@@ -83,7 +83,7 @@ A ticket waits until that comment is answered. **Answer by commenting on the tic
 - **"Safety Net is unfinished"** — an autonomous run found nothing workable in Safety Net while Safety Net is unfinished. The report lists the Safety Net's tickets alone: in review with their merge requests, blocked and waiting with their reasons. Merge or answer them, or name another Track.
 - **Nobody answered** a decision point of an interactive run.
 
-Every run closes with two lines. **Status** opens with how many things wait for you, or that none does, and says what happened and where it ended; **Next** says what you can do now, and for each thing that waits what the suite recommends and what happens if you do not answer. Where a claim could not be confirmed — CI still running, checks unreadable — the report says so.
+Every run closes with two lines. **Status** opens with how many things wait for you — every merge request in review and every unanswered question of the suite the run came across, its own among them — or that none does, and says what happened and where it ended; **Next** says what you can do now, and for each thing that waits what the suite recommends and what happens if you do not answer. Where a claim could not be confirmed — CI still running, checks unreadable — the report says so.
 
 ## Running it regularly
 

@@ -47,6 +47,8 @@ has an open pull request of the suite, mergeable, CI green. PHPStan Levels 8, 9 
       on #53.
 - [ ] Variant A: the scan proposes PHPStan Level 7, blocked by #51, and no ticket for Levels 8 to 10; its report
       names them in a *Later* line, behind Level 7.
+- [ ] Variant A: **Status** opens with three things that wait for the human — #52, the open question on #53 and the
+      run's own pull request — and does not count the Housekeeping ticket.
 - [ ] Variant B: no Guardrails scan runs; Track choice recommends Guardrails, and selection picks #53.
 - [ ] Variant C: the trace finds PHPStan Levels 8 to 10 not known but beyond the horizon, from a parser call with the
       seed from the trace, and counts them as accounted for; no Guardrails scan runs.
@@ -67,3 +69,4 @@ tickets and picking PHPMD.
 2026-11-11, on 6011078 with the trace asked beside a ticket that has delivered a part, and the baseline ticket defined: pass, every line, both variants, as a walk-through, by one player. Then the trace's sentence was split for reading, and its search keeps only hits that match the Stage.
 
 2026-11-13, on 6fe1dd2 with a scan that files a chain only two levels deep: pass, every line, all three variants, as walk-throughs, A and C by one player. Variant C's last line had expected the run to end, but Track choice rightly went on to Investigation, which always has something; the line now asks only that Guardrails is not recommended. Then the trace's two closing bullets said "within the horizon" and "or beyond the horizon", and its seed takes the Stages known so far, wording only.
+2026-11-15, on 060f874 with the Status line counting every merge request in review and unanswered question the run saw: variant A passes, every line, as a walk-through, by one player.

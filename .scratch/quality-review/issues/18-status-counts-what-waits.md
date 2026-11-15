@@ -1,7 +1,7 @@
 # 18 — What the Status line counts as waiting for the human
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (r8 on 2026-11-11, r7 A on 2026-11-12; named twice, so a ticket under Q54). The run's
