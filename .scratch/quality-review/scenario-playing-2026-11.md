@@ -310,3 +310,13 @@ deleted by hand in the tool's commit (tickets 11 and 12, ticket 17, here); filed
 `gh pr ready` with no decision point of its own; the trace's "delivered a part" condition missing from Track
 choice's table (ticket 18's r7 A). Named once: the part's name for the branch of a rollout part; no fallback to the
 `Not yet:` counts where the fresh measurement's temporary config may not be written.
+
+## Closing balance (2026-11-16)
+
+Every ticket of the plan is done, 01–10 and 11–22 from the plays. d9 passes in the maintainer's real sessions.
+Left in this log without a ticket, under Q81, named twice: `gh pr ready` with no decision point of its own; the trace's
+"delivered a part" condition missing from Track choice's table; "several tiny rules may share a part" with no
+measure; the options a rollout file gives an extra rule the preset does not hold; a standing plan that names no
+slices against a fresh measurement; the changelog entry a Housekeeping slice goes before, where the target keeps
+none; the fixture's `Not yet:` counts against a measurement of its files. Everything else was named once. A third
+naming in a later play makes any of them a ticket.

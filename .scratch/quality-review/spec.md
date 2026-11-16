@@ -1,6 +1,6 @@
 # quality-review
 
-**Status:** open — grilled and confirmed on 2026-11-06, tickets 01–10 filed
+**Status:** done — grilled and confirmed on 2026-11-06, tickets 01–10 filed, 11–22 from the plays; all done on 2026-11-16
 
 What came out of a critical review of the suite at 0.11.0 on 2026-11-06, gone through with the maintainer point by
 point. Five strands of work stand; three points of the review were rejected (*Not in this plan*).
