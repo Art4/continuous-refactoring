@@ -50,7 +50,12 @@ Variant B: `/continuous-housekeeping autonomous`
       `CheckoutTest`'s `#[UsesClass]` lines and `OrderFlowTest` as an integration test with neither size nor an
       empty list.
 - [ ] Variant B: one ticket is filed for `coverage-metadata-strict`; its proposal says to delete `CheckoutTest`'s
-      list, to give `OrderFlowTest` `#[Medium]` and delete its list, and to leave `CartTest` as it is.
+      list, to give `OrderFlowTest` `#[Medium]` and delete its list, and proposes no change to `CartTest`.
 - [ ] Variant B: no other Stage is judged not fulfilled, and the run reaches the remaining tasks of #70.
 
 ## Results
+
+2026-11-16, on 1732a4b, the scenario's first playing: both variants pass, every line, as a walk-through, by one player.
+Variant B's line on `CartTest` first asked the ticket to name it as left alone; it was reworded to "proposes no
+change", which the record shows, and judged again. Then the rule `tests/README.md` gains says that neither an
+integration nor a functional test lists what it uses, since a run on another ticket reads the rules there.

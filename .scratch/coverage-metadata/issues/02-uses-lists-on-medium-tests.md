@@ -1,7 +1,7 @@
 # 02 — No `#[UsesClass]` lists on medium and large tests
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 From GitHub issue #279. A target that followed `coverage-metadata-strict` ended up with `#[UsesClass]` lists of

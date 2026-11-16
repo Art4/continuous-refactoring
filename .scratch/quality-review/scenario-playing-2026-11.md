@@ -320,3 +320,11 @@ measure; the options a rollout file gives an extra rule the preset does not hold
 slices against a fresh measurement; the changelog entry a Housekeeping slice goes before, where the target keeps
 none; the fixture's `Not yet:` counts against a measurement of its files. Everything else was named once. A third
 naming in a later play makes any of them a ticket.
+
+**From the play for GitHub issue #279** (r12 A and B on 1732a4b: player 135k, judge 55k, B re-judged after a scenario
+fix: pass). Fixed before merge: the rule `tests/README.md` gains now says that a medium or large test lists nothing,
+since a run on an Investigation ticket reads the rules there, not the Pack file. Named once, in both variants: writes
+before the first decision point (Claim, branch) against "everything before it is read-only". Named once: a pure move slice under test-first; a default for a new constructor argument;
+the fixture's CI without a coverage job; which Housekeeping lines count as new; whether Housekeeping removes the
+lists itself rather than filing a ticket; `phpunit.md`'s layout naming integration tests by folder; *Judging a Stage*
+with evidence partly gone; the "Search words:" line against the rule on forge-facing text.
