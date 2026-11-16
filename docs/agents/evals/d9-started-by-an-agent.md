@@ -33,3 +33,7 @@ time and the human ended it at its first question, so what such a run does after
 the human's report; the target's state was not read here.
 
 2026-11-07, on 0e29b63: not played — it needs a real top-level session.
+
+2026-11-16, in the maintainer's real sessions on the shipped skills of recent days: pass, every line. A subagent asked
+to call the Driver ended with a pointer to how the skill is to be called; a run was chosen each time, by skill call and
+by description; the Driver also re-invoked itself at its cadence. Rests on the human's report.
