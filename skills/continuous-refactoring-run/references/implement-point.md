@@ -47,7 +47,7 @@ merge request is its own matter. Then go to step 4.
 
 - **A tooling ticket** → make the change the plan's slices name: a dependency, configuration, a CI job.
   Where the tool rewrites code (Rector, a code-style fixer), the tool's own run is one commit and holds
-  nothing typed by hand. No test is written.
+  no code typed by hand: only the tool's changes and the configuration line that switches them on. No test is written.
 - **A baseline ticket** → no test is written: the existing suite is what notices a behaviour change. By its list:
   - a baseline: fix file by file, one commit per file, following the tool's diagnosis; then regenerate the
     baseline with the command the plan names and commit it by itself;

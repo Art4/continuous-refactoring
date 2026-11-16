@@ -1,7 +1,7 @@
 # 22 — A hand edit in the tool's own commit
 
 Type: task
-Status: open
+Status: done
 Blocked by: —
 
 **What the plays showed** (tickets 11 and 12, ticket 17, r7 A for ticket 21; named three times, so a ticket under
