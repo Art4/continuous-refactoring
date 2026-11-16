@@ -17,7 +17,7 @@ The Tool for the Role Test Coverage in the PHP Pack; measured with PHPUnit's own
 - **MR scope:** the two config settings, and the metadata on every test class, in the form the target's PHPUnit reads and the test file already uses — attributes (`#[CoversClass]`, `#[UsesClass]`) from PHPUnit 10, annotations (`@covers`, `@uses`) below it, Pest's `covers()` on Pest; no file mixes both forms.
   - A unit test covers exactly one class, the one it tests; another class it runs is listed as used, not covered.
   - A class whose coverage came only from the test of another class gets a test of its own, so the floor holds (the Ratchet's one exception, below, is for where it cannot).
-  - A test in `tests/Integration/` or `tests/Functional/` covers the class it enters through.
+  - An integration or functional test covers the class it enters through.
   - `tests/README.md` gains the rule "a unit test covers exactly one class, the one it tests; everything else it runs it uses", added to the target's file as it stands.
   - Where Infection is fulfilled (`infection.md`), it is run again in full: a mutant is now judged only by the tests that cover its line, so the score can drop, and its minimum follows the same rule as the floor.
 
@@ -26,8 +26,8 @@ The Tool for the Role Test Coverage in the PHP Pack; measured with PHPUnit's own
 Applies only on PHPUnit 10 or newer, and not on Pest: Pest has no counterpart to `#[UsesClass]`, so a Pest test that runs a collaborator has no way to name it. On PHPUnit 9 the Stage applies once the target moves to PHPUnit 10.
 
 - **Purpose:** every test also names what it runs without covering it, so code a test reaches by accident makes it risky instead of counting as covered. A class an extract creates then cannot slip in without its own test and without the old test saying it uses it.
-- **Fulfilment check:** the config of `coverage-metadata-required` and `beStrictAboutCoverageMetadata="true"`; the coverage-enabled run is green. PHPUnit applies this check only in a run that collects coverage, so the coverage floor's CI job is the gate, not the plain test job.
-- **MR scope:** the setting; `#[UsesClass]` (or `#[UsesMethod]`) on every unit test for the code it runs but does not cover; `#[Medium]` on the test classes in `tests/Integration/` and `#[Large]` on those in `tests/Functional/`. PHPUnit skips this check for medium and large tests, so tests that run real collaborators keep their `#[CoversClass]` and need no list of everything behind it. `tests/README.md` gains the rule "a unit test lists what it uses; an integration test is `#[Medium]`, a functional test `#[Large]`", added to the target's file as it stands. Infection as for `coverage-metadata-required`.
+- **Fulfilment check:** the config of `coverage-metadata-required` and `beStrictAboutCoverageMetadata="true"`; every integration and functional test carries its size and no `#[UsesClass]` or `#[UsesMethod]`; the coverage-enabled run is green. PHPUnit applies this check only in a run that collects coverage, so the coverage floor's CI job is the gate, not the plain test job.
+- **MR scope:** the setting; `#[UsesClass]` (or `#[UsesMethod]`) on every unit test for the code it runs but does not cover; `#[Medium]` on every integration test, a test class that runs real collaborators on purpose, and `#[Large]` on every functional test, one that runs the application through its entry point, wherever they live (`tests/Integration/` and `tests/Functional/` as a rule). PHPUnit skips this check for medium and large tests, so tests that run real collaborators keep their `#[CoversClass]` and need no list of everything behind it. `tests/README.md` gains the rule "a unit test lists what it uses; an integration test is `#[Medium]`, a functional test `#[Large]`, and neither lists what it uses", added to the target's file as it stands. Infection as for `coverage-metadata-required`.
 
 ## The Ratchet: a floor that only climbs
 
@@ -40,5 +40,5 @@ A fixed percentage picked once (70%, 80%, …) would be unreachable on day one f
 The rules are the target's `tests/README.md`; this is what they mean for a change.
 
 - A new class gets a test of its own that covers it.
-- After an extract or a move, the tests that now run the new class without covering it list it as used. That is the metadata following the code, not a weaker check: the test's assertions stay as they are.
+- After an extract or a move, the unit tests that now run the new class without covering it list it as used. That is the metadata following the code, not a weaker check: the test's assertions stay as they are. A medium or large test lists nothing: it keeps its `#[CoversClass]` alone.
 - A test that covers the new class too, besides its own, is wrong under the rule; the new class's own test covers it.

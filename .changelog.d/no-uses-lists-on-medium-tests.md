@@ -1,0 +1,1 @@
+Under strict coverage metadata, integration and functional tests now carry their size (`#[Medium]`, `#[Large]`) and no `#[UsesClass]` list, wherever they live: an extract adds a used class only to unit tests, and a project whose integration tests carry such lists gets a ticket to remove them.
