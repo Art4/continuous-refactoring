@@ -4,7 +4,7 @@ All notable changes to this project are documented here. Format inspired by
 [Keep a Changelog](https://keepachangelog.com/), kept flat (no `Added`/`Changed`/`Fixed`
 subcategories) — see `CONTRIBUTING.md`'s "Changelog" section for how entries are produced.
 
-## [0.12.0] - 2026-11-16
+## [0.12.0] - 2026-11-17
 
 - The suite now notices when one of its merge requests can no longer merge — a conflict after another one landed, a branch the forge refuses to merge while behind, or CI failing from an outdated base — and brings it onto the default branch itself, by rebase or merge as the project's history does it. Only a conflict that needs a decision is handed to you, on the merge request; nothing is pushed then.
 - A merge request of the suite is now a draft while the suite still works on it: it opens as a draft, and becomes ready once the Driver's review passes it — or, for a run alone, once CI is green. A request for changes or a question makes it a draft again, with a comment saying why. Make one a draft yourself and the suite leaves it alone until you mark it ready or comment.
