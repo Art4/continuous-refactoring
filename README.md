@@ -78,7 +78,7 @@ fallback.
 With the [`skills`](https://github.com/vercel-labs/skills) installer (Node.js 22.20 or newer), run in the target:
 
 ```bash
-npx skills@latest add https://github.com/Art4/continuous-refactoring/tree/0.11.0/skills --skill '*' -a <agent>
+npx skills@latest add https://github.com/Art4/continuous-refactoring/tree/0.12.0/skills --skill '*' -a <agent>
 ```
 
 `<agent>` is your agent, such as `opencode`, `claude-code` or `codex`; repeat `-a` for several, or leave it out
@@ -89,7 +89,7 @@ Always install all three: `continuous-refactoring` and `continuous-housekeeping`
 `continuous-refactoring-run`, which must sit beside them in the same skills folder.
 
 **Without Node.js**, or to work on the suite itself: clone this repository, check out a release tag
-(`git checkout 0.11.0`), and put three symlinks side by side in the target's skills folder:
+(`git checkout 0.12.0`), and put three symlinks side by side in the target's skills folder:
 
 ```bash
 mkdir -p <target>/.agents/skills
